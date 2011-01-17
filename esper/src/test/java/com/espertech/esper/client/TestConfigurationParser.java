@@ -65,9 +65,12 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getViewResources().isAllowMultipleExpiryPolicies());
         assertFalse(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
         assertTrue(config.getEngineDefaults().getLogging().isEnableTimerDebug());
+        assertFalse(config.getEngineDefaults().getLogging().isEnableQueryPlan());
+        assertFalse(config.getEngineDefaults().getLogging().isEnableJDBC());
         assertEquals(15000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
         assertEquals(ConfigurationEngineDefaults.TimeSourceType.MILLI, config.getEngineDefaults().getTimeSource().getTimeSourceType());
         assertFalse(config.getEngineDefaults().getExecution().isPrioritized());
+        assertFalse(config.getEngineDefaults().getExecution().isFairlock());
 
         assertEquals(StreamSelector.ISTREAM_ONLY, config.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
         assertFalse(config.getEngineDefaults().getLanguage().isSortUsingCollator());
@@ -78,6 +81,7 @@ public class TestConfigurationParser extends TestCase
         assertTrue(config.getEngineDefaults().getExpression().isExtendedAggregation());
         assertFalse(config.getEngineDefaults().getExpression().isDuckTyping());
         assertNull(config.getEngineDefaults().getExceptionHandling().getHandlerFactories());
+        assertNull(config.getEngineDefaults().getConditionHandling().getHandlerFactories());
 
         ConfigurationEventTypeXMLDOM domType = new ConfigurationEventTypeXMLDOM();
         assertFalse(domType.isXPathPropertyExpr());
@@ -120,6 +124,7 @@ public class TestConfigurationParser extends TestCase
         ConfigurationEventTypeXMLDOM schemaDesc = config.getEventTypesXMLDOM().get("MySchemaXMLEventName");
         assertEquals("MySchemaEvent", schemaDesc.getRootElementName());
         assertEquals("MySchemaXMLEvent.xsd", schemaDesc.getSchemaResource());
+        assertEquals("actual-xsd-text-here", schemaDesc.getSchemaText());
         assertEquals("samples:schemas:simpleSchema", schemaDesc.getRootElementNamespace());
         assertEquals("default-name-space", schemaDesc.getDefaultNamespace());
         assertEquals("/myevent/element2", schemaDesc.getXPathProperties().get("element2").getXpath());
@@ -315,11 +320,14 @@ public class TestConfigurationParser extends TestCase
         assertEquals(ConfigurationEventTypeLegacy.AccessorStyle.PUBLIC, config.getEngineDefaults().getEventMeta().getDefaultAccessorStyle());
         assertTrue(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
         assertFalse(config.getEngineDefaults().getLogging().isEnableTimerDebug());
+        assertTrue(config.getEngineDefaults().getLogging().isEnableQueryPlan());
+        assertTrue(config.getEngineDefaults().getLogging().isEnableJDBC());
         assertEquals(30000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
         assertEquals(StreamSelector.RSTREAM_ISTREAM_BOTH, config.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
 
         assertEquals(ConfigurationEngineDefaults.TimeSourceType.NANO, config.getEngineDefaults().getTimeSource().getTimeSourceType());
         assertTrue(config.getEngineDefaults().getExecution().isPrioritized());
+        assertTrue(config.getEngineDefaults().getExecution().isFairlock());
 
         ConfigurationMetricsReporting metrics = config.getEngineDefaults().getMetricsReporting();
         assertTrue(metrics.isEnableMetricsReporting());
@@ -354,6 +362,9 @@ public class TestConfigurationParser extends TestCase
         assertEquals(2, config.getEngineDefaults().getExceptionHandling().getHandlerFactories().size());
         assertEquals("my.company.cep.LoggingExceptionHandlerFactory", config.getEngineDefaults().getExceptionHandling().getHandlerFactories().get(0));
         assertEquals("my.company.cep.AlertExceptionHandlerFactory", config.getEngineDefaults().getExceptionHandling().getHandlerFactories().get(1));
+        assertEquals(2, config.getEngineDefaults().getConditionHandling().getHandlerFactories().size());
+        assertEquals("my.company.cep.LoggingConditionHandlerFactory", config.getEngineDefaults().getConditionHandling().getHandlerFactories().get(0));
+        assertEquals("my.company.cep.AlertConditionHandlerFactory", config.getEngineDefaults().getConditionHandling().getHandlerFactories().get(1));
 
         // variables
         assertEquals(2, config.getVariables().size());

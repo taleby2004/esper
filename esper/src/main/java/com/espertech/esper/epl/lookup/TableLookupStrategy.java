@@ -10,6 +10,7 @@ package com.espertech.esper.epl.lookup;
 
 import com.espertech.esper.client.EventBean;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -24,5 +25,5 @@ public interface TableLookupStrategy
      * @param events to look up
      * @return set of matching events, or null if none matching
      */
-    public Set<EventBean> lookup(EventBean[] events);
+    public Collection<EventBean> lookup(EventBean[] events);
 }

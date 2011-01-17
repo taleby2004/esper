@@ -83,9 +83,9 @@ public class StatementSpecMapper
      * @param configuration supplies config values
      * @return statement specification, and internal representation of a statement
      */
-    public static StatementSpecRaw map(EPStatementObjectModel sodaStatement, EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI)
+    public static StatementSpecRaw map(EPStatementObjectModel sodaStatement, EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI, PatternNodeFactory patternNodeFactory)
     {
-        StatementSpecMapContext mapContext = new StatementSpecMapContext(engineImportService, variableService, configuration, schedulingService, engineURI);
+        StatementSpecMapContext mapContext = new StatementSpecMapContext(engineImportService, variableService, configuration, schedulingService, engineURI, patternNodeFactory);
 
         StatementSpecRaw raw = map(sodaStatement, mapContext);
         if (mapContext.isHasVariables())
@@ -231,6 +231,46 @@ public class StatementSpecMapper
                 clause.addItem(OnInsertSplitStreamItem.create(insertIntoClause, selectClause, whereClause));
             }
             model.setOnExpr(clause);
+        }
+        else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_MERGE)
+        {
+            OnTriggerMergeDesc trigger = (OnTriggerMergeDesc) onTriggerDesc;
+            OnMergeClause clause = OnMergeClause.create(trigger.getWindowName(), trigger.getOptionalAsName());
+            for (OnTriggerMergeItem item : trigger.getItems())
+            {
+                OnMergeMatchedAction action;
+                if (item instanceof OnTriggerMergeItemDelete) {
+                    OnTriggerMergeItemDelete delete = (OnTriggerMergeItemDelete) item;
+                    Expression optionalCondition = delete.getOptionalMatchCond() == null ? null : unmapExpressionDeep(delete.getOptionalMatchCond(), unmapContext);
+                    action = new OnMergeMatchedDeleteAction(optionalCondition);
+                }
+                else if (item instanceof OnTriggerMergeItemUpdate) {
+                    OnTriggerMergeItemUpdate merge = (OnTriggerMergeItemUpdate) item;
+                    List<AssignmentPair> assignments = new ArrayList<AssignmentPair>();
+                    for (OnTriggerSetAssignment pair : merge.getAssignments())
+                    {
+                        Expression expr = unmapExpressionDeep(pair.getExpression(), unmapContext);
+                        assignments.add(new AssignmentPair(pair.getVariableName(), expr));
+                    }
+                    Expression optionalCondition = merge.getOptionalMatchCond() == null ? null : unmapExpressionDeep(merge.getOptionalMatchCond(), unmapContext);
+                    action = new OnMergeMatchedUpdateAction(assignments, optionalCondition);
+                }
+                else if (item instanceof OnTriggerMergeItemInsert) {
+                    OnTriggerMergeItemInsert insert = (OnTriggerMergeItemInsert) item;
+                    List<String> columnNames = new ArrayList<String>(insert.getColumns());
+                    List<SelectClauseElement> select = unmapSelectClauseElements(insert.getSelectClause(), unmapContext);
+                    Expression optionalCondition = insert.getOptionalMatchCond() == null ? null : unmapExpressionDeep(insert.getOptionalMatchCond(), unmapContext);
+                    action = new OnMergeMatchedInsertAction(columnNames, select, optionalCondition);
+                }
+                else {
+                    throw new IllegalArgumentException("Unrecognized merged action type '" + item.getClass() + "'");
+                }
+                clause.addAction(action);
+            }
+            model.setOnExpr(clause);
+        }
+        else {
+            throw new IllegalArgumentException("Type of on-clause not handled: " + onTriggerDesc.getOnTriggerType());
         }
     }
 
@@ -616,6 +656,44 @@ public class StatementSpecMapper
             OnTriggerSplitStreamDesc desc = new OnTriggerSplitStreamDesc(OnTriggerType.ON_SPLITSTREAM, splitClause.isFirst(), streams);
             raw.setOnTriggerDesc(desc);
         }
+        else if (onExpr instanceof OnMergeClause)
+        {
+            OnMergeClause merge = (OnMergeClause) onExpr;
+            List<OnTriggerMergeItem> items = new ArrayList<OnTriggerMergeItem>();
+            for (OnMergeMatchedAction action : merge.getActions())
+            {
+                OnTriggerMergeItem item;
+                if (action instanceof OnMergeMatchedDeleteAction) {
+                    OnMergeMatchedDeleteAction delete = (OnMergeMatchedDeleteAction) action;
+                    ExprNode optionalCondition = delete.getOptionalCondition() == null ? null : mapExpressionDeep(delete.getOptionalCondition(), mapContext);
+                    item = new OnTriggerMergeItemDelete(optionalCondition);
+                }
+                else if (action instanceof OnMergeMatchedUpdateAction) {
+                    OnMergeMatchedUpdateAction update = (OnMergeMatchedUpdateAction) action;
+                    List<OnTriggerSetAssignment> assignments = new ArrayList<OnTriggerSetAssignment>();
+                    for (AssignmentPair pair : update.getAssignments())
+                    {
+                        ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
+                        assignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
+                    }
+                    ExprNode optionalCondition = update.getOptionalCondition() == null ? null : mapExpressionDeep(update.getOptionalCondition(), mapContext);
+                    item = new OnTriggerMergeItemUpdate(optionalCondition, assignments);
+                }
+                else if (action instanceof OnMergeMatchedInsertAction) {
+                    OnMergeMatchedInsertAction insert = (OnMergeMatchedInsertAction) action;
+                    List<String> columnNames = new ArrayList<String>(insert.getColumnNames());
+                    List<SelectClauseElementRaw> select = mapSelectClauseElements(insert.getSelectList(), mapContext);
+                    ExprNode optionalCondition = insert.getOptionalCondition() == null ? null : mapExpressionDeep(insert.getOptionalCondition(), mapContext);
+                    item = new OnTriggerMergeItemInsert(optionalCondition, columnNames, select);
+                }
+                else {
+                    throw new IllegalArgumentException("Unrecognized merged action type '" + action.getClass() + "'");
+                }
+                items.add(item);
+            }
+            OnTriggerMergeDesc mergeDesc = new OnTriggerMergeDesc(merge.getWindowName(), merge.getOptionalAsName(), items);
+            raw.setOnTriggerDesc(mergeDesc);
+        }
         else
         {
             throw new IllegalArgumentException("Cannot map on-clause expression type : " + onExpr);
@@ -851,30 +929,36 @@ public class StatementSpecMapper
     {    	
         SelectClause clause = SelectClause.create();
         clause.setStreamSelector(SelectClauseStreamSelectorEnum.mapFromSODA(selectStreamSelectorEnum));
-        for (SelectClauseElementRaw raw : selectClauseSpec.getSelectExprList())
+        clause.addElements(unmapSelectClauseElements(selectClauseSpec.getSelectExprList(), unmapContext));
+        clause.setDistinct(selectClauseSpec.isDistinct());
+        return clause;
+    }
+
+    private static List<SelectClauseElement> unmapSelectClauseElements(List<SelectClauseElementRaw> selectExprList, StatementSpecUnMapContext unmapContext) {
+        List<SelectClauseElement> elements = new ArrayList<SelectClauseElement>();
+        for (SelectClauseElementRaw raw : selectExprList)
         {
             if (raw instanceof SelectClauseStreamRawSpec)
             {
                 SelectClauseStreamRawSpec streamSpec = (SelectClauseStreamRawSpec) raw;
-                clause.addStreamWildcard(streamSpec.getStreamName(), streamSpec.getOptionalAsName());
+                elements.add(new SelectClauseStreamWildcard(streamSpec.getStreamName(), streamSpec.getOptionalAsName()));
             }
             else if (raw instanceof SelectClauseElementWildcard)
             {
-                clause.addWildcard();
+                elements.add(new SelectClauseWildcard());
             }
             else if (raw instanceof SelectClauseExprRawSpec)
             {
                 SelectClauseExprRawSpec rawSpec = (SelectClauseExprRawSpec) raw;
                 Expression expression = unmapExpressionDeep(rawSpec.getSelectExpression(), unmapContext);
-                clause.add(expression, rawSpec.getOptionalAsName());
+                elements.add(new SelectClauseExpression(expression, rawSpec.getOptionalAsName()));
             }
             else
             {
                 throw new IllegalStateException("Unexpected select clause element typed " + raw.getClass().getName());
             }
         }
-        clause.setDistinct(selectClauseSpec.isDistinct());
-        return clause;
+        return elements;
     }
 
     private static InsertIntoClause unmapInsertInto(InsertIntoDesc insertIntoDesc)
@@ -1019,14 +1103,13 @@ public class StatementSpecMapper
         raw.setSelectClauseSpec(spec);
     }
 
-    private static SelectClauseSpecRaw mapSelectRaw(SelectClause selectClause, StatementSpecMapContext mapContext)
-    {
-        SelectClauseSpecRaw spec = new SelectClauseSpecRaw();
-        for (SelectClauseElement element : selectClause.getSelectList())
+    private static List<SelectClauseElementRaw> mapSelectClauseElements(List<SelectClauseElement> elements, StatementSpecMapContext mapContext) {
+        List<SelectClauseElementRaw> result = new ArrayList<SelectClauseElementRaw>();
+        for (SelectClauseElement element : elements)
         {
             if (element instanceof SelectClauseWildcard)
             {
-                spec.add(new SelectClauseElementWildcard());
+                result.add(new SelectClauseElementWildcard());
             }
             else if (element instanceof SelectClauseExpression)
             {
@@ -1034,15 +1117,22 @@ public class StatementSpecMapper
                 Expression expr = selectExpr.getExpression();
                 ExprNode exprNode = mapExpressionDeep(expr, mapContext);
                 SelectClauseExprRawSpec rawElement = new SelectClauseExprRawSpec(exprNode, selectExpr.getAsName());
-                spec.add(rawElement);
+                result.add(rawElement);
             }
             else if (element instanceof SelectClauseStreamWildcard)
             {
                 SelectClauseStreamWildcard streamWild = (SelectClauseStreamWildcard) element;
                 SelectClauseStreamRawSpec rawElement = new SelectClauseStreamRawSpec(streamWild.getStreamName(), streamWild.getOptionalColumnName());
-                spec.add(rawElement);
+                result.add(rawElement);
             }
         }
+        return result;
+    }
+
+    private static SelectClauseSpecRaw mapSelectRaw(SelectClause selectClause, StatementSpecMapContext mapContext)
+    {
+        SelectClauseSpecRaw spec = new SelectClauseSpecRaw();
+        spec.addAll(mapSelectClauseElements(selectClause.getSelectList(), mapContext));
         spec.setDistinct(selectClause.isDistinct());
         return spec;
     }
@@ -1057,8 +1147,15 @@ public class StatementSpecMapper
     private static List<ExprNode> mapExpressionDeep(List<Expression> expressions, StatementSpecMapContext mapContext)
     {
         List<ExprNode> result = new ArrayList<ExprNode>();
+        if (expressions == null) {
+            return result;
+        }
         for (Expression expr : expressions)
         {
+            if (expr == null) {
+                result.add(null);
+                continue;
+            }
             result.add(mapExpressionDeep(expr, mapContext));
         }
         return result;
@@ -1326,6 +1423,10 @@ public class StatementSpecMapper
             InstanceOfExpression node = (InstanceOfExpression) expr;
             return new ExprInstanceofNode(node.getTypeNames());
         }
+        else if (expr instanceof TypeOfExpression)
+        {
+            return new ExprTypeofNode();
+        }
         else if (expr instanceof CastExpression)
         {
             CastExpression node = (CastExpression) expr;
@@ -1342,7 +1443,7 @@ public class StatementSpecMapper
         else if (expr instanceof TimePeriodExpression)
         {
             TimePeriodExpression tpe = (TimePeriodExpression) expr;
-            return new ExprTimePeriod(tpe.isHasDays(), tpe.isHasHours(), tpe.isHasMinutes(), tpe.isHasSeconds(), tpe.isHasMilliseconds());
+            return new ExprTimePeriod(tpe.isHasYears(), tpe.isHasMonths(), tpe.isHasWeeks(), tpe.isHasDays(), tpe.isHasHours(), tpe.isHasMinutes(), tpe.isHasSeconds(), tpe.isHasMilliseconds());
         }
         else if (expr instanceof CompareListExpression)
         {
@@ -1473,8 +1574,15 @@ public class StatementSpecMapper
     private static List<Expression> unmapExpressionDeep(List<ExprNode> expressions, StatementSpecUnMapContext unmapContext)
     {
         List<Expression> result = new ArrayList<Expression>();
+        if (expressions == null) {
+            return result;
+        }
         for (ExprNode expr : expressions)
         {
+            if (expr == null) {
+                result.add(null);
+                continue;
+            }
             result.add(unmapExpressionDeep(expr, unmapContext));
         }
         return result;
@@ -1774,6 +1882,10 @@ public class StatementSpecMapper
             ExprInstanceofNode node = (ExprInstanceofNode) expr;
             return new InstanceOfExpression(node.getClassIdentifiers());
         }
+        else if (expr instanceof ExprTypeofNode)
+        {
+            return new TypeOfExpression();
+        }
         else if (expr instanceof ExprCastNode)
         {
             ExprCastNode node = (ExprCastNode) expr;
@@ -1797,7 +1909,7 @@ public class StatementSpecMapper
         else if (expr instanceof ExprTimePeriod)
         {
             ExprTimePeriod node = (ExprTimePeriod) expr;
-            return new TimePeriodExpression(node.isHasDay(), node.isHasHour(), node.isHasMinute(), node.isHasSecond(), node.isHasMillisecond());
+            return new TimePeriodExpression(node.isHasYear(), node.isHasMonth(), node.isHasWeek(), node.isHasDay(), node.isHasHour(), node.isHasMinute(), node.isHasSecond(), node.isHasMillisecond());
         }
         else if (expr instanceof ExprNumberSetWildcard)
         {
@@ -2032,54 +2144,56 @@ public class StatementSpecMapper
         }
         if (eval instanceof PatternAndExpr)
         {
-            return new EvalAndNode();
+            return mapContext.getPatternNodeFactory().makeAndNode();
         }
         else if (eval instanceof PatternOrExpr)
         {
-            return new EvalOrNode();
+            return mapContext.getPatternNodeFactory().makeOrNode();
         }
         else if (eval instanceof PatternFollowedByExpr)
         {
-            return new EvalFollowedByNode();
+            PatternFollowedByExpr fb = (PatternFollowedByExpr) eval;
+            List<ExprNode> maxExpr = mapExpressionDeep(fb.getOptionalMaxPerSubexpression(), mapContext);
+            return mapContext.getPatternNodeFactory().makeFollowedByNode(maxExpr);
         }
         else if (eval instanceof PatternEveryExpr)
         {
-            return new EvalEveryNode();
+            return mapContext.getPatternNodeFactory().makeEveryNode();
         }
         else if (eval instanceof PatternFilterExpr)
         {
             PatternFilterExpr filterExpr = (PatternFilterExpr) eval;
             FilterSpecRaw filterSpec = mapFilter(filterExpr.getFilter(), mapContext);
-            return new EvalFilterNode(filterSpec, filterExpr.getTagName());
+            return mapContext.getPatternNodeFactory().makeFilterNode(filterSpec, filterExpr.getTagName());
         }
         else if (eval instanceof PatternObserverExpr)
         {
             PatternObserverExpr observer = (PatternObserverExpr) eval;
             List<ExprNode> expressions = mapExpressionDeep(observer.getParameters(), mapContext);
-            return new EvalObserverNode(new PatternObserverSpec(observer.getNamespace(), observer.getName(), expressions));
+            return mapContext.getPatternNodeFactory().makeObserverNode(new PatternObserverSpec(observer.getNamespace(), observer.getName(), expressions));
         }
         else if (eval instanceof PatternGuardExpr)
         {
             PatternGuardExpr guard = (PatternGuardExpr) eval;
             List<ExprNode> expressions = mapExpressionDeep(guard.getParameters(), mapContext);
-            return new EvalGuardNode(new PatternGuardSpec(guard.getNamespace(), guard.getName(), expressions));
+            return mapContext.getPatternNodeFactory().makeGuardNode(new PatternGuardSpec(guard.getNamespace(), guard.getName(), expressions));
         }
         else if (eval instanceof PatternNotExpr)
         {
-            return new EvalNotNode();
+            return mapContext.getPatternNodeFactory().makeNotNode();
         }
         else if (eval instanceof PatternMatchUntilExpr)
         {
             PatternMatchUntilExpr until = (PatternMatchUntilExpr) eval;
             ExprNode low = until.getLow() != null ? mapExpressionDeep(until.getLow(), mapContext) : null;
             ExprNode high = until.getHigh() != null ? mapExpressionDeep(until.getHigh(), mapContext) : null;
-            return new EvalMatchUntilNode(low, high, null);
+            return mapContext.getPatternNodeFactory().makeMatchUntilNode(low, high);
         }
         else if (eval instanceof PatternEveryDistinctExpr)
         {
             PatternEveryDistinctExpr everyDist = (PatternEveryDistinctExpr) eval;
             List<ExprNode> expressions = mapExpressionDeep(everyDist.getExpressions(), mapContext);
-            return new EvalEveryDistinctNode(expressions, null);
+            return mapContext.getPatternNodeFactory().makeEveryDistinctNode(expressions);
         }
         throw new IllegalArgumentException("Could not map pattern expression node of type " + eval.getClass().getSimpleName());
     }
@@ -2096,7 +2210,9 @@ public class StatementSpecMapper
         }
         else if (eval instanceof EvalFollowedByNode)
         {
-            return new PatternFollowedByExpr();
+            EvalFollowedByNode fb = (EvalFollowedByNode) eval;
+            List<Expression> expressions = unmapExpressionDeep(fb.getOptionalMaxExpressions(), unmapContext);
+            return new PatternFollowedByExpr(expressions);
         }
         else if (eval instanceof EvalEveryNode)
         {
@@ -2352,7 +2468,7 @@ public class StatementSpecMapper
                 }
                 String toCompile = "select * from java.lang.Object where " + expression;
                 StatementSpecRaw rawSqlExpr = EPAdministratorHelper.compileEPL(toCompile, expression, false, null, SelectClauseStreamSelectorEnum.ISTREAM_ONLY,
-                        mapContext.getEngineImportService(), mapContext.getVariableService(), mapContext.getSchedulingService(), mapContext.getEngineURI(), mapContext.getConfiguration());
+                        mapContext.getEngineImportService(), mapContext.getVariableService(), mapContext.getSchedulingService(), mapContext.getEngineURI(), mapContext.getConfiguration(), mapContext.getPatternNodeFactory());
 
                 if ((rawSqlExpr.getSubstitutionParameters() != null) && (rawSqlExpr.getSubstitutionParameters().size() > 0)) {
                     throw new ASTWalkException("EPL substitution parameters are not allowed in SQL ${...} expressions, consider using a variable instead");

@@ -8,10 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.guard;
 
-import com.espertech.esper.pattern.PatternContext;
-import com.espertech.esper.pattern.MatchedEventConvertor;
-import com.espertech.esper.pattern.PatternExpressionUtil;
-import com.espertech.esper.pattern.MatchedEventMap;
+import com.espertech.esper.pattern.*;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.MetaDefItem;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -54,9 +51,9 @@ public class TimerWithinGuardFactory implements GuardFactory, MetaDefItem, Seria
         this.millisecondsExpr = params.get(0);
     }
 
-    public Guard makeGuard(PatternContext context, MatchedEventMap matchedEventMap, Quitable quitable, Object stateNodeId, Object guardState)
+    public Guard makeGuard(PatternContext context, MatchedEventMap matchedEventMap, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState)
     {
-        Object millisecondVal = PatternExpressionUtil.evaluate("Timer-within guard", matchedEventMap, millisecondsExpr, convertor, context);
+        Object millisecondVal = PatternExpressionUtil.evaluate("Timer-within guard", matchedEventMap, millisecondsExpr, convertor, quitable.getContext());
 
         if (millisecondVal == null)
         {
@@ -65,6 +62,6 @@ public class TimerWithinGuardFactory implements GuardFactory, MetaDefItem, Seria
 
         Number param = (Number) millisecondVal;
         long milliseconds = Math.round(1000d * param.doubleValue());
-        return new TimerWithinGuard(milliseconds, context, quitable);
+        return new TimerWithinGuard(milliseconds, quitable);
     }
 }

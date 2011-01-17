@@ -82,12 +82,28 @@ eplExpressionRule
 
 onExpr 
 	:	^(i=ON_EXPR onStreamExpr
-		(onDeleteExpr | onUpdateExpr | onSelectExpr (onSelectInsertExpr+ onSelectInsertOutput?)? | onSetExpr)
+		(onDeleteExpr | onUpdateExpr | onSelectExpr (onSelectInsertExpr+ onSelectInsertOutput?)? | onSetExpr | onMergeExpr)
 		{ leaveNode($i); } )
 	;
 	
 onStreamExpr
 	:	^(s=ON_STREAM (eventFilterExpr | patternInclusionExpression) IDENT? { leaveNode($s); })
+	;
+
+onMergeExpr
+	:	^(m=ON_MERGE_EXPR IDENT IDENT? mergeItem+ whereClause[true]?)
+	;
+	
+mergeItem
+	:	(mergeMatched | mergeUnmatched)
+	;
+
+mergeMatched
+	:	^(m=MERGE_UPD valueExpr? UPDATE? DELETE? onSetAssignment* { leaveNode($m); })
+	;
+
+mergeUnmatched
+	:	^(um=MERGE_INS selectionList exprCol? valueExpr? { leaveNode($um); })
 	;
 	
 updateExpr
@@ -154,7 +170,7 @@ createColTypeList
 	;
 
 createColTypeListElement
-	:	^(CREATE_COL_TYPE IDENT CLASS_IDENT LBRACK?)
+	:	^(CREATE_COL_TYPE CLASS_IDENT CLASS_IDENT LBRACK?)
 	;
 
 createSelectionListElement
@@ -193,7 +209,7 @@ selectExpr
 	;
 	
 insertIntoExpr
-	:	^(i=INSERTINTO_EXPR (ISTREAM | RSTREAM)? IDENT (exprCol)? { leaveNode($i); } )
+	:	^(i=INSERTINTO_EXPR (ISTREAM | RSTREAM)? CLASS_IDENT (exprCol)? { leaveNode($i); } )
 	;
 	
 exprCol
@@ -537,6 +553,7 @@ builtinFunc
 	| 	^(f=PREVIOUSWINDOW valueExpr) { leaveNode($f); }
 	| 	^(f=PRIOR c=NUM_INT eventPropertyExpr[true]) {leaveNode($c); leaveNode($f);}
 	| 	^(f=INSTANCEOF valueExpr CLASS_IDENT (CLASS_IDENT)*) { leaveNode($f); }
+	| 	^(f=TYPEOF valueExpr) { leaveNode($f); }
 	| 	^(f=CAST valueExpr CLASS_IDENT) { leaveNode($f); }
 	| 	^(f=EXISTS eventPropertyExpr[true]) { leaveNode($f); }
 	|	^(f=CURRENT_TIMESTAMP {}) { leaveNode($f); }
@@ -598,13 +615,17 @@ exprChoice
 	
 	
 distinctExpressions
-	:	^( PATTERN_EVERY_DISTINCT_EXPR valueExpr+ )
+	:	^( PATTERN_EVERY_DISTINCT_EXPR valueExprWithTime+ )
 	;
 	
 patternOp
-	:	^( f=FOLLOWED_BY_EXPR exprChoice exprChoice (exprChoice)* { leaveNode($f); } )
+	:	^( f=FOLLOWED_BY_EXPR followedByItem followedByItem (followedByItem)* { leaveNode($f); } )
 	| 	^( o=OR_EXPR exprChoice exprChoice (exprChoice)* { leaveNode($o); } )
 	| 	^( a=AND_EXPR exprChoice exprChoice (exprChoice)* { leaveNode($a); } )	
+	;
+	
+followedByItem
+	:	^( FOLLOWED_BY_ITEM valueExpr? exprChoice)	
 	;
 	
 atomicExpr
@@ -668,13 +689,28 @@ timePeriod
 	;
 	
 timePeriodDef
-	: 	dayPart (hourPart)? (minutePart)? (secondPart)? (millisecondPart)?
+	: 	yearPart (monthPart)? (weekPart)? (dayPart)? (hourPart)? (minutePart)? (secondPart)? (millisecondPart)?
+	| 	monthPart (weekPart)? (dayPart)? (hourPart)? (minutePart)? (secondPart)? (millisecondPart)?
+	| 	weekPart (dayPart)? (hourPart)? (minutePart)? (secondPart)? (millisecondPart)?
+	| 	dayPart (hourPart)? (minutePart)? (secondPart)? (millisecondPart)?
 	|	hourPart (minutePart)? (secondPart)? (millisecondPart)?
 	|	minutePart (secondPart)? (millisecondPart)?
 	|	secondPart (millisecondPart)?
 	|	millisecondPart
 	;
 	
+yearPart
+	:	^( YEAR_PART valueExpr )
+	;
+
+monthPart
+	:	^( MONTH_PART valueExpr )
+	;
+
+weekPart
+	:	^( WEEK_PART valueExpr )
+	;
+
 dayPart
 	:	^( DAY_PART valueExpr )
 	;

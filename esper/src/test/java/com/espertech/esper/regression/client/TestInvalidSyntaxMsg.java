@@ -20,7 +20,7 @@ public class TestInvalidSyntaxMsg extends TestCase
     public void testInvalidSyntax()
     {
         tryCompile("insert into 7event select * from " + SupportBeanReservedKeyword.class.getName(),
-                   "Incorrect syntax near ' ' ('into' is a reserved keyword) at line 1 column 11 unexpected character 'v', check for an invalid identifier [insert into 7event select * from com.espertech.esper.support.bean.SupportBeanReservedKeyword]");
+                   "Incorrect syntax near ' ' ('into' is a reserved keyword) at line 1 column 11 unexpected character 'v', check for an invalid identifier or missing additional keywords [insert into 7event select * from com.espertech.esper.support.bean.SupportBeanReservedKeyword]");
 
         tryCompile("select foo, create from " + SupportBeanReservedKeyword.class.getName(),
                    "Incorrect syntax near 'create' (a reserved keyword) at line 1 column 12, please check the select clause [select foo, create from com.espertech.esper.support.bean.SupportBeanReservedKeyword]");
@@ -53,7 +53,7 @@ public class TestInvalidSyntaxMsg extends TestCase
                    "Incorrect syntax near 'google' expecting 'from' but found an identifier at line 1 column 9 [select * google]");
 
         tryCompile("insert into into",
-                   "Incorrect syntax near 'into' (a reserved keyword) expecting an identifier but found 'into' at line 1 column 12, please check the insert-into clause [insert into into]");
+                   "Incorrect syntax near 'into' (a reserved keyword) at line 1 column 12, please check the insert-into clause [insert into into]");
 
         tryCompile("select prior(A, x) from A",
                    "Incorrect syntax near 'A' at line 1 column 13, please check the select clause [select prior(A, x) from A]");

@@ -30,6 +30,7 @@ public class ConfigurationEngineDefaults implements Serializable
     private Expression expression;
     private Execution execution;
     private ExceptionHandling exceptionHandling;
+    private ConditionHandling conditionHandling;
     private ConfigurationMetricsReporting metricsReporting;
     private AlternativeContext alternativeContext;
     private static final long serialVersionUID = -528835191586154300L;
@@ -51,6 +52,7 @@ public class ConfigurationEngineDefaults implements Serializable
         expression = new Expression();
         execution = new Execution();
         exceptionHandling = new ExceptionHandling();
+        conditionHandling = new ConditionHandling();
         alternativeContext = new AlternativeContext();
     }
 
@@ -186,6 +188,14 @@ public class ConfigurationEngineDefaults implements Serializable
      */
     public void setExceptionHandling(ExceptionHandling exceptionHandling) {
         this.exceptionHandling = exceptionHandling;
+    }
+
+    public ConditionHandling getConditionHandling() {
+        return conditionHandling;
+    }
+
+    public void setConditionHandling(ConditionHandling conditionHandling) {
+        this.conditionHandling = conditionHandling;
     }
 
     /**
@@ -779,6 +789,8 @@ public class ConfigurationEngineDefaults implements Serializable
     {
         private boolean enableExecutionDebug;
         private boolean enableTimerDebug;
+        private boolean enableQueryPlan;
+        private boolean enableJDBC;
         private static final long serialVersionUID = -8129836306582810327L;
 
         /**
@@ -788,6 +800,8 @@ public class ConfigurationEngineDefaults implements Serializable
         {
             enableExecutionDebug = false;
             enableTimerDebug = true;
+            enableQueryPlan = false;
+            enableJDBC = false;
         }
 
         /**
@@ -832,6 +846,38 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setEnableTimerDebug(boolean enableTimerDebug)
         {
             this.enableTimerDebug = enableTimerDebug;
+        }
+
+        /**
+         * Returns indicator whether query plan logging is enabled or not.
+         * @return indicator
+         */
+        public boolean isEnableQueryPlan() {
+            return enableQueryPlan;
+        }
+
+        /**
+         * Set indicator whether query plan logging is enabled, by default it is disabled.
+         * @param enableQueryPlan indicator
+         */
+        public void setEnableQueryPlan(boolean enableQueryPlan) {
+            this.enableQueryPlan = enableQueryPlan;
+        }
+
+        /**
+         * Returns an indicator whether JDBC query reporting is enabled.
+         * @return indicator
+         */
+        public boolean isEnableJDBC() {
+            return enableJDBC;
+        }
+
+        /**
+         * Set the indicator whether JDBC query reporting is enabled.
+         * @param enableJDBC set to true for JDBC query reorting enabled
+         */
+        public void setEnableJDBC(boolean enableJDBC) {
+            this.enableJDBC = enableJDBC;
         }
     }
 
@@ -1165,6 +1211,7 @@ public class ConfigurationEngineDefaults implements Serializable
     public static class Execution implements Serializable
     {
         private boolean prioritized;
+        private boolean fairlock;
         private static final long serialVersionUID = 0L;
 
         /**
@@ -1193,6 +1240,14 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setPrioritized(boolean prioritized)
         {
             this.prioritized = prioritized;
+        }
+
+        public boolean isFairlock() {
+            return fairlock;
+        }
+
+        public void setFairlock(boolean fairlock) {
+            this.fairlock = fairlock;
         }
     }
 
@@ -1289,6 +1344,13 @@ public class ConfigurationEngineDefaults implements Serializable
             handlerFactories.add(exceptionHandlerFactoryClassName);
         }
 
+        public void addClasses(List<String> classNames) {
+            if (handlerFactories == null) {
+                handlerFactories = new ArrayList<String>();
+            }
+            handlerFactories.addAll(classNames);
+        }
+
         /**
          * Add an exception handler factory class.
          * <p>
@@ -1299,6 +1361,57 @@ public class ConfigurationEngineDefaults implements Serializable
          */
         public void addClass(Class exceptionHandlerFactoryClass) {
             addClass(exceptionHandlerFactoryClass.getName());
+        }
+    }
+
+    /**
+     * Configuration object for defining condition handling behavior.
+     */
+    public static class ConditionHandling implements Serializable {
+        private static final long serialVersionUID = -708367341332718634L;
+        private List<String> handlerFactories;
+
+        /**
+         * Returns the list of condition handler factory class names,
+         * see {@link com.espertech.esper.client.hook.ConditionHandlerFactory}
+         * @return list of fully-qualified class names
+         */
+        public List<String> getHandlerFactories() {
+            return handlerFactories;
+        }
+
+        /**
+         * Add an condition handler factory class name.
+         * <p>
+         * Provide a fully-qualified class name of the implementation
+         * of the {@link com.espertech.esper.client.hook.ConditionHandlerFactory}
+         * interface.
+         * @param className class name of condition handler factory
+         */
+        public void addClass(String className) {
+            if (handlerFactories == null) {
+                handlerFactories = new ArrayList<String>();
+            }
+            handlerFactories.add(className);
+        }
+
+        public void addClasses(List<String> classNames) {
+            if (handlerFactories == null) {
+                handlerFactories = new ArrayList<String>();
+            }
+            handlerFactories.addAll(classNames);
+        }
+
+        /**
+         * Add an condition handler factory class.
+         * <p>
+         * The class provided should implement the
+         * {@link com.espertech.esper.client.hook.ConditionHandlerFactory}
+         * interface.
+         * @param clazz class of implementation
+         */
+        public void addClass(Class clazz) {
+            addClass(clazz.getName());
         }
     }
 }

@@ -255,6 +255,7 @@ class ConfigurationParser {
         String rootElementName = getRequiredAttribute(xmldomElement, "root-element-name");
         String rootElementNamespace = getOptionalAttribute(xmldomElement, "root-element-namespace");
         String schemaResource = getOptionalAttribute(xmldomElement, "schema-resource");
+        String schemaText = getOptionalAttribute(xmldomElement, "schema-text");
         String defaultNamespace = getOptionalAttribute(xmldomElement, "default-namespace");
         String resolvePropertiesAbsoluteStr = getOptionalAttribute(xmldomElement, "xpath-resolve-properties-absolute");
         String propertyExprXPathStr = getOptionalAttribute(xmldomElement, "xpath-property-expr");
@@ -266,6 +267,7 @@ class ConfigurationParser {
         ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc = new ConfigurationEventTypeXMLDOM();
         xmlDOMEventTypeDesc.setRootElementName(rootElementName);
         xmlDOMEventTypeDesc.setSchemaResource(schemaResource);
+        xmlDOMEventTypeDesc.setSchemaText(schemaText);
         xmlDOMEventTypeDesc.setRootElementNamespace(rootElementNamespace);
         xmlDOMEventTypeDesc.setDefaultNamespace(defaultNamespace);
         xmlDOMEventTypeDesc.setXPathFunctionResolver(xpathFunctionResolverClass);
@@ -918,7 +920,11 @@ class ConfigurationParser {
             }
             if (subElement.getNodeName().equals("exceptionHandling"))
             {
-                handleExceptionHandling(configuration, subElement);
+                configuration.getEngineDefaults().getExceptionHandling().addClasses(getHandlerFactories(subElement));
+            }
+            if (subElement.getNodeName().equals("conditionHandling"))
+            {
+                configuration.getEngineDefaults().getConditionHandling().addClasses(getHandlerFactories(subElement));
             }
         }
     }
@@ -1065,6 +1071,18 @@ class ConfigurationParser {
                 String valueText = getRequiredAttribute(subElement, "enabled");
                 Boolean value = Boolean.parseBoolean(valueText);
                 configuration.getEngineDefaults().getLogging().setEnableTimerDebug(value);
+            }
+            if (subElement.getNodeName().equals("query-plan"))
+            {
+                String valueText = getRequiredAttribute(subElement, "enabled");
+                Boolean value = Boolean.parseBoolean(valueText);
+                configuration.getEngineDefaults().getLogging().setEnableQueryPlan(value);
+            }
+            if (subElement.getNodeName().equals("jdbc"))
+            {
+                String valueText = getRequiredAttribute(subElement, "enabled");
+                Boolean value = Boolean.parseBoolean(valueText);
+                configuration.getEngineDefaults().getLogging().setEnableJDBC(value);
             }
         }
     }
@@ -1270,10 +1288,17 @@ class ConfigurationParser {
             boolean isPrioritized = Boolean.parseBoolean(prioritizedStr);
             configuration.getEngineDefaults().getExecution().setPrioritized(isPrioritized);
         }
+        String fairlockStr = getOptionalAttribute(parentElement, "fairlock");
+        if (fairlockStr != null)
+        {
+            boolean isFairlock = Boolean.parseBoolean(fairlockStr);
+            configuration.getEngineDefaults().getExecution().setFairlock(isFairlock);
+        }
     }
 
-    private static void handleExceptionHandling(Configuration configuration, Element parentElement)
+    private static List<String> getHandlerFactories(Element parentElement)
     {
+        List<String> list = new ArrayList<String>();
         DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
         while (nodeIterator.hasNext())
         {
@@ -1281,9 +1306,10 @@ class ConfigurationParser {
             if (subElement.getNodeName().equals("handlerFactory"))
             {
                 String text = getRequiredAttribute(subElement, "class");
-                configuration.getEngineDefaults().getExceptionHandling().addClass(text);
+                list.add(text);
             }
         }
+        return list;
     }
 
     private static void handleMetricsReportingPatterns(ConfigurationMetricsReporting.StmtGroupMetrics groupDef, Element parentElement)

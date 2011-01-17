@@ -3,7 +3,7 @@ package com.espertech.esper.client.hook;
 /**
  * Factory for exception handler instance(s).
  * <p>
- * Received CEP engine contextual information and should return an implementation of the
+ * Receives CEP engine contextual information and should return an implementation of the
  * {@link ExceptionHandler} interface.
  */
 public interface ExceptionHandlerFactory {

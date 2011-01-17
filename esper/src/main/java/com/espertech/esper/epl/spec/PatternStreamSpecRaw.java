@@ -15,10 +15,7 @@ import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.expression.ExprValidationPropertyException;
+import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.property.PropertyEvaluator;
 import com.espertech.esper.epl.property.PropertyEvaluatorFactory;
 import com.espertech.esper.epl.variable.VariableService;
@@ -34,6 +31,9 @@ import com.espertech.esper.pattern.observer.ObserverParameterException;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.UuidGenerator;
+import com.espertech.esper.view.ViewParameterException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
@@ -43,6 +43,7 @@ import java.util.*;
 public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
 {
     private final EvalNode evalNode;
+    private static final Log log = LogFactory.getLog(PatternStreamSpecRaw.class);
     private static final long serialVersionUID = 6393401926404401433L;
 
     /**
@@ -99,7 +100,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             // obtain property event type, if final event type is properties
             if (filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec() != null)
             {
-                PropertyEvaluator optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec(), resolvedEventType, filterNode.getEventAsName(), context.getEventAdapterService(), context.getMethodResolutionService(), context.getSchedulingService(), context.getVariableService(), context.getEngineURI());
+                PropertyEvaluator optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec(), resolvedEventType, filterNode.getEventAsName(), context.getEventAdapterService(), context.getMethodResolutionService(), context.getSchedulingService(), context.getVariableService(), context.getEngineURI(), context.getStatementId());
                 finalEventType = optionalPropertyEvaluator.getFragmentEventType();
                 isPropertyEvaluation = true;
             }
@@ -259,7 +260,29 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             MatchedEventConvertor convertor = new MatchedEventConvertorImpl(matchEventFromChildNodes.getTaggedEventTypes(), matchEventFromChildNodes.getArrayEventTypes(), context.getEventAdapterService());
 
             distinctNode.setConvertor(convertor);
-            distinctNode.setExpressions(validated);
+
+            // Determine whether some expressions are constants or time period
+            List<ExprNode> distinctExpressions = new ArrayList<ExprNode>();
+            Long msecToExpire = null;
+            for (ExprNode expr : validated) {
+                if (expr instanceof ExprTimePeriod) {
+                    Double secondsExpire = (Double) ((ExprTimePeriod) expr).evaluate(null, true, context);
+                    if ((secondsExpire != null) && (secondsExpire > 0)) {
+                        msecToExpire = Math.round(1000d * secondsExpire);
+                    }
+                    log.debug("Setting every-distinct msec-to-expire to " + msecToExpire);
+                }
+                else if (expr.isConstantResult()) {
+                    log.warn("Every-distinct node utilizes an expression returning a constant value, please check expression '" + expr.toExpressionString() + "', not adding expression to distinct-value expression list");
+                }
+                else {
+                    distinctExpressions.add(expr);
+                }
+            }
+            if (distinctExpressions.isEmpty()) {
+                throw new ExprValidationException("Every-distinct node requires one or more distinct-value expressions that each return non-constant result values");
+            }
+            distinctNode.setExpressions(distinctExpressions, msecToExpire);
         }
         else if (evalNode instanceof EvalMatchUntilNode)
         {
@@ -318,6 +341,38 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             }
             matchUntilNode.setTagsArrayedSet(arrayTags);
         }
+        else if (evalNode instanceof EvalFollowedByNode)
+        {
+            EvalFollowedByNode followedByNode = (EvalFollowedByNode) evalNode;
+            StreamTypeService streamTypeService = new StreamTypeServiceImpl(context.getEngineURI(), false);
+
+            if (followedByNode.getOptionalMaxExpressions() != null) {
+                List<ExprNode> validated = new ArrayList<ExprNode>();
+                for (ExprNode maxExpr : followedByNode.getOptionalMaxExpressions()) {
+                    if (maxExpr == null) {
+                        validated.add(null);
+                    }
+                    else {
+                        ExprNodeSummaryVisitor visitor = new ExprNodeSummaryVisitor();
+                        maxExpr.accept(visitor);
+                        if (!visitor.isPlain())
+                        {
+                            String errorMessage = "Invalid maximum expression in followed-by, " + visitor.getMessage() + " are not allowed within the expression";
+                            log.error(errorMessage);
+                            throw new ExprValidationException(errorMessage);
+                        }
+
+                        ExprNode validatedExpr = maxExpr.getValidatedSubtree(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context);
+                        validated.add(validatedExpr);
+                        if ((validatedExpr.getExprEvaluator().getType() == null) || (!JavaClassHelper.isNumeric(validatedExpr.getExprEvaluator().getType()))) {
+                            String message = "Invalid maximum expression in followed-by, the expression must return an integer value";
+                            throw new ExprValidationException(message);
+                        }
+                    }
+                }
+                followedByNode.setOptionalMaxExpressions(validated);
+            }
+        }
 
         if (newTaggedEventTypes != null)
         {
@@ -349,7 +404,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         return validated;
     }
 
-    private static StreamTypeService getStreamTypeService(String engineURI, EventAdapterService eventAdapterService, LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
+    private static StreamTypeService getStreamTypeService(String engineURI, EventAdapterService eventAdapterService, Map<String, Pair<EventType, String>> taggedEventTypes, Map<String, Pair<EventType, String>> arrayEventTypes)
     {
         LinkedHashMap<String, Pair<EventType, String>> filterTypes = new LinkedHashMap<String, Pair<EventType, String>>();
         filterTypes.putAll(taggedEventTypes);

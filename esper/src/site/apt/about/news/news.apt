@@ -1,5 +1,32 @@
 News
 
+* January 24, 2010  -  Esper 4.1.0 - Update release
+
+  * Support for on-merge which provides and atomic update-insert (aka. upsert) operation for use with named windows
+  
+  * Support for subqueries against named windows to share existing indexes on the named window (both implicitly-created or via create-index)
+  
+  * Support for configuration option to enable output of query plan to log destination (aka. explain-plan)
+  
+  * Support for a new 'typeof' function that returns the event type name, for use with variant streams and event type super-types (POJO extends and implements, map super-types)
+  
+  * Support for XML event type update at runtime via ConfigurationOperations
+  
+  * Support for an extended time interval grammar that now supports 'weeks', 'months' and 'years' keywords
+  
+  * Support for additional means to control external time
+  
+  * Support for loading an XML schema from a string
+  
+  * Support for a new form of the followed-by (->) operator: The form "-[max]> allows specifying an upper limit on the number of pattern instances
+  
+  * We refactored the pattern engine to reduce memory use of pattern instances significantly
+  
+  * Many additional bug fixes and improvements to documentation, code and performance; Please see history for additional information.
+
+  []
+
+
 * October 18, 2010  -  NEsper 3.4.1 for .NET (incl. Mono support)
 	      
   * Update release with performance improvements. Same feature set as 3.4.0.

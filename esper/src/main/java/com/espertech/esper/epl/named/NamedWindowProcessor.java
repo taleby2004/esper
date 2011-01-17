@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.named;
 
+import com.espertech.esper.core.*;
+import com.espertech.esper.epl.core.SelectExprEventTypeRegistry;
 import com.espertech.esper.epl.property.PropertyEvaluator;
 import com.espertech.esper.epl.spec.OnTriggerDesc;
 import com.espertech.esper.epl.core.ResultSetProcessor;
@@ -17,10 +19,6 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.view.StatementStopService;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.InternalEventRouter;
-import com.espertech.esper.core.StatementResultService;
-import com.espertech.esper.core.StatementContext;
 
 import java.util.List;
 
@@ -35,6 +33,7 @@ public class NamedWindowProcessor
     private final EventType eventType;
     private final String eplExpression;
     private final String statementName;
+    private final boolean isEnableSubqueryIndexShare;
 
     /**
      * Ctor.
@@ -49,13 +48,14 @@ public class NamedWindowProcessor
      * @param isPrioritized if the engine is running with prioritized execution
      * @param exprEvaluatorContext context for expression evalauation
      */
-    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext)
+    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext, StatementLock statementResourceLock, boolean isEnableSubqueryIndexShare, boolean enableQueryPlanLog)
     {
         this.eventType = eventType;
         this.eplExpression = eplExpression;
         this.statementName = statementName;
+        this.isEnableSubqueryIndexShare = isEnableSubqueryIndexShare;
 
-        rootView = new NamedWindowRootView(revisionProcessor);
+        rootView = new NamedWindowRootView(revisionProcessor, statementResourceLock, enableQueryPlanLog);
         tailView = new NamedWindowTailView(eventType, namedWindowService, rootView, createWindowStmtHandle, statementResultService, revisionProcessor, isPrioritized, exprEvaluatorContext);
         rootView.setDataWindowContents(tailView);   // for iteration used for delete without index
     }
@@ -156,5 +156,9 @@ public class NamedWindowProcessor
     {
         tailView.destroy();
         rootView.destroy();
+    }
+
+    public boolean isEnableSubqueryIndexShare() {
+        return isEnableSubqueryIndexShare;
     }
 }

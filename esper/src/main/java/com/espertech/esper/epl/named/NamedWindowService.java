@@ -9,14 +9,15 @@
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.core.EPStatementHandle;
+import com.espertech.esper.core.StatementLock;
 import com.espertech.esper.core.StatementResultService;
-import com.espertech.esper.view.ViewProcessingException;
-import com.espertech.esper.util.ManagedLock;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
+import com.espertech.esper.view.ViewProcessingException;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public interface NamedWindowService
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */
-    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext) throws ViewProcessingException;
+    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext, Annotation[] annotations) throws ViewProcessingException;
 
     /**
      * Returns the processing instance for a given named window.
@@ -98,14 +99,14 @@ public interface NamedWindowService
      * @param windowName is the window name
      * @return the lock for the named window, or null if the window dos not yet exists
      */
-    public ManagedLock getNamedWindowLock(String windowName);
+    public StatementLock getNamedWindowLock(String windowName);
 
     /**
      * Sets the lock to use for a named window.
      * @param windowName is the named window name
      * @param statementResourceLock is the statement lock for the create window statement
      */
-    public void addNamedWindowLock(String windowName, ManagedLock statementResourceLock);
+    public void addNamedWindowLock(String windowName, StatementLock statementResourceLock);
 
     /**
      * Clear out the service.

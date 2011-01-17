@@ -11,10 +11,7 @@ package com.espertech.esper.epl.named;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.InternalEventRouter;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.core.*;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
@@ -22,11 +19,9 @@ import com.espertech.esper.epl.join.plan.FilterExprAnalyzer;
 import com.espertech.esper.epl.join.plan.QueryGraph;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.PropertyIndexedEventTable;
-import com.espertech.esper.epl.lookup.IndexedTableLookupStrategy;
-import com.espertech.esper.epl.lookup.IndexedTableLookupStrategyCoercing;
-import com.espertech.esper.epl.lookup.JoinedPropDesc;
-import com.espertech.esper.epl.lookup.TableLookupStrategy;
+import com.espertech.esper.epl.lookup.*;
 import com.espertech.esper.epl.spec.OnTriggerDesc;
+import com.espertech.esper.epl.spec.OnTriggerMergeDesc;
 import com.espertech.esper.epl.spec.OnTriggerType;
 import com.espertech.esper.epl.spec.OnTriggerWindowUpdateDesc;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
@@ -34,6 +29,7 @@ import com.espertech.esper.filter.FilterOperator;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecParam;
 import com.espertech.esper.filter.FilterSpecParamConstant;
+import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.StatementStopService;
@@ -52,26 +48,33 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class NamedWindowRootView extends ViewSupport
 {
+    private static final Log queryPlanLog = LogFactory.getLog(AuditPath.QUERYPLAN_LOG);
     private static final Log log = LogFactory.getLog(NamedWindowRootView.class);
 
     private EventType namedWindowEventType;
     private final NamedWindowIndexRepository indexRepository;
     private Iterable<EventBean> dataWindowContents;
-    private final Map<LookupStrategy, PropertyIndexedEventTable> tablePerStrategy;
+    private final Map<LookupStrategy, PropertyIndexedEventTable> tablePerMultiLookup;
+    private final Map<TableLookupStrategy, PropertyIndexedEventTable> tablePerSingleLookup;
     private final ValueAddEventProcessor revisionProcessor;
     private final ConcurrentHashMap<String, PropertyIndexedEventTable> explicitIndexes;
+    private final boolean queryPlanLogging;
     private boolean isChildBatching;
+    private StatementLock statementResourceLock;
 
     /**
      * Ctor.
      * @param revisionProcessor handle update events if supplied, or null if not handling revisions
      */
-    public NamedWindowRootView(ValueAddEventProcessor revisionProcessor)
+    public NamedWindowRootView(ValueAddEventProcessor revisionProcessor, StatementLock statementResourceLock, boolean queryPlanLogging)
     {
         this.indexRepository = new NamedWindowIndexRepository();
-        this.tablePerStrategy = new HashMap<LookupStrategy, PropertyIndexedEventTable>();
+        this.tablePerMultiLookup = new HashMap<LookupStrategy, PropertyIndexedEventTable>();
+        this.tablePerSingleLookup = new HashMap<TableLookupStrategy, PropertyIndexedEventTable>();
         this.explicitIndexes = new ConcurrentHashMap<String, PropertyIndexedEventTable>();
         this.revisionProcessor = revisionProcessor;
+        this.statementResourceLock = statementResourceLock;
+        this.queryPlanLogging = queryPlanLogging;
     }
 
     /**
@@ -197,12 +200,12 @@ public class NamedWindowRootView extends ViewSupport
             throws ExprValidationException
     {
         // Determine strategy for deletion and index table to use (if any)
-        Pair<LookupStrategy,PropertyIndexedEventTable> strategy = getStrategyPair(onTriggerDesc, joinExpr, filterEventType);
+        Pair<LookupStrategy,PropertyIndexedEventTable> strategy = getStrategyPair(joinExpr, filterEventType);
 
         // If a new table is required, add that table to be updated
         if (strategy.getSecond() != null)
         {
-            tablePerStrategy.put(strategy.getFirst(), strategy.getSecond());
+            tablePerMultiLookup.put(strategy.getFirst(), strategy.getSecond());
         }
 
         if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_DELETE)
@@ -218,6 +221,11 @@ public class NamedWindowRootView extends ViewSupport
             OnTriggerWindowUpdateDesc desc = (OnTriggerWindowUpdateDesc) onTriggerDesc;
             return new NamedWindowOnUpdateView(statementStopService, strategy.getFirst(), this, statementResultService, statementContext, desc);
         }
+        else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_MERGE)
+        {
+            OnTriggerMergeDesc desc = (OnTriggerMergeDesc) onTriggerDesc;
+            return new NamedWindowOnMergeView(statementStopService, strategy.getFirst(), this, statementResultService, statementContext, desc, filterEventType);
+        }
         else
         {
             throw new IllegalStateException("Unknown trigger type " + onTriggerDesc.getOnTriggerType());
@@ -231,14 +239,14 @@ public class NamedWindowRootView extends ViewSupport
      */
     public void removeOnExpr(LookupStrategy strategy)
     {
-        PropertyIndexedEventTable table = tablePerStrategy.remove(strategy);
+        PropertyIndexedEventTable table = tablePerMultiLookup.remove(strategy);
         if (table != null)
         {
             indexRepository.removeTableReference(table);
         }
     }
 
-    private Pair<LookupStrategy,PropertyIndexedEventTable> getStrategyPair(OnTriggerDesc onTriggerDesc, ExprNode joinExpr, EventType filterEventType)
+    private Pair<LookupStrategy,PropertyIndexedEventTable> getStrategyPair(ExprNode joinExpr, EventType filterEventType)
     {
         // No join expression means delete all
         if (joinExpr == null)
@@ -301,7 +309,7 @@ public class NamedWindowRootView extends ViewSupport
         }
 
         // create the strategy
-        TableLookupStrategy lookupStrategy = null;
+        TableLookupStrategy lookupStrategy;
         if (!mustCoerce)
         {
             lookupStrategy = new IndexedTableLookupStrategy(eventTypePerStream, streamNumbersPerProperty, keyPropertiesJoin, table);
@@ -336,7 +344,7 @@ public class NamedWindowRootView extends ViewSupport
     public void destroy()
     {
         indexRepository.destroy();
-        tablePerStrategy.clear();
+        tablePerMultiLookup.clear();
     }
 
     /**
@@ -365,6 +373,36 @@ public class NamedWindowRootView extends ViewSupport
                 }
             }
         }
+
+        PropertyIndexedEventTable tableFound = findTable(keysAndTypes);
+        if (tableFound == null) {
+            if (queryPlanLogging && queryPlanLog.isInfoEnabled()) {
+                queryPlanLog.info("no index found");
+            }
+            return null;    // indicates table scan
+        }
+
+        Object[] keyValues = new Object[tableFound.getPropertyNames().length];
+        for (int keyIndex = 0; keyIndex < tableFound.getPropertyNames().length; keyIndex++) {
+            for (FilterSpecParam param : filter.getParameters()) {
+                if (param.getPropertyName().equals(tableFound.getPropertyNames()[keyIndex])) {
+                    keyValues[keyIndex] = param.getFilterValue(null);
+                    break;
+                }
+            }
+        }
+
+        if (queryPlanLogging && queryPlanLog.isInfoEnabled()) {
+            queryPlanLog.info("index lookup, using keys " + Arrays.toString(tableFound.getPropertyNames()));
+        }
+        Set<EventBean> result = tableFound.lookup(keyValues);
+        if (result != null) {
+            return result;
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    private PropertyIndexedEventTable findTable(Map<String, Class> keysAndTypes) {
         if (keysAndTypes.isEmpty()) {
             return null;
         }
@@ -426,24 +464,10 @@ public class NamedWindowRootView extends ViewSupport
                     indexName = entry.getKey();
                 }
             }
-            log.debug("Using index " + indexName + " for on-demand query");
+            log.debug("Found index " + indexName + " for on-demand query");
         }
 
-        Object[] keyValues = new Object[tableFound.getPropertyNames().length];
-        for (int keyIndex = 0; keyIndex < tableFound.getPropertyNames().length; keyIndex++) {
-            for (FilterSpecParam param : filter.getParameters()) {
-                if (param.getPropertyName().equals(tableFound.getPropertyNames()[keyIndex])) {
-                    keyValues[keyIndex] = param.getFilterValue(null);
-                    break;
-                }
-            }
-        }
-
-        Set<EventBean> result = tableFound.lookup(keyValues);
-        if (result != null) {
-            return result;
-        }
-        return Collections.EMPTY_LIST;
+        return tableFound;
     }
 
     /**
@@ -452,7 +476,7 @@ public class NamedWindowRootView extends ViewSupport
      */
     public void removeExplicitIndex(String indexName)
     {
-        EventTable table = explicitIndexes.remove(indexName);
+        PropertyIndexedEventTable table = explicitIndexes.remove(indexName);
         if (table != null) {
             indexRepository.removeTableReference(table);
         }
@@ -464,5 +488,115 @@ public class NamedWindowRootView extends ViewSupport
      */
     public void setBatchView(boolean batchView) {
         isChildBatching = batchView;
+    }
+
+    public TableLookupStrategy getAddSubqueryLookupStrategy(EventType[] eventTypesPerStream, JoinedPropPlan joinDesc, boolean fullTableScan) {
+        // if there are no join criteria to use, return default copy strategy
+        if (fullTableScan || joinDesc.getJoinProps().isEmpty()) {
+            if (queryPlanLogging && queryPlanLog.isInfoEnabled()) {
+                queryPlanLog.info("shared, full table scan");
+            }
+            return new FullTableScanLookupStrategyLocking(dataWindowContents, statementResourceLock);
+        }
+
+        Map<String, Class> indexedCols = new LinkedHashMap<String, Class>();
+        for (Map.Entry<String, JoinedPropDesc> entry : joinDesc.getJoinProps().entrySet()) {
+            indexedCols.put(entry.getValue().getIndexPropName(), entry.getValue().getCoercionType());
+        }
+
+        // find matching table that could be used
+        PropertyIndexedEventTable table = findTable(indexedCols);
+
+        // no matching existing table found, add new one
+        if (table == null) {
+            Pair<TableLookupStrategy, String> strategy = addTableGetStrategy(joinDesc, eventTypesPerStream);
+            if (queryPlanLogging && queryPlanLog.isInfoEnabled()) {
+                queryPlanLog.info("new sharable index, " + strategy.getSecond());
+            }
+            return new IndexedTableLookupStrategyLocking(strategy.getFirst(), statementResourceLock);
+        }
+
+        // build strategy based on existing table
+        EventType[] types = new EventType[table.getPropertyNames().length];
+        int[] streamNumbers = new int[table.getPropertyNames().length];
+        String[] keyProps = new String[table.getPropertyNames().length];
+        Class[] coercionTypes = new Class[table.getPropertyNames().length];
+        String[] indexProps = new String[table.getPropertyNames().length];
+
+        for (int i = 0; i < table.getPropertyNames().length; i++) {
+            String indexedProp = table.getPropertyNames()[i];
+
+            for (Map.Entry<String, JoinedPropDesc> entry : joinDesc.getJoinProps().entrySet()) {
+                JoinedPropDesc joinPlan = entry.getValue();
+                if (entry.getValue().getIndexPropName().equals(indexedProp)) {
+                    indexProps[i] = indexedProp;
+                    types[i] = eventTypesPerStream[joinPlan.getKeyStreamId()];
+                    streamNumbers[i] = joinPlan.getKeyStreamId();
+                    keyProps[i] = joinPlan.getKeyPropName();
+                    coercionTypes[i] = joinPlan.getCoercionType();
+                }
+            }
+        }
+
+        IndexedTableLookupStrategy strategy;
+        String message = "index lookup on " + Arrays.toString(indexProps) + " based on " + Arrays.toString(keyProps);
+        if (!joinDesc.isMustCoerce()) {
+            strategy = new IndexedTableLookupStrategy(types, streamNumbers, keyProps, table);
+        }
+        else {
+            strategy = new IndexedTableLookupStrategyCoercing(types, streamNumbers, keyProps, table, coercionTypes);
+            message = "coerced " + message;
+        }
+        IndexedTableLookupStrategyLocking locking = new IndexedTableLookupStrategyLocking(strategy, statementResourceLock);
+        tablePerSingleLookup.put(locking, table);
+        indexRepository.addTableReference(table);
+        
+        if (queryPlanLogging && queryPlanLog.isInfoEnabled()) {
+            queryPlanLog.info("existing index, " + message);
+        }
+        return locking;
+    }
+
+    private Pair<TableLookupStrategy, String> addTableGetStrategy(JoinedPropPlan joinDesc, EventType[] eventTypePerStream) {
+
+        Collection<JoinedPropDesc> propsJoined = joinDesc.getJoinProps().values();
+        JoinedPropDesc[] propsJoinedArr = propsJoined.toArray(new JoinedPropDesc[propsJoined.size()]);
+        Arrays.sort(propsJoinedArr);
+
+        String[] indexPropertiesJoin = JoinedPropDesc.getIndexProperties(propsJoinedArr);
+        String[] keyPropertiesJoin = JoinedPropDesc.getKeyProperties(propsJoinedArr);
+        Class[] coercionTypes = JoinedPropDesc.getCoercionTypes(propsJoinedArr);
+        int[] streamNumbersPerProperty = JoinedPropDesc.getKeyStreamNums(propsJoinedArr);
+
+        // Add all joined fields to an array for sorting
+        IndexedPropDesc[] indexedPropDesc = new IndexedPropDesc[keyPropertiesJoin.length];
+        for (int i = 0; i < propsJoinedArr.length; i++)
+        {
+            indexedPropDesc[i] = new IndexedPropDesc(indexPropertiesJoin[i], coercionTypes[i]);
+        }
+
+        // Get the table for this index
+        PropertyIndexedEventTable table = indexRepository.addTable(indexedPropDesc, dataWindowContents, namedWindowEventType, joinDesc.isMustCoerce());
+
+        // create the strategy
+        TableLookupStrategy lookupStrategy;
+        String message = "index lookup on " + Arrays.toString(indexPropertiesJoin) + " based on " + Arrays.toString(keyPropertiesJoin);
+        if (!joinDesc.isMustCoerce())
+        {
+            lookupStrategy = new IndexedTableLookupStrategy(eventTypePerStream, streamNumbersPerProperty, keyPropertiesJoin, table);
+        }
+        else
+        {
+            lookupStrategy = new IndexedTableLookupStrategyCoercing(eventTypePerStream, streamNumbersPerProperty, keyPropertiesJoin, table, coercionTypes);
+            message = "coerced " + message;
+        }
+        return new Pair<TableLookupStrategy, String>(lookupStrategy, message);
+    }
+
+    public void removeSubqueryLookupStrategy(TableLookupStrategy namedWindowSubqueryLookup) {
+        PropertyIndexedEventTable table = tablePerSingleLookup.remove(namedWindowSubqueryLookup);
+        if (table != null) {
+            indexRepository.removeTableReference(table);
+        }
     }
 }

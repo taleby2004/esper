@@ -1,15 +1,16 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EPRuntimeIsolated;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.time.CurrentTimeSpanEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.TimerEvent;
 import com.espertech.esper.collection.ArrayBackedCollection;
 import com.espertech.esper.collection.DualWorkQueue;
 import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.schedule.ScheduleHandle;
@@ -25,7 +26,7 @@ import java.util.*;
 /**
  * Implementation for isolated runtime.
  */
-public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRouteDest
+public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEventRouteDest
 {
     private EPServicesContext unisolatedServices;
     private EPIsolationUnitServices services;
@@ -33,6 +34,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
     private boolean isPrioritized;
     private boolean isLatchStatementInsertStream;
     private ExprEvaluatorContext isolatedTimeEvalContext;
+    private ThreadWorkQueue threadWorkQueue;
 
     private ThreadLocal<Map<EPStatementHandle, ArrayDeque<FilterHandleCallback>>> matchesPerStmtThreadLocal;
     private ThreadLocal<Map<EPStatementHandle, Object>> schedulePerStmtThreadLocal;
@@ -46,6 +48,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
     {
         this.services = svc;
         this.unisolatedServices = unisolatedSvc;
+        this.threadWorkQueue = new ThreadWorkQueue();
         isSubselectPreeval = unisolatedSvc.getEngineSettingsService().getEngineSettings().getExpression().isSelfSubselectPreeval();
         isPrioritized = unisolatedSvc.getEngineSettingsService().getEngineSettings().getExecution().isPrioritized();
         isLatchStatementInsertStream = unisolatedSvc.getEngineSettingsService().getEngineSettings().getThreading().isInsertIntoDispatchPreserveOrder();
@@ -188,7 +191,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
 
         // Get it wrapped up, process event
         EventBean eventBean = unisolatedServices.getEventAdapterService().adapterForDOM(document);
-        ThreadWorkQueue.addBack(eventBean);
+        threadWorkQueue.addBack(eventBean);
     }
 
     public void sendEvent(Map map, String eventTypeName) throws EPException
@@ -279,25 +282,84 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
             log.debug(".processTimeEvent Setting time and evaluating schedules");
         }
 
-        CurrentTimeEvent current = (CurrentTimeEvent) event;
-        long currentTime = current.getTimeInMillis();
+        if (event instanceof CurrentTimeEvent) {
+            CurrentTimeEvent current = (CurrentTimeEvent) event;
+            long currentTime = current.getTimeInMillis();
 
-        if (currentTime == services.getSchedulingService().getTime())
+            if (currentTime == services.getSchedulingService().getTime())
+            {
+                if (log.isWarnEnabled())
+                {
+                    log.warn("Duplicate time event received for currentTime " + currentTime);
+                }
+            }
+            services.getSchedulingService().setTime(currentTime);
+
+            processSchedule();
+
+            // Let listeners know of results
+            dispatch();
+
+            // Work off the event queue if any events accumulated in there via a route()
+            processThreadWorkQueue();
+
+            return;
+        }
+
+        // handle time span
+        CurrentTimeSpanEvent span = (CurrentTimeSpanEvent) event;
+        long targetTime = span.getTargetTimeInMillis();
+        long currentTime = services.getSchedulingService().getTime();
+        Long optionalResolution = span.getOptionalResolution();
+
+        if (targetTime < currentTime)
         {
             if (log.isWarnEnabled())
             {
-                log.warn("Duplicate time event received for currentTime " + currentTime);
+                log.warn("Past or current time event received for currentTime " + targetTime);
             }
         }
-        services.getSchedulingService().setTime(currentTime);
 
-        processSchedule();
+        // Evaluation of all time events is protected from statement management
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()) && (ExecutionPathDebugLog.isTimerDebugEnabled))
+        {
+            log.debug(".processTimeEvent Setting time span and evaluating schedules for time " + targetTime + " optional resolution " + span.getOptionalResolution());
+        }
 
-        // Let listeners know of results
-        dispatch();
+        while(currentTime < targetTime) {
 
-        // Work off the event queue if any events accumulated in there via a route()
-        processThreadWorkQueue();
+            if ((optionalResolution != null) && (optionalResolution > 0)) {
+                currentTime += optionalResolution;
+            }
+            else {
+                Long nearest = services.getSchedulingService().getNearestTimeHandle();
+                if (nearest == null) {
+                    currentTime = targetTime;
+                }
+                else {
+                    currentTime = nearest;
+                }
+            }
+            if (currentTime > targetTime) {
+                currentTime = targetTime;
+            }
+
+            // Evaluation of all time events is protected from statement management
+            if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()) && (ExecutionPathDebugLog.isTimerDebugEnabled))
+            {
+                log.debug(".processTimeEvent Setting time and evaluating schedules for time " + currentTime);
+            }
+
+            services.getSchedulingService().setTime(currentTime);
+
+            processSchedule();
+
+            // Let listeners know of results
+            dispatch();
+
+            // Work off the event queue if any events accumulated in there via a route()
+            processThreadWorkQueue();
+        }
     }
 
     private void processSchedule()
@@ -417,7 +479,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
      */
     public void processThreadWorkQueue()
     {
-        DualWorkQueue queues = ThreadWorkQueue.getThreadQueue();
+        DualWorkQueue queues = threadWorkQueue.getThreadQueue();
 
         if (queues.getFrontQueue().isEmpty()) {
             boolean haveDispatched = unisolatedServices.getNamedWindowService().dispatch(isolatedTimeEvalContext);
@@ -619,7 +681,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
      */
     public void processStatementFilterMultiple(EPStatementHandle handle, ArrayDeque<FilterHandleCallback> callbackList, EventBean event)
     {
-        handle.getStatementLock().acquireLock(unisolatedServices.getStatementLockFactory());
+        handle.getStatementLock().acquireWriteLock(unisolatedServices.getStatementLockFactory());
         try
         {
             if (handle.isHasVariables())
@@ -675,7 +737,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
         }
         finally
         {
-            handle.getStatementLock().releaseLock(unisolatedServices.getStatementLockFactory());
+            handle.getStatementLock().releaseWriteLock(unisolatedServices.getStatementLockFactory());
         }
     }
 
@@ -687,7 +749,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
      */
     public void processStatementFilterSingle(EPStatementHandle handle, EPStatementHandleCallback handleCallback, EventBean event)
     {
-        handle.getStatementLock().acquireLock(unisolatedServices.getStatementLockFactory());
+        handle.getStatementLock().acquireWriteLock(unisolatedServices.getStatementLockFactory());
         try
         {
             if (handle.isHasVariables())
@@ -706,7 +768,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
         }
         finally
         {
-            handleCallback.getEpStatementHandle().getStatementLock().releaseLock(unisolatedServices.getStatementLockFactory());
+            handleCallback.getEpStatementHandle().getStatementLock().releaseWriteLock(unisolatedServices.getStatementLockFactory());
         }
     }
 
@@ -754,20 +816,20 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
         {
             if (addToFront) {
                 Object latch = epStatementHandle.getInsertIntoFrontLatchFactory().newLatch(event);
-                ThreadWorkQueue.addFront(latch);
+                threadWorkQueue.addFront(latch);
             }
             else {
                 Object latch = epStatementHandle.getInsertIntoBackLatchFactory().newLatch(event);
-                ThreadWorkQueue.addBack(latch);
+                threadWorkQueue.addBack(latch);
             }
         }
         else
         {
             if (addToFront) {
-                  ThreadWorkQueue.addFront(event);
+                  threadWorkQueue.addFront(event);
             }
             else {
-                ThreadWorkQueue.addBack(event);
+                threadWorkQueue.addBack(event);
             }
         }
     }
@@ -775,6 +837,14 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolated, InternalEventRo
     public void setInternalEventRouter(InternalEventRouter internalEventRouter)
     {
         throw new UnsupportedOperationException("Isolated runtime does not route itself");
+    }
+
+    public Long getNextScheduledTime() {
+        return services.getSchedulingService().getNearestTimeHandle();
+    }
+
+    public Map<String, Long> getStatementNearestSchedules() {
+        return EPRuntimeImpl.getStatementNearestSchedulesInternal(services.getSchedulingService(), unisolatedServices.getStatementLifecycleSvc());
     }
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);

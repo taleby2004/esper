@@ -10,31 +10,31 @@ package com.espertech.esper.pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.util.ExecutionPathDebugLog;
 
 /**
  * This class represents an 'not' operator in the evaluation tree representing any event expressions.
  */
-public final class EvalNotNode extends EvalNode
+public class EvalNotNode extends EvalNode
 {
     private static final long serialVersionUID = -8072564032270892802L;
 
-    public final EvalStateNode newState(Evaluator parentNode,
+    private transient PatternContext context;
+
+    protected EvalNotNode() {
+    }
+
+    public EvalStateNode newState(Evaluator parentNode,
                                         MatchedEventMap beginState,
-                                        PatternContext context, Object stateNodeId)
+                                        PatternContext context, EvalStateNodeNumber stateNodeId)
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".newState");
+        if (this.context == null) {
+            this.context = context;
         }
+        return new EvalNotStateNode(parentNode, this, beginState);
+    }
 
-        if (getChildNodes().size() != 1)
-        {
-            throw new IllegalStateException("Expected number of child nodes incorrect, expected 1 child node, found "
-                    + getChildNodes().size());
-        }
-
-        return context.getPatternStateFactory().makeNotNode(parentNode, this, beginState, stateNodeId);
+    public PatternContext getContext() {
+        return context;
     }
 
     public final String toString()

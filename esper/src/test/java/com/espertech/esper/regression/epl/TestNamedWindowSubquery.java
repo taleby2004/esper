@@ -1,14 +1,14 @@
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 public class TestNamedWindowSubquery extends TestCase
 {
@@ -16,95 +16,20 @@ public class TestNamedWindowSubquery extends TestCase
     private SupportUpdateListener listenerWindow;
     private SupportUpdateListener listenerStmtOne;
     private SupportUpdateListener listenerStmtTwo;
-    private SupportUpdateListener listenerStmtThree;
     private SupportUpdateListener listenerStmtDelete;
 
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getLogging().setEnableQueryPlan(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("ABean", SupportBean_S0.class);
         listenerWindow = new SupportUpdateListener();
         listenerStmtOne = new SupportUpdateListener();
         listenerStmtTwo = new SupportUpdateListener();
-        listenerStmtThree = new SupportUpdateListener();
         listenerStmtDelete = new SupportUpdateListener();
-    }
-
-    public void testSubquery()
-    {
-        // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, longPrimitive as b, longBoxed as c from " + SupportBean.class.getName();
-        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
-        stmtCreate.addListener(listenerWindow);
-
-        // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, longPrimitive as b, longBoxed as c from " + SupportBean.class.getName();
-        epService.getEPAdministrator().createEPL(stmtTextInsertOne);
-
-        // create consumer
-        String stmtTextSelectOne = "select irstream (select a from MyWindow) as value, symbol from " + SupportMarketDataBean.class.getName();
-        EPStatement stmtSelectOne = epService.getEPAdministrator().createEPL(stmtTextSelectOne);
-        stmtSelectOne.addListener(listenerStmtOne);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtSelectOne.getEventType().getPropertyNames(), new String[] {"value", "symbol"});
-        assertEquals(String.class, stmtSelectOne.getEventType().getPropertyType("value"));
-        assertEquals(String.class, stmtSelectOne.getEventType().getPropertyType("symbol"));
-
-        sendMarketBean("M1");
-        String fieldsStmt[] = new String[] {"value", "symbol"};
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M1"});
-
-        sendSupportBean("S1", 1L, 2L);
-        assertFalse(listenerStmtOne.isInvoked());
-        String fieldsWin[] = new String[] {"a", "b", "c"};
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsWin, new Object[] {"S1", 1L, 2L});
-
-        // create consumer 2 -- note that this one should not start empty now
-        String stmtTextSelectTwo = "select irstream (select a from MyWindow) as value, symbol from " + SupportMarketDataBean.class.getName();
-        EPStatement stmtSelectTwo = epService.getEPAdministrator().createEPL(stmtTextSelectTwo);
-        stmtSelectTwo.addListener(listenerStmtTwo);
-
-        sendMarketBean("M1");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S1", "M1"});
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S1", "M1"});
-
-        sendSupportBean("S2", 10L, 20L);
-        assertFalse(listenerStmtOne.isInvoked());
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsWin, new Object[] {"S2", 10L, 20L});
-
-        sendMarketBean("M2");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M2"});
-        assertFalse(listenerWindow.isInvoked());
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M2"});
-
-        // create delete stmt
-        String stmtTextDelete = "on " + SupportBean_A.class.getName() + " delete from MyWindow where id = a";
-        EPStatement stmtDelete = epService.getEPAdministrator().createEPL(stmtTextDelete);
-        stmtDelete.addListener(listenerStmtDelete);
-
-        // delete S1
-        epService.getEPRuntime().sendEvent(new SupportBean_A("S1"));
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fieldsWin, new Object[] {"S1", 1L, 2L});
-
-        sendMarketBean("M3");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S2", "M3"});
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S2", "M3"});
-
-        // delete S2
-        epService.getEPRuntime().sendEvent(new SupportBean_A("S2"));
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fieldsWin, new Object[] {"S2", 10L, 20L});
-
-        sendMarketBean("M4");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M4"});
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M4"});
-
-        sendSupportBean("S3", 100L, 200L);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsWin, new Object[] {"S3", 100L, 200L});
-
-        sendMarketBean("M5");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S3", "M5"});
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S3", "M5"});
-        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testSubquerySelfCheck()
@@ -150,22 +75,6 @@ public class TestNamedWindowSubquery extends TestCase
         sendSupportBean("E2", 5);
         ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2", 5});
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 4}, {"E2", 5}});
-    }
-
-    public void testCorrelatedSubquerySelect() {
-
-        // ESPER-452
-        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
-        epService.getEPAdministrator().getConfiguration().addEventType("ABean", SupportBean_S0.class);
-        epService.getEPAdministrator().createEPL("create window MyWindow.std:unique(string) as select * from SupportBean");
-        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select status.*, (select * from MyWindow where string = ABean.p00) as details" +
-                    " from ABean(p01='good') as status");
-        stmt.addListener(listenerStmtOne);
-        
-        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1", "good"));
-        assertTrue(listenerStmtOne.isInvoked());
     }
 
     public void testSubqueryDeleteInsertReplace()
@@ -215,7 +124,7 @@ public class TestNamedWindowSubquery extends TestCase
         }
     }
 
-    public void testSubqueryAggregation()
+    public void testUncorrelatedSubqueryAggregation()
     {
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, longPrimitive as b from " + SupportBean.class.getName();

@@ -19,6 +19,7 @@ import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.join.JoinSetComposer;
+import com.espertech.esper.epl.join.JoinSetFilter;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
 import com.espertech.esper.epl.spec.NamedWindowConsumerStreamSpec;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
@@ -30,6 +31,7 @@ import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecCompiler;
+import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,12 +43,14 @@ import java.util.*;
  */
 public class EPPreparedExecuteMethod
 {
+    private static final Log queryPlanLog = LogFactory.getLog(AuditPath.QUERYPLAN_LOG);
     private static final Log log = LogFactory.getLog(EPPreparedExecuteMethod.class);
 
     private final StatementSpecCompiled statementSpec;
     private final ResultSetProcessor resultSetProcessor;
     private final NamedWindowProcessor[] processors;
     private final JoinSetComposer joinComposer;
+    private final JoinSetFilter joinFilter;
     private final ExprEvaluatorContext exprEvaluatorContext;
     private EventBeanReader eventBeanReader;
     private final FilterSpecCompiled[] filters;
@@ -64,6 +68,11 @@ public class EPPreparedExecuteMethod
                                 StatementContext statementContext)
             throws ExprValidationException
     {
+        boolean queryPlanLogging = services.getConfigSnapshot().getEngineDefaults().getLogging().isEnableQueryPlan();
+        if (queryPlanLogging) {
+            queryPlanLog.info("Query plans for Fire-and-forget query '" + statementContext.getExpression() + "'");
+        }
+
         this.statementSpec = statementSpec;
         this.exprEvaluatorContext = statementContext;
 
@@ -140,11 +149,18 @@ public class EPPreparedExecuteMethod
             {
                 viewablePerStream[i] = processors[i].getTailView();
             }
-            joinComposer = statementContext.getJoinSetComposerFactory().makeComposer(statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typesPerStream, namesPerStream, viewablePerStream, SelectClauseStreamSelectorEnum.ISTREAM_ONLY, streamJoinAnalysisResult, statementContext);
+            joinComposer = statementContext.getJoinSetComposerFactory().makeComposer(statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typesPerStream, namesPerStream, viewablePerStream, SelectClauseStreamSelectorEnum.ISTREAM_ONLY, streamJoinAnalysisResult, statementContext, queryPlanLogging);
+            if (statementSpec.getFilterRootNode() != null) {
+                joinFilter = new JoinSetFilter(statementSpec.getFilterRootNode().getExprEvaluator());
+            }
+            else {
+                joinFilter = null;
+            }
         }
         else
         {
             joinComposer = null;
+            joinFilter = null;
         }
     }
 
@@ -199,6 +215,9 @@ public class EPPreparedExecuteMethod
                 newDataPerStream[i] = snapshots[i].toArray(new EventBean[snapshots[i].size()]);
             }
             UniformPair<Set<MultiKey<EventBean>>> result = joinComposer.join(newDataPerStream, oldDataPerStream, exprEvaluatorContext);
+            if (joinFilter != null) {
+                joinFilter.process(result.getFirst(), null, exprEvaluatorContext);
+            }
             results = resultSetProcessor.processJoinResult(result.getFirst(), null, true);
         }
 

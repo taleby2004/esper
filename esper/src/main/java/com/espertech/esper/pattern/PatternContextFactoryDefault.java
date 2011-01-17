@@ -20,12 +20,6 @@ public class PatternContextFactoryDefault implements PatternContextFactory
                                         EvalRootNode rootNode,
                                         boolean hasArrayProperties)
     {
-        PatternStateFactory patternStateFactory = new PatternStateFactoryImpl();
-
-        PatternContext patternContext = new PatternContext(statementContext, streamId, patternStateFactory);
-
-        patternStateFactory.setContext(patternContext);
-
-        return patternContext;
+        return new PatternContext(statementContext, streamId);
     }
 }

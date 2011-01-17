@@ -9,29 +9,19 @@
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyDescriptor;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.core.StatementResultService;
-import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
 import com.espertech.esper.epl.spec.OnTriggerWindowUpdateDesc;
-import com.espertech.esper.event.EventBeanCopyMethod;
-import com.espertech.esper.event.EventPropertyWriter;
 import com.espertech.esper.event.EventTypeSPI;
-import com.espertech.esper.util.TypeWidener;
-import com.espertech.esper.util.TypeWidenerFactory;
 import com.espertech.esper.view.StatementStopService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * View for the on-delete statement that handles removing events from a named window.
@@ -41,13 +31,8 @@ public class NamedWindowOnUpdateView extends NamedWindowOnExprBaseView
     private static final Log log = LogFactory.getLog(NamedWindowOnUpdateView.class);
     private EventBean[] lastResult;
     private final StatementResultService statementResultService;
-    private final ExprEvaluator[] expressions;
-    private final String[] propertyNames;
-    private final EventPropertyWriter[] writers;
     private final EventTypeSPI eventTypeSPI;
-    private final EventBeanCopyMethod copyMethod;
-    private final boolean[] notNullableField;
-    private final TypeWidener[] wideners;
+    private final NamedWindowUpdateHelper updateHelper;
 
     /**
      * Ctor.
@@ -70,41 +55,7 @@ public class NamedWindowOnUpdateView extends NamedWindowOnExprBaseView
         super(statementStopService, lookupStrategy, removeStreamView, exprEvaluatorContext);
         this.statementResultService = statementResultService;
         eventTypeSPI = (EventTypeSPI) removeStreamView.getEventType();
-
-        // validate expression, obtain wideners
-        wideners = new TypeWidener[onTriggerDesc.getAssignments().size()];
-        List<String> properties = new ArrayList<String>();
-        int len = onTriggerDesc.getAssignments().size();
-        expressions = new ExprEvaluator[len];
-        writers = new EventPropertyWriter[len];
-        notNullableField = new boolean[len];
-
-        for (int i = 0; i < onTriggerDesc.getAssignments().size(); i++)
-        {
-            OnTriggerSetAssignment assignment = onTriggerDesc.getAssignments().get(i);
-            expressions[i] = assignment.getExpression().getExprEvaluator();
-            EventPropertyDescriptor writableProperty = eventTypeSPI.getWritableProperty(assignment.getVariableName());
-
-            if (writableProperty == null)
-            {
-                throw new ExprValidationException("Property '" + assignment.getVariableName() + "' is not available for write access");
-            }
-            writers[i] = eventTypeSPI.getWriter(assignment.getVariableName());
-            notNullableField[i] = writableProperty.getPropertyType().isPrimitive();
-
-            properties.add(assignment.getVariableName());
-            wideners[i] = TypeWidenerFactory.getCheckPropertyAssignType(assignment.getExpression().toExpressionString(), assignment.getExpression().getExprEvaluator().getType(),
-                    writableProperty.getPropertyType(), assignment.getVariableName());
-        }
-        propertyNames = properties.toArray(new String[properties.size()]);
-
-        // map expression index to property index
-        List<String> propertiesUniqueList = new ArrayList(new HashSet(properties));
-        String[] propertiesArray = propertiesUniqueList.toArray(new String[propertiesUniqueList.size()]);
-        copyMethod = eventTypeSPI.getCopyMethod(propertiesArray);
-        if (copyMethod == null) {
-            throw new ExprValidationException("Event type does not support event bean copy");
-        }
+        updateHelper = NamedWindowUpdateHelper.make(eventTypeSPI, onTriggerDesc.getAssignments(), onTriggerDesc.getOptionalAsName());
     }
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
@@ -120,23 +71,7 @@ public class NamedWindowOnUpdateView extends NamedWindowOnExprBaseView
         for (EventBean triggerEvent : triggerEvents) {
             eventsPerStream[1] = triggerEvent;
             for (EventBean matchingEvent : matchingEvents) {
-                EventBean copy = copyMethod.copy(matchingEvent);
-                eventsPerStream[0] = copy;
-
-                for (int i = 0; i < expressions.length; i++) {
-                    Object result = expressions[i].evaluate(eventsPerStream, true, super.getExprEvaluatorContext());
-
-                    if (result == null && notNullableField[i]) {
-                        log.warn("Null value returned by expression for assignment to property '" + propertyNames[i] + " is ignored as the property type is not nullable for expression");
-                        continue;
-                    }
-
-                    if (wideners[i] != null) {
-                        result = wideners[i].widen(result);
-                    }
-                    writers[i].write(result, copy);
-                }
-
+                EventBean copy = updateHelper.update(matchingEvent, eventsPerStream, super.getExprEvaluatorContext());
                 newData.add(copy);
                 oldData.add(matchingEvent);
             }

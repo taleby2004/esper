@@ -19,12 +19,12 @@ public class TestTimerWithinOrMaxCountGuard extends TestCase {
     public void setUp()
     {
         StatementContext stmtContext = SupportStatementContextFactory.makeContext(new SchedulingServiceImpl(new TimeSourceServiceImpl()));
-        PatternContext context = new PatternContext(stmtContext, 1, null);
+        PatternContext context = new PatternContext(stmtContext, 1);
         scheduleService = stmtContext.getSchedulingService();
 
-        quitable = new SupportQuitable();
+        quitable = new SupportQuitable(context);
 
-        guard =  new TimerWithinOrMaxCountGuard(1000, 2, context, quitable);
+        guard =  new TimerWithinOrMaxCountGuard(1000, 2, quitable);
     }
 
     public void testInspect() {

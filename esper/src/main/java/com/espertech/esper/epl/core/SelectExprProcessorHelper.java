@@ -48,6 +48,7 @@ public class SelectExprProcessorHelper
     private final SelectExprEventTypeRegistry selectExprEventTypeRegistry;
     private final MethodResolutionService methodResolutionService;
     private final ExprEvaluatorContext exprEvaluatorContext;
+    private final String statementId;
 
     /**
      * Ctor.
@@ -71,7 +72,8 @@ public class SelectExprProcessorHelper
                                    ValueAddEventService valueAddEventService,
                                    SelectExprEventTypeRegistry selectExprEventTypeRegistry,
                                    MethodResolutionService methodResolutionService,
-                                   ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+                                   ExprEvaluatorContext exprEvaluatorContext,
+                                   String statementId) throws ExprValidationException
     {
         this.selectionList = selectionList;
         this.selectedStreams = selectedStreams;
@@ -83,6 +85,7 @@ public class SelectExprProcessorHelper
         this.valueAddEventService = valueAddEventService;
         this.selectExprEventTypeRegistry = selectExprEventTypeRegistry;
         this.methodResolutionService = methodResolutionService;
+        this.statementId = statementId;
     }
 
     public SelectExprProcessor getEvaluator() throws ExprValidationException {
@@ -622,11 +625,33 @@ public class SelectExprProcessorHelper
             {
                 if (vaeProcessor != null)
                 {
-                    resultEventType = eventAdapterService.createAnonymousMapType(selPropertyTypes);
+                    // Use an anonymous type if the target is not a variant stream
+                    if (valueAddEventService.getValueAddProcessor(insertIntoDesc.getEventTypeName()) == null) {
+                        resultEventType = eventAdapterService.createAnonymousMapType(selPropertyTypes);
+                    }
+                    else {
+                        String statementName = "stmt_" + statementId + "_insert";
+                        resultEventType = eventAdapterService.addNestableMapType(statementName, selPropertyTypes, null, false, false, false, false, true);
+                    }
                 }
                 else
                 {
                     EventType existingType = eventAdapterService.getExistsTypeByName(insertIntoDesc.getEventTypeName());
+
+                    if (existingType == null) {
+                        // The type may however be an auto-import or fully-qualified class name
+                        Class clazz = null;
+                        try {
+                            clazz = this.methodResolutionService.resolveClass(insertIntoDesc.getEventTypeName());
+                        }
+                        catch (EngineImportException e) {
+                            log.debug("Target stream name '" + insertIntoDesc.getEventTypeName() + "' is not resolved as a class name");
+                        }
+                        if (clazz != null) {
+                            existingType = eventAdapterService.addBeanType(clazz.getName(), clazz, false, false, false);
+                        }
+                    }
+
                     SelectExprInsertEventBean selectExprInsertEventBean = null;
                     if (existingType != null)
                     {
@@ -679,6 +704,7 @@ public class SelectExprProcessorHelper
         }
         catch (EventAdapterException ex)
         {
+            log.debug("Exception provided by event adapter: " + ex.getMessage(), ex);
             throw new ExprValidationException(ex.getMessage());
         }
     }

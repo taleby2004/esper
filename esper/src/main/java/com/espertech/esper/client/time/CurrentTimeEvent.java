@@ -11,13 +11,15 @@ package com.espertech.esper.client.time;
 import java.util.Date;
 
 /**
- * Event for externally controlling the time within an {@link com.espertech.esper.client.EPRuntime} instance.
+ * Event for externally controlling the time within an {@link com.espertech.esper.client.EPRuntime}
+ * or {@link com.espertech.esper.client.EPRuntimeIsolated} instance.
  * External clocking must be enabled via {@link TimerControlEvent} before this class can be used
  * to externally feed time.
  */
 public final class CurrentTimeEvent extends TimerEvent
 {
-    private final long timeInMillis;
+    private static final long serialVersionUID = -145001725701558269L;
+    private long timeInMillis;
 
     /**
      * Constructor.
@@ -40,5 +42,13 @@ public final class CurrentTimeEvent extends TimerEvent
     public long getTimeInMillis()
     {
         return timeInMillis;
+    }
+
+    /**
+     * Sets the time in milliseconds.
+     * @param timeInMillis to set
+     */
+    public void setTimeInMillis(long timeInMillis) {
+        this.timeInMillis = timeInMillis;
     }
 }

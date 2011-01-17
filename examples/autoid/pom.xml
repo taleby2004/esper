@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.espertech</groupId>
 		<artifactId>esper_examples</artifactId>
-		<version>4.0.0</version>
+		<version>4.1.0</version>
 	</parent>
 	<name>Esper Examples - AutoID</name>
 	<groupId>com.espertech</groupId>
@@ -35,6 +35,17 @@
 	</dependencies>
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+			  	<configuration>
+				  <archive>
+				    <manifestEntries>
+				      <Built-By>EsperTech</Built-By>
+				    </manifestEntries>
+				  </archive>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

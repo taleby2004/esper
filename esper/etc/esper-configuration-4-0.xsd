@@ -61,6 +61,7 @@
 			<xs:attribute name="root-element-namespace" type="xs:string" use="optional"/>
 			<xs:attribute name="default-namespace" type="xs:string" use="optional"/>
 			<xs:attribute name="schema-resource" type="xs:string" use="optional"/>
+			<xs:attribute name="schema-text" type="xs:string" use="optional"/>
 			<xs:attribute name="event-sender-validates-root" type="xs:boolean" use="optional"/>
 			<xs:attribute name="auto-fragment" type="xs:boolean" use="optional"/>
 			<xs:attribute name="xpath-resolve-properties-absolute" type="xs:boolean" use="optional"/>
@@ -370,6 +371,7 @@
 					<xs:element ref="esper:expression" minOccurs="0"/>
 					<xs:element ref="esper:execution" minOccurs="0"/>
 					<xs:element ref="esper:exceptionHandling" minOccurs="0"/>
+					<xs:element ref="esper:conditionHandling" minOccurs="0"/>
 				</xs:choice>
 			</xs:sequence>
 		</xs:complexType>
@@ -477,6 +479,8 @@
 			<xs:sequence maxOccurs="unbounded" minOccurs="0">
 				<xs:choice>
 					<xs:element ref="esper:execution-path" minOccurs="0"/>
+					<xs:element ref="esper:jdbc" minOccurs="0"/>
+					<xs:element ref="esper:query-plan" minOccurs="0"/>
 					<xs:element ref="esper:timer-debug" minOccurs="0"/>
 				</xs:choice>
 			</xs:sequence>
@@ -514,7 +518,17 @@
 			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="query-plan">
+		<xs:complexType>
+			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="timer-debug">
+		<xs:complexType>
+			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="jdbc">
 		<xs:complexType>
 			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 		</xs:complexType>
@@ -697,6 +711,13 @@
 				</xs:sequence>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="conditionHandling">
+		<xs:complexType>
+				<xs:sequence>
+					<xs:element ref="esper:handlerFactory" minOccurs="0" maxOccurs="unbounded"/>
+				</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="handlerFactory">
 		<xs:complexType>
 			<xs:attribute name="class" type="xs:string" use="required"/>
@@ -705,6 +726,7 @@
 	<xs:element name="execution">
 		<xs:complexType>
 			<xs:attribute name="prioritized" type="xs:boolean" use="optional"/>
+			<xs:attribute name="fairlock" type="xs:boolean" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="stmtgroup">

@@ -7,7 +7,11 @@ import org.apache.commons.logging.LogFactory;
  * Global boolean for enabling and disable audit path reporting.
  */
 public class AuditPath {
+
     private static final Log log = LogFactory.getLog(AuditPath.class);
+
+    public static final String QUERYPLAN_LOG = "com.espertech.esper.queryplan"; 
+    public static final String JDBC_LOG = "com.espertech.esper.jdbc"; 
 
     /**
      * Public access.

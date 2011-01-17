@@ -408,22 +408,22 @@ public void updateRStream(String orderId, long count) {...}]]></programlisting>
 					<title>Delivery of Begin and End Indications</title>
 	
 					<para>
-						If your subscriber requires a notification for begin and end of event delivery, it can expose methods by name <literal>start</literal> and <literal>end</literal>. 
+						If your subscriber requires a notification for begin and end of event delivery, it can expose methods by name <literal>updateStart</literal> and <literal>updateEnd</literal>. 
 					</para>
 					
 					<para>
-						The <literal>start</literal> method must take two integer parameters that indicate the number of events of the insert stream and remove stream to be delivered. The engine invokes the <literal>start</literal> method immediately prior to delivering events to the <literal>update</literal> and <literal>updateRStream</literal> methods.
+						The <literal>updateStart</literal> method must take two integer parameters that indicate the number of events of the insert stream and remove stream to be delivered. The engine invokes the <literal>updateStart</literal> method immediately prior to delivering events to the <literal>update</literal> and <literal>updateRStream</literal> methods.
 					</para>
 
 					<para>
-						The <literal>end</literal> method must take no parameters. The engine invokes the <literal>end</literal> method immediately after delivering events to the <literal>update</literal> and <literal>updateRStream</literal> methods.
+						The <literal>updateEnd</literal> method must take no parameters. The engine invokes the <literal>updateEnd</literal> method immediately after delivering events to the <literal>update</literal> and <literal>updateRStream</literal> methods.
 					</para>
 
 					<para>
 						An example set of delivery methods:
 					</para>
 					<programlisting><![CDATA[// Called by the engine before delivering events to update methods
-public void start(int insertStreamLength, int removeStreamLength)
+public void updateStart(int insertStreamLength, int removeStreamLength)
 
 // To deliver insert stream events
 public void update(String orderId, long count) {...}
@@ -432,7 +432,7 @@ public void update(String orderId, long count) {...}
 public void updateRStream(String orderId, long count) {...}
 
 // Called by the engine after delivering events
-public void end() {...}]]></programlisting>
+public void updateEnd() {...}]]></programlisting>
 				</sect4>
 				
 		   </sect3>
@@ -1515,21 +1515,91 @@ runtime.sendEvent(new TimerControlEvent(TimerControlEvent.ClockType.CLOCK_EXTERN
 		</para>
 
 		<programlisting><![CDATA[// Set start time at zero.
-epRuntime().sendEvent(new CurrentTimeEvent(0));
+runtime.sendEvent(new CurrentTimeEvent(0));
 
 // create a statement here
 epAdministrator.createEPL("select * from MyEvent output every 5 seconds");
 
 // move time forward 1 second
-epRuntime().sendEvent(new CurrentTimeEvent(1000));
+runtime.sendEvent(new CurrentTimeEvent(1000));
 
 // move time forward 5 seconds
-epRuntime().sendEvent(new CurrentTimeEvent(6000));]]></programlisting>
+runtime.sendEvent(new CurrentTimeEvent(6000));]]></programlisting>
 
 		<para>
 			When sending external timer events, your application should make sure that <literal>long</literal>-type time values are ascending. That is, each long-type value should be either the same value or a larger value then the prior value provided by a <literal>CurrentTimeEvent</literal>. The engine outputs a warning if time events move back in time.
 		</para>
 		
+		<para>
+		    Your application may use the <literal>getNextScheduledTime</literal> method in <literal>EPRuntime</literal> to determine the earliest time a schedule for any statement requires evaluation.
+		</para>
+		
+		<para>
+			The following code snippet sets the current time, creates a statement and prints the next scheduled time which is 1 minute later then the current time:
+		</para>
+		<programlisting><![CDATA[// Set start time to the current time.
+runtime.sendEvent(new CurrentTimeEvent(System.currentTimeMillis()));
+
+// Create a statement.
+epService.getEPAdministrator().createEPL("select * from pattern[timer:interval(1 minute)]");
+
+// Print next schedule time
+System.out.println("Next schedule at " + new Date(runtime.getNextScheduledTime());]]></programlisting>
+
+		<sect2 id="api-controlling-time-span">
+			<title>Controlling Time Using Time Span Events</title>
+			<para>
+				With <literal>CurrentTimeEvent</literal>, as described above, your application can advance engine time to a given point in time. In addition, the <literal>getNextScheduledTime</literal> method in <literal>EPRuntime</literal> returns the next scheduled time according to started statements.
+				You would typically use <literal>CurrentTimeEvent</literal> to advance time at a relatively high resolution.
+			</para>
+			
+			<para>
+				To advance time for a span of time without sending individual <literal>CurrentTimeEvent</literal> events to the engine, the API provides the class <literal>CurrentTimeSpanEvent</literal>.  You may use <literal>CurrentTimeSpanEvent</literal> with or without a resolution.
+			</para>
+			
+			<para>
+				If your application only provides the target end time of time span to <literal>CurrentTimeSpanEvent</literal> and no resolution, the engine advances time up to the target time by stepping through all relevant times according to started statements.
+			</para>
+				
+			<para>
+				If your application provides the target end time of time span and in addition a <literal>long</literal>-typed resolution, the engine advances time up to the target time by incrementing time according to the resolution (regardless of next scheduled time according to started statements).
+			</para>
+				
+			<para>
+				Consider the following example:
+			</para>
+			
+			<programlisting><![CDATA[// Set start time to Jan.1, 2010, 00:00 am for this example
+SimpleDateFormat format = new SimpleDateFormat("yyyy MM dd HH:mm:ss SSS");
+Date startTime = format.parse("2010 01 01 00:00:00 000");
+runtime.sendEvent(new CurrentTimeEvent(startTime.getTime()));
+
+// Create a statement.
+EPStatement stmt = epService.getEPAdministrator().createEPL("select current_timestamp() as ct " +
+  "from pattern[every timer:interval(1 minute)]");
+stmt.addListener(...);	// add a listener
+
+// Advance time to 10 minutes after start time
+runtime.sendEvent(new CurrentTimeSpanEvent(startTime.getTime() + 10*60*1000));]]></programlisting>
+
+			<para>
+				The above example advances time to 10 minutes after the time set using <literal>CurrentTimeSpanEvent</literal>. As the example does not pass a resolution, the engine advances time according to statement schedules.
+				Upon sending the <literal>CurrentTimeSpanEvent</literal> the listener sees 10 invocations for minute 1 to minute 10.
+			</para>
+			
+			<para>
+				To advance time according to a given resolution, you may provide the resolution as shown below:
+			</para>		
+			<programlisting><![CDATA[// Advance time to 10 minutes after start time at 100 msec resolution
+runtime.sendEvent(new CurrentTimeSpanEvent(startTime.getTime() + 10*60*1000, 100));]]></programlisting>
+		</sect2>
+
+		<sect2 id="api-controlling-time-spi">
+			<title>Additional Time-Related APIs</title>
+			<para>
+				Consider using the service-provider interface <literal>EPRuntimeSPI</literal> <literal>EPRuntimeIsolatedSPI</literal>. The two interfaces are service-provider interfaces that expose additional function to manage statement schedules. However the SPI interfaces should be considered an extension API and are subject to change between release versions.
+			</para>
+		</sect2>
     </sect1>
 
     <sect1 id="api-time-resolution">
@@ -1820,6 +1890,30 @@ isolatedService.getEPRuntime().send(historyEvent);
         
         <para>
 			As the configuration section describes, your application registers one or more classes that implement the <literal>ExceptionHandlerFactory</literal> interface in the engine configuration. Upon engine initialization the engine obtains a factory instance from the class name that then provides the exception handler instance. The exception handler class must implement the <literal>ExceptionHandler</literal> interface.
+        </para>
+    </sect1>
+
+    <sect1 id="api-condition">
+        <title>Condition Handling</title>
+        
+        <para>
+			You may register one or more condition handlers for the engine to invoke in the case it encounters certain conditions, as outlined below, when executing a statement. By default and without condition handlers the engine logs the condition at informational level and continues processing. The configuration is described in <xref linkend="config-engine-conditionhandling"/>.
+        </para>
+        
+        <para>
+			If your application registers condition handlers as part of engine configuration, the engine invokes the condition handlers in the order they are registered passing relevant condition information such as EPL statement name, expression and the condition information itself.
+        </para>
+        
+        <para>
+			Currently the only condition indicated by this facility is raised by the pattern followed-by operator when used with the limit expression and when the limit is reached, see <xref linkend="pattern-temporal-followed-by-max"/>.
+        </para>
+
+        <para>
+			A condition handler may not itself throw a runtime exception or return any value.
+        </para>
+
+        <para>
+			As the configuration section describes, your application registers one or more classes that implement the <literal>ConditionHandlerFactory</literal> interface in the engine configuration. Upon engine initialization the engine obtains a factory instance from the class name that then provides the condition handler instance. The condition handler class must implement the <literal>ConditionHandler</literal> interface.
         </para>
     </sect1>
 

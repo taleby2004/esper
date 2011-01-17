@@ -14,6 +14,48 @@ import junit.framework.TestCase;
 
 public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 {
+    public void testExpireSeenBeforeKey() {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.addEventType("SupportBean", SupportBean.class);
+        EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider(config);
+        engine.initialize();
+
+        engine.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        String expression = "select * from pattern [every-distinct(a.intPrimitive, 1 sec) a=SupportBean(string like 'A%')]";
+        EPStatement statement = engine.getEPAdministrator().createEPL(expression);
+        SupportUpdateListener listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A1"});
+
+        engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
+        assertFalse(listener.isInvoked());
+
+        engine.getEPRuntime().sendEvent(new SupportBean("A3", 2));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A3"});
+
+        engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
+        engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
+        assertFalse(listener.isInvoked());
+
+        engine.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
+
+        engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A4"});
+        engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A5"});
+
+        engine.getEPRuntime().sendEvent(new SupportBean("A6", 1));
+        engine.getEPRuntime().sendEvent(new CurrentTimeEvent(1999));
+        engine.getEPRuntime().sendEvent(new SupportBean("A7", 2));
+        assertFalse(listener.isInvoked());
+        
+        engine.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
+        engine.getEPRuntime().sendEvent(new SupportBean("A7", 2));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A7"});
+    }
+
     public void testEveryDistinctOverFilter() throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();
@@ -22,7 +64,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [every-distinct(intPrimitive) a=SupportBean]";
+        runEveryDistinctOverFilter(engine, expression);
 
+        expression = "select * from pattern [every-distinct(intPrimitive, 2 minutes) a=SupportBean]";
+        runEveryDistinctOverFilter(engine, expression);
+    }
+
+    private void runEveryDistinctOverFilter(EPServiceProvider engine, String expression) {
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -50,6 +98,8 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         EPStatementObjectModel model = engine.getEPAdministrator().compileEPL(expression);
         assertEquals(expression, model.toEPL());
         engine.getEPAdministrator().create(model);
+
+        statement.destroy();
     }
 
     public void testRepeatOverDistinct() throws Exception
@@ -60,6 +110,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [[2] every-distinct(a.intPrimitive) a=SupportBean]";
+        runRepeatOverDistinct(engine, expression);
+
+        expression = "select * from pattern [[2] every-distinct(a.intPrimitive, 1 hour) a=SupportBean]";
+        runRepeatOverDistinct(engine, expression);
+    }
+
+    private void runRepeatOverDistinct(EPServiceProvider engine, String expression) {
 
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -87,6 +144,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [every-distinct(a[0].intPrimitive) [2] a=SupportBean]";
+        runEveryDistinctOverRepeat(engine, expression);
+
+        expression = "select * from pattern [every-distinct(a[0].intPrimitive, a[0].intPrimitive, 1 hour) [2] a=SupportBean]";
+        runEveryDistinctOverRepeat(engine, expression);
+    }
+
+    private void runEveryDistinctOverRepeat(EPServiceProvider engine, String expression) {
 
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -118,6 +182,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         // for 10 seconds, look for every distinct A
         String expression = "select * from pattern [(every-distinct(a.intPrimitive) a=SupportBean) where timer:within(10 sec)]";
+        runTimerWithinOverDistinct(engine, expression);
+
+        expression = "select * from pattern [(every-distinct(a.intPrimitive, 2 days 2 minutes) a=SupportBean) where timer:within(10 sec)]";
+        runTimerWithinOverDistinct(engine, expression);
+    }
+    
+    private void runTimerWithinOverDistinct(EPServiceProvider engine, String expression) {
 
         sendTimer(0, engine);
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
@@ -149,6 +220,14 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [every-distinct(a.intPrimitive) (a=SupportBean where timer:within(10 sec))]";
+        runEveryDistinctOverTimerWithin(engine, expression);
+
+        expression = "select * from pattern [every-distinct(a.intPrimitive, 1 hour) (a=SupportBean where timer:within(10 sec))]";
+        runEveryDistinctOverTimerWithin(engine, expression);
+    }
+
+    private void runEveryDistinctOverTimerWithin(EPServiceProvider engine, String expression) {
+
         sendTimer(0, engine);
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -208,6 +287,14 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [every-distinct(a.intPrimitive, b.intPrimitive) (a=SupportBean(string like 'A%') and b=SupportBean(string like 'B%'))]";
+        runEveryDistinctOverAnd(engine, expression);
+
+        expression = "select * from pattern [every-distinct(a.intPrimitive, b.intPrimitive, 1 hour) (a=SupportBean(string like 'A%') and b=SupportBean(string like 'B%'))]";
+        runEveryDistinctOverAnd(engine, expression);
+    }
+
+    private void runEveryDistinctOverAnd(EPServiceProvider engine, String expression) {
+
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -250,6 +337,14 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [every-distinct(coalesce(a.intPrimitive, 0) + coalesce(b.intPrimitive, 0)) (a=SupportBean(string like 'A%') or b=SupportBean(string like 'B%'))]";
+        runEveryDistinctOverOr(engine, expression);
+
+        expression = "select * from pattern [every-distinct(coalesce(a.intPrimitive, 0) + coalesce(b.intPrimitive, 0), 1 hour) (a=SupportBean(string like 'A%') or b=SupportBean(string like 'B%'))]";
+        runEveryDistinctOverOr(engine, expression);
+    }
+
+    private void runEveryDistinctOverOr(EPServiceProvider engine, String expression) {
+
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -286,6 +381,14 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [every-distinct(a.intPrimitive) (a=SupportBean(string like 'A%') and not SupportBean(string like 'B%'))]";
+        runEveryDistinctOverNot(engine, expression);
+
+        expression = "select * from pattern [every-distinct(a.intPrimitive, 1 hour) (a=SupportBean(string like 'A%') and not SupportBean(string like 'B%'))]";
+        runEveryDistinctOverNot(engine, expression);
+    }
+
+    private void runEveryDistinctOverNot(EPServiceProvider engine, String expression) {
+
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -317,6 +420,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [every-distinct(a.intPrimitive + b.intPrimitive) (a=SupportBean(string like 'A%') -> b=SupportBean(string like 'B%'))]";
+        runEveryDistinctOverFollowedBy(engine, expression);
+
+        expression = "select * from pattern [every-distinct(a.intPrimitive + b.intPrimitive, 1 hour) (a=SupportBean(string like 'A%') -> b=SupportBean(string like 'B%'))]";
+        runEveryDistinctOverFollowedBy(engine, expression);
+    }
+
+    private void runEveryDistinctOverFollowedBy(EPServiceProvider engine, String expression) {
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -351,6 +461,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [(every-distinct(a.intPrimitive) a=SupportBean(string like 'A%')) -> b=SupportBean(intPrimitive=a.intPrimitive)]";
+        runEveryDistinctWithinFollowedBy(engine, expression);
+
+        expression = "select * from pattern [(every-distinct(a.intPrimitive, 2 hours 1 minute) a=SupportBean(string like 'A%')) -> b=SupportBean(intPrimitive=a.intPrimitive)]";
+        runEveryDistinctWithinFollowedBy(engine, expression);
+    }
+
+    private void runEveryDistinctWithinFollowedBy(EPServiceProvider engine, String expression) {
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -392,6 +509,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         String expression = "select * from pattern [every-distinct(a.intPrimitive) a=SupportBean(string like 'A%') -> every-distinct(b.intPrimitive) b=SupportBean(string like 'B%')]";
+        runFollowedByWithDistinct(engine, expression);
+
+        expression = "select * from pattern [every-distinct(a.intPrimitive, 1 day) a=SupportBean(string like 'A%') -> every-distinct(b.intPrimitive) b=SupportBean(string like 'B%')]";
+        runFollowedByWithDistinct(engine, expression);
+    }
+    
+    private void runFollowedByWithDistinct(EPServiceProvider engine, String expression) {
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -433,6 +557,9 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         tryInvalid(engine, "every-distinct(dummy) A",
                 "Property named 'dummy' is not valid in any stream, every-distinct requires that all properties resolve from sub-expressions to the every-distinct [every-distinct(dummy) A]");
+
+        tryInvalid(engine, "every-distinct(2 sec) A",
+                "Every-distinct node requires one or more distinct-value expressions that each return non-constant result values [every-distinct(2 sec) A]");
     }
 
     public void tryInvalid(EPServiceProvider engine, String statement, String message) throws Exception

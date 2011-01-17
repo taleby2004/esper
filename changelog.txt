@@ -1,6 +1,51 @@
 Esper Changelog
 ===================
 
+Changes in version 4.1.0
+------------------------
+Major API or EPL changes
+  - Support for on-merge which provides and atomic update-insert (aka. upsert) operation for use with named windows
+  - Support for subqueries against named windows to share existing indexes on the named window (both implicitly-created or via create-index)
+  - Support for configuration option to enable output of query plan to log destination (aka. explain-plan)
+  - Support for a new 'typeof' function that returns the event type name, for use with variant streams and event type super-types (POJO extends and implements, map super-types)
+  - Support for XML event type update at runtime via ConfigurationOperations
+  - Support for an extended time interval grammar that now supports 'weeks', 'months' and 'years' keywords
+  - Support for additional means to control external time
+  - Support for loading an XML schema from a string
+  - Support for a new form of the followed-by (->) operator: The form "-[max]> allows specifying an upper limit on the number of pattern instances
+  - We refactored the pattern engine to reduce memory use of pattern instances significantly
+
+Minor changes
+  - Fixed issue ESPER-502 NullPointerException in OutputProcessViewDistinctOrAfter.process() and update() methods
+  - Fixed issue ESPER-503 Incorrect warning logged using @Hint('reclaim_group_aged=2') with std:groupwin grouped data windows
+  - Fixed issue ESPER-505 Reference Documation 4.0.0; Table 6.5; duplicety of operator
+  - Fixed issue ESPER-506 NullPointerException on an inner join of named window with aggregation and group-by
+  - Fixed issue ESPER-509 Documentation bug in subscriber use: "start" and "end" are "updateStart" and "updateEnd"
+  - Fixed issue ESPER-510 Support for event array for event objects populated by insert into
+  - Fixed issue ESPER-511 Make CurrentTimeEvent and TimerControlEvent Serializable
+  - Fixed issue ESPER-512 EventBean getUnderlying method when both subscriber and listener are used returns Class and not the underlying object
+  - Fixed issue ESPER-513 On-Update set Error starting statement: Property 'u.v2' is not available for write access [on com.espertech.esper.support.bean.SupportBean update MyWindow as u set v1=string, u.v2=string]
+  - Fixed issue ESPER-516 Insert into stream defined by a schema created as a map schema with property type being an event type not compiling
+  - Fixed issue ESPER-517 Error message "IllegalStateException: Event named ''a' not found in event pattern result set" is inaccurate
+  - Fixed issue ESPER-518 NPE in fire-and-forget query against two named windows with group-by and aggregations when named windows are empty
+  - Fixed issue ESPER-519 Fire-and-Forget join on 2 named windows with where-clause filtering on one window's rows returns incorrect result
+  - Fixed issue ESPER-520 Possible memory leak using @Hint('reclaim_group_aged=xxx') with time windows
+  - Fixed issue ESPER-521 Insert into stream defined by a schema created as a map schema with property type being an event type not populating when inserted from a map schema stream
+  - Fixed issue ESPER-522 Provide time control event for advancing the system clock by a batch of ticks
+  - Fixed issue ESPER-523 Scheduling service SPI to provide nearest time and statement info
+  - Fixed issue ESPER-526 Unidirectional inner join between two named windows when started late (named windows have data) produces too many rows for first result delivery
+  - Fixed issue ESPER-527 memory leak is possible for unbound/unlimited keys used with every-distinct
+  - Fixed issue ESPER-528 Unidirectional left outer join between same streams (self join) when used with staggered time-window and grouped view causes out of memory
+  - Fixed issue ESPER-529 create-schema to allow dot characters in property names
+  - Fixed issue ESPER-533 NullpointerException in Pattern And-state with timer:interval and "not"
+  - Fixed issue ESPER-535 "Previous" function when used under single-row plug-in function or user-defined function not compiling in match-recognize  
+  - Fixed issue ESPER-536 NPE using Output Limiting clause with an EPStatementObjectModel - ExprTimePeriod
+  - Fixed issue ESPER-537 NullpointerException in Create-Window with Model-after Syntax when a nested property does not exist
+  - Fixed issue ESPER-538 Support for auto-event name in insert-into (populate underlying event)
+  - Fixed issue ESPER-539 Support for insert-into to specifiy the fully-qualified class name
+  - Fixed issue ESPER-543 Multiple engine instances same thread sending and receiving problem
+
+
 Changes in version 4.0.0
 ------------------------
 Major API or EPL changes

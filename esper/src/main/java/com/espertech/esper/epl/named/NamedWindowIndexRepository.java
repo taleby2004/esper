@@ -95,12 +95,23 @@ public class NamedWindowIndexRepository
         return table;
     }
 
+    public void addTableReference(EventTable table) {
+        for (Map.Entry<MultiKey<IndexedPropDesc>, Pair<PropertyIndexedEventTable, Integer>> entry : tableIndexes.entrySet())
+        {
+            if (entry.getValue().getFirst() == table)
+            {
+                int current = entry.getValue().getSecond() + 1;
+                entry.getValue().setSecond(current);
+            }
+        }
+    }
+
     /**
      * Remove a reference to an index table, decreasing its reference count.
      * If the table is no longer used, discard it and no longer update events into the index.
      * @param table to remove a reference to
      */
-    public void removeTableReference(EventTable table)
+    public void removeTableReference(PropertyIndexedEventTable table)
     {
         for (Map.Entry<MultiKey<IndexedPropDesc>, Pair<PropertyIndexedEventTable, Integer>> entry : tableIndexes.entrySet())
         {

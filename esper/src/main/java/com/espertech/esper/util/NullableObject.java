@@ -8,14 +8,18 @@
  **************************************************************************************/
 package com.espertech.esper.util;
 
+import java.io.Serializable;
+
 /**
  * A generic class to hold an object that may itself be a null value versus an undefined (not existing) value.
  * <p>
  * The presence of a reference indicates that a value exists, the absence of a reference to this object indicates
  * that there is no value (similar to a Pair<Object, Boolean>).
  */
-public class NullableObject<T>
+public class NullableObject<T> implements Serializable
 {
+    private static final long serialVersionUID = 4345362826746027878L;
+
     private T object;
 
     /**

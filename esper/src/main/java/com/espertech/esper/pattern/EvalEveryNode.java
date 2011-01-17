@@ -10,38 +10,35 @@ package com.espertech.esper.pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.util.ExecutionPathDebugLog;
 
 /**
  * This class represents an 'every' operator in the evaluation tree representing an event expression.
  */
-public final class EvalEveryNode extends EvalNode
+public class EvalEveryNode extends EvalNode
 {
     private static final long serialVersionUID = 3672732014060588205L;
+
+    private transient PatternContext context;
 
     /**
      * Ctor.
      */
-    public EvalEveryNode()
+    protected EvalEveryNode()
     {
     }
 
-    public final EvalStateNode newState(Evaluator parentNode,
+    public EvalStateNode newState(Evaluator parentNode,
                                         MatchedEventMap beginState,
-                                        PatternContext context, Object stateNodeId)
+                                        PatternContext context, EvalStateNodeNumber stateNodeId)
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".newState");
+        if (this.context == null) {
+            this.context = context;
         }
+        return new EvalEveryStateNode(parentNode, this, beginState);
+    }
 
-        if (getChildNodes().size() != 1)
-        {
-            throw new IllegalStateException("Expected number of child nodes incorrect, expected 1 node, found "
-                    + getChildNodes().size());
-        }
-
-        return context.getPatternStateFactory().makeEveryStateNode(parentNode, this, beginState, context, stateNodeId);
+    public PatternContext getContext() {
+        return context;
     }
 
     public final String toString()

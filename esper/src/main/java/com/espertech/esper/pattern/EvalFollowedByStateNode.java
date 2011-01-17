@@ -9,46 +9,43 @@
 package com.espertech.esper.pattern;
 
 
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
-
-import com.espertech.esper.util.ExecutionPathDebugLog;
 
 /**
  * This class represents the state of a followed-by operator in the evaluation state tree.
  */
 public final class EvalFollowedByStateNode extends EvalStateNode implements Evaluator
 {
+    private final EvalFollowedByNode evalFollowedByNode;
     private final HashMap<EvalStateNode, Integer> nodes;
-    private final PatternContext context;
 
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
      * @param beginState contains the events that make up prior matches
-     * @param context contains handles to services required
      * @param evalFollowedByNode is the factory node associated to the state
      */
     public EvalFollowedByStateNode(Evaluator parentNode,
                                          EvalFollowedByNode evalFollowedByNode,
-                                         MatchedEventMap beginState,
-                                         PatternContext context)
+                                         MatchedEventMap beginState)
     {
-        super(evalFollowedByNode, parentNode, null);
+        super(parentNode, null);
 
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".constructor");
-        }
-
+        this.evalFollowedByNode = evalFollowedByNode;
         this.nodes = new HashMap<EvalStateNode, Integer>();
-        this.context = context;
 
         EvalNode child = evalFollowedByNode.getChildNodes().get(0);
-        EvalStateNode childState = child.newState(this, beginState, context, null);
+        EvalStateNode childState = child.newState(this, beginState, evalFollowedByNode.getContext(), null);
         nodes.put(childState, 0);
+    }
+
+    @Override
+    public EvalNode getFactoryNode() {
+        return evalFollowedByNode;
     }
 
     public final void start()
@@ -102,11 +99,11 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
 
             this.getParentEvaluator().evaluateTrue(matchEvent, this, isFollowedByQuitted);
         }
-        // Else start a new listener for the next-in-line filter
+        // Else start a new sub-expression for the next-in-line filter
         else
         {
             EvalNode child = getFactoryNode().getChildNodes().get(index + 1);
-            EvalStateNode childState = child.newState(this, matchEvent, context, null);
+            EvalStateNode childState = child.newState(this, matchEvent, evalFollowedByNode.getContext(), null);
             nodes.put(childState, index + 1);
             childState.start();
         }
@@ -121,7 +118,7 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
 
         fromNode.quit();
         nodes.remove(fromNode);
-        
+
         if (nodes.isEmpty())
         {
             this.getParentEvaluator().evaluateFalse(this);

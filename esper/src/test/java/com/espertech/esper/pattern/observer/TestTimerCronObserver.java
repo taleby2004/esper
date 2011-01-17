@@ -27,14 +27,14 @@ public class TestTimerCronObserver extends TestCase
 
         scheduleService = new SchedulingServiceImpl(new TimeSourceServiceImpl());
         StatementContext stmtContext = SupportStatementContextFactory.makeContext(scheduleService);
-        PatternContext context = new PatternContext(stmtContext, 1, null);
+        PatternContext context = new PatternContext(stmtContext, 1);
 
         ScheduleSpec scheduleSpec = new ScheduleSpec();
         scheduleSpec.addValue(ScheduleUnit.SECONDS, 1);
 
-        evaluator = new SupportObserverEvaluator();
+        evaluator = new SupportObserverEvaluator(context);
 
-        observer =  new TimerAtObserver(scheduleSpec, context, beginState, evaluator);
+        observer =  new TimerAtObserver(scheduleSpec, beginState, evaluator);
     }
 
     public void testStartAndObserve()

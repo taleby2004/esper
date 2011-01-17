@@ -207,11 +207,11 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     {
         SchemaModel schemaModel = null;
 
-        if (xmlDOMEventTypeDesc.getSchemaResource() != null)
+        if ((xmlDOMEventTypeDesc.getSchemaResource() != null) || (xmlDOMEventTypeDesc.getSchemaText() != null))
         {
             try
             {
-                schemaModel = XSDSchemaMapper.loadAndMap(xmlDOMEventTypeDesc.getSchemaResource(), 2);
+                schemaModel = XSDSchemaMapper.loadAndMap(xmlDOMEventTypeDesc.getSchemaResource(), xmlDOMEventTypeDesc.getSchemaText(), 2);
             }
             catch (Exception ex)
             {
@@ -326,6 +326,30 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         try
         {
             eventAdapterService.updateMapEventType(mapeventTypeName, typeMap);
+        }
+        catch (EventAdapterException e)
+        {
+            throw new ConfigurationException("Error updating Map event type: " + e.getMessage(), e);
+        }
+    }
+
+    public void replaceXMLEventType(String xmlEventTypeName, ConfigurationEventTypeXMLDOM config) throws ConfigurationException {
+        SchemaModel schemaModel = null;
+        if (config.getSchemaResource() != null)
+        {
+            try
+            {
+                schemaModel = XSDSchemaMapper.loadAndMap(config.getSchemaResource(), config.getSchemaText(), 2);
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationException(ex.getMessage(), ex);
+            }
+        }
+
+        try
+        {
+            eventAdapterService.replaceXMLEventType(xmlEventTypeName, config, schemaModel);
         }
         catch (EventAdapterException e)
         {

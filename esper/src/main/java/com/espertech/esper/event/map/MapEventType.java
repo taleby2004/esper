@@ -77,7 +77,7 @@ public class MapEventType implements EventTypeSPI
         this.optionalSuperTypes = optionalSuperTypes;
         if (optionalDeepSupertypes == null)
         {
-            this.optionalDeepSupertypes = Collections.EMPTY_SET;
+            this.optionalDeepSupertypes = Collections.emptySet();
         }
         else
         {
@@ -747,46 +747,6 @@ public class MapEventType implements EventTypeSPI
     }
 
     /**
-     * Compares two sets of properties and determines if they are the same, allowing for
-     * boxed/unboxed types.
-     * @param setOne is the first set of properties
-     * @param setTwo is the second set of properties
-     * @return true if the property set is equivalent, false if not
-     */
-    public static boolean isEqualsProperties(Map<String, Class> setOne, Map<String, Class> setTwo)
-    {
-        // Should have the same number of properties
-        if (setOne.size() != setTwo.size())
-        {
-            return false;
-        }
-
-        // Compare property by property
-        for (Map.Entry<String, Class> entry : setOne.entrySet())
-        {
-            Class otherClass = setTwo.get(entry.getKey());
-            Class thisClass = entry.getValue();
-            if (((otherClass == null) && (thisClass != null)) ||
-                 (otherClass != null) && (thisClass == null))
-            {
-                return false;
-            }
-            if (otherClass == null)
-            {
-                continue;
-            }
-            Class boxedOther = JavaClassHelper.getBoxedType(otherClass);
-            Class boxedThis = JavaClassHelper.getBoxedType(thisClass);
-            if (!boxedOther.equals(boxedThis))
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Adds additional properties that do not yet exist on the given type.
      * <p.
      * Ignores properties already present. Allows nesting.
@@ -872,11 +832,23 @@ public class MapEventType implements EventTypeSPI
         {
             String propName = entry.getKey();
             Object setTwoType = setTwo.get(entry.getKey());
+            boolean setTwoTypeFound = setTwo.containsKey(entry.getKey());
             Object setOneType = entry.getValue();
+
+            // allow null for nested event types
+            if ((setOneType instanceof String || setOneType instanceof EventType) && setTwoType == null) {
+                continue;
+            }
+            if ((setTwoType instanceof String || setTwoType instanceof EventType) && setOneType == null) {
+                continue;
+            }
+            if (!setTwoTypeFound) {
+                return "The property '" + propName + "' is not provided but required";
+            }
             if (((setTwoType == null) && (setOneType != null)) ||
                  (setTwoType != null) && (setOneType == null))
             {
-                return "Type by name '" + otherName + "' in property '" + propName + "' incompatible with null-type";
+                return "Type by name '" + otherName + "' in property '" + propName + "' incompatible with null-type or property name not found in target";
             }
             if (setTwoType == null)
             {
@@ -925,6 +897,29 @@ public class MapEventType implements EventTypeSPI
                     String setOneEventType = (String) setOneType;
                     EventType setTwoEventType = (EventType) setTwoType;
                     return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneEventType + "' but receives event type '" + setTwoEventType.getName() + "'";
+                }
+            }
+            else if ((setTwoType instanceof String) && (setOneType instanceof String))
+            {
+                if (!setTwoType.equals(setOneType))
+                {
+                    String setOneEventType = (String) setOneType;
+                    String setTwoEventType = (String) setTwoType;
+                    return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneEventType + "' but receives event type '" + setTwoEventType + "'";
+                }
+            }
+            else if ((setTwoType instanceof EventType[]) && (setOneType instanceof String))
+            {
+                EventType[] setTwoTypeArr = (EventType[]) setTwoType;
+                EventType setTwoFragmentType = setTwoTypeArr[0];
+                String setOneTypeString = (String)setOneType;
+                if (!(setOneTypeString.endsWith("[]"))) {
+                    return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneType + "' but receives event type '" + setTwoFragmentType.getName() + "[]'";
+                }
+                String setOneTypeNoArray = (setOneTypeString).replaceAll("\\[\\]", "");
+                if (!(setTwoFragmentType.getName().equals(setOneTypeNoArray)))
+                {
+                    return "Type by name '" + otherName + "' in property '" + propName + "' expected event type '" + setOneTypeNoArray + "[]' but receives event type '" + setTwoFragmentType.getName() + "'";
                 }
             }
             else
@@ -1396,7 +1391,7 @@ public class MapEventType implements EventTypeSPI
     {
         if (!(otherType instanceof MapEventType))
         {
-            return "Type by name '" + otherType.getName() + "' is not a compatible type";
+            return "Type by name '" + otherType.getName() + "' is not a compatible type (target type underlying is '" + otherType.getUnderlyingType().getSimpleName() + "')";
         }
 
         MapEventType other = (MapEventType) otherType;

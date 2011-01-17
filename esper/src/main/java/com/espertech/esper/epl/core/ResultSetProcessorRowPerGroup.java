@@ -17,7 +17,6 @@ import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.OutputLimitLimitType;
 import com.espertech.esper.epl.spec.OutputLimitSpec;
@@ -131,7 +130,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
                 count++;
             }
         }
-        if (!oldEvents.isEmpty())
+        if (oldEvents != null && !oldEvents.isEmpty())
         {
             // apply old data to aggregates
             int count = 0;
@@ -438,7 +437,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
 
     private MultiKeyUntyped[] generateGroupKeys(Set<MultiKey<EventBean>> resultSet, Map<MultiKeyUntyped, EventBean[]> eventPerKey, boolean isNewData)
     {
-        if (resultSet.isEmpty())
+        if (resultSet == null || resultSet.isEmpty())
         {
             return null;
         }

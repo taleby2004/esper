@@ -85,6 +85,7 @@ tokens
 	WEEKDAY='weekday';
 	LW='lastweekday';
 	INSTANCEOF='instanceof';
+	TYPEOF='typeof';
 	CAST='cast';
 	CURRENT_TIMESTAMP='current_timestamp';
 	DELETE='delete';
@@ -94,6 +95,12 @@ tokens
 	UNTIL='until';
 	AT='at';
 	INDEX='index';
+	TIMEPERIOD_YEAR='year';
+	TIMEPERIOD_YEARS='years';
+	TIMEPERIOD_MONTH='month';
+	TIMEPERIOD_MONTHS='months';
+	TIMEPERIOD_WEEK='week';
+	TIMEPERIOD_WEEKS='weeks';
 	TIMEPERIOD_DAY='day';
 	TIMEPERIOD_DAYS='days';
 	TIMEPERIOD_HOUR='hour';
@@ -120,12 +127,16 @@ tokens
 	AFTER='after';	
 	FOR='for';	
 	WHILE='while';	
+	USING='using';
+	MERGE='merge';
+	MATCHED='matched';
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
    	NUMERIC_PARAM_FREQUENCY;   	
    	OBJECT_PARAM_ORDERED_EXPR;
    	FOLLOWED_BY_EXPR;
+   	FOLLOWED_BY_ITEM;
    	ARRAY_PARAM_LIST;
    	PATTERN_FILTER_EXPR;
    	PATTERN_NOT_EXPR;
@@ -194,6 +205,9 @@ tokens
 	UNARY_MINUS;
 	TIME_PERIOD;
 	ARRAY_EXPR;
+	YEAR_PART;
+	MONTH_PART;
+	WEEK_PART;
 	DAY_PART;
 	HOUR_PART;
 	MINUTE_PART;
@@ -228,6 +242,7 @@ tokens
 	ON_DELETE_EXPR;
 	ON_SELECT_EXPR;
 	ON_UPDATE_EXPR;
+	ON_MERGE_EXPR;
 	ON_SELECT_INSERT_EXPR;
 	ON_SELECT_INSERT_OUTPUT;
 	ON_EXPR_FROM;
@@ -254,6 +269,8 @@ tokens
 	CREATE_SCHEMA_EXPR_QUAL;
 	CREATE_SCHEMA_EXPR_INH;
 	VARIANT_LIST;
+	MERGE_UPD;
+	MERGE_INS;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -463,6 +480,7 @@ tokens
 	parserTokenParaphases.put(WEEKDAY, "'weekday'");
 	parserTokenParaphases.put(LW, "'lastweekday'");
 	parserTokenParaphases.put(INSTANCEOF, "'instanceof'");
+	parserTokenParaphases.put(TYPEOF, "'typeof'");
 	parserTokenParaphases.put(CAST, "'cast'");
 	parserTokenParaphases.put(CURRENT_TIMESTAMP, "'current_timestamp'");
 	parserTokenParaphases.put(DELETE, "'delete'");
@@ -473,6 +491,12 @@ tokens
 	parserTokenParaphases.put(INDEX, "'index'");
 	parserTokenParaphases.put(UNTIL, "'until'");
 	parserTokenParaphases.put(AT, "'at'");
+	parserTokenParaphases.put(TIMEPERIOD_YEAR, "'year'");
+	parserTokenParaphases.put(TIMEPERIOD_YEARS, "'years'");
+	parserTokenParaphases.put(TIMEPERIOD_MONTH, "'month'");
+	parserTokenParaphases.put(TIMEPERIOD_MONTHS, "'months'");
+	parserTokenParaphases.put(TIMEPERIOD_WEEK, "'week'");
+	parserTokenParaphases.put(TIMEPERIOD_WEEKS, "'weeks'");
 	parserTokenParaphases.put(TIMEPERIOD_DAY, "'day'");
 	parserTokenParaphases.put(TIMEPERIOD_DAYS, "'days'");
 	parserTokenParaphases.put(TIMEPERIOD_HOUR, "'hour'");
@@ -499,6 +523,8 @@ tokens
 	parserTokenParaphases.put(AFTER, "'after'");
 	parserTokenParaphases.put(FOR, "'for'");
 	parserTokenParaphases.put(WHILE, "'while'");
+	parserTokenParaphases.put(MERGE, "'merge'");
+	parserTokenParaphases.put(MATCHED, "'matched'");
 
 	parserKeywordSet = new java.util.TreeSet<String>(parserTokenParaphases.values());
     }
@@ -631,8 +657,8 @@ selectExpr
 	
 onExpr 
 	:	ON onStreamExpr
-		(onDeleteExpr | onSelectExpr (onSelectInsertExpr+ outputClauseInsert?)? | onSetExpr | onUpdateExpr )
-		-> ^(ON_EXPR onStreamExpr onDeleteExpr? onSelectExpr? onSelectInsertExpr* outputClauseInsert? onSetExpr? onUpdateExpr?)
+		(onDeleteExpr | onSelectExpr (onSelectInsertExpr+ outputClauseInsert?)? | onSetExpr | onUpdateExpr | onMergeExpr)
+		-> ^(ON_EXPR onStreamExpr onDeleteExpr? onSelectExpr? onSelectInsertExpr* outputClauseInsert? onSetExpr? onUpdateExpr? onMergeExpr?)
 	;
 	
 onStreamExpr
@@ -647,6 +673,32 @@ updateExpr
 		-> ^(UPDATE_EXPR classIdentifier $i? onSetAssignment+ whereClause?)
 	;
 
+onMergeExpr
+	:	MERGE INTO? n=IDENT (AS i=IDENT | i=IDENT)?
+		(WHERE whereClause)?		
+		mergeItem+
+		-> ^(ON_MERGE_EXPR $n $i? mergeItem+ whereClause?)
+	;
+
+mergeItem
+	:	(mergeMatched | mergeUnmatched)
+	;
+	
+mergeMatched
+	:	WHEN MATCHED (AND_EXPR expression)? THEN
+		(
+		  (i=UPDATE SET onSetAssignment (COMMA onSetAssignment)*)
+		| d=DELETE 		
+		)
+		-> ^(MERGE_UPD expression? $i? $d? onSetAssignment*)
+	;
+
+mergeUnmatched
+	:	WHEN NOT_EXPR MATCHED (AND_EXPR expression)? THEN
+		INSERT (LPAREN columnList RPAREN)? SELECT selectionList
+		-> ^(MERGE_INS selectionList columnList? expression?)
+	;	
+	
 onSelectExpr	
 @init  { paraphrases.push("on-select clause"); }
 @after { paraphrases.pop(); }
@@ -745,8 +797,8 @@ createColumnList
 	;
 	
 createColumnListElement
-	:   	name=IDENT (classIdentifier (b=LBRACK RBRACK)?)
-		-> ^(CREATE_COL_TYPE $name classIdentifier $b?)
+	:   	classIdentifierNonGreedy (classIdentifier (b=LBRACK RBRACK)?)
+		-> ^(CREATE_COL_TYPE classIdentifierNonGreedy classIdentifier $b?)
 	;
 
 createSelectionList 	
@@ -789,8 +841,8 @@ variantListElement
 insertIntoExpr
 @init  { paraphrases.push("insert-into clause"); }
 @after { paraphrases.pop(); }
-	:	(s=ISTREAM | s=RSTREAM)? INTO i=IDENT (LPAREN columnList RPAREN)?
-		-> ^(INSERTINTO_EXPR $s? $i columnList?)
+	:	(s=ISTREAM | s=RSTREAM)? INTO classIdentifier (LPAREN columnList RPAREN)?
+		-> ^(INSERTINTO_EXPR $s? classIdentifier columnList?)
 	;
 		
 columnList
@@ -994,8 +1046,9 @@ methodJoinExpression
 viewExpression
 @init  { paraphrases.push("view specifications"); }
 @after { paraphrases.pop(); }
-	:	ns=IDENT COLON nm=IDENT LPAREN expressionWithTimeList? RPAREN
-		-> ^(VIEW_EXPR $ns $nm expressionWithTimeList?)
+	:	ns=IDENT COLON (i=IDENT|m=MERGE) LPAREN expressionWithTimeList? RPAREN
+		-> {m != null}? ^(VIEW_EXPR $ns ^(IDENT["merge"]) expressionWithTimeList?)
+		-> ^(VIEW_EXPR $ns $i expressionWithTimeList?)
 	;
 
 groupByListExpr
@@ -1272,6 +1325,7 @@ builtinFunc
 	// MIN and MAX can also be "Math.min" static function and "min(price)" aggregation function and "min(a, b, c...)" built-in function
 	// therefore handled in code via libFunction as below
 	| INSTANCEOF^ LPAREN! expression COMMA! classIdentifier (COMMA! classIdentifier)* RPAREN!
+	| TYPEOF^ LPAREN! expression RPAREN!
 	| CAST^ LPAREN! expression (COMMA! | AS!) classIdentifier RPAREN!
 	| EXISTS^ LPAREN! eventProperty RPAREN!
 	| CURRENT_TIMESTAMP^ (LPAREN! RPAREN!)?
@@ -1348,11 +1402,17 @@ patternExpression
 @after { paraphrases.pop(); }
 	: followedByExpression
 	;
-	
+
 followedByExpression
-	: orExpression (f=FOLLOWED_BY orExpression)*
-	    -> {$f != null}? ^(FOLLOWED_BY_EXPR orExpression+)
+  @init { boolean fb = false; } 
+	: orExpression (followedByRepeat { fb = true; } )*
+	    -> {fb == true}? ^(FOLLOWED_BY_EXPR ^(FOLLOWED_BY_ITEM orExpression) followedByRepeat+)
 	    -> orExpression
+	;
+	
+followedByRepeat
+	:   (f=FOLLOWED_BY | (g=FOLLOWMAX_BEGIN expression FOLLOWMAX_END)) orExpression
+    		-> ^(FOLLOWED_BY_ITEM expression? orExpression)
 	;
 	
 orExpression
@@ -1393,7 +1453,7 @@ distinctExpressionList
 	;
 
 distinctExpressionAtom
-	:	expression
+	:	expressionWithTime
    	;
 
 guardPostFix
@@ -1637,6 +1697,8 @@ keywordAllowedIdent returns [String result]
 		|FIRST { $result = "first"; }
 		|LAST { $result = "last"; }
 		|WHILE { $result = "while"; }
+		|MERGE { $result = "merge"; }
+		|MATCHED { $result = "matched"; }
 		|UNIDIRECTIONAL { $result = "unidirectional"; }
 		|RETAINUNION { $result = "retain-union"; }
 		|RETAININTERSECTION { $result = "retain-intersection"; }
@@ -1650,6 +1712,7 @@ keywordAllowedIdent returns [String result]
 		|WEEKDAY { $result = "weekday"; }
 		|LW { $result = "lastweekday"; }
 		|INSTANCEOF { $result = "instanceof"; }
+		|TYPEOF { $result = "typeof"; }
 		|CAST { $result = "cast"; }
 		|SNAPSHOT { $result = "snapshot"; }
 		|VARIABLE { $result = "variable"; }		
@@ -1678,13 +1741,34 @@ escapableIdent
 timePeriod 	
 	:	
 	(	
-		dayPart hourPart? minutePart? secondPart? millisecondPart?
+		yearPart monthPart? weekPart? dayPart? hourPart? minutePart? secondPart? millisecondPart?
+	|	monthPart weekPart? dayPart? hourPart? minutePart? secondPart? millisecondPart?
+	|	weekPart dayPart? hourPart? minutePart? secondPart? millisecondPart?
+	|	dayPart hourPart? minutePart? secondPart? millisecondPart?
 	|	hourPart minutePart? secondPart? millisecondPart?
 	|	minutePart secondPart? millisecondPart?
 	|	secondPart millisecondPart?
 	|	millisecondPart
 	)
-		-> ^(TIME_PERIOD dayPart? hourPart? minutePart? secondPart? millisecondPart?)
+		-> ^(TIME_PERIOD yearPart? monthPart? weekPart? dayPart? hourPart? minutePart? secondPart? millisecondPart?)
+	;
+
+yearPart
+	:	(number|i=IDENT|substitution) (TIMEPERIOD_YEARS | TIMEPERIOD_YEAR)
+		-> {i!= null}? ^(YEAR_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(YEAR_PART number? substitution?)
+	;
+
+monthPart
+	:	(number|i=IDENT|substitution) (TIMEPERIOD_MONTHS | TIMEPERIOD_MONTH)
+		-> {i!= null}? ^(MONTH_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(MONTH_PART number? substitution?)
+	;
+
+weekPart
+	:	(number|i=IDENT|substitution) (TIMEPERIOD_WEEKS | TIMEPERIOD_WEEK)
+		-> {i!= null}? ^(WEEK_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
+		-> ^(WEEK_PART number? substitution?)
 	;
 
 dayPart
@@ -1752,6 +1836,8 @@ stringconstant
 //----------------------------------------------------------------------------
 
 // Operators
+FOLLOWMAX_BEGIN : '-[';
+FOLLOWMAX_END   : ']>';
 FOLLOWED_BY 	: '->';
 EQUALS 		: '=';
 SQL_NE 		: '<>';

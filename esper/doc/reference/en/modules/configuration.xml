@@ -486,7 +486,8 @@ configuration.addEventType("MyXMLNodeEvent", desc);]]></programlisting>
 			<para>
 				 This example configures an event property named <literal>countTags</literal> whose value is computed by an XPath expression. The namespace prefixes
 				 and default namespace are for use with XPath expressions and must also be made known to the engine in order for the engine to compile XPath expressions. 
-				 Via the <literal>schema-resource</literal> attribute we instruct the engine to load a schema file.
+				 Via the <literal>schema-resource</literal> attribute we instruct the engine to load a schema file. You may also use <literal>schema-text</literal> instead to 
+				 provide the actual text of the schema.
 			</para>
 			
 			<para>
@@ -499,7 +500,7 @@ configuration.addEventType("MyXMLNodeEvent", desc);]]></programlisting>
 				<title>Schema Resource</title>
 				<para>
 					 The <literal>schema-resource</literal> attribute takes a schema resource URL or classpath-relative filename. 
-					 The engine attempts to resolve the schema resource as an URL. If the schema resource name is not a valid URL, the engine attempts to resolve the resource from classpath via the <literal>ClassLoader.getResource</literal> method using the thread context class loader. If the name could not be resolved, the engine uses the Configuration class classloader.
+					 The engine attempts to resolve the schema resource as an URL. If the schema resource name is not a valid URL, the engine attempts to resolve the resource from classpath via the <literal>ClassLoader.getResource</literal> method using the thread context class loader. If the name could not be resolved, the engine uses the Configuration class classloader. Use the <literal>schema-text</literal> attribute instead when it is more practical to provide the actual text of the schema. 
 				</para>
 
 				<para>
@@ -1490,6 +1491,76 @@ config.getEngineDefaults().getLogging().setEnableTimerDebug(false);]]></programl
 				<para>
 					Note: this is a configuration option that applies to all engine instances of a given Java module or VM.
 				</para>
+
+				<para>
+					The XML snippet is:
+				</para>
+				<programlisting><![CDATA[<esper-configuration>
+  <engine-settings>
+    <defaults>
+      <logging>
+        <execution-path enabled="true"/>
+        <timer-debug enabled="false"/>
+    </logging>
+    </defaults>
+  </engine-settings>
+</esper-configuration>]]></programlisting>
+			</sect3>
+
+			<sect3 id="config-engine-logging-queryplan" revision="1">
+				<title>Query Plan Logging</title>
+
+				<para>
+				   By default, the engine does not produce query plan output unless logging at debug-level. 
+				   To enable query plan logging, set this option in the configuration. When enabled, the engine reports, at INFO level, any query plans under the log name <literal>com.espertech.esper.queryplan</literal>.
+				</para>
+
+				<para>
+					The API to use to enable query plan logging is shown here:
+				</para>
+				<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getLogging().setEnableQueryPlan(true);]]></programlisting>
+
+				<para>
+					The XML snippet is:
+				</para>
+				<programlisting><![CDATA[<esper-configuration>
+  <engine-settings>
+    <defaults>
+      <logging>
+        <query-plan enabled="true"/>
+    </logging>
+    </defaults>
+  </engine-settings>
+</esper-configuration>]]></programlisting>
+			</sect3>
+
+			<sect3 id="config-engine-logging-jdbc" revision="1">
+				<title>JDBC Logging</title>
+
+				<para>
+				   By default, the engine does not measure JDBC query execution times or report the number of rows returned from a JDBC query through logging. 
+				   To enable JDBC logging, set this option in the configuration. When enabled, the engine reports, at INFO level, any JDBC query performance and number of rows returned under the log name <literal>com.espertech.esper.jdbc</literal>.
+				</para>
+
+				<para>
+					The API to use to enable query plan logging is shown here:
+				</para>
+				<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getLogging().setEnableJDBC(true);]]></programlisting>
+
+				<para>
+					The XML snippet is:
+				</para>
+				<programlisting><![CDATA[<esper-configuration>
+  <engine-settings>
+    <defaults>
+      <logging>
+        <jdbc enabled="true"/>
+    </logging>
+    </defaults>
+  </engine-settings>
+</esper-configuration>]]></programlisting>
 			</sect3>
 		</sect2>
 
@@ -1860,7 +1931,7 @@ config.getEngineDefaults().getExpression().setDivisionByZeroReturnsNull(true);]]
 				</para>
 
 				<para>
-					 The XML configuration is as follows:
+					 The XML configuration to enable the flag, which is disabled by default, is as follows:
 				</para>
 	
 				<programlisting><![CDATA[<engine-settings>
@@ -1875,6 +1946,30 @@ config.getEngineDefaults().getExpression().setDivisionByZeroReturnsNull(true);]]
 	
 				<programlisting><![CDATA[Configuration config = new Configuration();
 config.getEngineDefaults().getExecution().setPrioritized(true);]]></programlisting>
+			</sect3>
+
+			<sect3 id="config-engine-execution-fairlock" revision="1">
+				<title>Fair Locking</title>
+				<para>
+					By default Esper configures statement-level locks without fair locking. If your application is multi-threaded and performs very frequent reads via iterator or fire-and-forget queries, you may need to set this flag to prevent lock starvation in the face of concurrent reads and writes. Please consult the Java API documentation under <literal>ReentrantReadWriteLock</literal> and <emphasis>Fair Mode</emphasis> for more information.
+				</para>
+		
+				<para>
+					 The XML configuration to enable fair locking, which is disabled by default, is as follows:
+				</para>
+	
+				<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <execution fairlock="true"/>
+  </defaults>
+</engine-settings>]]></programlisting>
+			
+				<para>
+				 The API to change the setting:
+				</para>
+	
+				<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getExecution().setFairlock(true);]]></programlisting>
 			</sect3>
 		</sect2>
 
@@ -1906,6 +2001,37 @@ config.getEngineDefaults().getExecution().setPrioritized(true);]]></programlisti
 			</para>
 			<programlisting><![CDATA[Configuration config = new Configuration();
 config.getEngineDefaults().getExceptionHandling().addClass(MyCEPEngineExceptionHandlerFactory.class);]]></programlisting>
+	
+		</sect2>
+
+		<sect2 id="config-engine-conditionhandling" revision="1">
+			<title>Engine Settings related to Condition Handling</title>
+			
+			<para>
+				Use the settings as described here to register a condition handler factory class that provides a condition handler. The engine invokes condition handlers in the order they are listed to indicate conditions, which is the term used for notification when certain predefined limits are reached, as further described in <xref linkend="api-condition"/>.
+			</para>
+
+			<para>
+				Please provide the full-qualified class name of each class that implements the <literal>com.espertech.esper.client.hook.ConditionHandlerFactory</literal> interface in the engine defaults configuration as below.
+			</para>
+	
+			<para>
+				 The XML configuration is as follows:
+			</para>
+
+			<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <conditionHandling>
+      <handlerFactory class="my.company.cep.MyCEPEngineConditionHandlerFactory"/>
+    </conditionHandling>
+  </defaults>
+</engine-settings>]]></programlisting>
+		
+			<para>
+			 The API calls to register a condition handler factory are as follows:
+			</para>
+			<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getConditionHandling().addClass(MyCEPEngineConditionHandlerFactory.class);]]></programlisting>
 	
 		</sect2>
 
@@ -2135,6 +2261,81 @@ config.addVariantStream("OutgoingEvent", variant);]]></programlisting>
 			Certain configuration changes are available to perform on an engine instance while in operation. Such configuration operations are available via the <literal>getConfiguration</literal> method on <literal>EPAdministrator</literal>,
 			which returns an <literal>ConfigurationOperations</literal> object. Please consult the JavaDoc documentation for more detail.
 		</para>
+	</sect1>
+
+	<sect1 id="configuration-logging">		
+		<title>Logging Configuration</title>
+
+		<indexterm><primary>configuration</primary><secondary>logging</secondary></indexterm>
+		<para>
+		   Esper logs all messages to Apache commons logging under an appropriate log level. To output log messages you can add Log4j to classpath and configure Log4j as below. Or you may use SLF4J or no logging component or implement your own logging component.
+		</para>
+		
+		<para>
+		   For performance reasons, Esper does not log any debug-level or informational-level messages for event execution unless explicitly configured via <xref linkend="config-engine-logging-execpath"/>.
+		</para>
+
+		<para>
+			A callback API for receiving certain critical engine reports is available as described in <xref linkend="api-exception"/>.
+		</para>
+
+		<para>
+			Apache Commons Logging uses an automatic discovery mechanism to find a log framework that it will delegate to.  If your application has another component using logback, please inspect you logback configuration and add <literal>com.espertech</literal>.
+		</para>
+
+		<para>
+		   The next table explains the log levels:
+		</para>
+
+		<table frame="topbot">
+			<title>Log Levels</title>
+			<tgroup cols="2">
+				<colspec colwidth=".5*"/>
+				<colspec colwidth="1*"/>
+				<thead>
+					<row>
+						<entry>Log Level</entry>
+						<entry>Use</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>Debug</entry>
+						<entry>Displays detailed engine-internal information that may not be easy to understand for application developers but are useful for engine support.</entry>
+					</row>
+					<row>
+						<entry>Info</entry>
+						<entry>Used for a few critical engine-level log messages.</entry>
+					</row>
+					<row>
+						<entry>Warn</entry>
+						<entry>Certain important warning or informational messages are displayed under the warning level.</entry>
+					</row>
+					<row>
+						<entry>Error</entry>
+						<entry>Exceptions reported within the engine or by plug-in components are reported under the error level. When users enter invalid EPL statements such validation errors are not reported as error logs and are indicated via API exception instead.</entry>
+					</row>
+				</tbody>
+			</tgroup>
+			
+		</table>
+		
+		<sect2 id="configuration-logging-log4j">		
+			<title>Log4j Logging Configuration</title>
+			
+			<para>
+				Log4j is the default logging component. Please find additional information for Log4j configuration and extension in <ulink url="http://logging.apache.org/log4j">http://logging.apache.org/log4j</ulink>.
+			</para>
+			
+			<para>
+				The easiest way to configure Log4j is by providing a Log4J configuration file, similar to the <literal>log4j.xml</literal> file shipped in the <literal>etc</literal> folder of the distribution.
+			</para>
+
+			<para>
+				Add the <literal>log4j.configuration</literal> system property to the <literal>java</literal> command line and provide the file name of the Log4j configuration file, making sure your classpath also includes the directory of the file:
+			</para>
+			<programlisting><![CDATA[java -Dlog4j.configuration=log4j.xml ...]]></programlisting>
+		</sect2>
 	</sect1>
 
 </chapter>

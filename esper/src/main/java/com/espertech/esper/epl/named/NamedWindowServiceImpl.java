@@ -11,18 +11,16 @@ package com.espertech.esper.epl.named;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.ExceptionHandlingService;
-import com.espertech.esper.core.StatementLockFactory;
-import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.client.annotation.HintEnum;
+import com.espertech.esper.core.*;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
-import com.espertech.esper.util.ManagedLock;
 import com.espertech.esper.util.ManagedReadWriteLock;
 import com.espertech.esper.view.ViewProcessingException;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -32,13 +30,14 @@ import java.util.*;
 public class NamedWindowServiceImpl implements NamedWindowService
 {
     private final Map<String, NamedWindowProcessor> processors;
-    private final Map<String, ManagedLock> windowStatementLocks;
+    private final Map<String, StatementLock> windowStatementLocks;
     private final StatementLockFactory statementLockFactory;
     private final VariableService variableService;
     private final Set<NamedWindowLifecycleObserver> observers;
     private final ExceptionHandlingService exceptionHandlingService;
     private final boolean isPrioritized;
     private final ManagedReadWriteLock eventProcessingRWLock;
+    private final boolean enableQueryPlanLog;
 
     private ThreadLocal<List<NamedWindowConsumerDispatchUnit>> threadLocal = new ThreadLocal<List<NamedWindowConsumerDispatchUnit>>()
     {
@@ -63,16 +62,17 @@ public class NamedWindowServiceImpl implements NamedWindowService
      * @param isPrioritized if the engine is running with prioritized execution
      */
     public NamedWindowServiceImpl(StatementLockFactory statementLockFactory, VariableService variableService, boolean isPrioritized,
-                                  ManagedReadWriteLock eventProcessingRWLock, ExceptionHandlingService exceptionHandlingService)
+                                  ManagedReadWriteLock eventProcessingRWLock, ExceptionHandlingService exceptionHandlingService, boolean enableQueryPlanLog)
     {
         this.processors = new HashMap<String, NamedWindowProcessor>();
-        this.windowStatementLocks = new HashMap<String, ManagedLock>();
+        this.windowStatementLocks = new HashMap<String, StatementLock>();
         this.statementLockFactory = statementLockFactory;
         this.variableService = variableService;
         this.observers = new HashSet<NamedWindowLifecycleObserver>();
         this.isPrioritized = isPrioritized;
         this.eventProcessingRWLock = eventProcessingRWLock;
         this.exceptionHandlingService = exceptionHandlingService;
+        this.enableQueryPlanLog = enableQueryPlanLog;
     }
 
     public void destroy()
@@ -88,13 +88,13 @@ public class NamedWindowServiceImpl implements NamedWindowService
         return names.toArray(new String[names.size()]);
     }
 
-    public ManagedLock getNamedWindowLock(String windowName)
+    public StatementLock getNamedWindowLock(String windowName)
     {
         return windowStatementLocks.get(windowName);
     }
 
-    public void addNamedWindowLock(String windowName, ManagedLock statementResourceLock)
-    {
+    public void addNamedWindowLock(String windowName, StatementLock statementResourceLock)
+    {        
         windowStatementLocks.put(windowName, statementResourceLock);
     }
 
@@ -113,14 +113,22 @@ public class NamedWindowServiceImpl implements NamedWindowService
         return processor;
     }
 
-    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext) throws ViewProcessingException
+    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService,
+                                             ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized,
+                                             ExprEvaluatorContext exprEvaluatorContext, Annotation[] annotations) throws ViewProcessingException
     {
         if (processors.containsKey(name))
         {
             throw new ViewProcessingException("A named window by name '" + name + "' has already been created");
         }
 
-        NamedWindowProcessor processor = new NamedWindowProcessor(this, name, eventType, createWindowStmtHandle, statementResultService, revisionProcessor, eplExpression, statementName, isPrioritized, exprEvaluatorContext);
+        StatementLock statementResourceLock = windowStatementLocks.get(name);
+        if (statementResourceLock == null) {
+            throw new ViewProcessingException("A lock for named window by name '" + name + "' is not allocated");
+        }
+
+        boolean isEnableSubqueryIndexShare = HintEnum.ENABLE_WINDOW_SUBQUERY_INDEXSHARE.getHint(annotations) != null;
+        NamedWindowProcessor processor = new NamedWindowProcessor(this, name, eventType, createWindowStmtHandle, statementResultService, revisionProcessor, eplExpression, statementName, isPrioritized, exprEvaluatorContext, statementResourceLock, isEnableSubqueryIndexShare, enableQueryPlanLog);
         processors.put(name, processor);
 
         if (!observers.isEmpty())
@@ -195,7 +203,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
             for (Map.Entry<EPStatementHandle, List<NamedWindowConsumerView>> entry : unit.getDispatchTo().entrySet())
             {
                 EPStatementHandle handle = entry.getKey();
-                handle.getStatementLock().acquireLock(statementLockFactory);
+                handle.getStatementLock().acquireWriteLock(statementLockFactory);
                 try
                 {
                     if (handle.isHasVariables())
@@ -216,7 +224,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
                 }
                 finally
                 {
-                    handle.getStatementLock().releaseLock(null);
+                    handle.getStatementLock().releaseWriteLock(null);
                 }
 
                 if ((isPrioritized) && (handle.isPreemptive()))
@@ -275,7 +283,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
                 EventBean[] newData = unit.getDeltaData().getNewData();
                 EventBean[] oldData = unit.getDeltaData().getOldData();
 
-                handle.getStatementLock().acquireLock(statementLockFactory);
+                handle.getStatementLock().acquireWriteLock(statementLockFactory);
                 try
                 {
                     if (handle.isHasVariables())
@@ -296,7 +304,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
                 }
                 finally
                 {
-                    handle.getStatementLock().releaseLock(null);
+                    handle.getStatementLock().releaseWriteLock(null);
                 }
 
                 if ((isPrioritized) && (handle.isPreemptive()))
@@ -327,7 +335,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
                 }
             }
 
-            handle.getStatementLock().acquireLock(statementLockFactory);
+            handle.getStatementLock().acquireWriteLock(statementLockFactory);
             try
             {
                 if (handle.isHasVariables())
@@ -349,7 +357,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
             }
             finally
             {
-                handle.getStatementLock().releaseLock(null);
+                handle.getStatementLock().releaseWriteLock(null);
             }
 
             if ((isPrioritized) && (handle.isPreemptive()))

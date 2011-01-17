@@ -10,11 +10,13 @@ import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventBeanManufactureException;
 import com.espertech.esper.event.EventBeanManufacturer;
 import com.espertech.esper.event.WriteablePropertyDescriptor;
+import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.util.TypeWidener;
 import com.espertech.esper.util.TypeWidenerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,14 @@ public class SelectExprInsertEventBean
         if (writableProps == null)
         {
             return null;    // no writable properties, not a writable type, proceed
+        }
+        // For map event types this class does not handle fragment inserts; all fragments are required however and must be explicit
+        if (eventType instanceof MapEventType) {
+            for (EventPropertyDescriptor prop : eventType.getPropertyDescriptors()) {
+                if (prop.isFragment()) {
+                    return null;
+                }
+            }
         }
         return new SelectExprInsertEventBean(eventType, writableProps);
     }
@@ -209,6 +219,40 @@ public class SelectExprInsertEventBean
                         public Class getType()
                         {
                             return returnType;
+                        }
+
+                        public Map<String, Object> getEventType() {
+                            return null;
+                        }
+                    };
+                }
+                // handle case where the select-clause contains an fragment array
+                else if (columnType instanceof EventType[])
+                {
+                    EventType columnEventType = ((EventType[]) columnType)[0];
+                    final Class componentReturnType = columnEventType.getUnderlyingType();
+                    final Class arrayReturnType = Array.newInstance(componentReturnType, 0).getClass();
+
+                    widener = TypeWidenerFactory.getCheckPropertyAssignType(columnNames[i], arrayReturnType, desc.getType(), desc.getPropertyName());
+                    final ExprEvaluator inner = evaluator;
+                    evaluator = new ExprEvaluator() {
+                        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+                        {
+                            Object result = inner.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+                            if (!(result instanceof EventBean[])) {
+                                return null;
+                            }
+                            EventBean[] events = (EventBean[]) result;
+                            Object values = Array.newInstance(componentReturnType, events.length);
+                            for (int i = 0; i < events.length; i++) {
+                                Array.set(values, i, events[i].getUnderlying());
+                            }
+                            return values;
+                        }
+
+                        public Class getType()
+                        {
+                            return componentReturnType;
                         }
 
                         public Map<String, Object> getEventType() {

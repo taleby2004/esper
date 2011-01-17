@@ -29,16 +29,14 @@ import com.espertech.esper.timer.TimerService;
 import com.espertech.esper.timer.TimerCallback;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.SerializableObjectCopier;
+import com.espertech.esper.util.Version;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.naming.Context;
 import javax.naming.NamingException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -55,6 +53,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     private Set<EPServiceStateListener> serviceListeners;
     private Set<EPStatementStateListener> statementListeners;
     private StatementEventDispatcherUnthreaded stmtEventDispatcher;
+    private Map<String, EPServiceProviderImpl> runtimes;
 
     /**
      * Constructor - initializes services.
@@ -62,7 +61,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
      * @param engineURI is the engine URI or "default" (or null which it assumes as "default") if this is the default provider
      * @throws ConfigurationException is thrown to indicate a configuraton error
      */
-    public EPServiceProviderImpl(Configuration configuration, String engineURI) throws ConfigurationException
+    public EPServiceProviderImpl(Configuration configuration, String engineURI, Map<String, EPServiceProviderImpl> runtimes) throws ConfigurationException
     {
         if (configuration == null)
         {
@@ -72,6 +71,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         {
         	throw new NullPointerException("Engine URI should not be null at this stage");
         }
+        this.runtimes = runtimes;
         this.engineURI = engineURI;
         verifyConfiguration(configuration);
         configSnapshot = takeSnapshot(configuration);
@@ -233,6 +233,9 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     {
         if (engine != null)
         {
+            EPServiceEngine engineToDestroy = engine;
+            engine = null;
+
             for (EPServiceStateListener listener : serviceListeners)
             {
                 try
@@ -245,7 +248,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                 }
             }
 
-            engine.getServices().getTimerService().stopInternalClock(false);
+            engineToDestroy.getServices().getTimerService().stopInternalClock(false);
             // Give the timer thread a little moment to catch up
             try
             {
@@ -257,14 +260,14 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
             }
 
             // plugin-loaders - destroy in opposite order
-            List<ConfigurationPluginLoader> pluginLoaders = engine.getServices().getConfigSnapshot().getPluginLoaders();
+            List<ConfigurationPluginLoader> pluginLoaders = engineToDestroy.getServices().getConfigSnapshot().getPluginLoaders();
             if (!pluginLoaders.isEmpty()) {
                 List<ConfigurationPluginLoader> reversed = new ArrayList<ConfigurationPluginLoader>(pluginLoaders);
                 Collections.reverse(reversed);
                 for (ConfigurationPluginLoader config : reversed) {
                     PluginLoader plugin;
                     try {
-                        plugin = (PluginLoader) engine.getServices().getEngineEnvContext().lookup("plugin-loader/" + config.getLoaderName());
+                        plugin = (PluginLoader) engineToDestroy.getServices().getEngineEnvContext().lookup("plugin-loader/" + config.getLoaderName());
                         plugin.destroy();
                     }
                     catch (NamingException e) {
@@ -275,15 +278,14 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                     }
                 }
             }
-            
-            engine.getRuntime().destroy();
-            engine.getAdmin().destroy();
-            engine.getServices().destroy();
 
-            engine.getServices().initialize();
+            engineToDestroy.getRuntime().destroy();
+            engineToDestroy.getAdmin().destroy();
+            engineToDestroy.getServices().destroy();
+            runtimes.remove(engineURI);
+
+            engineToDestroy.getServices().initialize();
         }
-
-        engine = null;
     }
 
     public boolean isDestroyed()
@@ -302,6 +304,8 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
      */
     protected void doInitialize()
     {
+        log.info("Initializing engine URI '" + engineURI + "' version " + Version.VERSION);
+        
         // This setting applies to all engines in a given VM
         ExecutionPathDebugLog.setDebugEnabled(configSnapshot.getEngineDefaults().getLogging().isEnableExecutionDebug());
         ExecutionPathDebugLog.setTimerDebugEnabled(configSnapshot.getEngineDefaults().getLogging().isEnableTimerDebug());

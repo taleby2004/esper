@@ -9,9 +9,7 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.hook.ExceptionHandler;
-import com.espertech.esper.client.hook.ExceptionHandlerFactoryContext;
-import com.espertech.esper.client.hook.ExceptionHandlerFactory;
+import com.espertech.esper.client.hook.*;
 import com.espertech.esper.core.deploy.DeploymentStateService;
 import com.espertech.esper.core.deploy.DeploymentStateServiceImpl;
 import com.espertech.esper.core.thread.ThreadingService;
@@ -41,6 +39,7 @@ import com.espertech.esper.event.xml.SchemaModel;
 import com.espertech.esper.event.xml.XSDSchemaMapper;
 import com.espertech.esper.filter.FilterServiceProvider;
 import com.espertech.esper.filter.FilterServiceSPI;
+import com.espertech.esper.pattern.PatternNodeFactoryImpl;
 import com.espertech.esper.plugin.PlugInEventRepresentation;
 import com.espertech.esper.plugin.PlugInEventRepresentationContext;
 import com.espertech.esper.schedule.*;
@@ -93,7 +92,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         EngineEnvContext jndiContext = new EngineEnvContext();
 
         // exception handling
-        ExceptionHandlingService exceptionHandlingService = initExceptionHandling(epServiceProvider.getURI(), configSnapshot.getEngineDefaults().getExceptionHandling());
+        ExceptionHandlingService exceptionHandlingService = initExceptionHandling(epServiceProvider.getURI(), configSnapshot.getEngineDefaults().getExceptionHandling(), configSnapshot.getEngineDefaults().getConditionHandling());
 
         // Statement context factory
         StatementContextFactory statementContextFactory = new StatementContextFactoryDefault(plugInViews, plugInPatternObj);
@@ -110,10 +109,10 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         VariableService variableService = new VariableServiceImpl(configSnapshot.getEngineDefaults().getVariables().getMsecVersionRelease(), schedulingService, eventAdapterService, null);
         initVariables(variableService, configSnapshot.getVariables());
 
-        StatementLockFactory statementLockFactory = new StatementLockFactoryImpl();
+        StatementLockFactory statementLockFactory = new StatementLockFactoryImpl(configSnapshot.getEngineDefaults().getExecution().isFairlock());
         StreamFactoryService streamFactoryService = StreamFactoryServiceProvider.newService(configSnapshot.getEngineDefaults().getViewResources().isShareViews());
         FilterServiceSPI filterService = FilterServiceProvider.newService();
-        NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory, variableService, engineSettingsService.getEngineSettings().getExecution().isPrioritized(), eventProcessingRWLock, exceptionHandlingService);
+        NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory, variableService, engineSettingsService.getEngineSettings().getExecution().isPrioritized(), eventProcessingRWLock, exceptionHandlingService, configSnapshot.getEngineDefaults().getLogging().isEnableQueryPlan());
 
         ValueAddEventService valueAddEventService = new ValueAddEventServiceImpl();
         valueAddEventService.init(configSnapshot.getRevisionEventTypes(), configSnapshot.getVariantStreams(), eventAdapterService);
@@ -137,7 +136,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
                 plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService,
                 namedWindowService, variableService, timeSourceService, valueAddEventService, metricsReporting, statementEventTypeRef,
                 statementVariableRef, configSnapshot, threadingService, internalEventRouterImpl, statementIsolationService, schedulingMgmtService,
-                deploymentStateService, exceptionHandlingService);
+                deploymentStateService, exceptionHandlingService, new PatternNodeFactoryImpl());
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);
@@ -152,15 +151,16 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         return services;
     }
 
-    protected static ExceptionHandlingService initExceptionHandling(String engineURI, ConfigurationEngineDefaults.ExceptionHandling exceptionHandling)
+    protected static ExceptionHandlingService initExceptionHandling(String engineURI, ConfigurationEngineDefaults.ExceptionHandling exceptionHandling,
+                                                                    ConfigurationEngineDefaults.ConditionHandling conditionHandling)
         throws ConfigurationException
     {
-        List<ExceptionHandler> result;
+        List<ExceptionHandler> exceptionHandlers;
         if (exceptionHandling.getHandlerFactories() == null || exceptionHandling.getHandlerFactories().isEmpty()) {
-            result = Collections.emptyList();
+            exceptionHandlers = Collections.emptyList();
         }
         else {
-            result = new ArrayList<ExceptionHandler>();
+            exceptionHandlers = new ArrayList<ExceptionHandler>();
             ExceptionHandlerFactoryContext context = new ExceptionHandlerFactoryContext(engineURI);
             for (String className : exceptionHandling.getHandlerFactories()) {
                 try {
@@ -170,14 +170,37 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
                         log.warn("Exception handler factory '" + className + "' returned a null handler, skipping factory");
                         continue;
                     }
-                    result.add(handler);
+                    exceptionHandlers.add(handler);
                 }
                 catch (RuntimeException ex) {
                     throw new ConfigurationException("Exception initializing exception handler from exception handler factory '" + className + "': " + ex.getMessage(), ex);
                 }
             }
         }
-        return new ExceptionHandlingService(engineURI, result);
+
+        List<ConditionHandler> conditionHandlers;
+        if (conditionHandling.getHandlerFactories() == null || conditionHandling.getHandlerFactories().isEmpty()) {
+            conditionHandlers = Collections.emptyList();
+        }
+        else {
+            conditionHandlers = new ArrayList<ConditionHandler>();
+            ConditionHandlerFactoryContext context = new ConditionHandlerFactoryContext(engineURI);
+            for (String className : conditionHandling.getHandlerFactories()) {
+                try {
+                    ConditionHandlerFactory factory = (ConditionHandlerFactory) JavaClassHelper.instantiate(ConditionHandlerFactory.class, className);
+                    ConditionHandler handler = factory.getHandler(context);
+                    if (handler == null) {
+                        log.warn("Condition handler factory '" + className + "' returned a null handler, skipping factory");
+                        continue;
+                    }
+                    conditionHandlers.add(handler);
+                }
+                catch (RuntimeException ex) {
+                    throw new ConfigurationException("Exception initializing exception handler from exception handler factory '" + className + "': " + ex.getMessage(), ex);
+                }
+            }
+        }
+        return new ExceptionHandlingService(engineURI, exceptionHandlers, conditionHandlers);
     }
 
     /**
@@ -272,11 +295,11 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         for (Map.Entry<String, ConfigurationEventTypeXMLDOM> entry : xmlDOMNames.entrySet())
         {
             SchemaModel schemaModel = null;
-            if (entry.getValue().getSchemaResource() != null)
+            if ((entry.getValue().getSchemaResource() != null) || (entry.getValue().getSchemaText() != null))
             {
                 try
                 {
-                    schemaModel = XSDSchemaMapper.loadAndMap(entry.getValue().getSchemaResource(), 2);
+                    schemaModel = XSDSchemaMapper.loadAndMap(entry.getValue().getSchemaResource(), entry.getValue().getSchemaText(), 2);
                 }
                 catch (Exception ex)
                 {
