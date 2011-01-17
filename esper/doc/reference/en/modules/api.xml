@@ -258,7 +258,7 @@ countStmt.start();]]></programlisting>
 			<indexterm><primary>subscriber object</primary></indexterm>
 			<indexterm><primary>statement</primary><secondary>subscriber object</secondary></indexterm>
 			<para>
-				A subscriber object is a direct binding of query results to a Java object. The object, a POJO, receives statement results via method invocation. The subscriber class need not implement an interface or extend a superclass.
+				A subscriber object is a direct binding of query results to a Java object. The object, a POJO, receives statement results via method invocation. The subscriber class does not need to implement an interface or extend a superclass. Only one subscriber object may be set for a statement.
 			</para>
 			
 			<para>

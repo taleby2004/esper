@@ -88,6 +88,9 @@ public interface EPStatement extends EPListenable, EPIterable
     /**
      * Attaches a subscriber to receive statement results,
      * or removes a previously set subscriber (by providing a null value).
+     * <p>
+     * Only a single subscriber may be set for a statement. If this method is invoked twice
+     * any previously-set subscriber is no longer used. 
      * @param subscriber to attach, or null to remove the previously set subscriber
      * @throws EPSubscriberException if the subscriber does not provide the methods
      *   needed to receive statement results
