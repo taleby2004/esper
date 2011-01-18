@@ -21,7 +21,7 @@ public class EvalRootNode extends EvalNode implements PatternStarter
 
     private transient PatternContext context;
 
-    protected EvalRootNode() {
+    public EvalRootNode() {
     }
 
     public final PatternStopCallback start(PatternMatchCallback callback,
