@@ -121,7 +121,7 @@ public class PropertyUtility
             MultiKey<String> props = getPropertiesContributed(deltaEventTypes[i], allProperties);
             if (props.getArray().length == 0)
             {
-                log.warn("Event type name '" + names[i] + "' does not contribute (or override) any properties of the revision event type");
+                log.warn("Event type named '" + names[i] + "' does not contribute (or override) any properties of the revision event type");
                 continue;
             }
 

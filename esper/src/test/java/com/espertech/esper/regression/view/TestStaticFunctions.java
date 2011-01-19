@@ -441,7 +441,7 @@ public class TestStaticFunctions extends TestCase
         stmt.addListener(listener);
 
         long startTime = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 500; i++)
         {
             epService.getEPRuntime().sendEvent(new SupportTemperatureBean("a"));
         }

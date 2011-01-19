@@ -420,6 +420,24 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
+        // Test valid case of array insert
+        String validEpl = "INSERT INTO FinalEventValid SELECT s as startEvent, e as endEvent FROM PATTERN [" +
+                "every s=SupportBean_S0 -> e=SupportBean(string=s.p00) until timer:interval(10 sec)]";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(validEpl);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "G1"));
+        epService.getEPRuntime().sendEvent(new SupportBean("G1", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("G1", 3));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
+
+        FinalEventValid out = ((FinalEventValid) listener.assertOneGetNewAndReset().getUnderlying());
+        assertEquals(1, out.getStartEvent().getId());
+        assertEquals("G1", out.getStartEvent().getP00());
+        assertEquals(2, out.getEndEvent().length);
+        assertEquals(2, out.getEndEvent()[0].getIntPrimitive());
+        assertEquals(3, out.getEndEvent()[1].getIntPrimitive());
+
         // Test invalid case of non-array destination insert
         String invalidEpl = "INSERT INTO FinalEventInvalidNonArray SELECT s as startEvent, e as endEvent FROM PATTERN [" +
                 "every s=SupportBean_S0 -> e=SupportBean(string=s.p00) until timer:interval(10 sec)]";
@@ -441,24 +459,6 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         catch (EPException ex) {
             assertEquals("Error starting statement: Invalid assignment of column 'startEvent' of type 'com.espertech.esper.support.bean.SupportBean_S0' to event property 'startEvent' typed as 'com.espertech.esper.support.bean.SupportBean_S0[]', column and parameter types mismatch [INSERT INTO FinalEventInvalidArray SELECT s as startEvent, e as endEvent FROM PATTERN [every s=SupportBean_S0 -> e=SupportBean(string=s.p00) until timer:interval(10 sec)]]", ex.getMessage());
         }
-
-        // Test valid case of array insert
-        String validEpl = "INSERT INTO FinalEventValid SELECT s as startEvent, e as endEvent FROM PATTERN [" +
-                "every s=SupportBean_S0 -> e=SupportBean(string=s.p00) until timer:interval(10 sec)]";
-        EPStatement stmt = epService.getEPAdministrator().createEPL(validEpl);
-        stmt.addListener(listener);
-
-        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "G1"));
-        epService.getEPRuntime().sendEvent(new SupportBean("G1", 2));
-        epService.getEPRuntime().sendEvent(new SupportBean("G1", 3));
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
-
-        FinalEventValid out = ((FinalEventValid) listener.assertOneGetNewAndReset().getUnderlying());
-        assertEquals(1, out.getStartEvent().getId());
-        assertEquals("G1", out.getStartEvent().getP00());
-        assertEquals(2, out.getEndEvent().length);
-        assertEquals(2, out.getEndEvent()[0].getIntPrimitive());
-        assertEquals(3, out.getEndEvent()[1].getIntPrimitive());
     }
 
     public void testArrayMapInsert() {
@@ -470,6 +470,25 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         epService.getEPAdministrator().createEPL("create schema FinalEventInvalidArray (startEvent EventOne, endEvent EventTwo)");
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+
+        // Test valid case of array insert
+        String validEpl = "INSERT INTO FinalEventValid SELECT s as startEvent, e as endEvent FROM PATTERN [" +
+                "every s=EventOne -> e=EventTwo(id=s.id) until timer:interval(10 sec)]";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(validEpl);
+        stmt.addListener(listener);
+
+        sendEventOne("G1");
+        sendEventTwo("G1", 2);
+        sendEventTwo("G1", 3);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
+
+        Map out = ((Map) listener.assertOneGetNewAndReset().getUnderlying());
+        EventBean startEventOne = (EventBean) out.get("startEvent");
+        EventBean endEventOne = ((EventBean[]) out.get("endEvent"))[0];
+        EventBean endEventTwo = ((EventBean[]) out.get("endEvent"))[1];
+        assertEquals("G1", startEventOne.get("id"));
+        assertEquals(2, endEventOne.get("val"));
+        assertEquals(3, endEventTwo.get("val"));
 
         // Test invalid case of non-array destination insert
         String invalidEpl = "INSERT INTO FinalEventInvalidNonArray SELECT s as startEvent, e as endEvent FROM PATTERN [" +
@@ -492,25 +511,6 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         catch (EPException ex) {
             assertEquals("Error starting statement: Event type named 'FinalEventInvalidArray' has already been declared with differing column name or type information: Type by name 'FinalEventInvalidArray' in property 'endEvent' expected event type 'EventTwo' but receives event type 'EventTwo[]' [INSERT INTO FinalEventInvalidArray SELECT s as startEvent, e as endEvent FROM PATTERN [every s=EventOne -> e=EventTwo(id=s.id) until timer:interval(10 sec)]]", ex.getMessage());
         }
-
-        // Test valid case of array insert
-        String validEpl = "INSERT INTO FinalEventValid SELECT s as startEvent, e as endEvent FROM PATTERN [" +
-                "every s=EventOne -> e=EventTwo(id=s.id) until timer:interval(10 sec)]";
-        EPStatement stmt = epService.getEPAdministrator().createEPL(validEpl);
-        stmt.addListener(listener);
-
-        sendEventOne("G1");
-        sendEventTwo("G1", 2);
-        sendEventTwo("G1", 3);
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
-
-        Map out = ((Map) listener.assertOneGetNewAndReset().getUnderlying());
-        EventBean startEventOne = (EventBean) out.get("startEvent");
-        EventBean endEventOne = ((EventBean[]) out.get("endEvent"))[0];
-        EventBean endEventTwo = ((EventBean[]) out.get("endEvent"))[1];
-        assertEquals("G1", startEventOne.get("id"));
-        assertEquals(2, endEventOne.get("val"));
-        assertEquals(3, endEventTwo.get("val"));
     }
 
     private void sendEventTwo(String id, int val) {

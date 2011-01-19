@@ -300,7 +300,7 @@ public class TestUpdate extends TestCase
         epService.getEPRuntime().sendEvent(makeMap("p0", "somevalue", "p1", "E3"), "MyMapType");
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"BLANK", "E3"});
 
-        epService.getEPAdministrator().createEPL("@Priority(3) @Name('b') update istream BaseOneA set i='FINAL'");
+        epService.getEPAdministrator().createEPL("@Priority(3) @Name('c') update istream BaseOneA set i='FINAL'");
 
         epService.getEPRuntime().sendEvent(makeMap("p0", "somevalue", "p1", "E4"), "MyMapType");
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"BLANK", "E4"});

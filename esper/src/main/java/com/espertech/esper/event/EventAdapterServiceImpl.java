@@ -213,7 +213,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         EventType type = nameToTypeMap.get(mapeventTypeName);
         if (type == null)
         {
-            throw new EventAdapterException("Event type name '" + mapeventTypeName + "' has not been declared");
+            throw new EventAdapterException("Event type named '" + mapeventTypeName + "' has not been declared");
         }
         if (!(type instanceof MapEventType))
         {
@@ -461,7 +461,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         EventType existingType = nameToTypeMap.get(eventTypeName);
         if (existingType == null)
         {
-            throw new EventAdapterException("Event type name '" + eventTypeName + "' has not been defined");
+            throw new EventAdapterException("Event type named '" + eventTypeName + "' has not been defined");
         }
 
         return adaptorForTypedMap(event, existingType);

@@ -80,7 +80,7 @@ public class TestMapEventNested extends TestCase
         }
         catch (ConfigurationException ex)
         {
-            assertEquals("Error updating Map event type: Event type name 'dummy' has not been declared", ex.getMessage());
+            assertEquals("Error updating Map event type: Event type named 'dummy' has not been declared", ex.getMessage());
         }
 
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
@@ -91,7 +91,7 @@ public class TestMapEventNested extends TestCase
         }
         catch (ConfigurationException ex)
         {
-            assertEquals("Error updating Map event type: Event type by name 'SupportBean' is not a Map event type", ex.getMessage());
+            assertEquals("Error updating Map event type: Event type by named 'SupportBean' is not a Map event type", ex.getMessage());
         }
     }
 
