@@ -17,15 +17,21 @@ public interface EPServiceProvider
 {
     /**
      * Returns a class instance of EPRuntime.
+     * <p>
+     * If the engine instance is destroyed, the behavior is undefined and a NullPointerException is possible.
      * @return an instance of EPRuntime
+     * @throws EPServiceDestroyedException thrown when the engine instance has been destroyed
      */
-    public EPRuntime getEPRuntime();
+    public EPRuntime getEPRuntime() throws EPServiceDestroyedException;
 
     /**
      * Returns a class instance of EPAdministrator.
+     * <p>
+     * If the engine instance is destroyed, the behavior is undefined and a NullPointerException is possible.
      * @return an instance of EPAdministrator
+     * @throws EPServiceDestroyedException thrown when the engine instance has been destroyed
      */
-    public EPAdministrator getEPAdministrator();
+    public EPAdministrator getEPAdministrator() throws EPServiceDestroyedException;
 
     /**
      * Provides naming context for public named objects.
@@ -33,8 +39,9 @@ public interface EPServiceProvider
      * An extension point designed for use by input and output adapters as well as
      * other extension services.
      * @return naming context providing name-to-object bindings
+     * @throws EPServiceDestroyedException thrown when the engine instance has been destroyed
      */
-    public Context getContext();
+    public Context getContext() throws EPServiceDestroyedException;
 
     /**
      * Frees any resources associated with this engine instance, and leaves the engine instance
@@ -117,8 +124,9 @@ public interface EPServiceProvider
      * returning an existing isolated service for an existing name.
      * @param name to return isolated service for
      * @return isolated service
+     * @throws EPServiceDestroyedException thrown when the engine instance has been destroyed
      */
-    public EPServiceProviderIsolated getEPServiceIsolated(String name);
+    public EPServiceProviderIsolated getEPServiceIsolated(String name) throws EPServiceDestroyedException;
 
     /**
      * Returns the names of isolated service providers currently allocated.

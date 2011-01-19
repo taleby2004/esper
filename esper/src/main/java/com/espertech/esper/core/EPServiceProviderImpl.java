@@ -59,6 +59,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
      * Constructor - initializes services.
      * @param configuration is the engine configuration
      * @param engineURI is the engine URI or "default" (or null which it assumes as "default") if this is the default provider
+     * @param runtimes map of URI and runtime
      * @throws ConfigurationException is thrown to indicate a configuraton error
      */
     public EPServiceProviderImpl(Configuration configuration, String engineURI, Map<String, EPServiceProviderImpl> runtimes) throws ConfigurationException
@@ -81,6 +82,10 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     }
 
     public synchronized EPServiceProviderIsolated getEPServiceIsolated(String name) {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
+
         if (engine.getServices().getConfigSnapshot().getEngineDefaults().getViewResources().isShareViews())
         {
             throw new EPException("Isolated runtime requires view sharing disabled, set engine defaults under view resources and share views to false");
@@ -145,39 +150,63 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
     public EPRuntime getEPRuntime()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getRuntime();
     }
 
     public EPAdministrator getEPAdministrator()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getAdmin();
     }
 
     public EPServicesContext getServicesContext() {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices();
     }
 
     public ThreadingService getThreadingService()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getThreadingService();
     }
 
     public EventAdapterService getEventAdapterService()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getEventAdapterService();
     }
 
     public SchedulingService getSchedulingService()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getSchedulingService();
     }
 
     public FilterService getFilterService()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getFilterService();
     }
 
     public TimerService getTimerService() {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getTimerService();
     }
 
@@ -187,55 +216,80 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
     public NamedWindowService getNamedWindowService()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getNamedWindowService();
     }
 
     public ExtensionServicesContext getExtensionServicesContext()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getExtensionServicesContext();
     }
 
     public StatementLifecycleSvc getStatementLifecycleSvc()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getStatementLifecycleSvc();
     }
 
     public MetricReportingService getMetricReportingService()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getMetricsReportingService();
     }
 
     public ValueAddEventService getValueAddEventService()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getValueAddEventService();
     }
 
     public StatementEventTypeRef getStatementEventTypeRef()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getStatementEventTypeRefService();
     }
 
     public EngineEnvContext getEngineEnvContext()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getEngineEnvContext();
     }
 
     public Context getContext()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getEngineEnvContext();
     }
 
     public StatementContextFactory getStatementContextFactory() {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getStatementContextFactory();
     }
 
-    public void destroy()
+    public synchronized void destroy()
     {
         if (engine != null)
         {
-            EPServiceEngine engineToDestroy = engine;
-            engine = null;
-
+            // first invoke listeners
             for (EPServiceStateListener listener : serviceListeners)
             {
                 try
@@ -247,6 +301,9 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                     log.error("Runtime exception caught during an onEPServiceDestroyRequested callback:" + ex.getMessage(), ex);
                 }
             }
+
+            // assign null value
+            EPServiceEngine engineToDestroy = engine;
 
             engineToDestroy.getServices().getTimerService().stopInternalClock(false);
             // Give the timer thread a little moment to catch up
@@ -279,6 +336,9 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                 }
             }
 
+            // assign null - making EPRuntime and EPAdministrator unobtainable
+            engine = null;
+            
             engineToDestroy.getRuntime().destroy();
             engineToDestroy.getAdmin().destroy();
             engineToDestroy.getServices().destroy();
@@ -701,24 +761,39 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
     public String[] getEPServiceIsolatedNames()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getStatementIsolationService().getIsolationUnitNames();
     }
 
     public SchedulingMgmtService getSchedulingMgmtService()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getSchedulingMgmtService();
     }
 
     public EngineImportService getEngineImportService() {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getEngineImportService();
     }
 
     public TimeProvider getTimeProvider() {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getSchedulingService();
     }
 
     public VariableService getVariableService()
     {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
         return engine.getServices().getVariableService();
     }
 }

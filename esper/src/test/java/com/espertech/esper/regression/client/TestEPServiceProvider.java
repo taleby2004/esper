@@ -48,6 +48,20 @@ public class TestEPServiceProvider extends TestCase
         assertTrue(Arrays.asList(uris).contains("default"));
         
         epService.destroy();
+        try {
+            epService.getEPRuntime();
+            fail();
+        }
+        catch (EPServiceDestroyedException ex) {
+            // expected
+        }
+        try {
+            epService.getEPAdministrator();
+            fail();
+        }
+        catch (EPServiceDestroyedException ex) {
+            // expected
+        }
         ArrayAssertionUtil.assertNotContains(EPServiceProviderManager.getProviderURIs(), "default");
 
         // test destroy
