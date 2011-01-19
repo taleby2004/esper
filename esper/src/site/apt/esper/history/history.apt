@@ -24,7 +24,7 @@ Version 4.1.0
     
 * Major changes
      
-  * Support for on-merge which provides and atomic update-insert (aka. upsert) operation for use with named windows
+  * Support for on-merge which provides and atomic update-insert-delete (aka. upsert or merge) operation for use with named windows
   
   * Support for subqueries against named windows to share existing indexes on the named window (both implicitly-created or via create-index)
   

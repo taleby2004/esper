@@ -4,7 +4,7 @@ Esper Changelog
 Changes in version 4.1.0
 ------------------------
 Major API or EPL changes
-  - Support for on-merge which provides and atomic update-insert (aka. upsert) operation for use with named windows
+  - Support for on-merge which provides an atomic update-insert-delete (aka. upsert or merge) operation for use with named windows
   - Support for subqueries against named windows to share existing indexes on the named window (both implicitly-created or via create-index)
   - Support for configuration option to enable output of query plan to log destination (aka. explain-plan)
   - Support for a new 'typeof' function that returns the event type name, for use with variant streams and event type super-types (POJO extends and implements, map super-types)
@@ -44,7 +44,8 @@ Minor changes
   - Fixed issue ESPER-538 Support for auto-event name in insert-into (populate underlying event)
   - Fixed issue ESPER-539 Support for insert-into to specifiy the fully-qualified class name
   - Fixed issue ESPER-543 Multiple engine instances same thread sending and receiving problem
-
+  - Fixed issue ESPER-546 "Last" aggregation function with on-select returns inconsistent results
+  
 
 Changes in version 4.0.0
 ------------------------

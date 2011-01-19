@@ -86,6 +86,8 @@ Core CEP Features
 		
 		* Support for predefined query execution optimized by indexed access, via on-select and on-demand (fire-and-forget) query and explicit indexes
 		
+		* Support for update-insert-delete (aka. merge or upsert) in a single atomic operation
+		
 		[]
 		
 	[]

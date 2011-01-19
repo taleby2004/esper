@@ -2,7 +2,7 @@ News
 
 * January 24, 2010  -  Esper 4.1.0 - Update release
 
-  * Support for on-merge which provides and atomic update-insert (aka. upsert) operation for use with named windows
+  * Support for on-merge which provides an atomic update-insert-delete (aka. upsert or merge) operation for use with named windows
   
   * Support for subqueries against named windows to share existing indexes on the named window (both implicitly-created or via create-index)
   
