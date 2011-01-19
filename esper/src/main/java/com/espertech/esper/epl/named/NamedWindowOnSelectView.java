@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -101,7 +102,8 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
         resultSetProcessor.clear();
 
         // build join result
-        Set<MultiKey<EventBean>> newEvents = new HashSet<MultiKey<EventBean>>();
+        // use linked hash set to retain order of join results for last/first/window to work most intuitively
+        Set<MultiKey<EventBean>> newEvents = new LinkedHashSet<MultiKey<EventBean>>();
         for (int i = 0; i < triggerEvents.length; i++)
         {
             EventBean triggerEvent = triggerEvents[0];

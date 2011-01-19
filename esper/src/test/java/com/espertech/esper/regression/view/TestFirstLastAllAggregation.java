@@ -25,6 +25,34 @@ public class TestFirstLastAllAggregation extends TestCase {
         epService.initialize();
     }
 
+    public void testLastMaxMixedOnSelect() {
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean(string like 'A%')");
+
+        String epl = "on SupportBean(string like 'B%') select last(mw.intPrimitive) as li, max(mw.intPrimitive) as mi from MyWindow mw";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+        String[] fields = "li,mi".split(",");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A1", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("B1", -1));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, 10});
+
+        for (int i = 11; i < 20; i++) {
+            epService.getEPRuntime().sendEvent(new SupportBean("A1", i));
+            epService.getEPRuntime().sendEvent(new SupportBean("Bx", -1));
+            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {i, i});
+        }
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("B1", -1));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, 19});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A1", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("B1", -1));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2, 19});
+    }
+
     public void testPrevNthIndexedFirstLast() {
         String epl = "select " +
                 "prev(intPrimitive, 0) as p0, " +
