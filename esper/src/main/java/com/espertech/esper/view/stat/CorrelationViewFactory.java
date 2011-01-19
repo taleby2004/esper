@@ -37,8 +37,14 @@ public class CorrelationViewFactory implements ViewFactory
      */
     protected ExprNode expressionY;
 
+    /**
+     * Additional properties.
+     */
     protected StatViewAdditionalProps additionalProps;
 
+    /**
+     * Event type.
+     */
     protected EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException

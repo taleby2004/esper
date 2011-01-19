@@ -456,7 +456,11 @@ public class EventBeanUtility
      */
     public static EventBean[] getDistinctByProp(ArrayDeque<EventBean> events, EventBeanReader reader)
     {
-        if ((events == null) || (events.size() < 2))
+        if (events == null || events.isEmpty())
+        {
+            return new EventBean[0];
+        }
+        if (events.size() < 2)
         {
             return events.toArray(new EventBean[events.size()]);
         }

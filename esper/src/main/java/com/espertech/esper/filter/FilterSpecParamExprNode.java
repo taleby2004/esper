@@ -28,8 +28,8 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
     private final ExprNode exprNode;
     private final LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes;
     private final LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes;
-    private final EventAdapterService eventAdapterService;
-    private final VariableService variableService;
+    private final transient EventAdapterService eventAdapterService;
+    private final transient VariableService variableService;
     private final boolean hasVariable;
     private static final long serialVersionUID = 2298436088557677833L;
 

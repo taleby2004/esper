@@ -32,7 +32,7 @@ public class ExprStreamInstanceMethodNode extends ExprNode implements ExprEvalua
 	private final String streamName;
 	private final List<ExprChainedSpec> chainSpec;
 
-    private transient int streamNum = -1;
+    private int streamNum = -1;
     private transient ExprDotEval[] evaluators;
 
     /**

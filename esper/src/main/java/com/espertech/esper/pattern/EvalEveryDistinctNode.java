@@ -22,7 +22,7 @@ import java.util.List;
 public class EvalEveryDistinctNode extends EvalNode
 {
     private List<ExprNode> expressions;
-    protected ExprEvaluator[] expressionsArray;
+    protected transient ExprEvaluator[] expressionsArray;
     private transient MatchedEventConvertor convertor;
     private transient PatternContext context;
     private Long msecToExpire;

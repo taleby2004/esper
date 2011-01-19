@@ -8,7 +8,6 @@ import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 public class NamedWindowOnMergeActionIns extends NamedWindowOnMergeAction {
     private SelectExprProcessor insertHelper;
-    private EventBean[] eventsPerStream = new EventBean[1];
 
     public NamedWindowOnMergeActionIns(ExprEvaluator optionalFilter, SelectExprProcessor insertHelper) {
         super(optionalFilter);

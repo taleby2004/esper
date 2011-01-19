@@ -104,7 +104,7 @@ public class MapEventType implements EventTypeSPI
         for (Map.Entry<String, Class> entry : simplePropertyTypes.entrySet())
         {
             hashCode *= 31;
-            hashCode = hashCode ^ entry.getKey().hashCode();
+            hashCode ^= entry.getKey().hashCode();
         }
 
         // Copy parent properties to child

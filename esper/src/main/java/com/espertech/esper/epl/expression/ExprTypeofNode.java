@@ -25,6 +25,7 @@ import java.util.Map;
  */
 public class ExprTypeofNode extends ExprNode
 {
+    private static final long serialVersionUID = -612634538694877204L;
     private transient ExprEvaluator evaluator;
 
     /**

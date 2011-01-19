@@ -17,7 +17,7 @@ public final class FilterSpecParamEventPropIndexed extends FilterSpecParam
     private final int resultEventIndex;
     private final String resultEventProperty;
     private final boolean isMustCoerce;
-    private final SimpleNumberCoercer numberCoercer;
+    private final transient SimpleNumberCoercer numberCoercer;
     private final Class coercionType;
     private final String statementName;
     private static final long serialVersionUID = -1781904301744323795L;

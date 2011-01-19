@@ -2355,6 +2355,9 @@ public class StatementSpecMapper
                 {
                     selectClause = unmapSelect(atom.getOptionalSelectClause(), SelectClauseStreamSelectorEnum.ISTREAM_ONLY, unmapContext);
                 }
+                else {
+                    selectClause = new SelectClause();
+                }
                 if (selectClause.getSelectList().isEmpty()) {
                     selectClause.getSelectList().add(new SelectClauseWildcard());
                 }

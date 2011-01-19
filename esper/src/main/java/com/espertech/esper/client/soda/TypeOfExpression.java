@@ -17,7 +17,7 @@ import java.io.StringWriter;
  */
 public class TypeOfExpression extends ExpressionBase
 {
-    private String[] typeNames;
+    private String[] typeNames;private static final long serialVersionUID = 8091600570950143727L;
 
     /**
      * Ctor.

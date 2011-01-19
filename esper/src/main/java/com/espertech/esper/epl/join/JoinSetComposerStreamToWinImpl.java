@@ -59,7 +59,7 @@ public class JoinSetComposerStreamToWinImpl implements JoinSetComposer
             boolean flag = false;
             for (boolean selfJoinRepositoryReset : selfJoinRepositoryResets)
             {
-                flag = flag | selfJoinRepositoryReset;
+                flag |= selfJoinRepositoryReset;
             }
             this.isResetSelfJoinRepositories = flag;
         }

@@ -25,6 +25,7 @@ import java.io.Serializable;
  */
 public final class CurrentTimeSpanEvent extends TimerEvent implements Serializable
 {
+    private static final long serialVersionUID = -1288617544919785502L;
     private long targetTimeInMillis;
     private Long optionalResolution;
 

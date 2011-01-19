@@ -35,6 +35,7 @@ public class CreateWindowDesc implements MetaDefItem, Serializable
      * @param insert true for insert-info
      * @param insertFilter optional filter expression
      * @param streamSpecOptions options such as retain-union etc
+     * @param columns list of columns, if using column syntax
      */
     public CreateWindowDesc(String windowName, List<ViewSpec> viewSpecs, StreamSpecOptions streamSpecOptions, boolean insert, ExprNode insertFilter, List<ColumnDesc> columns)
     {
@@ -118,6 +119,10 @@ public class CreateWindowDesc implements MetaDefItem, Serializable
         return streamSpecOptions;
     }
 
+    /**
+     * Returns column names and types.
+     * @return column descriptors
+     */
     public List<ColumnDesc> getColumns()
     {
         return columns;

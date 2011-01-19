@@ -32,7 +32,9 @@ public final class CorrelationView extends BaseBivariateStatisticsView implement
      * Constructor.
      * @param xExpression is the expression providing X data points
      * @param yExpression is the expression providing X data points
-x     * @param statementContext contains required view services
+     * @param statementContext contains required view services
+     * @param eventType event type
+     * @param additionalProps additional properties
      */
     public CorrelationView(StatementContext statementContext, ExprNode xExpression, ExprNode yExpression, EventType eventType, StatViewAdditionalProps additionalProps)
     {
@@ -53,6 +55,15 @@ x     * @param statementContext contains required view services
         return doPopulateMap(baseStatisticsBean,eventAdapterService,eventType,additionalProps,decoration);
     }
 
+    /**
+     * Populate bean.
+     * @param baseStatisticsBean results
+     * @param eventAdapterService event wrapping
+     * @param eventType type to produce
+     * @param additionalProps addition properties
+     * @param decoration decoration values
+     * @return bean
+     */
     public static EventBean doPopulateMap(BaseStatisticsBean baseStatisticsBean,
                                          EventAdapterService eventAdapterService,
                                          EventType eventType,
@@ -82,6 +93,7 @@ x     * @param statementContext contains required view services
     /**
      * Creates the event type for this view.
      * @param statementContext is the event adapter service
+     * @param additionalProps additional props
      * @return event type of view
      */
     protected static EventType createEventType(StatementContext statementContext, StatViewAdditionalProps additionalProps)

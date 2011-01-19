@@ -55,7 +55,7 @@ public class TestVariablesCreate extends TestCase
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsVar, new Object[] {null, "abc"});
     }
 
-    public void testCompile()
+    public void testCompileStartStop()
     {
         String text = "create variable long var1";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
@@ -74,6 +74,18 @@ public class TestVariablesCreate extends TestCase
         String[] fieldsVar = new String[] {"var1", "var2"};
         sendSupportBean("E1", 10);
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsVar, new Object[] {null, "abc"});
+
+        // ESPER-545
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        String createText = "create variable int FOO = 0";
+        epService.getEPAdministrator().createEPL(createText);
+        epService.getEPAdministrator().createEPL("on pattern [every SupportBean] set FOO = FOO + 1");
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        assertEquals(1, epService.getEPRuntime().getVariableValue("FOO"));
+        
+        epService.getEPAdministrator().destroyAllStatements();
+        epService.getEPAdministrator().createEPL(createText);
+        assertEquals(0, epService.getEPRuntime().getVariableValue("FOO"));
     }
 
     public void testSubscribeAndIterate()

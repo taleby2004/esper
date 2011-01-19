@@ -25,7 +25,7 @@ public final class FilterSpecParamEventProp extends FilterSpecParam
     private final String resultEventAsName;
     private final String resultEventProperty;
     private final boolean isMustCoerce;
-    private final SimpleNumberCoercer numberCoercer;
+    private transient final SimpleNumberCoercer numberCoercer;
     private final Class coercionType;
     private final String statementName;
     private static final long serialVersionUID = 7839598101507253516L;

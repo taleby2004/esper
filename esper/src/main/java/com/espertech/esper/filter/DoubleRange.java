@@ -41,12 +41,12 @@ public final class DoubleRange
         if (min != null)
         {
             hashCode = 31*hashCode;
-            hashCode = hashCode^min.hashCode();
+            hashCode ^= min.hashCode();
         }
         if (max != null)
         {
             hashCode = 31*hashCode;
-            hashCode = hashCode^max.hashCode();
+            hashCode ^= max.hashCode();
         }
     }
 

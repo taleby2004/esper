@@ -31,7 +31,7 @@ public class ExprStaticMethodNode extends ExprNode implements ExprNodeInnerNodeP
     private final String className;
     private final List<ExprChainedSpec> chainSpec;
     
-    private transient final boolean isUseCache;
+    private final boolean isUseCache;
     private transient boolean isReturnsConstantResult;
     private transient ExprEvaluator evaluator;
 

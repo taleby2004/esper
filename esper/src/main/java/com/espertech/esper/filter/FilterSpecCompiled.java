@@ -198,8 +198,8 @@ public final class FilterSpecCompiled
         for (FilterSpecParam param : parameters)
         {
             hashCode = 31*hashCode;
-            hashCode = hashCode ^ param.getPropertyName().hashCode();
-            hashCode = hashCode ^ (31 * param.getFilterHash());
+            hashCode ^= param.getPropertyName().hashCode();
+            hashCode ^= (31 * param.getFilterHash());
         }
         return hashCode;
     }       

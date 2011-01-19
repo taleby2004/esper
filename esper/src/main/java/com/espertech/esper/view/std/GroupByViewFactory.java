@@ -49,7 +49,6 @@ public class GroupByViewFactory implements ViewFactory
         this.viewParameters = expressionParameters;
 
         Hint reclaimGroupAged = HintEnum.RECLAIM_GROUP_AGED.getHint(viewFactoryContext.getStatementContext().getAnnotations());
-        Hint reclaimGroupFrequency = HintEnum.RECLAIM_GROUP_AGED.getHint(viewFactoryContext.getStatementContext().getAnnotations());
 
         if (reclaimGroupAged != null) {
             isReclaimAged = true;

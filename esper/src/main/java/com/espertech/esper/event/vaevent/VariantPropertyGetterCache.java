@@ -54,8 +54,10 @@ public class VariantPropertyGetterCache
             VariantPropertyGetterRow row = allGetters.get(type);
             if (row == null)
             {
-                row = new VariantPropertyGetterRow(type, new EventPropertyGetter[assignedPropertyNumber + 1]);
-                allGetters.put(type, row);
+                synchronized(this) {
+                    row = new VariantPropertyGetterRow(type, new EventPropertyGetter[assignedPropertyNumber + 1]);
+                    allGetters.put(type, row);
+                }
             }
             row.addGetter(assignedPropertyNumber, getter);
         }

@@ -27,6 +27,14 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
     private final Set<String> inherits;
     private final boolean variant;
 
+    /**
+     * Ctor.
+     * @param schemaName name
+     * @param types event type name(s)
+     * @param columns column definition
+     * @param inherits supertypes
+     * @param variant variant streams
+     */
     public CreateSchemaDesc(String schemaName, Set<String> types, List<ColumnDesc> columns, Set<String> inherits, boolean variant)
     {
         this.schemaName = schemaName;
@@ -36,26 +44,46 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
         this.variant = variant;
     }
 
+    /**
+     * Returns schema name.
+     * @return schema name
+     */
     public String getSchemaName()
     {
         return schemaName;
     }
 
+    /**
+     * Returns column definitions.
+     * @return column defs
+     */
     public List<ColumnDesc> getColumns()
     {
         return columns;
     }
 
+    /**
+     * Returns supertypes.
+     * @return supertypes
+     */
     public Set<String> getInherits()
     {
         return inherits;
     }
 
+    /**
+     * Returns type name(s).
+     * @return types
+     */
     public Set<String> getTypes()
     {
         return types;
     }
 
+    /**
+     * Returns true for variant stream.
+     * @return flag
+     */
     public boolean isVariant()
     {
         return variant;

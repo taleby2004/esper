@@ -103,7 +103,7 @@ public class PermutationEnumeration implements Enumeration<int[]>
             int index = currentVal / factor;
             result[position] = out.get(index);
             out.remove(index);
-            currentVal = currentVal - index * factor;
+            currentVal -= index * factor;
         }
         result[numElements - 1] = out.get(0);
 
@@ -142,7 +142,7 @@ public class PermutationEnumeration implements Enumeration<int[]>
         int fac = 1;
         for (int i = 1; i <= num; i++)
         {
-            fac = fac * i;
+            fac *= i;
         }
         return fac;
     }

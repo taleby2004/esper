@@ -34,7 +34,7 @@ public class ExprPlugInSingleRowNode extends ExprNode implements ExprNodeInnerNo
     private final Class clazz;
     private final List<ExprChainedSpec> chainSpec;
 
-    private transient final boolean isUseCache;
+    private final boolean isUseCache;
     private transient boolean isReturnsConstantResult;
     private transient ExprEvaluator evaluator;
 

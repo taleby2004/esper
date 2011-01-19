@@ -5,6 +5,7 @@ import java.util.Arrays;
 
 public class EvalStateNodeNumber implements Serializable
 {
+    private static final long serialVersionUID = 4881487549563453035L;
     private int[] stateNumber;
     private int hashCode;
 
@@ -108,7 +109,7 @@ public class EvalStateNodeNumber implements Serializable
         hashCode = 7;
         for (int i = 0; i < stateNumber.length; i++)
         {
-            hashCode = hashCode ^ stateNumber[i];
+            hashCode ^= stateNumber[i];
         }
     }
 }

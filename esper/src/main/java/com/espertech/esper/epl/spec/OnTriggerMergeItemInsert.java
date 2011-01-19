@@ -21,7 +21,7 @@ public class OnTriggerMergeItemInsert extends OnTriggerMergeItem
     
     private final List<String> columns;
     private final List<SelectClauseElementRaw> selectClause;
-    private List<SelectClauseElementCompiled> selectClauseCompiled;
+    private transient List<SelectClauseElementCompiled> selectClauseCompiled;
 
     public OnTriggerMergeItemInsert(ExprNode optionalMatchCond, List<String> columns, List<SelectClauseElementRaw> selectClause) {
         super(optionalMatchCond);

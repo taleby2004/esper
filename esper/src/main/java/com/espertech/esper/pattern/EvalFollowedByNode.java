@@ -26,7 +26,7 @@ public class EvalFollowedByNode extends EvalNode
     private List<ExprNode> optionalMaxExpressions;
     protected boolean hasMax;
     private Integer[] cachedMaxPerChild;
-    private ExprEvaluator[] cachedMaxEvaluatorPerChild;
+    private transient ExprEvaluator[] cachedMaxEvaluatorPerChild;
 
     protected EvalFollowedByNode(List<ExprNode> optionalMaxExpressions) {
         this.optionalMaxExpressions = optionalMaxExpressions;

@@ -48,6 +48,10 @@ public class BeanEventAdapter implements BeanEventTypeFactory
         this.eventAdapterService = eventAdapterService;
     }
 
+    /**
+     * Sets the default accessor style.
+     * @param defaultAccessorStyle style to set
+     */
     public void setDefaultAccessorStyle(ConfigurationEventTypeLegacy.AccessorStyle defaultAccessorStyle)
     {
         this.defaultAccessorStyle = defaultAccessorStyle;

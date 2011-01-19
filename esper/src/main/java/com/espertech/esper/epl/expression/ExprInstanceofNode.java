@@ -63,7 +63,9 @@ public class ExprInstanceofNode extends ExprNode implements ExprEvaluator
 
         evaluator = this.getChildNodes().get(0).getExprEvaluator();
         Set<Class> classList = getClassSet(classIdentifiers);
-        classes = classList.toArray(new Class[classList.size()]);
+        synchronized(this) {
+            classes = classList.toArray(new Class[classList.size()]);
+        }
     }
 
     public boolean isConstantResult()

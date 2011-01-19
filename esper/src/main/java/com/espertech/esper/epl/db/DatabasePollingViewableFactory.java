@@ -39,6 +39,9 @@ import java.util.*;
  */
 public class DatabasePollingViewableFactory
 {
+    /**
+     * Placeholder name for SQL-where clause substitution.
+     */
     public static final String SAMPLE_WHERECLAUSE_PLACEHOLDER = "$ESPER-SAMPLE-WHERE";
 
     /**
@@ -296,6 +299,12 @@ public class DatabasePollingViewableFactory
                 text = "Error compiling metadata SQL to retrieve statement metadata, consider using the 'metadatasql' syntax, using sql text '" + sampleSQL + "'";
             }
 
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                log.info("Error closing statement: " + e.getMessage(), e);
+            }
+
             log.error(text, ex);
             throw new ExprValidationException(text + ", reason: " + ex.getMessage());
         }
@@ -307,6 +316,14 @@ public class DatabasePollingViewableFactory
         }
         catch (SQLException ex)
         {
+            try
+            {
+                result.close();
+            }
+            catch (SQLException e)
+            {
+                // don't handle
+            }
             try
             {
                 statement.close();

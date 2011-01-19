@@ -17,6 +17,11 @@ import java.util.Set;
  */
 public class CollectionUtil<T>
 {
+    /**
+     * Returns an array of integer values from the set of integer values
+     * @param set to return array for
+     * @return array
+     */
     public static int[] intArray(Set<Integer> set)
     {
         if (set == null)

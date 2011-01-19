@@ -82,7 +82,7 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
         {
             writeMethods[i] = fastClass.getMethod(properties[i].getWriteMethod());
             primitiveType[i] = properties[i].getType().isPrimitive();
-            primitiveTypeCheck = primitiveTypeCheck | primitiveType[i];
+            primitiveTypeCheck |= primitiveType[i];
         }
         hasPrimitiveTypes = primitiveTypeCheck;
     }

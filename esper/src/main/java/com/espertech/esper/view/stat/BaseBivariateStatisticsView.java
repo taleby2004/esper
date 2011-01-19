@@ -52,6 +52,15 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
     private Object[] lastValuesEventNew;
     private EventBean lastNewEvent;
 
+    /**
+     * Populate bean.
+     * @param baseStatisticsBean results
+     * @param eventAdapterService event adapters
+     * @param eventType type
+     * @param additionalProps additional props
+     * @param decoration decoration values
+     * @return bean
+     */
     protected abstract EventBean populateMap(BaseStatisticsBean baseStatisticsBean, EventAdapterService eventAdapterService,
                                              EventType eventType, StatViewAdditionalProps additionalProps, Object[] decoration);
 
@@ -60,6 +69,8 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
      * @param expressionX is the expression to get the X values from
      * @param expressionY is the expression to get the Y values from
      * @param statementContext contains required view services
+     * @param eventType type of event
+     * @param additionalProps additional props
      */
     public BaseBivariateStatisticsView(StatementContext statementContext,
                                        ExprNode expressionX,

@@ -19,7 +19,9 @@ public interface BeanEventTypeFactory
      * Returns the bean event type for a given class assigning the given name.
      * @param name is the name
      * @param clazz is the class for which to generate an event type
-     * @param isConfigured if the class is a configuration value
+     * @param isConfigured if the class is a configuration value, false if discovered
+     * @param isPreconfigured if configured before use
+     * @param isPreconfiguredStatic if from static engine config
      * @return is the event type for the class
      */
     public BeanEventType createBeanType(String name, Class clazz, boolean isPreconfiguredStatic, boolean isPreconfigured, boolean isConfigured);
