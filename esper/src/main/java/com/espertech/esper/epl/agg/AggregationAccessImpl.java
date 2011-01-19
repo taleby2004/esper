@@ -13,11 +13,18 @@ import com.espertech.esper.client.EventBean;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+/**
+ * Implementation of access function for single-stream (not joins).
+ */
 public class AggregationAccessImpl implements AggregationAccess
 {
     private int streamId;
     private ArrayList<EventBean> events = new ArrayList<EventBean>();
 
+    /**
+     * Ctor.
+     * @param streamId stream id
+     */
     public AggregationAccessImpl(int streamId)
     {
         this.streamId = streamId;

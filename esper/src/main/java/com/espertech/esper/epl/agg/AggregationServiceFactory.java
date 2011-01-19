@@ -140,6 +140,9 @@ public class AggregationServiceFactory
      * @param annotations - statement annotations
      * @param variableService - variable
      * @param statementStopService - stop callbacks
+     * @param isJoin - true for joins
+     * @param whereClause the where-clause function if any
+     * @param havingClause the having-clause function if any
      * @return instance for aggregation handling
      * @throws com.espertech.esper.epl.expression.ExprValidationException if validation fails
      */
@@ -395,6 +398,9 @@ public class AggregationServiceFactory
         }
     }
 
+    /**
+     * Descriptor assigning to an aggregation expression the factory to use and other equivalent aggregation nodes.
+     */
     public static class ExprAggDesc {
         private ExprAggregateNode aggregationNode;
         private AggregationMethodFactory factory;
@@ -402,32 +408,57 @@ public class AggregationServiceFactory
         private List<ExprAggregateNode> equivalentNodes;
         private Integer columnNum;
 
+        /**
+         * Ctor.
+         * @param aggregationNode expression
+         * @param factory method factory
+         */
         public ExprAggDesc(ExprAggregateNode aggregationNode, AggregationMethodFactory factory)
         {
             this.aggregationNode = aggregationNode;
             this.factory = factory;
         }
 
+        /**
+         * Returns the equivalent aggregation functions.
+         * @return list of agg nodes
+         */
         public List<ExprAggregateNode> getEquivalentNodes()
         {
             return equivalentNodes;
         }
 
+        /**
+         * Returns the method factory.
+         * @return factory
+         */
         public AggregationMethodFactory getFactory()
         {
             return factory;
         }
 
+        /**
+         * Returns the column number assigned.
+         * @return column number
+         */
         public Integer getColumnNum()
         {
             return columnNum;
         }
 
+        /**
+         * Assigns a column number.
+         * @param columnNum column number
+         */
         public void setColumnNum(Integer columnNum)
         {
             this.columnNum = columnNum;
         }
 
+        /**
+         * Add an equivalent aggregation function node
+         * @param aggNodeToAdd node to add
+         */
         public void addEquivalent(ExprAggregateNode aggNodeToAdd)
         {
             if (equivalentNodes == null) {
@@ -436,11 +467,19 @@ public class AggregationServiceFactory
             equivalentNodes.add(aggNodeToAdd);
         }
 
+        /**
+         * Returns the expression.
+         * @return expression
+         */
         public ExprAggregateNode getAggregationNode()
         {
             return aggregationNode;
         }
 
+        /**
+         * Assigns a future to the expression
+         * @param service the future
+         */
         public void assignFuture(AggregationResultFuture service)
         {
             aggregationNode.setAggregationResultFuture(service, columnNum);

@@ -27,6 +27,10 @@ public class PatternFollowedByExpr extends PatternExprBase
     {
     }
 
+    /**
+     * Ctor.
+     * @param optionalMaxPerSubexpression if parameterized by a max-limits for each pattern sub-expressions
+     */
     public PatternFollowedByExpr(List<Expression> optionalMaxPerSubexpression) {
         this.optionalMaxPerSubexpression = optionalMaxPerSubexpression;
     }
@@ -62,10 +66,18 @@ public class PatternFollowedByExpr extends PatternExprBase
         return PatternExprPrecedenceEnum.FOLLOWED_BY;
     }
 
+    /**
+     * Returns the instance limits, if any, for pattern-subexpressions.
+     * @return list of max-limit or null
+     */
     public List<Expression> getOptionalMaxPerSubexpression() {
         return optionalMaxPerSubexpression;
     }
 
+    /**
+     * Sets the instance limits, if any, for pattern-subexpressions.
+     * @param optionalMaxPerSubexpression list of max-limit or null
+     */
     public void setOptionalMaxPerSubexpression(List<Expression> optionalMaxPerSubexpression) {
         this.optionalMaxPerSubexpression = optionalMaxPerSubexpression;
     }

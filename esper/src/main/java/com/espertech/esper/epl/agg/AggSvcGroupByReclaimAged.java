@@ -69,6 +69,9 @@ public class AggSvcGroupByReclaimAged extends AggregationServiceBase
      * @param reclaimGroupFrequency hint to reclaim
      * @param variableService variables
      * @param statementStopService stop svc
+     * @param accessors accessor definitions
+     * @param streams streams in join
+     * @param isJoin true for join, false for single-stream
      * @throws com.espertech.esper.epl.expression.ExprValidationException when validation fails
      */
     public AggSvcGroupByReclaimAged(ExprEvaluator evaluators[],

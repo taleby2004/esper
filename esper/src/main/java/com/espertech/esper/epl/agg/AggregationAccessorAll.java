@@ -6,6 +6,9 @@ import com.espertech.esper.epl.expression.ExprEvaluator;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 
+/**
+ * Represents the aggregation accessor that provides the result for the "window" aggregation function.
+ */
 public class AggregationAccessorAll implements AggregationAccessor
 {
     private final int streamNum;
@@ -13,6 +16,12 @@ public class AggregationAccessorAll implements AggregationAccessor
     private final EventBean[] eventsPerStream;
     private final Class componentType;
 
+    /**
+     * Ctor.
+     * @param streamNum stream id
+     * @param childNode expression
+     * @param componentType type
+     */
     public AggregationAccessorAll(int streamNum, ExprEvaluator childNode, Class componentType)
     {
         this.streamNum = streamNum;

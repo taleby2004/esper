@@ -11,7 +11,14 @@ package com.espertech.esper.client.soda;
 import java.io.Serializable;
 import java.io.StringWriter;
 
+/**
+ * Marker interface for an on-merge clause action item.
+ */
 public interface OnMergeMatchedAction extends Serializable
 {
+    /**
+     * Render to EPL.
+     * @param writer to render to
+     */
     public void toEPL(StringWriter writer);
 }

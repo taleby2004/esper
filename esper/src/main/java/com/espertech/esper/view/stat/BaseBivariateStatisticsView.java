@@ -40,7 +40,13 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
      * Services required by implementing classes.
      */
     protected final StatementContext statementContext;
+    /**
+     * Add tional properties.
+     */
     protected final StatViewAdditionalProps additionalProps;
+    /**
+     * Event type.
+     */
     protected final EventType eventType;
 
     private Object[] lastValuesEventNew;

@@ -11,8 +11,19 @@ package com.espertech.esper.epl.agg;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
+/**
+ * Utility for use with aggregation access functions.
+ */
 public class AggregationAccessUtil
 {
+    /**
+     * Returns new accesses for each function.
+     * @param isJoin true for joins
+     * @param streams stream numbers
+     * @param methodResolutionService service for obtaining accesses
+     * @param groupKey group by key
+     * @return array of accessors
+     */
     protected static AggregationAccess[] getNewAccesses(boolean isJoin, int[] streams, MethodResolutionService methodResolutionService, MultiKeyUntyped groupKey) {
         AggregationAccess[] row = new AggregationAccess[streams.length];
         int i = 0;

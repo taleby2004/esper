@@ -15,12 +15,19 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+/**
+ * Implementation of access function for single-stream (not joins).
+ */
 public class AggregationAccessJoinImpl implements AggregationAccess
 {
     private int streamId;
     private LinkedHashMap<EventBean, Integer> refSet = new LinkedHashMap<EventBean, Integer>();
     private EventBean[] array;
 
+    /**
+     * Ctor.
+     * @param streamId stream id
+     */
     public AggregationAccessJoinImpl(int streamId)
     {
         this.streamId = streamId;

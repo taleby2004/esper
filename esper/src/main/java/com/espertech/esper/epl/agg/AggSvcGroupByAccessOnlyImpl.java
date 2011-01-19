@@ -8,6 +8,9 @@ import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Aggregation service for use when only first/last/window aggregation functions are used an none other.
+ */
 public class AggSvcGroupByAccessOnlyImpl implements AggregationService, AggregationResultFuture
 {
     private final MethodResolutionService methodResolutionService;
@@ -18,6 +21,13 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
 
     private AggregationAccess[] currentAccess;
 
+    /**
+     * Ctor.
+     * @param methodResolutionService factory service for implementations
+     * @param accessors accessor definitions
+     * @param streams streams in join
+     * @param isJoin true for join, false for single-stream
+     */
     public AggSvcGroupByAccessOnlyImpl(MethodResolutionService methodResolutionService,
                                                    AggregationAccessorSlotPair[] accessors,
                                                    int[] streams,

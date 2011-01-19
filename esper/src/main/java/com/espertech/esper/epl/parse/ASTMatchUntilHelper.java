@@ -11,12 +11,18 @@ package com.espertech.esper.epl.parse;
 import com.espertech.esper.epl.expression.ExprConstantNode;
 import com.espertech.esper.epl.expression.ExprNode;
 
+/**
+ * Helper for walking a pattern match-until clause.
+ */
 public class ASTMatchUntilHelper
 {
     /**
      * Validate.
      * @param lowerBounds is the lower bounds, or null if none supplied
      * @param upperBounds is the upper bounds, or null if none supplied
+     * @param isAllowLowerZero true to allow zero value for lower range
+     * @return true if closed range of constants and the constants are the same value
+     * @throws ASTWalkException if the AST is incorrect
      */
     public static boolean validate(ExprNode lowerBounds, ExprNode upperBounds, boolean isAllowLowerZero) throws ASTWalkException
     {

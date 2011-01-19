@@ -14,8 +14,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface SingleRowFunction {
 
-	/*
-	 * Single-row function name for use in EPL statements.
-	 */
+    /**
+     * Single-row function name for use in EPL statements.
+     * @return function name.
+     */
 	String name();
 }

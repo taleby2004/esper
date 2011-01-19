@@ -25,6 +25,9 @@ public class TimePeriodExpression extends ExpressionBase
 
     /**
      * Ctor.
+     * @param hasYears flag to indicate that a year-part expression exists
+     * @param hasMonths flag to indicate that a month-part expression exists
+     * @param hasWeeks flag to indicate that a week-part expression exists
      * @param hasDays flag to indicate that a day-part expression exists
      * @param hasHours flag to indicate that a hour-part expression exists
      * @param hasMinutes flag to indicate that a minute-part expression exists
@@ -58,6 +61,9 @@ public class TimePeriodExpression extends ExpressionBase
 
     /**
      * Ctor.
+     * @param yearsExpr expression returning years value, or null if no such part
+     * @param monthsExpr expression returning months value, or null if no such part
+     * @param weeksExpr expression returning weeks value, or null if no such part
      * @param daysExpr expression returning days value, or null if no such part
      * @param hoursExpr expression returning hours value, or null if no such part
      * @param minutesExpr expression returning minutes value, or null if no such part

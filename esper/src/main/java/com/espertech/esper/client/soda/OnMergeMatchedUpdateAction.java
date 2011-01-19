@@ -12,6 +12,9 @@ import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * For use with on-merge clauses, updates rows in a named window if matching rows are found.
+ */
 public class OnMergeMatchedUpdateAction implements OnMergeMatchedAction
 {
     private static final long serialVersionUID = 0L;
@@ -19,26 +22,50 @@ public class OnMergeMatchedUpdateAction implements OnMergeMatchedAction
     private List<AssignmentPair> assignments = Collections.emptyList();
     private Expression optionalCondition;
 
+    /**
+     * Ctor.
+     */
     public OnMergeMatchedUpdateAction() {
     }
 
+    /**
+     * Ctor.
+     * @param assignments assignments of values to columns
+     * @param optionalCondition optional condition or null
+     */
     public OnMergeMatchedUpdateAction(List<AssignmentPair> assignments, Expression optionalCondition) {
         this.assignments = assignments;
         this.optionalCondition = optionalCondition;
     }
 
+    /**
+     * Returns the action condition, or null if undefined.
+     * @return condition
+     */
     public Expression getOptionalCondition() {
         return optionalCondition;
     }
 
+    /**
+     * Sets the action condition, or null if undefined.
+     * @param optionalCondition to set, or null to remove the condition
+     */
     public void setOptionalCondition(Expression optionalCondition) {
         this.optionalCondition = optionalCondition;
     }
 
+    /**
+     * Returns the assignments to execute against any rows found in a named window
+     * @return assignments
+     */
     public List<AssignmentPair> getAssignments() {
         return assignments;
     }
 
+    /**
+     * Sets the assignments to execute against any rows found in a named window
+     * @param assignments to set
+     */
     public void setAssignments(List<AssignmentPair> assignments) {
         this.assignments = assignments;
     }

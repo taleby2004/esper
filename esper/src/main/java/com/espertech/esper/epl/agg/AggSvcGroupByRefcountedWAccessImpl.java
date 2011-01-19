@@ -46,6 +46,9 @@ public class AggSvcGroupByRefcountedWAccessImpl extends AggregationServiceBase
      * @param prototypes - collect the aggregation state that evaluators evaluate to, act as prototypes for new aggregations
      * aggregation states for each group
      * @param methodResolutionService - factory for creating additional aggregation method instances per group key
+     * @param accessors accessor definitions
+     * @param streams streams in join
+     * @param isJoin true for join, false for single-stream
      */
     public AggSvcGroupByRefcountedWAccessImpl(ExprEvaluator evaluators[],
                                        AggregationMethod prototypes[],

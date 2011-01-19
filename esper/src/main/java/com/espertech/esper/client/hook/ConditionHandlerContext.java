@@ -17,6 +17,7 @@ public class ConditionHandlerContext {
      * @param engineURI engine URI
      * @param statementName statement name
      * @param epl statement EPL expression text
+     * @param engineCondition condition reported
      */
     public ConditionHandlerContext(String engineURI, String statementName, String epl, BaseCondition engineCondition) {
         this.engineURI = engineURI;
@@ -49,6 +50,10 @@ public class ConditionHandlerContext {
         return epl;
     }
 
+    /**
+     * Returns the condition reported.
+     * @return condition reported
+     */
     public BaseCondition getEngineCondition() {
         return engineCondition;
     }

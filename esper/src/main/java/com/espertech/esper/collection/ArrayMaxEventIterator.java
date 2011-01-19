@@ -13,12 +13,20 @@ import com.espertech.esper.client.EventBean;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * Iterator for iterating over an array of events up to a given max number of events.
+ */
 public class ArrayMaxEventIterator implements Iterator<EventBean>
 {
     private final EventBean[] events;
     private final int maxNumEvents;
     private int position;
 
+    /**
+     * Ctor.
+     * @param events to iterate
+     * @param maxNumEvents max to iterate
+     */
     public ArrayMaxEventIterator(EventBean[] events, int maxNumEvents)
     {
         this.events = events;

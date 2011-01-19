@@ -26,6 +26,10 @@ public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBase
      * Ctor.
      * @param evaluators - evaluate the sub-expression within the aggregate function (ie. sum(4*myNum))
      * @param aggregators - collect the aggregation state that evaluators evaluate to
+     * @param methodResolutionService factory service for implementations
+     * @param accessors accessor definitions
+     * @param streams streams in join
+     * @param isJoin true for join, false for single-stream
      */
     public AggSvcGroupAllMixedAccessImpl(ExprEvaluator evaluators[],
                                          AggregationMethod aggregators[],

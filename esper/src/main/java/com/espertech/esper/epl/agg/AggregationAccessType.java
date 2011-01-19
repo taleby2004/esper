@@ -8,9 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
+/**
+ * Enum for aggregation access type.
+ */
 public enum AggregationAccessType
 {
+    /**
+     * For "first" function.
+     */
     FIRST,
+    /**
+     * For "last" function.
+     */
     LAST,
+    /**
+     * For "window" function.
+     */
     WINDOW
 }

@@ -15,6 +15,7 @@ public class AggregationMethodRowAged
      * @param lastUpdateTime time of creation
      * @param refcount number of items in state
      * @param methods aggregations
+     * @param accesses for first/last/window type access
      */
     public AggregationMethodRowAged(long refcount, long lastUpdateTime, AggregationMethod[] methods, AggregationAccess[] accesses)
     {
@@ -76,6 +77,10 @@ public class AggregationMethodRowAged
         refcount--;
     }
 
+    /**
+     * Returns the accesses for first/last/window aggregation functions.
+     * @return accesses
+     */
     public AggregationAccess[] getAccesses()
     {
         return accesses;

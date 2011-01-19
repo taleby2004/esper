@@ -5,11 +5,21 @@ import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
+/**
+ * Aggregation service for use when only first/last/window aggregation functions are used an none other.
+ */
 public class AggSvcGroupAllAccessOnlyImpl implements AggregationService, AggregationResultFuture
 {
     private final AggregationAccessorSlotPair[] accessors;
     private final AggregationAccess[] accesses;
 
+    /**
+     * Ctor.
+     * @param methodResolutionService factory service for implementations
+     * @param accessors accessor definitions
+     * @param streams streams in join
+     * @param isJoin true for join, false for single-stream
+     */
     public AggSvcGroupAllAccessOnlyImpl(MethodResolutionService methodResolutionService,
                                                    AggregationAccessorSlotPair[] accessors,
                                                    int[] streams,

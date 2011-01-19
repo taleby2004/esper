@@ -190,10 +190,18 @@ public class ConfigurationEngineDefaults implements Serializable
         this.exceptionHandling = exceptionHandling;
     }
 
+    /**
+     * Returns the condition handling configuration.
+     * @return condition handling configuration
+     */
     public ConditionHandling getConditionHandling() {
         return conditionHandling;
     }
 
+    /**
+     * Sets the condition handling configuration.
+     * @param conditionHandling exception handling configuration
+     */
     public void setConditionHandling(ConditionHandling conditionHandling) {
         this.conditionHandling = conditionHandling;
     }
@@ -1242,10 +1250,18 @@ public class ConfigurationEngineDefaults implements Serializable
             this.prioritized = prioritized;
         }
 
+        /**
+         * Returns true for fair locking, false for unfair locks.
+         * @return fairness flag
+         */
         public boolean isFairlock() {
             return fairlock;
         }
 
+        /**
+         * Set to true for fair locking, false for unfair locks.
+         * @param fairlock fairness flag
+         */
         public void setFairlock(boolean fairlock) {
             this.fairlock = fairlock;
         }
@@ -1344,6 +1360,10 @@ public class ConfigurationEngineDefaults implements Serializable
             handlerFactories.add(exceptionHandlerFactoryClassName);
         }
 
+        /**
+         * Add a list of exception handler class names.
+         * @param classNames to add
+         */
         public void addClasses(List<String> classNames) {
             if (handlerFactories == null) {
                 handlerFactories = new ArrayList<String>();
@@ -1395,6 +1415,10 @@ public class ConfigurationEngineDefaults implements Serializable
             handlerFactories.add(className);
         }
 
+        /**
+         * Add a list of condition handler class names. 
+         * @param classNames to add
+         */
         public void addClasses(List<String> classNames) {
             if (handlerFactories == null) {
                 handlerFactories = new ArrayList<String>();

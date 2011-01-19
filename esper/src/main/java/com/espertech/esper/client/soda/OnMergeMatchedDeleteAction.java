@@ -10,23 +10,41 @@ package com.espertech.esper.client.soda;
 
 import java.io.StringWriter;
 
+/**
+ * For use with on-merge clauses, deletes from a named window if matching rows are found.
+ */
 public class OnMergeMatchedDeleteAction implements OnMergeMatchedAction
 {
     private static final long serialVersionUID = 0L;
 
     private Expression optionalCondition;
 
+    /**
+     * Ctor.
+     * @param optionalCondition condition for action, or null if none required
+     */
     public OnMergeMatchedDeleteAction(Expression optionalCondition) {
         this.optionalCondition = optionalCondition;
     }
 
+    /**
+     * Ctor.
+     */
     public OnMergeMatchedDeleteAction() {
     }
 
+    /**
+     * Returns the action condition, or null if undefined.
+     * @return condition
+     */
     public Expression getOptionalCondition() {
         return optionalCondition;
     }
 
+    /**
+     * Sets the action condition, or null if undefined.
+     * @param optionalCondition to set, or null to remove the condition
+     */
     public void setOptionalCondition(Expression optionalCondition) {
         this.optionalCondition = optionalCondition;
     }

@@ -13,6 +13,7 @@ public class AggregationMethodPairRow
      * Ctor.
      * @param refcount number of items in state
      * @param methods aggregations
+     * @param accesses for first/last/window type access
      */
     public AggregationMethodPairRow(long refcount, AggregationMethod[] methods, AggregationAccess[] accesses)
     {
@@ -55,6 +56,10 @@ public class AggregationMethodPairRow
         refcount--;
     }
 
+    /**
+     * Returns the accesses for first/last/window aggregation functions.
+     * @return accesses
+     */
     public AggregationAccess[] getAccesses()
     {
         return accesses;

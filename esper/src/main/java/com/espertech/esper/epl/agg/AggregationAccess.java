@@ -45,6 +45,7 @@ public interface AggregationAccess
     /**
      * Counting from the first element to the last, returns the oldest (first) value entered for index zero
      * and the n-th oldest value for index N.
+     * @param index index
      * @return last value
      */
     public EventBean getFirstNthValue(int index);
@@ -52,6 +53,7 @@ public interface AggregationAccess
     /**
      * Counting from the last element to the first, returns the newest (last) value entered for index zero
      * and the n-th newest value for index N.
+     * @param index index
      * @return last value
      */
     public EventBean getLastNthValue(int index);

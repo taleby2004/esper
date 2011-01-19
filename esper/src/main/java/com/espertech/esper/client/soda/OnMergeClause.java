@@ -56,6 +56,7 @@ public class OnMergeClause extends OnClause
     /**
      * Renders the clause in textual representation.
      * @param writer to output to
+     * @param optionalWhereClause where clause if present, or null
      */
     public void toEPL(StringWriter writer, Expression optionalWhereClause)
     {
@@ -114,16 +115,29 @@ public class OnMergeClause extends OnClause
         this.optionalAsName = optionalAsName;
     }
 
+    /**
+     * Add a new action to the list of actions.
+     * @param action to add
+     * @return clause
+     */
     public OnMergeClause addAction(OnMergeMatchedAction action)
     {
         actions.add(action);
         return this;
     }
 
+    /**
+     * Returns all actions.
+     * @return actions
+     */
     public List<OnMergeMatchedAction> getActions() {
         return actions;
     }
 
+    /**
+     * Sets all actions.
+     * @param actions to set
+     */
     public void setActions(List<OnMergeMatchedAction> actions) {
         this.actions = actions;
     }

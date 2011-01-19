@@ -3,6 +3,9 @@ package com.espertech.esper.epl.agg;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 
+/**
+ * Represents the aggregation accessor that provides the result for the "first" and "last" aggregation function with index.
+ */
 public class AggregationAccessorFirstLastIndex implements AggregationAccessor
 {
     private final int streamNum;
@@ -12,6 +15,14 @@ public class AggregationAccessorFirstLastIndex implements AggregationAccessor
     private final int constant;
     private final boolean isFirst;
 
+    /**
+     * Ctor.
+     * @param streamNum stream id
+     * @param childNode expression
+     * @param indexNode index expression
+     * @param constant constant index
+     * @param isFirst true if returning first, false for returning last
+     */
     public AggregationAccessorFirstLastIndex(int streamNum, ExprEvaluator childNode, ExprEvaluator indexNode, int constant, boolean isFirst)
     {
         this.streamNum = streamNum;

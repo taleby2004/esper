@@ -10,7 +10,14 @@ public class AuditPath {
 
     private static final Log log = LogFactory.getLog(AuditPath.class);
 
+    /**
+     * Log destination for the query plan logging.
+     */
     public static final String QUERYPLAN_LOG = "com.espertech.esper.queryplan"; 
+
+    /**
+     * Log destination for the JDBC logging.
+     */
     public static final String JDBC_LOG = "com.espertech.esper.jdbc"; 
 
     /**
