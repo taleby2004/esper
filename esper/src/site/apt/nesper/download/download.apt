@@ -6,13 +6,13 @@ Download NEsper
 *------------------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+
 |                        | Download                                                                     | License
 *------------------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+
-| NEsper 3.4.1 (zip) | {{{http://dist.codehaus.org/esper/NEsper-3.4.1.zip} NEsper-3.4.1.zip  }}| {{{http://www.opensource.org/licenses/gpl-license.php} GNU GPL verison 2}}
+| NEsper 4.0.0 (zip)     | {{{http://dist.codehaus.org/esper/NEsper-4.0.0.zip} NEsper-4.0.0.zip  }}| {{{http://www.opensource.org/licenses/gpl-license.php} GNU GPL verison 2}}
 *------------------------+------------------------------------------------------------------------------+-----------------------------------------------------------------------------------+
 	
 
 * Previous Releases
 	
-	Earlier versions of NEsper can be downloaded from {{{http://dist.codehaus.org/esper}here}}.
+	Earlier versions of NEsper can be downloaded from {{{http://dist.codehaus.org/esper/prior-releases}here}}.
 
 
 * Prerequisite For Clients 

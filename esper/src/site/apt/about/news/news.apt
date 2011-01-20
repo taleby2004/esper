@@ -1,6 +1,6 @@
 News
 
-* January 24, 2010  -  Esper 4.1.0 - Update release
+* January 19, 2010  -  Esper 4.1.0 - Update release
 
   * Support for on-merge which provides an atomic update-insert-delete (aka. upsert or merge) operation for use with named windows
   
@@ -26,6 +26,15 @@ News
 
   []
 
+
+* January 19, 2010  -  NEsper 4.0.0 for .NET (incl. Mono support)
+	      
+  * Feature equivalent to Esper version 4.0.0
+  
+  * See Esper 4.0.0 changes below for a detailed changed list.
+
+  []
+  
 
 * October 18, 2010  -  NEsper 3.4.1 for .NET (incl. Mono support)
 	      
