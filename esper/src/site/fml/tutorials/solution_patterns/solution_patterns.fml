@@ -190,6 +190,38 @@ where sensor.sensorId = loc.sensorId</pre></div>
     </faq>    
   </part>
 
+  <part id="design">
+  	<title>Design Tips</title>
+  	
+    <faq id="design-0">
+      <question>Simple Statements</question>
+      <answer>
+        <p>
+          We recommend keeping your EPL statements simple and easy-to-read. 
+          Consider splitting a single, complex statement into multiple EPL statements, where the first statement produces data via insert-into into a stream that a second statement consumes.
+        </p>
+      </answer>
+    </faq>    
+    <faq id="design-0">
+      <question>Understand Joins</question>
+      <answer>
+        <p>
+          Joins are harder to get right as they are multidirectional: When new data arrives on any of the joined streams the join (Cartesian) product of the data windows is output (joined or limited by the where-clause if present) and aggregated (if using aggregations).
+        </p>
+        <p>
+          You can make joins unidirectional: Thus the join only outputs data when an event arrives for the single stream marked as unidirectional and no output occurs for other streams.
+        </p>
+        <p>
+          Consider replacing the join with one or more sub-queries, it is often easier to read and conceptually clearer.
+        </p>
+        <p>
+          When using joins with aggregations, consider splitting the statement into multiple simpler statements: Aggregate and output to a stream in one statement and use the output stream(s) in a second statement that joins or sub-queries without also aggregating.
+          Using separate streams gives you the flexibility to report or debug each individually, do the output rate controlling you prefer and reuse the streams for other stuff.
+        </p>        
+      </answer>
+    </faq>    
+  </part>
+
   <part id="general">
   	<title>General</title>
   	
@@ -229,6 +261,32 @@ where sensor.sensorId = loc.sensorId</pre></div>
 from FraudWarningEvent.win:time(30 sec) as fraud,
      WithdrawalEvent.win:time(30 sec) as withdraw
 where fraud.accountNumber = withdraw.accountNumber</pre></div>      
+      </answer>
+    </faq>    
+
+    <faq id="correlate-1">
+      <question>I want to compute and compare the maximum of all events since start and the maximum for the last 10 seconds?</question>
+      <answer>
+        <p>
+          Compute the maximum of all the values over the total time, output at a 1-minute resolution:
+        </p>
+	<div class="source"><pre>insert into HistoricStream select max(e) as maxE from MyEvent output last every 1 minute</pre></div>      
+	
+        <p>
+          Compute the maximum for the last 10 seconds:
+        </p>
+	<div class="source"><pre>insert into Last10Sec select max(e) as maxE from MyEvent.win:time(10)</pre></div>      
+
+        <p>
+          Compare, for example using a subquery:
+        </p>
+	<div class="source"><pre>select * from Last10Sec where maxE > (select maxE from HistoricStream.std:lastevent())</pre></div>      
+	
+	<p>
+	  Alternatively, you could put all in one statement as shown next. This sample EPL doesn't compare but also outputs average and the value itself:
+	</p>
+	<div class="source"><pre>select e, max(e), avg(e), select (max(local.e) as localMax, avg(local.e) as localAvg from MyEvent.win:time(10)) from MyEvent</pre></div>      
+
       </answer>
     </faq>    
 
