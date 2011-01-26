@@ -482,7 +482,11 @@ public EventType getEventType() {
 			<programlisting><![CDATA[public class MyConcatAggregationFunction extends AggregationSupport { ...]]></programlisting>
 
 			<para>
-				The engine generally constructs one instance of the aggregation function class for each time the function is listed in a statement, however the engine may decide to reduce the number of aggregation class instances if it finds equivalent aggregations. The constructor initializes the aggregation function:
+				The engine generally constructs one instance of the aggregation function class for each time the function is listed in a statement, however the engine may decide to reduce the number of aggregation class instances if it finds equivalent aggregations. The class that provides the aggregation and extends <literal>AggregationSupport</literal> does not have to be threadsafe.
+			</para>
+
+			<para>
+				The constructor initializes the aggregation function:
 			</para>
 			<programlisting><![CDATA[public class MyConcatAggregationFunction extends AggregationSupport {
   private final static char DELIMITER = ' ';
