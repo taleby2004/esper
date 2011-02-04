@@ -642,9 +642,16 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 			<para>
 				For example, the below statement could be faster to evaluate:
 			</para>
-			<programlisting><![CDATA[select * from MyEvent(field1="value" and MyHelperLibrary.filter(field1, field2, field3, field4*field5))]]></programlisting>
+			<programlisting><![CDATA[select * from MyEvent(field1="value" and 
+  MyHelperLibrary.filter(field1, field2, field3, field4*field5))]]></programlisting>
 		</sect2>
 
+		<sect2 id="perf-tips-17">
+				<title>Statement and Engine Metric Reporting</title>
+				<para>
+					You can use statement and engine metric reporting as described in <xref linkend="api-instrumentation"/> to monitor performance or identify slow statements.
+				</para>
+		</sect2>
     </sect1>
 
     <sect1 id="performance-kit" revision="1">

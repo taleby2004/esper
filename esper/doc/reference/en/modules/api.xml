@@ -2306,6 +2306,11 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
 		<programlisting><![CDATA[select * from com.espertech.esper.client.metric.EngineMetric]]></programlisting>
 
         <para>
+			The next statement selects all statement metric events:
+        </para>        
+		<programlisting><![CDATA[select * from com.espertech.esper.client.metric.StatementMetric]]></programlisting>
+
+        <para>
 			Make sure to have metrics reporting enabled since only then do listeners or subscribers to a statement such as above receive metric events.
         </para>        
 
@@ -2612,4 +2617,33 @@ config.addPluginLoader("MyLoader", "org.mypackage.MyLoader", props);]]></program
 }]]></programlisting>
 	</sect1>
 
+    <sect1 id="api-annotation">
+        <title>Interrogating EPL Annotations</title>
+        
+		<indexterm><primary>annotation</primary><secondary>interrogating</secondary></indexterm>
+        <para>
+			As discussed in <xref linkend="epl-syntax-annotation"/> an EPL annotation is an addition made to information in an EPL statement. The API and examples to interrogate annotations are described here.
+        </para>
+        
+        <para>
+          You may use the <literal>getAnnotations</literal> method of <literal>EPStatement</literal> to obtain annotations specified for an EPL statement. Or when compiling an EPL expression to a <literal>EPStatementObjectModel</literal> statement object model you may also query, change or add annotations.
+        </para>
+
+        <para>
+          The following example code demonstrates iterating over an <literal>EPStatement</literal> statement's annotations and retrieving values:
+        </para>
+                
+		<programlisting><![CDATA[String exampleEPL = "@Tag(name='direct-output', value='sink 1') select * from RootEvent";
+EPStatement stmt = epService.getEPAdministrator().createEPL(exampleEPL);
+for (Annotation annotation : stmt.getAnnotations()) {
+  if (annotation instanceof Tag) {
+    Tag tag = (Tag) annotation;
+    System.out.println("Tag name " + tag.name() + " value " + tag.value());
+  }
+}]]></programlisting>
+
+		<para>
+			The output of the sample code shown above is <literal>Tag name direct-output value sink 1</literal>.
+		</para>
+	</sect1>
 </chapter>
