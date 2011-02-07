@@ -38,21 +38,23 @@ Commonly Asked Questions
 	
 Esper Enterprise Edition Feature Summary 
 
-	* Rich web-based multi-window GUI based on Flex
+	* Rich web-based multi-window GUI based on Flex for design and management of EPL statements and CEP engine in general
 
-	* Real-time continuously-updating displays
-	
-		* Charts, Timeline, Gauge, Grids
-	
-		* Interactive, composable, configurable, can be integrated
+	* Real-time continuously-updating displays (charts, timeline, gauge, grids) that are interactive, composable, configurable and easy to integrate
 
-	* Data distribution service
+	* Data distribution service for efficient 3-tier data fan-out from CEP engine(s) to browsers
 	
-	* Hot deployment of EPL modules and event-driven applications packaged as WAR
+	* Hot deployment of EPL modules and event-driven applications
 	
-	* {{{http://www.espertech.com/products/esperee.php}Info and Download}}
-	
-	* {{{http://www.espertech.com/resources/sd_esperhqscreenshots.html}Screenshots}}
+	* {{{http://www.espertech.com/products/esperee.php}Info and Download}} and {{{http://www.espertech.com/resources/sd_esperhqscreenshots.html}Screenshots}}
+
+	[]
+
+EsperHA Feature Summary 
+
+	* Resiliency of CEP engine state and EPL statement state, as needed; Supports storing state to either BerkeleyDB Java or Relational DB (JDBC) or Apache Cassandra
+
+	* {{{http://www.espertech.com/products/esperha.php}Info and Download}}
 
 	[]
 
