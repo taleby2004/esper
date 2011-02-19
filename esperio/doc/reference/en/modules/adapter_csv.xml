@@ -354,6 +354,9 @@ coordinator.start();]]></programlisting>
 				that instructs the adapter to use the engine timer thread if set to true, and the adapter can use the application thread if the flag passed is false.
         </para>
 
+		<para>
+			You may not set an event rate per second when using a timestamp column and time-order.
+		</para>
     </sect1>
 
     <sect1 id="csv-step-4">
