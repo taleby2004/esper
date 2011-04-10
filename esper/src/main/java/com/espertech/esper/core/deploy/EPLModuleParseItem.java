@@ -1,5 +1,8 @@
 package com.espertech.esper.core.deploy;
 
+/**
+ * Item parsing an EPL module file.
+ */
 public class EPLModuleParseItem
 {
     private String expression;
@@ -7,6 +10,13 @@ public class EPLModuleParseItem
     private int startChar;
     private int endChar;
 
+    /**
+     * Ctor.
+     * @param expression EPL
+     * @param lineNum line number
+     * @param startChar start character number total file
+     * @param endChar end character number
+     */
     public EPLModuleParseItem(String expression, int lineNum, int startChar, int endChar)
     {
         this.expression = expression;
@@ -15,21 +25,37 @@ public class EPLModuleParseItem
         this.endChar = endChar;
     }
 
+    /**
+     * Returns line number of expression.
+     * @return line number
+     */
     public int getLineNum()
     {
         return lineNum;
     }
 
+    /**
+     * Returns the expression.
+     * @return expression
+     */
     public String getExpression()
     {
         return expression;
     }
 
+    /**
+     * Returns the position of the start character.
+     * @return start char position
+     */
     public int getStartChar()
     {
         return startChar;
     }
 
+    /**
+     * Returns the position of the end character.
+     * @return end char position
+     */
     public int getEndChar()
     {
         return endChar;

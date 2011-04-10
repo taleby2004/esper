@@ -14,6 +14,9 @@ import com.espertech.esper.util.UuidGenerator;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Implementation for storing deployment state.
+ */
 public class DeploymentStateServiceImpl implements DeploymentStateService
 {
     private final Map<String, DeploymentInformation> deployments;

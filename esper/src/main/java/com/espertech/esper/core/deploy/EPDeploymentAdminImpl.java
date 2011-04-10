@@ -26,9 +26,16 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * Deployment administrative implementation.
+ */
 public class EPDeploymentAdminImpl implements EPDeploymentAdmin
 {
+    /**
+     * Newline character.
+     */
     public static final String newline = System.getProperty("line.separator");
+    
     private static Log log = LogFactory.getLog(EPDeploymentAdminImpl.class);
 
     private final EPAdministratorSPI epService;
@@ -37,6 +44,14 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
     private final EventAdapterService eventAdapterService;
     private final StatementIsolationService statementIsolationService;
 
+    /**
+     * Ctor.
+     * @param epService admininstrative SPI
+     * @param deploymentStateService deployment state maintainance service
+     * @param statementEventTypeRef maintains statement-eventtype relationship
+     * @param eventAdapterService event wrap service
+     * @param statementIsolationService for isolated statement execution
+     */
     public EPDeploymentAdminImpl(EPAdministratorSPI epService, DeploymentStateService deploymentStateService, StatementEventTypeRef statementEventTypeRef, EventAdapterService eventAdapterService, StatementIsolationService statementIsolationService)
     {
         this.epService = epService;

@@ -165,6 +165,11 @@ public class DependencyGraph
         return rootNodes;
     }
 
+    /**
+     * Return the root nodes ignoring the nodes provided.
+     * @param ignoreList nodes to be ignored
+     * @return root nodes
+     */
     public Set<Integer> getRootNodes(Set<Integer> ignoreList)
     {
         Set<Integer> rootNodes = new HashSet<Integer>();

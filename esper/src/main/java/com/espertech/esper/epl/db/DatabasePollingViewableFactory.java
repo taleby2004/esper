@@ -53,6 +53,7 @@ public class DatabasePollingViewableFactory
      * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
      * @param columnTypeConversionHook hook for statement-specific column conversion
      * @param outputRowConversionHook hook for statement-specific row conversion
+     * @param enableJDBCLogging indicator to enable JDBC logging
      * @return viewable providing poll functionality
      * @throws ExprValidationException if the validation failed
      */

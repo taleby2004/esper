@@ -20,5 +20,12 @@ public interface Quitable
      */
     public void guardQuit();
 
+    /**
+     * Retains the pattern context with relevant pattern and statement-level services.
+     * <p>
+     * The pattern context is the same context as provided to the guard factory and
+     * is provided by the quitable so the guard instance does not need to retain the pattern context.
+     * @return pattern context
+     */
     public PatternContext getContext();
 }

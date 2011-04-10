@@ -8,15 +8,25 @@
  **************************************************************************************/
 package com.espertech.esper.core;
 
-import com.espertech.esper.client.*;
+import com.espertech.esper.client.ConfigurationOperations;
 import com.espertech.esper.epl.spec.*;
+import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 
+/**
+ * Context for administrative services.
+ */
 public class EPAdministratorContext
 {
     private final EPServicesContext services;
     private final ConfigurationOperations configurationOperations;
     private final SelectClauseStreamSelectorEnum defaultStreamSelector;
 
+    /**
+     * Ctor.
+     * @param services engine services
+     * @param configurationOperations configuration snapshot
+     * @param defaultStreamSelector default stream selection
+     */
     public EPAdministratorContext(EPServicesContext services, ConfigurationOperations configurationOperations, SelectClauseStreamSelectorEnum defaultStreamSelector)
     {
         this.configurationOperations = configurationOperations;
@@ -24,16 +34,28 @@ public class EPAdministratorContext
         this.services = services;
     }
 
+    /**
+     * Returns configuration.
+     * @return configuration
+     */
     public ConfigurationOperations getConfigurationOperations()
     {
         return configurationOperations;
     }
 
+    /**
+     * Returns the default stream selector.
+     * @return default stream selector
+     */
     public SelectClauseStreamSelectorEnum getDefaultStreamSelector()
     {
         return defaultStreamSelector;
     }
 
+    /**
+     * Returns the engine services context.
+     * @return engine services
+     */
     public EPServicesContext getServices()
     {
         return services;

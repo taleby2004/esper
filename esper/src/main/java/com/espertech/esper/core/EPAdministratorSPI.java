@@ -60,5 +60,8 @@ public interface EPAdministratorSPI extends EPAdministrator
      */
     public MatchRecognizeRegEx compileMatchRecognizePatternToSODA(String matchRecogPatternExpression);
 
+    /**
+     * Destroy the administrative interface.
+     */
     public void destroy();
 }

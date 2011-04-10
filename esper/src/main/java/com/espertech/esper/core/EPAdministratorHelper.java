@@ -28,6 +28,9 @@ import org.antlr.runtime.tree.Tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * Helper class for administrative interface.
+ */
 public class EPAdministratorHelper
 {
     private static ParseRuleSelector patternParseRule;
@@ -70,6 +73,16 @@ public class EPAdministratorHelper
         };
     }
 
+    /**
+     * Compile an EPL statement.
+     * @param eplStatement to compile
+     * @param eplStatementForErrorMsg the statement to use for indicating error messages
+     * @param addPleaseCheck true to add please-check message text
+     * @param statementName the name of statement
+     * @param services engine services
+     * @param defaultStreamSelector stream selector
+     * @return compiled statement
+     */
     public static StatementSpecRaw compileEPL(String eplStatement, String eplStatementForErrorMsg, boolean addPleaseCheck, String statementName, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector) {
         return compileEPL(eplStatement, eplStatementForErrorMsg, addPleaseCheck, statementName, defaultStreamSelector,
                 services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), services.getEngineURI(), services.getConfigSnapshot(), services.getPatternNodeFactory());

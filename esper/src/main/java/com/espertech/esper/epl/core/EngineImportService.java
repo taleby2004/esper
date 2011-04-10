@@ -66,6 +66,7 @@ public interface EngineImportService
      * Used at statement compile-time to try and resolve a given function name into an
      * single-row function. Matches function name case-neutral.
      * @param functionName is the function name
+     * @return class name and method name pair
      * @throws EngineImportUndefinedException if the function is not a configured single-row function
      * @throws EngineImportException if the function providing class could not be loaded or doesn't match
      */
