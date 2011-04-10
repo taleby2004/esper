@@ -9,12 +9,8 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.util.CoercionException;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.SimpleNumberCoercerFactory;
@@ -28,12 +24,13 @@ import java.util.Map;
 /**
  * Represents the case-when-then-else control flow function is an expression tree.
  */
-public class ExprCaseNode extends ExprNode implements ExprEvaluator
+public class ExprCaseNode extends ExprNodeBase implements ExprEvaluator
 {
     private static final long serialVersionUID = 792538321520346459L;
 
     private final boolean isCase2;
     private Class resultType;
+    private Map<String, Object> mapResultType;
     private boolean isNumericResult;
     private boolean mustCoerce;
 
@@ -67,11 +64,7 @@ public class ExprCaseNode extends ExprNode implements ExprEvaluator
         return isCase2;
     }
 
-    public Map<String, Object> getEventType() {
-        return null;
-    }
-
-    public void validate(StreamTypeService streamTypeService_, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         CaseAnalysis analysis = analyzeCase();
 
@@ -100,26 +93,69 @@ public class ExprCaseNode extends ExprNode implements ExprEvaluator
 
         // Determine type of each result (then-node and else node) child node expression
         List<Class> childTypes = new LinkedList<Class>();
+        List<Map<String, Object>> childMapTypes = new LinkedList<Map<String, Object>>();
         for (UniformPair<ExprEvaluator> pair : whenThenNodeList)
         {
+            if (pair.getSecond().getEventType() != null) {
+                childMapTypes.add(pair.getSecond().getEventType());
+                continue;
+            }
             childTypes.add(pair.getSecond().getType());
+
         }
         if (optionalElseExprNode != null)
         {
-            childTypes.add(optionalElseExprNode.getType());
-        }
-
-        // Determine common denominator type
-        try {
-            resultType = JavaClassHelper.getCommonCoercionType(childTypes.toArray(new Class[childTypes.size()]));
-            if (JavaClassHelper.isNumeric(resultType))
-            {
-                isNumericResult = true;
+            if (optionalElseExprNode.getEventType() != null) {
+                childMapTypes.add(optionalElseExprNode.getEventType());
+            }
+            else {
+                childTypes.add(optionalElseExprNode.getType());
             }
         }
-        catch (CoercionException ex)
-        {
-            throw new ExprValidationException("Implicit conversion not allowed: " + ex.getMessage());
+
+        if (!childMapTypes.isEmpty() && !childTypes.isEmpty()) {
+            String message = "Case node 'when' expressions require that all results either return a single value or a Map-type (new-operator) value";
+            String check;
+            int count = -1;
+            for (UniformPair<ExprEvaluator> pair : whenThenNodeList) {
+                count++;
+                if (pair.getSecond().getType() != Map.class && pair.getSecond().getType() != null) {
+                    check = ", check when-condition number " + count;
+                    throw new ExprValidationException(message + check);
+                }
+            }
+            if (optionalElseExprNode != null) {
+                if (optionalElseExprNode.getType() != Map.class && optionalElseExprNode.getType() != null) {
+                    check = ", check the else-condition";
+                    throw new ExprValidationException(message + check);
+                }
+            }
+            throw new ExprValidationException(message);
+        }
+
+        if (childMapTypes.isEmpty()) {
+            // Determine common denominator type
+            try {
+                resultType = JavaClassHelper.getCommonCoercionType(childTypes.toArray(new Class[childTypes.size()]));
+                if (JavaClassHelper.isNumeric(resultType))
+                {
+                    isNumericResult = true;
+                }
+            }
+            catch (CoercionException ex)
+            {
+                throw new ExprValidationException("Implicit conversion not allowed: " + ex.getMessage());
+            }
+        }
+        else {
+            mapResultType = childMapTypes.get(0);
+            for (int i = 1; i < childMapTypes.size(); i++) {
+                Map<String, Object> other = childMapTypes.get(i);
+                String messageEquals = MapEventType.isDeepEqualsProperties("Case-when number " + i, mapResultType, other);
+                if (messageEquals != null) {
+                    throw new ExprValidationException("Incompatible case-when return types by new-operator in case-when number " + i + ": " + messageEquals);
+                }
+            }
         }
     }
 
@@ -131,6 +167,10 @@ public class ExprCaseNode extends ExprNode implements ExprEvaluator
     public Class getType()
     {
         return resultType;
+    }
+
+    public Map<String, Object> getEventType() {
+        return mapResultType;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

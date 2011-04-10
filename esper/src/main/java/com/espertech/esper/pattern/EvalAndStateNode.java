@@ -9,11 +9,10 @@
 package com.espertech.esper.pattern;
 
 
-import java.util.*;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.util.ExecutionPathDebugLog;
+
+import java.util.*;
 
 /**
  * This class represents the state of an "and" operator in the evaluation state tree.
@@ -55,11 +54,6 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
 
     public final void start()
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".start Starting and-expression all children, size=" + getFactoryNode().getChildNodes().size());
-        }
-
         if (activeChildNodes.size() < 2)
         {
             throw new IllegalStateException("AND state node is inactive");
@@ -73,13 +67,20 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
         }
     }
 
+    public boolean isFilterStateNode() {
+        return false;
+    }
+
+    public boolean isNotOperator() {
+        return false;
+    }
+
+    public boolean isFilterChildNonQuitting() {
+        return false;
+    }
+
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".evaluateTrue fromNode=" + fromNode.hashCode());
-        }
-
         // If one of the children quits, remove the child
         if (isQuitted)
         {
@@ -114,7 +115,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
         {
             for (EvalStateNode stateNode : activeChildNodes)
             {
-                if (!(stateNode instanceof EvalNotStateNode))
+                if (!(stateNode.isNotOperator()))
                 {
                     quitted = false;
                 }
@@ -136,11 +137,6 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".evaluateFalse Removing fromNode=" + fromNode.hashCode());
-        }
-
         if (eventsPerChild != null) {
             eventsPerChild.remove(fromNode);
         }
@@ -214,11 +210,6 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
 
     public final void quit()
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".quit Stopping all children");
-        }
-
         for (EvalStateNode child : activeChildNodes)
         {
             child.quit();

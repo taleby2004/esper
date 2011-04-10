@@ -12,21 +12,25 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.OneEventCollection;
+import com.espertech.esper.core.EPStatementHandle;
+import com.espertech.esper.core.InternalEventRouter;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.metric.MetricReportingPath;
+import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.spec.*;
+import com.espertech.esper.event.EventTypeMetadata;
 import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.util.UuidGenerator;
 import com.espertech.esper.view.StatementStopService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * View for the on-delete statement that handles removing events from a named window.
@@ -37,8 +41,12 @@ public class NamedWindowOnMergeView extends NamedWindowOnExprBaseView
     private EventBean[] lastResult;
     private final StatementResultService statementResultService;
     private final EventTypeSPI eventTypeSPI;
-    private List<NamedWindowOnMergeAction> updateDeleteActions;
-    private List<NamedWindowOnMergeAction> insertActions;
+    private List<NamedWindowOnMergeMatch> matched;
+    private List<NamedWindowOnMergeMatch> unmatched;
+    private EPStatementHandle createWindowStatementHandle;
+    private MetricReportingService metricReportingService;
+    private InternalEventRouter internalEventRouter;
+    private String namedWindowName;
 
     /**
      * Ctor.
@@ -51,19 +59,28 @@ public class NamedWindowOnMergeView extends NamedWindowOnExprBaseView
      * @throws ExprValidationException when expression validation fails
      */
     public NamedWindowOnMergeView(StatementStopService statementStopService,
-                                 LookupStrategy lookupStrategy,
+                                 NamedWindowLookupStrategy lookupStrategy,
                                  NamedWindowRootView removeStreamView,
                                  StatementResultService statementResultService,
                                  StatementContext statementContext,
                                  OnTriggerMergeDesc onTriggerDesc,
-                                 EventType triggeringEventType)
+                                 EventType triggeringEventType,
+                                 String triggeringStreamName,
+                                 EPStatementHandle createWindowStatementHandle,
+                                 MetricReportingService metricReportingService,
+                                 InternalEventRouter internalEventRouter,
+                                 String namedWindowName)
             throws ExprValidationException
     {
         super(statementStopService, lookupStrategy, removeStreamView, statementContext);
         this.statementResultService = statementResultService;
+        this.createWindowStatementHandle = createWindowStatementHandle;
+        this.metricReportingService = metricReportingService;
+        this.internalEventRouter = internalEventRouter;
+        this.namedWindowName = namedWindowName;
         eventTypeSPI = (EventTypeSPI) removeStreamView.getEventType();
 
-        setup(onTriggerDesc, triggeringEventType, statementContext);
+        setup(onTriggerDesc, triggeringEventType, triggeringStreamName, statementContext);
     }
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
@@ -74,8 +91,8 @@ public class NamedWindowOnMergeView extends NamedWindowOnExprBaseView
 
         if ((matchingEvents == null) || (matchingEvents.length == 0)){
             for (EventBean triggerEvent : triggerEvents) {
-                eventsPerStream[0] = triggerEvent;
-                for (NamedWindowOnMergeAction action : insertActions) {
+                eventsPerStream[1] = triggerEvent;
+                for (NamedWindowOnMergeMatch action : unmatched) {
                     if (!action.isApplies(eventsPerStream, super.getExprEvaluatorContext())) {
                         continue;
                     }
@@ -93,7 +110,7 @@ public class NamedWindowOnMergeView extends NamedWindowOnExprBaseView
                 eventsPerStream[1] = triggerEvent;
                 for (EventBean matchingEvent : matchingEvents) {
                     eventsPerStream[0] = matchingEvent;
-                    for (NamedWindowOnMergeAction action : updateDeleteActions) {
+                    for (NamedWindowOnMergeMatch action : matched) {
                         if (!action.isApplies(eventsPerStream, super.getExprEvaluatorContext())) {
                             continue;
                         }
@@ -106,6 +123,11 @@ public class NamedWindowOnMergeView extends NamedWindowOnExprBaseView
 
         if (!newData.isEmpty() || (oldData != null && !oldData.isEmpty()))
         {
+            if ((MetricReportingPath.isMetricsEnabled) && (createWindowStatementHandle.getMetricsHandle().isEnabled()) && !newData.isEmpty())
+            {
+                metricReportingService.accountTime(createWindowStatementHandle.getMetricsHandle(), 0, 0, newData.toArray().length);
+            }
+
             // Events to delete are indicated via old data
             this.rootView.update(newData.isEmpty() ? null : newData.toArray(), (oldData == null || oldData.isEmpty()) ? null : oldData.toArray());
 
@@ -129,66 +151,95 @@ public class NamedWindowOnMergeView extends NamedWindowOnExprBaseView
         return new ArrayEventIterator(lastResult);
     }
 
-
-    private void setup(OnTriggerMergeDesc onTriggerDesc, EventType triggeringEventType, StatementContext statementContext)
+    private void setup(OnTriggerMergeDesc onTriggerDesc, EventType triggeringEventType, String triggeringStreamName, StatementContext statementContext)
         throws ExprValidationException {
 
-        updateDeleteActions = new ArrayList<NamedWindowOnMergeAction>();
-        insertActions = new ArrayList<NamedWindowOnMergeAction>();
+        matched = new ArrayList<NamedWindowOnMergeMatch>();
+        unmatched = new ArrayList<NamedWindowOnMergeMatch>();
 
         int count = 1;
-        for (OnTriggerMergeItem item : onTriggerDesc.getItems()) {
-            try {
-                if (item instanceof OnTriggerMergeItemInsert) {
-                    OnTriggerMergeItemInsert insertDesc = (OnTriggerMergeItemInsert) item;
-                    insertActions.add(setupInsert(insertDesc, triggeringEventType, statementContext));
+        for (OnTriggerMergeMatched matchedItem : onTriggerDesc.getItems()) {
+            List<NamedWindowOnMergeAction> actions = new ArrayList<NamedWindowOnMergeAction>();
+            for (OnTriggerMergeAction item : matchedItem.getActions()) {
+                try {
+                    if (item instanceof OnTriggerMergeActionInsert) {
+                        OnTriggerMergeActionInsert insertDesc = (OnTriggerMergeActionInsert) item;
+                        actions.add(setupInsert(insertDesc, triggeringEventType, triggeringStreamName, statementContext));
+                    }
+                    else if (item instanceof OnTriggerMergeActionUpdate) {
+                        OnTriggerMergeActionUpdate updateDesc = (OnTriggerMergeActionUpdate) item;
+                        NamedWindowUpdateHelper updateHelper = NamedWindowUpdateHelper.make(eventTypeSPI, updateDesc.getAssignments(), onTriggerDesc.getOptionalAsName());
+                        ExprEvaluator filterEval = updateDesc.getOptionalWhereClause() == null ? null : updateDesc.getOptionalWhereClause().getExprEvaluator();
+                        actions.add(new NamedWindowOnMergeActionUpd(filterEval, updateHelper));
+                    }
+                    else if (item instanceof OnTriggerMergeActionDelete) {
+                        OnTriggerMergeActionDelete deleteDesc = (OnTriggerMergeActionDelete) item;
+                        ExprEvaluator filterEval = deleteDesc.getOptionalWhereClause() == null ? null : deleteDesc.getOptionalWhereClause().getExprEvaluator();
+                        actions.add(new NamedWindowOnMergeActionDel(filterEval));
+                    }
+                    else {
+                        throw new IllegalArgumentException("Invalid type of merge item '" + item.getClass() + "'");
+                    }
+                    count++;
                 }
-                else if (item instanceof OnTriggerMergeItemUpdate) {
-                    OnTriggerMergeItemUpdate updateDesc = (OnTriggerMergeItemUpdate) item;
-                    NamedWindowUpdateHelper updateHelper = NamedWindowUpdateHelper.make(eventTypeSPI, updateDesc.getAssignments(), onTriggerDesc.getOptionalAsName());
-                    ExprEvaluator filterEval = updateDesc.getOptionalMatchCond() == null ? null : updateDesc.getOptionalMatchCond().getExprEvaluator();
-                    updateDeleteActions.add(new NamedWindowOnMergeActionUpd(filterEval, updateHelper));
+                catch (ExprValidationException ex) {
+                    boolean isNot = item instanceof OnTriggerMergeActionInsert;
+                    String message = "Exception encountered in when-" + (isNot?"not-":"") + "matched (clause " + count + "): " + ex.getMessage();
+                    throw new ExprValidationException(message, ex);
                 }
-                else if (item instanceof OnTriggerMergeItemDelete) {
-                    OnTriggerMergeItemDelete deleteDesc = (OnTriggerMergeItemDelete) item;
-                    ExprEvaluator filterEval = deleteDesc.getOptionalMatchCond() == null ? null : deleteDesc.getOptionalMatchCond().getExprEvaluator();
-                    updateDeleteActions.add(new NamedWindowOnMergeActionDel(filterEval));
-                }
-                else {
-                    throw new IllegalArgumentException("Invalid type of merge item '" + item.getClass() + "'");
-                }
-                count++;
             }
-            catch (ExprValidationException ex) {
-                boolean isNot = item instanceof OnTriggerMergeItemInsert;
-                String message = "Exception encountered in when-" + (isNot?"not-":"") + "matched (clause " + count + "): " + ex.getMessage();
-                throw new ExprValidationException(message, ex);
+
+            if (matchedItem.isMatchedUnmatched()) {
+                matched.add(new NamedWindowOnMergeMatch(matchedItem.getOptionalMatchCond(), actions));
+            }
+            else {
+                unmatched.add(new NamedWindowOnMergeMatch(matchedItem.getOptionalMatchCond(), actions));
             }
         }
     }
 
-    private NamedWindowOnMergeActionIns setupInsert(OnTriggerMergeItemInsert onTriggerInsertDesc, EventType triggeringEventType, StatementContext statementContext)
+    private NamedWindowOnMergeActionIns setupInsert(OnTriggerMergeActionInsert desc, EventType triggeringEventType, String triggeringStreamName, StatementContext statementContext)
         throws ExprValidationException {
 
-        List<SelectClauseElementCompiled> selectClause = onTriggerInsertDesc.getSelectClauseCompiled();
-        InsertIntoDesc desc = new InsertIntoDesc(true, eventTypeSPI.getName());
-        for (String col : onTriggerInsertDesc.getColumns()) {
-            desc.add(col);
+        // Compile insert-into info
+        String streamName = desc.getOptionalStreamName() != null ? desc.getOptionalStreamName() : eventTypeSPI.getName();
+        List<SelectClauseElementCompiled> selectClause = desc.getSelectClauseCompiled();
+        InsertIntoDesc insertIntoDesc = new InsertIntoDesc(true, streamName);
+        for (String col : desc.getColumns()) {
+            insertIntoDesc.add(col);
         }
-        boolean isUsingWildcard = false;    // Refactor me
+
+        // rewrite any wildcards to use "stream.wildcard"
+        if (triggeringStreamName == null) {
+            triggeringStreamName = UuidGenerator.generate();
+        }
+        List<SelectClauseElementCompiled> selectNoWildcard = new ArrayList<SelectClauseElementCompiled>();
         for (SelectClauseElementCompiled element : selectClause)
         {
-            if (element instanceof SelectClauseElementWildcard)
+            if (!(element instanceof SelectClauseElementWildcard))
             {
-                isUsingWildcard = true;
+                selectNoWildcard.add(element);
+                continue;
             }
+            SelectClauseStreamCompiledSpec streamSelect = new SelectClauseStreamCompiledSpec(triggeringStreamName, null);
+            streamSelect.setStreamNumber(1);
+            selectNoWildcard.add(streamSelect);
         }
+
+        // Set up event types for select-clause evaluation: The first type does not contain anything as its the named window row which is not present for insert
+        EventType dummyTypeNoProperties = new MapEventType(EventTypeMetadata.createAnonymous("merge_named_window_insert"), "merge_named_window_insert", null, Collections.<String, Object>emptyMap(), null, null);
+        EventType[] eventTypes = new EventType[] {dummyTypeNoProperties, triggeringEventType};
+        String[] streamNames = new String[] {UuidGenerator.generate(), triggeringStreamName};
+        StreamTypeService streamTypeService = new StreamTypeServiceImpl(eventTypes, streamNames, new boolean[1], statementContext.getEngineURI(), false);
+
+        // Get select expr processor
         SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
-        StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {triggeringEventType}, new String[] {null}, new boolean[1], statementContext.getEngineURI(), false);
-        SelectExprProcessor insertHelper = SelectExprProcessorFactory.getProcessor(selectClause, isUsingWildcard, desc, null, streamTypeService,
+        SelectExprProcessor insertHelper = SelectExprProcessorFactory.getProcessor(selectNoWildcard, false, insertIntoDesc, null, streamTypeService,
                 statementContext.getEventAdapterService(), statementResultService, statementContext.getValueAddEventService(), selectExprEventTypeRegistry,
-                statementContext.getMethodResolutionService(), statementContext, statementContext.getVariableService(), statementContext.getTimeProvider(), statementContext.getEngineURI(), statementContext.getStatementId());
-        ExprEvaluator filterEval = onTriggerInsertDesc.getOptionalMatchCond() == null ? null : onTriggerInsertDesc.getOptionalMatchCond().getExprEvaluator();
-        return new NamedWindowOnMergeActionIns(filterEval, insertHelper);
+                statementContext.getMethodResolutionService(), statementContext, statementContext.getVariableService(), statementContext.getTimeProvider(), statementContext.getEngineURI(), statementContext.getStatementId(), statementContext.getStatementName(), statementContext.getAnnotations());
+        ExprEvaluator filterEval = desc.getOptionalWhereClause() == null ? null : desc.getOptionalWhereClause().getExprEvaluator();
+
+        InternalEventRouter routerToUser = streamName.equals(namedWindowName) ? null : internalEventRouter;
+        return new NamedWindowOnMergeActionIns(filterEval, insertHelper, routerToUser, statementContext.getEpStatementHandle(), statementContext.getInternalEventEngineRouteDest());
     }    
 }

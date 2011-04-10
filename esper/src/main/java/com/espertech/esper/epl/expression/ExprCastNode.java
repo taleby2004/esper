@@ -9,11 +9,6 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.*;
 
 import java.math.BigDecimal;
@@ -23,7 +18,7 @@ import java.util.Map;
 /**
  * Represents the CAST(expression, type) function is an expression tree.
  */
-public class ExprCastNode extends ExprNode implements ExprEvaluator
+public class ExprCastNode extends ExprNodeBase implements ExprEvaluator
 {
     private final String classIdentifier;
     private Class targetType;
@@ -58,7 +53,7 @@ public class ExprCastNode extends ExprNode implements ExprEvaluator
         return null;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 1)
         {

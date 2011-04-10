@@ -8,14 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.schedule.TimeProvider;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -23,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Represents the INSTANCEOF(a,b,...) function is an expression tree.
  */
-public class ExprInstanceofNode extends ExprNode implements ExprEvaluator
+public class ExprInstanceofNode extends ExprNodeBase implements ExprEvaluator
 {
     private final String[] classIdentifiers;
 
@@ -50,7 +45,7 @@ public class ExprInstanceofNode extends ExprNode implements ExprEvaluator
         return null;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 1)
         {

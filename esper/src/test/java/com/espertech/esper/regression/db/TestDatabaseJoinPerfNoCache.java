@@ -76,8 +76,8 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
             assertFalse(listener.isInvoked());
         }
         long endTime = System.currentTimeMillis();
-        log.info(".testSelectRStream delta=" + (endTime - startTime));
-        assertTrue(endTime - startTime < 500);
+        long delta = (endTime - startTime);
+        assertTrue("delta=" + delta, endTime - startTime < 500);
 
         // 1001st event should finally join and produce a result
         SupportBean_S0 bean = new SupportBean_S0(10);

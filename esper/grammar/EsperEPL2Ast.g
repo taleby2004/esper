@@ -70,10 +70,21 @@ elementValue
     	;    
 
 //----------------------------------------------------------------------------
+// Expression Declaration
+//----------------------------------------------------------------------------
+expressionDecl
+	:	^(e=EXPRESSIONDECL IDENT valueExpr expressionLambdaDecl? ) { leaveNode($e); }
+	;
+
+expressionLambdaDecl
+	:	^(GOES (IDENT | exprCol))
+	;
+
+//----------------------------------------------------------------------------
 // EPL expression
 //----------------------------------------------------------------------------
 startEPLExpressionRule
-	:	^(EPL_EXPR annotation[true]* eplExpressionRule) { end(); }		
+	:	^(EPL_EXPR (annotation[true] | expressionDecl)* eplExpressionRule) { end(); }		
 	;
 
 eplExpressionRule
@@ -99,11 +110,21 @@ mergeItem
 	;
 
 mergeMatched
-	:	^(m=MERGE_UPD valueExpr? UPDATE? DELETE? onSetAssignment* { leaveNode($m); })
+	:	^(m=MERGE_MAT mergeMatchedItem+ valueExpr? { leaveNode($m); })
+	;
+
+mergeMatchedItem
+	:	^(m=MERGE_UPD onSetAssignment* whereClause[false]? { leaveNode($m); })
+	|	^(d=MERGE_DEL whereClause[false]? INT_TYPE { leaveNode($d); })
+	|	mergeInsert
 	;
 
 mergeUnmatched
-	:	^(um=MERGE_INS selectionList exprCol? valueExpr? { leaveNode($um); })
+	:	^(m=MERGE_UNM mergeInsert+ valueExpr? { leaveNode($m); })
+	;
+	
+mergeInsert
+	:	^(um=MERGE_INS selectionList CLASS_IDENT? exprCol? whereClause[false]? { leaveNode($um); })
 	;
 	
 updateExpr
@@ -154,7 +175,15 @@ createWindowExpr
 	;
 
 createIndexExpr
-	:	^(i=CREATE_INDEX_EXPR IDENT IDENT exprCol { leaveNode($i); })
+	:	^(i=CREATE_INDEX_EXPR IDENT IDENT indexColList { leaveNode($i); })
+	;
+
+indexColList
+	:	^(INDEXCOL indexCol+)
+	;
+	
+indexCol
+	:	^(INDEXCOL IDENT IDENT?)
 	;
 
 createWindowExprInsert
@@ -442,6 +471,7 @@ valueExpr
 	| 	subSelectRowExpr 
 	| 	subSelectExistsExpr
 	|	dotExpr
+	|	newExpr
 	;
 
 valueExprWithTime
@@ -582,13 +612,24 @@ arithmeticExpr
 dotExpr
 	:	^(d=DOT_EXPR valueExpr libFunctionWithClass*) { leaveNode($d); }
 	;
+	
+newExpr	:	^(n=NEWKW newAssign*) { leaveNode($n); }
+	;
+
+newAssign
+	:	^(NEW_ITEM eventPropertyExpr[false] valueExpr?)
+	;
 
 libFuncChain
 	:  	^(l=LIB_FUNC_CHAIN libFunctionWithClass libOrPropFunction*) { leaveNode($l); }
 	;
 
 libFunctionWithClass
-	:  	^(l=LIB_FUNCTION (CLASS_IDENT)? IDENT (DISTINCT)? (valueExpr)*)
+	:  	^(l=LIB_FUNCTION (CLASS_IDENT)? IDENT (DISTINCT)? libFunctionArgItem* LPAREN?)
+	;
+	
+libFunctionArgItem
+	:	expressionLambdaDecl | valueExprWithTime
 	;
 	
 libOrPropFunction

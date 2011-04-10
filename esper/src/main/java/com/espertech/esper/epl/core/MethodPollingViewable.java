@@ -17,17 +17,19 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.db.DataCache;
 import com.espertech.esper.epl.db.PollExecStrategy;
 import com.espertech.esper.epl.expression.*;
-import com.espertech.esper.epl.join.PollResultIndexingStrategy;
+import com.espertech.esper.epl.join.pollindex.PollResultIndexingStrategy;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.UnindexedEventTableList;
 import com.espertech.esper.epl.spec.MethodStreamSpec;
 import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.HistoricalEventViewable;
 import com.espertech.esper.view.View;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
@@ -57,6 +59,10 @@ public class MethodPollingViewable implements HistoricalEventViewable
         public EventTable index(List<EventBean> pollResult, boolean isActiveCache)
         {
             return new UnindexedEventTableList(pollResult);
+        }
+
+        public String toQueryPlan() {
+            return this.getClass().getSimpleName() + " unindexed";
         }
     };
 
@@ -99,16 +105,17 @@ public class MethodPollingViewable implements HistoricalEventViewable
 
     public void validate(EngineImportService engineImportService, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, TimeProvider timeProvider,
                          VariableService variableService, ExprEvaluatorContext exprEvaluatorContext, ConfigurationInformation configSnapshot,
-                         SchedulingService schedulingService, String engineURI, Map<Integer, List<ExprNode>> sqlParameters) throws ExprValidationException {
+                         SchedulingService schedulingService, String engineURI, Map<Integer, List<ExprNode>> sqlParameters, EventAdapterService eventAdapterService, String statementName, Annotation[] annotations) throws ExprValidationException {
         Class[] paramTypes = new Class[inputParameters.size()];
         int count = 0;
         validatedExprNodes = new ExprEvaluator[inputParameters.size()];
         requiredStreams = new TreeSet<Integer>();
         ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
 
+        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, annotations);
         for (ExprNode exprNode : inputParameters)
         {
-            ExprNode validated = exprNode.getValidatedSubtree(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext);
+            ExprNode validated = ExprNodeUtil.getValidatedSubtree(exprNode, validationContext);
             ExprEvaluator evaluator = validated.getExprEvaluator();
             validatedExprNodes[count] = evaluator;
             paramTypes[count] = evaluator.getType();
@@ -188,7 +195,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
                         pollExecStrategy.start();
                         strategyStarted = true;
                     }
-                    
+
                     // Poll using the polling execution strategy and lookup values
                     List<EventBean> pollResult = pollExecStrategy.poll(lookupValues);
 

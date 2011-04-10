@@ -327,7 +327,7 @@ MyGetterUpdateListener listener = new MyGetterUpdateListener(stmt.getEventType()
 		</sect2>
 		
 		<sect2 id="perf-tips-9">
-			<title>Turn off logging</title>
+			<title>Turn off logging and audit</title>
 
 			<para>
 	Since Esper 1.10, even if you don't have a log4j configuration file in place, Esper will make sure to minimize execution path logging overhead.
@@ -336,6 +336,10 @@ MyGetterUpdateListener listener = new MyGetterUpdateListener(stmt.getEventType()
 
 			<para>
 	Please see the log4j configuration file in "etc/infoonly_log4j.xml" for example log4j settings.
+			</para>
+			
+			<para>
+				Esper provides the <literal>@Audit</literal> annotation for statements. For performance testing and production deployment, we recommend removing <literal>@Audit</literal>.
 			</para>
 		</sect2>
 
@@ -605,6 +609,10 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 			</para>
 
 			<para>
+				The hints for use with joins, outer joins, unidirectional joins, relational and non-relational join query planning are described in <xref linkend="epl-join-hints"/>.
+			</para>
+
+			<para>
 				The hint for use with <literal>group by</literal> to specify how state for groups is reclaimed is described in <xref linkend="epl-groupby-hints"/> and <xref linkend="view-std-groupwin"/>.
 			</para>
 
@@ -652,6 +660,32 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 					You can use statement and engine metric reporting as described in <xref linkend="api-instrumentation"/> to monitor performance or identify slow statements.
 				</para>
 		</sect2>
+
+		<sect2 id="perf-tips-18">
+			<title>Expression Evaluation Order and Early Exit</title>
+
+			<para>
+				The term "early exit" refers to when the engine can evaluate an expression without a complete evaluation of all sub-expressions.
+			</para>
+
+			<para>
+				Consider an expression such as follows:
+			</para>
+			<programlisting><![CDATA[where expr1 and expr2 and expr3]]></programlisting>
+
+			<para>
+				If expr1 is false the engine does not need to evaluate expr2 and expr3. Therefore when using the <literal>AND</literal> logical operator consider reordering expressions placing the most-selective expression first and less selective expressions thereafter.
+			</para>
+
+			<para>
+				The same is true for the <literal>OR</literal> logical operator: If expr1 is true the engine does not need to evaluate expr2 and expr3. Therefore when using the <literal>OR</literal> logical operator consider reordering expressions placing the least-selective expression first and more selective expressions thereafter. 
+			</para>
+
+			<para>
+				The order of expressions (here: expr1, expr2 and expr3) does not make a difference for the join and subquery query planner.
+			</para>
+		</sect2>
+
     </sect1>
 
     <sect1 id="performance-kit" revision="1">
@@ -729,10 +763,10 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
                         1.7.0)
                         and its dependencies as in the sample below (with Esper 2.1) :
                         <programlisting><![CDATA[# classpath on Unix/Linux (on one single line)
-etc:build:lib/esper-4.1.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
+etc:build:lib/esper-4.2.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
    :lib/antlr-runtime-3.2.jar:lib/log4j-1.2.16.jar
 @rem  classpath on Windows (on one single line)
-etc;build;lib\esper-4.1.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
+etc;build;lib\esper-4.2.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
    ;lib\antlr-runtime-3.2.jar;lib\log4j-1.2.16.jar]]></programlisting>
                         Note that <literal>./etc</literal> and <literal>./build</literal> have to be in the classpath.
                         At that stage you should also start to set min and max JVM heap. A good start is 1GB as in

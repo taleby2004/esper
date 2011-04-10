@@ -10,13 +10,10 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.event.EventBeanUtility;
 
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -115,14 +112,19 @@ public class ExprNodeUtility
             hasDataWindows = false;
         }
         else if (!isAllIRStream) {
-            hasDataWindows = false;
-            // get all aggregated properties to determine if any is from a windowed stream
-            ExprNodeIdentifierCollectVisitor visitor = new ExprNodeIdentifierCollectVisitor();
-            child.accept(visitor);
-            for (ExprIdentNode node : visitor.getExprProperties()) {
-                if (!isIStreamOnly[node.getStreamId()]) {
-                    hasDataWindows = true;
-                    break;
+            if (streamTypeService.getEventTypes().length > 1) {
+                // In a join we assume that a data window is present or implicit via unidirectional
+            }
+            else {
+                hasDataWindows = false;
+                // get all aggregated properties to determine if any is from a windowed stream
+                ExprNodeIdentifierCollectVisitor visitor = new ExprNodeIdentifierCollectVisitor();
+                child.accept(visitor);
+                for (ExprIdentNode node : visitor.getExprProperties()) {
+                    if (!isIStreamOnly[node.getStreamId()]) {
+                        hasDataWindows = true;
+                        break;
+                    }
                 }
             }
         }
@@ -273,7 +275,7 @@ public class ExprNodeUtility
         }
 
         List<ExprAggregateNode> aggregateNodes = new LinkedList<ExprAggregateNode>();
-        ExprAggregateNode.getAggregatesBottomUp(expression, aggregateNodes);
+        ExprAggregateNodeUtil.getAggregatesBottomUp(expression, aggregateNodes);
         if (!aggregateNodes.isEmpty())
         {
             return "an aggregation function";
@@ -281,31 +283,43 @@ public class ExprNodeUtility
         return null;
     }
 
-    protected static void toExpressionString(List<ExprChainedSpec> chainSpec, StringBuilder buffer)
+    protected static void toExpressionString(List<ExprChainedSpec> chainSpec, StringBuilder buffer, boolean prefixDot)
     {
+        String delimiterOuter = "";
+        if (prefixDot) {
+            delimiterOuter = ".";
+        }
+        boolean isFirst = true;
         for (ExprChainedSpec element : chainSpec) {
-            buffer.append(".");
+            buffer.append(delimiterOuter);
             buffer.append(element.getName());
-            buffer.append("(");
 
-            String delimiter = "";
-            for (ExprNode param : element.getParameters()) {
-                buffer.append(delimiter);
-                delimiter = ", ";
-                buffer.append(param.toExpressionString());
+            // the first item without dot-prefix and empty parameters should not be appended with parenthesis
+            if (!isFirst || prefixDot || !element.getParameters().isEmpty()) {
+                buffer.append("(");
+
+                String delimiter = "";
+                for (ExprNode param : element.getParameters()) {
+                    buffer.append(delimiter);
+                    delimiter = ", ";
+                    buffer.append(param.toExpressionString());
+                }
+                buffer.append(")");
             }
-            buffer.append(")");
+
+            delimiterOuter = ".";
+            isFirst = false;
         }
     }
 
 
-    public static void validate(List<ExprChainedSpec> chainSpec, StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException {
+    public static void validate(List<ExprChainedSpec> chainSpec, ExprValidationContext validationContext) throws ExprValidationException {
 
         // validate all parameters
         for (ExprChainedSpec chainElement : chainSpec) {
             List<ExprNode> validated = new ArrayList<ExprNode>();
             for (ExprNode expr : chainElement.getParameters()) {
-                validated.add(expr.getValidatedSubtree(streamTypeService, methodResolutionService, viewResourceDelegate, timeProvider, variableService, exprEvaluatorContext));
+                validated.add(ExprNodeUtil.getValidatedSubtree(expr, validationContext));
             }
             chainElement.setParameters(validated);
         }
@@ -317,5 +331,16 @@ public class ExprNodeUtility
             result.addAll(chainElement.getParameters());
         }
         return result;
+    }
+
+    public static String printEvaluators(ExprEvaluator[] evaluators) {
+        StringWriter writer = new StringWriter();
+        String delimiter = "";
+        for (int i = 0; i < evaluators.length; i++) {
+            writer.append(delimiter);
+            writer.append(evaluators[i].getClass().getSimpleName());
+            delimiter = ", ";
+        }
+        return writer.toString();
     }
 }

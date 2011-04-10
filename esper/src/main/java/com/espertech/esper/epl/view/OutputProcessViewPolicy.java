@@ -8,25 +8,25 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
-import com.espertech.esper.epl.spec.OutputLimitSpec;
-import com.espertech.esper.epl.spec.OutputLimitLimitType;
-import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.util.ExecutionPathDebugLog;
-import com.espertech.esper.util.AuditPath;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.spec.OutputLimitLimitType;
+import com.espertech.esper.epl.spec.OutputLimitSpec;
 import com.espertech.esper.event.EventBeanUtility;
+import com.espertech.esper.util.AuditPath;
+import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.LinkedHashSet;
 
 /**
  * A view that prepares output events, batching incoming
@@ -64,7 +64,8 @@ public class OutputProcessViewPolicy extends OutputProcessView
     					  OutputLimitSpec outputLimitSpec,
     					  StatementContext statementContext,
                           boolean isDistinct,
-                          boolean isGrouped)
+                          boolean isGrouped,
+                          boolean isWithHavingClause)
             throws ExprValidationException
     {
         super(resultSetProcessor, outputStrategy, isInsertInto, statementContext, isDistinct, outputLimitSpec.getAfterTimePeriodExpr(), outputLimitSpec.getAfterNumberOfEvents());
@@ -76,7 +77,7 @@ public class OutputProcessViewPolicy extends OutputProcessView
     	}
 
     	OutputCallback outputCallback = getCallbackToLocal(streamCount);
-    	this.outputCondition = statementContext.getOutputConditionFactory().createCondition(outputLimitSpec, statementContext, outputCallback, isGrouped);
+    	this.outputCondition = statementContext.getOutputConditionFactory().createCondition(outputLimitSpec, statementContext, outputCallback, isGrouped, isWithHavingClause);
         outputLimitLimitType = outputLimitSpec.getDisplayLimit();
     }
 

@@ -178,11 +178,6 @@ public abstract class ViewSupport implements View
             writer.println(prefix + " oldData.size=" + oldData.length + "...");
             printObjectArray(prefix, writer, oldData);
         }
-
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".dumpUpdateParams Dumping update parameters..." + buffer.toString());
-        }
     }
 
     private static void printObjectArray(String prefix, PrintWriter writer, Object[] objects)
@@ -205,13 +200,15 @@ public abstract class ViewSupport implements View
     {
         if (log.isDebugEnabled())
         {
-            for (View child : parentViewable.getViews())
-            {
-                if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+            if (parentViewable != null && parentViewable.getViews() != null) {
+                for (View child : parentViewable.getViews())
                 {
-                    log.debug(".dumpChildViews " + prefix + ' ' + child.toString());
+                    if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+                    {
+                        log.debug(".dumpChildViews " + prefix + ' ' + child.toString());
+                    }
+                    dumpChildViews(prefix + "  ", child);
                 }
-                dumpChildViews(prefix + "  ", child);
             }
         }
     }

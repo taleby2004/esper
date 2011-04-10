@@ -10,17 +10,21 @@ package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.join.HistoricalIndexLookupStrategy;
-import com.espertech.esper.epl.join.PollResultIndexingStrategy;
-import com.espertech.esper.epl.join.exec.ExecNode;
-import com.espertech.esper.epl.join.exec.HistoricalDataExecNode;
-import com.espertech.esper.epl.join.exec.HistoricalTableLookupStrategy;
+import com.espertech.esper.epl.join.base.HistoricalIndexLookupStrategy;
+import com.espertech.esper.epl.join.pollindex.PollResultIndexingStrategy;
+import com.espertech.esper.epl.join.exec.base.ExecNode;
+import com.espertech.esper.epl.join.exec.base.HistoricalDataExecNode;
+import com.espertech.esper.epl.join.exec.base.HistoricalTableLookupStrategy;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.view.HistoricalEventViewable;
 import com.espertech.esper.view.Viewable;
+
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Query plan for performing a historical data lookup.
@@ -52,11 +56,15 @@ public class HistoricalDataPlanNode extends QueryPlanNode
         this.outerJoinExprNode = exprNode;
     }
 
-    public ExecNode makeExec(EventTable[][] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists)
+    public ExecNode makeExec(Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
     {
         Pair<HistoricalIndexLookupStrategy, PollResultIndexingStrategy> pair = historicalStreamIndexLists[streamNum].getStrategy(lookupStreamNum);
         HistoricalEventViewable viewable = (HistoricalEventViewable) streamViews[streamNum];
         return new HistoricalDataExecNode(viewable, pair.getSecond(), pair.getFirst(), numStreams, streamNum);
+    }
+
+    public void addIndexes(HashSet<String> usedIndexes) {
+        // none to add
     }
 
     /**

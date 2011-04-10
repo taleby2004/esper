@@ -9,11 +9,6 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.type.MinMaxTypeEnum;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.SimpleNumberBigDecimalCoercer;
@@ -27,7 +22,7 @@ import java.util.Map;
 /**
  * Represents the MAX(a,b) and MIN(a,b) functions is an expression tree.
  */
-public class ExprMinMaxRowNode extends ExprNode implements ExprEvaluator
+public class ExprMinMaxRowNode extends ExprNodeBase implements ExprEvaluator
 {
     private MinMaxTypeEnum minMaxTypeEnum;
     private Class resultType;
@@ -62,7 +57,7 @@ public class ExprMinMaxRowNode extends ExprNode implements ExprEvaluator
         return minMaxTypeEnum;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() < 2)
         {
@@ -118,7 +113,7 @@ public class ExprMinMaxRowNode extends ExprNode implements ExprEvaluator
             else
             {
                 computer = new MinMaxTypeEnum.MinComputerDoubleCoerce(evaluators);
-            }                
+            }
         }
     }
 

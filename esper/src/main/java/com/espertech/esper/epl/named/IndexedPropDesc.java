@@ -8,6 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.epl.named;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Holds property information for joined properties in a lookup.
  */
@@ -61,6 +66,25 @@ public class IndexedPropDesc implements Comparable
         return result;
     }
 
+    public static String[] getIndexProperties(List<IndexedPropDesc> descList) {
+        String[] result = new String[descList.size()];
+        int count = 0;
+        for (IndexedPropDesc desc : descList)
+        {
+            result[count++] = desc.getIndexPropName();
+        }
+        return result;
+    }
+
+    public static int getPropertyIndex(String propertyName, IndexedPropDesc[] descList) {
+        for (int i = 0; i < descList.length; i++) {
+            if (descList[i].getIndexPropName().equals(propertyName)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     /**
      * Returns the key coercion types.
      * @param descList a list of descriptors
@@ -107,6 +131,27 @@ public class IndexedPropDesc implements Comparable
         return true;
     }
 
+    public static boolean compare(List<IndexedPropDesc> first, List<IndexedPropDesc> second) {
+        if (first.size() != second.size()) {
+            return false;
+        }
+        List<IndexedPropDesc> copyFirst = new ArrayList<IndexedPropDesc>(first);
+        List<IndexedPropDesc> copySecond = new ArrayList<IndexedPropDesc>(second);
+        Comparator<IndexedPropDesc> comparator = new Comparator<IndexedPropDesc>() {
+            public int compare(IndexedPropDesc o1, IndexedPropDesc o2) {
+                return o1.getIndexPropName().compareTo(o2.getIndexPropName());
+            }
+        };
+        Collections.sort(copyFirst, comparator);
+        Collections.sort(copySecond, comparator);
+        for (int i = 0; i < copyFirst.size(); i++) {
+            if (!copyFirst.get(i).equals(copySecond.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     public int hashCode()
     {
         int result;

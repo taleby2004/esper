@@ -8,17 +8,18 @@
  **************************************************************************************/
 package com.espertech.esper.epl.named;
 
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.*;
-import com.espertech.esper.epl.core.SelectExprEventTypeRegistry;
+import com.espertech.esper.epl.core.ResultSetProcessor;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.property.PropertyEvaluator;
 import com.espertech.esper.epl.spec.OnTriggerDesc;
-import com.espertech.esper.epl.core.ResultSetProcessor;
-import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.view.StatementStopService;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
+import com.espertech.esper.view.StatementStopService;
 
 import java.util.List;
 
@@ -48,14 +49,14 @@ public class NamedWindowProcessor
      * @param isPrioritized if the engine is running with prioritized execution
      * @param exprEvaluatorContext context for expression evalauation
      */
-    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext, StatementLock statementResourceLock, boolean isEnableSubqueryIndexShare, boolean enableQueryPlanLog)
+    public NamedWindowProcessor(NamedWindowService namedWindowService, String windowName, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext, StatementLock statementResourceLock, boolean isEnableSubqueryIndexShare, boolean enableQueryPlanLog, MetricReportingService metricReportingService)
     {
         this.eventType = eventType;
         this.eplExpression = eplExpression;
         this.statementName = statementName;
         this.isEnableSubqueryIndexShare = isEnableSubqueryIndexShare;
 
-        rootView = new NamedWindowRootView(revisionProcessor, statementResourceLock, enableQueryPlanLog);
+        rootView = new NamedWindowRootView(revisionProcessor, statementResourceLock, enableQueryPlanLog, createWindowStmtHandle, metricReportingService);
         tailView = new NamedWindowTailView(eventType, namedWindowService, rootView, createWindowStmtHandle, statementResultService, revisionProcessor, isPrioritized, exprEvaluatorContext);
         rootView.setDataWindowContents(tailView);   // for iteration used for delete without index
     }
@@ -95,10 +96,10 @@ public class NamedWindowProcessor
      * @return on trigger handling view
      * @throws com.espertech.esper.epl.expression.ExprValidationException when expression validation fails
      */
-    public NamedWindowOnExprBaseView addOnExpr(OnTriggerDesc onTriggerDesc, ExprNode joinExpr, EventType filterEventType, StatementStopService statementStopService, InternalEventRouter internalEventRouter, boolean addToFront, ResultSetProcessor resultSetProcessor, EPStatementHandle statementHandle, StatementResultService statementResultService, StatementContext statementContext, boolean isDistinct)
+    public NamedWindowOnExprBaseView addOnExpr(OnTriggerDesc onTriggerDesc, ExprNode joinExpr, EventType filterEventType, String filterStreamName, StatementStopService statementStopService, InternalEventRouter internalEventRouter, boolean addToFront, ResultSetProcessor resultSetProcessor, EPStatementHandle statementHandle, StatementResultService statementResultService, StatementContext statementContext, boolean isDistinct)
             throws ExprValidationException
     {
-        return rootView.addOnExpr(onTriggerDesc, joinExpr, filterEventType, statementStopService, internalEventRouter, addToFront, resultSetProcessor, statementHandle, statementResultService, statementContext, isDistinct);
+        return rootView.addOnExpr(onTriggerDesc, joinExpr, filterEventType, filterStreamName, statementStopService, internalEventRouter, addToFront, resultSetProcessor, statementHandle, statementResultService, statementContext, isDistinct);
     }
 
     /**
@@ -160,5 +161,9 @@ public class NamedWindowProcessor
 
     public boolean isEnableSubqueryIndexShare() {
         return isEnableSubqueryIndexShare;
+    }
+
+    public IndexMultiKey[] getIndexDescriptors() {
+        return rootView.getIndexes();
     }
 }

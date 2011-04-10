@@ -14,7 +14,7 @@ public class SupportSelectExprFactory
     public static List<SelectClauseElementCompiled> makeInvalidSelectList() throws Exception
     {
         List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
-        ExprIdentNode node = new ExprIdentNode("xxxx", "s0");
+        ExprIdentNode node = new ExprIdentNodeImpl("xxxx", "s0");
         selectionList.add(new SelectClauseExprCompiledSpec(node, null));
         return selectionList;
     }
@@ -105,7 +105,7 @@ public class SupportSelectExprFactory
         top.addChildNode(c2);
         c1.addChildNode(c1_1);
 
-        top.getValidatedSubtree(null, null, null, null, null, null);
+        ExprNodeUtil.getValidatedSubtree(top, ExprValidationContextFactory.makeEmpty());
 
         List<SelectClauseExprRawSpec> selectionList = new LinkedList<SelectClauseExprRawSpec>();
         selectionList.add(new SelectClauseExprRawSpec(top, null));

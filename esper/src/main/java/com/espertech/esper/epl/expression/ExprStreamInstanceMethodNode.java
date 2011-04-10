@@ -8,13 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,7 +20,7 @@ import java.util.Map;
 /**
  * Represents an invocation of a instance method on an event of a given stream in the expression tree.
  */
-public class ExprStreamInstanceMethodNode extends ExprNode implements ExprEvaluator, ExprNodeInnerNodeProvider
+public class ExprStreamInstanceMethodNode extends ExprNodeBase implements ExprEvaluator, ExprNodeInnerNodeProvider
 {
     private static final Log log = LogFactory.getLog(ExprNode.class);
     private static final long serialVersionUID = 3422689488586035557L;
@@ -94,7 +90,7 @@ public class ExprStreamInstanceMethodNode extends ExprNode implements ExprEvalua
 	{
         StringBuilder buffer = new StringBuilder();
 		buffer.append(streamName);
-        ExprNodeUtility.toExpressionString(chainSpec, buffer);
+        ExprNodeUtility.toExpressionString(chainSpec, buffer, true);
 		return buffer.toString();
 	}
 
@@ -120,9 +116,9 @@ public class ExprStreamInstanceMethodNode extends ExprNode implements ExprEvalua
         return true;
 	}
 
-	public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+	public void validate(ExprValidationContext validationContext) throws ExprValidationException
 	{
-        String[] streams = streamTypeService.getStreamNames();
+        String[] streams = validationContext.getStreamTypeService().getStreamNames();
         for (int i = 0; i < streams.length; i++)
         {
             if ((streams[i] != null) && (streams[i].equals(streamName)))
@@ -137,10 +133,11 @@ public class ExprStreamInstanceMethodNode extends ExprNode implements ExprEvalua
             throw new ExprValidationException("Stream by name '" + streamName + "' could not be found among all streams");
         }
 
-        EventType eventType = streamTypeService.getEventTypes()[streamNum];
+        EventType eventType = validationContext.getStreamTypeService().getEventTypes()[streamNum];
         Class type = eventType.getUnderlyingType();
 
-        evaluators = ExprDotNodeUtility.getChainEvaluators(type, chainSpec, methodResolutionService, false);
+        ExprDotEvalTypeInfo typeInfo = ExprDotEvalTypeInfo.scalarOrUnderlying(type);
+        evaluators = ExprDotNodeUtility.getChainEvaluators(typeInfo, chainSpec, validationContext, false).getSecond();
 	}
 
 	public Class getType()
@@ -149,7 +146,7 @@ public class ExprStreamInstanceMethodNode extends ExprNode implements ExprEvalua
         {
             throw new IllegalStateException("Stream underlying node has not been validated");
         }
-        return evaluators[evaluators.length - 1].getResultType();
+        return evaluators[evaluators.length - 1].getTypeInfo().getScalar();
 	}
 
 	public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
@@ -178,24 +175,24 @@ public class ExprStreamInstanceMethodNode extends ExprNode implements ExprEvalua
     @Override
     public void accept(ExprNodeVisitor visitor) {
         super.accept(visitor);
-        ExprNode.acceptChain(visitor, chainSpec);
+        ExprNodeUtil.acceptChain(visitor, chainSpec);
     }
 
     @Override
     public void accept(ExprNodeVisitorWithParent visitor) {
         super.accept(visitor);
-        ExprNode.acceptChain(visitor, chainSpec);
+        ExprNodeUtil.acceptChain(visitor, chainSpec);
     }
 
     @Override
-    protected void acceptChildnodes(ExprNodeVisitorWithParent visitor, ExprNode parent) {
+    public void acceptChildnodes(ExprNodeVisitorWithParent visitor, ExprNode parent) {
         super.acceptChildnodes(visitor, parent);
-        ExprNode.acceptChain(visitor, chainSpec, this);
+        ExprNodeUtil.acceptChain(visitor, chainSpec, this);
     }
 
     @Override
-    protected void replaceUnlistedChildNode(ExprNode nodeToReplace, ExprNode newNode) {
-        ExprNode.replaceChainChildNode(nodeToReplace, newNode, chainSpec);
+    public void replaceUnlistedChildNode(ExprNode nodeToReplace, ExprNode newNode) {
+        ExprNodeUtil.replaceChainChildNode(nodeToReplace, newNode, chainSpec);
     }
 
     @Override

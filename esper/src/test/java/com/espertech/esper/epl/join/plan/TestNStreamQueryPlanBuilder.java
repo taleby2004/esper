@@ -1,10 +1,10 @@
 package com.espertech.esper.epl.join.plan;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.util.DependencyGraph;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,11 +28,11 @@ public class TestNStreamQueryPlanBuilder extends TestCase
         };
 
         queryGraph = new QueryGraph(5);
-        queryGraph.add(0, "p00", 1, "p10");
-        queryGraph.add(0, "p01", 2, "p20");
-        queryGraph.add(4, "p40", 3, "p30");
-        queryGraph.add(4, "p41", 3, "p31");
-        queryGraph.add(4, "p42", 2, "p21");
+        queryGraph.addStrictEquals(0, "p00", null, 1, "p10", null);
+        queryGraph.addStrictEquals(0, "p01", null, 2, "p20", null);
+        queryGraph.addStrictEquals(4, "p40", null, 3, "p30", null);
+        queryGraph.addStrictEquals(4, "p41", null, 3, "p31", null);
+        queryGraph.addStrictEquals(4, "p42", null, 2, "p21", null);
 
         dependencyGraph = new DependencyGraph(5);
         isHistorical = new boolean[5];
@@ -40,14 +40,14 @@ public class TestNStreamQueryPlanBuilder extends TestCase
 
     public void testBuild()
     {
-        QueryPlan plan = NStreamQueryPlanBuilder.build(queryGraph, typesPerStream, false, isHistorical, dependencyGraph, null);
+        QueryPlan plan = NStreamQueryPlanBuilder.build(queryGraph, typesPerStream, false, isHistorical, dependencyGraph, null, false);
 
         log.debug(".testBuild plan=" + plan);
     }
 
     public void testCreateStreamPlan()
     {
-        QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph);
+        QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, typesPerStream);
         for (int i = 0; i < indexes.length; i++)
         {
             log.debug(".testCreateStreamPlan index " + i + " = " + indexes[i]);
@@ -62,17 +62,17 @@ public class TestNStreamQueryPlanBuilder extends TestCase
         TableLookupNode tableLookupSpec = (TableLookupNode) nested.getChildNodes().get(0);
 
         // Check lookup strategy for first lookup
-        IndexedTableLookupPlan lookupStrategySpec = (IndexedTableLookupPlan) tableLookupSpec.getLookupStrategySpec();
-        assertTrue(Arrays.equals(lookupStrategySpec.getKeyProperties(), new String[] {"p01"} ));
+        IndexedTableLookupPlanSingle lookupStrategySpec = (IndexedTableLookupPlanSingle) tableLookupSpec.getLookupStrategySpec();
+        assertEquals("p01", ((QueryGraphValueEntryHashKeyedProp) lookupStrategySpec.getHashKey()).getKeyProperty());
         assertEquals(0, lookupStrategySpec.getLookupStream());
         assertEquals(2, lookupStrategySpec.getIndexedStream());
-        assertEquals(0, lookupStrategySpec.getIndexNum());
+        assertNotNull(lookupStrategySpec.getIndexNum());
 
         // Check lookup strategy for last lookup
         tableLookupSpec = (TableLookupNode) nested.getChildNodes().get(3);
         FullTableScanLookupPlan unkeyedSpecScan = (FullTableScanLookupPlan) tableLookupSpec.getLookupStrategySpec();
         assertEquals(1, unkeyedSpecScan.getIndexedStream());
-        assertEquals(1, unkeyedSpecScan.getIndexNum());
+        assertNotNull(unkeyedSpecScan.getIndexNum());
     }
 
     public void testComputeBestPath()
@@ -95,8 +95,8 @@ public class TestNStreamQueryPlanBuilder extends TestCase
 
     public void testComputeNavigableDepth()
     {
-        queryGraph.add(3, "p30", 2, "p20");
-        queryGraph.add(2, "p30", 1, "p20");
+        queryGraph.addStrictEquals(3, "p30", null, 2, "p20", null);
+        queryGraph.addStrictEquals(2, "p30", null, 1, "p20", null);
 
         int depth = NStreamQueryPlanBuilder.computeNavigableDepth(0, new int[] {1, 2, 3, 4}, queryGraph);
         assertEquals(4, depth);

@@ -1,21 +1,22 @@
 package com.espertech.esper.epl.spec;
 
-import junit.framework.TestCase;
-import com.espertech.esper.epl.parse.EPLTreeWalker;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.parse.EPLTreeWalker;
 import com.espertech.esper.filter.*;
 import com.espertech.esper.pattern.EvalFilterNode;
-import com.espertech.esper.pattern.EvalNode;
 import com.espertech.esper.pattern.EvalNodeAnalysisResult;
+import com.espertech.esper.pattern.EvalNodeUtil;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.epl.parse.SupportParserHelper;
 import com.espertech.esper.support.epl.parse.SupportEPLTreeWalkerFactory;
+import com.espertech.esper.support.epl.parse.SupportParserHelper;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
-
-import java.util.List;
-import java.util.HashSet;
-
+import junit.framework.TestCase;
+import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
+
+import java.util.HashSet;
+import java.util.List;
 
 public class TestPatternStreamSpecRaw extends TestCase
 {
@@ -74,7 +75,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(1, spec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getFirst().getUnderlyingType());
 
-        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNode.recursiveAnalyzeChildNodes(spec.getEvalNode());
+        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalNode());
         List<EvalFilterNode> filters = evalNodeAnalysisResult.getFilterNodes();
         assertEquals(1, filters.size());
 
@@ -97,7 +98,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(1, spec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getFirst().getUnderlyingType());
 
-        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNode.recursiveAnalyzeChildNodes(spec.getEvalNode());
+        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalNode());
         List<EvalFilterNode> filters = evalNodeAnalysisResult.getFilterNodes();
         assertEquals(2, filters.size());
 
@@ -137,7 +138,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(1, spec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getFirst().getUnderlyingType());
 
-        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNode.recursiveAnalyzeChildNodes(spec.getEvalNode());
+        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalNode());
         List<EvalFilterNode> filters = evalNodeAnalysisResult.getFilterNodes();
         assertEquals(2, filters.size());
 
@@ -172,7 +173,7 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getFirst().getUnderlyingType());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("t").getFirst().getUnderlyingType());
 
-        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNode.recursiveAnalyzeChildNodes(spec.getEvalNode());
+        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalNode());
         List<EvalFilterNode> filters = evalNodeAnalysisResult.getFilterNodes();
         assertEquals(2, filters.size());
 
@@ -206,10 +207,10 @@ public class TestPatternStreamSpecRaw extends TestCase
 
     private static PatternStreamSpecRaw makeSpec(String expression) throws Exception
     {
-        Tree ast = SupportParserHelper.parseEPL(expression);
-        SupportParserHelper.displayAST(ast);
+        Pair<Tree, CommonTokenStream> ast = SupportParserHelper.parseEPL(expression);
+        SupportParserHelper.displayAST(ast.getFirst());
 
-        EPLTreeWalker walker = SupportEPLTreeWalkerFactory.makeWalker(ast);
+        EPLTreeWalker walker = SupportEPLTreeWalkerFactory.makeWalker(ast.getFirst(), ast.getSecond());
         walker.startEPLExpressionRule();
 
         PatternStreamSpecRaw spec = (PatternStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);

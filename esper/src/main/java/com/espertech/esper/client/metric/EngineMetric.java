@@ -15,6 +15,7 @@ public class EngineMetric extends MetricEvent
 {
     private final long timestamp;
     private final long inputCount;
+    private final long inputCountDelta;
     private final long scheduleDepth;
 
     /**
@@ -22,18 +23,20 @@ public class EngineMetric extends MetricEvent
      * @param engineURI engine URI
      * @param timestamp engine timestamp
      * @param inputCount number of input events
+     * @param inputCountDelta number of input events since last
      * @param scheduleDepth schedule depth
      */
-    public EngineMetric(String engineURI, long timestamp, long inputCount, long scheduleDepth)
+    public EngineMetric(String engineURI, long timestamp, long inputCount, long inputCountDelta, long scheduleDepth)
     {
         super(engineURI);
         this.timestamp = timestamp;
         this.inputCount = inputCount;
+        this.inputCountDelta = inputCountDelta;
         this.scheduleDepth = scheduleDepth;
     }
 
     /**
-     * Returns input count.
+     * Returns input count since engine initialization cumulative.
      * @return input count
      */
     public long getInputCount()
@@ -57,5 +60,13 @@ public class EngineMetric extends MetricEvent
     public long getTimestamp()
     {
         return timestamp;
+    }
+
+    /**
+     * Returns input count since last reporting period.
+     * @return input count
+     */
+    public long getInputCountDelta() {
+        return inputCountDelta;
     }
 }

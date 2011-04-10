@@ -8,17 +8,17 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.util.ExecutionPathDebugLog;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-
-import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Index for filter parameter constants for the not range operators (range open/closed/half).
@@ -28,10 +28,7 @@ import org.apache.commons.logging.LogFactory;
 public final class FilterParamIndexNotRange extends FilterParamIndexPropBase
 {
     private final TreeMap<DoubleRange, EventEvaluator> ranges;
-    private final Set<EventEvaluator> evaluators;
     private final ReadWriteLock rangesRWLock;
-
-    private double largestRangeValueDouble = Double.MIN_VALUE;
 
    /**
      * Constructs the index for matching ranges.
@@ -44,7 +41,6 @@ public final class FilterParamIndexNotRange extends FilterParamIndexPropBase
         super(attributeName, filterOperator, eventType);
 
         ranges = new TreeMap<DoubleRange, EventEvaluator>(new DoubleRangeComparator());
-        evaluators = new HashSet<EventEvaluator>();
         rangesRWLock = new ReentrantReadWriteLock();
 
         if (!(filterOperator.isInvertedRangeOperator()))
@@ -77,13 +73,7 @@ public final class FilterParamIndexNotRange extends FilterParamIndexPropBase
             return; // null endpoints are ignored
         }
 
-        if ( Math.abs(range.getMax() - range.getMin()) > largestRangeValueDouble)
-        {
-            largestRangeValueDouble = Math.abs(range.getMax() - range.getMin());
-        }
-
         ranges.put(range, matcher);
-        evaluators.add(matcher);
     }
 
     public final boolean remove(Object filterConstant)
@@ -93,7 +83,6 @@ public final class FilterParamIndexNotRange extends FilterParamIndexPropBase
         {
             return false;
         }
-        evaluators.remove(eval);
         return true;
     }
 
@@ -111,12 +100,6 @@ public final class FilterParamIndexNotRange extends FilterParamIndexPropBase
     {
         Object objAttributeValue = this.getGetter().get(eventBean);
 
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".match Finding range matches, attribute=" + this.getPropertyName() +
-                      "  attrValue=" + objAttributeValue);
-        }
-
         if (objAttributeValue == null)
         {
             return;
@@ -124,71 +107,45 @@ public final class FilterParamIndexNotRange extends FilterParamIndexPropBase
 
         double attributeValue = ((Number) objAttributeValue).doubleValue();
 
-        DoubleRange rangeStart = new DoubleRange(attributeValue - largestRangeValueDouble, attributeValue);
-        DoubleRange rangeEnd = new DoubleRange(attributeValue, Double.MAX_VALUE);
-
-        SortedMap<DoubleRange, EventEvaluator> subMap = ranges.subMap(rangeStart, rangeEnd);
-
-        // For not including either endpoint
-        // A bit awkward to duplicate the loop code, however better than checking the boolean many times over
-        // This may be a bit of an early performance optimization - the optimizer after all may do this better
-        Set<EventEvaluator> matchingEvals = new HashSet<EventEvaluator>();
-        if (this.getFilterOperator() == FilterOperator.NOT_RANGE_OPEN)  // include neither endpoint
-        {
-            for (Map.Entry<DoubleRange, EventEvaluator> entry : subMap.entrySet())
-            {
-                if ((attributeValue > entry.getKey().getMin()) &&
-                    (attributeValue < entry.getKey().getMax()))
+        if (this.getFilterOperator() == FilterOperator.NOT_RANGE_CLOSED) {   // include all endpoints
+            for (Map.Entry<DoubleRange, EventEvaluator> entry : ranges.entrySet()) {
+                if ((attributeValue < entry.getKey().getMin()) ||
+                    (attributeValue > entry.getKey().getMax()))
                 {
-                    matchingEvals.add(entry.getValue());
+                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
                 }
             }
         }
-        else if (this.getFilterOperator() == FilterOperator.NOT_RANGE_CLOSED)   // include all endpoints
-        {
-            for (Map.Entry<DoubleRange, EventEvaluator> entry : subMap.entrySet())
-            {
-                if ((attributeValue >= entry.getKey().getMin()) &&
-                    (attributeValue <= entry.getKey().getMax()))
+        else if (this.getFilterOperator() == FilterOperator.NOT_RANGE_OPEN) { // include neither endpoint
+            for (Map.Entry<DoubleRange, EventEvaluator> entry : ranges.entrySet()) {
+                if ((attributeValue <= entry.getKey().getMin()) ||
+                    (attributeValue >= entry.getKey().getMax()))
                 {
-                    matchingEvals.add(entry.getValue());
+                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
                 }
             }
         }
-        else if (this.getFilterOperator() == FilterOperator.NOT_RANGE_HALF_CLOSED) // include high endpoint not low endpoint
-        {
-            for (Map.Entry<DoubleRange, EventEvaluator> entry : subMap.entrySet())
-            {
-                if ((attributeValue > entry.getKey().getMin()) &&
-                    (attributeValue <= entry.getKey().getMax()))
+        else if (this.getFilterOperator() == FilterOperator.NOT_RANGE_HALF_CLOSED) { // include high endpoint not low endpoint
+            for (Map.Entry<DoubleRange, EventEvaluator> entry : ranges.entrySet()) {
+                if ((attributeValue <= entry.getKey().getMin()) ||
+                    (attributeValue > entry.getKey().getMax()))
                 {
-                    matchingEvals.add(entry.getValue());
+                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
                 }
             }
         }
-        else if (this.getFilterOperator() == FilterOperator.NOT_RANGE_HALF_OPEN) // include low endpoint not high endpoint
-        {
-            for (Map.Entry<DoubleRange, EventEvaluator> entry : subMap.entrySet())
-            {
-                if ((attributeValue >= entry.getKey().getMin()) &&
-                    (attributeValue < entry.getKey().getMax()))
+        else if (this.getFilterOperator() == FilterOperator.NOT_RANGE_HALF_OPEN) { // include low endpoint not high endpoint
+            for (Map.Entry<DoubleRange, EventEvaluator> entry : ranges.entrySet()) {
+                if ((attributeValue < entry.getKey().getMin()) ||
+                    (attributeValue >= entry.getKey().getMax()))
                 {
-                    matchingEvals.add(entry.getValue());
+                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
                 }
             }
         }
         else
         {
             throw new IllegalStateException("Invalid filter operator " + this.getFilterOperator());
-        }
-
-        // Now we have all the matching evaluators, invoke all that don't match
-        for (EventEvaluator eval : evaluators)
-        {
-            if (!matchingEvals.contains(eval))
-            {
-                eval.matchEvent(eventBean, matches, exprEvaluatorContext);
-            }
         }
     }
 

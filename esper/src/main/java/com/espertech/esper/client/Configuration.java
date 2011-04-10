@@ -105,6 +105,11 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     protected List<ConfigurationPlugInView> plugInViews;
 
     /**
+     * List of configured plug-in views.
+     */
+    protected List<ConfigurationPlugInVirtualDataWindow> plugInVirtualDataWindows;
+
+    /**
      * List of configured plug-in pattern objects.
      */
     protected List<ConfigurationPlugInPatternObject> plugInPatternObjects;
@@ -417,6 +422,10 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         return plugInViews;
     }
 
+    public List<ConfigurationPlugInVirtualDataWindow> getPlugInVirtualDataWindows() {
+        return plugInVirtualDataWindows;
+    }
+
     public List<ConfigurationPluginLoader> getPluginLoaders()
     {
         return pluginLoaders;
@@ -498,6 +507,21 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         configurationPlugInView.setName(name);
         configurationPlugInView.setFactoryClassName(viewFactoryClass);
         plugInViews.add(configurationPlugInView);
+    }
+
+    /**
+     * Add a virtual data window for plug-in.
+     * @param namespace is the namespace the virtual data window should be available under
+     * @param name is the name of the data window
+     * @param factoryClass is the view factory class to use
+     */
+    public void addPlugInVirtualDataWindow(String namespace, String name, String factoryClass)
+    {
+        ConfigurationPlugInVirtualDataWindow configurationPlugInVirtualDataWindow = new ConfigurationPlugInVirtualDataWindow();
+        configurationPlugInVirtualDataWindow.setNamespace(namespace);
+        configurationPlugInVirtualDataWindow.setName(name);
+        configurationPlugInVirtualDataWindow.setFactoryClassName(factoryClass);
+        plugInVirtualDataWindows.add(configurationPlugInVirtualDataWindow);
     }
 
     /**
@@ -662,6 +686,14 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public void setMetricsReportingStmtDisabled(String statementName)
     {
         throw new UnsupportedOperationException("Statement metric reporting can only be enabled or disabled at runtime");
+    }
+
+    public EventType getEventType(String eventTypeName) {
+        throw new UnsupportedOperationException("Obtaining an event type by name is only available at runtime");
+    }
+
+    public EventType[] getEventTypes() {
+        throw new UnsupportedOperationException("Obtaining event types is only available at runtime");
     }
 
     public void setMetricsReportingEnabled()
@@ -886,6 +918,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         addDefaultImports();
         isUsingDefaultImports = true;
         plugInViews = new ArrayList<ConfigurationPlugInView>();
+        plugInVirtualDataWindows = new ArrayList<ConfigurationPlugInVirtualDataWindow>();
         pluginLoaders = new ArrayList<ConfigurationPluginLoader>();
         plugInAggregationFunctions = new ArrayList<ConfigurationPlugInAggregationFunction>();
         plugInSingleRowFunctions = new ArrayList<ConfigurationPlugInSingleRowFunction>();

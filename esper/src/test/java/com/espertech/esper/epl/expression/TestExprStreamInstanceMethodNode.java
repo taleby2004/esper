@@ -72,11 +72,11 @@ public class TestExprStreamInstanceMethodNode extends TestCase
         SupportExprNodeFactory.validate3Stream(node);
         ExprNode other = new ExprStreamInstanceMethodNode("s0", makeSpec("getIntPrimitive"));
         SupportExprNodeFactory.validate3Stream(other);
-        
+
         assertTrue(node.equalsNode(other));
         assertFalse(node.equalsNode(new ExprStreamInstanceMethodNode("s1", makeSpec("getIntPrimitive"))));
         assertFalse(node.equalsNode(new ExprStreamInstanceMethodNode("s0", makeSpec("xxx"))));
-        assertFalse(node.equalsNode(new ExprStreamUnderlyingNode("xxx", false)));
+        assertFalse(node.equalsNode(new ExprStreamUnderlyingNodeImpl("xxx", false)));
     }
 
     protected static EventBean makeEvent(int intPrimitive)
@@ -90,7 +90,7 @@ public class TestExprStreamInstanceMethodNode extends TestCase
     {
         try
         {
-            node.validate(streamTypeService, null, null, null, null, null);
+            node.validate(ExprValidationContextFactory.make(streamTypeService));
             fail();
         }
         catch(ExprValidationException ex)
@@ -102,7 +102,7 @@ public class TestExprStreamInstanceMethodNode extends TestCase
     private List<ExprChainedSpec> makeSpec(String method, ExprNode...expr)
     {
         List<ExprChainedSpec> chained = new ArrayList<ExprChainedSpec>();
-        chained.add(new ExprChainedSpec(method, Arrays.asList(expr)));
+        chained.add(new ExprChainedSpec(method, Arrays.asList(expr), false));
         return chained;
     }
 

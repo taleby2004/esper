@@ -8,15 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.epl.metric;
 
+import com.espertech.esper.client.ConfigurationException;
 import com.espertech.esper.client.ConfigurationMetricsReporting;
 import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.client.ConfigurationException;
 import com.espertech.esper.client.metric.MetricEvent;
 import com.espertech.esper.core.EPServicesContext;
-import com.espertech.esper.core.StatementLifecycleObserver;
 import com.espertech.esper.core.StatementLifecycleEvent;
+import com.espertech.esper.core.StatementLifecycleObserver;
 import com.espertech.esper.core.StatementResultListener;
-import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.MetricUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -120,11 +119,6 @@ public class MetricReportingServiceImpl implements MetricReportingServiceSPI, Me
         {
             return;
         }
-        
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".processTimeEvent Setting time and evaluating schedules");
-        }
 
         schedule.setTime(timeEventTime);
         if (!isScheduled)
@@ -179,9 +173,9 @@ public class MetricReportingServiceImpl implements MetricReportingServiceSPI, Me
         executionContext.getRuntime().sendEvent(metricEvent);
     }
 
-    public void accountTime(StatementMetricHandle metricsHandle, long deltaCPU, long deltaWall)
+    public void accountTime(StatementMetricHandle metricsHandle, long deltaCPU, long deltaWall, int numInputEvents)
     {
-        stmtMetricRepository.accountTimes(metricsHandle, deltaCPU, deltaWall);
+        stmtMetricRepository.accountTimes(metricsHandle, deltaCPU, deltaWall, numInputEvents);
     }
 
     public void accountOutput(StatementMetricHandle handle, int numIStream, int numRStream)

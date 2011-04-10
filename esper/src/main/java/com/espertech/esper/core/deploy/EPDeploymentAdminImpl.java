@@ -9,8 +9,8 @@
 package com.espertech.esper.core.deploy;
 
 import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderIsolated;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.deploy.*;
 import com.espertech.esper.core.EPAdministratorSPI;
@@ -145,7 +145,7 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
                 try {
                     epService.compileEPL(item.getExpression());
                 }
-                catch (EPException ex) {
+                catch (RuntimeException ex) {
                     exceptions.add(new DeploymentItemException(ex.getMessage(), item.getExpression(), ex, item.getLineNumber()));
                 }
             }
@@ -245,9 +245,24 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
             message += " in module url '" + module.getUri() + "'";
         }
         if (exceptions.size() > 0) {
-            message += " : " + exceptions.get(0).getMessage();
+            message += " in expression '" + getAbbreviated(exceptions.get(0).getExpression()) + "' : " + exceptions.get(0).getMessage();
         }
         return new DeploymentActionException(message, exceptions);
+    }
+
+    private String getAbbreviated(String expression) {
+        if (expression.length() < 60) {
+            return replaceNewline(expression);
+        }
+        String subtext = expression.substring(0, 50) + "...(" + expression.length() + " chars)";
+        return replaceNewline(subtext);
+    }
+
+    private String replaceNewline(String text) {
+        text = text.replaceAll("\\n","");
+        text = text.replaceAll("\\t","");
+        text = text.replaceAll("\\r","");
+        return text;
     }
 
     public Module parse(String eplModuleText) throws IOException, ParseException

@@ -25,9 +25,21 @@ public class TestDotExpression extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportChainTop", SupportChainTop.class);
 
         tryInvalid("select (abc).noSuchMethod() from SupportBean abc",
-                "Error starting statement: Could not find instance method named 'noSuchMethod' in class 'com.espertech.esper.support.bean.SupportBean' taking no parameters [select (abc).noSuchMethod() from SupportBean abc]");
+                "Error starting statement: Could not find enumeration method, date-time method or instance method named 'noSuchMethod' in class 'com.espertech.esper.support.bean.SupportBean' taking no parameters [select (abc).noSuchMethod() from SupportBean abc]");
         tryInvalid("select (abc).getChildOne(\"abc\", 10).noSuchMethod() from SupportChainTop abc",
-                "Error starting statement: Could not find instance method named 'noSuchMethod' in class 'com.espertech.esper.support.bean.SupportChainChildOne' taking no parameters [select (abc).getChildOne(\"abc\", 10).noSuchMethod() from SupportChainTop abc]");
+                "Error starting statement: Could not find enumeration method, date-time method or instance method named 'noSuchMethod' in class 'com.espertech.esper.support.bean.SupportChainChildOne' taking no parameters [select (abc).getChildOne(\"abc\", 10).noSuchMethod() from SupportChainTop abc]");
+    }
+
+    public void testNestedPropertyInstanceExpr() {
+        epService.getEPAdministrator().getConfiguration().addEventType("LevelZero", LevelZero.class);
+        epService.getEPAdministrator().createEPL("select " +
+                "levelOne.getCustomLevelOne(10) as val0, " +
+                "levelOne.levelTwo.getCustomLevelTwo(20) as val1, " +
+                "levelOne.levelTwo.levelThree.getCustomLevelThree(30) as val2 " +
+                "from LevelZero").addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new LevelZero(new LevelOne(new LevelTwo(new LevelThree()))));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1,val2".split(","), new Object[] {"level1:10", "level2:20", "level3:30"});
     }
 
     public void testChainedUnparameterized() {
@@ -99,8 +111,8 @@ public class TestDotExpression extends TestCase
                 };
         for (int i = 0; i < rows.length; i++) {
             EventPropertyDescriptor prop = stmt.getEventType().getPropertyDescriptors()[i];
-            assertEquals(rows[i][0], prop.getPropertyName());
-            assertEquals(rows[i][1], prop.getPropertyType());
+            assertEquals("failed for " + rows[i][0], rows[i][0], prop.getPropertyName());
+            assertEquals("failed for " + rows[i][0], rows[i][1], prop.getPropertyType());
         }
 
         epService.getEPRuntime().sendEvent(bean);
@@ -159,5 +171,55 @@ public class TestDotExpression extends TestCase
         catch (EPStatementException ex) {
             assertEquals(message, ex.getMessage());
         }
-    }    
+    }
+
+    public static class LevelZero {
+        private LevelOne levelOne;
+
+        private LevelZero(LevelOne levelOne) {
+            this.levelOne = levelOne;
+        }
+
+        public LevelOne getLevelOne() {
+            return levelOne;
+        }
+    }
+
+    public static class LevelOne {
+        private LevelTwo levelTwo;
+
+        public LevelOne(LevelTwo levelTwo) {
+            this.levelTwo = levelTwo;
+        }
+
+        public LevelTwo getLevelTwo() {
+            return levelTwo;
+        }
+
+        public String getCustomLevelOne(int val) {
+            return "level1:" + val;
+        }
+    }
+
+    public static class LevelTwo {
+        private LevelThree levelThree;
+
+        public LevelTwo(LevelThree levelThree) {
+            this.levelThree = levelThree;
+        }
+
+        public LevelThree getLevelThree() {
+            return levelThree;
+        }
+
+        public String getCustomLevelTwo(int val) {
+            return "level2:" + val;
+        }
+    }
+
+    public static class LevelThree {
+        public String getCustomLevelThree(int val) {
+            return "level3:" + val;
+        }
+    }
 }

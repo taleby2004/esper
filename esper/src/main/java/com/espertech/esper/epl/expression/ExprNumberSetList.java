@@ -1,10 +1,5 @@
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.type.*;
@@ -20,7 +15,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Expression for use within crontab to specify a list of values.
  */
-public class ExprNumberSetList extends ExprNode implements ExprEvaluator
+public class ExprNumberSetList extends ExprNodeBase implements ExprEvaluator
 {
     private static final Log log = LogFactory.getLog(ExprNumberSetList.class);
     private transient ExprEvaluator[] evaluators;
@@ -72,7 +67,7 @@ public class ExprNumberSetList extends ExprNode implements ExprEvaluator
         return null;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         // all nodes must either be int, frequency or range
         evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
@@ -88,7 +83,7 @@ public class ExprNumberSetList extends ExprNode implements ExprEvaluator
                 throw new ExprValidationException("Frequency operator requires an integer-type parameter");
             }
         }
-        
+
     }
 
     public Class getType()
@@ -112,7 +107,7 @@ public class ExprNumberSetList extends ExprNode implements ExprEvaluator
                 parameters.add((NumberSetParameter) value);
                 continue;
             }
-            
+
             int intValue = ((Number) value).intValue();
             parameters.add(new IntParameter(intValue));
         }

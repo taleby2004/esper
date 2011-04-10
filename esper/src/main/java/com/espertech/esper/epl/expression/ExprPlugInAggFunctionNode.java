@@ -17,7 +17,7 @@ import com.espertech.esper.epl.core.StreamTypeService;
 /**
  * Represents a custom aggregation function in an expresson tree.
  */
-public class ExprPlugInAggFunctionNode extends ExprAggregateNode
+public class ExprPlugInAggFunctionNode extends ExprAggregateNodeBase
 {
     private transient AggregationSupport aggregationSupport;
     private static final long serialVersionUID = 4512085880102791194L;
@@ -53,7 +53,7 @@ public class ExprPlugInAggFunctionNode extends ExprAggregateNode
             }
             parameterTypes[count] = child.getExprEvaluator().getType();
             expressions[count] = child;
-            
+
             count++;
 
             if (!ExprNodeUtility.hasRemoveStream(child, streamTypeService)) {

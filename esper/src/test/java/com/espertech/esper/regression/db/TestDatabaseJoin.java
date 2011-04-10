@@ -5,10 +5,7 @@ import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBeanComplexProps;
-import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.bean.SupportBean_S0;
+import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -45,6 +42,31 @@ public class TestDatabaseJoin extends TestCase
         epService.initialize();
     }
 
+    public void test3Stream()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanTwo", SupportBeanTwo.class);
+
+        String stmtText = "select * from SupportBean.std:lastevent() sb, SupportBeanTwo.std:lastevent() sbt, " +
+                "sql:MyDB ['select myint from mytesttable'] as s1 " +
+                "  where sb.string = sbt.stringTwo and s1.myint = sbt.intPrimitiveTwo";
+
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
+        listener = new SupportUpdateListener();
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBeanTwo("T1", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("T1", -1));
+
+        epService.getEPRuntime().sendEvent(new SupportBeanTwo("T2", 30));
+        epService.getEPRuntime().sendEvent(new SupportBean("T2", -1));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T2", "T2", 30});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("T3", -1));
+        epService.getEPRuntime().sendEvent(new SupportBeanTwo("T3", 40));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T3", "T3", 40});
+    }
+
     public void testTimeBatchEPL()
     {
         String stmtText = "select " + ALL_FIELDS + " from " +
@@ -77,6 +99,36 @@ public class TestDatabaseJoin extends TestCase
         sendSupportBeanEvent(20);
         assertFalse(listener.isInvoked());
         ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{6, 60, "F"}, {9, 90, "I"}});
+
+        stmt.destroy();
+    }
+
+    public void test2HistoricalStarInner()
+    {
+        String[] fields = "a,b,c,d".split(",");
+        String stmtText = "select string as a, intPrimitive as b, s1.myvarchar as c, s2.myvarchar as d from " +
+                SupportBean.class.getName() + ".win:keepall() as s0 " +
+                " inner join " +
+                " sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} <> mytesttable.mybigint'] as s1 " +
+                " on s1.myvarchar=s0.string " +
+                " inner join " +
+                " sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} <> mytesttable.myint'] as s2 " +
+                " on s2.myvarchar=s0.string ";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 10));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("B", 3));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"B", 3, "B", "B"});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("D", 4));
+        assertFalse(listener.isInvoked());
 
         stmt.destroy();
     }

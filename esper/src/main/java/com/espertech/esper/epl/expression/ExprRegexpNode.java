@@ -10,11 +10,6 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.util.Map;
@@ -24,7 +19,7 @@ import java.util.regex.PatternSyntaxException;
 /**
  * Represents the regexp-clause in an expression tree.
  */
-public class ExprRegexpNode extends ExprNode implements ExprEvaluator
+public class ExprRegexpNode extends ExprNodeBase implements ExprEvaluator
 {
     private final boolean isNot;
 
@@ -52,7 +47,7 @@ public class ExprRegexpNode extends ExprNode implements ExprEvaluator
         return null;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 2)
         {

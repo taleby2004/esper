@@ -140,7 +140,15 @@ public class MapEventType implements EventTypeSPI
             }
 
             // parse, can be an indexed property
-            Property property = PropertyParser.parse(propertyName, false);
+            Property property = null;
+            try {
+                property = PropertyParser.parse(propertyName, false);
+            }
+            catch (Exception ex) {
+                // cannot parse property, return type
+                return simplePropertyTypes.get(propertyName);
+            }
+
             if (property instanceof IndexedProperty)
             {
                 IndexedProperty indexedProp = (IndexedProperty) property;
@@ -288,6 +296,9 @@ public class MapEventType implements EventTypeSPI
         else if (nestedType instanceof Class)
         {
             Class simpleClass = (Class) nestedType;
+            if (JavaClassHelper.isJavaBuiltinDataType(simpleClass)) {
+                return null;
+            }
             EventType nestedEventType = eventAdapterService.addBeanType(simpleClass.getName(), simpleClass, false, false, false);
             return nestedEventType.getPropertyType(propertyNested);
         }
@@ -845,14 +856,14 @@ public class MapEventType implements EventTypeSPI
             if (!setTwoTypeFound) {
                 return "The property '" + propName + "' is not provided but required";
             }
+            if (setTwoType == null)
+            {
+                continue;
+            }
             if (((setTwoType == null) && (setOneType != null)) ||
                  (setTwoType != null) && (setOneType == null))
             {
                 return "Type by name '" + otherName + "' in property '" + propName + "' incompatible with null-type or property name not found in target";
-            }
-            if (setTwoType == null)
-            {
-                continue;
             }
 
             if ((setTwoType instanceof Class) && (setOneType instanceof Class))
@@ -926,6 +937,9 @@ public class MapEventType implements EventTypeSPI
             {
                 String typeOne = getTypeName(setOneType);
                 String typeTwo = getTypeName(setTwoType);
+                if (typeOne.equals(typeTwo)) {
+                    continue;
+                }
                 return "Type by name '" + otherName + "' in property '" + propName + "' expected " + typeOne + " but receives " + typeTwo;
             }
         }
@@ -933,21 +947,27 @@ public class MapEventType implements EventTypeSPI
         return null;
     }
 
-    private static String getTypeName(Object setOneType)
+    private static String getTypeName(Object type)
     {
-        if (setOneType == null)
+        if (type == null)
         {
             return "null";
         }
-        if (setOneType instanceof Class)
+        if (type instanceof Class)
         {
-            return ((Class) setOneType).getName();
+            return ((Class) type).getName();
         }
-        if (setOneType instanceof EventType)
+        if (type instanceof EventType)
         {
-            return "event type '" + ((EventType)setOneType).getName() + "'";
+            return "event type '" + ((EventType)type).getName() + "'";
         }
-        return setOneType.getClass().getName();
+        if (type instanceof String) {
+            Class boxedType = JavaClassHelper.getBoxedType(JavaClassHelper.getPrimitiveClassForName((String)type));
+            if (boxedType != null) {
+                return boxedType.getName();
+            }
+        }
+        return type.getClass().getName();
     }
 
     private static void generateExceptionNestedProp(String name, Object value) throws EPException

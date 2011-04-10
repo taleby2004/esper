@@ -8,11 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
+import com.espertech.esper.epl.enummethod.dot.ExprDotStaticMethodWrap;
+import com.espertech.esper.epl.enummethod.dot.ExprDotStaticMethodWrapFactory;
+import com.espertech.esper.epl.enummethod.dot.ExprLambdaGoesNode;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
@@ -25,7 +24,7 @@ import java.util.List;
 /**
  * Represents an invocation of a plug-in single-row function  in the expression tree.
  */
-public class ExprPlugInSingleRowNode extends ExprNode implements ExprNodeInnerNodeProvider
+public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInnerNodeProvider
 {
     private static final long serialVersionUID = 2485214890449563098L;
     private static final Log log = LogFactory.getLog(ExprPlugInSingleRowNode.class);
@@ -80,7 +79,7 @@ public class ExprPlugInSingleRowNode extends ExprNode implements ExprNodeInnerNo
 	{
         StringBuilder buffer = new StringBuilder();
 		buffer.append(functionName);
-        ExprNodeUtility.toExpressionString(chainSpec, buffer);
+        ExprNodeUtility.toExpressionString(chainSpec, buffer, true);
 		return buffer.toString();
 	}
 
@@ -103,9 +102,9 @@ public class ExprPlugInSingleRowNode extends ExprNode implements ExprNodeInnerNo
         return other.clazz == this.clazz && other.functionName.endsWith(this.functionName);
 	}
 
-	public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+	public void validate(ExprValidationContext validationContext) throws ExprValidationException
 	{
-        ExprNodeUtility.validate(chainSpec, streamTypeService, methodResolutionService, viewResourceDelegate, timeProvider, variableService, exprEvaluatorContext);
+        ExprNodeUtility.validate(chainSpec, validationContext);
 
         // get first chain item
         List<ExprChainedSpec> chainList = new ArrayList<ExprChainedSpec>(chainSpec);
@@ -119,6 +118,9 @@ public class ExprPlugInSingleRowNode extends ExprNode implements ExprNodeInnerNo
         boolean allConstants = true;
         for(ExprNode childNode : firstItem.getParameters())
 		{
+            if (childNode instanceof ExprLambdaGoesNode) {
+                throw new ExprValidationException("Unexpected lambda-expression encountered as parameter to UDF or static method");
+            }
             ExprEvaluator eval = childNode.getExprEvaluator();
             childEvals[count] = eval;
 			paramTypes[count] = eval.getType();
@@ -133,9 +135,10 @@ public class ExprPlugInSingleRowNode extends ExprNode implements ExprNodeInnerNo
 
         // Try to resolve the method
         FastMethod staticMethod;
+        Method method;
 		try
 		{
-			Method method = methodResolutionService.resolveMethod(clazz.getName(), firstItem.getName(), paramTypes);
+			method = validationContext.getMethodResolutionService().resolveMethod(clazz.getName(), firstItem.getName(), paramTypes);
 			FastClass declaringClass = FastClass.create(Thread.currentThread().getContextClassLoader(), method.getDeclaringClass());
 			staticMethod = declaringClass.getMethod(method);
 		}
@@ -144,31 +147,35 @@ public class ExprPlugInSingleRowNode extends ExprNode implements ExprNodeInnerNo
 			throw new ExprValidationException(e.getMessage());
 		}
 
-        ExprDotEval[] eval = ExprDotNodeUtility.getChainEvaluators(staticMethod.getReturnType(), chainList, methodResolutionService, false);
-        evaluator = new ExprStaticMethodEvalInvoke(clazz.getName(), staticMethod, childEvals, isConstantParameters, eval);
+        // this may return a pair of null if there is no lambda or the result cannot be wrapped for lambda-function use
+        ExprDotStaticMethodWrap optionalLambdaWrap = ExprDotStaticMethodWrapFactory.make(method, validationContext.getEventAdapterService(), chainList);
+        ExprDotEvalTypeInfo typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExprDotEvalTypeInfo.scalarOrUnderlying(method.getReturnType());
+
+        ExprDotEval[] eval = ExprDotNodeUtility.getChainEvaluators(typeInfo, chainList, validationContext, false).getSecond();
+        evaluator = new ExprDotEvalStaticMethod(clazz.getName(), staticMethod, childEvals, isConstantParameters, optionalLambdaWrap, eval);
 	}
 
     @Override
     public void accept(ExprNodeVisitor visitor) {
         super.accept(visitor);
-        ExprNode.acceptChain(visitor, chainSpec);
+        ExprNodeUtil.acceptChain(visitor, chainSpec);
     }
 
     @Override
     public void accept(ExprNodeVisitorWithParent visitor) {
         super.accept(visitor);
-        ExprNode.acceptChain(visitor, chainSpec);
+        ExprNodeUtil.acceptChain(visitor, chainSpec);
     }
 
     @Override
-    protected void acceptChildnodes(ExprNodeVisitorWithParent visitor, ExprNode parent) {
+    public void acceptChildnodes(ExprNodeVisitorWithParent visitor, ExprNode parent) {
         super.acceptChildnodes(visitor, parent);
-        ExprNode.acceptChain(visitor, chainSpec, this);
+        ExprNodeUtil.acceptChain(visitor, chainSpec, this);
     }
 
     @Override
-    protected void replaceUnlistedChildNode(ExprNode nodeToReplace, ExprNode newNode) {
-        ExprNode.replaceChainChildNode(nodeToReplace, newNode, chainSpec);
+    public void replaceUnlistedChildNode(ExprNode nodeToReplace, ExprNode newNode) {
+        ExprNodeUtil.replaceChainChildNode(nodeToReplace, newNode, chainSpec);
     }
 
     public List<ExprNode> getAdditionalNodes() {

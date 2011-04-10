@@ -84,7 +84,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         DatabaseConfigService databaseConfigService = makeDatabaseRefService(configSnapshot, schedulingService, schedulingMgmtService);
 
         PluggableObjectCollection plugInViews = new PluggableObjectCollection();
-        plugInViews.addViews(configSnapshot.getPlugInViews());
+        plugInViews.addViews(configSnapshot.getPlugInViews(), configSnapshot.getPlugInVirtualDataWindows());
         PluggableObjectCollection plugInPatternObj = new PluggableObjectCollection();
         plugInPatternObj.addPatternObjects(configSnapshot.getPlugInPatternObjects());
 
@@ -112,12 +112,12 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         StatementLockFactory statementLockFactory = new StatementLockFactoryImpl(configSnapshot.getEngineDefaults().getExecution().isFairlock());
         StreamFactoryService streamFactoryService = StreamFactoryServiceProvider.newService(configSnapshot.getEngineDefaults().getViewResources().isShareViews());
         FilterServiceSPI filterService = FilterServiceProvider.newService();
-        NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory, variableService, engineSettingsService.getEngineSettings().getExecution().isPrioritized(), eventProcessingRWLock, exceptionHandlingService, configSnapshot.getEngineDefaults().getLogging().isEnableQueryPlan());
+        MetricReportingServiceImpl metricsReporting = new MetricReportingServiceImpl(configSnapshot.getEngineDefaults().getMetricsReporting(), epServiceProvider.getURI());
+        NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory, variableService, engineSettingsService.getEngineSettings().getExecution().isPrioritized(), eventProcessingRWLock, exceptionHandlingService, configSnapshot.getEngineDefaults().getLogging().isEnableQueryPlan(), metricsReporting);
 
         ValueAddEventService valueAddEventService = new ValueAddEventServiceImpl();
         valueAddEventService.init(configSnapshot.getRevisionEventTypes(), configSnapshot.getVariantStreams(), eventAdapterService);
 
-        MetricReportingServiceImpl metricsReporting = new MetricReportingServiceImpl(configSnapshot.getEngineDefaults().getMetricsReporting(), epServiceProvider.getURI());
         StatementEventTypeRef statementEventTypeRef = new StatementEventTypeRefImpl();
         StatementVariableRef statementVariableRef = new StatementVariableRefImpl(variableService);
 
@@ -426,7 +426,9 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
      */
     protected static EngineImportService makeEngineImportService(ConfigurationInformation configSnapshot)
     {
-        EngineImportServiceImpl engineImportService = new EngineImportServiceImpl(configSnapshot.getEngineDefaults().getExpression().isExtendedAggregation());
+        ConfigurationEngineDefaults.Expression expression = configSnapshot.getEngineDefaults().getExpression();
+        EngineImportServiceImpl engineImportService = new EngineImportServiceImpl(expression.isExtendedAggregation(),
+                expression.isUdfCache(), expression.isDuckTyping());
         engineImportService.addMethodRefs(configSnapshot.getMethodInvocationReferences());
 
         // Add auto-imports

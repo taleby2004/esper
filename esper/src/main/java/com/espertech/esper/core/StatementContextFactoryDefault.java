@@ -9,11 +9,13 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.annotation.Audit;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.annotation.Drop;
 import com.espertech.esper.client.annotation.Priority;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
-import com.espertech.esper.epl.join.JoinSetComposerFactoryImpl;
+import com.espertech.esper.epl.join.base.JoinSetComposerFactoryImpl;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
 import com.espertech.esper.epl.spec.CreateWindowDesc;
 import com.espertech.esper.epl.spec.OnTriggerDesc;
@@ -65,7 +67,8 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                                     CreateWindowDesc optCreateWindowDesc,
                                     boolean isFireAndForget,
                                     Annotation[] annotations,
-                                    EPIsolationUnitServices isolationUnitServices)
+                                    EPIsolationUnitServices isolationUnitServices,
+                                    String optionalCreateNamedWindowName)
     {
         // Allocate the statement's schedule bucket which stays constant over it's lifetime.
         // The bucket allows callbacks for the same time to be ordered (within and across statements) and thus deterministic.
@@ -110,11 +113,11 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         AnnotationAnalysisResult annotationData = AnnotationAnalysisResult.analyzeAnnotations(annotations);
         EPStatementHandle epStatementHandle = new EPStatementHandle(statementId, statementName, expression, statementResourceLock, expression, hasVariables, stmtMetric, annotationData.getPriority(), annotationData.isPremptive(), statementFilterVersion);
 
-        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService(), engineServices.getSchedulingService(), engineServices.getConfigSnapshot().getEngineDefaults().getExpression().isUdfCache());
+        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService(), engineServices.getSchedulingService());
 
         PatternContextFactory patternContextFactory = new PatternContextFactoryDefault();
 
-        ViewResolutionService viewResolutionService = new ViewResolutionServiceImpl(viewClasses);
+        ViewResolutionService viewResolutionService = new ViewResolutionServiceImpl(viewClasses, optionalCreateNamedWindowName);
         PatternObjectResolutionService patternResolutionService = new PatternObjectResolutionServiceImpl(patternObjectClasses);
 
         SchedulingServiceSPI schedulingService = engineServices.getSchedulingService();
@@ -123,6 +126,11 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         {
             filterService = isolationUnitServices.getFilterService();
             schedulingService = isolationUnitServices.getSchedulingService();
+        }
+
+        Audit scheduleAudit = AuditEnum.SCHEDULE.getAudit(annotations);
+        if (scheduleAudit != null) {
+            schedulingService = new SchedulingServiceAudit(statementName, schedulingService);
         }
 
         // Create statement context
@@ -155,7 +163,8 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 engineServices.getViewService(),
                 statementFilterVersion,
                 annotations,
-                engineServices.getExceptionHandlingService());
+                engineServices.getExceptionHandlingService(),
+                new ExpressionResultCacheService());
     }
 
     /**

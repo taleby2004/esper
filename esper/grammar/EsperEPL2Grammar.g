@@ -130,6 +130,8 @@ tokens
 	USING='using';
 	MERGE='merge';
 	MATCHED='matched';
+	EXPRESSIONDECL='expression';
+	NEWKW='new';
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -198,6 +200,7 @@ tokens
 	WHEN_LIMIT_EXPR;
 	INSERTINTO_EXPR;
 	EXPRCOL;
+	INDEXCOL;
 	CONCAT;	
 	LIB_FUNCTION;
 	LIB_FUNC_CHAIN;
@@ -269,8 +272,12 @@ tokens
 	CREATE_SCHEMA_EXPR_QUAL;
 	CREATE_SCHEMA_EXPR_INH;
 	VARIANT_LIST;
+	MERGE_UNM;
+	MERGE_MAT;
 	MERGE_UPD;
 	MERGE_INS;
+	MERGE_DEL;
+	NEW_ITEM;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -558,21 +565,34 @@ tokens
 }
 
 startPatternExpressionRule
-	:	annotationNoEnum*
+	:	(annotationNoEnum | expressionDecl)*
 		patternExpression
 		EOF!
 	;
 	
 startEPLExpressionRule 
-	:	annotationEnum*	
+	:	(annotationEnum | expressionDecl)*
 		eplExpression
 		EOF
-		-> ^(EPL_EXPR annotationEnum* eplExpression) 
+		-> ^(EPL_EXPR annotationEnum* expressionDecl* eplExpression) 
 	;
 
 startEventPropertyRule 
 	:	eventProperty
 		EOF!
+	;
+
+//----------------------------------------------------------------------------
+// Expression Declaration
+//----------------------------------------------------------------------------
+expressionDecl
+    	:	EXPRESSIONDECL i=IDENT LCURLY expressionLambdaDecl? expression RCURLY
+		-> ^(EXPRESSIONDECL $i expression expressionLambdaDecl?)
+    	;
+
+expressionLambdaDecl
+	:	(i=IDENT | (LPAREN columnList RPAREN)) GOES
+		-> ^(GOES $i? columnList?)	
 	;
 
 //----------------------------------------------------------------------------
@@ -685,19 +705,35 @@ mergeItem
 	;
 	
 mergeMatched
-	:	WHEN MATCHED (AND_EXPR expression)? THEN
-		(
-		  (i=UPDATE SET onSetAssignment (COMMA onSetAssignment)*)
-		| d=DELETE 		
-		)
-		-> ^(MERGE_UPD expression? $i? $d? onSetAssignment*)
+	:	WHEN MATCHED (AND_EXPR expression)? mergeMatchedItem+
+		-> ^(MERGE_MAT mergeMatchedItem+ expression?)
 	;
 
+mergeMatchedItem
+	:	THEN 
+		(
+		  ( u=UPDATE SET onSetAssignment (COMMA onSetAssignment)*) (WHERE whereClause)?
+		  | d=DELETE (WHERE whereClause)? 
+		  | mergeInsert
+		  )
+		-> {d != null}? ^(MERGE_DEL whereClause? INT_TYPE["dummy"])
+		-> {u != null}? ^(MERGE_UPD onSetAssignment* whereClause?)
+		-> mergeInsert
+	;		
+
 mergeUnmatched
-	:	WHEN NOT_EXPR MATCHED (AND_EXPR expression)? THEN
-		INSERT (LPAREN columnList RPAREN)? SELECT selectionList
-		-> ^(MERGE_INS selectionList columnList? expression?)
-	;	
+	:	WHEN NOT_EXPR MATCHED (AND_EXPR expression)? mergeUnmatchedItem+
+		-> ^(MERGE_UNM mergeUnmatchedItem+ expression?)
+	;
+	
+mergeUnmatchedItem
+	:	THEN! mergeInsert
+	;		
+	
+mergeInsert
+	: 	INSERT (INTO classIdentifier)? (LPAREN columnList RPAREN)? SELECT selectionList (WHERE whereClause)?
+		-> ^(MERGE_INS selectionList classIdentifier? columnList? whereClause?)
+	;
 	
 onSelectExpr	
 @init  { paraphrases.push("on-select clause"); }
@@ -780,9 +816,19 @@ createWindowExprModelAfter
 	;
 		
 createIndexExpr
-	:	CREATE INDEX n=IDENT ON w=IDENT LPAREN columnList RPAREN
-		-> ^(CREATE_INDEX_EXPR $n $w columnList)
+	:	CREATE INDEX n=IDENT ON w=IDENT LPAREN createIndexColumnList RPAREN
+		-> ^(CREATE_INDEX_EXPR $n $w createIndexColumnList)
 	;
+	
+createIndexColumnList
+	: 	createIndexColumn (COMMA createIndexColumn)* 
+		-> ^(INDEXCOL createIndexColumn+)
+	;	
+
+createIndexColumn
+	: 	IDENT IDENT? 
+		-> ^(INDEXCOL IDENT*)
+	;	
 
 createVariableExpr
 	:	CREATE VARIABLE classIdentifier n=IDENT (EQUALS expression)?
@@ -905,7 +951,8 @@ selectionList
 
 selectionListElement
   @init { String identifier = null; } 
-	:   	s=STAR -> WILDCARD_SELECT[$s]
+	:   	s=STAR
+		-> WILDCARD_SELECT[$s]
 	|	(streamSelector) => streamSelector
 	|	expression (AS i=keywordAllowedIdent { identifier = i.getTree().toString(); } )?
 		-> {identifier != null}? ^(SELECTION_ELEMENT_EXPR expression IDENT[identifier])
@@ -1258,10 +1305,18 @@ unaryExpression
 	| eventPropertyOrLibFunction
 	| (builtinFunc) => (builtinFunc)
 	| arrayExpression
-	| subSelectExpression
+	| subSelectExpression (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	    -> {$d != null}? ^(DOT_EXPR subSelectExpression libFunctionNoClass+)
+	    -> subSelectExpression
 	| existsSubSelectExpression
+	| NEWKW LCURLY newAssign (COMMA newAssign)* RCURLY -> ^(NEWKW newAssign*) 
 	;
-	    
+	
+newAssign
+	:	eventProperty (EQUALS expression)?
+		-> ^(NEW_ITEM eventProperty expression?)
+	;
+	
 subSelectExpression 
 	:	subQueryExpr
 		-> ^(SUBSELECT_EXPR subQueryExpr)
@@ -1317,10 +1372,16 @@ builtinFunc
 	| lastAggregation
 	| windowAggregation
 	| COALESCE^ LPAREN! expression COMMA! expression (COMMA! expression)* RPAREN!
-	| PREVIOUS^ LPAREN! expression (COMMA! expression)? RPAREN!
-	| PREVIOUSTAIL^ LPAREN! expression (COMMA! expression)? RPAREN!
+	| PREVIOUS LPAREN expression (COMMA expression)? RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(PREVIOUS expression+) libFunctionNoClass+)
+	  -> ^(PREVIOUS expression+)	   
+	| PREVIOUSTAIL LPAREN expression (COMMA expression)? RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(PREVIOUSTAIL expression+) libFunctionNoClass+)
+	  -> ^(PREVIOUSTAIL expression+)	   
 	| PREVIOUSCOUNT^ LPAREN! expression RPAREN!
-	| PREVIOUSWINDOW^ LPAREN! expression RPAREN!
+	| PREVIOUSWINDOW LPAREN expression RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(PREVIOUSWINDOW expression) libFunctionNoClass+)
+	  -> ^(PREVIOUSWINDOW expression)	   
 	| PRIOR^ LPAREN! NUM_INT COMMA! eventProperty RPAREN!
 	// MIN and MAX can also be "Math.min" static function and "min(price)" aggregation function and "min(a, b, c...)" built-in function
 	// therefore handled in code via libFunction as below
@@ -1328,21 +1389,26 @@ builtinFunc
 	| TYPEOF^ LPAREN! expression RPAREN!
 	| CAST^ LPAREN! expression (COMMA! | AS!) classIdentifier RPAREN!
 	| EXISTS^ LPAREN! eventProperty RPAREN!
-	| CURRENT_TIMESTAMP^ (LPAREN! RPAREN!)?
+	| CURRENT_TIMESTAMP (LPAREN RPAREN)? (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(CURRENT_TIMESTAMP) libFunctionNoClass+)
+	  -> ^(CURRENT_TIMESTAMP)
 	;
 	
 firstAggregation
-	: FIRST LPAREN accessAggExpr (COMMA expression)? RPAREN
+	: FIRST LPAREN accessAggExpr (COMMA expression)? RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(FIRST_AGGREG accessAggExpr expression?) libFunctionNoClass+)
 	  -> ^(FIRST_AGGREG accessAggExpr expression?)
 	;
 
 lastAggregation
-	: LAST LPAREN accessAggExpr (COMMA expression)? RPAREN
+	: LAST LPAREN accessAggExpr (COMMA expression)? RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(LAST_AGGREG accessAggExpr expression?) libFunctionNoClass+)
 	  -> ^(LAST_AGGREG accessAggExpr expression?)
 	;
 	
 windowAggregation
-	: WINDOW LPAREN accessAggExpr RPAREN
+	: WINDOW LPAREN accessAggExpr RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(WINDOW_AGGREG accessAggExpr) libFunctionNoClass+)
 	  -> ^(WINDOW_AGGREG accessAggExpr)
 	;
 
@@ -1368,25 +1434,31 @@ libFunction
 	;
 		
 libFunctionWithClass
-	: (classIdentifierNonGreedy DOT)? funcIdent LPAREN (libFunctionArgs)? RPAREN
-	  -> ^(LIB_FUNCTION classIdentifierNonGreedy? funcIdent libFunctionArgs?)
+	: (classIdentifierNonGreedy DOT)? funcIdent l=LPAREN (libFunctionArgs)? RPAREN
+	  -> ^(LIB_FUNCTION classIdentifierNonGreedy? funcIdent libFunctionArgs? $l?)
 	;	
 
 libFunctionNoClass
-	: funcIdent LPAREN (libFunctionArgs)? RPAREN
-	  -> ^(LIB_FUNCTION funcIdent libFunctionArgs?)
+	: funcIdent (l=LPAREN (libFunctionArgs)? RPAREN)?
+	  -> ^(LIB_FUNCTION funcIdent libFunctionArgs? $l?)
 	;	
 
 funcIdent
 	: escapableIdent
 	| max=MAX -> IDENT[$max]
 	| min=MIN -> IDENT[$min]
+	| w=WHERE -> IDENT[$w]
+	| s=SET -> IDENT[$s]
 	;
 	
 libFunctionArgs
-	: (ALL! | DISTINCT)? expression (COMMA! expression)*
+	: (ALL! | DISTINCT)? libFunctionArgItem (COMMA! libFunctionArgItem)*
 	;
 	
+libFunctionArgItem
+	: expressionLambdaDecl? expressionWithTime
+	;
+
 betweenList
 	: concatenationExpr AND_EXPR! concatenationExpr
 	;
@@ -1839,6 +1911,7 @@ stringconstant
 FOLLOWMAX_BEGIN : '-[';
 FOLLOWMAX_END   : ']>';
 FOLLOWED_BY 	: '->';
+GOES 		: '=>';
 EQUALS 		: '=';
 SQL_NE 		: '<>';
 QUESTION 	: '?';

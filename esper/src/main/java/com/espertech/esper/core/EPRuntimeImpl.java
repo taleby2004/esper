@@ -98,9 +98,14 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         routedExternal = new AtomicLong();
         engineFilterAndDispatchTimeContext = new ExprEvaluatorContext()
         {
-            public TimeProvider getTimeProvider()
-            {
+            private ExpressionResultCacheService expressionResultCacheService = new ExpressionResultCacheService();
+
+            public TimeProvider getTimeProvider() {
                 return services.getSchedulingService();
+            }
+
+            public ExpressionResultCacheService getExpressionResultCacheService() {
+                return expressionResultCacheService;
             }
         };
 
@@ -183,12 +188,13 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     public void timerCallback()
     {
+        long msec = services.getTimeSource().getTimeMillis();
+
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled() && (ExecutionPathDebugLog.isTimerDebugEnabled)))
         {
-            log.debug(".timerCallback Evaluating scheduled callbacks");
+            log.debug(".timerCallback Evaluating scheduled callbacks, time is " + msec);
         }
 
-        long msec = services.getTimeSource().getTimeMillis();
         CurrentTimeEvent currentTimeEvent = new CurrentTimeEvent(msec);
         sendEvent(currentTimeEvent);
     }
@@ -418,6 +424,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
         catch (RuntimeException ex)
         {
+            matchesArrayThreadLocal.get().clear();
             throw new EPException(ex);
         }
         finally
@@ -573,6 +580,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         {
             processScheduleHandles(handles);
         }
+        catch (RuntimeException ex)
+        {
+            handles.clear();
+            throw ex;
+        }
         finally
         {
             services.getEventProcessingRWLock().releaseReadLock();
@@ -608,7 +620,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
                 long deltaCPU = cpuTimeAfter - cpuTimeBefore;
                 long deltaWall = wallTimeAfter - wallTimeBefore;
-                services.getMetricsReportingService().accountTime(handle.getEpStatementHandle().getMetricsHandle(), deltaCPU, deltaWall);
+                services.getMetricsReportingService().accountTime(handle.getEpStatementHandle().getMetricsHandle(), deltaCPU, deltaWall, 1);
             }
             else
             {
@@ -680,7 +692,8 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
                 long deltaCPU = cpuTimeAfter - cpuTimeBefore;
                 long deltaWall = wallTimeAfter - wallTimeBefore;
-                services.getMetricsReportingService().accountTime(handle.getMetricsHandle(), deltaCPU, deltaWall);
+                int numInput = (callbackObject instanceof Collection) ? ((Collection) callbackObject).size() : 1;
+                services.getMetricsReportingService().accountTime(handle.getMetricsHandle(), deltaCPU, deltaWall, numInput);
             }
             else
             {
@@ -757,6 +770,12 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 processThreadWorkQueueUnlatched(item);
             }
 
+            boolean haveDispatched = services.getNamedWindowService().dispatch(engineFilterAndDispatchTimeContext);
+            if (haveDispatched)
+            {
+                dispatch();
+            }
+
             if (!queues.getFrontQueue().isEmpty()) {
                 processThreadWorkQueue();
             }
@@ -772,6 +791,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         try
         {
             processMatches(eventBean);
+        }
+        catch (RuntimeException ex)
+        {
+            matchesArrayThreadLocal.get().clear();
+            throw ex;
         }
         finally
         {
@@ -791,6 +815,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         try
         {
             processMatches(eventBean);
+        }
+        catch (RuntimeException ex)
+        {
+            matchesArrayThreadLocal.get().clear();
+            throw ex;
         }
         finally
         {
@@ -817,6 +846,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         try
         {
             processMatches(eventBean);
+        }
+        catch (RuntimeException ex)
+        {
+            matchesArrayThreadLocal.get().clear();
+            throw ex;
         }
         finally
         {
@@ -880,7 +914,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
                 long deltaCPU = cpuTimeAfter - cpuTimeBefore;
                 long deltaWall = wallTimeAfter - wallTimeBefore;
-                services.getMetricsReportingService().accountTime(handle.getMetricsHandle(), deltaCPU, deltaWall);
+                services.getMetricsReportingService().accountTime(handle.getMetricsHandle(), deltaCPU, deltaWall, 1);
             }
             else
             {
@@ -916,7 +950,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
                 long deltaCPU = cpuTimeAfter - cpuTimeBefore;
                 long deltaWall = wallTimeAfter - wallTimeBefore;
-                services.getMetricsReportingService().accountTime(handle.getMetricsHandle(), deltaCPU, deltaWall);
+                services.getMetricsReportingService().accountTime(handle.getMetricsHandle(), deltaCPU, deltaWall, callbackList.size());
             }
             else
             {
@@ -1338,7 +1372,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         {
             StatementSpecRaw spec = EPAdministratorHelper.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
             Annotation[] annotations = AnnotationUtil.compileAnnotations(spec.getAnnotations(), services.getEngineImportService(), epl);
-            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null, true, annotations, null);
+            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null, true, annotations, null, null);
             StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations);
             return new EPPreparedExecuteMethod(compiledSpec, services, statementContext);
         }

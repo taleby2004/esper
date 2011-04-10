@@ -19,15 +19,184 @@ public class TestSubselectFiltered extends TestCase
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventType("Sensor", SupportSensorEvent.class);
         config.addEventType("MyEvent", SupportBean.class);
+        config.addEventType("SupportBean", SupportBean.class);
         config.addEventType("S0", SupportBean_S0.class);
         config.addEventType("S1", SupportBean_S1.class);
         config.addEventType("S2", SupportBean_S2.class);
         config.addEventType("S3", SupportBean_S3.class);
         config.addEventType("S4", SupportBean_S4.class);
         config.addEventType("S5", SupportBean_S5.class);
+        config.addEventType("SupportBeanRange", SupportBeanRange.class);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
+    }
+    
+    public void test3StreamKeyRangeCoercion() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("ST0", SupportBean_ST0.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("ST1", SupportBean_ST1.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("ST2", SupportBean_ST2.class);
+
+        String epl = "select (" +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where string = st2.key2 and intPrimitive between s0.p01Long and s1.p11Long) " +
+                "from ST2.std:lastevent() st2, ST0.std:lastevent() s0, ST1.std:lastevent() s1";
+        runAssertion3StreamKeyRangeCoercion(epl, true);
+
+        epl = "select (" +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where string = st2.key2 and s1.p11Long >= intPrimitive and s0.p01Long <= intPrimitive) " +
+                "from ST2.std:lastevent() st2, ST0.std:lastevent() s0, ST1.std:lastevent() s1";
+        runAssertion3StreamKeyRangeCoercion(epl, false);
+
+        epl = "select (" +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where string = st2.key2 and s1.p11Long > intPrimitive) " +
+                "from ST2.std:lastevent() st2, ST0.std:lastevent() s0, ST1.std:lastevent() s1";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("G", 21));
+        epService.getEPRuntime().sendEvent(new SupportBean("G", 13));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST2("ST2", "G", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", -1L));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1", 20L));
+        assertEquals(13, listener.assertOneGetNewAndReset().get("sumi"));
+
+        stmt.destroy();
+        epl = "select (" +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where string = st2.key2 and s1.p11Long < intPrimitive) " +
+                "from ST2.std:lastevent() st2, ST0.std:lastevent() s0, ST1.std:lastevent() s1";
+        stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("G", 21));
+        epService.getEPRuntime().sendEvent(new SupportBean("G", 13));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST2("ST2", "G", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", -1L));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1", 20L));
+        assertEquals(21, listener.assertOneGetNewAndReset().get("sumi"));
+    }
+
+    private void runAssertion3StreamKeyRangeCoercion(String epl, boolean isHasRangeReversal) {
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("G", -1));
+        epService.getEPRuntime().sendEvent(new SupportBean("G", 9));
+        epService.getEPRuntime().sendEvent(new SupportBean("G", 21));
+        epService.getEPRuntime().sendEvent(new SupportBean("G", 13));
+        epService.getEPRuntime().sendEvent(new SupportBean("G", 17));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST2("ST21", "X", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST01", 10L));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST11", 20L));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("sumi")); // range 10 to 20
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST2("ST22", "G", 0));
+        assertEquals(30, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST01", 0L));    // range 0 to 20
+        assertEquals(39, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST2("ST21", null, 0));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST2("ST21", "G", 0));
+        assertEquals(39, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST11", 100L));   // range 0 to 100
+        assertEquals(60, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST11", null));   // range 0 to null
+        assertEquals(null, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST01", null));    // range null to null
+        assertEquals(null, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST11", -1L));   // range null to -1
+        assertEquals(null, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST01", 10L));    // range 10 to -1
+        if (isHasRangeReversal) {
+            assertEquals(8, listener.assertOneGetNewAndReset().get("sumi"));
+        }
+        else {
+            assertEquals(null, listener.assertOneGetNewAndReset().get("sumi"));
+        }
+
+        stmt.destroy();
+    }
+
+    public void test2StreamRangeCoercion() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("ST0", SupportBean_ST0.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("ST1", SupportBean_ST1.class);
+
+        // between and 'in' automatically revert the range (20 to 10 is the same as 10 to 20)
+        String epl = "select (" +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where intPrimitive between s0.p01Long and s1.p11Long) " +
+                "from ST0.std:lastevent() s0, ST1.std:lastevent() s1";
+        runAssertion2StreamRangeCoercion(epl, true);
+
+        epl = "select (" +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where intPrimitive between s1.p11Long and s0.p01Long) " +
+                "from ST1.std:lastevent() s1, ST0.std:lastevent() s0";
+        runAssertion2StreamRangeCoercion(epl, true);
+
+        // >= and <= should not automatically revert the range
+        epl = "select (" +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where intPrimitive >= s0.p01Long and intPrimitive <= s1.p11Long) " +
+                "from ST0.std:lastevent() s0, ST1.std:lastevent() s1";
+        runAssertion2StreamRangeCoercion(epl, false);
+    }
+
+    private void runAssertion2StreamRangeCoercion(String epl, boolean isHasRangeReversal) {
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST01", 10L));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST11", 20L));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 9));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 21));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("sumi")); // range 10 to 20
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 13));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0_1", 10L));  // range 10 to 20
+        assertEquals(13, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1_1", 13L));  // range 10 to 13
+        assertEquals(13, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0_2", 13L));  // range 13 to 13
+        assertEquals(13, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 14));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 12));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1_3", 13L));  // range 13 to 13
+        assertEquals(13, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1_4", 20L));  // range 13 to 20
+        assertEquals(27, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0_3", 11L));  // range 11 to 20
+        assertEquals(39, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0_4", null));  // range null to 16
+        assertEquals(null, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1_5", null));  // range null to null
+        assertEquals(null, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0_5", 20L));  // range 20 to null
+        assertEquals(null, listener.assertOneGetNewAndReset().get("sumi"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1_6", 13L));  // range 20 to 13
+        if (isHasRangeReversal) {
+            assertEquals(27, listener.assertOneGetNewAndReset().get("sumi"));
+        }
+        else {
+            assertEquals(null, listener.assertOneGetNewAndReset().get("sumi"));
+        }
+
+        stmt.destroy();
     }
 
     public void testSameEventCompile() throws Exception
@@ -126,12 +295,11 @@ public class TestSubselectFiltered extends TestCase
 
     public void testWhereConstant()
     {
+        // single-column constant
         String stmtText = "select (select id from S1.win:length(1000) where p10='X') as ids1 from S0";
-
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
-        // test no event, should return null
         epService.getEPRuntime().sendEvent(new SupportBean_S1(-1, "Y"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
         assertNull(listener.assertOneGetNewAndReset().get("ids1"));
@@ -146,10 +314,29 @@ public class TestSubselectFiltered extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
         assertEquals(1, listener.assertOneGetNewAndReset().get("ids1"));
 
-        // second X event
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "X"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2));
         assertEquals(null, listener.assertOneGetNewAndReset().get("ids1"));
+        stmt.destroy();
+
+        // two-column constant
+        stmtText = "select (select id from S1.win:length(1000) where p10='X' and p11='Y') as ids1 from S0";
+        stmt = epService.getEPAdministrator().createEPL(stmtText);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(1, "X", "Y"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
+        assertEquals(1, listener.assertOneGetNewAndReset().get("ids1"));
+        stmt.destroy();
+
+        // single range
+        stmtText = "select (select string from SupportBean.std:lastevent() where intPrimitive between 10 and 20) as ids1 from S0";
+        stmt = epService.getEPAdministrator().createEPL(stmtText);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 15));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
+        assertEquals("E1", listener.assertOneGetNewAndReset().get("ids1"));
     }
 
     public void testWherePrevious()

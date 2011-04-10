@@ -123,12 +123,13 @@ public final class FilterSpecCompiler
             }
             else
             {
-                ExprAndNode andNode = new ExprAndNode();
+                ExprAndNode andNode = new ExprAndNodeImpl();
                 for (ExprNode unoptimized : remainingExprNodes)
                 {
                     andNode.addChildNode(unoptimized);
                 }
-                andNode.validate(streamTypeService, methodResolutionService, null, timeProvider, variableService, statementContext);
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, statementContext, eventAdapterService, statementContext.getStatementName(), statementContext.getAnnotations());
+                andNode.validate(validationContext);
                 exprNode = andNode;
             }
         }
@@ -143,7 +144,7 @@ public final class FilterSpecCompiler
         PropertyEvaluator optionalPropertyEvaluator = null;
         if (optionalPropertyEvalSpec != null)
         {
-            optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(optionalPropertyEvalSpec, eventType, optionalStreamName, eventAdapterService, methodResolutionService, timeProvider, variableService, engineURI, statementContext.getStatementId());
+            optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(optionalPropertyEvalSpec, eventType, optionalStreamName, eventAdapterService, methodResolutionService, timeProvider, variableService, engineURI, statementContext.getStatementId(), statementContext.getStatementName(), statementContext.getAnnotations());
         }
 
         FilterSpecCompiled spec = new FilterSpecCompiled(eventType, eventTypeName, filterParams, optionalPropertyEvaluator);
@@ -191,6 +192,7 @@ public final class FilterSpecCompiler
     {
         List<ExprNode> validatedNodes = new ArrayList<ExprNode>();
 
+        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), statementContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getAnnotations());
         for (ExprNode node : exprNodes)
         {
             // Determine subselects
@@ -210,7 +212,7 @@ public final class FilterSpecCompiler
                 }
             }
 
-            ExprNode validated = node.getValidatedSubtree(streamTypeService, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), statementContext);
+            ExprNode validated = ExprNodeUtil.getValidatedSubtree(node, validationContext);
             validatedNodes.add(validated);
 
             if ((validated.getExprEvaluator().getType() != Boolean.class) && ((validated.getExprEvaluator().getType() != boolean.class)))
@@ -310,13 +312,14 @@ public final class FilterSpecCompiler
                 // validate
                 SelectClauseExprCompiledSpec compiled = (SelectClauseExprCompiledSpec) element;
                 ExprNode selectExpression = compiled.getSelectExpression();
-                selectExpression = selectExpression.getValidatedSubtree(subselectTypeService, statementContext.getMethodResolutionService(), viewResourceDelegateSubselect, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext);
+                ExprValidationContext validationContext = new ExprValidationContext(subselectTypeService, statementContext.getMethodResolutionService(), viewResourceDelegateSubselect, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getAnnotations());
+                selectExpression = ExprNodeUtil.getValidatedSubtree(selectExpression, validationContext);
                 subselect.setSelectClause(new ExprNode[] {selectExpression});
                 subselect.setSelectAsNames(new String[] {compiled.getAssignedName()});
 
                 // handle aggregation
                 List<ExprAggregateNode> aggExprNodes = new LinkedList<ExprAggregateNode>();
-                ExprAggregateNode.getAggregatesBottomUp(selectExpression, aggExprNodes);
+                ExprAggregateNodeUtil.getAggregatesBottomUp(selectExpression, aggExprNodes);
                 if (aggExprNodes.size() > 0)
                 {
                     // Other stream properties, if there is aggregation, cannot be under aggregation.
@@ -367,7 +370,7 @@ public final class FilterSpecCompiler
 
             // Ensure there is no aggregation nodes
             List<ExprAggregateNode> aggregateExprNodes = new LinkedList<ExprAggregateNode>();
-            ExprAggregateNode.getAggregatesBottomUp(validated, aggregateExprNodes);
+            ExprAggregateNodeUtil.getAggregatesBottomUp(validated, aggregateExprNodes);
             if (!aggregateExprNodes.isEmpty())
             {
                 throw new ExprValidationException("Aggregation functions not allowed within filters");
@@ -522,7 +525,7 @@ public final class FilterSpecCompiler
 
             if ((low != null) && (high != null))
             {
-                return new FilterSpecParamRange(propertyName, op, low, high);
+                return new FilterSpecParamRange(propertyName, op, low, high, identNode.getExprEvaluator().getType());
             }
         }
         return null;
@@ -534,8 +537,13 @@ public final class FilterSpecCompiler
         if (endpoint instanceof ExprConstantNode)
         {
             ExprConstantNode node = (ExprConstantNode) endpoint;
-            Number result = (Number) node.evaluate(null, true, exprEvaluatorContext);
-            return new RangeValueDouble(result.doubleValue());
+            Object value = node.evaluate(null, true, exprEvaluatorContext);
+            if (value instanceof String) {
+                return new RangeValueString((String)value);
+            }
+            else {
+                return new RangeValueDouble(((Number)value).doubleValue());
+            }
         }
 
         // or property
@@ -607,19 +615,19 @@ public final class FilterSpecCompiler
                     }
 
                     boolean isMustCoerce = false;
-                    Class numericCoercionType = JavaClassHelper.getBoxedType(identNodeInSet.getType());
-                    if (identNodeInner.getType() != identNodeInSet.getType())
+                    Class numericCoercionType = JavaClassHelper.getBoxedType(identNodeInSet.getExprEvaluator().getType());
+                    if (identNodeInner.getExprEvaluator().getType() != identNodeInSet.getExprEvaluator().getType())
                     {
-                        if (JavaClassHelper.isNumeric(identNodeInSet.getType()))
+                        if (JavaClassHelper.isNumeric(identNodeInSet.getExprEvaluator().getType()))
                         {
-                            if (!JavaClassHelper.canCoerce(identNodeInner.getType(), identNodeInSet.getType()))
+                            if (!JavaClassHelper.canCoerce(identNodeInner.getExprEvaluator().getType(), identNodeInSet.getExprEvaluator().getType()))
                             {
-                                throwConversionError(identNodeInner.getType(), identNodeInSet.getType(), identNodeInSet.getResolvedPropertyName());
+                                throwConversionError(identNodeInner.getExprEvaluator().getType(), identNodeInSet.getExprEvaluator().getType(), identNodeInSet.getResolvedPropertyName());
                             }
                             isMustCoerce = true;
                         }
                         else {
-                            break;  // assumed not compatible 
+                            break;  // assumed not compatible
                         }
                     }
 
@@ -754,17 +762,17 @@ public final class FilterSpecCompiler
 
         boolean isMustCoerce = false;
         SimpleNumberCoercer numberCoercer = null;
-        Class numericCoercionType = JavaClassHelper.getBoxedType(identNodeLeft.getType());
-        if (identNodeRight.getType() != identNodeLeft.getType())
+        Class numericCoercionType = JavaClassHelper.getBoxedType(identNodeLeft.getExprEvaluator().getType());
+        if (identNodeRight.getExprEvaluator().getType() != identNodeLeft.getExprEvaluator().getType())
         {
-            if (JavaClassHelper.isNumeric(identNodeRight.getType()))
+            if (JavaClassHelper.isNumeric(identNodeRight.getExprEvaluator().getType()))
             {
-                if (!JavaClassHelper.canCoerce(identNodeRight.getType(), identNodeLeft.getType()))
+                if (!JavaClassHelper.canCoerce(identNodeRight.getExprEvaluator().getType(), identNodeLeft.getExprEvaluator().getType()))
                 {
-                    throwConversionError(identNodeRight.getType(), identNodeLeft.getType(), identNodeLeft.getResolvedPropertyName());
+                    throwConversionError(identNodeRight.getExprEvaluator().getType(), identNodeLeft.getExprEvaluator().getType(), identNodeLeft.getResolvedPropertyName());
                 }
                 isMustCoerce = true;
-                numberCoercer = SimpleNumberCoercerFactory.getCoercer(identNodeRight.getType(), numericCoercionType);
+                numberCoercer = SimpleNumberCoercerFactory.getCoercer(identNodeRight.getExprEvaluator().getType(), numericCoercionType);
             }
         }
 
@@ -820,7 +828,7 @@ public final class FilterSpecCompiler
     private static Object handleConstantsCoercion(ExprIdentNode identNode, Object constant)
             throws ExprValidationException
     {
-        Class identNodeType = identNode.getType();
+        Class identNodeType = identNode.getExprEvaluator().getType();
         if (!JavaClassHelper.isNumeric(identNodeType))
         {
             return constant;    // no coercion required, other type checking performed by expression this comes from

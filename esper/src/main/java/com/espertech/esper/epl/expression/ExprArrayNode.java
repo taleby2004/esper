@@ -9,11 +9,6 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.CoercionException;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.SimpleNumberCoercer;
@@ -27,7 +22,7 @@ import java.util.Map;
 /**
  * Represents an array in a filter expressiun tree.
  */
-public class ExprArrayNode extends ExprNode implements ExprEvaluator
+public class ExprArrayNode extends ExprNodeBase implements ExprEvaluator
 {
     private Class arrayReturnType;
     private boolean mustCoerce;
@@ -36,7 +31,7 @@ public class ExprArrayNode extends ExprNode implements ExprEvaluator
     private transient SimpleNumberCoercer coercer;
     private transient Object constantResult;
     private transient ExprEvaluator[] evaluators;
-    
+
     private static final long serialVersionUID = 5533223915923867651L;
 
     /**
@@ -51,7 +46,7 @@ public class ExprArrayNode extends ExprNode implements ExprEvaluator
         return this;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         length = this.getChildNodes().size();
         evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
@@ -111,7 +106,7 @@ public class ExprArrayNode extends ExprNode implements ExprEvaluator
                 results = null;  // not using a constant result
                 break;
             }
-            results[index] = evaluators[index].evaluate(null, false, exprEvaluatorContext);
+            results[index] = evaluators[index].evaluate(null, false, validationContext.getExprEvaluatorContext());
             index++;
         }
 

@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.collection.Pair;
-
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +18,7 @@ import java.util.List;
 public class DotExpression extends ExpressionBase
 {
     private static final long serialVersionUID = -7597133103354244332L;
-    private List<Pair<String, List<Expression>>> chain = new ArrayList<Pair<String, List<Expression>>>();
+    private List<DotExpressionItem> chain = new ArrayList<DotExpressionItem>();
     
     /**
      * Ctor.
@@ -44,50 +42,41 @@ public class DotExpression extends ExpressionBase
      */
     public void add(String methodName, List<Expression> parameters)
     {
-        chain.add(new Pair<String, List<Expression>>(methodName, parameters));
+        chain.add(new DotExpressionItem(methodName, parameters, false));
+    }
+
+    /**
+     * Add a method to the chain of methods after the dot, indicating the this segment is a property and does not need parenthesis and won't have paramaters.
+     * @param methodName method name
+     * @param parameters parameter expressions
+     * @param isProperty property flag
+     */
+    public void add(String methodName, List<Expression> parameters, boolean isProperty)
+    {
+        chain.add(new DotExpressionItem(methodName, parameters, isProperty));
     }
 
     /**
      * Returns the method chain of all methods after the dot.
      * @return method name ane list of parameters
      */
-    public List<Pair<String, List<Expression>>> getChain()
+    public List<DotExpressionItem> getChain()
     {
         return chain;
     }
 
     public ExpressionPrecedenceEnum getPrecedence()
     {
-        return ExpressionPrecedenceEnum.RELATIONAL_BETWEEN_IN;
+        return ExpressionPrecedenceEnum.MINIMUM;
     }
 
     public void toPrecedenceFreeEPL(StringWriter writer)
     {
-        writer.write("(");
-        this.getChildren().get(0).toEPL(writer, getPrecedence());
-        writer.write(")");
-        renderChain(chain, writer);
-    }
-
-    /**
-     * Renders a method invocation chain
-     * @param chain pairs of method name and parameters
-     * @param writer to render to
-     */
-    protected static void renderChain(List<Pair<String, List<Expression>>> chain, StringWriter writer) {
-        for (Pair<String, List<Expression>> pair : chain)
-        {
-            writer.write(".");
-            writer.write(pair.getFirst());
-
+        if (!this.getChildren().isEmpty()) {
             writer.write("(");
-            String delimiter = "";
-            for (Expression param : pair.getSecond()) {
-                writer.write(delimiter);
-                delimiter = ", ";
-                param.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
-            }
+            this.getChildren().get(0).toEPL(writer, getPrecedence());
             writer.write(")");
         }
+        DotExpressionItem.render(chain, writer, !this.getChildren().isEmpty());
     }
 }

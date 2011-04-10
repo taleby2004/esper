@@ -17,6 +17,7 @@ import com.espertech.esper.schedule.TimeProvider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -30,26 +31,25 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
     private static final Log log = LogFactory.getLog(MethodResolutionServiceImpl.class);
 	private final EngineImportService engineImportService;
     private final TimeProvider timeProvider;
-    private final boolean isUdfCache;
 
     /**
      * Ctor.
      * @param engineImportService is the engine imports
      * @param timeProvider returns time
-     * @param isUdfCache returns true to cache UDF results for constant parameter sets
      */
     public MethodResolutionServiceImpl(EngineImportService engineImportService,
-                                       TimeProvider timeProvider,
-                                       boolean isUdfCache)
+                                       TimeProvider timeProvider)
 	{
         this.engineImportService = engineImportService;
         this.timeProvider = timeProvider;
-        this.isUdfCache = isUdfCache;
     }
 
-    public boolean isUdfCache()
-    {
-        return isUdfCache;
+    public boolean isUdfCache() {
+        return engineImportService.isUdfCache();
+    }
+
+    public boolean isDuckType() {
+        return engineImportService.isDuckType();
     }
 
     public AggregationSupport makePlugInAggregator(String functionName)
@@ -79,6 +79,10 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
     {
         return engineImportService.resolveMethod(className, methodName);
 	}
+
+    public Constructor resolveCtor(Class clazz, Class[] paramTypes) throws EngineImportException {
+        return engineImportService.resolveCtor(clazz, paramTypes);
+    }
 
     public Class resolveClass(String className)
 			throws EngineImportException

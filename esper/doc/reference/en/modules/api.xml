@@ -678,7 +678,7 @@ finally {
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						Add new event types for all event representations, check if an event type exists, update an existing Map event type or remove an event type.
+						Add new event types for all event representations, check if an event type exists, update an existing event type, remove an event type, query a list of types and obtain a type by name.
 					</para>
 				</listitem>
 				<listitem>
@@ -1380,11 +1380,11 @@ listener or subscriber instances then such shared state should be thread-safe.
 				<title>Threading Service Provider Interface</title>
 				
 				<para>
-					The service-provider interface <literal>EPServiceSPI</literal> is an extension API that allows to manage engine-level queues and thread pools .
+					The service-provider interface <literal>EPServiceProviderSPI</literal> is an extension API that allows to manage engine-level queues and thread pools .
 				</para>
 				
 				<para>
-					The service-provider interface <literal>EPServiceSPI</literal> is considered an extension API and subject to change between release versions.
+					The service-provider interface <literal>EPServiceProviderSPI</literal> is considered an extension API and subject to change between release versions.
 				</para>
 
 				<para>
@@ -1598,6 +1598,10 @@ runtime.sendEvent(new CurrentTimeSpanEvent(startTime.getTime() + 10*60*1000, 100
 			<title>Additional Time-Related APIs</title>
 			<para>
 				Consider using the service-provider interface <literal>EPRuntimeSPI</literal> <literal>EPRuntimeIsolatedSPI</literal>. The two interfaces are service-provider interfaces that expose additional function to manage statement schedules. However the SPI interfaces should be considered an extension API and are subject to change between release versions.
+			</para>
+			
+			<para>
+				Additional engine-internal SPI interfaces can be obtained by downcasting <literal>EPServiceProvider</literal> to <literal>EPServiceProviderSPI</literal>. For example the <literal>SchedulingServiceSPI</literal> exposes schedule information per statement (downcast from <literal>SchedulingService</literal>). Engine-internal SPI are subject to change between versions.
 			</para>
 		</sect2>
     </sect1>
@@ -2398,6 +2402,10 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
 							<entry>Cumulative number of input events since engine initialization time. Input events are defined as events send in via application threads as well as <literal>insert into</literal> events.</entry>
 						</row>
 						<row>
+							<entry>inputCountDelta</entry>
+							<entry>Number of input events since last reporting period.</entry>
+						</row>
+						<row>
 							<entry>scheduleDepth</entry>
 							<entry>Number of outstanding schedules.</entry>
 						</row>
@@ -2444,6 +2452,10 @@ EPStatement statement = epService.getEPAdministrator().create(prepared);]]></pro
 						<row>
 							<entry>wallTime</entry>
 							<entry>Statement processing wall time in nanoseconds (based on <literal>System.nanoTime</literal>).</entry>
+						</row>
+						<row>
+							<entry>numInput</entry>
+							<entry>Number of input events to the statement.</entry>
 						</row>
 						<row>
 							<entry>numOutputIStream</entry>

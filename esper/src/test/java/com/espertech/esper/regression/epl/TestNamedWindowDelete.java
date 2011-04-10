@@ -1,27 +1,24 @@
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.bean.SupportBean_B;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.EPStatementSPI;
+import com.espertech.esper.core.StatementType;
+import com.espertech.esper.epl.named.NamedWindowProcessor;
+import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.core.StatementType;
-import com.espertech.esper.core.EPStatementSPI;
-import com.espertech.esper.epl.named.NamedWindowProcessor;
+import junit.framework.TestCase;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class TestNamedWindowDelete extends TestCase
 {
-    private EPServiceProvider epService;
+    private EPServiceProviderSPI epService;
     private SupportUpdateListener listenerWindow;
     private SupportUpdateListener listenerWindowTwo;
     private SupportUpdateListener listenerSelect;
@@ -30,7 +27,8 @@ public class TestNamedWindowDelete extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        epService = EPServiceProviderManager.getDefaultProvider(config);
+        config.getEngineDefaults().getLogging().setEnableQueryPlan(true);
+        epService = (EPServiceProviderSPI) EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listenerWindow = new SupportUpdateListener();
         listenerWindowTwo = new SupportUpdateListener();
@@ -288,7 +286,7 @@ public class TestNamedWindowDelete extends TestCase
         assertEquals(1, getCount("MyWindow"));
     }
 
-    public void testDeleteMultiPropIndexes()
+    public void testCoercionKeyMultiPropIndexes()
     {
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as select " +
@@ -299,24 +297,31 @@ public class TestNamedWindowDelete extends TestCase
         List<EPStatement> deleteStatements = new LinkedList<EPStatement>();
         String stmtTextDelete = "on " + SupportBean.class.getName() + "(string='DB') as s0 delete from MyWindow as win where win.intPrimitive = s0.doubleBoxed";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(1, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         stmtTextDelete = "on " + SupportBean.class.getName() + "(string='DP') as s0 delete from MyWindow as win where win.intPrimitive = s0.doublePrimitive";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(1, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         stmtTextDelete = "on " + SupportBean.class.getName() + "(string='IB') as s0 delete from MyWindow where MyWindow.intPrimitive = s0.intBoxed";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(2, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         stmtTextDelete = "on " + SupportBean.class.getName() + "(string='IPDP') as s0 delete from MyWindow as win where win.intPrimitive = s0.intPrimitive and win.doublePrimitive = s0.doublePrimitive";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         stmtTextDelete = "on " + SupportBean.class.getName() + "(string='IPDP2') as s0 delete from MyWindow as win where win.doublePrimitive = s0.doublePrimitive and win.intPrimitive = s0.intPrimitive";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         stmtTextDelete = "on " + SupportBean.class.getName() + "(string='IPDPIB') as s0 delete from MyWindow as win where win.doublePrimitive = s0.doublePrimitive and win.intPrimitive = s0.intPrimitive and win.intBoxed = s0.intBoxed";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(4, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         stmtTextDelete = "on " + SupportBean.class.getName() + "(string='CAST') as s0 delete from MyWindow as win where win.intBoxed = s0.intPrimitive and win.doublePrimitive = s0.doubleBoxed and win.intPrimitive = s0.intBoxed";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(4, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         // create insert into
         String stmtTextInsertOne = "insert into MyWindow select string, intPrimitive, intBoxed, doublePrimitive, doubleBoxed "
@@ -394,6 +399,152 @@ public class TestNamedWindowDelete extends TestCase
         {
             stmt.destroy();
         }
+
+        // test single-two-field index reuse
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_ST0", SupportBean_ST0.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().createEPL("create window WinOne.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("on SupportBean_ST0 select * from WinOne where string = key0");
+        assertEquals(1, epService.getNamedWindowService().getNamedWindowIndexes("WinOne").length);
+
+        epService.getEPAdministrator().createEPL("on SupportBean_ST0 select * from WinOne where string = key0 and intPrimitive = p00");
+        assertEquals(2, epService.getNamedWindowService().getNamedWindowIndexes("WinOne").length);
+    }
+
+    public void testCoercionRangeMultiPropIndexes()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanTwo", SupportBeanTwo.class);
+
+        // create window
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select " +
+                                "string, intPrimitive, intBoxed, doublePrimitive, doubleBoxed from SupportBean";
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        stmtCreate.addListener(listenerWindow);
+        String stmtText = "insert into MyWindow select string, intPrimitive, intBoxed, doublePrimitive, doubleBoxed from SupportBean";
+        epService.getEPAdministrator().createEPL(stmtText);
+        String[] fields = new String[] {"string"};
+
+        sendSupportBean("E1", 1, 10, 100d, 1000d);
+        sendSupportBean("E2", 2, 20, 200d, 2000d);
+        sendSupportBean("E3", 3, 30, 3d, 30d);
+        sendSupportBean("E4", 4, 40, 4d, 40d);
+        sendSupportBean("E5", 5, 50, 500d, 5000d);
+        sendSupportBean("E6", 6, 60, 600d, 6000d);
+        listenerWindow.reset();
+
+        List<EPStatement> deleteStatements = new LinkedList<EPStatement>();
+        String stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win where win.intPrimitive between s2.doublePrimitiveTwo and s2.doubleBoxedTwo";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(1, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("T", 0, 0, 0d, null);
+        assertFalse(listenerWindow.isInvoked());
+        sendSupportBeanTwo("T", 0, 0, -1d, 1d);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E1"});
+
+        stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win where win.intPrimitive between s2.intPrimitiveTwo and s2.intBoxedTwo";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(2, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("T", -2, 2, 0d, 0d);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E2"});
+
+        stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win " +
+                "where win.intPrimitive between s2.intPrimitiveTwo and s2.intBoxedTwo and win.doublePrimitive between s2.intPrimitiveTwo and s2.intBoxedTwo";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("T", -3, 3, -3d, 3d);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E3"});
+
+        stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win " +
+                "where win.doublePrimitive between s2.intPrimitiveTwo and s2.intPrimitiveTwo and win.intPrimitive between s2.intPrimitiveTwo and s2.intPrimitiveTwo";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("T", -4, 4, -4, 4d);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E4"});
+
+        stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win where win.intPrimitive <= doublePrimitiveTwo";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("T", 0, 0, 5, 1d);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E5"});
+
+        stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win where win.intPrimitive not between s2.intPrimitiveTwo and s2.intBoxedTwo";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("T", 100, 200, 0, 0d);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E6"});
+
+        // delete
+        for (EPStatement stmt : deleteStatements) {
+            stmt.destroy();
+        }
+        deleteStatements.clear();
+        assertEquals(0, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+    }
+
+    public void testCoercionKeyAndRangeMultiPropIndexes()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanTwo", SupportBeanTwo.class);
+
+        // create window
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select " +
+                                "string, intPrimitive, intBoxed, doublePrimitive, doubleBoxed from SupportBean";
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        stmtCreate.addListener(listenerWindow);
+        String stmtText = "insert into MyWindow select string, intPrimitive, intBoxed, doublePrimitive, doubleBoxed from SupportBean";
+        epService.getEPAdministrator().createEPL(stmtText);
+        String[] fields = new String[] {"string"};
+
+        sendSupportBean("E1", 1, 10, 100d, 1000d);
+        sendSupportBean("E2", 2, 20, 200d, 2000d);
+        sendSupportBean("E3", 3, 30, 300d, 3000d);
+        sendSupportBean("E4", 4, 40, 400d, 4000d);
+        listenerWindow.reset();
+
+        List<EPStatement> deleteStatements = new LinkedList<EPStatement>();
+        String stmtTextDelete = "on SupportBeanTwo delete from MyWindow where string = stringTwo and intPrimitive between doublePrimitiveTwo and doubleBoxedTwo";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(1, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("T", 0, 0, 1d, 200d);
+        assertFalse(listenerWindow.isInvoked());
+        sendSupportBeanTwo("E1", 0, 0, 1d, 200d);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E1"});
+
+        stmtTextDelete = "on SupportBeanTwo delete from MyWindow where string = stringTwo and intPrimitive = intPrimitiveTwo and intBoxed between doublePrimitiveTwo and doubleBoxedTwo";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(2, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("E2", 2, 0, 19d, 21d);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E2"});
+
+        stmtTextDelete = "on SupportBeanTwo delete from MyWindow where intBoxed between doubleBoxedTwo and doublePrimitiveTwo and intPrimitive = intPrimitiveTwo and string = stringTwo ";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(2, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("E3", 3, 0, 29d, 34d);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E3"});
+
+        stmtTextDelete = "on SupportBeanTwo delete from MyWindow where intBoxed between intBoxedTwo and intBoxedTwo and intPrimitive = intPrimitiveTwo and string = stringTwo ";
+        deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
+        assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
+
+        sendSupportBeanTwo("E4", 4, 40, 0d, null);
+        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E4"});
+
+        // delete
+        for (EPStatement stmt : deleteStatements) {
+            stmt.destroy();
+        }
+        deleteStatements.clear();
+        assertEquals(0, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
     }
 
     private SupportBean_A sendSupportBean_A(String id)
@@ -419,6 +570,19 @@ public class TestNamedWindowDelete extends TestCase
         bean.setIntBoxed(intBoxed);
         bean.setDoublePrimitive(doublePrimitive);
         bean.setDoubleBoxed(doubleBoxed);
+        epService.getEPRuntime().sendEvent(bean);
+        return bean;
+    }
+
+    private SupportBeanTwo sendSupportBeanTwo(String string, int intPrimitive, Integer intBoxed,
+                                        double doublePrimitive, Double doubleBoxed)
+    {
+        SupportBeanTwo bean = new SupportBeanTwo();
+        bean.setStringTwo(string);
+        bean.setIntPrimitiveTwo(intPrimitive);
+        bean.setIntBoxedTwo(intBoxed);
+        bean.setDoublePrimitiveTwo(doublePrimitive);
+        bean.setDoubleBoxedTwo(doubleBoxed);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }

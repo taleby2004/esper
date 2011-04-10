@@ -8,10 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.ViewResourceDelegate;
 import com.espertech.esper.epl.variable.VariableService;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.TimeProvider;
 
 /**
@@ -19,22 +23,5 @@ import com.espertech.esper.schedule.TimeProvider;
  */
 public interface ExprValidator
 {
-    /**
-     * Validate node.
-     * @param streamTypeService serves stream event type info
-     * @param methodResolutionService - for resolving class names in library method invocations
-     * @param viewResourceDelegate - delegates for view resources to expression nodes
-     * @param timeProvider - provides engine current time
-     * @param variableService - provides access to variable values
-     * @param exprEvaluatorContext context for expression evalauation
-     * @throws ExprValidationException thrown when validation failed
-     */
-    public void validate(StreamTypeService streamTypeService,
-                         MethodResolutionService methodResolutionService,
-                         ViewResourceDelegate viewResourceDelegate,
-                         TimeProvider timeProvider,
-                         VariableService variableService,
-                         ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException;
-
-    public ExprEvaluator getExprEvaluator();
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException;
 }

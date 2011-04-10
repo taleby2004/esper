@@ -8,18 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.plan;
 
-import com.espertech.esper.epl.join.exec.ExecNode;
-import com.espertech.esper.epl.join.exec.LookupInstructionExecNode;
-import com.espertech.esper.epl.join.exec.LookupInstructionExec;
+import com.espertech.esper.epl.join.exec.base.ExecNode;
+import com.espertech.esper.epl.join.exec.base.LookupInstructionExecNode;
+import com.espertech.esper.epl.join.exec.base.LookupInstructionExec;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.epl.join.assemble.BaseAssemblyNode;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.view.Viewable;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Query plan for executing a set of lookup instructions and assembling an end result via
@@ -58,20 +61,27 @@ public class LookupInstructionQueryPlanNode extends QueryPlanNode
         this.assemblyInstructions = assemblyInstructions;
     }
 
-    public ExecNode makeExec(EventTable[][] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists)
+    public ExecNode makeExec(Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
     {
         LookupInstructionExec execs[] = new LookupInstructionExec[lookupInstructions.size()];
 
         int count = 0;
         for (LookupInstructionPlan instruction : lookupInstructions)
         {
-            LookupInstructionExec exec = instruction.makeExec(indexesPerStream, streamTypes, streamViews, historicalStreamIndexLists);
+            LookupInstructionExec exec = instruction.makeExec(indexesPerStream, streamTypes, streamViews, historicalStreamIndexLists, viewExternal);
             execs[count] = exec;
             count++;
         }
 
         return new LookupInstructionExecNode(rootStream, rootStreamName,
                 numStreams, execs, requiredPerStream, assemblyInstructions.toArray(new BaseAssemblyNode[assemblyInstructions.size()]));
+    }
+
+    @Override
+    public void addIndexes(HashSet<String> usedIndexes) {
+        for (LookupInstructionPlan plan : lookupInstructions) {
+            plan.addIndexes(usedIndexes);
+        }
     }
 
     protected void print(IndentWriter writer)

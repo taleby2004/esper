@@ -8,15 +8,18 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.plan;
 
-import com.espertech.esper.epl.join.exec.TableLookupStrategy;
-import com.espertech.esper.epl.join.exec.LookupInstructionExec;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.join.exec.base.JoinExecTableLookupStrategy;
+import com.espertech.esper.epl.join.exec.base.LookupInstructionExec;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.IndentWriter;
+import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.view.Viewable;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Plan for lookup using a from-stream event looking up one or more to-streams using a specified lookup plan for each
@@ -71,18 +74,18 @@ public class LookupInstructionPlan
      * @param historicalStreamIndexLists index management for historical streams
      * @return executable instruction
      */
-    public LookupInstructionExec makeExec(EventTable[][] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists)
+    public LookupInstructionExec makeExec(Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
     {
-        TableLookupStrategy strategies[] = new TableLookupStrategy[lookupPlans.length];
+        JoinExecTableLookupStrategy strategies[] = new JoinExecTableLookupStrategy[lookupPlans.length];
         for (int i = 0; i < lookupPlans.length; i++)
         {
             if (lookupPlans[i] != null)
             {
-                strategies[i] = lookupPlans[i].makeStrategy(indexesPerStream, streamTypes);
+                strategies[i] = lookupPlans[i].makeStrategy(indexesPerStream, streamTypes, viewExternal);
             }
             else
             {
-                strategies[i] = historicalPlans[i].makeOuterJoinStategy(streamViews, i, historicalStreamIndexLists);
+                strategies[i] = historicalPlans[i].makeOuterJoinStategy(streamViews, fromStream, historicalStreamIndexLists);
             }
         }
         return new LookupInstructionExec(fromStream, fromStreamName, toStreams, strategies, requiredPerStream);
@@ -113,5 +116,15 @@ public class LookupInstructionPlan
             }
         }
         writer.decrIndent();
+    }
+
+    public void addIndexes(HashSet<String> usedIndexes) {
+        for (int i = 0; i < lookupPlans.length; i++)
+        {
+            if (lookupPlans[i] != null)
+            {
+                usedIndexes.add(lookupPlans[i].getIndexNum());
+            }
+        }        
     }
 }

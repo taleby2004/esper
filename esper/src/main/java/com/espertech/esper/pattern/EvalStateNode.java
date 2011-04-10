@@ -54,6 +54,10 @@ public abstract class EvalStateNode
      */
     public abstract EvalNode getFactoryNode();
 
+    public abstract boolean isNotOperator();
+
+    public abstract boolean isFilterStateNode();
+
     /**
      * Constructor.
      * @param parentNode is the evaluator for this node on which to indicate a change in truth value
@@ -91,4 +95,5 @@ public abstract class EvalStateNode
     {
         this.parentEvaluator = parentEvaluator;
     }
+
 }

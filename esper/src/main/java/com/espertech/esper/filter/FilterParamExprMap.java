@@ -26,8 +26,8 @@ public class FilterParamExprMap
      */
     public FilterParamExprMap()
     {
-        exprNodes = new HashMap<ExprNode, FilterSpecParam>();
-        specParams = new HashMap<FilterSpecParam, ExprNode>();
+        exprNodes = new LinkedHashMap<ExprNode, FilterSpecParam>();
+        specParams = new LinkedHashMap<FilterSpecParam, ExprNode>();
     }
 
     /**

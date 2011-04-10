@@ -12,7 +12,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.EPStatementHandleCallback;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.filter.FilterValueSet;
-import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -39,11 +38,6 @@ public final class EvalFilterStateNode extends EvalStateNode implements FilterHa
     {
         super(parentNode, null);
 
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".constructor");
-        }
-
         this.evalFilterNode = evalFilterNode;
         this.beginState = beginState;
     }
@@ -60,11 +54,6 @@ public final class EvalFilterStateNode extends EvalStateNode implements FilterHa
 
     public final void start()
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".start Starting filter expression");
-        }
-
         if (isStarted)
         {
             throw new IllegalStateException("Filter state node already active");
@@ -77,11 +66,6 @@ public final class EvalFilterStateNode extends EvalStateNode implements FilterHa
 
     public final void quit()
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".quit Stop filter expression");
-        }
-
         isStarted = false;
         stopFiltering();
     }
@@ -93,17 +77,8 @@ public final class EvalFilterStateNode extends EvalStateNode implements FilterHa
 
     public final void matchFound(EventBean event)
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".matchFound Filter node received match");
-        }
-
         if (!isStarted)
         {
-            if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-            {
-                log.debug(".matchFound Match ignored, filter was stopped");
-            }
             return;
         }
 
@@ -138,7 +113,7 @@ public final class EvalFilterStateNode extends EvalStateNode implements FilterHa
         // and the all node would newState a new listener. The remove operation and the add operation
         // therefore don't take place if the EvalEveryStateNode node sits on top of a EvalFilterStateNode node.
         boolean isQuitted = false;
-        if (!(this.getParentEvaluator() instanceof EvalStateNodeNonQuitting))
+        if (!(this.getParentEvaluator().isFilterChildNonQuitting()))
         {
             stopFiltering();
             isQuitted = true;
@@ -170,6 +145,14 @@ public final class EvalFilterStateNode extends EvalStateNode implements FilterHa
         buffer.append(" spec=");
         buffer.append(evalFilterNode.getFilterSpec());
         return buffer.toString();
+    }
+
+    public boolean isFilterStateNode() {
+        return true;
+    }
+
+    public boolean isNotOperator() {
+        return false;
     }
 
     private void startFiltering()

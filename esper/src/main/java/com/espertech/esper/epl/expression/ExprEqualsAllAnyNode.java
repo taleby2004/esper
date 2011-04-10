@@ -1,11 +1,6 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.CoercionException;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.SimpleNumberCoercer;
@@ -20,7 +15,7 @@ import java.util.Map;
 /**
  * Represents an equals-for-group (= ANY/ALL/SOME (expression list)) comparator in a expression tree.
  */
-public class ExprEqualsAllAnyNode extends ExprNode implements ExprEvaluator
+public class ExprEqualsAllAnyNode extends ExprNodeBase implements ExprEvaluator
 {
     private final boolean isNot;
     private final boolean isAll;
@@ -71,7 +66,7 @@ public class ExprEqualsAllAnyNode extends ExprNode implements ExprEvaluator
         return null;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         // Must have 2 child nodes
         if (this.getChildNodes().size() < 1)
@@ -339,7 +334,7 @@ public class ExprEqualsAllAnyNode extends ExprNode implements ExprEvaluator
                         if (leftResult == null)
                         {
                             return null;
-                        }                        
+                        }
                         hasNonNullRow = true;
                         if (!mustCoerce)
                         {
@@ -855,7 +850,7 @@ public class ExprEqualsAllAnyNode extends ExprNode implements ExprEvaluator
         }
         buffer.append("(");
 
-        String delimiter = ""; 
+        String delimiter = "";
         for (int i = 0; i < this.getChildNodes().size()-1; i++)
         {
             buffer.append(delimiter);

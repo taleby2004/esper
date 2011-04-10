@@ -16,6 +16,8 @@ import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.MultiKeyUntypedEventPair;
 import com.espertech.esper.collection.UniformPair;
+import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.io.PrintWriter;
@@ -27,7 +29,17 @@ import java.util.*;
  */
 public class EventBeanUtility
 {
-    private static final EventBean[] nullArray = new EventBean[0];
+    public static EventPropertyGetter getAssertPropertyGetter(EventType type, String propertyName) {
+        EventPropertyGetter getter = type.getGetter(propertyName);
+        if (getter == null) {
+            throw new IllegalStateException("Property " + propertyName + " not found in type " + type.getName());
+        }
+        return getter;
+    }
+
+    public static EventPropertyGetter getAssertPropertyGetter(EventType[] eventTypes, int keyStreamNum, String property) {
+        return getAssertPropertyGetter(eventTypes[keyStreamNum], property);
+    }
 
     /**
      * Resizes an array of events to a new size.
@@ -293,6 +305,16 @@ public class EventBeanUtility
         return keyValues;
     }
 
+    public static Object[] getPropertyArray(EventBean[] eventsPerStream, EventPropertyGetter[] propertyGetters, int[] streamNums)
+    {
+        Object[] keyValues = new Object[propertyGetters.length];
+        for (int i = 0; i < propertyGetters.length; i++)
+        {
+            keyValues[i] = propertyGetters[i].get(eventsPerStream[streamNums[i]]);
+        }
+        return keyValues;
+    }
+
     /**
      * Returns Multikey instance for given event and getters.
      * @param event - event to get property values from
@@ -303,6 +325,92 @@ public class EventBeanUtility
     {
         Object[] keyValues = getPropertyArray(event, propertyGetters);
         return new MultiKeyUntyped(keyValues);
+    }
+
+    public static MultiKeyUntyped getMultiKey(EventBean event, EventPropertyGetter[] propertyGetters, Class[] coercionTypes) {
+        Object[] keyValues = getPropertyArray(event, propertyGetters);
+        if (coercionTypes == null) {
+            return new MultiKeyUntyped(keyValues);
+        }
+        for (int i = 0; i < coercionTypes.length; i++)
+        {
+            Object key = keyValues[i];
+            if ((key != null) && (!key.getClass().equals(coercionTypes[i])))
+            {
+                if (key instanceof Number)
+                {
+                    key = JavaClassHelper.coerceBoxed((Number) key, coercionTypes[i]);
+                    keyValues[i] = key;
+                }
+            }
+        }
+        return new MultiKeyUntyped(keyValues);
+    }
+
+    public static MultiKeyUntyped getMultiKey(EventBean[] eventsPerStream, ExprEvaluator[] evaluators, ExprEvaluatorContext context, Class[] coercionTypes) {
+        Object[] keyValues = getPropertyArray(eventsPerStream, evaluators, context);
+        if (coercionTypes == null) {
+            return new MultiKeyUntyped(keyValues);
+        }
+        for (int i = 0; i < coercionTypes.length; i++)
+        {
+            Object key = keyValues[i];
+            if ((key != null) && (!key.getClass().equals(coercionTypes[i])))
+            {
+                if (key instanceof Number)
+                {
+                    key = JavaClassHelper.coerceBoxed((Number) key, coercionTypes[i]);
+                    keyValues[i] = key;
+                }
+            }
+        }
+        return new MultiKeyUntyped(keyValues);
+    }
+
+    private static Object[] getPropertyArray(EventBean[] eventsPerStream, ExprEvaluator[] evaluators, ExprEvaluatorContext context) {
+        Object[] keys = new Object[evaluators.length];
+        for (int i = 0; i < keys.length; i++) {
+            keys[i] = evaluators[i].evaluate(eventsPerStream, true, context);
+        }
+        return keys;
+    }
+
+    public static MultiKeyUntyped getMultiKey(EventBean[] eventPerStream, EventPropertyGetter[] propertyGetters, int[] keyStreamNums, Class[] coercionTypes) {
+        Object[] keyValues = getPropertyArray(eventPerStream, propertyGetters, keyStreamNums);
+        if (coercionTypes == null) {
+            return new MultiKeyUntyped(keyValues);
+        }
+        coerce(keyValues, coercionTypes);
+        return new MultiKeyUntyped(keyValues);
+    }
+
+    private static void coerce(Object[] keyValues, Class[] coercionTypes) {
+        for (int i = 0; i < coercionTypes.length; i++)
+        {
+            Object key = keyValues[i];
+            if ((key != null) && (!key.getClass().equals(coercionTypes[i])))
+            {
+                if (key instanceof Number)
+                {
+                    key = JavaClassHelper.coerceBoxed((Number) key, coercionTypes[i]);
+                    keyValues[i] = key;
+                }
+            }
+        }
+    }
+
+    public static Object coerce(Object target, Class coercionType) {
+        if (coercionType == null) {
+            return target;
+        }
+        if (target != null && !target.getClass().equals(coercionType))
+        {
+            if (target instanceof Number)
+            {
+                return JavaClassHelper.coerceBoxed((Number) target, coercionType);
+            }
+        }
+        return target;
     }
 
     /**
@@ -532,5 +640,49 @@ public class EventBeanUtility
             result[count++] = row.getEventBean();
         }
         return result;
+    }
+
+    public static boolean compareReferences(EventBean[] reference, EventBean[] eventsPerStream) {
+        if (reference.length != eventsPerStream.length) {
+            return false;
+        }
+        for (int i = 0; i < reference.length; i++) {
+            if (reference[i] != eventsPerStream[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static String summarize(EventBean event) {
+        if (event == null) {
+            return "(null)";
+        }
+        return event.getUnderlying().toString();
+    }
+
+    public static String summarize(EventBean[] events) {
+        if (events == null) {
+            return "(null)";
+        }
+        if (events.length == 0) {
+            return "(empty)";
+        }
+        StringWriter writer = new StringWriter();
+        String delimiter = "";
+        for (int i = 0; i < events.length; i++) {
+            writer.write(delimiter);
+            writer.write("event ");
+            writer.write(Integer.toString(i));
+            writer.write(":");
+            if (events[i] == null) {
+                writer.write("null");
+            }
+            else {
+                writer.write(events[i].getUnderlying().toString());
+            }
+            delimiter = ", ";
+        }
+        return writer.toString();
     }
 }

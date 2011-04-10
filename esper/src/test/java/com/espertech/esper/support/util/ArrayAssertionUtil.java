@@ -431,6 +431,10 @@ public class ArrayAssertionUtil
         TestCase.assertEquals(numMatches, expected.length);
     }
 
+    public static void assertPropsPerRow(Iterator<EventBean> received, String[] props, Object[][] propertiesPerRow) {
+        assertPropsPerRow(ArrayAssertionUtil.iteratorToArray(received), props, propertiesPerRow);
+    }
+
     public static void assertPropsPerRow(EventBean[] received, Object[][] propertiesPerRow)
     {
         if (propertiesPerRow == null)
@@ -571,7 +575,7 @@ public class ArrayAssertionUtil
                 return;
             }
         }
-        Assert.assertEquals(propertyNames.length, propertiesThisRow.length);
+        Assert.assertEquals(propertiesThisRow.length, propertyNames.length);
 
         for (int j = 0; j < propertiesThisRow.length; j++)
         {
@@ -589,7 +593,7 @@ public class ArrayAssertionUtil
             assertEqualsExactOrder(eventPropArray, valueArray);
             return;
         }
-        Assert.assertEquals("Error asserting property named '" + name + "'",expected,received);
+        Assert.assertEquals(message,expected,received);
     }
 
     private static Object[] toObjectArray(Object array)
@@ -629,7 +633,7 @@ public class ArrayAssertionUtil
         }
     }
 
-    public static void assertProps(Map pojo, String[] propertyNames, Object... propertiesThisRow)
+    public static void assertPropsMap(Map pojo, String[] propertyNames, Object... propertiesThisRow)
     {
         if (propertiesThisRow == null)
         {
@@ -869,6 +873,20 @@ public class ArrayAssertionUtil
         return events.toArray(new EventBean[0]);
     }
 
+    public static Object[] iteratorToArrayObject(Iterator iterator)
+    {
+        if (iterator == null)
+        {
+            Assert.fail("Null iterator");
+        }
+        ArrayList<Object> items = new ArrayList<Object>();
+        for (;iterator.hasNext();)
+        {
+            items.add(iterator.next());
+        }
+        return items.toArray(new Object[items.size()]);
+    }
+
     public static Object[] iteratorToArrayUnderlying(Iterator<EventBean> iterator)
     {
         ArrayList<Object> events = new ArrayList<Object>();
@@ -879,7 +897,7 @@ public class ArrayAssertionUtil
         return events.toArray();
     }
 
-    public static int iteratorCount(Iterator<EventBean> iterator)
+    public static <T> int iteratorCount(Iterator<T> iterator)
     {
         int count = 0;
         for (;iterator.hasNext();)
@@ -1035,6 +1053,18 @@ public class ArrayAssertionUtil
         return result;
     }
 
+    public static Object[] addArrayObjectArr(Object[] ...more)
+    {
+        List list = new ArrayList();
+        for (int i = 0; i < more.length; i++)
+        {
+            for (int j = 0; j < more[i].length; j++) {
+                list.add(more[i][j]);
+            }
+        }
+        return list.toArray();
+    }
+
     private static final Log log = LogFactory.getLog(ArrayAssertionUtil.class);
 
     public static EventBean[] sort(Iterator<EventBean> oldevents, final String property) {
@@ -1092,5 +1122,13 @@ public class ArrayAssertionUtil
         for (String value : values) {
             Assert.assertTrue(set.contains(value));
         }
+    }
+
+    public static Object[] getUnderlying(EventBean[] events) {
+        Object[] arr = new Object[events.length];
+        for (int i = 0; i < events.length; i++) {
+            arr[i] = events[i].getUnderlying();
+        }
+        return arr;
     }
 }

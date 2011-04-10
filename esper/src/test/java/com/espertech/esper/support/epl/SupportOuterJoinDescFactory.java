@@ -8,11 +8,12 @@ public class SupportOuterJoinDescFactory
 {
     public static OuterJoinDesc makeDesc(String propOne, String streamOne, String propTwo, String streamTwo, OuterJoinType type) throws Exception
     {
-        ExprIdentNode identNodeOne = new ExprIdentNode(propOne, streamOne);
-        ExprIdentNode identNodeTwo = new ExprIdentNode(propTwo, streamTwo);
+        ExprIdentNode identNodeOne = new ExprIdentNodeImpl(propOne, streamOne);
+        ExprIdentNode identNodeTwo = new ExprIdentNodeImpl(propTwo, streamTwo);
 
-        identNodeOne.validate(new SupportStreamTypeSvc3Stream(), null, null, null, null, null);
-        identNodeTwo.validate(new SupportStreamTypeSvc3Stream(), null, null, null, null, null);
+        ExprValidationContext context = ExprValidationContextFactory.make(new SupportStreamTypeSvc3Stream());
+        identNodeOne.validate(context);
+        identNodeTwo.validate(context);
         OuterJoinDesc desc = new OuterJoinDesc(type, identNodeOne, identNodeTwo, null, null);
 
         return desc;

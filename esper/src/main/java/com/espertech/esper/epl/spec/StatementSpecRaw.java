@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprSubstitutionNode;
 import com.espertech.esper.util.MetaDefItem;
 
@@ -20,6 +21,7 @@ import java.io.Serializable;
  */
 public class StatementSpecRaw implements MetaDefItem, Serializable
 {
+    private ExpressionDeclDesc expressionDeclDesc;
     private OnTriggerDesc onTriggerDesc;
     private UpdateDesc updateDesc;
     private CreateWindowDesc createWindowDesc;
@@ -282,7 +284,7 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
     }
 
     /**
-     * Sets the descriptor for create-variable statements, if this is one. 
+     * Sets the descriptor for create-variable statements, if this is one.
      * @param createVariableDesc create-variable info
      */
     public void setCreateVariableDesc(CreateVariableDesc createVariableDesc)
@@ -448,5 +450,13 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
     public void setSubstitutionParameters(List<ExprSubstitutionNode> substitutionParameters)
     {
         this.substitutionParameters = substitutionParameters;
+    }
+
+    public ExpressionDeclDesc getExpressionDeclDesc() {
+        return expressionDeclDesc;
+    }
+
+    public void setExpressionDeclDesc(ExpressionDeclDesc expressionDeclDesc) {
+        this.expressionDeclDesc = expressionDeclDesc;
     }
 }

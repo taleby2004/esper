@@ -8,18 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.view;
 
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.epl.core.EngineImportService;
-import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.epl.db.SQLParameterDesc;
-import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.SchedulingService;
-import com.espertech.esper.client.ConfigurationInformation;
+import com.espertech.esper.schedule.TimeProvider;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
@@ -46,5 +47,8 @@ public interface ValidatedView
                          ConfigurationInformation configSnapshot,
                          SchedulingService schedulingService,
                          String engineURI,
-                         Map<Integer, List<ExprNode>> sqlParameters) throws ExprValidationException;
+                         Map<Integer, List<ExprNode>> sqlParameters,
+                         EventAdapterService eventAdapterService,
+                         String statementName,
+                         Annotation[] annotations) throws ExprValidationException;
 }

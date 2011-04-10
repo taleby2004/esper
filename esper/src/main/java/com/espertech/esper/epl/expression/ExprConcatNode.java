@@ -9,18 +9,13 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
 
 import java.util.Map;
 
 /**
  * Represents a simple Math (+/-/divide/*) in a filter expression tree.
  */
-public class ExprConcatNode extends ExprNode implements ExprEvaluator
+public class ExprConcatNode extends ExprNodeBase implements ExprEvaluator
 {
     private StringBuffer buffer;
     private transient ExprEvaluator[] evaluators;
@@ -43,7 +38,7 @@ public class ExprConcatNode extends ExprNode implements ExprEvaluator
         return null;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() < 2)
         {

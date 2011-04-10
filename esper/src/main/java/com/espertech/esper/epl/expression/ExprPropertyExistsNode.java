@@ -8,19 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.schedule.TimeProvider;
 
 import java.util.Map;
 
 /**
  * Represents the EXISTS(property) function in an expression tree.
  */
-public class ExprPropertyExistsNode extends ExprNode implements ExprEvaluator
+public class ExprPropertyExistsNode extends ExprNodeBase implements ExprEvaluator
 {
     private ExprIdentNode identNode;
     private static final long serialVersionUID = -6304444201237275628L;
@@ -37,7 +32,7 @@ public class ExprPropertyExistsNode extends ExprNode implements ExprEvaluator
         return this;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 1)
         {
@@ -68,7 +63,7 @@ public class ExprPropertyExistsNode extends ExprNode implements ExprEvaluator
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        return identNode.evaluatePropertyExists(eventsPerStream, isNewData);
+        return identNode.getExprEvaluatorIdent().evaluatePropertyExists(eventsPerStream, isNewData);
     }
 
     public String toExpressionString()

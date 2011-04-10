@@ -8,10 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKeyUntyped;
-import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,7 +22,7 @@ import java.util.Set;
  * Contains the state collected by an "every" operator. The state includes handles to any sub-listeners
  * started by the operator.
  */
-public final class EvalEveryDistinctStateNode extends EvalStateNode implements Evaluator, EvalStateNodeNonQuitting
+public final class EvalEveryDistinctStateNode extends EvalStateNode implements Evaluator
 {
     private final EvalEveryDistinctNode everyDistinctNode;
     private final Map<EvalStateNode, Set<MultiKeyUntyped>> spawnedNodes;
@@ -43,11 +40,6 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
     {
         super(parentNode, null);
 
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".constructor");
-        }
-
         this.everyDistinctNode = everyDistinctNode;
         this.spawnedNodes = new LinkedHashMap<EvalStateNode, Set<MultiKeyUntyped>>();
         this.beginState = beginState.shallowCopy();
@@ -63,11 +55,6 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
 
     public final void start()
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".start Starting single child");
-        }
-
         if (spawnedNodes.size() != 1)
         {
             throw new IllegalStateException("EVERY state node is expected to have single child state node");
@@ -94,11 +81,6 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".evaluateFalse");
-        }
-
         fromNode.quit();
         spawnedNodes.remove(fromNode);
 
@@ -124,11 +106,6 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
 
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".evaluateTrue fromNode=" + fromNode  + "  isQuitted=" + isQuitted);
-        }
-
         // determine if this evaluation has been seen before from the same node
         MultiKeyUntyped matchEventKey = PatternExpressionUtil.getKeys(matchEvent, everyDistinctNode);
         boolean haveSeenThis = false;
@@ -151,7 +128,7 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
         }
 
         // See explanation in EvalFilterStateNode for the type check
-        if (fromNode instanceof EvalFilterStateNode)
+        if (fromNode.isFilterStateNode())
         {
             // We do not need to newState new listeners here, since the filter state node below this node did not quit
         }
@@ -190,11 +167,6 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
 
     public final void quit()
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".quit Quitting EVERY-node all children");
-        }
-
         // Stop all child nodes
         for (EvalStateNode child : spawnedNodes.keySet())
         {
@@ -215,6 +187,18 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
         }
 
         return data;
+    }
+
+    public boolean isFilterStateNode() {
+        return false;
+    }
+
+    public boolean isNotOperator() {
+        return false;
+    }
+
+    public boolean isFilterChildNonQuitting() {
+        return true;
     }
 
     public final String toString()

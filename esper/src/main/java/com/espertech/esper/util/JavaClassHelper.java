@@ -8,24 +8,23 @@
  **************************************************************************************/
 package com.espertech.esper.util;
 
-import com.espertech.esper.event.EventAdapterException;
-import com.espertech.esper.type.*;
-import com.espertech.esper.epl.expression.ExprConstantNode;
-import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.client.annotation.Hook;
+import com.espertech.esper.client.annotation.HookType;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
-import com.espertech.esper.client.annotation.HookType;
-import com.espertech.esper.client.annotation.Hook;
-
-import java.util.*;
-import java.math.BigInteger;
-import java.math.BigDecimal;
-import java.lang.reflect.*;
-import java.lang.annotation.Annotation;
-
+import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.event.EventAdapterException;
+import com.espertech.esper.type.*;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.io.StringWriter;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Helper for questions about Java classes such as
@@ -451,10 +450,18 @@ public class JavaClassHelper
             }
             return typeOne;
         }
+        if (typeOne == null) {
+            return typeTwo;
+        }
+        if (typeTwo == null) {
+            return typeOne;
+        }
         if (!isNumeric(typeOne) || !isNumeric(typeTwo))
         {
+            String typeOneName = typeOne == null ? "(null)" : typeOne.getName();
+            String typeTwoName = typeTwo == null ? "(null)" : typeTwo.getName();
             throw new CoercionException("Types cannot be compared: " +
-                    typeOne.getName() + " and " + typeTwo.getName());
+                     typeOneName + " and " + typeTwoName);
         }
         return getArithmaticCoercionType(typeOne, typeTwo);
     }
@@ -743,6 +750,9 @@ public class JavaClassHelper
         {
             for (Class type : types)
             {
+                if (types[0] == type) {
+                    continue;
+                }
                 if (isJavaBuiltinDataType(type))
                 {
                     throw new CoercionException("Cannot coerce to " + types[0].getName() + " type " + type.getName());
@@ -1210,7 +1220,33 @@ public class JavaClassHelper
         return true;
     }
 
-    private static void getSuperInterfaces(Class clazz, Set<Class> result)
+    public static Class[] getSuperInterfaces(Class clazz)
+    {
+        Set<Class> interfaces = new HashSet<Class>();
+        Class[] declaredInterfaces = clazz.getInterfaces();
+
+        for (int i = 0; i < declaredInterfaces.length; i++)
+        {
+            interfaces.add(declaredInterfaces[i]);
+            getSuperInterfaces(declaredInterfaces[i], interfaces);
+        }
+
+        Set<Class> superClasses = new HashSet<Class>();
+        getSuperClasses(clazz, superClasses);
+        for (Class superClass : superClasses) {
+            declaredInterfaces = superClass.getInterfaces();
+
+            for (int i = 0; i < declaredInterfaces.length; i++)
+            {
+                interfaces.add(declaredInterfaces[i]);
+                getSuperInterfaces(declaredInterfaces[i], interfaces);
+            }
+        }
+
+        return interfaces.toArray(new Class[declaredInterfaces.length]);
+    }
+
+    public static void getSuperInterfaces(Class clazz, Set<Class> result)
     {
         Class interfaces[] = clazz.getInterfaces();
 
@@ -1498,5 +1534,41 @@ public class JavaClassHelper
             return clazz.getComponentType().getName() + "(Array)";
         }
         return clazz.getName();
+    }
+
+    public static Method getMethodByName(Class clazz, String methodName) {
+        for (Method m : clazz.getMethods()) {
+            if (m.getName().equals(methodName)) {
+                return m;
+            }
+        }
+        throw new IllegalStateException("Expected '" + methodName + "' method not found on interface '" + clazz.getName());
+    }
+
+    public static void writeInstance(StringWriter writer, Object instance, boolean fullyQualified) {
+        if (instance == null) {
+            writer.write("(null)");
+            return;
+        }
+
+        String className;
+        if (fullyQualified) {
+            className = instance.getClass().getName();
+        }
+        else {
+            className = instance.getClass().getSimpleName();
+        }
+        writeInstance(writer, className, instance);
+    }
+
+    public static void writeInstance(StringWriter writer, String title, Object instance) {
+        writer.write(title);
+        writer.write("@");
+        if (instance == null) {
+            writer.write("(null)");
+        }
+        else {
+            writer.write(Integer.toHexString(System.identityHashCode(instance)));
+        }
     }
 }

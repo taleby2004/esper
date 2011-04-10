@@ -9,12 +9,7 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.view.ViewCapPriorEventAccess;
 import com.espertech.esper.view.window.RandomAccessByIndex;
 import com.espertech.esper.view.window.RelativeAccessByEventNIndex;
@@ -24,7 +19,7 @@ import java.util.Map;
 /**
  * Represents the 'prior' prior event function in an expression node tree.
  */
-public class ExprPriorNode extends ExprNode implements ViewResourceCallback, ExprEvaluator
+public class ExprPriorNode extends ExprNodeBase implements ViewResourceCallback, ExprEvaluator
 {
     private Class resultType;
     private int streamNumber;
@@ -52,7 +47,7 @@ public class ExprPriorNode extends ExprNode implements ViewResourceCallback, Exp
         return null;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if (this.getChildNodes().size() != 2)
         {
@@ -68,7 +63,7 @@ public class ExprPriorNode extends ExprNode implements ViewResourceCallback, Exp
             throw new ExprValidationException("Prior function requires an integer index parameter");
         }
 
-        Object value = constantNode.getExprEvaluator().evaluate(null, false, exprEvaluatorContext);
+        Object value = constantNode.getExprEvaluator().evaluate(null, false, validationContext.getExprEvaluatorContext());
         constantIndexNumber = ((Number) value).intValue();
         evaluator = this.getChildNodes().get(1).getExprEvaluator();
 
@@ -89,12 +84,12 @@ public class ExprPriorNode extends ExprNode implements ViewResourceCallback, Exp
             throw new ExprValidationException("Previous function requires an event property as parameter");
         }
 
-        if (viewResourceDelegate == null)
+        if (validationContext.getViewResourceDelegate() == null)
         {
             throw new ExprValidationException("Prior function cannot be used in this context");
         }
         // Request a callback that provides the required access
-        if (!viewResourceDelegate.requestCapability(streamNumber, new ViewCapPriorEventAccess(constantIndexNumber), this))
+        if (!validationContext.getViewResourceDelegate().requestCapability(streamNumber, new ViewCapPriorEventAccess(constantIndexNumber), this))
         {
             throw new ExprValidationException("Prior function requires the prior event view resource");
         }

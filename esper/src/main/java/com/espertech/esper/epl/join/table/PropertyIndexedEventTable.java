@@ -8,17 +8,15 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.table;
 
-import java.util.*;
-
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.util.ExecutionPathDebugLog;
-
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.event.EventBeanUtility;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.*;
 
 /**
  * Index that organizes events by the event property values into hash buckets. Based on a HashMap
@@ -31,7 +29,6 @@ public class PropertyIndexedEventTable implements EventTable
 {
     private final int streamNum;
     private final String[] propertyNames;
-    private final Class[] propertyCoercedTypes;
 
     /**
      * Getters for properties.
@@ -48,13 +45,11 @@ public class PropertyIndexedEventTable implements EventTable
      * @param streamNum - the stream number that is indexed
      * @param eventType - types of events indexed
      * @param propertyNames - property names to use for indexing
-     * @param propertyCoercedTypes - property types
      */
-    public PropertyIndexedEventTable(int streamNum, EventType eventType, String[] propertyNames, Class[] propertyCoercedTypes)
+    public PropertyIndexedEventTable(int streamNum, EventType eventType, String[] propertyNames)
     {
         this.streamNum = streamNum;
         this.propertyNames = propertyNames;
-        this.propertyCoercedTypes = propertyCoercedTypes;
 
         // Init getters
         propertyGetters = new EventPropertyGetter[propertyNames.length];
@@ -148,11 +143,6 @@ public class PropertyIndexedEventTable implements EventTable
         Set<EventBean> events = propertyIndex.get(key);
         if (events == null)
         {
-            if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-            {
-                log.debug(".remove Event could not be located in index, event " + event);
-            }
-
             return;
         }
 
@@ -160,10 +150,6 @@ public class PropertyIndexedEventTable implements EventTable
         {
             // Not an error, its possible that an old-data event is artificial (such as for statistics) and
             // thus did not correspond to a new-data event raised earlier.
-            if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-            {
-                log.debug(".remove Event could not be located in index, event " + event);
-            }
             return;
         }
 
@@ -180,7 +166,7 @@ public class PropertyIndexedEventTable implements EventTable
 
     public Iterator<EventBean> iterator()
     {
-        return new PropertyIndexedEventTableIterator(propertyIndex);
+        return new PropertyIndexedEventTableIterator<MultiKeyUntyped>(propertyIndex);
     }
 
     public void clear()
@@ -196,18 +182,13 @@ public class PropertyIndexedEventTable implements EventTable
         return propertyNames;
     }
 
-    /**
-     * Returns property types.
-     * @return types
-     */
-    public Class[] getPropertyCoercedTypes()
-    {
-        return propertyCoercedTypes;
+    public String toString() {
+        return toQueryPlan();
     }
 
-    public String toString()
+    public String toQueryPlan()
     {
-        return "PropertyIndexedEventTable" +
+        return this.getClass().getSimpleName() +
                 " streamNum=" + streamNum +
                 " propertyNames=" + Arrays.toString(propertyNames);
     }

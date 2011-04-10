@@ -8,9 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.plan;
 
-import com.espertech.esper.epl.join.exec.TableLookupStrategy;
+import com.espertech.esper.epl.join.exec.base.JoinExecTableLookupStrategy;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.virtualdw.VirtualDWView;
+
+import java.util.Map;
 
 /**
  * Abstract specification on how to perform a table lookup.
@@ -19,7 +22,10 @@ public abstract class TableLookupPlan
 {
     private int lookupStream;
     private int indexedStream;
-    private int indexNum;
+    private String indexNum;
+
+    public abstract JoinExecTableLookupStrategy makeStrategyInternal(EventTable eventTable, EventType[] eventTypes);
+    public abstract TableLookupKeyDesc getKeyDescriptor();
 
     /**
      * Instantiates the lookup plan into a execution strategy for the lookup.
@@ -27,7 +33,13 @@ public abstract class TableLookupPlan
      * @param eventTypes - types of events in stream
      * @return lookup strategy instance
      */
-    public abstract TableLookupStrategy makeStrategy(EventTable[][] indexesPerStream, EventType[] eventTypes);
+    public final JoinExecTableLookupStrategy makeStrategy(Map<String,EventTable>[] indexesPerStream, EventType[] eventTypes, VirtualDWView[] viewExternals) {
+        EventTable eventTable = indexesPerStream[this.getIndexedStream()].get(getIndexNum());
+        if (viewExternals[indexedStream] != null) {
+            return viewExternals[indexedStream].getJoinLookupStrategy(eventTable, getKeyDescriptor(), lookupStream);
+        }
+        return makeStrategyInternal(eventTable, eventTypes);
+    }
 
     /**
      * Ctor.
@@ -35,7 +47,7 @@ public abstract class TableLookupPlan
      * @param indexedStream - - stream number of stream that is being access via index/table
      * @param indexNum - index to use for lookup
      */
-    protected TableLookupPlan(int lookupStream, int indexedStream, int indexNum)
+    protected TableLookupPlan(int lookupStream, int indexedStream, String indexNum)
     {
         this.lookupStream = lookupStream;
         this.indexedStream = indexedStream;
@@ -64,7 +76,7 @@ public abstract class TableLookupPlan
      * Returns index number to use for looking up in.
      * @return index number
      */
-    public int getIndexNum()
+    public String getIndexNum()
     {
         return indexNum;
     }

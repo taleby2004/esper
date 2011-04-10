@@ -1,10 +1,5 @@
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.client.EventBean;
 
 import java.util.Map;
@@ -13,7 +8,7 @@ import java.util.Map;
  * A placeholder expression for view/pattern object parameters that allow
  * sorting expression values ascending or descending.
  */
-public class ExprOrderedExpr extends ExprNode implements ExprEvaluator
+public class ExprOrderedExpr extends ExprNodeBase implements ExprEvaluator
 {
     private final boolean isDescending;
     private transient ExprEvaluator evaluator;
@@ -62,7 +57,7 @@ public class ExprOrderedExpr extends ExprNode implements ExprEvaluator
         return other.isDescending == this.isDescending;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         evaluator = getChildNodes().get(0).getExprEvaluator();
         // always valid

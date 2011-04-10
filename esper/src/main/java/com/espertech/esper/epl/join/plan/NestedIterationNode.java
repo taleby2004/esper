@@ -9,15 +9,18 @@
 package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.join.exec.ExecNode;
+import com.espertech.esper.epl.join.exec.base.ExecNode;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
-import com.espertech.esper.epl.join.exec.NestedIterationExecNode;
+import com.espertech.esper.epl.join.exec.base.NestedIterationExecNode;
+import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.view.Viewable;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Plan to perform a nested iteration over child nodes.
@@ -60,7 +63,7 @@ public class NestedIterationNode extends QueryPlanNode
         return childNodes;
     }
 
-    public ExecNode makeExec(EventTable[][] indexPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexList)
+    public ExecNode makeExec(Map<String, EventTable>[] indexPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexList, VirtualDWView[] viewExternal)
     {
         if (childNodes.isEmpty())
         {
@@ -70,10 +73,17 @@ public class NestedIterationNode extends QueryPlanNode
         NestedIterationExecNode execNode = new NestedIterationExecNode(nestingOrder);
         for (QueryPlanNode child : childNodes)
         {
-            ExecNode childExec = child.makeExec(indexPerStream, streamTypes, streamViews, historicalStreamIndexList);
+            ExecNode childExec = child.makeExec(indexPerStream, streamTypes, streamViews, historicalStreamIndexList, viewExternal);
             execNode.addChildNode(childExec);
         }
         return execNode;
+    }
+
+    public void addIndexes(HashSet<String> usedIndexes) {
+        for (QueryPlanNode child : childNodes)
+        {
+            child.addIndexes(usedIndexes);
+        }
     }
 
     public void print(IndentWriter indentWriter)

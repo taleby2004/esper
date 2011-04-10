@@ -9,13 +9,17 @@
 package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.join.exec.ExecNode;
-import com.espertech.esper.epl.join.exec.TableLookupStrategy;
-import com.espertech.esper.epl.join.exec.TableOuterLookupExecNode;
+import com.espertech.esper.epl.join.exec.base.ExecNode;
+import com.espertech.esper.epl.join.exec.base.JoinExecTableLookupStrategy;
+import com.espertech.esper.epl.join.exec.base.TableOuterLookupExecNode;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.util.IndentWriter;
+import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.view.Viewable;
+
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Specifies exection of a table lookup with outer join using the a specified lookup plan.
@@ -48,10 +52,14 @@ public class TableOuterLookupNode extends QueryPlanNode
                " tableLookupPlan=" + tableLookupPlan);
     }
 
-    public ExecNode makeExec(EventTable[][] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists)
+    public ExecNode makeExec(Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
     {
-        TableLookupStrategy lookupStrategy = tableLookupPlan.makeStrategy(indexesPerStream, streamTypes);
+        JoinExecTableLookupStrategy lookupStrategy = tableLookupPlan.makeStrategy(indexesPerStream, streamTypes, viewExternal);
 
         return new TableOuterLookupExecNode(tableLookupPlan.getIndexedStream(), lookupStrategy);
+    }
+
+    public void addIndexes(HashSet<String> usedIndexes) {
+        usedIndexes.add(tableLookupPlan.getIndexNum());
     }
 }

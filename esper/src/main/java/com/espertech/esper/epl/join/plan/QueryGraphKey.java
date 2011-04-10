@@ -24,12 +24,6 @@ public class QueryGraphKey
      */
     public QueryGraphKey(int streamOne, int streamTwo)
     {
-        if (streamOne > streamTwo)
-        {
-            int temp = streamTwo;
-            streamTwo = streamOne;
-            streamOne = temp;
-        }
         streams = new UniformPair<Integer>(streamOne, streamTwo);
     }
 

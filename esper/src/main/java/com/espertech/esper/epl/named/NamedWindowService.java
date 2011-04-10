@@ -17,7 +17,6 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.view.ViewProcessingException;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
@@ -63,7 +62,7 @@ public interface NamedWindowService
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */
-    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext, Annotation[] annotations) throws ViewProcessingException;
+    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext, boolean isEnableSubqueryIndexShare) throws ViewProcessingException;
 
     /**
      * Returns the processing instance for a given named window.
@@ -126,4 +125,11 @@ public interface NamedWindowService
      * @param observer to remove
      */
     public void removeObserver(NamedWindowLifecycleObserver observer);
+
+    /**
+     * Returns an index descriptor array describing all available indexes for the named window.
+     * @param windowName window name
+     * @return indexes
+     */
+    public IndexMultiKey[] getNamedWindowIndexes(String windowName);
 }

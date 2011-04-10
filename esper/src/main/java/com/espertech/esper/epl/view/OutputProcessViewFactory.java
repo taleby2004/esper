@@ -8,9 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
+import com.espertech.esper.client.annotation.Audit;
 import com.espertech.esper.core.InternalEventRouter;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
+import com.espertech.esper.epl.expression.ExprValidationContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.*;
 
@@ -65,11 +67,12 @@ public class OutputProcessViewFactory
         boolean isGrouped = statementSpec.getGroupByExpressions() != null && !statementSpec.getGroupByExpressions().isEmpty();
 
         if (outputLimitSpec != null) {
+            ExprValidationContext validationContext = new ExprValidationContext(null, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), statementContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getAnnotations());
             if (outputLimitSpec.getAfterTimePeriodExpr() != null) {
-                outputLimitSpec.getAfterTimePeriodExpr().validate(null, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), statementContext);
+                outputLimitSpec.getAfterTimePeriodExpr().validate(validationContext);
             }
             if (outputLimitSpec.getTimePeriodExpr() != null) {
-                outputLimitSpec.getTimePeriodExpr().validate(null, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), statementContext);
+                outputLimitSpec.getTimePeriodExpr().validate(validationContext);
             }
         }
 
@@ -93,13 +96,20 @@ public class OutputProcessViewFactory
             }
             else
             {
+                boolean isWithHavingClause = statementSpec.getHavingExprRootNode() != null;
                 if (outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.SNAPSHOT)
                 {
-                    outputProcessView = new OutputProcessViewSnapshot(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext, isDistinct, isGrouped);
+                    outputProcessView = new OutputProcessViewSnapshot(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext, isDistinct, isGrouped, isWithHavingClause);
+                }
+                // For FIRST without groups we are using a special logic that integrates the first-flag, in order to still conveniently use all sorts of output conditions.
+                // FIRST with group-by is handled by setting the output condition to null (OutputConditionNull) and letting the ResultSetProcessor handle first-per-group.
+                // Without having-clause there is no required order of processing, thus also use regular policy.
+                else if (outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.FIRST && statementSpec.getGroupByExpressions().isEmpty() && isWithHavingClause) {
+                    outputProcessView = new OutputProcessViewPolicyFirst(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext, isDistinct, false, isWithHavingClause);
                 }
                 else
                 {
-                    outputProcessView = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext, isDistinct, isGrouped);
+                    outputProcessView = new OutputProcessViewPolicy(resultSetProcessor, outputStrategy, isRouted, streamCount, outputLimitSpec, statementContext, isDistinct, isGrouped, isWithHavingClause);
                 }
             }
         }

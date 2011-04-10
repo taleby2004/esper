@@ -12,7 +12,7 @@ package com.espertech.esper.filter;
 /**
  * Holds a range of double values with a minimum (start) value and a maximum (end) value.
  */
-public final class DoubleRange
+public final class DoubleRange implements Range
 {
     private Double min;
     private Double max;
@@ -56,6 +56,14 @@ public final class DoubleRange
      */
     public final Double getMin()
     {
+        return min;
+    }
+
+    public Object getHighEndpoint() {
+        return max;
+    }
+
+    public Object getLowEndpoint() {
         return min;
     }
 

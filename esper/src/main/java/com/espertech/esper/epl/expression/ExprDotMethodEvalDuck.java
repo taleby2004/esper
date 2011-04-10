@@ -2,6 +2,7 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
@@ -86,8 +87,7 @@ public class ExprDotMethodEvalDuck implements ExprDotEval
         return null;
     }
 
-    public Class getResultType()
-    {
-        return Object.class;
+    public ExprDotEvalTypeInfo getTypeInfo() {
+        return ExprDotEvalTypeInfo.scalarOrUnderlying(Object.class);
     }
 }

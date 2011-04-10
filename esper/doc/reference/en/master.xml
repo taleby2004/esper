@@ -12,25 +12,21 @@
 	<!ENTITY references SYSTEM "modules/references.xml">
 	<!ENTITY operatorreference SYSTEM "modules/operatorreference.xml">
 	<!ENTITY functionreference SYSTEM "modules/functionreference.xml">
+	<!ENTITY enumerationreference SYSTEM "modules/enumerationreference.xml">
+	<!ENTITY datetimereference SYSTEM "modules/datetimereference.xml">
 	<!ENTITY viewreference SYSTEM "modules/viewreference.xml">
 	<!ENTITY processingmodel SYSTEM "modules/processingmodel.xml">
 	<!ENTITY extension SYSTEM "modules/extension.xml">
     <!ENTITY performance SYSTEM "modules/performance.xml">
     <!ENTITY appendix_outputspec SYSTEM "modules/appendix_outputspec.xml">
     <!ENTITY appendix_keywords SYSTEM "modules/appendix_keywords.xml">
-	<!ENTITY packaging_deployment SYSTEM "modules/packaging_deployment.xml">
+	<!ENTITY devlifecycle SYSTEM "modules/devlifecycle.xml">
 ]>
-<!-- Terminology notes
-
-- We write "an A event" to mean an event of type A.
-  
-
--->
 <book lang="en">
 	<bookinfo>
 		<title>Esper - Event Stream and Complex Event Processing for Java</title>
 		<subtitle>Reference Documentation</subtitle>
-		<releaseinfo>4.1.0</releaseinfo>
+		<releaseinfo>4.2.0</releaseinfo>
 		<copyright>
 			<year>2011</year>
 			<holder>EsperTech Inc.</holder>
@@ -129,13 +125,17 @@
 
     &functionreference;
 
+    &enumerationreference;
+
+    &datetimereference;
+
     &viewreference;
 
     &api;
 
     &configuration;
 
-    &packaging_deployment;
+    &devlifecycle;
 
     &extension;
 

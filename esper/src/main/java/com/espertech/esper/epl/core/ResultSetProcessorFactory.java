@@ -97,6 +97,7 @@ public class ResultSetProcessorFactory
 
         // Validate selection expressions, if any (could be wildcard i.e. empty list)
         List<SelectClauseExprCompiledSpec> namedSelectionList = new LinkedList<SelectClauseExprCompiledSpec>();
+        ExprValidationContext validationContext = new ExprValidationContext(typeService, stmtContext.getMethodResolutionService(), viewResourceDelegate, stmtContext.getSchedulingService(), stmtContext.getVariableService(),stmtContext, stmtContext.getEventAdapterService(), stmtContext.getStatementName(), stmtContext.getAnnotations());
         for (int i = 0; i < selectClauseSpec.getSelectExprList().size(); i++)
         {
             // validate element
@@ -104,7 +105,7 @@ public class ResultSetProcessorFactory
             if (element instanceof SelectClauseExprCompiledSpec)
             {
                 SelectClauseExprCompiledSpec expr = (SelectClauseExprCompiledSpec) element;
-                ExprNode validatedExpression = expr.getSelectExpression().getValidatedSubtree(typeService, stmtContext.getMethodResolutionService(), viewResourceDelegate, stmtContext.getSchedulingService(), stmtContext.getVariableService(),stmtContext);
+                ExprNode validatedExpression = ExprNodeUtil.getValidatedSubtree(expr.getSelectExpression(), validationContext);
 
                 // determine an element name if none assigned
                 String asName = expr.getAssignedName();
@@ -194,7 +195,7 @@ public class ResultSetProcessorFactory
                 throw new ExprValidationException("Subselects not allowed within group-by");
             }
 
-            ExprNode validatedGroupBy = groupByNodes.get(i).getValidatedSubtree(typeService, stmtContext.getMethodResolutionService(), viewResourceDelegate, stmtContext.getSchedulingService(), stmtContext.getVariableService(),stmtContext);
+            ExprNode validatedGroupBy = ExprNodeUtil.getValidatedSubtree(groupByNodes.get(i), validationContext);
             groupByNodes.set(i, validatedGroupBy);
             groupByTypes[i] = validatedGroupBy.getExprEvaluator().getType();
         }
@@ -211,7 +212,7 @@ public class ResultSetProcessorFactory
                 throw new ExprValidationException("Subselects not allowed within having-clause");
             }
 
-            optionalHavingNode = optionalHavingNode.getValidatedSubtree(typeService, stmtContext.getMethodResolutionService(), viewResourceDelegate, stmtContext.getSchedulingService(), stmtContext.getVariableService(), stmtContext);
+            optionalHavingNode = ExprNodeUtil.getValidatedSubtree(optionalHavingNode, validationContext);
         }
 
         // Validate order-by expressions, if any (could be empty list for no order-by)
@@ -228,7 +229,7 @@ public class ResultSetProcessorFactory
             }
 
             Boolean isDescending = orderByList.get(i).isDescending();
-        	OrderByItem validatedOrderBy = new OrderByItem(orderByNode.getValidatedSubtree(typeService, stmtContext.getMethodResolutionService(), viewResourceDelegate, stmtContext.getSchedulingService(), stmtContext.getVariableService(), stmtContext), isDescending);
+        	OrderByItem validatedOrderBy = new OrderByItem(ExprNodeUtil.getValidatedSubtree(orderByNode, validationContext), isDescending);
         	orderByList.set(i, validatedOrderBy);
         }
 
@@ -250,7 +251,7 @@ public class ResultSetProcessorFactory
         List<ExprAggregateNode> selectAggregateExprNodes = new LinkedList<ExprAggregateNode>();
         for (SelectClauseExprCompiledSpec element : namedSelectionList)
         {
-            ExprAggregateNode.getAggregatesBottomUp(element.getSelectExpression(), selectAggregateExprNodes);
+            ExprAggregateNodeUtil.getAggregatesBottomUp(element.getSelectExpression(), selectAggregateExprNodes);
         }
         if (!allowAggregation && !selectAggregateExprNodes.isEmpty())
         {
@@ -262,7 +263,7 @@ public class ResultSetProcessorFactory
         Set<Pair<Integer, String>> propertiesAggregatedHaving = new HashSet<Pair<Integer, String>>();
         if (optionalHavingNode != null)
         {
-            ExprAggregateNode.getAggregatesBottomUp(optionalHavingNode, havingAggregateExprNodes);
+            ExprAggregateNodeUtil.getAggregatesBottomUp(optionalHavingNode, havingAggregateExprNodes);
             propertiesAggregatedHaving = ExprNodeUtility.getAggregatedProperties(havingAggregateExprNodes);
         }
         if (!allowAggregation && !havingAggregateExprNodes.isEmpty())
@@ -276,7 +277,7 @@ public class ResultSetProcessorFactory
         {
             for (ExprNode orderByNode : orderByNodes)
             {
-                ExprAggregateNode.getAggregatesBottomUp(orderByNode, orderByAggregateExprNodes);
+                ExprAggregateNodeUtil.getAggregatesBottomUp(orderByNode, orderByAggregateExprNodes);
             }
             if (!allowAggregation && !orderByAggregateExprNodes.isEmpty())
             {
@@ -302,7 +303,7 @@ public class ResultSetProcessorFactory
         // Construct the processor for evaluating the select clause
         SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(stmtContext.getDynamicReferenceEventTypes());
         SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(selectClauseSpec.getSelectExprList(), isUsingWildcard, insertIntoDesc, statementSpecCompiled.getForClauseSpec(), typeService, stmtContext.getEventAdapterService(), stmtContext.getStatementResultService(), stmtContext.getValueAddEventService(), selectExprEventTypeRegistry, stmtContext.getMethodResolutionService(), stmtContext,
-                stmtContext.getVariableService(), stmtContext.getTimeProvider(), stmtContext.getEngineURI(), stmtContext.getStatementId());
+                stmtContext.getVariableService(), stmtContext.getTimeProvider(), stmtContext.getEngineURI(), stmtContext.getStatementId(), stmtContext.getStatementName(), stmtContext.getAnnotations());
 
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesGroupBy = getGroupByProperties(groupByNodes);
@@ -313,7 +314,8 @@ public class ResultSetProcessorFactory
         validateGroupBy(groupByNodes);
 
         // Validate the having-clause (selected aggregate nodes and all in group-by are allowed)
-        if (optionalHavingNode != null)
+        boolean hasAggregation = (!selectAggregateExprNodes.isEmpty()) || (!havingAggregateExprNodes.isEmpty()) || (!orderByAggregateExprNodes.isEmpty()) || (!propertiesAggregatedHaving.isEmpty());
+        if (optionalHavingNode != null && hasAggregation)
         {
             validateHaving(propertiesGroupBy, optionalHavingNode);
         }
@@ -365,7 +367,6 @@ public class ResultSetProcessorFactory
             return new ResultSetProcessorSimple(selectExprProcessor, orderByProcessor, optionHavingEval, isSelectRStream, stmtContext);
         }
 
-        boolean hasAggregation = (!selectAggregateExprNodes.isEmpty()) || (!havingAggregateExprNodes.isEmpty()) || (!orderByAggregateExprNodes.isEmpty()) || (!propertiesAggregatedHaving.isEmpty());
         if ((groupByNodes.isEmpty()) && hasAggregation)
         {
             // (3)
@@ -453,7 +454,7 @@ public class ResultSetProcessorFactory
         List<ExprAggregateNode> aggregateNodesHaving = new LinkedList<ExprAggregateNode>();
         if (aggregateNodesHaving != null)
         {
-            ExprAggregateNode.getAggregatesBottomUp(havingNode, aggregateNodesHaving);
+            ExprAggregateNodeUtil.getAggregatesBottomUp(havingNode, aggregateNodesHaving);
         }
 
         // Any non-aggregated properties must occur in the group-by clause (if there is one)
@@ -481,7 +482,7 @@ public class ResultSetProcessorFactory
         List<ExprAggregateNode> aggNodes = new LinkedList<ExprAggregateNode>();
         for (ExprNode groupByNode : groupByNodes)
         {
-            ExprAggregateNode.getAggregatesBottomUp(groupByNode, aggNodes);
+            ExprAggregateNodeUtil.getAggregatesBottomUp(groupByNode, aggNodes);
             if (!aggNodes.isEmpty())
             {
                 throw new ExprValidationException("Group-by expressions cannot contain aggregate functions");

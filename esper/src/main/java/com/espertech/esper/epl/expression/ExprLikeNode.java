@@ -8,21 +8,16 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.LikeUtil;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.schedule.TimeProvider;
 
 import java.util.Map;
 
 /**
  * Represents the like-clause in an expression tree.
  */
-public class ExprLikeNode extends ExprNode implements ExprEvaluator
+public class ExprLikeNode extends ExprNodeBase implements ExprEvaluator
 {
     private final boolean isNot;
 
@@ -48,7 +43,7 @@ public class ExprLikeNode extends ExprNode implements ExprEvaluator
         return this;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         if ((this.getChildNodes().size() != 2) && (this.getChildNodes().size() != 3))
         {

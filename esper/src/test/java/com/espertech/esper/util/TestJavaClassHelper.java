@@ -7,11 +7,11 @@ import java.io.BufferedReader;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
-import java.lang.reflect.Method;
-import java.lang.reflect.Field;
 
 public class TestJavaClassHelper extends TestCase
 {
@@ -804,7 +804,7 @@ public class TestJavaClassHelper extends TestCase
                 {"getList", String.class},
                 {"getListObject", Object.class},
                 {"getListUndefined", null},
-                {"getIterable", Integer.class},
+                {"getIterator", Integer.class},
                 {"getNested", MyClassWithGetters.class},
                 {"getIntPrimitive", null},
                 {"getIntBoxed", null},
@@ -897,7 +897,7 @@ public class TestJavaClassHelper extends TestCase
         public ArrayList<Object> getListObject(){return null;}
         public ArrayList getListUndefined(){return null;}
         public ArrayList<String> getList(){return null;}
-        public Iterable<Integer> getIterable(){return null;}
+        public Iterator<Integer> getIterator(){return null;}
         public Set<MyClassWithGetters> getNested(){return null;}
         public Integer getIntBoxed(){return null;}
         public int getIntPrimitive(){return 1;}

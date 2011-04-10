@@ -1,19 +1,30 @@
-Event Stream Intelligence with Esper and NEsper 
+Event Processing with Esper and NEsper 
 
-	Esper is a component for CEP and ESP applications, available for Java as Esper, and for .NET as NEsper.
+	Esper is a component for complex event processing (CEP), available for Java as Esper, and for .NET as NEsper.
 
 	Esper and NEsper enable rapid development of applications that process large volumes of incoming messages or events. Esper and NEsper filter 
 	and analyze events in various ways, and respond to conditions of interest in real-time.
 	
 Technology Introduction
 
-	Complex Event Processing, or CEP, is technology to process events and discover complex patterns among multiple streams of event data.
-	ESP stands for Event Stream Processing and deals with the task of processing multiple streams of event data with the goal of identifying the meaningful events within those streams,
-	and deriving meaningful information from them. Real-time OLAP (online analytical processing) and continuous query are also terms used frequently for this technology.
-		
-	Esper provides an optimized language for dealing with high frequency time-based event data: the Event Processing Language (EPL).
+	Complex event processing (CEP) delivers high-speed processing of many events across all the layers of an organization, 
+	identifying the most meaningful events within the event cloud, analyzing their impact, and taking subsequent action in real time (source:Wikipedia).
 
-	The Esper engine has been developed to address the requirements of applications that analyze and react to events. Some typical examples of applications are:
+	
+	Esper offers: 
+	
+	* A Domain Specific Language (DSL) for processing events. 
+		
+		* The Event Processing Language (EPL) is an optimized language for dealing with high frequency time-based event data.
+		
+		[]
+	
+	* Continuous Queries, Time/Length Windows, Pattern Matching
+	
+	[]
+			
+
+	Some typical examples of applications are:
 	
 	* Business process management and automation (process monitoring, BAM, reporting exceptions, operational intelligence) 
 	
@@ -59,7 +70,7 @@ EsperHA Feature Summary
 	[]
 
 
-Core CEP Features
+Core Esper Features
 
 	
 * Event Stream Processing
@@ -68,7 +79,7 @@ Core CEP Features
 
 	* Tumbling windows: time, length and multi-policy; first-event
 	
-	* Combine windows with intersection and union semantics.
+	* Combine windows with intersection and union semantics. Partitioned windows.
 
 	* Grouping, aggregation, sorting, filtering, merging, splitting or duplicating of event streams
 

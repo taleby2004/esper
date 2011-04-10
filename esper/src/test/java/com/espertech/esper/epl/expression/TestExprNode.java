@@ -1,10 +1,8 @@
 package com.espertech.esper.epl.expression;
 
-import junit.framework.TestCase;
 import com.espertech.esper.support.epl.SupportExprNode;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
-import com.espertech.esper.support.epl.SupportStreamTypeSvc1Stream;
-import com.espertech.esper.epl.core.*;
+import junit.framework.TestCase;
 
 public class TestExprNode extends TestCase
 {
@@ -32,7 +30,7 @@ public class TestExprNode extends TestCase
         parent_2.addChildNode(supportNode2_1);
         parent_2.addChildNode(supportNode2_2);
 
-        topNode.getValidatedSubtree(null, null, null, null, null, null);
+        ExprNodeUtil.getValidatedSubtree(topNode, ExprValidationContextFactory.makeEmpty());
 
         assertEquals(1, supportNode1_1.getValidateCountSnapshot());
         assertEquals(2, supportNode1_2.getValidateCountSnapshot());
@@ -41,46 +39,6 @@ public class TestExprNode extends TestCase
         assertEquals(5, supportNode2_2.getValidateCountSnapshot());
         assertEquals(6, parent_2.getValidateCountSnapshot());
         assertEquals(7, topNode.getValidateCountSnapshot());
-    }
-
-    public void testIdentToStaticMethod() throws ExprValidationException, EngineImportException
-    {
-        StreamTypeService typeService = new SupportStreamTypeSvc1Stream();
-        EngineImportService engineImportService = new EngineImportServiceImpl(true);
-        engineImportService.addImport("java.lang.*");
-        MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineImportService, null, true);
-
-        ExprNode identNode = new ExprIdentNode("Integer.valueOf(\"3\")");
-        ExprNode result = identNode.getValidatedSubtree(typeService, methodResolutionService, null, null, null, null);
-        assertTrue(result instanceof ExprStaticMethodNode);
-        assertEquals(Integer.valueOf("3"), result.getExprEvaluator().evaluate(null, false, null));
-
-        identNode = new ExprIdentNode("Integer.valueOf(\'3\')");
-        result = identNode.getValidatedSubtree(typeService, methodResolutionService, null, null, null, null);
-        assertTrue(result instanceof ExprStaticMethodNode);
-        assertEquals(Integer.valueOf("3"), result.getExprEvaluator().evaluate(null, false, null));
-
-        identNode = new ExprIdentNode("UknownClass.nonexistentMethod(\"3\")");
-        try
-        {
-            result = identNode.getValidatedSubtree(typeService, methodResolutionService, null, null, null, null);
-            fail();
-        }
-        catch(ExprValidationException e)
-        {
-            // Expected
-        }
-
-        identNode = new ExprIdentNode("unknownMap(\"key\")");
-        try
-        {
-            result = identNode.getValidatedSubtree(typeService, methodResolutionService, null, null, null, null);
-            fail();
-        }
-        catch(ExprValidationException e)
-        {
-            // Expected
-        }
     }
 
     public void testDeepEquals() throws Exception
@@ -94,42 +52,42 @@ public class TestExprNode extends TestCase
 
     public void testParseMappedProp()
     {
-        ExprNode.MappedPropertyParseResult result = ExprNode.parseMappedProperty("a.b('c')");
+        ExprNodeUtil.MappedPropertyParseResult result = ExprNodeUtil.parseMappedProperty("a.b('c')");
         assertEquals("a", result.getClassName());
         assertEquals("b", result.getMethodName());
         assertEquals("c", result.getArgString());
 
-        result = ExprNode.parseMappedProperty("SupportStaticMethodLib.delimitPipe('POLYGON ((100.0 100, \", 100 100, 400 400))')");
+        result = ExprNodeUtil.parseMappedProperty("SupportStaticMethodLib.delimitPipe('POLYGON ((100.0 100, \", 100 100, 400 400))')");
         assertEquals("SupportStaticMethodLib", result.getClassName());
         assertEquals("delimitPipe", result.getMethodName());
         assertEquals("POLYGON ((100.0 100, \", 100 100, 400 400))", result.getArgString());
 
-        result = ExprNode.parseMappedProperty("a.b.c.d.e('f.g.h,u.h')");
+        result = ExprNodeUtil.parseMappedProperty("a.b.c.d.e('f.g.h,u.h')");
         assertEquals("a.b.c.d", result.getClassName());
         assertEquals("e", result.getMethodName());
         assertEquals("f.g.h,u.h", result.getArgString());
 
-        result = ExprNode.parseMappedProperty("a.b.c.d.E(\"hfhf f f f \")");
+        result = ExprNodeUtil.parseMappedProperty("a.b.c.d.E(\"hfhf f f f \")");
         assertEquals("a.b.c.d", result.getClassName());
         assertEquals("E", result.getMethodName());
         assertEquals("hfhf f f f ", result.getArgString());
 
-        result = ExprNode.parseMappedProperty("c.d.doit(\"kf\"kf'kf\")");
+        result = ExprNodeUtil.parseMappedProperty("c.d.getEnumerationSource(\"kf\"kf'kf\")");
         assertEquals("c.d", result.getClassName());
-        assertEquals("doit", result.getMethodName());
+        assertEquals("getEnumerationSource", result.getMethodName());
         assertEquals("kf\"kf'kf", result.getArgString());
 
-        result = ExprNode.parseMappedProperty("c.d.doit('kf\"kf'kf\"')");
+        result = ExprNodeUtil.parseMappedProperty("c.d.getEnumerationSource('kf\"kf'kf\"')");
         assertEquals("c.d", result.getClassName());
-        assertEquals("doit", result.getMethodName());
+        assertEquals("getEnumerationSource", result.getMethodName());
         assertEquals("kf\"kf'kf\"", result.getArgString());
 
-        result = ExprNode.parseMappedProperty("f('a')");
+        result = ExprNodeUtil.parseMappedProperty("f('a')");
         assertEquals(null, result.getClassName());
         assertEquals("f", result.getMethodName());
         assertEquals("a", result.getArgString());
 
-        assertNull(ExprNode.parseMappedProperty("('a')"));
-        assertNull(ExprNode.parseMappedProperty(""));
+        assertNull(ExprNodeUtil.parseMappedProperty("('a')"));
+        assertNull(ExprNodeUtil.parseMappedProperty(""));
     }
 }

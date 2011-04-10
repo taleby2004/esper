@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.event.EventAdapterService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
@@ -47,7 +49,7 @@ public class ExprSubselectExistsNode extends ExprSubselectNode
         return null;
     }
 
-    public void validate(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
     }
 
@@ -86,7 +88,22 @@ public class ExprSubselectExistsNode extends ExprSubselectNode
         return false;
     }
 
-    @Override
+    public Collection<EventBean> evaluateGetCollEvents(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext context) {
+        return null;
+    }
+
+    public EventType getEventTypeCollection() {
+        return null;
+    }
+
+    public Class getComponentTypeCollection() throws ExprValidationException {
+        return null;
+    }
+
+    public Collection evaluateGetCollScalar(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
+        return null;
+    }
+
     public boolean isAllowMultiColumnSelect() {
         return false;
     }    

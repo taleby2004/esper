@@ -14,8 +14,7 @@ import com.espertech.esper.view.window.RandomAccessByIndexGetter;
 import com.espertech.esper.view.window.RelativeAccessByEventNIndex;
 import com.espertech.esper.view.window.RelativeAccessByEventNIndexMap;
 
-import java.lang.reflect.Array;
-import java.util.Iterator;
+import java.util.Collection;
 
 public class ExprPreviousEvalCount implements ExprPreviousEval
 {
@@ -47,4 +46,12 @@ public class ExprPreviousEvalCount implements ExprPreviousEval
 
         return size;
     }
+
+    public Collection<EventBean> evaluateGetCollEvents(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
+        return null;
+    }
+
+    public Collection evaluateGetCollScalar(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
+        return null;
+    }    
 }

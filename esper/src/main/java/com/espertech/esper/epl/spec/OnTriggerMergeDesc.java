@@ -17,14 +17,14 @@ public class OnTriggerMergeDesc extends OnTriggerWindowDesc
 {
     private static final long serialVersionUID = 3388811105339812571L;
     
-    private List<OnTriggerMergeItem> items;
+    private List<OnTriggerMergeMatched> items;
 
-    public OnTriggerMergeDesc(String windowName, String optionalAsName, List<OnTriggerMergeItem> items) {
+    public OnTriggerMergeDesc(String windowName, String optionalAsName, List<OnTriggerMergeMatched> items) {
         super(windowName, optionalAsName, OnTriggerType.ON_MERGE);
         this.items = items;
     }
 
-    public List<OnTriggerMergeItem> getItems() {
+    public List<OnTriggerMergeMatched> getItems() {
         return items;
     }
 }

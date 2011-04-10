@@ -11,7 +11,7 @@ public class TestExprRelationalOpNode extends TestCase
 
     public void setUp()
     {
-        opNode = new ExprRelationalOpNode(RelationalOpEnum.GE);
+        opNode = new ExprRelationalOpNodeImpl(RelationalOpEnum.GE);
     }
 
     public void testGetType() throws Exception
@@ -26,7 +26,7 @@ public class TestExprRelationalOpNode extends TestCase
         // Test success
         opNode.addChildNode(new SupportExprNode(String.class));
         opNode.addChildNode(new SupportExprNode(String.class));
-        opNode.validate(null, null, null, null, null, null);
+        opNode.validate(ExprValidationContextFactory.makeEmpty());
 
         opNode.getChildNodes().clear();
         opNode.addChildNode(new SupportExprNode(String.class));
@@ -34,7 +34,7 @@ public class TestExprRelationalOpNode extends TestCase
         // Test too few nodes under this node
         try
         {
-            opNode.validate(null, null, null, null, null, null);
+            opNode.validate(ExprValidationContextFactory.makeEmpty());
             fail();
         }
         catch (IllegalStateException ex)
@@ -46,7 +46,7 @@ public class TestExprRelationalOpNode extends TestCase
         opNode.addChildNode(new SupportExprNode(Integer.class));
         try
         {
-            opNode.validate(null, null, null, null, null, null);
+            opNode.validate(ExprValidationContextFactory.makeEmpty());
             fail();
         }
         catch (ExprValidationException ex)
@@ -61,7 +61,7 @@ public class TestExprRelationalOpNode extends TestCase
 
         try
         {
-            opNode.validate(null, null, null, null, null, null);
+            opNode.validate(ExprValidationContextFactory.makeEmpty());
             fail();
         }
         catch (ExprValidationException ex)
@@ -76,7 +76,7 @@ public class TestExprRelationalOpNode extends TestCase
         SupportExprNode childTwo = new SupportExprNode("c");
         opNode.addChildNode(childOne);
         opNode.addChildNode(childTwo);
-        opNode.validate(null, null, null, null, null, null);       // Type initialization
+        opNode.validate(ExprValidationContextFactory.makeEmpty());       // Type initialization
 
         assertEquals(true, opNode.evaluate(null, false, null));
 
@@ -103,7 +103,7 @@ public class TestExprRelationalOpNode extends TestCase
 
     private ExprRelationalOpNode makeNode(Object valueLeft, Class typeLeft, Object valueRight, Class typeRight) throws Exception
     {
-        ExprRelationalOpNode relOpNode = new ExprRelationalOpNode(RelationalOpEnum.GE);
+        ExprRelationalOpNode relOpNode = new ExprRelationalOpNodeImpl(RelationalOpEnum.GE);
         relOpNode.addChildNode(new SupportExprNode(valueLeft, typeLeft));
         relOpNode.addChildNode(new SupportExprNode(valueRight, typeRight));
         SupportExprNodeUtil.validate(relOpNode);
@@ -113,7 +113,7 @@ public class TestExprRelationalOpNode extends TestCase
     public void testEqualsNode() throws Exception
     {
         assertTrue(opNode.equalsNode(opNode));
-        assertFalse(opNode.equalsNode(new ExprRelationalOpNode(RelationalOpEnum.LE)));
+        assertFalse(opNode.equalsNode(new ExprRelationalOpNodeImpl(RelationalOpEnum.LE)));
         assertFalse(opNode.equalsNode(new ExprOrNode()));
     }
 }

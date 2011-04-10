@@ -8,13 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.epl.named;
 
-import com.espertech.esper.view.ViewSupport;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.view.StatementStopCallback;
 import com.espertech.esper.view.StatementStopService;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.util.ExecutionPathDebugLog;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,7 +28,7 @@ public abstract class NamedWindowOnExprBaseView extends ViewSupport implements S
      * The event type of the events hosted in the named window.
      */
     protected final EventType namedWindowEventType;
-    private final LookupStrategy lookupStrategy;
+    private final NamedWindowLookupStrategy lookupStrategy;
     private final ExprEvaluatorContext exprEvaluatorContext;
 
     /**
@@ -45,7 +44,7 @@ public abstract class NamedWindowOnExprBaseView extends ViewSupport implements S
      * @param exprEvaluatorContext context for expression evalauation
      */
     public NamedWindowOnExprBaseView(StatementStopService statementStopService,
-                                 LookupStrategy lookupStrategy,
+                                 NamedWindowLookupStrategy lookupStrategy,
                                  NamedWindowRootView rootView,
                                  ExprEvaluatorContext exprEvaluatorContext)
     {
@@ -71,13 +70,6 @@ public abstract class NamedWindowOnExprBaseView extends ViewSupport implements S
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".update Received update, " +
-                    "  newData.length==" + ((newData == null) ? 0 : newData.length) +
-                    "  oldData.length==" + ((oldData == null) ? 0 : oldData.length));
-        }
-
         if (newData == null)
         {
             return;

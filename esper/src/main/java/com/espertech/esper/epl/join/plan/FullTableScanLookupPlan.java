@@ -8,11 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.plan;
 
-import com.espertech.esper.epl.join.exec.FullTableScanLookupStrategy;
-import com.espertech.esper.epl.join.exec.TableLookupStrategy;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.join.exec.base.FullTableScanLookupStrategy;
+import com.espertech.esper.epl.join.exec.base.JoinExecTableLookupStrategy;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.UnindexedEventTable;
-import com.espertech.esper.client.EventType;
+
+import java.util.Collections;
 
 /**
  * Plan for a full table scan.
@@ -25,14 +27,18 @@ public class FullTableScanLookupPlan extends TableLookupPlan
      * @param indexedStream - stream to full table scan
      * @param indexNum - index number for the table containing the full unindexed contents
      */
-    public FullTableScanLookupPlan(int lookupStream, int indexedStream, int indexNum)
+    public FullTableScanLookupPlan(int lookupStream, int indexedStream, String indexNum)
     {
         super(lookupStream, indexedStream, indexNum);
     }
 
-    public TableLookupStrategy makeStrategy(EventTable[][] indexesPerStream, EventType[] eventTypes)
+    public TableLookupKeyDesc getKeyDescriptor() {
+        return new TableLookupKeyDesc(Collections.<QueryGraphValueEntryHashKeyed>emptyList(), Collections.<QueryGraphValueEntryRange>emptyList());
+    }
+
+    public JoinExecTableLookupStrategy makeStrategyInternal(EventTable eventTable, EventType[] eventTypes)
     {
-        UnindexedEventTable index = (UnindexedEventTable) indexesPerStream[this.getIndexedStream()][this.getIndexNum()];
+        UnindexedEventTable index = (UnindexedEventTable) eventTable;
         return new FullTableScanLookupStrategy(index);
     }
 

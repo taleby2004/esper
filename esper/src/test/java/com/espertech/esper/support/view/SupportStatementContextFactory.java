@@ -56,16 +56,16 @@ public class SupportStatementContextFactory
                 new ScheduleBucket(1),
                 SupportEventAdapterService.getService(),
                 null,
-                new ViewResolutionServiceImpl(ViewEnumHelper.getBuiltinViews()),
+                new ViewResolutionServiceImpl(ViewEnumHelper.getBuiltinViews(), null),
                 new PatternObjectResolutionServiceImpl(null),
                 null,
                 null,
-                new MethodResolutionServiceImpl(new EngineImportServiceImpl(true), null, true),
+                new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true), null),
                 null,
                 null,
                 null,
                 new OutputConditionFactoryDefault(),
-                new NamedWindowServiceImpl(null, variableService, false, new ManagedReadWriteLock("dummyeplock", true), new ExceptionHandlingService("engURI", Collections.<ExceptionHandler>emptyList(), Collections.<ConditionHandler>emptyList()), false),
+                new NamedWindowServiceImpl(null, variableService, false, new ManagedReadWriteLock("dummyeplock", true), new ExceptionHandlingService("engURI", Collections.<ExceptionHandler>emptyList(), Collections.<ConditionHandler>emptyList()), false, null),
                 null,
                 new StatementResultServiceImpl(null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading())), // statement result svc
                 null, // resolution URIs
@@ -75,6 +75,7 @@ public class SupportStatementContextFactory
                 null,
                 null,
                 new StatementFilterVersion(),
+                null,
                 null,
                 null);
     }

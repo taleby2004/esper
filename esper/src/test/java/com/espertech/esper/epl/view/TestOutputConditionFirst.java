@@ -1,15 +1,16 @@
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.epl.spec.OutputLimitSpec;
+import com.espertech.esper.core.EPStatementHandleCallback;
+import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.epl.expression.ExprConstantNodeImpl;
+import com.espertech.esper.epl.expression.ExprTimePeriod;
+import com.espertech.esper.epl.expression.ExprTimePeriodImpl;
 import com.espertech.esper.epl.spec.OutputLimitLimitType;
 import com.espertech.esper.epl.spec.OutputLimitRateType;
-import com.espertech.esper.epl.expression.ExprTimePeriod;
-import com.espertech.esper.epl.expression.ExprConstantNode;
+import com.espertech.esper.epl.spec.OutputLimitSpec;
 import com.espertech.esper.support.epl.SupportExprNodeUtil;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.core.EPStatementHandleCallback;
 import junit.framework.TestCase;
 
 public class TestOutputConditionFirst extends TestCase
@@ -37,15 +38,15 @@ public class TestOutputConditionFirst extends TestCase
 	
 	public void testUpdateTime() throws Exception
 	{
-        ExprTimePeriod timePeriodValid = new ExprTimePeriod(false, false, false, false, false, false, true, false);
-        timePeriodValid.addChildNode(new ExprConstantNode(TEST_INTERVAL_MSEC/1000d));
+        ExprTimePeriod timePeriodValid = new ExprTimePeriodImpl(false, false, false, false, false, false, true, false);
+        timePeriodValid.addChildNode(new ExprConstantNodeImpl(TEST_INTERVAL_MSEC/1000d));
         SupportExprNodeUtil.validate(timePeriodValid);
 
 		OutputLimitSpec outputConditionSpec = new OutputLimitSpec(null, null, OutputLimitRateType.TIME_PERIOD, OutputLimitLimitType.FIRST, null, null, null, timePeriodValid, null, null);
 		SupportSchedulingServiceImpl schedulingServiceStub = new SupportSchedulingServiceImpl();
 		StatementContext statementContext = SupportStatementContextFactory.makeContext(schedulingServiceStub);
 		
-		OutputCondition condition = new OutputConditionFirst(outputConditionSpec, statementContext, callback, false);
+		OutputCondition condition = new OutputConditionFirst(outputConditionSpec, statementContext, callback, false, false);
 
         long startTime = 0;
         schedulingServiceStub.setTime(startTime);
@@ -87,7 +88,7 @@ public class TestOutputConditionFirst extends TestCase
 		OutputLimitSpec outputConditionSpec = new OutputLimitSpec(3d, null, OutputLimitRateType.EVENTS, OutputLimitLimitType.FIRST, null, null, null, null, null, null);
 		StatementContext statementContext = SupportStatementContextFactory.makeContext();
 		
-		OutputCondition condition = (new OutputConditionFactoryDefault()).createCondition(outputConditionSpec, statementContext, callback, false);
+		OutputCondition condition = (new OutputConditionFactoryDefault()).createCondition(outputConditionSpec, statementContext, callback, false, false);
 
 		// Send first event of the batch, callback should be made
 		condition.updateOutputCondition(1, 0);

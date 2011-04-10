@@ -1,14 +1,13 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.event.EventTypeSPI;
-import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -71,6 +70,9 @@ public class TestMapEvent extends TestCase
         ConfigurationOperations configOps = epService.getEPAdministrator().getConfiguration();
         EPStatement stmt = epService.getEPAdministrator().createEPL("select myInt from myMapEvent", "stmtOne");
         ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"stmtOne"}, configOps.getEventTypeNameUsedBy("myMapEvent").toArray());
+        
+        assertEquals(1, epService.getEPAdministrator().getConfiguration().getEventTypes().length);
+        assertEquals("myMapEvent", epService.getEPAdministrator().getConfiguration().getEventType("myMapEvent").getName());
 
         try {
             configOps.removeEventType("myMapEvent", false);
@@ -86,6 +88,8 @@ public class TestMapEvent extends TestCase
         assertTrue(configOps.removeEventType("myMapEvent", false));
         assertFalse(configOps.removeEventType("myMapEvent", false));    // try double-remove
         assertFalse(configOps.isEventTypeExists("myMapEvent"));
+        assertEquals(0, epService.getEPAdministrator().getConfiguration().getEventTypes().length);
+        assertEquals(null, epService.getEPAdministrator().getConfiguration().getEventType("myMapEvent"));
         try {
             epService.getEPAdministrator().createEPL("select myInt from myMapEvent");
             fail();
@@ -100,6 +104,8 @@ public class TestMapEvent extends TestCase
         configOps.addEventType("myMapEvent", properties);
         assertTrue(configOps.isEventTypeExists("myMapEvent"));
         assertTrue(configOps.getEventTypeNameUsedBy("myMapEvent").isEmpty());
+        assertEquals(1, epService.getEPAdministrator().getConfiguration().getEventTypes().length);
+        assertEquals("myMapEvent", epService.getEPAdministrator().getConfiguration().getEventType("myMapEvent").getName());
 
         // compile
         epService.getEPAdministrator().createEPL("select p01 from myMapEvent", "stmtTwo");
@@ -274,16 +280,6 @@ public class TestMapEvent extends TestCase
         {
             // expected
         }
-    }
-
-    private Map<String, Object> makeMap(Object[][] entries)
-    {
-        Map result = new HashMap<String, Object>();
-        for (int i = 0; i < entries.length; i++)
-        {
-            result.put(entries[i][0], entries[i][1]);
-        }
-        return result;
     }
 
     private static Log log = LogFactory.getLog(TestMapEvent.class);

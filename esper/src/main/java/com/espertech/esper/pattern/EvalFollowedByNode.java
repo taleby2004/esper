@@ -10,6 +10,7 @@ package com.espertech.esper.pattern;
 
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -18,7 +19,7 @@ import java.util.List;
 /**
  * This class represents a followed-by operator in the evaluation tree representing any event expressions.
  */
-public class EvalFollowedByNode extends EvalNode
+public class EvalFollowedByNode extends EvalNodeBase
 {
     private static final long serialVersionUID = -3535280879288655577L;
 

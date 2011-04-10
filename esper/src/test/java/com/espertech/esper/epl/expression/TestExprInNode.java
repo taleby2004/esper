@@ -20,25 +20,25 @@ public class TestExprInNode extends TestCase
 
     public void testGetType()  throws Exception
     {
-        assertEquals(Boolean.class, inNodeNormal.getType());
-        assertEquals(Boolean.class, inNodeNotIn.getType());
+        assertEquals(Boolean.class, inNodeNormal.getExprEvaluator().getType());
+        assertEquals(Boolean.class, inNodeNotIn.getExprEvaluator().getType());
     }
 
     public void testValidate() throws Exception
     {
         inNodeNormal = SupportExprNodeFactory.makeInSetNode(true);
-        inNodeNormal.validate(null, null, null, null, null, null);
+        inNodeNormal.validate(ExprValidationContextFactory.makeEmpty());
 
         // No subnodes: Exception is thrown.
-        tryInvalidValidate(new ExprInNode(true));
+        tryInvalidValidate(new ExprInNodeImpl(true));
 
         // singe child node not possible, must be 2 at least
-        inNodeNormal = new ExprInNode(true);
+        inNodeNormal = new ExprInNodeImpl(true);
         inNodeNormal.addChildNode(new SupportExprNode(new Integer(4)));
         tryInvalidValidate(inNodeNormal);
 
         // test a type mismatch
-        inNodeNormal = new ExprInNode(true);
+        inNodeNormal = new ExprInNodeImpl(true);
         inNodeNormal.addChildNode(new SupportExprNode("sx"));
         inNodeNormal.addChildNode(new SupportExprNode(4));
         tryInvalidValidate(inNodeNormal);
@@ -87,7 +87,7 @@ public class TestExprInNode extends TestCase
     private void tryInvalidValidate(ExprInNode exprInNode) throws Exception
     {
         try {
-            exprInNode.validate(null, null, null, null, null, null);
+            exprInNode.validate(ExprValidationContextFactory.makeEmpty());
             fail();
         }
         catch (ExprValidationException ex)

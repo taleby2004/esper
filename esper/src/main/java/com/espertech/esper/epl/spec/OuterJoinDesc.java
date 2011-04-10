@@ -13,6 +13,7 @@ import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.util.MetaDefItem;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Contains the ON-clause criteria in an outer join.
@@ -95,7 +96,7 @@ public class OuterJoinDesc implements MetaDefItem, Serializable
      */
     public ExprNode makeExprNode(ExprEvaluatorContext exprEvaluatorContext)
     {
-        ExprNode representativeNode = new ExprEqualsNode(false);
+        ExprNode representativeNode = new ExprEqualsNodeImpl(false);
         representativeNode.addChildNode(leftNode);
         representativeNode.addChildNode(rightNode);
 
@@ -104,14 +105,14 @@ public class OuterJoinDesc implements MetaDefItem, Serializable
             return representativeNode;
         }
 
-        ExprAndNode andNode = new ExprAndNode();
+        ExprAndNode andNode = new ExprAndNodeImpl();
         topValidate(representativeNode, exprEvaluatorContext);
         andNode.addChildNode(representativeNode);
         representativeNode = andNode;
 
         for (int i = 0; i < addLeftNode.length; i++)
         {
-            ExprEqualsNode eqNode = new ExprEqualsNode(false);
+            ExprEqualsNode eqNode = new ExprEqualsNodeImpl(false);
             eqNode.addChildNode(addLeftNode[i]);
             eqNode.addChildNode(addRightNode[i]);
             topValidate(eqNode, exprEvaluatorContext);
@@ -122,10 +123,20 @@ public class OuterJoinDesc implements MetaDefItem, Serializable
         return representativeNode;
     }
 
+    public static boolean consistsOfAllInnerJoins(List<OuterJoinDesc> outerJoinDescList) {
+        for (OuterJoinDesc desc : outerJoinDescList) {
+            if (desc.getOuterJoinType() != OuterJoinType.INNER) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void topValidate(ExprNode exprNode, ExprEvaluatorContext exprEvaluatorContext) {
         try
         {
-            exprNode.validate(null, null, null, null, null, exprEvaluatorContext);
+            ExprValidationContext validationContext = new ExprValidationContext(null, null, null, null, null, exprEvaluatorContext, null, null, null);
+            exprNode.validate(validationContext);
         }
         catch (ExprValidationException e)
         {
