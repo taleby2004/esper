@@ -122,7 +122,7 @@ public class ExprDotNodeUtility
                     Method method = validationContext.getMethodResolutionService().resolveMethod(currentInputType.getScalar(), chainElement.getName(), paramTypes);
                     FastClass declaringClass = FastClass.create(Thread.currentThread().getContextClassLoader(), method.getDeclaringClass());
                     FastMethod fastMethod = declaringClass.getMethod(method);
-                    ExprDotMethodEvalNoDuck noduck = new ExprDotMethodEvalNoDuck(fastMethod, paramEvals);
+                    ExprDotMethodEvalNoDuck noduck = new ExprDotMethodEvalNoDuck(validationContext.getStatementName(), fastMethod, paramEvals);
                     methodEvals.add(noduck);
                     currentInputType = noduck.getTypeInfo();
                 }
@@ -132,7 +132,7 @@ public class ExprDotNodeUtility
                         throw new ExprValidationException(e.getMessage(), e);
                     }
                     else {
-                        ExprDotMethodEvalDuck duck = new ExprDotMethodEvalDuck(validationContext.getMethodResolutionService(), chainElement.getName(), paramTypes, paramEvals);
+                        ExprDotMethodEvalDuck duck = new ExprDotMethodEvalDuck(validationContext.getStatementName(), validationContext.getMethodResolutionService(), chainElement.getName(), paramTypes, paramEvals);
                         methodEvals.add(duck);
                         currentInputType = duck.getTypeInfo();
                     }

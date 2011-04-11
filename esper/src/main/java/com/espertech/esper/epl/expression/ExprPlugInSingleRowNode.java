@@ -152,7 +152,7 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
         ExprDotEvalTypeInfo typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExprDotEvalTypeInfo.scalarOrUnderlying(method.getReturnType());
 
         ExprDotEval[] eval = ExprDotNodeUtility.getChainEvaluators(typeInfo, chainList, validationContext, false).getSecond();
-        evaluator = new ExprDotEvalStaticMethod(clazz.getName(), staticMethod, childEvals, isConstantParameters, optionalLambdaWrap, eval);
+        evaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), clazz.getName(), staticMethod, childEvals, isConstantParameters, optionalLambdaWrap, eval);
 	}
 
     @Override

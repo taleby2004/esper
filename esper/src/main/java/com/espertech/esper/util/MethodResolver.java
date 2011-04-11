@@ -197,31 +197,46 @@ public class MethodResolver
 
 		if(bestMatch != null)
 		{
+            logWarnBoxedToPrimitiveType(declaringClass, methodName, bestMatch, paramTypes);
 			return bestMatch;
 		}
-		else
-		{
-			StringBuffer params = new StringBuffer();
-			if(paramTypes != null && paramTypes.length != 0)
-			{
-				String appendString = "";
-				for(Object param : paramTypes)
-				{
-					params.append(appendString);
-                    if (param == null) {
-                        params.append("(null)");
-                    }
-                    else {
-					    params.append(param.toString());
-                    }
-					appendString = ", ";
-				}
-			}
-			throw new EngineNoSuchMethodException("Unknown method " + declaringClass.getSimpleName() + '.' + methodName + '(' + params + ')', conversionFailedMethod);
-		}
+
+        StringBuffer params = new StringBuffer();
+        if(paramTypes != null && paramTypes.length != 0)
+        {
+            String appendString = "";
+            for(Object param : paramTypes)
+            {
+                params.append(appendString);
+                if (param == null) {
+                    params.append("(null)");
+                }
+                else {
+                    params.append(param.toString());
+                }
+                appendString = ", ";
+            }
+        }
+        throw new EngineNoSuchMethodException("Unknown method " + declaringClass.getSimpleName() + '.' + methodName + '(' + params + ')', conversionFailedMethod);
 	}
 
-	private static boolean isWideningConversion(Class declarationType, Class invocationType)
+    private static void logWarnBoxedToPrimitiveType(Class declaringClass, String methodName, Method bestMatch, Class[] paramTypes) {
+        Class[] parametersMethod = bestMatch.getParameterTypes();
+        for (int i = 0; i < parametersMethod.length; i++) {
+            if (!parametersMethod[i].isPrimitive()) {
+                continue;
+            }
+            if (paramTypes[i] == null || (JavaClassHelper.getBoxedType(parametersMethod[i])) == paramTypes[i]) {
+                String paramTypeStr = paramTypes[i] == null ? "null" : paramTypes[i].getSimpleName();
+                log.warn("Method '" + methodName + "' in class '" + declaringClass.getName() + "' expects primitive type '" + parametersMethod[i] +
+                        "' as parameter " + i + ", but receives a nullable (boxed) type " + paramTypeStr +
+                        ". This may cause null pointer exception at runtime if the actual value is null, please consider using boxed types for method parameters.");
+                return;
+            }
+        }
+    }
+
+    private static boolean isWideningConversion(Class declarationType, Class invocationType)
 	{
 		if(wideningConversions.containsKey(declarationType))
 		{

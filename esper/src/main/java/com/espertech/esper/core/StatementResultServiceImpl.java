@@ -18,7 +18,6 @@ import com.espertech.esper.core.thread.ThreadingOption;
 import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.metric.MetricReportingServiceSPI;
@@ -42,6 +41,7 @@ public class StatementResultServiceImpl implements StatementResultService
 {
     private static Log log = LogFactory.getLog(StatementResultServiceImpl.class);
 
+    private final String statementName;
     private final StatementLifecycleSvc statementLifecycleSvc;
     private final MetricReportingService metricReportingService;
     private final ThreadingService threadingService;
@@ -89,11 +89,13 @@ public class StatementResultServiceImpl implements StatementResultService
      * @param metricReportingService for metrics reporting
      * @param threadingService for outbound threading
      */
-    public StatementResultServiceImpl(StatementLifecycleSvc statementLifecycleSvc,
+    public StatementResultServiceImpl(String statementName,
+                                      StatementLifecycleSvc statementLifecycleSvc,
                                       MetricReportingServiceSPI metricReportingService,
                                       ThreadingService threadingService)
     {
         log.debug(".ctor");
+        this.statementName = statementName;
         this.statementLifecycleSvc = statementLifecycleSvc;
         this.metricReportingService = metricReportingService;
         if (metricReportingService != null) {
@@ -176,7 +178,7 @@ public class StatementResultServiceImpl implements StatementResultService
             return;
         }
 
-        statementResultNaturalStrategy = ResultDeliveryStrategyFactory.create(statementListenerSet.getSubscriber(),
+        statementResultNaturalStrategy = ResultDeliveryStrategyFactory.create(statementName, statementListenerSet.getSubscriber(),
                 selectClauseTypes, selectClauseColumnNames);
         isMakeNatural = true;
     }

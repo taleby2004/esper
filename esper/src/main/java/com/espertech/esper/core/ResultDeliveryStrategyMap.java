@@ -27,6 +27,7 @@ import java.util.Map;
 public class ResultDeliveryStrategyMap implements ResultDeliveryStrategy
 {
     private static Log log = LogFactory.getLog(ResultDeliveryStrategyMap.class);
+    private final String statementName;
     private final Object subscriber;
     private final FastMethod fastMethod;
     private final String[] columnNames;
@@ -37,8 +38,9 @@ public class ResultDeliveryStrategyMap implements ResultDeliveryStrategy
      * @param method the delivery method
      * @param columnNames the column names for the map
      */
-    public ResultDeliveryStrategyMap(Object subscriber, Method method, String[] columnNames)
+    public ResultDeliveryStrategyMap(String statementName, Object subscriber, Method method, String[] columnNames)
     {
+        this.statementName = statementName;
         this.subscriber = subscriber;
         FastClass fastClass = FastClass.create(Thread.currentThread().getContextClassLoader(), subscriber.getClass());
         this.fastMethod = fastClass.getMethod(method);
@@ -64,7 +66,7 @@ public class ResultDeliveryStrategyMap implements ResultDeliveryStrategy
             fastMethod.invoke(subscriber, params);
         }
         catch (InvocationTargetException e) {
-            ResultDeliveryStrategyImpl.handle(log, e, params, subscriber, fastMethod);
+            ResultDeliveryStrategyImpl.handle(statementName, log, e, params, subscriber, fastMethod);
         }
     }
 

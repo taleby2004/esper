@@ -30,6 +30,16 @@ public class TestStaticFunctions extends TestCase
         listener = new SupportUpdateListener();
 	}
 
+    public void testNullPrimitive() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addImport(NullPrimitive.class);
+
+        // test passing null
+        epService.getEPAdministrator().createEPL("select NullPrimitive.getValue(intBoxed) from SupportBean").addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean());
+    }
+
     public void testChainedInstance() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addImport(LevelZero.class);
@@ -549,4 +559,11 @@ public class TestStaticFunctions extends TestCase
         }
     }
 
+    public static class NullPrimitive {
+
+        public static Integer getValue(int input)
+        {
+            return input + 10;
+        }
+    }
 }

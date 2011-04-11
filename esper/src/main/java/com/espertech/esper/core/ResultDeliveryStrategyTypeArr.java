@@ -27,6 +27,7 @@ import java.lang.reflect.Array;
 public class ResultDeliveryStrategyTypeArr implements ResultDeliveryStrategy
 {
     private static Log log = LogFactory.getLog(ResultDeliveryStrategyImpl.class);
+    private final String statementName;
     private final Object subscriber;
     private final FastMethod fastMethod;
     private final Class componentType;
@@ -36,8 +37,9 @@ public class ResultDeliveryStrategyTypeArr implements ResultDeliveryStrategy
      * @param subscriber is the receiver to method invocations
      * @param method is the method to deliver to
      */
-    public ResultDeliveryStrategyTypeArr(Object subscriber, Method method)
+    public ResultDeliveryStrategyTypeArr(String statementName, Object subscriber, Method method)
     {
+        this.statementName = statementName;
         this.subscriber = subscriber;
         FastClass fastClass = FastClass.create(Thread.currentThread().getContextClassLoader(), subscriber.getClass());
         this.fastMethod = fastClass.getMethod(method);
@@ -63,7 +65,7 @@ public class ResultDeliveryStrategyTypeArr implements ResultDeliveryStrategy
             fastMethod.invoke(subscriber, params);
         }
         catch (InvocationTargetException e) {
-            ResultDeliveryStrategyImpl.handle(log, e, params, subscriber, fastMethod);
+            ResultDeliveryStrategyImpl.handle(statementName, log, e, params, subscriber, fastMethod);
         }
     }
 

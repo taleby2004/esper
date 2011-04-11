@@ -12,6 +12,7 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.event.NaturalEventBean;
+import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
 {
     private static Log log = LogFactory.getLog(ResultDeliveryStrategyImpl.class);
+    private final String statementName;
     private final Object subscriber;
     private final FastMethod updateFastMethod;
     private final FastMethod startFastMethod;
@@ -45,8 +47,9 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
      * @param endMethod to call to indicate when delivery ends, or null if no such indication is required
      * @param rStreamMethod to deliver the remove stream to, or null if no such indication is required
      */
-    public ResultDeliveryStrategyImpl(Object subscriber, DeliveryConvertor deliveryConvertor, Method method, Method startMethod, Method endMethod, Method rStreamMethod)
+    public ResultDeliveryStrategyImpl(String statementName, Object subscriber, DeliveryConvertor deliveryConvertor, Method method, Method startMethod, Method endMethod, Method rStreamMethod)
     {
+        this.statementName = statementName;
         this.subscriber = subscriber;
         this.deliveryConvertor = deliveryConvertor;
         FastClass fastClass = FastClass.create(Thread.currentThread().getContextClassLoader(), subscriber.getClass());
@@ -96,7 +99,7 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
                 startFastMethod.invoke(subscriber, params);
             }
             catch (InvocationTargetException e) {
-                handle(log, e, params, subscriber, startFastMethod);
+                handle(statementName, log, e, params, subscriber, startFastMethod);
             }
             catch (Throwable t) {
                 handleThrowable(log, t, null, subscriber, startFastMethod);
@@ -121,7 +124,7 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
                         updateFastMethod.invoke(subscriber, params);
                     }
                     catch (InvocationTargetException e) {
-                        handle(log, e, params, subscriber, updateFastMethod);
+                        handle(statementName, log, e, params, subscriber, updateFastMethod);
                     }
                     catch (Throwable t) {
                         handleThrowable(log, t, params, subscriber, updateFastMethod);
@@ -140,7 +143,7 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
                         updateRStreamFastMethod.invoke(subscriber, params);
                     }
                     catch (InvocationTargetException e) {
-                        handle(log, e, params, subscriber, updateRStreamFastMethod);
+                        handle(statementName, log, e, params, subscriber, updateRStreamFastMethod);
                     }
                     catch (Throwable t) {
                         handleThrowable(log, t, params, subscriber, updateRStreamFastMethod);
@@ -154,7 +157,7 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
                 endFastMethod.invoke(subscriber, null);
             }
             catch (InvocationTargetException e) {
-                handle(log, e, null, subscriber, endFastMethod);
+                handle(statementName, log, e, null, subscriber, endFastMethod);
             }
             catch (Throwable t) {
                 handleThrowable(log, t, null, subscriber, endFastMethod);
@@ -171,11 +174,8 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
      * @param method the method to call
      * @throws EPException converted from the passed invocation exception
      */
-    protected static void handle(Log logger, InvocationTargetException e, Object[] params, Object subscriber, FastMethod method) {
-        String message = "Invocation exception when invoking method '" + method.getName() +
-                "' on subscriber class '" + subscriber.getClass().getSimpleName() +
-                "' for parameters " + ((params == null) ? "null" : Arrays.toString(params)) +
-                " : " + e.getTargetException().getClass().getSimpleName() + " : " + e.getTargetException().getMessage();
+    protected static void handle(String statementName, Log logger, InvocationTargetException e, Object[] params, Object subscriber, FastMethod method) {
+        String message = JavaClassHelper.getMessageInvocationTarget(statementName, method.getJavaMethod(), subscriber.getClass().getName(), params, e);
         logger.error(message, e.getTargetException());
     }
 

@@ -3,6 +3,7 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
+import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
@@ -17,6 +18,7 @@ public class ExprDotMethodEvalDuck implements ExprDotEval
 {
     private static final Log log = LogFactory.getLog(ExprDotMethodEvalDuck.class);
 
+    private final String statementName;
     private final MethodResolutionService methodResolutionService;
     private final String methodName;
     private final Class[] parameterTypes;
@@ -24,8 +26,9 @@ public class ExprDotMethodEvalDuck implements ExprDotEval
 
     private Map<Class, FastMethod> cache;
 
-    public ExprDotMethodEvalDuck(MethodResolutionService methodResolutionService, String methodName, Class[] parameterTypes, ExprEvaluator[] parameters)
+    public ExprDotMethodEvalDuck(String statementName, MethodResolutionService methodResolutionService, String methodName, Class[] parameterTypes, ExprEvaluator[] parameters)
     {
+        this.statementName = statementName;
         this.methodResolutionService = methodResolutionService;
         this.methodName = methodName;
         this.parameterTypes = parameterTypes;
@@ -63,10 +66,7 @@ public class ExprDotMethodEvalDuck implements ExprDotEval
 		}
 		catch (InvocationTargetException e)
 		{
-            String message = "Method '" + method.getName() +
-                    "' of class '" + method.getDeclaringClass().getSimpleName() +
-                    "' reported an exception: " +
-                    e.getTargetException();
+            String message = JavaClassHelper.getMessageInvocationTarget(statementName, method.getJavaMethod(), target.getClass().getName(), args, e);
             log.error(message, e.getTargetException());
 		}
         return null;

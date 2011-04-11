@@ -16,6 +16,7 @@ import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.type.*;
+import net.sf.cglib.reflect.FastMethod;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -1570,5 +1571,31 @@ public class JavaClassHelper
         else {
             writer.write(Integer.toHexString(System.identityHashCode(instance)));
         }
+    }
+
+    public static String getMessageInvocationTarget(String statementName, Method method, String classOrPropertyName, Object[] args, InvocationTargetException e) {
+        if (!(e.getCause() instanceof NullPointerException)) {
+            return null;
+        }
+
+        String parameters = args == null ? "null" : Arrays.toString(args);
+        if (args != null) {
+            Class[] methodParameters = method.getParameterTypes();
+            for (int i = 0; i < methodParameters.length; i++) {
+                if (methodParameters[i].isPrimitive() && args[i] == null) {
+                    return "NullPointerException invoking method '" + method.getName() +
+                           "' of class '" + classOrPropertyName +
+                           "' in parameter " + i +
+                           " passing parameters " + parameters +
+                           " for statement '" + statementName + "': The method expects a primitive " + methodParameters[i].getSimpleName() +
+                           " value but received a null value";
+                }
+            }
+        }
+
+        return "Invocation exception when invoking method '" + method.getName() +
+            "' of class '" + classOrPropertyName +
+            "' passing parameters " + parameters +
+            " for statement '" + statementName + "': " + e.getTargetException().getClass().getSimpleName() + " : " + e.getTargetException().getMessage();
     }
 }

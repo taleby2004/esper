@@ -10,6 +10,7 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.enummethod.dot.ExprDotStaticMethodWrap;
+import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +22,7 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator
 {
     private static final Log log = LogFactory.getLog(ExprDotEvalStaticMethod.class);
 
+    private final String statementName;
     private final String classOrPropertyName;
 	private final FastMethod staticMethod;
     private final ExprEvaluator[] childEvals;
@@ -31,13 +33,15 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator
     private boolean isCachedResult;
     private Object cachedResult;
 
-    public ExprDotEvalStaticMethod(String classOrPropertyName,
+    public ExprDotEvalStaticMethod(String statementName,
+                                   String classOrPropertyName,
                                    FastMethod staticMethod,
                                    ExprEvaluator[] childEvals,
                                    boolean constantParameters,
                                    ExprDotStaticMethodWrap resultWrapLambda,
                                    ExprDotEval[] chainEval)
     {
+        this.statementName = statementName;
         this.classOrPropertyName = classOrPropertyName;
         this.staticMethod = staticMethod;
         this.childEvals = childEvals;
@@ -105,10 +109,7 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator
 		}
 		catch (InvocationTargetException e)
 		{
-            String message = "Method '" + staticMethod.getName() +
-                    "' of class '" + classOrPropertyName +
-                    "' reported an exception: " +
-                    e.getTargetException();
+            String message = JavaClassHelper.getMessageInvocationTarget(statementName, staticMethod.getJavaMethod(), classOrPropertyName, args, e);
             log.error(message, e.getTargetException());
 		}
         return null;

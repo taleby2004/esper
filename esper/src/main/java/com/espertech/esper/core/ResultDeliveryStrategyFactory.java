@@ -31,7 +31,7 @@ public class ResultDeliveryStrategyFactory
      * @return strategy for dispatching naturals
      * @throws EPSubscriberException if the subscriber is invalid
      */
-    public static ResultDeliveryStrategy create(Object subscriber,
+    public static ResultDeliveryStrategy create(String statementName, Object subscriber,
                                                         Class[] selectClauseTypes,
                                                         String[] selectClauseColumns)
             throws EPSubscriberException
@@ -160,15 +160,15 @@ public class ResultDeliveryStrategyFactory
 
         if (isMapArrayDelivery)
         {
-            return new ResultDeliveryStrategyMap(subscriber, subscriptionMethod, selectClauseColumns);
+            return new ResultDeliveryStrategyMap(statementName, subscriber, subscriptionMethod, selectClauseColumns);
         }
         else if (isObjectArrayDelivery)
         {
-            return new ResultDeliveryStrategyObjectArr(subscriber, subscriptionMethod);
+            return new ResultDeliveryStrategyObjectArr(statementName, subscriber, subscriptionMethod);
         }
         else if (isTypeArrayDelivery)
         {
-            return new ResultDeliveryStrategyTypeArr(subscriber, subscriptionMethod);
+            return new ResultDeliveryStrategyTypeArr(statementName, subscriber, subscriptionMethod);
         }
 
         // Try to find the "start", "end" and "updateRStream" methods
@@ -210,6 +210,6 @@ public class ResultDeliveryStrategyFactory
             convertor = new DeliveryConvertorNull();
         }
 
-        return new ResultDeliveryStrategyImpl(subscriber, convertor, subscriptionMethod, startMethod, endMethod, rStreamMethod);
+        return new ResultDeliveryStrategyImpl(statementName, subscriber, convertor, subscriptionMethod, startMethod, endMethod, rStreamMethod);
     }
 }
