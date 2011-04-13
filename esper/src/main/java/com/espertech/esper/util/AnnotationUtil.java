@@ -1,4 +1,4 @@
-package com.espertech.esper.client.annotation;
+package com.espertech.esper.util;
 
 public class AnnotationUtil {
     public static boolean isListed(String list, String lookedForValue) {

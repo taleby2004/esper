@@ -18,11 +18,12 @@ import java.util.Collection;
  */
 public interface ExprEvaluatorEnumeration
 {
+    public EventType getEventTypeCollection() throws ExprValidationException;
     public Collection<EventBean> evaluateGetROCollectionEvents(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context);
 
+    public Class getComponentTypeCollection() throws ExprValidationException;
     public Collection evaluateGetROCollectionScalar(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context);
 
-    public EventType getEventTypeCollection() throws ExprValidationException;
-
-    public Class getComponentTypeCollection() throws ExprValidationException;
+    public EventType getEventTypeSingle() throws ExprValidationException;
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context);
 }

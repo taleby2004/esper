@@ -17,4 +17,5 @@ public interface ExprPreviousEval
     public Object evaluate(EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext);
     public Collection<EventBean> evaluateGetCollEvents(EventBean[] eventsPerStream, ExprEvaluatorContext context);
     public Collection evaluateGetCollScalar(EventBean[] eventsPerStream, ExprEvaluatorContext context);
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, ExprEvaluatorContext context);
 }

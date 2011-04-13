@@ -156,6 +156,13 @@ public class ExprPreviousNode extends ExprNodeBase implements ViewResourceCallba
         return evaluator.evaluateGetCollEvents(eventsPerStream, context);
     }
 
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        if (!isNewData) {
+            return null;
+        }
+        return evaluator.evaluateGetEventBean(eventsPerStream, context);
+    }
+
     public Collection evaluateGetROCollectionScalar(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
         if (!isNewData) {
             return null;
@@ -164,7 +171,17 @@ public class ExprPreviousNode extends ExprNodeBase implements ViewResourceCallba
     }
 
     public EventType getEventTypeCollection() throws ExprValidationException {
+        if (previousType == PreviousType.PREV || previousType == PreviousType.PREVTAIL) {
+            return null;
+        }
         return enumerationMethodType;
+    }
+
+    public EventType getEventTypeSingle() throws ExprValidationException {
+        if (previousType == PreviousType.PREV || previousType == PreviousType.PREVTAIL) {
+            return enumerationMethodType;
+        }
+        return null;
     }
 
     public Class getComponentTypeCollection() throws ExprValidationException {

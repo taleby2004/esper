@@ -151,4 +151,8 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBase
     public Collection<EventBean> getCollection(int column) {
         return null;
     }
+
+    public EventBean getEventBean(int column) {
+        return null;
+    }
 }

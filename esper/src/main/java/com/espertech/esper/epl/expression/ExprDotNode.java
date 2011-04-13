@@ -255,6 +255,9 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
             if (rootLambdaEvaluator.getEventTypeCollection() != null) {
                 info = ExprDotEvalTypeInfo.eventColl(rootLambdaEvaluator.getEventTypeCollection());
             }
+            else if (rootLambdaEvaluator.getEventTypeSingle() != null) {
+                info = ExprDotEvalTypeInfo.event(rootLambdaEvaluator.getEventTypeSingle());
+            }
             else if (rootLambdaEvaluator.getComponentTypeCollection() != null) {
                 info = ExprDotEvalTypeInfo.componentColl(rootLambdaEvaluator.getComponentTypeCollection());
             }

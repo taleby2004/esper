@@ -194,4 +194,14 @@ public class AggSvcGroupByRefcountedWAccessImpl extends AggregationServiceBase
             return pair.getAccessor().getCollectionReadOnly(currentAggregatorAccesses[pair.getSlot()]);
         }
     }
+
+    public EventBean getEventBean(int column) {
+        if (column < aggregators.length) {
+            return null;
+        }
+        else {
+            AggregationAccessorSlotPair pair = accessors[column - aggregators.length];
+            return pair.getAccessor().getEventBean(currentAggregatorAccesses[pair.getSlot()]);
+        }
+    }
 }

@@ -3,7 +3,7 @@ package com.espertech.esper.client.deploy;
 import java.util.List;
 
 /**
- * Returned by the {@link EPDeploymentAdmin#getDeploymentOrder} operation to holds an ordered list of modules considering each module's uses-dependencies
+ * Returned by the {@link EPDeploymentAdmin#getDeploymentOrder(java.util.Collection, DeploymentOrderOptions)} operation to holds an ordered list of modules considering each module's uses-dependencies
  * on other modules. 
  */
 public class DeploymentOrder

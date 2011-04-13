@@ -107,7 +107,7 @@ public class TestEnumInvalid extends TestCase {
 
         // not a property
         epl = "select contained.firstof().dummy from SupportBean_ST0_Container";
-        tryInvalid(epl, "Error starting statement: Could not find event property, enumeration method or instance method named 'dummy in event type 'SupportBean_ST0' [select contained.firstof().dummy from SupportBean_ST0_Container]");
+        tryInvalid(epl, "Error starting statement: Could not find enumeration method, date-time method or instance method named 'dummy' in class 'com.espertech.esper.support.bean.SupportBean_ST0' taking no parameters [select contained.firstof().dummy from SupportBean_ST0_Container]");
 
         // not a property
         epl = "select contained.selectFrom(x => key0).toMap(x=>x, y=>y) from SupportBean_ST0_Container";

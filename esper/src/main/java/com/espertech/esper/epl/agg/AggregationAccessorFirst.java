@@ -43,4 +43,8 @@ public class AggregationAccessorFirst implements AggregationAccessor
         }
         return Collections.singletonList(bean);
     }
+
+    public EventBean getEventBean(AggregationAccess currentAcces) {
+        return currentAcces.getFirstValue();
+    }
 }

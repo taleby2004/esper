@@ -27,4 +27,6 @@ public interface AggregationResultFuture
     public Object getValue(int column);
 
     public Collection<EventBean> getCollection(int column);
+
+    public EventBean getEventBean(int column);
 }

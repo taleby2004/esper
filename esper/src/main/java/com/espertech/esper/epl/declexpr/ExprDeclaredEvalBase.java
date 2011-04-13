@@ -130,4 +130,12 @@ public abstract class ExprDeclaredEvalBase implements ExprEvaluator, ExprEvaluat
         }
         return null;
     }
+
+    public EventType getEventTypeSingle() throws ExprValidationException {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return null;
+    }
 }

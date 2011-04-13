@@ -62,6 +62,10 @@ public class AggSvcGroupAllNoAccessImpl extends AggregationServiceBase
         return null;
     }
 
+    public EventBean getEventBean(int column) {
+        return null;
+    }
+
     public void clearResults()
     {
         for (AggregationMethod aggregator : aggregators)

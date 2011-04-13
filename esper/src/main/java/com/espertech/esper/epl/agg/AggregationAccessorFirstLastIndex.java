@@ -54,6 +54,10 @@ public class AggregationAccessorFirstLastIndex implements AggregationAccessor
         return Collections.singletonList(bean);
     }
 
+    public EventBean getEventBean(AggregationAccess currentAcces) {
+        return getBean(currentAcces);
+    }
+
     private EventBean getBean(AggregationAccess access) {
         EventBean bean;
         int index = constant;

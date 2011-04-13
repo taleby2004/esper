@@ -94,5 +94,13 @@ public class ExprSubselectInNode extends ExprSubselectNode
 
     public boolean isAllowMultiColumnSelect() {
         return false;
-    }    
+    }
+
+    public EventType getEventTypeSingle() throws ExprValidationException {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return null;
+    }
 }

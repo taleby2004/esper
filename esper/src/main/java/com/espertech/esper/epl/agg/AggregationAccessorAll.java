@@ -55,4 +55,8 @@ public class AggregationAccessorAll implements AggregationAccessor
         }
         return access.collectionReadOnly();
     }
+
+    public EventBean getEventBean(AggregationAccess currentAcces) {
+        return null;
+    }
 }

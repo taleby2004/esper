@@ -163,6 +163,14 @@ public class ExprSubselectRowNode extends ExprSubselectNode
         return result;
     }
 
+    public EventType getEventTypeSingle() throws ExprValidationException {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return null;
+    }    
+
     public EventType getEventTypeCollection() throws ExprValidationException {
         if (selectClause == null)   // wildcards allowed
         {

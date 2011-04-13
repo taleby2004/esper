@@ -58,4 +58,12 @@ public class PropertyExprEvaluatorScalarIterable implements ExprEvaluatorEnumera
     public Class getComponentTypeCollection() throws ExprValidationException {
         return componentType;
     }
+
+    public EventType getEventTypeSingle() throws ExprValidationException {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return null;
+    }
 }

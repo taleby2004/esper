@@ -98,6 +98,16 @@ public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBase
         }
     }
 
+    public EventBean getEventBean(int column) {
+        if (column < aggregators.length) {
+            return null;
+        }
+        else {
+            AggregationAccessorSlotPair pair = accessors[column - aggregators.length];
+            return pair.getAccessor().getEventBean(accesses[pair.getSlot()]);
+        }
+    }
+
     public void clearResults()
     {
         for (AggregationAccess access : accesses) {

@@ -26,6 +26,9 @@ public class ExprDotEvalRootChild implements ExprEvaluator, ExprEvaluatorEnumera
             if (typeInfo.getEventTypeColl() != null) {
                 innerEvaluator = new InnerEvaluatorEventCollection(rootLambdaEvaluator, typeInfo.getEventTypeColl());
             }
+            else if (typeInfo.getEventType() != null) {
+                innerEvaluator = new InnerEvaluatorEventBean(rootLambdaEvaluator, typeInfo.getEventType());
+            }
             else {
                 innerEvaluator = new InnerEvaluatorScalarCollection(rootLambdaEvaluator, typeInfo.getComponent());
             }
@@ -93,12 +96,62 @@ public class ExprDotEvalRootChild implements ExprEvaluator, ExprEvaluatorEnumera
         return null;
     }
 
+    public EventType getEventTypeSingle() throws ExprValidationException {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return null;
+    }
+
     private static interface InnerEvaluator {
         public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext);
         public Collection<EventBean> evaluateGetROCollectionEvents(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context);
         public Collection evaluateGetROCollectionScalar(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context);
+        public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context);
+
         public EventType getEventTypeCollection() throws ExprValidationException;
+        public EventType getEventTypeSingle() throws ExprValidationException;
         public Class getComponentTypeCollection() throws ExprValidationException;
+    }
+
+    private static class InnerEvaluatorEventBean implements InnerEvaluator {
+
+        private final ExprEvaluatorEnumeration rootLambdaEvaluator;
+        private final EventType eventType;
+
+        private InnerEvaluatorEventBean(ExprEvaluatorEnumeration rootLambdaEvaluator, EventType eventType) {
+            this.rootLambdaEvaluator = rootLambdaEvaluator;
+            this.eventType = eventType;
+        }
+
+        public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+            return rootLambdaEvaluator.evaluateGetEventBean(eventsPerStream, isNewData, context);
+        }
+
+        public Collection<EventBean> evaluateGetROCollectionEvents(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+            return rootLambdaEvaluator.evaluateGetROCollectionEvents(eventsPerStream, isNewData, context);
+        }
+
+        public Collection evaluateGetROCollectionScalar(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+            return rootLambdaEvaluator.evaluateGetROCollectionScalar(eventsPerStream, isNewData, context);
+        }
+
+        public EventType getEventTypeCollection() throws ExprValidationException {
+            return null;
+        }
+
+        public Class getComponentTypeCollection() throws ExprValidationException {
+            return null;
+        }
+
+        public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+            return rootLambdaEvaluator.evaluateGetEventBean(eventsPerStream, isNewData, context);
+        }
+
+        public EventType getEventTypeSingle() throws ExprValidationException {
+            return eventType;
+        }
     }
 
     private static class InnerEvaluatorScalarCollection implements InnerEvaluator {
@@ -129,6 +182,14 @@ public class ExprDotEvalRootChild implements ExprEvaluator, ExprEvaluatorEnumera
 
         public Class getComponentTypeCollection() throws ExprValidationException {
             return componentType;
+        }
+
+        public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+            return null;
+        }
+
+        public EventType getEventTypeSingle() throws ExprValidationException {
+            return null;
         }
     }
 
@@ -161,6 +222,14 @@ public class ExprDotEvalRootChild implements ExprEvaluator, ExprEvaluatorEnumera
         public Class getComponentTypeCollection() throws ExprValidationException {
             return null;
         }
+
+        public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+            return null;
+        }
+
+        public EventType getEventTypeSingle() throws ExprValidationException {
+            return null;
+        }
     }
 
     private static class InnerEvaluatorScalar implements InnerEvaluator {
@@ -188,6 +257,14 @@ public class ExprDotEvalRootChild implements ExprEvaluator, ExprEvaluatorEnumera
         }
 
         public Class getComponentTypeCollection() throws ExprValidationException {
+            return null;
+        }
+
+        public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+            return null;
+        }
+
+        public EventType getEventTypeSingle() throws ExprValidationException {
             return null;
         }
     }

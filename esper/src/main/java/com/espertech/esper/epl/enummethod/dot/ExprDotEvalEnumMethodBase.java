@@ -37,14 +37,15 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
 
     public void init(EnumMethodEnum enumMethodEnum, String enumMethodUsedName, ExprDotEvalTypeInfo typeInfo, List<ExprNode> parameters, ExprValidationContext validationContext) throws ExprValidationException {
 
-        EventType eventType = typeInfo.getEventTypeColl();
+        EventType eventTypeColl = typeInfo.getEventTypeColl();
+        EventType eventTypeBean = typeInfo.getEventType();
         Class collectionComponentType = typeInfo.getComponent();
 
         this.enumMethodEnum = enumMethodEnum;
         this.enumMethodUsedName = enumMethodUsedName;
         this.streamCountIncoming = validationContext.getStreamTypeService().getEventTypes().length;
 
-        if (eventType == null && collectionComponentType == null) {
+        if (eventTypeColl == null && collectionComponentType == null && eventTypeBean == null) {
             throw new ExprValidationException("Invalid input for built-in enumeration method '" + enumMethodUsedName + "', expecting collection of event-type or scalar values as input, received " + typeInfo.toTypeName());
         }
 
@@ -74,12 +75,13 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
 
         List<ExprDotEvalParam> bodiesAndParameters = new ArrayList<ExprDotEvalParam>();
         int count = 0;
+        EventType inputEventType = eventTypeBean == null ? eventTypeColl : eventTypeBean;
         for (ExprNode node : parameters) {
-            ExprDotEvalParam bodyAndParameter = getBodyAndParameter(enumMethodUsedName, count++, node, eventType, collectionComponentType, validationContext, bodiesAndParameters, footprint);
+            ExprDotEvalParam bodyAndParameter = getBodyAndParameter(enumMethodUsedName, count++, node, inputEventType, collectionComponentType, validationContext, bodiesAndParameters, footprint);
             bodiesAndParameters.add(bodyAndParameter);
         }
 
-        this.enumEval = getEnumEval(validationContext.getStreamTypeService(), enumMethodUsedName, bodiesAndParameters, eventType, collectionComponentType, streamCountIncoming);
+        this.enumEval = getEnumEval(validationContext.getStreamTypeService(), enumMethodUsedName, bodiesAndParameters, inputEventType, collectionComponentType, streamCountIncoming);
 
         // determine the stream ids of event properties asked for in the evaluator(s)
         HashSet<Integer> streamsRequired = new HashSet<Integer>();
@@ -118,6 +120,9 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
     }
 
     public Object evaluate(Object target, EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+        if (target instanceof EventBean) {
+            target = Collections.singletonList((EventBean) target);
+        }
         if (cache) {
             ExpressionResultCacheEntry<Long[], Object> cacheValue = exprEvaluatorContext.getExpressionResultCacheService().getEnumerationMethodLastValue(this);
             if (cacheValue != null) {

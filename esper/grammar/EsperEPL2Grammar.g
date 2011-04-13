@@ -266,6 +266,7 @@ tokens
 	FIRST_AGGREG;
 	LAST_AGGREG;
 	WINDOW_AGGREG;
+	ACCESS_AGG;
 	UPDATE_EXPR;
 	ON_SET_EXPR_ITEM;
 	CREATE_SCHEMA_EXPR;
@@ -1395,27 +1396,27 @@ builtinFunc
 	;
 	
 firstAggregation
-	: FIRST LPAREN accessAggExpr (COMMA expression)? RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
-	  -> {$d != null}? ^(DOT_EXPR ^(FIRST_AGGREG accessAggExpr expression?) libFunctionNoClass+)
-	  -> ^(FIRST_AGGREG accessAggExpr expression?)
+	: FIRST LPAREN (accessAggExpr (COMMA expression)?)? RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(FIRST_AGGREG accessAggExpr? expression?) libFunctionNoClass+)
+	  -> ^(FIRST_AGGREG accessAggExpr? expression?)
 	;
 
 lastAggregation
-	: LAST LPAREN accessAggExpr (COMMA expression)? RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
-	  -> {$d != null}? ^(DOT_EXPR ^(LAST_AGGREG accessAggExpr expression?) libFunctionNoClass+)
-	  -> ^(LAST_AGGREG accessAggExpr expression?)
+	: LAST LPAREN (accessAggExpr (COMMA expression)?)? RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(LAST_AGGREG accessAggExpr? expression?) libFunctionNoClass+)
+	  -> ^(LAST_AGGREG accessAggExpr? expression?)
 	;
 	
 windowAggregation
-	: WINDOW LPAREN accessAggExpr RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
-	  -> {$d != null}? ^(DOT_EXPR ^(WINDOW_AGGREG accessAggExpr) libFunctionNoClass+)
-	  -> ^(WINDOW_AGGREG accessAggExpr)
+	: WINDOW LPAREN accessAggExpr? RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(WINDOW_AGGREG accessAggExpr?) libFunctionNoClass+)
+	  -> ^(WINDOW_AGGREG accessAggExpr?)
 	;
 
 accessAggExpr
-   	:   	s=STAR -> PROPERTY_WILDCARD_SELECT[$s]
-	|	(propertyStreamSelector) => propertyStreamSelector
-	|	expression
+   	:   	s=STAR -> ^(ACCESS_AGG PROPERTY_WILDCARD_SELECT[$s])
+	|	(propertyStreamSelector) => propertyStreamSelector -> ^(ACCESS_AGG propertyStreamSelector)
+	|	expression -> ^(ACCESS_AGG expression)
 	;
 
 

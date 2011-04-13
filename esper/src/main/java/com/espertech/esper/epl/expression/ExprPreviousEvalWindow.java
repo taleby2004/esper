@@ -115,5 +115,9 @@ public class ExprPreviousEvalWindow implements ExprPreviousEval
         }
         eventsPerStream[streamNumber] = originalEvent;
         return deque;
-    }    
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
+        return null;
+    }
 }

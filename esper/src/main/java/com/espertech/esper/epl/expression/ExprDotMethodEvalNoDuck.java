@@ -13,7 +13,7 @@ public class ExprDotMethodEvalNoDuck implements ExprDotEval
 {
     private static final Log log = LogFactory.getLog(ExprDotMethodEvalNoDuck.class);
 
-    private final String statementName;
+    protected final String statementName;
     private final FastMethod method;
     private final ExprEvaluator[] parameters;
 

@@ -114,6 +114,14 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
         return null;
     }
 
+    public EventType getEventTypeSingle() throws ExprValidationException {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return null;
+    }
+
     @Override
     public boolean isAllowMultiColumnSelect() {
         return false;

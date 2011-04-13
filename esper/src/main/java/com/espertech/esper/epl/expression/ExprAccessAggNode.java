@@ -212,11 +212,25 @@ public class ExprAccessAggNode extends ExprAggregateNodeBase implements ExprEval
     }
 
     public EventType getEventTypeCollection() {
+        if (accessType == AggregationAccessType.FIRST || accessType == AggregationAccessType.LAST) {
+            return null;
+        }
         return containedType;
     }
 
     public Class getComponentTypeCollection() throws ExprValidationException {
         return scalarCollectionEvaluator == null ? null : scalarCollectionEvaluator.componentType;
+    }
+
+    public EventType getEventTypeSingle() throws ExprValidationException {
+        if (accessType == AggregationAccessType.FIRST || accessType == AggregationAccessType.LAST) {
+            return containedType;
+        }
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return super.aggregationResultFuture.getEventBean(column);
     }
 
     @Override

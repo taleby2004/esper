@@ -424,7 +424,7 @@ public class ConfigurationEventTypeXMLDOM implements MetaDefItem, Serializable
      * <p>
      * When setting this flag to true care should be taken about the compatibility of the supplied XML type
      * configuration information and the existing EPL statements and stored events, if any. For more information
-     * please consult {@link ConfigurationOperations#replaceXMLEventType}. 
+     * please consult {@link ConfigurationOperations#replaceXMLEventType(String, ConfigurationEventTypeXMLDOM)}.
      * @param updateStoredType set to false (the default) to indicate that stored type information takes precedence over configuration type information
      */
     public void setUpdateStoredType(boolean updateStoredType) {

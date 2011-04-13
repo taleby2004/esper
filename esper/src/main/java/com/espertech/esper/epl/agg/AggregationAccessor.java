@@ -17,4 +17,6 @@ public interface AggregationAccessor
     public Object getValue(AggregationAccess access);
 
     public Collection<EventBean> getCollectionReadOnly(AggregationAccess access);
+
+    public EventBean getEventBean(AggregationAccess currentAcces);
 }

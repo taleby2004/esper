@@ -1,7 +1,7 @@
 package com.espertech.esper.client.deploy;
 
 /**
- * Options class passed to {@link EPDeploymentAdmin#getDeploymentOrder} for controlling the behavior of ordering and dependency checking logic.
+ * Options class passed to {@link EPDeploymentAdmin#getDeploymentOrder(java.util.Collection, DeploymentOrderOptions)} for controlling the behavior of ordering and dependency checking logic.
  */
 public class DeploymentOrderOptions
 {

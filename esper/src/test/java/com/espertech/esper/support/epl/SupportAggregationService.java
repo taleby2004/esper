@@ -50,6 +50,9 @@ public class SupportAggregationService implements AggregationService
 
     public void clearResults()
     {
-        //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public EventBean getEventBean(int column) {
+        return null;
     }
 }

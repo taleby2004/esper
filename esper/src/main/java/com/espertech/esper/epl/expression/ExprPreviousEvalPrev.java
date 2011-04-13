@@ -57,13 +57,12 @@ public class ExprPreviousEvalPrev implements ExprPreviousEval
         return evalResult;
     }
 
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
+        return getSubstitute(eventsPerStream, context);
+    }
+
     public Collection<EventBean> evaluateGetCollEvents(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
-        EventBean substituteEvent = getSubstitute(eventsPerStream, context);
-        if (substituteEvent == null)
-        {
-            return null;
-        }
-        return Collections.singletonList(substituteEvent);
+        return null;
     }
 
     public Collection evaluateGetCollScalar(EventBean[] eventsPerStream, ExprEvaluatorContext context) {

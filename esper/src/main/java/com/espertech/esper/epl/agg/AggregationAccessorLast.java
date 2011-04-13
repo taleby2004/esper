@@ -43,4 +43,8 @@ public class AggregationAccessorLast implements AggregationAccessor
         }
         return Collections.singletonList(bean);
     }
+
+    public EventBean getEventBean(AggregationAccess currentAcces) {
+        return currentAcces.getLastValue();
+    }
 }

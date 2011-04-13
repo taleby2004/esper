@@ -116,15 +116,29 @@ public class ExprDotNodeUtility
             }
 
             // Try to resolve the method
-            if (currentInputType.isScalar()) {
+            if (currentInputType.isScalar() || currentInputType.getEventType() != null) {
                 try
                 {
-                    Method method = validationContext.getMethodResolutionService().resolveMethod(currentInputType.getScalar(), chainElement.getName(), paramTypes);
+                    Class target;
+                    if (currentInputType.isScalar()) {
+                        target = currentInputType.getScalar();
+                    }
+                    else {
+                        target = currentInputType.getEventType().getUnderlyingType();
+                    }
+                    Method method = validationContext.getMethodResolutionService().resolveMethod(target, chainElement.getName(), paramTypes);
                     FastClass declaringClass = FastClass.create(Thread.currentThread().getContextClassLoader(), method.getDeclaringClass());
                     FastMethod fastMethod = declaringClass.getMethod(method);
-                    ExprDotMethodEvalNoDuck noduck = new ExprDotMethodEvalNoDuck(validationContext.getStatementName(), fastMethod, paramEvals);
-                    methodEvals.add(noduck);
-                    currentInputType = noduck.getTypeInfo();
+
+                    ExprDotEval eval;
+                    if (currentInputType.isScalar()) {
+                        eval = new ExprDotMethodEvalNoDuck(validationContext.getStatementName(), fastMethod, paramEvals);
+                    }
+                    else {
+                        eval = new ExprDotMethodEvalNoDuckUnderlying(validationContext.getStatementName(), fastMethod, paramEvals);
+                    }
+                    methodEvals.add(eval);
+                    currentInputType = eval.getTypeInfo();
                 }
                 catch(Exception e)
                 {
@@ -141,7 +155,7 @@ public class ExprDotNodeUtility
             }
 
             String message = "Could not find event property, enumeration method or instance method named '" +
-                    chainElement.getName() + " in " + currentInputType.toTypeName();
+                    chainElement.getName() + "' in " + currentInputType.toTypeName();
             throw new ExprValidationException(message);
         }
 

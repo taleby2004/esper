@@ -41,6 +41,10 @@ public class AggregationServiceNull implements AggregationService {
         return null;
     }
 
+    public EventBean getEventBean(int column) {
+        return null;
+    }
+
     public void clearResults()
     {
         // no state to clear

@@ -1042,7 +1042,7 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 				</para>
 				
 				<para>
-					You may specify the wildcard (<literal>*</literal>) character in which case the function returns the underlying event of the single selected stream. For joins and subqueries you must use the stream wildcard syntax below.
+					You may specify the wildcard (<literal>*</literal>) character in which case the function returns the underlying event of the single selected stream. When selecting a single stream you may specify no parameter instead of wildcard. For joins and subqueries you must use the stream wildcard syntax below.
 				</para>
 
 				<para>
@@ -1082,6 +1082,10 @@ from Trade.std:groupwin(symbol).win:length(10)</programlisting>
 				</para>
 				<programlisting>select first(temperature, 0) as f1, first(temperature, 1) as f2
 from SensorEvent.win:time(10 sec)</programlisting>
+
+				<para>
+					You may use dot-syntax to invoke a method on the first event. You may also append a property name using dot-syntax.
+				</para>
 			</sect3>
 
 			<sect3 id="epl-function-aggregation-dwtrack-last">
@@ -1097,7 +1101,7 @@ from SensorEvent.win:time(10 sec)</programlisting>
 				</para>
 
 				<para>
-					Similar to the <literal>first</literal> aggregation function described above, you may specify the wildcard (<literal>*</literal>) character or stream name and wildcard (<literal>*</literal>) character or a <emphasis>value_expression</emphasis> to evaluate for the last event.
+					Similar to the <literal>first</literal> aggregation function described above, you may specify the wildcard (<literal>*</literal>) character, no parameter or stream name and wildcard (<literal>*</literal>) character or a <emphasis>value_expression</emphasis> to evaluate for the last event.
 				</para>
 
 				<para>

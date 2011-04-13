@@ -54,4 +54,12 @@ public class PropertyExprEvaluatorEventCollection implements ExprEvaluatorEnumer
     public Class getComponentTypeCollection() throws ExprValidationException {
         return null;
     }
+
+    public EventType getEventTypeSingle() throws ExprValidationException {
+        return null;
+    }
+
+    public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+        return null;
+    }
 }

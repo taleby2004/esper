@@ -25,6 +25,15 @@ public class TestFirstLastAllAggregation extends TestCase {
         epService.initialize();
     }
 
+    public void testNoParamChainedAndProperty() {
+        epService.getEPAdministrator().getConfiguration().addEventType("ChainEvent", ChainEvent.class);
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select first().property as val0, first().myMethod() as val1, window() as val2 from ChainEvent.std:lastevent()");
+        stmt.addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new ChainEvent("p1"));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1".split(","), new Object[] {"p1", "abc"});
+    }
+
     public void testLastMaxMixedOnSelect() {
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean(string like 'A%')");
@@ -791,6 +800,22 @@ public class TestFirstLastAllAggregation extends TestCase {
         }
         catch (EPStatementException ex) {
             assertEquals(message, ex.getMessage());
+        }
+    }
+
+    public static class ChainEvent {
+        private String property;
+
+        public ChainEvent(String property) {
+            this.property = property;
+        }
+
+        public String getProperty() {
+            return property;
+        }
+
+        public String myMethod() {
+            return "abc";
         }
     }
 }

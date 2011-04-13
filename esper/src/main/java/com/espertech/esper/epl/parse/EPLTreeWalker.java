@@ -2268,6 +2268,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
 
         ExprAggregateNode aggregateNode;
+        ExprNode childNode = null;
 
         switch (node.getType())
         {
@@ -2292,11 +2293,23 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case FIRST_AGGREG:
             case WINDOW_AGGREG:
             case LAST_AGGREG:
-                boolean isWildcard = ASTUtil.findFirstNode(node, PROPERTY_WILDCARD_SELECT) != null;
-                Tree streamWCNode = ASTUtil.findFirstNode(node, PROPERTY_SELECTION_STREAM);
+                boolean isWildcard = false;
                 String streamWildcard = null;
-                if (streamWCNode != null) {
-                    streamWildcard = streamWCNode.getChild(0).getText();
+                if (node.getChildCount() > 0 && node.getChild(0).getType() == ACCESS_AGG) {
+                    Tree wildcardNode = ASTUtil.findFirstNode(node.getChild(0), PROPERTY_WILDCARD_SELECT);
+                    Tree streamWCNode = ASTUtil.findFirstNode(node.getChild(0), PROPERTY_SELECTION_STREAM);
+                    if (wildcardNode != null) {
+                        isWildcard = true;
+                    }
+                    else if (streamWCNode != null) {
+                        streamWildcard = streamWCNode.getChild(0).getText();
+                    }
+                    else {
+                        childNode = astExprNodeMap.remove(node.getChild(0).getChild(0));
+                    }
+                }
+                else {  // no parameter case
+                    isWildcard = true;
                 }
 
                 if (node.getType() == FIRST_AGGREG) {
@@ -2313,6 +2326,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized aggregate node type");
         }
 
+        if (childNode != null) {
+            aggregateNode.addChildNode(childNode);
+        }
         astExprNodeMap.put(node, aggregateNode);
     }
 

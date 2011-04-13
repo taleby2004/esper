@@ -56,6 +56,11 @@ public class AggSvcGroupAllAccessOnlyImpl implements AggregationService, Aggrega
         return pair.getAccessor().getValue(accesses[pair.getSlot()]);
     }
 
+    public EventBean getEventBean(int column) {
+        AggregationAccessorSlotPair pair = accessors[column];
+        return pair.getAccessor().getEventBean(accesses[pair.getSlot()]);
+    }
+
     public Collection<EventBean> getCollection(int column)
     {
         AggregationAccessorSlotPair pair = accessors[column];

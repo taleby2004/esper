@@ -22,4 +22,8 @@ public class SupportAggregationResultFuture implements AggregationResultFuture
     public Collection<EventBean> getCollection(int column) {
         return null;
     }
+
+    public EventBean getEventBean(int column) {
+        return null;
+    }
 }

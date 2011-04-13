@@ -83,6 +83,10 @@ public class AggregationServiceMatchRecognizeImpl implements AggregationServiceM
         return null;
     }
 
+    public EventBean getEventBean(int column) {
+        return null;
+    }
+
     public void clearResults()
     {
         for (AggregationMethod aggregator : aggregatorsAll)
