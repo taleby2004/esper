@@ -214,6 +214,49 @@ public class TestPreviousFunction extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 17, 0L, "F2"));
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"IBM", "F2", 12d, 12d, 2L, splitDoubles("17d,12d")});
+
+        // test length window overflow
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().createEPL("select prev(5,intPrimitive) as val0 from SupportBean.std:groupwin(string).win:length(5)").addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 11));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 12));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 13));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 14));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 15));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("C", 20));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("C", 21));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("C", 22));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("C", 23));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("C", 24));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("B", 31));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("C", 25));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 16));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
     }
 
     public void testSortWindowPerGroup()
