@@ -124,7 +124,7 @@ public class PropertyIndexedEventTable implements EventTable
         Set<EventBean> events = propertyIndex.get(key);
         if (events == null)
         {
-            events = new HashSet<EventBean>();
+            events = new LinkedHashSet<EventBean>();
             propertyIndex.put(key, events);
         }
 

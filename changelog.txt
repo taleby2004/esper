@@ -4,13 +4,38 @@ Esper Changelog
 Changes in version 4.2.0
 ------------------------
 Major API or EPL changes
-  - The on-merge clause has been extended to allow multiple actions (multiple then-clauses), to allow insert-into a stream other then the currently-merged named window
-    and adding support for an optional where-clause for each action.
-  - The query planning and indexing for joins, subqueries, on-merge/select/update/delete, fire-and-forget queries and create-index has been enhanced to support btree indexes for use with 
-    ranges, inverted ranges and relational operator queries. 
+  - Support for @Audit annotation which instructs the engine to output detailed debug-level information about the statements processing, such as pattern instance counts, expression result values, property values and more.
+  - Support for Virtual Data Window, an extension point for (large) external data stores to become accessible same as a named window.
+  - Support for enumeration methods, which work with lambda expressions to perform common tasks on subquery results, named windows, event properties or inputs that are or can be projected to a collection of events, scalar values or objects.
+  - Support for date-time methods for date and time manifulation and querying, such as for adding or subtracting time periods, setting or rounding calendar fields and querying fields.
+  - Support for the 'new' operator, which populates a new data structure by evaluating column names and assignment expressions, useful when an expression should return multiple results, for performing a transformation or inside enumeration method lambda expressions.
+  - Support for constructore injection for event objects populated by insert into
+  - Support for the on-merge clause to allow multiple actions (multiple then-clauses), to allow insert-into a stream other then the currently-merged named window and adding support for an optional where-clause for each action.
+  - Support for mapped and indexed properties to allow an expression as a map key or index
+  - Improvement for query planning and indexing for joins, subqueries, on-merge/select/update/delete, fire-and-forget queries and create-index to support btree indexes for use with ranges, inverted ranges and relational operator (>, <, >=, <=) queries. 
+  - Improvements to statement metrics reporting in regards to event counts and reportinf for named windows
+  - Improvements to query plan output.
   - Reduced memory use for hash indexes on single columns.
 
-Changes in version 4.2.0
+Minor changes
+  - Fixed issue ESPER-549 NullPointerException upon failing to resolve UDF and when configuring a non-default auto-import
+  - Fixed issue ESPER-550 Where-clause expression validation not taking expression return type into account
+  - Fixed issue ESPER-551 Custom exception handler that rethrows runtime exceptions may cause wrong callback for next event
+  - Fixed issue ESPER-552 NPE logged delivering null-value results to Subscriber update method
+  - Fixed issue ESPER-555 Improve error message for UDF functions and subscribers that expect primitive typed parameters and receive null
+  - Fixed issue ESPER-556 Method-invocation-join when not unidirectional in combination with max/min aggregation function produces warning
+  - Fixed issue ESPER-557 On-merge statement creation throws StringIndexOutOfBoundsException when using alias for named window but not for property
+  - Fixed issue ESPER-558 Incorrect having-clause validation "non-aggregated properties in the 'having' clause must occur in the 'group-by' clause"
+  - Fixed issue ESPER-559 Output-first With Having-Clause not honoring output interval reliably
+  - Fixed issue ESPER-560 Updated (or deleted) event in a Named Window is not delivered to a consuming statement
+  - Fixed issue ESPER-561 Invoking instance method of an object returned by static method invocation returns cache of static method
+  - Fixed issue ESPER-562 On-select with aggregation and group-by not releasing memory after completion of a triggering event
+  - Fixed issue ESPER-563 Small memory leak creating large number of failed-validation statements
+  - Fixed issue ESPER-564 Subquery of identical event stream does not include most recent event in window aggregate
+  - Fixed issue ESPER-566 First Aggregation Function Returns Wrong (Growing) Result When Used in Correlated Subquery
+  
+
+Changes in version 4.1.0
 ------------------------
 Major API or EPL changes
   - Support for on-merge which provides an atomic update-insert-delete (aka. upsert or merge) operation for use with named windows

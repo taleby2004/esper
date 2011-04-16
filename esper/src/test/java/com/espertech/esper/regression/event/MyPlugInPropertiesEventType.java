@@ -96,4 +96,12 @@ public class MyPlugInPropertiesEventType implements EventType
     {
         return null;  // sample does not provide any fragments
     }
+
+    public EventPropertyGetterMapped getGetterMapped(String mappedProperty) {
+        return null;    // sample does not provide a getter for mapped properties
+    }
+
+    public EventPropertyGetterIndexed getGetterIndexed(String indexedProperty) {
+        return null;    // sample does not provide a getter for indexed properties
+    }
 }

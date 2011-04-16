@@ -11,10 +11,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.event.*;
-import com.espertech.esper.event.property.GenericPropertyDesc;
-import com.espertech.esper.event.property.Property;
-import com.espertech.esper.event.property.PropertyParser;
-import com.espertech.esper.event.property.SimpleProperty;
+import com.espertech.esper.event.property.*;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
@@ -22,8 +19,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.util.*;
 import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * Implementation of the EventType interface for handling JavaBean-type classes.
@@ -122,29 +119,6 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         return prop.getPropertyType(this, eventAdapterService);
     }
 
-    /**
-     * Returns the type and its generic property type, if any, or just the generic type as the type for indexed
-     * or mapped properties.
-     * @param propertyName a property expression
-     * @return type and generic type, if any
-     */
-    public final GenericPropertyDesc getPropertyTypeGeneric(String propertyName)
-    {
-        SimplePropertyInfo simpleProp = getSimplePropertyInfo(propertyName);
-        if ((simpleProp != null) && (simpleProp.getClazz() != null ))
-        {
-            return simpleProp.getDescriptor().getReturnTypeGeneric();
-        }
-
-        Property prop = PropertyParser.parse(propertyName, false);
-        if (prop instanceof SimpleProperty)
-        {
-            // there is no such property since it wasn't in simplePropertyTypes
-            return null;
-        }
-        return prop.getPropertyTypeGeneric(this, eventAdapterService);
-    }
-
     public boolean isProperty(String propertyName)
     {
         if (getPropertyType(propertyName) == null)
@@ -194,6 +168,24 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         EventPropertyGetter getter = prop.getGetter(this, eventAdapterService);
         propertyGetterCache.put(propertyName, getter);
         return getter;
+    }
+
+    public EventPropertyGetterMapped getGetterMapped(String mappedPropertyName) {
+        EventPropertyDescriptor desc = this.propertyDescriptorMap.get(mappedPropertyName);
+        if (desc == null || !desc.isMapped()) {
+            return null;
+        }
+        MappedProperty mappedProperty = new MappedProperty(mappedPropertyName);
+        return mappedProperty.getGetter(this, eventAdapterService);
+    }
+
+    public EventPropertyGetterIndexed getGetterIndexed(String indexedPropertyName) {
+        EventPropertyDescriptor desc = this.propertyDescriptorMap.get(indexedPropertyName);
+        if (desc == null || !desc.isIndexed()) {
+            return null;
+        }
+        IndexedProperty indexedProperty = new IndexedProperty(indexedPropertyName);
+        return indexedProperty.getGetter(this, eventAdapterService);
     }
 
     /**

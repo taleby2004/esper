@@ -230,16 +230,34 @@ public class StreamTypeServiceImpl implements StreamTypeService
 
         for (int i = 0; i < eventTypes.length; i++)
         {
-            if ((eventTypes[i] != null) && (eventTypes[i].isProperty(propertyName)))
+            if (eventTypes[i] != null)
             {
-                streamType = eventTypes[i];
-                foundCount++;
-                foundIndex = index;
+                Class propertyType = null;
+                boolean found = false;
+                
+                if (eventTypes[i].isProperty(propertyName)) {
+                    propertyType = eventTypes[i].getPropertyType(propertyName);
+                    found = true;
+                }
+                else {
+                    // mapped(expression) or array(expression) are not property names but expressions against a property by name "mapped" or "array"
+                    EventPropertyDescriptor descriptor = eventTypes[i].getPropertyDescriptor(propertyName);
+                    if (descriptor != null) {
+                        found = true;
+                        propertyType = descriptor.getPropertyType();
+                    }
+                }
 
-                // If the property could be resolved from stream 0 then we don't need to look further
-                if ((i == 0) && isStreamZeroUnambigous)
-                {
-                    return new PropertyResolutionDescriptor(streamNames[0], eventTypes[0], propertyName, 0, streamType.getPropertyType(propertyName));
+                if (found) {
+                    streamType = eventTypes[i];
+                    foundCount++;
+                    foundIndex = index;
+
+                    // If the property could be resolved from stream 0 then we don't need to look further
+                    if ((i == 0) && isStreamZeroUnambigous)
+                    {
+                        return new PropertyResolutionDescriptor(streamNames[0], eventTypes[0], propertyName, 0, propertyType);
+                    }
                 }
             }
             index++;
@@ -438,9 +456,13 @@ public class StreamTypeServiceImpl implements StreamTypeService
         Class propertyType = streamType.getPropertyType(propertyName);
         if (propertyType == null)
         {
-            Pair<Integer, String> possibleMatch = findLevMatch(propertyName, streamType);
-            String message = "Property named '" + propertyName + "' is not valid in stream '" + streamName + "'";
-            throw new PropertyNotFoundException(message, possibleMatch);
+            EventPropertyDescriptor desc = streamType.getPropertyDescriptor(propertyName);
+            if (desc == null) {
+                Pair<Integer, String> possibleMatch = findLevMatch(propertyName, streamType);
+                String message = "Property named '" + propertyName + "' is not valid in stream '" + streamName + "'";
+                throw new PropertyNotFoundException(message, possibleMatch);
+            }
+            propertyType = desc.getPropertyType();
         }
 
         return new PropertyResolutionDescriptor(streamName, streamType, propertyName, index, propertyType);

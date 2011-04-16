@@ -8,9 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.client.ConfigurationMethodRef;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.client.ConfigurationMethodRef;
 import com.espertech.esper.epl.expression.ExprNode;
 
 import java.lang.reflect.Constructor;
@@ -118,7 +118,7 @@ public interface EngineImportService
      * @return method this resolves to
      * @throws EngineImportException if the method cannot be resolved to a visible static or instance method
      */
-    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes) throws EngineImportException;
+    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes, boolean allowMapArrayProperty) throws EngineImportException;
 
     /**
      * Resolve an extended (non-SQL std) builtin aggregation.

@@ -11,6 +11,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventPropertyGetterAndIndexed;
 import com.espertech.esper.event.bean.BeanEventPropertyGetter;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -20,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Getter for an array property identified by a given index, using the CGLIB fast method.
  */
-public class ArrayFastPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
+public class ArrayFastPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter, EventPropertyGetterAndIndexed
 {
     private final FastMethod fastMethod;
     private final int index;
@@ -44,6 +45,11 @@ public class ArrayFastPropertyGetter extends BaseNativePropertyGetter implements
     }
 
     public Object getBeanProp(Object object) throws PropertyAccessException
+    {
+        return getBeanPropInternal(object, index);
+    }
+
+    private Object getBeanPropInternal(Object object, int index) throws PropertyAccessException
     {
         try
         {
@@ -71,8 +77,11 @@ public class ArrayFastPropertyGetter extends BaseNativePropertyGetter implements
 
     public final Object get(EventBean obj) throws PropertyAccessException
     {
-        Object underlying = obj.getUnderlying();
-        return getBeanProp(underlying);
+        return getBeanProp(obj.getUnderlying());
+    }
+
+    public Object get(EventBean eventBean, int index) throws PropertyAccessException {
+        return getBeanPropInternal(eventBean.getUnderlying(), index);
     }
 
     public String toString()

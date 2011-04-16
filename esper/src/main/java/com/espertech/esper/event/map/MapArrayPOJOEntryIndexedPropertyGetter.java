@@ -12,7 +12,7 @@ import java.lang.reflect.Array;
 /**
  * A getter that works on arrays residing within a Map as an event property.
  */
-public class MapArrayPOJOEntryIndexedPropertyGetter extends BaseNativePropertyGetter implements MapEventPropertyGetter
+public class MapArrayPOJOEntryIndexedPropertyGetter extends BaseNativePropertyGetter implements MapEventPropertyGetter, MapEventPropertyGetterAndIndexed
 {
     private final String propertyMap;
     private final int index;
@@ -32,6 +32,11 @@ public class MapArrayPOJOEntryIndexedPropertyGetter extends BaseNativePropertyGe
     }
 
     public Object getMap(Map<String, Object> map) throws PropertyAccessException
+    {
+        return getMapInternal(map, index);
+    }
+
+    public Object getMapInternal(Map<String, Object> map, int index) throws PropertyAccessException
     {
         // If the map does not contain the key, this is allowed and represented as null
         Object value = map.get(propertyMap);
@@ -54,6 +59,20 @@ public class MapArrayPOJOEntryIndexedPropertyGetter extends BaseNativePropertyGe
     public boolean isMapExistsProperty(Map<String, Object> map)
     {
         return map.containsKey(propertyMap);
+    }
+
+    public Object get(EventBean eventBean, int index) throws PropertyAccessException {
+        Object underlying = eventBean.getUnderlying();
+
+        // The underlying is expected to be a map
+        if (!(underlying instanceof Map))
+        {
+            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
+                    "the underlying data object is not of type java.lang.Map");
+        }
+
+        Map<String, Object> map = (Map<String, Object>) underlying;
+        return getMapInternal(map, index);
     }
 
     public Object get(EventBean obj)

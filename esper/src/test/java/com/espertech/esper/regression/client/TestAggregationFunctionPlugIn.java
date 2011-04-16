@@ -324,8 +324,8 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
     public void testInvalid()
     {
-        tryInvalid("select xxx(id) from A ",
-                "Error in expression: Unknown single-row function or aggregation function named 'xxx' could not be resolved [select xxx(id) from A ]");
+        tryInvalid("select xxx(string) from " + SupportBean.class.getName(),
+                "Error starting statement: Unknown single-row function, aggregation function or mapped or indexed property named 'xxx' could not be resolved [select xxx(string) from com.espertech.esper.support.bean.SupportBean]");
     }
 
     private void tryInvalid(String stmtText, String expectedMsg)

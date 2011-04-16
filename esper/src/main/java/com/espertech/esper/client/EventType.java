@@ -184,4 +184,30 @@ public interface EventType
      * @return type name or null if none assigned
      */
     public String getName();
+
+    /**
+     * Get the getter of an event property that is a mapped event property: Getters are useful when an application
+     * receives events of the same event type multiple times and requires fast access
+     * to a mapped property.
+     * <p>
+     * Returns null if the property name is not valid against the event type or the property is not a mapped property.
+     * <p>
+     * The method takes a mapped property name (and not a property expression) as a parameter.
+     * @param mappedPropertyName is the property name
+     * @return a getter that can be used to obtain property values for event instances of the same event type
+     */
+    public EventPropertyGetterMapped getGetterMapped(String mappedPropertyName);
+
+    /**
+     * Get the getter of an event property that is a indexed event property: Getters are useful when an application
+     * receives events of the same event type multiple times and requires fast access
+     * to a indexed property.
+     * <p>
+     * Returns null if the property name is not valid against the event type or the property is not an indexed property.
+     * <p>
+     * The method takes a indexed property name (and not a property expression) as a parameter.
+     * @param indexedPropertyName is the property name
+     * @return a getter that can be used to obtain property values for event instances of the same event type
+     */
+    public EventPropertyGetterIndexed getGetterIndexed(String indexedPropertyName);
 }

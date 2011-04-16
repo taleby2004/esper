@@ -2022,7 +2022,12 @@ public class EPLTreeWalker extends EsperEPL2Ast
             }
         }
 
-        throw new IllegalStateException("Unknown single-row function or aggregation function named '" + childNodeText + "' could not be resolved");
+        // Could be a mapped property with an expression-parameter "mapped(expr)" or array property with an expression-parameter "array(expr)".
+        List<ExprChainedSpec> spec = new ArrayList<ExprChainedSpec>();
+        List<ExprNode> childExpressions = getExprNodesLibFunc(0, node, astExprNodeMap);
+        spec.add(new ExprChainedSpec(childNodeText, childExpressions, true));
+        astExprNodeMap.put(node, new ExprDotNode(spec, false, false));
+        return;
     }
 
     private void leaveDotExpr(Tree node)

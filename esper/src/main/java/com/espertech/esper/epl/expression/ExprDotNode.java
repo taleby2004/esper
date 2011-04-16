@@ -8,10 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.client.EventPropertyDescriptor;
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.FragmentEventType;
+import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
@@ -61,6 +58,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                 break;
             }
         }
+        int prefixedStreamName = prefixedStreamName(chainSpec, validationContext.getStreamTypeService());
 
         // The root node expression may provide the input value:
         //   Such as "window(*).doIt(...)" or "(select * from Window).doIt()" or "prevwindow(sb).doIt(...)", in which case the expression to act on is a child expression
@@ -86,6 +84,59 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
             UniformPair<ExprDotEval[]> evals = ExprDotNodeUtility.getChainEvaluators(typeInfo, chainSpec, validationContext, isDuckTyping);
             exprEvaluator = new ExprDotEvalRootChild(rootNodeEvaluator, enumSrc.getFirst(), enumSrc.getSecond(), evals.getFirst(), evals.getSecond());
         }
+        // No root node, and this is a 1-element chain i.e. "something(param,...)" (cannot be stream instance method, must be property with expression parameter).
+        // Plug-in single-row methods are not handled here.
+        // Plug-in aggregation methods are not handled here.
+        else if (chainSpec.size() == 1 || (chainSpec.size() == 2 && prefixedStreamName != -1)) {
+            ExprChainedSpec spec = chainSpec.size() == 2 ? chainSpec.get(1) : chainSpec.get(0);
+            if (spec.getParameters().size() != 1) {
+                throw new ExprValidationException("Unknown single-row function or aggregation function named '" + spec.getName() + "' could not be resolved");
+            }
+            // single-parameter can resolve to a property
+            Pair<PropertyResolutionDescriptor, String> propertyInfoPair = null;
+            try {
+                if (!streamTypeService.hasPropertyAgnosticType()) {
+                    String propName = spec.getName();
+                    if (chainSpec.size() == 2) {
+                        propName = chainSpec.get(0).getName() + "." + propName;
+                    }
+                    propertyInfoPair = ExprIdentNodeImpl.getTypeFromStream(streamTypeService, propName);
+                }
+            }
+            catch (ExprValidationPropertyException ex) {
+                // fine
+            }
+            if (propertyInfoPair == null) {
+                throw new ExprValidationException("Unknown single-row function, aggregation function or mapped or indexed property named '" + spec.getName() + "' could not be resolved");
+            }
+            EventPropertyDescriptor propertyDesc = propertyInfoPair.getFirst().getStreamEventType().getPropertyDescriptor(propertyInfoPair.getFirst().getPropertyName());
+            if (propertyDesc == null || (!propertyDesc.isMapped() && !propertyDesc.isIndexed())) {
+                throw new ExprValidationException("Unknown single-row function, aggregation function or mapped or indexed property named '" + spec.getName() + "' could not be resolved");
+            }
+
+            ExprEvaluator parameterEval = spec.getParameters().get(0).getExprEvaluator();
+            int streamNum = propertyInfoPair.getFirst().getStreamNum();
+            if (propertyDesc.isMapped()) {
+                if (parameterEval.getType() != String.class) {
+                    throw new ExprValidationException("Parameter expression to mapped property '" + propertyDesc.getPropertyName() + "' is expected to return a string-type value but returns " + JavaClassHelper.getClassNameFullyQualPretty(parameterEval.getType()));
+                }
+                EventPropertyGetterMapped mappedGetter = propertyInfoPair.getFirst().getStreamEventType().getGetterMapped(propertyInfoPair.getFirst().getPropertyName());
+                if (mappedGetter == null) {
+                    throw new ExprValidationException("Mapped property named '" + spec.getName() + "' failed to obtain getter-object");
+                }
+                exprEvaluator = new ExprDotEvalPropertyExprMapped(validationContext.getStatementName(), propertyDesc.getPropertyName(), streamNum, parameterEval, propertyDesc.getPropertyType(), mappedGetter);
+            }
+            else {
+                if (JavaClassHelper.getBoxedType(parameterEval.getType()) != Integer.class) {
+                    throw new ExprValidationException("Parameter expression to mapped property '" + propertyDesc.getPropertyName() + "' is expected to return a Integer-type value but returns " + JavaClassHelper.getClassNameFullyQualPretty(parameterEval.getType()));
+                }
+                EventPropertyGetterIndexed indexedGetter = propertyInfoPair.getFirst().getStreamEventType().getGetterIndexed(propertyInfoPair.getFirst().getPropertyName());
+                if (indexedGetter == null) {
+                    throw new ExprValidationException("Mapped property named '" + spec.getName() + "' failed to obtain getter-object");
+                }
+                exprEvaluator = new ExprDotEvalPropertyExprIndexed(validationContext.getStatementName(), propertyDesc.getPropertyName(), streamNum, parameterEval, propertyDesc.getPropertyType(), indexedGetter);
+            }
+        }
         else {
             // There no root node, in this case the classname or property name is provided as part of the chain.
             // Such as "MyClass.myStaticLib(...)" or "mycollectionproperty.doIt(...)"
@@ -95,7 +146,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
 
             Pair<PropertyResolutionDescriptor, String> propertyInfoPair = null;
             try {
-                if (!streamTypeService.hasPropertyAgnosticType() && (firstItem.isProperty() || firstItem.getParameters().isEmpty())) {
+                if (!streamTypeService.hasPropertyAgnosticType()) {
                     propertyInfoPair = ExprIdentNodeImpl.getTypeFromStream(streamTypeService, firstItem.getName());
                 }
             }
@@ -168,6 +219,17 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                 exprEvaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), className, staticMethod, childEvals, isConstantParameters, optionalLambdaWrap, evals.getSecond());
             }
         }
+    }
+
+    private int prefixedStreamName(List<ExprChainedSpec> chainSpec, StreamTypeService streamTypeService) {
+        if (chainSpec.size() < 1) {
+            return -1;
+        }
+        ExprChainedSpec spec = chainSpec.get(0);
+        if (!spec.isProperty()) {
+            return -1;
+        }
+        return streamTypeService.getStreamNumForStreamName(spec.getName());
     }
 
     public void accept(ExprNodeVisitor visitor) {

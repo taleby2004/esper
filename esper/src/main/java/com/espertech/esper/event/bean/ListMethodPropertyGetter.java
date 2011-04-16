@@ -3,6 +3,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventPropertyGetterAndIndexed;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.InvocationTargetException;
@@ -12,7 +13,7 @@ import java.util.List;
 /**
  * Getter for a list property identified by a given index, using vanilla reflection.
  */
-public class ListMethodPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
+public class ListMethodPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter, EventPropertyGetterAndIndexed
 {
     private final Method method;
     private final int index;
@@ -35,7 +36,15 @@ public class ListMethodPropertyGetter extends BaseNativePropertyGetter implement
         }
     }
 
-    public Object getBeanProp(Object object) throws PropertyAccessException
+    public Object get(EventBean eventBean, int index) throws PropertyAccessException {
+        return getBeanPropInternal(eventBean.getUnderlying(), index);
+    }
+
+    public Object getBeanProp(Object object) throws PropertyAccessException {
+        return getBeanPropInternal(object, index);
+    }
+
+    public Object getBeanPropInternal(Object object, int index) throws PropertyAccessException
     {
         try
         {

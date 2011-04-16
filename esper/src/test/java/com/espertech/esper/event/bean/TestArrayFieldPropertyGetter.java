@@ -42,6 +42,7 @@ public class TestArrayFieldPropertyGetter extends TestCase
     public void testGet()
     {
         assertEquals(bean.fieldStringArray[0], getter.get(event));
+        assertEquals(bean.fieldStringArray[0], getter.get(event, 0));
 
         assertNull(getterOutOfBounds.get(event));
 

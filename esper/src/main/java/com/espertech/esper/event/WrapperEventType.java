@@ -200,7 +200,79 @@ public class WrapperEventType implements EventTypeSPI
 		}
 	}
 
-	public String[] getPropertyNames()
+    public EventPropertyGetterMapped getGetterMapped(String mappedProperty) {
+        final EventPropertyGetterMapped undMapped = underlyingEventType.getGetterMapped(mappedProperty);
+        if (undMapped != null) {
+            return new EventPropertyGetterMapped() {
+                public Object get(EventBean event, String mapKey) throws PropertyAccessException {
+                    if(!(event instanceof DecoratingEventBean))
+                    {
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
+                    }
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
+                    EventBean wrappedEvent = wrapperEvent.getUnderlyingEvent();
+                    if (wrappedEvent == null)
+                    {
+                        return null;
+                    }
+                    return undMapped.get(wrappedEvent, mapKey);
+                }
+            };
+        }
+        final EventPropertyGetterMapped decoMapped = underlyingMapType.getGetterMapped(mappedProperty);
+        if (decoMapped != null) {
+            return new EventPropertyGetterMapped() {
+                public Object get(EventBean event, String mapKey) throws PropertyAccessException {
+                    if(!(event instanceof DecoratingEventBean))
+                    {
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
+                    }
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
+                    Map map = wrapperEvent.getDecoratingProperties();
+                    return decoMapped.get(eventAdapterService.adaptorForTypedMap(map, underlyingMapType), mapKey);
+                }
+            };
+        }
+        return null;
+    }
+
+    public EventPropertyGetterIndexed getGetterIndexed(String indexedProperty) {
+        final EventPropertyGetterIndexed undIndexed = underlyingEventType.getGetterIndexed(indexedProperty);
+        if (undIndexed != null) {
+            return new EventPropertyGetterIndexed() {
+                public Object get(EventBean event, int index) throws PropertyAccessException {
+                    if(!(event instanceof DecoratingEventBean))
+                    {
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
+                    }
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
+                    EventBean wrappedEvent = wrapperEvent.getUnderlyingEvent();
+                    if (wrappedEvent == null)
+                    {
+                        return null;
+                    }
+                    return undIndexed.get(wrappedEvent, index);
+                }
+            };
+        }
+        final EventPropertyGetterIndexed decoIndexed = underlyingMapType.getGetterIndexed(indexedProperty);
+        if (decoIndexed != null) {
+            return new EventPropertyGetterIndexed() {
+                public Object get(EventBean event, int index) throws PropertyAccessException {
+                    if(!(event instanceof DecoratingEventBean))
+                    {
+                        throw new PropertyAccessException("Mismatched property getter to EventBean type");
+                    }
+                    DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
+                    Map map = wrapperEvent.getDecoratingProperties();
+                    return decoIndexed.get(eventAdapterService.adaptorForTypedMap(map, underlyingMapType), index);
+                }
+            };
+        }
+        return null;
+    }
+
+    public String[] getPropertyNames()
 	{
 		return propertyNames;
 	}

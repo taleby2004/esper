@@ -41,6 +41,7 @@ public class TestArrayMethodPropertyGetter extends TestCase
     public void testGet()
     {
         assertEquals(bean.getArrayProperty()[0], getter.get(event));
+        assertEquals(bean.getArrayProperty()[0], getter.get(event, 0));
 
         assertNull(getterOutOfBounds.get(event));
 

@@ -371,7 +371,7 @@ public class EngineImportServiceImpl implements EngineImportService
 		throw new ClassNotFoundException("Unknown class " + className);
 	}
 
-    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes)
+    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes, boolean allowMapArrayProperty)
 			throws EngineImportException
     {
         try
@@ -380,6 +380,24 @@ public class EngineImportServiceImpl implements EngineImportService
         }
         catch (EngineNoSuchMethodException e)
         {
+            // resolve "getMapped(expression)" the same as "mapped(expression)"
+            if (allowMapArrayProperty && paramTypes.length == 1 && (paramTypes[0] == String.class || JavaClassHelper.getBoxedType(paramTypes[0]) == Integer.class)) {
+                String getterMethod = "get" + Character.toUpperCase(methodName.charAt(0));
+                if (methodName.length() > 1) {
+                    getterMethod = getterMethod + methodName.substring(1);
+                }
+                try {
+                    Method method = MethodResolver.resolveMethod(clazz, getterMethod, paramTypes, true);
+                    if (!Modifier.isStatic(method.getModifiers())) {
+                        return method;
+                    }
+                }
+                catch (EngineNoSuchMethodException e2) {
+                    log.debug("Failed to find alternative getter-method: " + e2.getMessage(), e2);
+                    // no action for e2
+                }
+            }
+
             throw convert(clazz, methodName, paramTypes, e, true);
         }
     }

@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Getter for a dynamic mappeds property for maps.
  */
-public class MapMappedPropertyGetter implements MapEventPropertyGetter
+public class MapMappedPropertyGetter implements MapEventPropertyGetter, MapEventPropertyGetterAndMapped
 {
     private final String key;
     private final String fieldName;
@@ -45,6 +45,25 @@ public class MapMappedPropertyGetter implements MapEventPropertyGetter
         }
         Map innerMap = (Map) value;
         return innerMap.get(key);
+    }
+
+    public Object get(EventBean eventBean, String mapKey) throws PropertyAccessException {
+        Object underlying = eventBean.getUnderlying();
+        if (!(underlying instanceof Map))
+        {
+            return null;
+        }
+        Object value = ((Map)underlying).get(fieldName);
+        if (value == null)
+        {
+            return null;
+        }
+        if (!(value instanceof Map))
+        {
+            return null;
+        }
+        Map innerMap = (Map) value;
+        return innerMap.get(mapKey);
     }
 
     public boolean isMapExistsProperty(Map<String, Object> map)

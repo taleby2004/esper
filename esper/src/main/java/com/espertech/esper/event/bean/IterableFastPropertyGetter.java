@@ -3,6 +3,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventPropertyGetterAndIndexed;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -13,7 +14,7 @@ import java.util.Iterator;
 /**
  * Getter for a iterable property identified by a given index, using the CGLIB fast method.
  */
-public class IterableFastPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
+public class IterableFastPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter, EventPropertyGetterAndIndexed
 {
     private final FastMethod fastMethod;
     private final int index;
@@ -52,6 +53,10 @@ public class IterableFastPropertyGetter extends BaseNativePropertyGetter impleme
         {
             throw new PropertyAccessException(e);
         }
+    }
+
+    public Object get(EventBean eventBean, int index) throws PropertyAccessException {
+        return getIterable(eventBean.getUnderlying(), index);
     }
 
     /**

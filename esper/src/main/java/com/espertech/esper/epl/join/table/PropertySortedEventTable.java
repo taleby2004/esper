@@ -61,7 +61,7 @@ public class PropertySortedEventTable implements EventTable
         this.propertyName = propertyName;
         propertyGetter = EventBeanUtility.getAssertPropertyGetter(eventType, propertyName);
         propertyIndex = new TreeMap<Object, Set<EventBean>>();
-        nullKeyedValues = new HashSet<EventBean>();
+        nullKeyedValues = new LinkedHashSet<EventBean>();
     }
 
     /**
@@ -320,7 +320,7 @@ public class PropertySortedEventTable implements EventTable
         Set<EventBean> events = propertyIndex.get(key);
         if (events == null)
         {
-            events = new HashSet<EventBean>();
+            events = new LinkedHashSet<EventBean>();
             propertyIndex.put(key, events);
         }
 

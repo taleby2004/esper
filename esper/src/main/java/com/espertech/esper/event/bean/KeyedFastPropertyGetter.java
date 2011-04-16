@@ -11,6 +11,8 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventPropertyGetterAndIndexed;
+import com.espertech.esper.event.EventPropertyGetterAndMapped;
 import net.sf.cglib.reflect.FastMethod;
 
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * Getter for a key property identified by a given key value, using the CGLIB fast method.
  */
-public class KeyedFastPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
+public class KeyedFastPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter, EventPropertyGetterAndMapped, EventPropertyGetterAndIndexed
 {
     private final FastMethod fastMethod;
     private final Object key;
@@ -41,7 +43,23 @@ public class KeyedFastPropertyGetter extends BaseNativePropertyGetter implements
         return true; // Property exists as the property is not dynamic (unchecked)
     }
 
-    public Object getBeanProp(Object object) throws PropertyAccessException
+    public final Object get(EventBean obj) throws PropertyAccessException {
+        return getBeanProp(obj.getUnderlying());
+    }
+
+    public Object getBeanProp(Object object) throws PropertyAccessException {
+        return getBeanPropInternal(object, key);
+    }
+
+    public Object get(EventBean eventBean, String mapKey) throws PropertyAccessException {
+        return getBeanPropInternal(eventBean.getUnderlying(), mapKey);
+    }
+
+    public Object get(EventBean eventBean, int index) throws PropertyAccessException {
+        return getBeanPropInternal(eventBean.getUnderlying(), index);
+    }
+
+    public Object getBeanPropInternal(Object object, Object key) throws PropertyAccessException
     {
         try
         {
@@ -55,12 +73,6 @@ public class KeyedFastPropertyGetter extends BaseNativePropertyGetter implements
         {
             throw new PropertyAccessException(e);
         }
-    }
-
-    public final Object get(EventBean obj) throws PropertyAccessException
-    {
-        Object underlying = obj.getUnderlying();
-        return getBeanProp(underlying);
     }
 
     public String toString()

@@ -39,7 +39,7 @@ public interface MethodResolutionService
      * @return method this resolves to
      * @throws EngineImportException if the method cannot be resolved to a visible static or instance method
      */
-    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes) throws EngineImportException;
+    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes, boolean allowMapArrayProperty) throws EngineImportException;
 
     /**
      * Resolves matching available constructors to a list of parameter types to an instance or static method exposed by the given class.

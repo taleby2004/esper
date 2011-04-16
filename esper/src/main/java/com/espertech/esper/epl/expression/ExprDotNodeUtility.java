@@ -107,7 +107,7 @@ public class ExprDotNodeUtility
                 // preresolve as method
                 try {
                     if (currentInputType.isScalar()) {
-                        validationContext.getMethodResolutionService().resolveMethod(currentInputType.getScalar(), chainElement.getName(), paramTypes);
+                        validationContext.getMethodResolutionService().resolveMethod(currentInputType.getScalar(), chainElement.getName(), paramTypes, true);
                     }
                 }
                 catch (Exception ex) {
@@ -126,7 +126,7 @@ public class ExprDotNodeUtility
                     else {
                         target = currentInputType.getEventType().getUnderlyingType();
                     }
-                    Method method = validationContext.getMethodResolutionService().resolveMethod(target, chainElement.getName(), paramTypes);
+                    Method method = validationContext.getMethodResolutionService().resolveMethod(target, chainElement.getName(), paramTypes, true);
                     FastClass declaringClass = FastClass.create(Thread.currentThread().getContextClassLoader(), method.getDeclaringClass());
                     FastMethod fastMethod = declaringClass.getMethod(method);
 

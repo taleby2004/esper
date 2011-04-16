@@ -27,6 +27,7 @@ public class TestKeyedMethodPropertyGetter extends TestCase
     public void testGet()
     {
         assertEquals(bean.getIndexed(1), getter.get(event));
+        assertEquals(bean.getIndexed(1), getter.get(event, 1));
 
         try
         {

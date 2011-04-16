@@ -11,6 +11,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventPropertyGetterAndMapped;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -21,7 +22,7 @@ import java.util.Map;
 /**
  * Getter for a key property identified by a given key value of a map, using the CGLIB fast method.
  */
-public class KeyedMapFastPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
+public class KeyedMapFastPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter, EventPropertyGetterAndMapped
 {
     private final FastMethod fastMethod;
     private final Object key;
@@ -45,7 +46,15 @@ public class KeyedMapFastPropertyGetter extends BaseNativePropertyGetter impleme
         return true; // Property exists as the property is not dynamic (unchecked)
     }
 
-    public Object getBeanProp(Object object) throws PropertyAccessException
+    public Object getBeanProp(Object object) throws PropertyAccessException {
+        return getBeanPropInternal(object, key);
+    }
+
+    public Object get(EventBean eventBean, String mapKey) throws PropertyAccessException {
+        return getBeanPropInternal(eventBean.getUnderlying(), mapKey);
+    }
+
+    public Object getBeanPropInternal(Object object, Object key) throws PropertyAccessException
     {
         try
         {

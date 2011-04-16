@@ -11,10 +11,7 @@ package com.espertech.esper.event.property;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.event.*;
-import com.espertech.esper.event.map.MapArrayMaptypedUndPropertyGetter;
-import com.espertech.esper.event.map.MapEventType;
-import com.espertech.esper.event.map.MapArrayPOJOEntryIndexedPropertyGetter;
-import com.espertech.esper.event.map.MapEventPropertyGetter;
+import com.espertech.esper.event.map.*;
 import com.espertech.esper.event.bean.*;
 import com.espertech.esper.event.xml.*;
 import com.espertech.esper.event.xml.DOMIndexedGetter;
@@ -35,6 +32,10 @@ import java.util.List;
 public class IndexedProperty extends PropertyBase
 {
     private int index;
+
+    public IndexedProperty(String propertyName) {
+        super(propertyName);
+    }
 
     /**
      * Ctor.
@@ -66,7 +67,7 @@ public class IndexedProperty extends PropertyBase
         return index;
     }
 
-    public EventPropertyGetter getGetter(BeanEventType eventType, EventAdapterService eventAdapterService)
+    public EventPropertyGetterAndIndexed getGetter(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
         FastClass fastClass = eventType.getFastClass();
         InternalEventPropDescriptor propertyDesc = eventType.getIndexedProperty(propertyNameAtomic);
@@ -278,7 +279,7 @@ public class IndexedProperty extends PropertyBase
         }
     }
 
-    public MapEventPropertyGetter getGetterMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)
+    public MapEventPropertyGetterAndIndexed getGetterMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)
     {
         Object type = optionalMapPropTypes.get(propertyNameAtomic);
         if (type == null)

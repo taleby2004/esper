@@ -11,6 +11,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventPropertyGetterAndMapped;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.Field;
@@ -19,7 +20,7 @@ import java.util.Map;
 /**
  * Getter for a key property identified by a given key value, using vanilla reflection.
  */
-public class KeyedMapFieldPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
+public class KeyedMapFieldPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter, EventPropertyGetterAndMapped
 {
     private final Field field;
     private final Object key;
@@ -37,8 +38,15 @@ public class KeyedMapFieldPropertyGetter extends BaseNativePropertyGetter implem
         this.field = field;
     }
 
+    public Object get(EventBean eventBean, String mapKey) throws PropertyAccessException {
+        return getBeanPropInternal(eventBean.getUnderlying(), mapKey);
+    }
 
-    public Object getBeanProp(Object object) throws PropertyAccessException
+    public Object getBeanProp(Object object) throws PropertyAccessException {
+        return getBeanPropInternal(object, key);
+    }
+
+    public Object getBeanPropInternal(Object object, Object key) throws PropertyAccessException
     {
         try
         {

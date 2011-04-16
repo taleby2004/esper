@@ -8,10 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.event;
 
-import com.espertech.esper.client.EventPropertyDescriptor;
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.FragmentEventType;
+import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -148,6 +145,14 @@ public abstract class BaseConfigurableEventType implements EventTypeSPI {
         }
 
         return doResolvePropertyGetter(propertyExpression);
+    }
+
+    public EventPropertyGetterMapped getGetterMapped(String mappedProperty) {
+        return null;
+    }
+
+    public EventPropertyGetterIndexed getGetterIndexed(String indexedProperty) {
+        return null;
     }
 
     public synchronized FragmentEventType getFragmentType(String property)

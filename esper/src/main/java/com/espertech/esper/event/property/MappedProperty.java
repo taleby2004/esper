@@ -10,9 +10,10 @@ package com.espertech.esper.event.property;
 
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.map.MapMappedPropertyGetter;
-import com.espertech.esper.event.map.MapEventPropertyGetter;
+import com.espertech.esper.event.EventPropertyGetterAndMapped;
 import com.espertech.esper.event.bean.*;
+import com.espertech.esper.event.map.MapEventPropertyGetterAndMapped;
+import com.espertech.esper.event.map.MapMappedPropertyGetter;
 import com.espertech.esper.event.xml.*;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
@@ -30,6 +31,10 @@ import java.util.Map;
 public class MappedProperty extends PropertyBase
 {
     private String key;
+
+    public MappedProperty(String propertyName) {
+        super(propertyName);
+    }
 
     /**
      * Ctor.
@@ -61,7 +66,7 @@ public class MappedProperty extends PropertyBase
         return false;
     }
 
-    public EventPropertyGetter getGetter(BeanEventType eventType, EventAdapterService eventAdapterService)
+    public EventPropertyGetterAndMapped getGetter(BeanEventType eventType, EventAdapterService eventAdapterService)
     {
         InternalEventPropDescriptor propertyDesc = eventType.getMappedProperty(propertyNameAtomic);
         if (propertyDesc != null)
@@ -200,7 +205,7 @@ public class MappedProperty extends PropertyBase
         return null;  // Mapped properties are not allowed in non-dynamic form in a map
     }
 
-    public MapEventPropertyGetter getGetterMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)
+    public MapEventPropertyGetterAndMapped getGetterMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)
     {
         Object type = optionalMapPropTypes.get(getPropertyNameAtomic());
         if (type == null)
@@ -213,6 +218,9 @@ public class MappedProperty extends PropertyBase
             {
                 return new MapMappedPropertyGetter(getPropertyNameAtomic(), this.getKey());
             }
+        }
+        if (type instanceof Map) {
+            return new MapMappedPropertyGetter(getPropertyNameAtomic(), this.getKey());
         }
         return null;
     }

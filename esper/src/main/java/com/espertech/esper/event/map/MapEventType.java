@@ -13,6 +13,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 import com.espertech.esper.event.*;
 import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.event.bean.InternalEventPropDescriptor;
 import com.espertech.esper.event.property.*;
 import com.espertech.esper.util.GraphUtil;
 import com.espertech.esper.util.JavaClassHelper;
@@ -639,6 +640,24 @@ public class MapEventType implements EventTypeSPI
                 + nestedType.getClass() + " for property '" + propertyName + "', expected Class, Map.class or Map<String, Object> as value type";
             throw new PropertyAccessException(message);
         }
+    }
+
+    public EventPropertyGetterMapped getGetterMapped(String mappedPropertyName) {
+        EventPropertyDescriptor desc = this.propertyDescriptorMap.get(mappedPropertyName);
+        if (desc == null || !desc.isMapped()) {
+            return null;
+        }
+        MappedProperty mappedProperty = new MappedProperty(mappedPropertyName);
+        return mappedProperty.getGetterMap(this.nestableTypes, this.eventAdapterService);
+    }
+
+    public EventPropertyGetterIndexed getGetterIndexed(String indexedPropertyName) {
+        EventPropertyDescriptor desc = this.propertyDescriptorMap.get(indexedPropertyName);
+        if (desc == null || !desc.isIndexed()) {
+            return null;
+        }
+        IndexedProperty indexedProperty = new IndexedProperty(indexedPropertyName);
+        return indexedProperty.getGetterMap(this.nestableTypes, this.eventAdapterService);
     }
 
     /**

@@ -10,10 +10,7 @@ package com.espertech.esper.epl.join.table;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * Simple table of events without an index.
@@ -21,7 +18,7 @@ import java.util.Arrays;
 public class UnindexedEventTable implements EventTable
 {
     private final int streamNum;
-    private Set<EventBean> eventSet = new HashSet<EventBean>();
+    private Set<EventBean> eventSet = new LinkedHashSet<EventBean>();
 
     /**
      * Ctor.

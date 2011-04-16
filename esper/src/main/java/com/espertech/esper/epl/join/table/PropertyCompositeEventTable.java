@@ -151,7 +151,7 @@ public class PropertyCompositeEventTable implements EventTable
 
     public Iterator<EventBean> iterator()
     {
-        HashSet<EventBean> result = new HashSet<EventBean>();
+        HashSet<EventBean> result = new LinkedHashSet<EventBean>();
         chain.getAll(result, index);
         return result.iterator();
     }
