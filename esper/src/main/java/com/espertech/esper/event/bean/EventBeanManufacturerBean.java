@@ -170,7 +170,7 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
         {
             try
             {
-                Method method = methodResolutionService.resolveMethod(fastClass.getJavaClass(), factoryMethodName, new Class[0], false);
+                Method method = methodResolutionService.resolveMethod(fastClass.getJavaClass(), factoryMethodName, new Class[0]);
                 return fastClass.getMethod(method);
             }
             catch (EngineImportException e)

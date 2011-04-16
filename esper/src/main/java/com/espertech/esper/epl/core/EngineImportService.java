@@ -118,7 +118,7 @@ public interface EngineImportService
      * @return method this resolves to
      * @throws EngineImportException if the method cannot be resolved to a visible static or instance method
      */
-    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes, boolean allowMapArrayProperty) throws EngineImportException;
+    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes) throws EngineImportException;
 
     /**
      * Resolve an extended (non-SQL std) builtin aggregation.

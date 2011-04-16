@@ -90,9 +90,9 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return engineImportService.resolveClass(className);
 	}
 
-    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes, boolean allowMapArrayProperty) throws EngineImportException
+    public Method resolveMethod(Class clazz, String methodName, Class[] paramTypes) throws EngineImportException
     {
-        return engineImportService.resolveMethod(clazz, methodName, paramTypes, allowMapArrayProperty);
+        return engineImportService.resolveMethod(clazz, methodName, paramTypes);
     }
 
     public AggregationMethod makeCountAggregator(boolean isIgnoreNull)
