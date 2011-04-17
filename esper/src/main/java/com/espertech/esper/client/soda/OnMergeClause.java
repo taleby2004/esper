@@ -53,7 +53,7 @@ public class OnMergeClause extends OnClause
         this.windowName = windowName;
         this.optionalAsName = optionalAsName;
         this.matchItems = matchItems;
-        matchItems = new ArrayList<OnMergeMatchItem>();
+        this.matchItems = new ArrayList<OnMergeMatchItem>();
     }
 
     /**

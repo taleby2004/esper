@@ -12,6 +12,8 @@ import java.util.List;
  */
 public class NewOperatorExpression extends ExpressionBase {
 
+    private static final long serialVersionUID = -7207726921338996912L;
+
     private List<String> columnNames;
 
     /**

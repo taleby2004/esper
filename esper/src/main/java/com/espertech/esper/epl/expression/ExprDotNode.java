@@ -35,7 +35,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
     private final boolean isDuckTyping;
     private final boolean isUDFCache;
 
-    private ExprEvaluator exprEvaluator;
+    private transient ExprEvaluator exprEvaluator;
     private boolean isReturnsConstantResult;
 
     public ExprDotNode(List<ExprChainedSpec> chainSpec, boolean isDuckTyping, boolean isUDFCache)

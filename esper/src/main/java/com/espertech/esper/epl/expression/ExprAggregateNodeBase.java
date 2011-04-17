@@ -33,7 +33,9 @@ import java.util.TreeMap;
  */
 public abstract class ExprAggregateNodeBase extends ExprNodeBase implements ExprEvaluator, ExprAggregateNode
 {
-	protected transient AggregationResultFuture aggregationResultFuture;
+	private static final long serialVersionUID = 4859196214837888423L;
+
+    protected transient AggregationResultFuture aggregationResultFuture;
 	protected int column;
     private transient AggregationMethodFactory aggregationMethodFactory;
 

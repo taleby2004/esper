@@ -14,7 +14,9 @@ import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -26,10 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public final class FilterParamIndexNotRangeString extends FilterParamIndexPropBase
 {
     private final TreeMap<StringRange, EventEvaluator> ranges;
-    private final Set<EventEvaluator> evaluators;
     private final ReadWriteLock rangesRWLock;
-
-    private double largestRangeValueDouble = Double.MIN_VALUE;
 
    /**
      * Constructs the index for matching ranges.
@@ -42,7 +41,6 @@ public final class FilterParamIndexNotRangeString extends FilterParamIndexPropBa
         super(attributeName, filterOperator, eventType);
 
         ranges = new TreeMap<StringRange, EventEvaluator>(new StringRangeComparator());
-        evaluators = new HashSet<EventEvaluator>();
         rangesRWLock = new ReentrantReadWriteLock();
 
         if (!(filterOperator.isInvertedRangeOperator()))
@@ -76,7 +74,6 @@ public final class FilterParamIndexNotRangeString extends FilterParamIndexPropBa
         }
 
         ranges.put(range, matcher);
-        evaluators.add(matcher);
     }
 
     public final boolean remove(Object filterConstant)
@@ -86,7 +83,6 @@ public final class FilterParamIndexNotRangeString extends FilterParamIndexPropBa
         {
             return false;
         }
-        evaluators.remove(eval);
         return true;
     }
 

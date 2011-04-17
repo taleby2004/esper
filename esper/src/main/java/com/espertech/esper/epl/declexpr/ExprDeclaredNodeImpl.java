@@ -25,9 +25,11 @@ import java.util.List;
  */
 public class ExprDeclaredNodeImpl extends ExprNodeBase implements ExprDeclaredNode
 {
+    private static final long serialVersionUID = 9140100131374697808L;
+
     private final ExpressionDeclItem prototype;
     private List<ExprNode> chainParameters;
-    private ExprEvaluator exprEvaluator;
+    private transient ExprEvaluator exprEvaluator;
     private ExprNode expressionBodyCopy;
 
     public ExprDeclaredNodeImpl(ExpressionDeclItem prototype, List<ExprNode> chainParameters) {

@@ -1639,7 +1639,7 @@ public class EPStatementStartMethod
         try
         {
             ExprValidationContext validationContext = new ExprValidationContext(typeService, statementContext.getMethodResolutionService(), viewResourceDelegate, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getAnnotations());
-            equalsNode = ExprNodeUtil.getValidatedSubtree(equalsNode, validationContext);
+            ExprNodeUtil.getValidatedSubtree(equalsNode, validationContext);
         }
         catch (ExprValidationException ex)
         {

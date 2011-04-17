@@ -19,6 +19,7 @@ import java.util.Map;
  */
 public class ExprLambdaGoesNode extends ExprNodeBase implements ExprEvaluator
 {
+    private static final long serialVersionUID = 5551755641199945138L;
     private List<String> goesToNames;
 
     public ExprLambdaGoesNode(List<String> goesToNames)

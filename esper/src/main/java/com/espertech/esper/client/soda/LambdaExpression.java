@@ -20,6 +20,8 @@ import java.util.List;
  */
 public class LambdaExpression extends ExpressionBase
 {
+    private static final long serialVersionUID = 353451331713297154L;
+
     private List<String> parameters;
 
     /**

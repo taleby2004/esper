@@ -13,10 +13,12 @@ package com.espertech.esper.pattern;
  */
 public class EvalAuditNode extends EvalNodeBase
 {
+    private static final long serialVersionUID = 2024418131446981960L;
+
     private final boolean auditPattern;
     private final boolean auditPatternInstance;
     private final String patternExpr;
-    private final EvalAuditInstanceCount instanceCount;
+    private final transient EvalAuditInstanceCount instanceCount;
     private final boolean filterChildNonQuitting;
 
     private transient PatternContext context;

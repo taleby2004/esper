@@ -13,6 +13,8 @@ package com.espertech.esper.client.soda;
  */
 public abstract class Junction extends ExpressionBase
 {
+    private static final long serialVersionUID = -8660058437278023625L;
+
     /**
      * Expression to add to the conjunction (AND) or disjunction (OR).
      * @param expression to add

@@ -17,6 +17,8 @@ import java.util.List;
  */
 public abstract class ProjectedStream extends Stream
 {
+    private static final long serialVersionUID = -8999968913067920696L;
+
     private List<View> views;
     private boolean unidirectional;
     private boolean retainUnion;

@@ -20,6 +20,8 @@ import java.util.List;
  */
 public class DotExpressionItem implements Serializable
 {
+    private static final long serialVersionUID = 4189610785425631920L;
+
     private String name;
     private List<Expression> parameters;
     private boolean property; // relevant if there are no parameters

@@ -79,7 +79,7 @@ public class JoinExecTableLookupStrategyVirtualDW implements JoinExecTableLookup
         public Object evaluate(EventBean[] events, ExprEvaluatorContext context);
     }
 
-    private class ExternalEvaluatorHashRelOp implements ExternalEvaluator {
+    private static class ExternalEvaluatorHashRelOp implements ExternalEvaluator {
 
         private final ExprEvaluator hashKeysEval;
 
@@ -92,7 +92,7 @@ public class JoinExecTableLookupStrategyVirtualDW implements JoinExecTableLookup
         }
     }
 
-    private class ExternalEvaluatorBtreeRange implements ExternalEvaluator {
+    private static class ExternalEvaluatorBtreeRange implements ExternalEvaluator {
 
         private final ExprEvaluator startEval;
         private final ExprEvaluator endEval;

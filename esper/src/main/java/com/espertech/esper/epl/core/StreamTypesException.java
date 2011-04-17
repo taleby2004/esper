@@ -15,6 +15,8 @@ import com.espertech.esper.collection.Pair;
  */
 public abstract class StreamTypesException extends Exception
 {
+    private static final long serialVersionUID = -6230611896745775451L;
+
     private final Pair<Integer, String> optionalSuggestion;
 
     /**

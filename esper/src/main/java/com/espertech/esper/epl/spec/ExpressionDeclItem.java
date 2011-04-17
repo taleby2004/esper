@@ -15,6 +15,8 @@ import java.util.List;
 
 public class ExpressionDeclItem implements Serializable
 {
+    private static final long serialVersionUID = 1823345580817519502L;
+
     private final String name;
     private ExprNode inner;
     private List<String> parametersNames;

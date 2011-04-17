@@ -8,6 +8,7 @@ import com.espertech.esper.event.bean.BeanEventType;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class ExprDotStaticMethodWrapArrayEvents implements ExprDotStaticMethodWrap {
     private EventAdapterService eventAdapterService;
@@ -117,6 +118,9 @@ public class ExprDotStaticMethodWrapArrayEvents implements ExprDotStaticMethodWr
         }
 
         public EventBean next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
             Object next = Array.get(array, count++);
             if (next == null) {
                 return null;

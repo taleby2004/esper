@@ -15,6 +15,8 @@ import java.io.StringWriter;
  */
 public abstract class AccessProjectionExpressionBase extends ExpressionBase
 {
+    private static final long serialVersionUID = 6858302558659972064L;
+
     private boolean wildcard;
     private String streamWildcard;
 

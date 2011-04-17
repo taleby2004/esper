@@ -30,7 +30,7 @@ public class ExprCaseNode extends ExprNodeBase implements ExprEvaluator
 
     private final boolean isCase2;
     private Class resultType;
-    private Map<String, Object> mapResultType;
+    private transient Map<String, Object> mapResultType;
     private boolean isNumericResult;
     private boolean mustCoerce;
 

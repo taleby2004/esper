@@ -13,13 +13,9 @@ Technology Introduction
 	
 	Esper offers: 
 	
-	* A Domain Specific Language (DSL) for processing events. 
-		
-		* The Event Processing Language (EPL) is an optimized language for dealing with high frequency time-based event data.
-		
-		[]
-	
-	* Continuous Queries, Time/Length Windows, Pattern Matching
+	* A Domain Specific Language (DSL) for processing events. The Event Processing Language (EPL) is an optimized language for dealing with high frequency time-based event data.
+			
+	* Continuous queries, time and length windows, pattern matching, aggregation plus many other features.
 	
 	[]
 			
@@ -97,12 +93,14 @@ Core Esper Features
 		
 		* Multiple and custom entry and exit criteria for events
 		
-		* Support for predefined query execution optimized by indexed access, via on-select and on-demand (fire-and-forget) query and explicit indexes
+		* Support for predefined query execution optimized by indexed access, via on-select and on-demand (fire-and-forget) query and explicit indexes (hash and btree)
 		
 		* Support for update-insert-delete (aka. merge or upsert) in a single atomic operation
 		
 		[]
 		
+	* Enumeration methods, date-time methods, lambda-expressions, expression definition and reuse, 'new' operator for returning multiple results from an expression
+	
 	[]
 		
         
@@ -252,7 +250,7 @@ Core Esper Features
     * Supports <<multiple independent Esper engines per JavaVM>>
     		  
     * <<Pluggable architecture>> for event pattern and event stream analysis via user-defined functions, plug-in views, plug-in aggregation functions, plug-in 
-      pattern guards and plug-in pattern event observers, event instance methods
+      pattern guards and plug-in pattern event observers and event instance methods. Virtual data windows for transparently backing named windows with an external store
       
     * <<Performance-minded design>>: query strategy analysis and index building; array-based collections; delta networks and many other techniques
     
@@ -268,7 +266,7 @@ Core Esper Features
     
     * JSON and XML output event rendering without syntax to learn
             
-    * <<Annotations>> allow adding information to EPL statements specific to your application
+    * <<Annotations>> allow adding information to EPL statements specific to your application, allow debugging and allow tuning memory use and performance
     
     * Assign a <<priority>> to your statement; Identify <<preemptive>> statements that cause an event to drop in face of multiple statements matching filters.
     

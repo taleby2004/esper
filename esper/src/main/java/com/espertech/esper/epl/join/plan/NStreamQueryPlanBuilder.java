@@ -305,7 +305,6 @@ public class NStreamQueryPlanBuilder
         // composite range and index lookup
         else {
             List<QueryGraphValueEntryHashKeyed> hashKeys = hashKeyProps.getKeys();
-            QueryGraphValue value = queryGraph.getGraphValue(currentLookupStream, indexedStream);
             return new CompositeTableLookupPlan(currentLookupStream, indexedStream, indexNum, hashKeys, rangeProps.getKeys());
         }
     }

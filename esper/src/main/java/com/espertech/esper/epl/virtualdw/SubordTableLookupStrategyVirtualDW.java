@@ -92,7 +92,7 @@ public class SubordTableLookupStrategyVirtualDW implements SubordTableLookupStra
         public Object evaluate(EventBean[] events, ExprEvaluatorContext context);
     }
 
-    private class ExternalEvaluatorHashRelOp implements ExternalEvaluator {
+    private static class ExternalEvaluatorHashRelOp implements ExternalEvaluator {
 
         private final ExprEvaluator hashKeysEval;
         private final Class coercionType;
@@ -107,7 +107,7 @@ public class SubordTableLookupStrategyVirtualDW implements SubordTableLookupStra
         }
     }
 
-    private class ExternalEvaluatorBtreeRange implements ExternalEvaluator {
+    private static class ExternalEvaluatorBtreeRange implements ExternalEvaluator {
 
         private final ExprEvaluator startEval;
         private final ExprEvaluator endEval;

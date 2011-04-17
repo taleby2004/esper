@@ -7,6 +7,8 @@ import java.lang.reflect.Constructor;
  */
 public class EngineNoSuchCtorException extends Exception
 {
+    private static final long serialVersionUID = 5903661121726479172L;
+
     private transient Constructor nearestMissCtor;
 
     /**

@@ -15,6 +15,8 @@ import java.io.Serializable;
  */
 public class ConfigurationPlugInVirtualDataWindow implements Serializable
 {
+    private static final long serialVersionUID = 2402714694249103765L;
+
     private String namespace;
     private String name;
     private String factoryClassName;

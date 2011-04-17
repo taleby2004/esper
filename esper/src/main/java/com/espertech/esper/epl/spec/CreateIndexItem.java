@@ -18,6 +18,8 @@ import java.util.List;
  */
 public class CreateIndexItem implements MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = -3552356958442063252L;
+
     private final String name;
     private final CreateIndexType type;
 

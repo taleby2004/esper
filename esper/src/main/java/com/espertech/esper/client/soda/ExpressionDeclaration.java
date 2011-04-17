@@ -9,6 +9,8 @@ import java.util.List;
  */
 public class ExpressionDeclaration implements Serializable {
 
+    private static final long serialVersionUID = 8445897497101986441L;
+
     private String name;
     private List<String> parameterNames;
     private Expression expression;

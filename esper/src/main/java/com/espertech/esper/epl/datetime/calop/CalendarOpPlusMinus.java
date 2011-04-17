@@ -37,8 +37,8 @@ public class CalendarOpPlusMinus implements CalendarOp {
             return;
         }
 
-        int days = (int) (duration / (1000*60*60*24));
-        int msec = (int) (duration - days * (1000*60*60*24));
+        int days = (int) (duration / (1000L*60*60*24));
+        int msec = (int) (duration - days * (1000L*60*60*24));
         cal.add(Calendar.MILLISECOND, factor * msec);
         cal.add(Calendar.DATE, factor * days);
     }

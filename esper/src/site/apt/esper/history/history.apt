@@ -1,4 +1,4 @@
-Change History
+change History
 ~~~~~~~~~~~~~~
 
 	This section lists the changes between Esper releases. The changes introduced in each release are split into the following categories.
@@ -10,6 +10,52 @@ Change History
 	* <<Minor changes>>: Smaller changes and bug fixes.
 	
 	[]
+
+
+Version 4.2.0
+
+	Released April 16, 2011
+	
+	Built with JDK 6.0 Update 24
+
+* API changes
+
+  * None.
+    
+* Major changes
+     
+  * Support for enumeration methods, which work with lambda expressions to perform common tasks on subquery results, named windows, event properties or inputs that are or can be projected to a collection of events, scalar values or objects.
+  
+  * Support for date-time methods for date and time manipulation and querying, such as for adding or subtracting time periods, setting or rounding calendar fields and querying fields.
+  
+  * Support for @Audit annotation which instructs the engine to output detailed debug-level information about the statements processing, such as pattern instance counts, expression result values, property values and more.
+  
+  * Support for Virtual Data Window, an extension point for (large) external data stores to become accessible same as a named window.
+  
+  * Support for the 'new' operator, which populates a new data structure by evaluating column names and assignment expressions, useful when an expression should return multiple results, for performing a transformation or inside enumeration method lambda expressions.
+  
+  * Support for constructor injection for event objects populated by insert into.
+  
+  * Support for the on-merge clause to allow multiple actions (multiple then-clauses), to allow insert-into a stream other then the currently-merged named window and adding support for an optional where-clause for each action.
+  
+  * Support for mapped and indexed properties to allow an expression as a map key or index.
+  
+  * Improvement for query planning and indexing for joins, subqueries, on-merge, on-select, on-update, on-delete, fire-and-forget queries and create-index to support btree indexes for use with ranges, inverted ranges and relational operator (\>, \<, \>=, \<=) queries. 
+  
+  * Improvements to statement metrics reporting in regards to event counts and reporting for named windows.
+  
+  * Improvements to query plan output.
+  
+  * Reduced memory use for hash indexes on single columns.
+  
+  []
+
+* Minor changes
+
+  * Bug fixes: see JIRA list of resolved issues for release 4.2 or changelog.txt
+
+  []
+
 
 
 Version 4.1.0

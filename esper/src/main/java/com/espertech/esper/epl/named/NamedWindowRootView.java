@@ -465,13 +465,7 @@ public class NamedWindowRootView extends ViewSupport
                 continue;
             }
             if (param.getFilterOperator() == FilterOperator.EQUAL) {
-                Object filterValue = param.getFilterValue(null);
-                if (filterValue == null) {
-                    keysAvailable.add(param.getPropertyName());
-                }
-                else {
-                    keysAvailable.add(param.getPropertyName());
-                }
+                keysAvailable.add(param.getPropertyName());
             }
             else if (param.getFilterOperator().isRangeOperator() ||
                      param.getFilterOperator().isInvertedRangeOperator() ||

@@ -18,6 +18,8 @@ import java.util.List;
  */
 public class OnTriggerMergeMatched implements Serializable
 {
+    private static final long serialVersionUID = -8789870272699226779L;
+
     private final boolean matchedUnmatched;
     private ExprNode optionalMatchCond;
     private final List<OnTriggerMergeAction> actions;

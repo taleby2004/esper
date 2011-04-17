@@ -23,9 +23,11 @@ import java.util.Map;
  */
 public class ExprNewNode extends ExprNodeBase implements ExprEvaluator {
 
+    private static final long serialVersionUID = -210293632565665600L;
+
     private final String[] columnNames;
-    private Map<String, Object> eventType;
-    private ExprEvaluator[] evaluators;
+    private transient Map<String, Object> eventType;
+    private transient ExprEvaluator[] evaluators;
     private boolean isAllConstants;
 
     /**
@@ -47,7 +49,7 @@ public class ExprNewNode extends ExprNodeBase implements ExprEvaluator {
         evaluators = ExprNodeUtility.getEvaluators(this.getChildNodes());
 
         for (int i = 0; i < columnNames.length; i++) {
-            isAllConstants &= this.getChildNodes().get(i).isConstantResult();
+            isAllConstants = isAllConstants && this.getChildNodes().get(i).isConstantResult();
             if (eventType.containsKey(columnNames[i])) {
                 throw new ExprValidationException("Failed to validate new-keyword property names, property '" + columnNames[i] + "' has already been declared");
             }

@@ -55,6 +55,9 @@ public class ExpressionResultCacheService {
             return null;
         }
         ExpressionResultCacheEntry<EventBean, Collection<EventBean>> entry = ref.get();
+        if (entry == null) {
+            return null;
+        }
         if (entry.getReference() != reference) {
             return null;
         }
@@ -73,6 +76,9 @@ public class ExpressionResultCacheService {
             return null;
         }
         ExpressionResultCacheEntry<EventBean[], Object> entry = ref.get();
+        if (entry == null) {
+            return null;
+        }
         EventBean[] cacheEvents = entry.getReference();
         if (cacheEvents.length != eventsPerStream.length) {
             return null;
@@ -99,6 +105,9 @@ public class ExpressionResultCacheService {
             return null;
         }
         ExpressionResultCacheEntry<EventBean[], Collection<EventBean>> entry = ref.get();
+        if (entry == null) {
+            return null;
+        }
         EventBean[] cacheEvents = entry.getReference();
         if (cacheEvents.length != eventsPerStream.length) {
             return null;
@@ -125,6 +134,9 @@ public class ExpressionResultCacheService {
             return null;
         }
         ExpressionResultCacheEntry<Long[], Object> entry = ref.get();
+        if (entry == null) {
+            return null;
+        }
         Long[] required = entry.getReference();
         if (required.length != lastValueCacheStack.size()) {
             return null;

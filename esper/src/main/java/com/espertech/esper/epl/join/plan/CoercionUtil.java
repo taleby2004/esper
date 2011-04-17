@@ -146,16 +146,6 @@ public class CoercionUtil {
         return new CoercionDesc(mustCoerce, coercionTypes);
     }
 
-    private static Class getCoercionType(Class valuePropType, String propertyKey, EventType eventTypeKey) {
-        Class coercionType = null;
-        Class keyPropType = JavaClassHelper.getBoxedType(eventTypeKey.getPropertyType(propertyKey));
-        if (valuePropType != keyPropType)
-        {
-            coercionType = JavaClassHelper.getCompareToCoercionType(valuePropType, keyPropType);
-        }
-        return coercionType;
-    }
-
     private static Class getCoercionType(Class valuePropType, Class keyPropTypeExpr) {
         Class coercionType = null;
         Class keyPropType = JavaClassHelper.getBoxedType(keyPropTypeExpr);

@@ -17,6 +17,8 @@ import java.io.Serializable;
  */
 public abstract class OnTriggerMergeAction implements Serializable
 {
+    private static final long serialVersionUID = 8361210591971686132L;
+
     private ExprNode optionalWhereClause;
 
     protected OnTriggerMergeAction(ExprNode optionalWhereClause) {

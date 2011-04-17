@@ -16,6 +16,8 @@ package com.espertech.esper.client;
  */
 public class EPServiceDestroyedException extends RuntimeException
 {
+    private static final long serialVersionUID = 14163093254581288L;
+
     /**
      * Ctor.
      * @param engineURI - engine URI

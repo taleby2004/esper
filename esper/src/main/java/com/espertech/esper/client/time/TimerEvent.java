@@ -15,4 +15,5 @@ import java.io.Serializable;
  */
 public abstract class TimerEvent implements Serializable
 {
+    private static final long serialVersionUID = 7042146786401152079L;
 }

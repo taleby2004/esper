@@ -26,6 +26,8 @@ import java.util.Set;
  */
 public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEvaluator, ExprEvaluatorEnumeration
 {
+    private static final long serialVersionUID = -2469169635913155764L;
+    
     private static final Log log = LogFactory.getLog(ExprSubselectNode.class);
 
     /**

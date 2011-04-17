@@ -15,6 +15,8 @@ import com.espertech.esper.pattern.MatchedEventMap;
  */
 public class RangeValueString implements FilterSpecParamRangeValue
 {
+    private static final long serialVersionUID = -2813440284912349247L;
+
     private final String string;
 
     /**

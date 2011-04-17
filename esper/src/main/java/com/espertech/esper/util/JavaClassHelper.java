@@ -459,10 +459,9 @@ public class JavaClassHelper
         }
         if (!isNumeric(typeOne) || !isNumeric(typeTwo))
         {
-            String typeOneName = typeOne == null ? "(null)" : typeOne.getName();
-            String typeTwoName = typeTwo == null ? "(null)" : typeTwo.getName();
-            throw new CoercionException("Types cannot be compared: " +
-                     typeOneName + " and " + typeTwoName);
+            String typeOneName = typeOne.getName();
+            String typeTwoName = typeTwo.getName();
+            throw new CoercionException("Types cannot be compared: " + typeOneName + " and " + typeTwoName);
         }
         return getArithmaticCoercionType(typeOne, typeTwo);
     }

@@ -32,7 +32,7 @@ public class EvalInsertWildcardSSWrapperRevision extends EvalBase implements Sel
             Map<String, Object> map = wrapper.getDecoratingProperties();
             if ((super.getExprNodes().length == 0) && (!map.isEmpty()))
             {
-                props = new HashMap<String, Object>(map);
+                // no action
             }
             else
             {

@@ -17,6 +17,8 @@ import java.io.Serializable;
  */
 public abstract class OnTriggerMergeEntry implements Serializable
 {
+    private static final long serialVersionUID = 1528981268472654745L;
+
     private ExprNode optionalMatchCond;
 
     protected OnTriggerMergeEntry(ExprNode optionalMatchCond) {

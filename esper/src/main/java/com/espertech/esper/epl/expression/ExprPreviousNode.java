@@ -32,7 +32,7 @@ public class ExprPreviousNode extends ExprNodeBase implements ViewResourceCallba
     private int streamNumber;
     private Integer constantIndexNumber;
     private boolean isConstantIndex;
-    private EventType enumerationMethodType;
+    private transient EventType enumerationMethodType;
 
     private transient ExprPreviousEval evaluator;
 

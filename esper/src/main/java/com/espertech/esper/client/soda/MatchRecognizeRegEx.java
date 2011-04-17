@@ -20,6 +20,8 @@ import java.io.StringWriter;
  */
 public abstract class MatchRecognizeRegEx implements Serializable
 {
+    private static final long serialVersionUID = 6650134218683492050L;
+
     private String treeObjectName;
     private List<MatchRecognizeRegEx> children;
 

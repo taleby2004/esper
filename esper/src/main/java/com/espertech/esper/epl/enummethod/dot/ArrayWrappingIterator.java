@@ -2,6 +2,7 @@ package com.espertech.esper.epl.enummethod.dot;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class ArrayWrappingIterator implements Iterator {
     private Object array;
@@ -19,11 +20,10 @@ public class ArrayWrappingIterator implements Iterator {
     }
 
     public Object next() {
-        Object next = Array.get(array, count++);
-        if (next == null) {
-            return null;
+        if (hasNext()) {
+            return Array.get(array, count++);
         }
-        return next;
+        throw new NoSuchElementException();
     }
 
     public void remove() {
