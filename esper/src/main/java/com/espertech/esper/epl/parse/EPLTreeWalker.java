@@ -2025,7 +2025,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         // Could be a mapped property with an expression-parameter "mapped(expr)" or array property with an expression-parameter "array(expr)".
         List<ExprChainedSpec> spec = new ArrayList<ExprChainedSpec>();
         List<ExprNode> childExpressions = getExprNodesLibFunc(0, node, astExprNodeMap);
-        spec.add(new ExprChainedSpec(childNodeText, childExpressions, true));
+        spec.add(new ExprChainedSpec(childNodeText, childExpressions, false));
         astExprNodeMap.put(node, new ExprDotNode(spec, false, false));
         return;
     }

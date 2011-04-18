@@ -3,6 +3,7 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.core.EPAdministratorSPI;
+import com.espertech.esper.epl.expression.ExprDotNode;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.pattern.EvalFollowedByNode;
 import com.espertech.esper.pattern.EvalNode;
@@ -249,6 +250,9 @@ public class TestEPAdministrator extends TestCase
     public void testSPI() {
         EPAdministratorSPI spi = (EPAdministratorSPI) epService.getEPAdministrator();
 
+        ExprDotNode funcnode = (ExprDotNode) spi.compileExpression("func()");
+        assertFalse(funcnode.getChainSpec().get(0).isProperty());
+        
         ExprNode node = spi.compileExpression("value=5 and /* comment */ true");
         assertEquals("(value = 5 AND true)", node.toExpressionString());
 
