@@ -228,4 +228,12 @@ public class AxiomXMLEventType implements EventTypeSPI
     {
         return null;
     }
+
+    public EventPropertyGetterMapped getGetterMapped(String mappedPropertyName) {
+        return null;
+    }
+
+    public EventPropertyGetterIndexed getGetterIndexed(String indexedPropertyName) {
+        return null;
+    }
 }

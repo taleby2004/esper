@@ -167,6 +167,16 @@
 				  <excludeTransitive>true</excludeTransitive>
 				</configuration>
 			</plugin>	
+			<plugin>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+				   <execution>
+					  <goals>
+						 <goal>jar</goal>
+					  </goals>
+				   </execution>
+				</executions>
+			 </plugin>
 		</plugins>
 		<testResources>
 			<testResource>
