@@ -1,5 +1,6 @@
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.soda.EPStatementFormatter;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
@@ -10,6 +11,8 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 
 public class TestFilterPropertySimple extends TestCase
 {
+    private String NEWLINE = System.getProperty("line.separator");
+
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
 
@@ -54,6 +57,12 @@ public class TestFilterPropertySimple extends TestCase
                       "OrderEvent[select * from orderdetail.items] as item " +
                       "where book.bookId = item.productId " +
                       "order by book.bookId, item.amount";
+        String stmtTextFormatted = "select *" + NEWLINE +
+                      "from OrderEvent as orderEvent unidirectional," + NEWLINE +
+                      "OrderEvent[select * from books] as book," + NEWLINE +
+                      "OrderEvent[select * from orderdetail.items] as item" + NEWLINE +
+                      "where book.bookId = item.productId" + NEWLINE +
+                      "order by book.bookId, item.amount";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -63,6 +72,7 @@ public class TestFilterPropertySimple extends TestCase
         stmt.destroy();
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         assertEquals(stmtText, model.toEPL());
+        assertEquals(stmtTextFormatted, model.toEPL(new EPStatementFormatter(true)));
         stmt = epService.getEPAdministrator().create(model);
         stmt.addListener(listener);
 

@@ -94,7 +94,7 @@ public class ForClauseItem implements Serializable
         if (keyword == null) {
             return;
         }
-        writer.write(" for ");
+        writer.write("for ");
         writer.write(keyword.getName());
         if (expressions.size() == 0) {
             return;

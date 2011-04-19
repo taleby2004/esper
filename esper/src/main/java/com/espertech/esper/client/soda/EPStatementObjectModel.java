@@ -308,10 +308,21 @@ public class EPStatementObjectModel implements Serializable
      */
     public String toEPL()
     {
+        return toEPL(new EPStatementFormatter(false));
+    }
+
+    /**
+     * Renders the object model in it's EPL syntax textual representation, using a whitespace-formatter as provided.
+     * @param formatter the formatter to use
+     * @return EPL representing the statement object model
+     * @throws IllegalStateException if required clauses do not exist
+     */
+    public String toEPL(EPStatementFormatter formatter)
+    {
         StringWriter writer = new StringWriter();
 
-        AnnotationPart.toEPL(writer, annotations);
-        ExpressionDeclaration.toEPL(writer, expressionDeclarations);
+        AnnotationPart.toEPL(writer, annotations, formatter);
+        ExpressionDeclaration.toEPL(writer, expressionDeclarations, formatter);
 
         if (createIndex != null)
         {
@@ -341,8 +352,8 @@ public class EPStatementObjectModel implements Serializable
                 createWindow.toEPLCreateTablePart(writer);
             }
             else {
-                selectClause.toEPL(writer);
-                fromClause.toEPL(writer);
+                selectClause.toEPL(writer, formatter, false);
+                fromClause.toEPL(writer, formatter);
                 createWindow.toEPLInsertPart(writer);
             }
             return writer.toString();
@@ -360,54 +371,54 @@ public class EPStatementObjectModel implements Serializable
         }
         else if (onExpr != null)
         {
+            formatter.beginOnTrigger(writer);
             writer.write("on ");
-            fromClause.getStreams().get(0).toEPL(writer);
+            fromClause.getStreams().get(0).toEPL(writer, formatter);
 
             if (onExpr instanceof OnDeleteClause)
             {
-                writer.write(" delete from ");
+                formatter.beginOnDelete(writer);
+                writer.write("delete from ");
                 ((OnDeleteClause)onExpr).toEPL(writer);
             }
             else if (onExpr instanceof OnUpdateClause)
             {
-                writer.write(" update ");
+                formatter.beginOnUpdate(writer);
+                writer.write("update ");
                 ((OnUpdateClause)onExpr).toEPL(writer);
             }
             else if (onExpr instanceof OnSelectClause)
             {
-                writer.write(" ");
                 if (insertInto != null)
                 {
-                    insertInto.toEPL(writer);
+                    insertInto.toEPL(writer, formatter, true);
                 }
-                selectClause.toEPL(writer);
+                selectClause.toEPL(writer, formatter, true);
                 writer.write(" from ");
                 ((OnSelectClause)onExpr).toEPL(writer);
             }
             else if (onExpr instanceof OnSetClause)
             {
                 OnSetClause onSet = (OnSetClause) onExpr;
-                onSet.toEPL(writer);
+                onSet.toEPL(writer, formatter);
             }
             else if (onExpr instanceof OnMergeClause)
             {
-                OnMergeClause merge= (OnMergeClause) onExpr;
-                merge.toEPL(writer, whereClause);
+                OnMergeClause merge = (OnMergeClause) onExpr;
+                merge.toEPL(writer, whereClause, formatter);
                 displayWhereClause = false;
             }
             else
             {
                 OnInsertSplitStreamClause split = (OnInsertSplitStreamClause) onExpr;
-                writer.write(" ");
-                insertInto.toEPL(writer);
-                selectClause.toEPL(writer);
+                insertInto.toEPL(writer, formatter, true);
+                selectClause.toEPL(writer, formatter, true);
                 if (whereClause != null)
                 {
                     writer.write(" where ");
                     whereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
                 }
-                writer.write(" ");
-                split.toEPL(writer);
+                split.toEPL(writer, formatter);
                 displayWhereClause = false;
             }
         }
@@ -424,10 +435,10 @@ public class EPStatementObjectModel implements Serializable
 
             if (insertInto != null)
             {
-                insertInto.toEPL(writer);
+                insertInto.toEPL(writer, formatter, true);
             }
-            selectClause.toEPL(writer);
-            fromClause.toEPL(writer);
+            selectClause.toEPL(writer, formatter, true);
+            fromClause.toEPL(writer, formatter);
         }
 
         if (matchRecognizeClause != null)
@@ -436,36 +447,43 @@ public class EPStatementObjectModel implements Serializable
         }
         if ((whereClause != null) && (displayWhereClause))
         {
-            writer.write(" where ");
+            formatter.beginWhere(writer);
+            writer.write("where ");
             whereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         if (groupByClause != null)
         {
-            writer.write(" group by ");
+            formatter.beginGroupBy(writer);
+            writer.write("group by ");
             groupByClause.toEPL(writer);
         }
         if (havingClause != null)
         {
-            writer.write(" having ");
+            formatter.beginHaving(writer);
+            writer.write("having ");
             havingClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         if (outputLimitClause != null)
         {
-            writer.write(" output ");
+            formatter.beginOutput(writer);
+            writer.write("output ");
             outputLimitClause.toEPL(writer);
         }
         if (orderByClause != null)
         {
-            writer.write(" order by ");
+            formatter.beginOrderBy(writer);
+            writer.write("order by ");
             orderByClause.toEPL(writer);
         }
         if (rowLimitClause != null)
         {
-            writer.write(" limit ");
+            formatter.beginLimit(writer);
+            writer.write("limit ");
             rowLimitClause.toEPL(writer);
         }
         if (forClause != null) {
-            forClause.toEPL(writer);            
+            formatter.beginFor(writer);
+            forClause.toEPL(writer);
         }
 
         return writer.toString();

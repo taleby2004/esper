@@ -86,21 +86,20 @@ public class ExpressionDeclaration implements Serializable {
      * Print.
      * @param writer to print to
      * @param expressionDeclarations expression declarations
+     * @param formatter for newline-whitespace formatting
      */
-    public static void toEPL(StringWriter writer, List<ExpressionDeclaration> expressionDeclarations) {
+    public static void toEPL(StringWriter writer, List<ExpressionDeclaration> expressionDeclarations, EPStatementFormatter formatter) {
         if ((expressionDeclarations == null) || (expressionDeclarations.isEmpty())) {
             return;
         }
 
-        String delimiter = "";
-        String writerDelimiter = "";
         for (ExpressionDeclaration part : expressionDeclarations) {
-            writerDelimiter = " ";
-            writer.append(delimiter);
+            if (part.getName() == null) {
+                continue;
+            }
+            formatter.beginExpressionDecl(writer);
             part.toEPL(writer);
-            delimiter = " ";
         }
-        writer.append(writerDelimiter);
     }
 
     /**

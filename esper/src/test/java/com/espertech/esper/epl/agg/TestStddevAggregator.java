@@ -31,6 +31,16 @@ public class TestStddevAggregator extends TestCase
         assertEquals("2.0816", Double.toString(result).substring(0, 6));
     }
 
+    public void testAllOne() {
+        AggregationMethod agg = new StddevAggregator();
+        agg.enter(1);
+        agg.enter(1);
+        agg.enter(1);
+        agg.enter(1);
+        agg.enter(1);
+        assertEquals(0.0d, agg.getValue());
+    }
+
 }
 
 

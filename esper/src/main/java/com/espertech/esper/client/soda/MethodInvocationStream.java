@@ -130,7 +130,7 @@ public class MethodInvocationStream extends Stream
         return this;
     }
 
-    public void toEPLStream(StringWriter writer)
+    public void toEPLStream(StringWriter writer, EPStatementFormatter formatter)
     {
         writer.write("method:");
         writer.write(className);

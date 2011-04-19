@@ -129,8 +129,9 @@ public class Filter implements Serializable
     /**
      * Returns a textual representation of the filter.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
      */
-    public void toEPL(StringWriter writer)
+    public void toEPL(StringWriter writer, EPStatementFormatter formatter)
     {
         writer.write(eventTypeName);
         if (filter != null)
@@ -144,7 +145,7 @@ public class Filter implements Serializable
             for (ContainedEventSelect propertySelect : optionalPropertySelects)
             {
                 writer.write('[');
-                propertySelect.toEPL(writer);
+                propertySelect.toEPL(writer, formatter);
                 writer.write(']');
             }
         }

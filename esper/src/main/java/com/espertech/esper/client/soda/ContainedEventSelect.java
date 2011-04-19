@@ -111,13 +111,14 @@ public class ContainedEventSelect implements Serializable
     /**
      * Returns the EPL.
      * @param writer to write to
+     * @param formatter for newline-whitespace formatting
      */
-    public void toEPL(StringWriter writer)
+    public void toEPL(StringWriter writer, EPStatementFormatter formatter)
     {
         if (selectClause != null)
         {
-            selectClause.toEPL(writer);
-            writer.write("from ");
+            selectClause.toEPL(writer, formatter, false);
+            writer.write(" from ");
         }
         writer.write(propertyName);
         if (propertyAsName != null)

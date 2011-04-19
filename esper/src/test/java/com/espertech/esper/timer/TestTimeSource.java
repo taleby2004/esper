@@ -20,7 +20,7 @@ public class TestTimeSource extends TestCase
     public void testWallClock() throws InterruptedException
     {
         // allow a tolerance as TimeSourceMillis resolution may be around 16ms
-        final long TOLERANCE_MILLISECS = 20, DELAY_MILLISECS = 100;
+        final long TOLERANCE_MILLISECS = 50, DELAY_MILLISECS = 100;
 
         // This is a smoke test
         TimeSourceService nanos = new TimeSourceServiceImpl();

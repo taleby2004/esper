@@ -92,7 +92,7 @@ public class PatternMatchUntilExpr extends PatternExprBase
         return PatternExprPrecedenceEnum.MATCH_UNTIL;
     }
 
-    public void toPrecedenceFreeEPL(StringWriter writer)
+    public void toPrecedenceFreeEPL(StringWriter writer, EPStatementFormatter formatter)
     {
         if ((low != null) || (high != null))
         {
@@ -127,12 +127,12 @@ public class PatternMatchUntilExpr extends PatternExprBase
         if (this.getChildren().get(0) instanceof PatternMatchUntilExpr) {
             precedence = PatternExprPrecedenceEnum.MAXIMIM;
         }
-        this.getChildren().get(0).toEPL(writer, precedence);
+        this.getChildren().get(0).toEPL(writer, precedence, formatter);
 
         if (this.getChildren().size() > 1)
         {
             writer.write(" until ");
-            this.getChildren().get(1).toEPL(writer, getPrecedence());
+            this.getChildren().get(1).toEPL(writer, getPrecedence(), formatter);
         }
     }
 }

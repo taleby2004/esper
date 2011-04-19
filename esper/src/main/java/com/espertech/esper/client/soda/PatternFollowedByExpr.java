@@ -82,14 +82,14 @@ public class PatternFollowedByExpr extends PatternExprBase
         this.optionalMaxPerSubexpression = optionalMaxPerSubexpression;
     }
 
-    public void toPrecedenceFreeEPL(StringWriter writer)
+    public void toPrecedenceFreeEPL(StringWriter writer, EPStatementFormatter formatter)
     {
         String delimiter = "";
         int childNum = 0;
         for (PatternExpr child : this.getChildren())
         {
             writer.write(delimiter);
-            child.toEPL(writer, getPrecedence());
+            child.toEPL(writer, getPrecedence(), formatter);
 
             delimiter = " -> ";
             if (optionalMaxPerSubexpression != null && optionalMaxPerSubexpression.size() > childNum) {

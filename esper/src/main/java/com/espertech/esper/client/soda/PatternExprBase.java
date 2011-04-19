@@ -8,9 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Abstract base class for all pattern expressions.
@@ -58,14 +58,14 @@ public abstract class PatternExprBase implements PatternExpr
         children.add(expression);
     }
 
-    public final void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence) {
+    public final void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence, EPStatementFormatter formatter) {
         if (this.getPrecedence().getLevel() < parentPrecedence.getLevel()) {
             writer.write("(");
-            toPrecedenceFreeEPL(writer);
+            toPrecedenceFreeEPL(writer, formatter);
             writer.write(")");
         }
         else {
-            toPrecedenceFreeEPL(writer);
+            toPrecedenceFreeEPL(writer, formatter);
         }
     }
 
@@ -73,6 +73,7 @@ public abstract class PatternExprBase implements PatternExpr
      * Renders the expressions and all it's child expression, in full tree depth, as a string in
      * language syntax.
      * @param writer is the output to use
+     * @param formatter for newline-whitespace formatting
      */
-    public abstract void toPrecedenceFreeEPL(StringWriter writer);
+    public abstract void toPrecedenceFreeEPL(StringWriter writer, EPStatementFormatter formatter);
 }

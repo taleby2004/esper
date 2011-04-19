@@ -98,14 +98,14 @@ public class PatternGuardExpr extends EPBaseNamedObject implements PatternExpr
         return PatternExprPrecedenceEnum.GUARD;
     }
 
-    public final void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence) {
+    public final void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence, EPStatementFormatter formatter) {
         if (this.getPrecedence().getLevel() < parentPrecedence.getLevel()) {
             writer.write("(");
-            toPrecedenceFreeEPL(writer);
+            toPrecedenceFreeEPL(writer, formatter);
             writer.write(")");
         }
         else {
-            toPrecedenceFreeEPL(writer);
+            toPrecedenceFreeEPL(writer, formatter);
         }
     }
 
@@ -113,9 +113,10 @@ public class PatternGuardExpr extends EPBaseNamedObject implements PatternExpr
      * Renders the expressions and all it's child expression, in full tree depth, as a string in
      * language syntax.
      * @param writer is the output to use
+     * @param formatter for newline-whitespace formatting
      */
-    public void toPrecedenceFreeEPL(StringWriter writer) {
-        guarded.get(0).toEPL(writer, getPrecedence());
+    public void toPrecedenceFreeEPL(StringWriter writer, EPStatementFormatter formatter) {
+        guarded.get(0).toEPL(writer, getPrecedence(), formatter);
         if (GuardEnum.isWhile(this.getNamespace(), this.getName())) {
             writer.write(" while (");
             this.getParameters().get(0).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);

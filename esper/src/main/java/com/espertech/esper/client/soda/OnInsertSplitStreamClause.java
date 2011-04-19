@@ -9,8 +9,8 @@
 package com.espertech.esper.client.soda;
 
 import java.io.StringWriter;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A clause to insert into zero, one or more streams based on criteria.
@@ -63,15 +63,16 @@ public class OnInsertSplitStreamClause extends OnClause
     /**
      * Renders the clause in textual representation.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
      */
-    public void toEPL(StringWriter writer)
+    public void toEPL(StringWriter writer, EPStatementFormatter formatter)
     {
         String delimiter = "";
         for (OnInsertSplitStreamItem item : items)
         {
             writer.append(delimiter);
-            item.getInsertInto().toEPL(writer);
-            item.getSelectClause().toEPL(writer);
+            item.getInsertInto().toEPL(writer, formatter, true);
+            item.getSelectClause().toEPL(writer, formatter, true);
             if (item.getWhereClause() != null)
             {
                 writer.append(" where ");

@@ -74,7 +74,7 @@ public class PatternObserverExpr extends EPBaseNamedObject implements PatternExp
         return PatternExprPrecedenceEnum.ATOM;
     }
 
-    public void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence) {
+    public void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence, EPStatementFormatter formatter) {
         if (this.getPrecedence().getLevel() < parentPrecedence.getLevel()) {
             writer.write("(");
             toPrecedenceFreeEPL(writer);

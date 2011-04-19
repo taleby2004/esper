@@ -196,9 +196,12 @@ public class InsertIntoClause implements Serializable
     /**
      * Renders the clause in textual representation.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
+     * @param isTopLevel to indicate if this insert-into-clause is inside other clauses.
      */
-    public void toEPL(StringWriter writer)
+    public void toEPL(StringWriter writer, EPStatementFormatter formatter, boolean isTopLevel)
     {
+        formatter.beginInsertInto(writer, isTopLevel);
         writer.write("insert ");
         if (!insertStream)
         {
@@ -221,6 +224,5 @@ public class InsertIntoClause implements Serializable
             }
             writer.write(")");
         }
-        writer.write(' ');
     }
 }

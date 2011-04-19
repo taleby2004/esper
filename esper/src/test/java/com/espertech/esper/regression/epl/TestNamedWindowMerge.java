@@ -1,6 +1,7 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.EPStatementFormatter;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.regression.view.TestFilterPropertySimple;
 import com.espertech.esper.support.bean.SupportBean;
@@ -19,6 +20,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class TestNamedWindowMerge extends TestCase {
+
+    private String NEWLINE = System.getProperty("line.separator");
 
     private EPServiceProvider epService;
     private SupportUpdateListener nwListener;
@@ -69,6 +72,16 @@ public class TestNamedWindowMerge extends TestCase {
                 "then update set intPrimitive = 999 where intPrimitive = 1000 " +
                 "then update set intPrimitive = 1999 where intPrimitive = 2000 " +
                 "then delete where intPrimitive = 2000 ";
+        String eplFormatted = "on SupportBean_ST0 as st0" + NEWLINE +
+                "merge Win as win" + NEWLINE +
+                "where st0.key0 = win.string" + NEWLINE +
+                "when matched" + NEWLINE +
+                "then delete where intPrimitive < 0" + NEWLINE +
+                "then update set intPrimitive = st0.p00 where intPrimitive = 3000 or p00 = 3000" + NEWLINE +
+                "then delete where intPrimitive = 1000" + NEWLINE +
+                "then update set intPrimitive = 999 where intPrimitive = 1000" + NEWLINE +
+                "then update set intPrimitive = 1999 where intPrimitive = 2000" + NEWLINE +
+                "then delete where intPrimitive = 2000";
         epService.getEPAdministrator().createEPL(epl);
         String[] fields = "string,intPrimitive".split(",");
 
@@ -98,6 +111,7 @@ public class TestNamedWindowMerge extends TestCase {
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
         assertEquals(epl.trim(), model.toEPL().trim());
+        assertEquals(eplFormatted.trim(), model.toEPL(new EPStatementFormatter(true)));
         EPStatement merged = epService.getEPAdministrator().create(model);
         assertEquals(merged.getText().trim(), model.toEPL().trim());        
      }

@@ -37,13 +37,13 @@ public class PatternEveryExpr extends PatternExprBase
         return PatternExprPrecedenceEnum.EVERY_NOT;
     }
 
-    public void toPrecedenceFreeEPL(StringWriter writer)
+    public void toPrecedenceFreeEPL(StringWriter writer, EPStatementFormatter formatter)
     {
         writer.write("every ");
         PatternExprPrecedenceEnum precedence = getPrecedence();
         if (this.getChildren().get(0) instanceof PatternEveryExpr) {
             precedence = PatternExprPrecedenceEnum.MAXIMIM;
         }
-        this.getChildren().get(0).toEPL(writer, precedence);
+        this.getChildren().get(0).toEPL(writer, precedence, formatter);
     }
 }

@@ -55,7 +55,7 @@ public class PatternEveryDistinctExpr extends PatternExprBase
         return PatternExprPrecedenceEnum.EVERY_NOT;
     }
 
-    public void toPrecedenceFreeEPL(StringWriter writer)
+    public void toPrecedenceFreeEPL(StringWriter writer, EPStatementFormatter formatter)
     {
         writer.write("every-distinct(");
         String delimiter = "";
@@ -66,6 +66,6 @@ public class PatternEveryDistinctExpr extends PatternExprBase
         }
         writer.write(") ");
 
-        this.getChildren().get(0).toEPL(writer, getPrecedence());
+        this.getChildren().get(0).toEPL(writer, getPrecedence(), formatter);
     }
 }

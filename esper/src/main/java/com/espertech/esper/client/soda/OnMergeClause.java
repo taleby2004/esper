@@ -59,23 +59,29 @@ public class OnMergeClause extends OnClause
      * Renders the clause in textual representation.
      * @param writer to output to
      * @param optionalWhereClause where clause if present, or null
+     * @param formatter for newline-whitespace formatting
      */
-    public void toEPL(StringWriter writer, Expression optionalWhereClause)
+    public void toEPL(StringWriter writer, Expression optionalWhereClause, EPStatementFormatter formatter)
     {
-        writer.write(" merge ");
+        formatter.beginMerge(writer);
+        writer.write("merge ");
         writer.write(windowName);
+
         if (optionalAsName != null)
         {
             writer.write(" as ");
             writer.write(optionalAsName);
         }
+
         if (optionalWhereClause != null)
         {
-            writer.write(" where ");
+            formatter.beginMergeWhere(writer);
+            writer.write("where ");
             optionalWhereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
+
         for (OnMergeMatchItem item : matchItems) {
-            item.toEPL(writer);
+            item.toEPL(writer, formatter);
         }
     }
 

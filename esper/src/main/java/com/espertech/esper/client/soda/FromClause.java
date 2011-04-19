@@ -136,32 +136,38 @@ public class FromClause implements Serializable
     /**
      * Renders the from-clause in textual representation.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
      */
-    public void toEPL(StringWriter writer)
+    public void toEPL(StringWriter writer, EPStatementFormatter formatter)
     {
-        toEPLOptions(writer, true);
+        toEPLOptions(writer, formatter, true);
     }
 
     /**
      * Renders the from-clause in textual representation.
      * @param writer to output to
      * @param includeFrom flag whether to add the "from" literal
+     * @param formatter for newline-whitespace formatting
      */
-    protected void toEPLOptions(StringWriter writer, boolean includeFrom)
+    protected void toEPLOptions(StringWriter writer, EPStatementFormatter formatter, boolean includeFrom)
     {
         String delimiter = "";
         if (includeFrom)
         {
-            writer.write("from ");
+            formatter.beginFrom(writer);
+            writer.write("from");
         }
 
         if ((outerJoinQualifiers == null) || (outerJoinQualifiers.size() == 0))
         {
+            boolean first = true;
             for (Stream stream : streams)
             {
                 writer.write(delimiter);
-                stream.toEPL(writer);
-                delimiter = ", ";
+                formatter.beginFromStream(writer, first);
+                first = false;
+                stream.toEPL(writer, formatter);
+                delimiter = ",";
             }
         }
         else
@@ -170,10 +176,13 @@ public class FromClause implements Serializable
             {
                 throw new IllegalArgumentException("Number of outer join qualifiers must be one less then the number of streams.");
             }
+            boolean first = true;
             for (int i = 0; i < streams.size(); i++)
             {
                 Stream stream = streams.get(i);
-                stream.toEPL(writer);
+                formatter.beginFromStream(writer, first);
+                first = false;
+                stream.toEPL(writer, formatter);
 
                 if (i > 0)
                 {
@@ -200,11 +209,12 @@ public class FromClause implements Serializable
                     OuterJoinQualifier qualType = outerJoinQualifiers.get(i);
                     writer.write(" ");
                     writer.write(qualType.getType().getText());
-                    writer.write(" outer join ");
+                    writer.write(" outer join");
                 }
             }
         }
     }
+    
     /**
      * Returns the outer join descriptors, if this is an outer join, or an empty list if
      * none of the streams are outer joined.

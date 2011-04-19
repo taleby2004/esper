@@ -32,8 +32,9 @@ public abstract class Stream implements Serializable
     /**
      * Renders the stream in textual representation.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
      */
-    public abstract void toEPLStream(StringWriter writer);
+    public abstract void toEPLStream(StringWriter writer, EPStatementFormatter formatter);
     
     /**
      * Renders the stream in textual representation any stream options, if present.
@@ -77,10 +78,11 @@ public abstract class Stream implements Serializable
     /**
      * Renders the clause in textual representation.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
      */
-    public void toEPL(StringWriter writer)
+    public void toEPL(StringWriter writer, EPStatementFormatter formatter)
     {
-        toEPLStream(writer);
+        toEPLStream(writer, formatter);
 
         if (streamName != null)
         {

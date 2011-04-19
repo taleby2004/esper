@@ -267,9 +267,12 @@ public class SelectClause implements Serializable
     /**
      * Renders the clause in textual representation.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
+     * @param isTopLevel to indicate if this select-clause is inside other clauses.
      */
-    public void toEPL(StringWriter writer)
+    public void toEPL(StringWriter writer, EPStatementFormatter formatter, boolean isTopLevel)
     {
+        formatter.beginSelect(writer, isTopLevel);
         writer.write("select ");
 
         if (distinct)
@@ -289,7 +292,7 @@ public class SelectClause implements Serializable
             writer.write("irstream ");
         }
 
-        if (selectList != null) {
+        if (selectList != null && !selectList.isEmpty()) {
             String delimiter = "";
             for (SelectClauseElement element : selectList)
             {
@@ -297,7 +300,9 @@ public class SelectClause implements Serializable
                 element.toEPLElement(writer);
                 delimiter = ", ";
             }
-            writer.write(' ');
+        }
+        else {
+            writer.write('*');
         }
     }
 

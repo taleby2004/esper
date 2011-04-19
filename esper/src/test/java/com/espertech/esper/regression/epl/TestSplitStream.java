@@ -112,8 +112,8 @@ public class TestSplitStream extends TestCase
     public void test2SplitNoDefaultOutputFirst()
     {
         String stmtOrigText = "on SupportBean " +
-                    "insert into AStream select *  where intPrimitive = 1 " +
-                    "insert into BStream select *  where intPrimitive = 1 or intPrimitive = 2";
+                    "insert into AStream select * where intPrimitive = 1 " +
+                    "insert into BStream select * where intPrimitive = 1 or intPrimitive = 2";
         EPStatement stmtOrig = epService.getEPAdministrator().createEPL(stmtOrigText);
         runAssertion(stmtOrig);
 

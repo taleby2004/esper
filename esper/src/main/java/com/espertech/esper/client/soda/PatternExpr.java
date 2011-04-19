@@ -45,8 +45,9 @@ public interface PatternExpr extends Serializable
      * language syntax.
      * @param writer is the output to use
      * @param parentPrecedence precedence
+     * @param formatter formatter
      */    
-    public void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence);
+    public void toEPL(StringWriter writer, PatternExprPrecedenceEnum parentPrecedence, EPStatementFormatter formatter);
 
     /**
      * Returns the id for the pattern expression, for use by tools.

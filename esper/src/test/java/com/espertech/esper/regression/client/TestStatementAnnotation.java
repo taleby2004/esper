@@ -2,6 +2,7 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.annotation.*;
+import com.espertech.esper.client.soda.EPStatementFormatter;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportEnum;
@@ -18,6 +19,7 @@ import java.util.Comparator;
 
 public class TestStatementAnnotation extends TestCase
 {
+    private String NEWLINE = System.getProperty("line.separator");
     private EPServiceProvider epService;
 
     public void testInvalid() throws Exception
@@ -204,6 +206,14 @@ public class TestStatementAnnotation extends TestCase
                 "@MyAnnotationValuePair(stringVal='a',intVal=-1,longVal=2,booleanVal=true,charVal='x',byteVal=10,shortVal=20,doubleVal=2.5) " +
                 "@Name('STMTONE') " +
                 "select * from Bean";
+        String stmtTextFormatted = "@MyAnnotationSimple" + NEWLINE +
+                "@MyAnnotationValue('abc')" + NEWLINE +
+                "@MyAnnotationValueDefaulted" + NEWLINE +
+                "@MyAnnotationValueEnum(supportEnum=com.espertech.esper.support.bean.SupportEnum.ENUM_VALUE_3)" + NEWLINE +
+                "@MyAnnotationValuePair(stringVal='a',intVal=-1,longVal=2,booleanVal=true,charVal='x',byteVal=10,shortVal=20,doubleVal=2.5)" + NEWLINE +
+                "@Name('STMTONE')" + NEWLINE +
+                "select *" + NEWLINE +
+                "from Bean";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         EPStatementSPI spi = (EPStatementSPI) stmt;
         assertEquals("select * from Bean", spi.getExpressionNoAnnotations());
@@ -241,6 +251,8 @@ public class TestStatementAnnotation extends TestCase
         // statement model
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         assertEquals(stmtText, model.toEPL());
+        String textFormatted = model.toEPL(new EPStatementFormatter(true));
+        assertEquals(stmtTextFormatted, textFormatted);
         EPStatement stmtTwo = epService.getEPAdministrator().create(model);
         assertEquals(stmtTwo.getText(), model.toEPL());
         assertEquals(6, stmtTwo.getAnnotations().length);

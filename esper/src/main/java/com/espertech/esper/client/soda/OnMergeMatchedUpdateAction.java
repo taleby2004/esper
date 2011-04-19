@@ -72,7 +72,7 @@ public class OnMergeMatchedUpdateAction implements OnMergeMatchedAction
 
     @Override
     public void toEPL(StringWriter writer) {
-        writer.write(" then update set ");
+        writer.write("then update set ");
         String delimiter = "";
         for (AssignmentPair pair : assignments)
         {

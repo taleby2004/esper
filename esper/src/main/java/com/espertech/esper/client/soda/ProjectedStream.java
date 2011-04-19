@@ -33,8 +33,9 @@ public abstract class ProjectedStream extends Stream
     /**
      * Represent as textual.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
      */
-    public abstract void toEPLProjectedStream(StringWriter writer);
+    public abstract void toEPLProjectedStream(StringWriter writer, EPStatementFormatter formatter);
 
     /**
      * Represent type as textual non complete.
@@ -124,9 +125,9 @@ public abstract class ProjectedStream extends Stream
      * Renders the clause in textual representation.
      * @param writer to output to
      */
-    public void toEPLStream(StringWriter writer)
+    public void toEPLStream(StringWriter writer, EPStatementFormatter formatter)
     {
-        toEPLProjectedStream(writer);
+        toEPLProjectedStream(writer, formatter);
         toEPLViews(writer, views);
     }
     

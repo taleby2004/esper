@@ -86,13 +86,13 @@ public class PatternFilterExpr extends PatternExprBase
         return PatternExprPrecedenceEnum.ATOM;
     }
 
-    public void toPrecedenceFreeEPL(StringWriter writer)
+    public void toPrecedenceFreeEPL(StringWriter writer, EPStatementFormatter formatter)
     {
         if (tagName != null)
         {
             writer.write(tagName);
             writer.write('=');
         }
-        filter.toEPL(writer);
+        filter.toEPL(writer, formatter);
     }
 }

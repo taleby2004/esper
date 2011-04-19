@@ -24,13 +24,13 @@ public class PatternExprPlaceholder extends PatternExprBase
     {
     }
 
-    public void toPrecedenceFreeEPL(StringWriter writer) {
+    public void toPrecedenceFreeEPL(StringWriter writer, EPStatementFormatter formatter) {
         if ((this.getChildren() == null) || (this.getChildren().size() == 0)) {
             return;
         }
         PatternExpr patternExpr = getChildren().get(0);
         if (patternExpr != null) {
-            patternExpr.toEPL(writer, getPrecedence());
+            patternExpr.toEPL(writer, getPrecedence(), formatter);
         }
     }
 

@@ -75,10 +75,12 @@ public class OnSetClause extends OnClause
     /**
      * Renders the clause in EPL.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
      */
-    public void toEPL(StringWriter writer)
+    public void toEPL(StringWriter writer, EPStatementFormatter formatter)
     {
-        writer.write(" set ");
+        formatter.beginOnSet(writer);
+        writer.write("set ");
         String delimiter = "";
         for (AssignmentPair pair : assignments)
         {

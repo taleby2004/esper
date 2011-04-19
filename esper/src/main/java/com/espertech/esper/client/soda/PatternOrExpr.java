@@ -55,13 +55,13 @@ public class PatternOrExpr extends PatternExprBase
         return PatternExprPrecedenceEnum.OR;
     }
 
-    public void toPrecedenceFreeEPL(StringWriter writer)
+    public void toPrecedenceFreeEPL(StringWriter writer, EPStatementFormatter formatter)
     {
         String delimiter = "";
         for (PatternExpr child : this.getChildren())
         {
             writer.write(delimiter);
-            child.toEPL(writer, getPrecedence());
+            child.toEPL(writer, getPrecedence(), formatter);
             delimiter = " or ";
         }
     }

@@ -178,7 +178,7 @@ public class TestNamedWindowOM extends TestCase
         model.setSelectClause(SelectClause.createStreamWildcard("s1"));
         EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(listenerOnSelect);
-        String stmtTextOnSelect = "on " + SupportBean_B.class.getName() + " as s0 select s1.*  from MyWindow as s1 where s0.id = s1.key";
+        String stmtTextOnSelect = "on " + SupportBean_B.class.getName() + " as s0 select s1.* from MyWindow as s1 where s0.id = s1.key";
         assertEquals(stmtTextOnSelect, model.toEPL());
 
         // send some more events

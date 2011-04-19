@@ -88,11 +88,11 @@ public class PatternStream extends ProjectedStream
         this.expression = expression;
     }
 
-    public void toEPLProjectedStream(StringWriter writer)
+    public void toEPLProjectedStream(StringWriter writer, EPStatementFormatter formatter)
     {
         writer.write("pattern [");
         if (expression != null) {
-            expression.toEPL(writer, PatternExprPrecedenceEnum.MINIMUM);
+            expression.toEPL(writer, PatternExprPrecedenceEnum.MINIMUM, formatter);
         }
         writer.write(']');
     }

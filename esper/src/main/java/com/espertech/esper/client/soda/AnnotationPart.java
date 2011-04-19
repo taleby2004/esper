@@ -118,24 +118,20 @@ public class AnnotationPart implements Serializable {
      * Print.
      * @param writer to print to
      * @param annotations annotations
+     * @param formatter for newline-whitespace formatting
      */
-    public static void toEPL(StringWriter writer, List<AnnotationPart> annotations) {
+    public static void toEPL(StringWriter writer, List<AnnotationPart> annotations, EPStatementFormatter formatter) {
         if ((annotations == null) || (annotations.isEmpty())) {
             return;
         }
 
-        String delimiter = "";
-        String writerDelimiter = "";
         for (AnnotationPart part : annotations) {
             if (part.getName() == null) {
                 continue;
             }
-            writerDelimiter = " ";
-            writer.append(delimiter);
+            formatter.beginAnnotation(writer);
             part.toEPL(writer);
-            delimiter = " ";
         }
-        writer.append(writerDelimiter);
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.espertech.esper.regression.enummethod;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.EPStatementFormatter;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
@@ -12,6 +13,8 @@ import junit.framework.TestCase;
 import java.util.*;
 
 public class TestExpressionDef extends TestCase {
+
+    private String NEWLINE = System.getProperty("line.separator");
 
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
@@ -349,6 +352,13 @@ public class TestExpressionDef extends TestCase {
                 "expression fTwo {(x, y) => x.intPrimitive + y.intPrimitive} " +
                 "expression fThree {(x, y) => x.intPrimitive + 100} " +
                 "select fZero(), fOne(t), fTwo(t, t), fThree(t, t) from SupportBean as t";
+        String eplFormatted = "" +
+                "expression fZero {10}" + NEWLINE +
+                "expression fOne {x => x.intPrimitive}" + NEWLINE +
+                "expression fTwo {(x, y) => x.intPrimitive + y.intPrimitive}" + NEWLINE +
+                "expression fThree {(x, y) => x.intPrimitive + 100}" + NEWLINE +
+                "select fZero(), fOne(t), fTwo(t, t), fThree(t, t)" + NEWLINE +
+                "from SupportBean as t";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -357,6 +367,7 @@ public class TestExpressionDef extends TestCase {
         stmt.destroy();
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
         assertEquals(epl, model.toEPL());
+        assertEquals(eplFormatted, model.toEPL(new EPStatementFormatter(true)));
         stmt = epService.getEPAdministrator().create(model);
         assertEquals(epl, stmt.getText());
         stmt.addListener(listener);

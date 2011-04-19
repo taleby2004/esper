@@ -51,7 +51,7 @@ public class OnMergeMatchedDeleteAction implements OnMergeMatchedAction
 
     @Override
     public void toEPL(StringWriter writer) {
-        writer.write(" then delete");
+        writer.write("then delete");
         if (whereClause != null) {
             writer.write(" where ");
             whereClause.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);

@@ -8,9 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.StringWriter;
 
 /**
  * A stream upon which projections (views) can be added that selects events by name and filter expression.
@@ -142,9 +142,9 @@ public class FilterStream extends ProjectedStream
         this.filter = filter;
     }
 
-    public void toEPLProjectedStream(StringWriter writer)
+    public void toEPLProjectedStream(StringWriter writer, EPStatementFormatter formatter)
     {
-        filter.toEPL(writer);
+        filter.toEPL(writer, formatter);
     }
 
 	public void toEPLProjectedStreamType(StringWriter writer)

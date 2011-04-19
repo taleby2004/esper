@@ -45,14 +45,16 @@ public class OnMergeMatchItem extends OnClause
     /**
      * Renders the clause in textual representation.
      * @param writer to output to
+     * @param formatter for newline-whitespace formatting
      */
-    public void toEPL(StringWriter writer)
+    public void toEPL(StringWriter writer, EPStatementFormatter formatter)
     {
+        formatter.beginMergeWhenMatched(writer);
         if (matched) {
-            writer.write(" when matched");
+            writer.write("when matched");
         }
         else {
-            writer.write(" when not matched");
+            writer.write("when not matched");
         }
         if (optionalCondition != null)
         {
@@ -60,6 +62,7 @@ public class OnMergeMatchItem extends OnClause
             optionalCondition.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
         }
         for (OnMergeMatchedAction action : actions) {
+            formatter.beginMergeAction(writer);
             action.toEPL(writer);
         }
     }
