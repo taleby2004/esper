@@ -6,6 +6,7 @@
   <artifactId>esperdist</artifactId>
   <packaging>pom</packaging>
   <modules>
+    <module>esper</module>
     <module>esperio-csv</module>
     <module>esperio-db</module>
     <module>esperio-http</module>

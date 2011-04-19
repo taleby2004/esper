@@ -1,6 +1,6 @@
 News
 
-* April 16, 2011  -  Esper 4.2.0 - Update release
+* April 19, 2011  -  Esper 4.2.0 - Update release
 
   * Support for enumeration methods, which work with lambda expressions to perform common tasks on subquery results, named windows, event properties or inputs that are or can be projected to a collection of events, scalar values or objects.
   
