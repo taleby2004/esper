@@ -1,11 +1,14 @@
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
+
+import java.util.HashMap;
 
 public class TestNamedWindowUpdate extends TestCase
 {
@@ -42,7 +45,7 @@ public class TestNamedWindowUpdate extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
         
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), "string,intPrimitive".split(","), new Object[][] {{"E1", 3}, {"E2", 7}});
+        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), "string,intPrimitive".split(","), new Object[][]{{"E1", 3}, {"E2", 7}});
     }
 
     public void testMultipleDataWindowIntersect() {
@@ -69,6 +72,43 @@ public class TestNamedWindowUpdate extends TestCase
         ArrayAssertionUtil.assertPropsPerRow(oldevents, "string,intPrimitive".split(","), new Object[][] {{"E1", 2}, {"E2", 3}});
 
         ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), "string,intPrimitive".split(","), new Object[][] {{"E2", 300}});
+    }
+    
+    public void testMultipleDataWindowIntersectOnUpdate() {
+        SupportUpdateListener listener = new SupportUpdateListener();
+        String[] fields = "company,value,total".split(",");
+
+        // ESPER-568
+        epService.getEPAdministrator().createEPL("create schema S2 ( company string, value double, total double)");
+	    EPStatement stmtWin = epService.getEPAdministrator().createEPL("create window S2Win.win:time(25 hour).std:firstunique(company) as S2");
+        epService.getEPAdministrator().createEPL("insert into S2Win select * from S2.std:firstunique(company)");
+        epService.getEPAdministrator().createEPL("on S2 as a update S2Win as b set total = b.value + a.value");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select count(*) as cnt from S2Win");
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(createEvent("AComp", 3.0, 0.0), "S2");
+        assertEquals(1L, listener.assertOneGetNewAndReset().get("cnt"));
+        ArrayAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][] {{"AComp", 3.0, 0.0}});
+
+        epService.getEPRuntime().sendEvent(createEvent("AComp", 6.0, 0.0), "S2");
+        assertEquals(1L, listener.assertOneGetNewAndReset().get("cnt"));
+        ArrayAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][] {{"AComp", 3.0, 9.0}});
+
+        epService.getEPRuntime().sendEvent(createEvent("AComp", 5.0, 0.0), "S2");
+        assertEquals(1L, listener.assertOneGetNewAndReset().get("cnt"));
+        ArrayAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][] {{"AComp", 3.0, 8.0}});
+
+        epService.getEPRuntime().sendEvent(createEvent("BComp", 4.0, 0.0), "S2");
+        assertEquals(2L, listener.assertOneGetNewAndReset().get("cnt"));
+        ArrayAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][] {{"AComp", 3.0, 7.0}, {"BComp", 4.0, 0.0}});
+    }
+
+    private HashMap<String, Object> createEvent(String company, double value, double total) {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("company", company);
+        map.put("value", value);
+        map.put("total", total);
+        return map;
     }
 
     public void testMultipleDataWindowUnion() {

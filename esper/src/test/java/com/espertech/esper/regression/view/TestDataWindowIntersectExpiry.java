@@ -686,19 +686,6 @@ public class TestDataWindowIntersectExpiry extends TestCase
         return arr;
     }
 
-    private void tryInvalid(String text, String message)
-    {
-        try
-        {
-            epService.getEPAdministrator().createEPL(text);
-            fail();
-        }
-        catch (EPStatementException ex)
-        {
-            assertEquals(message, ex.getMessage());
-        }
-    }
-
     private void sendTimer(long timeInMSec)
     {
         CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);

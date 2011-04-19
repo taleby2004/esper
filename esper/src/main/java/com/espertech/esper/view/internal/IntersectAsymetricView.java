@@ -34,6 +34,7 @@ public class IntersectAsymetricView extends ViewSupport implements LastPostObser
     private boolean isHasRemovestreamData;
     private boolean isRetainObserverEvents;
     private boolean isDiscardObserverEvents;
+    private Set<EventBean> oldEvents = new HashSet<EventBean>();
 
     /**
      * Ctor.
@@ -64,10 +65,28 @@ public class IntersectAsymetricView extends ViewSupport implements LastPostObser
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        // The assumption is that either remove stream (named window deletes) or insert stream (new events) are indicated
-        if ((newData != null) && (oldData != null))
+        oldEvents.clear();
+        EventBean[] newDataPosted = null;
+
+        // handle remove stream
+        if (oldData != null)
         {
-            log.error("Intersection view received both insert and remove stream");
+            isDiscardObserverEvents = true;    // disable reaction logic in observer
+            try
+            {
+                for (View view : views)
+                {
+                    view.update(null, oldData);
+                }
+            }
+            finally
+            {
+                isDiscardObserverEvents = false;
+            }
+
+            for (int i = 0; i < oldData.length; i++) {
+                oldEvents.add(oldData[i]);
+            }
         }
 
         if (newData != null)
@@ -163,7 +182,7 @@ public class IntersectAsymetricView extends ViewSupport implements LastPostObser
                     }
                 }
 
-                oldData = removalEvents.toArray(new EventBean[removalEvents.size()]);
+                oldEvents.addAll(removalEvents);
             }
 
             newEvents.clear();
@@ -173,35 +192,21 @@ public class IntersectAsymetricView extends ViewSupport implements LastPostObser
                 }
             }
 
-            EventBean[] newDataPosted = null;
             if (!newEvents.isEmpty()) {
                 newDataPosted = newEvents.toArray(new EventBean[newEvents.size()]);
             }
 
-            // indicate new and, possibly, old data
-            if ((newDataPosted != null) || (oldData != null)) {
-                updateChildren(newDataPosted, oldData);
-            }
         }
 
-        // handle remove stream
-        else if (oldData != null)
-        {
-            isDiscardObserverEvents = true;    // disable reaction logic in observer
-            try
-            {
-                for (View view : views)
-                {
-                    view.update(null, oldData);
-                }
-            }
-            finally
-            {
-                isDiscardObserverEvents = false;
-            }
-
-            updateChildren(null, oldData);
+        // indicate new and, possibly, old data
+        EventBean[] oldDataPosted = null;
+        if (!oldEvents.isEmpty()) {
+            oldDataPosted = oldEvents.toArray(new EventBean[oldEvents.size()]);
         }
+        if ((newDataPosted != null) || (oldDataPosted != null)) {
+            updateChildren(newDataPosted, oldDataPosted);
+        }
+        oldEvents.clear();
     }
 
     public EventType getEventType()
