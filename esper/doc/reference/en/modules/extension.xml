@@ -602,13 +602,13 @@ StatementContext statementContext;  // Other EPL statement information.]]></prog
     timestampExpression = validatedNodes[0];
     valueExpression = validatedNodes[1];
 
-    if ((timestampExpression.getType() != long.class) && 
-        (timestampExpression.getType() != Long.class)) {
+    if ((timestampExpression.getExprEvaluator().getType() != long.class) && 
+        (timestampExpression.getExprEvaluator().getType() != Long.class)) {
         throw new ViewParameterException(
             "View requires long-typed timestamp values in parameter 1");
     }
-    if ((valueExpression.getType() != double.class) && 
-        (valueExpression.getType() != Double.class)) {
+    if ((valueExpression.getExprEvaluator().getType() != double.class) && 
+        (valueExpression.getExprEvaluator().getType() != Double.class)) {
         throw new ViewParameterException(
             "View requires double-typed values for in parameter 2");
     }
@@ -1065,7 +1065,7 @@ public EventType getEventType() {
         throw new GuardParameterException(message);
     }
 
-    if (guardParameters.get(0).getType() != Integer.class) {
+    if (guardParameters.get(0).getExprEvaluator().getType() != Integer.class) {
         throw new GuardParameterException(message);
     }
 
@@ -1261,7 +1261,7 @@ public EventType getEventType() {
     if (expressionParameters.size() != 1) {
 	    throw new ObserverParameterException(message);
     }
-    if (!(expressionParameters.get(0).getType() == String.class)) {
+    if (!(expressionParameters.get(0).getExprEvaluator().getType() == String.class)) {
 	    throw new ObserverParameterException(message);
     }
 

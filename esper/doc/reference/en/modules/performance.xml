@@ -665,7 +665,7 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 			<title>Expression Evaluation Order and Early Exit</title>
 
 			<para>
-				The term "early exit" refers to when the engine can evaluate an expression without a complete evaluation of all sub-expressions.
+				The term "early exit" or "short-circuit evaluation" refers to when the engine can evaluate an expression without a complete evaluation of all sub-expressions.
 			</para>
 
 			<para>

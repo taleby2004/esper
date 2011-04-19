@@ -188,6 +188,28 @@ where sensor.sensorId = loc.sensorId</pre></div>
         </p>
       </answer>
     </faq>    
+    <faq id="troubleshooting-3">
+      <question>My query produces unexpected results?</question>
+      <answer>
+        <p>
+          Use @Audit to turn on statement-level processing debug output which is logged under informational level to your output, please
+          see the documentation for more details. For example: "@Audit select * from MyEvent".
+        </p>
+        <p>
+          @Audit also accepts a number of keywords to control which aspects of processing are output and which are not.
+        </p>
+      </answer>
+    </faq>    
+    <faq id="troubleshooting-4">
+      <question>I'm getting a stack overflow error?</question>
+      <answer>
+        <p>
+          This can happen if your listener or subscriber code sends in an event via "sendEvent" method and that event triggers 
+          a listener again which may send in another event (applies to default threading model). Use the "route" method to send
+          events into the engine from a listener.
+        </p>
+      </answer>
+    </faq>    
   </part>
 
   <part id="design">
@@ -210,6 +232,7 @@ where sensor.sensorId = loc.sensorId</pre></div>
         </p>
         <p>
           You can make joins unidirectional: Thus the join only outputs data when an event arrives for the single stream marked as unidirectional and no output occurs for other streams.
+          Unidirectional is also useful when you want to trigger a join from a time-based pattern, for example "select sum(xyz) from pattern[every timer:interval(10)] unidirectional, MyEvent.win:time(100), ... where ...".
         </p>
         <p>
           Consider replacing the join with one or more sub-queries, it is often easier to read and conceptually clearer.
@@ -1822,6 +1845,52 @@ when matched and ce.action = 'LEAVE' then update set carcount = carcount - 1</pr
 	<div class="source"><pre>select * from StreetCarCountWindow</pre></div>
       </answer>
     </faq>
+
+    <faq id="first-unique">
+      <question>I would like to trigger whenever the event contains a new and distinct security id and the source is one of the {A,B,C}?</question>
+      <answer>
+        <p>
+          The firstunique datawindow outputs only the first unique event per criteria(s).
+        </p>
+	<div class="source"><pre>select * from Event(string in ('A','B','C')).win:firstunique(securityId)</pre></div>
+	
+	<p>
+	  If you like to delete from the first-unique data window, use a named window and on-delete.
+	</p>
+      </answer>
+    </faq>
+    
+    <faq id="semantic-window">
+      <question>How to perform an aggregation over a "semantic" window, i.e. a window that opens upon the arrival of a given event and closes upon the arrival of another event?</question>
+      <answer>
+        <p>
+          An example use case for this is: Give me the average CPU utilization of machine "X" while user "Y" was logged onto it.
+          So the "semantic" window opens when the event "user_Y_logged_In" arrives and closes when another event "user_Y_logged_Out" arrives.
+        </p>
+        <p>
+    	  This solution uses two named windows. Named windows offer a custom expiry policy, through the use of on-merge and on-delete.
+        </p>        
+       	<p>
+       	  Hold CPU utilization:
+       	</p>
+	<div class="source"><pre>create window CPUUtilizationWin.win:time(1 day) as CPUUtilization</pre></div>
+	<div class="source"><pre>insert into CPUUtilizationWin select * from CPUUtilization</pre></div>
+
+       	<p>
+       	  Hold users that are logged in:
+       	</p>
+	<div class="source"><pre>create window UserWin.std:unique(userId) as (userId string, loginTime long)</pre></div>
+	<div class="source"><pre>on LogInEvent li merge UserWin uw where li.userId = uw.userId when not matched then insert select li.userId as userId, current_timestamp() as loginTime</pre></div>
+	<div class="source"><pre>on LogOutEvent lo delete from UserWin uw where uw.userId = lo.userId</pre></div>
+
+       	<p>
+       	  Output average utilization every 1 minute:
+       	</p>
+	<div class="source"><pre>select userId, (select avg(cpu) from CPUUtilizationWin where timestamp between uw.loginTime and current_timestamp()) as avgUserCPU 
+from pattern[every timer:interval(1 min)] unidirectional, UserWin uw group by userId</pre></div>
+      </answer>
+    </faq>
+
   </part>
 
 </faqs>

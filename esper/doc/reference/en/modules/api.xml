@@ -1220,7 +1220,7 @@ In Esper, an engine instance is a unit of separation. Applications can obtain an
 
         <para>
 			Applications can use Esper APIs to concurrently, by multiple threads of execution, perform such functions as creating and 
-managing statements, or sending events into an engine instance for processing. Applications can use application-managed thread pools or any set of same or different threads of execution with any of the public Esper APIs. There are no restrictions towards threading other then those noted in specific sections of this document. 
+managing statements, or sending events into an engine instance for processing. Applications can use application-managed threads or thread pools or any set of same or different threads of execution with any of the public Esper APIs. There are no restrictions towards threading other then those noted in specific sections of this document. 
         </para>
         
         <para>

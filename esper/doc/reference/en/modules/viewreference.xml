@@ -1214,6 +1214,10 @@ from StockTickEvent.std:groupwin(symbol).win:length(5).stat:weighted_avg(price, 
 events with the highest price (with ties resolved by alphabetical order of symbol).
 				</para>
 				<programlisting><![CDATA[select * from StockTickEvent.ext:sort(10, price desc, symbol asc)]]></programlisting>				
+				
+				<para>
+					The sorted window is often used with the <literal>prev</literal>, <literal>prevwindow</literal> or <literal>prevtail</literal> single-row functions to output properties according to sort order.
+				</para>
 			</sect2>
 			
 			<sect2 id="view-time-order" >
