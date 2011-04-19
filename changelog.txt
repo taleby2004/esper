@@ -33,7 +33,8 @@ Minor changes
   - Fixed issue ESPER-563 Small memory leak creating large number of failed-validation statements
   - Fixed issue ESPER-564 Subquery of identical event stream does not include most recent event in window aggregate
   - Fixed issue ESPER-566 First Aggregation Function Returns Wrong (Growing) Result When Used in Correlated Subquery
-  
+  - Fixed issue ESPER-568 Duplicate remove stream events posted from intersection-data window when used with on-update (named window only)
+
 
 Changes in version 4.1.0
 ------------------------
