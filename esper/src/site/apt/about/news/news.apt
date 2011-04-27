@@ -1,5 +1,14 @@
 News
 
+* April 27, 2011  -  NEsper 4.1.0 for .NET (incl. Mono support)
+	      
+  * Feature equivalent to Esper version 4.1.0
+  
+  * See Esper 4.1.0 changes below for a detailed changed list.
+
+  []  
+
+
 * April 19, 2011  -  Esper 4.2.0 - Update release
 
   * Support for enumeration methods, which work with lambda expressions to perform common tasks on subquery results, named windows, event properties or inputs that are or can be projected to a collection of events, scalar values or objects.
