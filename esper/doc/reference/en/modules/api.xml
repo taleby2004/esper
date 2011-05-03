@@ -442,7 +442,7 @@ public void updateEnd() {...}]]></programlisting>
 	
 				<indexterm><primary>subscriber object</primary><secondary>multi-row</secondary></indexterm>
 				<para>
-					In place of row-by-row delivery, your subscriber can receive all events in the insert and remove stream via a single method invocation. 
+					In place of row-by-row delivery, your subscriber can receive all events in the insert and remove stream via a single method invocation. This is applicable when an EPL delivers multiple output rows for a given input event or time advancing, for example when multiple pattern matches occur for the same incoming event, for a join producing multiple output rows or with output rate limiting, for example.
 				</para>
 
 				<para>

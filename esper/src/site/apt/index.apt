@@ -233,7 +233,7 @@ Core Esper Features
     * <<Variant event streams>> allows treating disparate types of events as the same type, such as when the event type can only be known at runtime, 
        when the event type is expected to vary, or when optional properties are desired.
  
-    * <<Concurrency-safe iterator>> provides complete query capability for all statements    
+    * <<Concurrency-safe iterator>> provides complete query capability for all statements, with read-write locking
     
     * Supports <<externally-provided time>> as well as Java system time, allowing applications full control over the concept of time within an engine
     		
