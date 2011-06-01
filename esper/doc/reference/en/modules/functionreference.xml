@@ -480,6 +480,14 @@ select current_timestamp() from MyEvent]]></programlisting>
 			<programlisting>select prev(rank, symbol) from Trade.ext:sort(10, volume desc), RankSelectionEvent unidirectional</programlisting>
 
 			<para>
+				Use the <literal>prev</literal> function in combination with a grouped data window to access a previous event per grouping criteria.
+			</para>			
+			<para>
+				The example below returns the price of the previous Trade event for the same symbol, or <literal>null</literal> if for that symbol there is no previous Trade event:
+			</para>
+			<programlisting>select prev(1, price) from Trade.std:groupwin(symbol).win:length(2)</programlisting>
+
+			<para>
 				The <literal>prev</literal> function returns a <literal>null</literal> value if the data window does not currently hold the i-th previous event. The example below illustrates this using a time batch window. Here the <literal>prev</literal>  
 				function returns a null value for any events in which the previous event is not in the same batch of events. Note that the <literal>prior</literal> function as discussed below can be used if a null value is not the desired result.
 			</para>
