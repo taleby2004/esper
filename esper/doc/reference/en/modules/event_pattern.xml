@@ -1053,6 +1053,10 @@ a=A -> every-distinct(a.aprop) b=B]]></programlisting>
 			<para>
 				The optional <emphasis>range</emphasis> can also specify a maximum number of times that <emphasis>repeated_pattern_expr</emphasis> pattern sub-expression evaluates to true and retains tagged events. When this number is reached, the engine stops the <emphasis>repeated_pattern_expr</emphasis> pattern sub-expression.
 			</para>
+			
+			<para>
+			    The <literal>until</literal> keyword is always required when specifying a range and is not required if specifying a fixed number of repeat as discussed in the section before.
+			</para>
 
 			<sect3 id="pattern-repeatuntil-norange" >
 			   <title>Unbound Repeat</title>
