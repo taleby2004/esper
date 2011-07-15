@@ -622,6 +622,10 @@ following conditions occurs, whichever occurs first: the data window has collect
 				<para>
 					An expression may return a <literal>null</literal> value. The engine treats a <literal>null</literal> value as any other value. An expression can also return a custom application object, whereby the application class should implement the <literal>hashCode</literal> and <literal>equals</literal> methods.
 				</para>
+				
+				<para>
+					Use <literal>group by</literal> instead of the grouped data window to control how aggregations are grouped.
+				</para>
 
 				<para>
 					This example computes the total price for the last 5 events considering the last 5 events per each symbol, aggregating the price across all symbols (since no <literal>group by</literal> clause is specified the aggregation is across all symbols):
@@ -680,9 +684,21 @@ select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(5)
 				<para>
 					Last, we consider a grouped data window for two group criteria. Here, the query results are total price per symbol and feed for the last 100 events per symbol and feed.
 				</para>
-
 				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupwin(symbol, feed).win:length(100)]]></programlisting>
-    
+		
+				<para>
+					When using grouped-window with time windows, note that if the engine retains 5 minutes of events or retains 5 minutes of events per group, the result is the same from the perspective of retaining events as both policies retain, considering all groups, the same set of events.
+				</para>
+				<para>
+					For example:
+				</para>
+				<programlisting><![CDATA[// Use this:
+select sum(price) from StockTickEvent.win:time(1 minute)
+// is equivalent to:
+// select sum(price) from StockTickEvent.std:groupwin(symbol).win:time(1 minute)
+// Use the group-by clause for grouping aggregation by symbol.]]></programlisting>
+
+
 				<para>
 					For advanced users: There is an optional view that can control how the <literal>std:groupwin</literal> grouped-window view gets evaluated and that view is the <literal>std:merge</literal> view. 
 					The merge view can only occur after a <literal>std:groupwin</literal> grouped-window view in a view chain and controls
