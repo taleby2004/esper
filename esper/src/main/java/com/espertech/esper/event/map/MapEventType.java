@@ -13,7 +13,6 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 import com.espertech.esper.event.*;
 import com.espertech.esper.event.bean.BeanEventType;
-import com.espertech.esper.event.bean.InternalEventPropDescriptor;
 import com.espertech.esper.event.property.*;
 import com.espertech.esper.util.GraphUtil;
 import com.espertech.esper.util.JavaClassHelper;
@@ -31,6 +30,7 @@ public class MapEventType implements EventTypeSPI
     private final EventAdapterService eventAdapterService;
     private final EventType[] optionalSuperTypes;
     private final Set<EventType> optionalDeepSupertypes;
+    private final int eventTypeId;
 
     // Simple (not-nested) properties are stored here
     private String[] propertyNames;       // Cache an array of property names so not to construct one frequently
@@ -46,6 +46,9 @@ public class MapEventType implements EventTypeSPI
     private Map<String, Object> nestableTypes;  // Deep definition of the map-type, containing nested maps and objects
     private Map<String, Pair<EventPropertyDescriptor, EventPropertyWriter>> propertyWriters;
     private EventPropertyDescriptor[] writablePropertyDescriptors;
+
+    private String startTimstampPropertyName;
+    private String endTimestampPropertyName;
 
     private int hashCode;
 
@@ -63,12 +66,16 @@ public class MapEventType implements EventTypeSPI
      */
     public MapEventType(EventTypeMetadata metadata,
                         String typeName,
+                        int eventTypeId,
                         EventAdapterService eventAdapterService,
                         Map<String, Object> propertyTypes,
                         EventType[] optionalSuperTypes,
-                        Set<EventType> optionalDeepSupertypes)
+                        Set<EventType> optionalDeepSupertypes,
+                        ConfigurationEventTypeMap configMapType
+                        )
     {
         this.metadata = metadata;
+        this.eventTypeId = eventTypeId;
         this.typeName = typeName;
         this.eventAdapterService = eventAdapterService;
 
@@ -110,6 +117,12 @@ public class MapEventType implements EventTypeSPI
 
         // Copy parent properties to child
         copySuperTypes();
+
+        if (configMapType != null) {
+            startTimstampPropertyName = configMapType.getStartTimestampPropertyName();
+            endTimestampPropertyName = configMapType.getEndTimestampPropertyName();
+            EventTypeUtility.validateTimestampProperties(this, startTimstampPropertyName, endTimestampPropertyName);
+        }
     }
 
     public String getName()
@@ -120,6 +133,18 @@ public class MapEventType implements EventTypeSPI
     public EventBeanReader getReader()
     {
         return new MapEventBeanReader(this);
+    }
+
+    public int getEventTypeId() {
+        return eventTypeId;
+    }
+
+    public String getStartTimestampPropertyName() {
+        return startTimstampPropertyName;
+    }
+
+    public String getEndTimestampPropertyName() {
+        return endTimestampPropertyName;
     }
 
     public final Class getPropertyType(String propertyName)

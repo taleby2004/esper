@@ -224,10 +224,14 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 break;
             case EVAL_EQUALS_EXPR:
             case EVAL_NOTEQUALS_EXPR:
+            case EVAL_IS_EXPR:
+            case EVAL_ISNOT_EXPR:
                 leaveEqualsExpr(node);
                 break;
             case EVAL_EQUALS_GROUP_EXPR:
             case EVAL_NOTEQUALS_GROUP_EXPR:
+            case EVAL_IS_GROUP_EXPR:
+            case EVAL_ISNOT_GROUP_EXPR:
                 leaveEqualsGroupExpr(node);
                 break;
             case WHERE_EXPR:
@@ -563,6 +567,21 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 }
             }
         }
+
+        switch (node.getType())
+        {
+            case SUM:
+            case AVG:
+            case COUNT:
+            case MEDIAN:
+            case STDDEV:
+            case AVEDEV:
+            case FIRST_AGGREG:
+            case LAST_AGGREG:
+            case WINDOW_AGGREG:
+                postLeaveAggregate(node);
+                break;
+        }
     }
 
     private void mapChildASTToChildExprNode(Tree node)
@@ -711,37 +730,50 @@ public class EPLTreeWalker extends EsperEPL2Ast
             }
         }
 
-        // get inherited
-        Set<String> inherited = new LinkedHashSet<String>();
-        for (int i = 0; i < node.getChildCount(); i++) {
-            Tree p = node.getChild(i);
-            if (p.getType() == CREATE_SCHEMA_EXPR_INH) {
-                if (!p.getChild(0).getText().toLowerCase().equals("inherits")) {
-                    throw new EPException("Expected 'inherits' keyword after create-schema clause but encountered '" + p.getChild(0).getText() + "'");
-                }
-                for (int j = 1; j < p.getChildCount(); j++) {
-                    if (p.getChild(j).getType() == EXPRCOL) {
-                        for (int k = 0; k < p.getChild(j).getChildCount(); k++) {
-                            inherited.add(p.getChild(j).getChild(k).getText());
-                        }
-                    }
-                }
-            }
-        }
-
-        // get qualifier
+        // get variant keyword
         boolean variant = false;
         for (int i = 0; i < node.getChildCount(); i++) {
             Tree p = node.getChild(i);
-            if (p.getType() == CREATE_SCHEMA_EXPR_QUAL) {
+            if (p.getType() == CREATE_SCHEMA_EXPR_VAR) {
                 if (!p.getChild(0).getText().toLowerCase().equals("variant")) {
                     throw new EPException("Expected 'variant' keyword after create-schema clause but encountered '" + p.getChild(0).getText() + "'");
                 }
                 variant = true;
             }
         }
+
+        // get inherited and start timestamp and end timestamps
+        String startTimestamp = null;
+        String endTimestamp = null;
+        Set<String> inherited = new LinkedHashSet<String>();
+        for (int i = 0; i < node.getChildCount(); i++) {
+            Tree p = node.getChild(i);
+            if (p.getType() == CREATE_SCHEMA_EXPR_QUAL) {
+                String childName = p.getChild(0).getText().toLowerCase();
+                if (childName.equals("inherits")) {
+                    for (int j = 1; j < p.getChildCount(); j++) {
+                        if (p.getChild(j).getType() == EXPRCOL) {
+                            for (int k = 0; k < p.getChild(j).getChildCount(); k++) {
+                                inherited.add(p.getChild(j).getChild(k).getText());
+                            }
+                        }
+                    }
+                    continue;
+                }
+                else if (childName.equals("starttimestamp")) {
+                    startTimestamp = p.getChild(1).getChild(0).getText();
+                    continue;
+                }
+                else if (childName.equals("endtimestamp")) {
+                    endTimestamp = p.getChild(1).getChild(0).getText();
+                    continue;
+                }
+                throw new EPException("Expected 'inherits', 'starttimestamp' or 'endtimestamp' keyword after create-schema clause but encountered '" + p.getChild(0).getText() + "'");
+            }
+        }
+
         statementSpec.getStreamSpecs().add(new FilterStreamSpecRaw(new FilterSpecRaw(Object.class.getName(), Collections.<ExprNode>emptyList(), null), Collections.<ViewSpec>emptyList(), null, new StreamSpecOptions()));
-        statementSpec.setCreateSchemaDesc(new CreateSchemaDesc(schemaName, typeNames, columnTypes, inherited, variant));
+        statementSpec.setCreateSchemaDesc(new CreateSchemaDesc(schemaName, typeNames, columnTypes, inherited, variant, startTimestamp, endTimestamp));
     }
 
     private void leaveCreateVariable(Tree node)
@@ -1678,8 +1710,8 @@ public class EPLTreeWalker extends EsperEPL2Ast
                 ExprNode expression = astExprNodeMap.remove(intervalParent.getChild(1));
                 ExprTimePeriod timePeriodExpr;
                 try {
-                    ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(engineURI, false), null, null, timeProvider, variableService, exprEvaluatorContext, null, null, null);
-                    timePeriodExpr = (ExprTimePeriod) ExprNodeUtil.getValidatedSubtree(expression, validationContext);
+                    ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(engineURI, false), null, null, timeProvider, variableService, exprEvaluatorContext, null, null, null, null);
+                    timePeriodExpr = (ExprTimePeriod) ExprNodeUtility.getValidatedSubtree(expression, validationContext);
                 }
                 catch (ExprValidationException ex)
                 {
@@ -1945,12 +1977,6 @@ public class EPLTreeWalker extends EsperEPL2Ast
     	log.debug(".leaveLibFunctionOld");
 
         String childNodeText = node.getChild(0).getText();
-        if ((childNodeText.toLowerCase().equals("max")) || (childNodeText.toLowerCase().equals("min")))
-        {
-            handleMinMax(node);
-            return;
-        }
-
         if (node.getChild(0).getType() == CLASS_IDENT)
         {
             String className = node.getChild(0).getText();
@@ -2000,6 +2026,13 @@ public class EPLTreeWalker extends EsperEPL2Ast
         catch (EngineImportException e)
         {
             throw new IllegalStateException("Error resolving aggregation: " + e.getMessage(), e);
+        }
+
+        if ((childNodeText.toLowerCase().equals("max")) || (childNodeText.toLowerCase().equals("min")) ||
+            (childNodeText.toLowerCase().equals("fmax")) || (childNodeText.toLowerCase().equals("fmin")))
+        {
+            handleMinMax(node);
+            return;
         }
 
         // try built-in expanded set of aggregation functions
@@ -2100,12 +2133,18 @@ public class EPLTreeWalker extends EsperEPL2Ast
         log.debug(".leaveEqualsExpr");
 
         boolean isNot = false;
-        if (node.getType() == EVAL_NOTEQUALS_EXPR)
+        if (node.getType() == EVAL_NOTEQUALS_EXPR || node.getType() == EVAL_ISNOT_EXPR)
         {
             isNot = true;
         }
 
-        ExprEqualsNode identNode = new ExprEqualsNodeImpl(isNot);
+        boolean isIs = false;
+        if (node.getType() == EVAL_IS_EXPR || node.getType() == EVAL_ISNOT_EXPR)
+        {
+            isIs = true;
+        }
+
+        ExprEqualsNode identNode = new ExprEqualsNodeImpl(isNot, isIs);
         astExprNodeMap.put(node, identNode);
     }
 
@@ -2211,12 +2250,14 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
         // Determine min or max
         Tree childNode = libNode.getChild(0);
+        String childNodeText = childNode.getText().toLowerCase();
         MinMaxTypeEnum minMaxTypeEnum;
-        if (childNode.getText().equals("min"))
+        boolean filtered = childNodeText.startsWith("f");
+        if (childNodeText.equals("min") || childNodeText.equals("fmin"))
         {
             minMaxTypeEnum = MinMaxTypeEnum.MIN;
         }
-        else if (childNode.getText().equals("max"))
+        else if (childNodeText.equals("max") || childNodeText.equals("fmax"))
         {
             minMaxTypeEnum = MinMaxTypeEnum.MAX;
         }
@@ -2234,14 +2275,14 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
 
         // Error if more then 3 nodes with distinct since it's an aggregate function
-        if ((libNode.getChildCount() > 4) && (isDistinct))
+        if ((libNode.getChildCount() > 4) && (isDistinct) && !filtered)
         {
             throw new ASTWalkException("The distinct keyword is not valid in per-row min and max " +
                     "functions with multiple sub-expressions");
         }
 
         ExprNode minMaxNode;
-        if ((!isDistinct) && (libNode.getChildCount() > 3))
+        if ((!isDistinct) && (libNode.getChildCount() > 3) && !filtered)
         {
             // use the row function
             minMaxNode = new ExprMinMaxRowNode(minMaxTypeEnum);
@@ -2249,7 +2290,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         else
         {
             // use the aggregation function
-            minMaxNode = new ExprMinMaxAggrNode(isDistinct, minMaxTypeEnum);
+            minMaxNode = new ExprMinMaxAggrNode(isDistinct, minMaxTypeEnum, filtered);
         }
         astExprNodeMap.put(libNode, minMaxNode);
     }
@@ -2272,28 +2313,31 @@ public class EPLTreeWalker extends EsperEPL2Ast
             isDistinct = true;
         }
 
+        // NOTE: Also see "postLeaveAggregate" below which appends the filter expression
+        boolean hasFilter = ASTUtil.findFirstNode(node, AGG_FILTER_EXPR) != null;
+
         ExprAggregateNode aggregateNode;
         ExprNode childNode = null;
 
         switch (node.getType())
         {
             case AVG:
-                aggregateNode = new ExprAvgNode(isDistinct);
+                aggregateNode = new ExprAvgNode(isDistinct, hasFilter);
                 break;
             case SUM:
-                aggregateNode = new ExprSumNode(isDistinct);
+                aggregateNode = new ExprSumNode(isDistinct, hasFilter);
                 break;
             case COUNT:
-                aggregateNode = new ExprCountNode(isDistinct);
+                aggregateNode = new ExprCountNode(isDistinct, hasFilter);
                 break;
             case MEDIAN:
-                aggregateNode = new ExprMedianNode(isDistinct);
+                aggregateNode = new ExprMedianNode(isDistinct, hasFilter);
                 break;
             case STDDEV:
-                aggregateNode = new ExprStddevNode(isDistinct);
+                aggregateNode = new ExprStddevNode(isDistinct, hasFilter);
                 break;
             case AVEDEV:
-                aggregateNode = new ExprAvedevNode(isDistinct);
+                aggregateNode = new ExprAvedevNode(isDistinct, hasFilter);
                 break;
             case FIRST_AGGREG:
             case WINDOW_AGGREG:
@@ -2335,6 +2379,17 @@ public class EPLTreeWalker extends EsperEPL2Ast
             aggregateNode.addChildNode(childNode);
         }
         astExprNodeMap.put(node, aggregateNode);
+    }
+
+    private void postLeaveAggregate(Tree node)
+    {
+        Tree optionalFilterNode = ASTUtil.findFirstNode(node, AGG_FILTER_EXPR);
+        if (optionalFilterNode == null) {
+            return;
+        }
+        ExprNode currentAggNode = astExprNodeMap.get(node);
+        ExprNode filter = astExprNodeMap.remove(optionalFilterNode.getChild(0));
+        currentAggNode.addChildNode(filter);
     }
 
     private void leaveRelationalOp(Tree node)
@@ -2692,11 +2747,29 @@ public class EPLTreeWalker extends EsperEPL2Ast
             ++count;
         }
 
+        Integer consumption = null;
+        if ((node.getChildCount() > count) && (node.getChild(count).getType() == ATCHAR))
+        {
+            Tree filterConsumeAnno = node.getChild(count);
+            String name = filterConsumeAnno.getChild(0).getText();
+            if (!name.toUpperCase().equals("CONSUME")) {
+                throw new EPException("Unexpected pattern filter @ annotation, expecting 'consume' but received '" + name + "'");
+            }
+            Object number = filterConsumeAnno.getChildCount() < 2 ? null : ASTConstantHelper.parse(filterConsumeAnno.getChild(1));
+            if (number != null) {
+                consumption = ((Number) number).intValue();
+            }
+            else {
+                consumption = 1;
+            }
+            count++;
+        }
+
         List<ExprNode> exprNodes = getExprNodes(node, count);
 
         FilterSpecRaw rawFilterSpec = new FilterSpecRaw(eventName, exprNodes, propertyEvalSpec);
         propertyEvalSpec = null;
-        EvalNode filterNode = patternNodeFactory.makeFilterNode(rawFilterSpec, optionalPatternTagName);
+        EvalNode filterNode = patternNodeFactory.makeFilterNode(rawFilterSpec, optionalPatternTagName, consumption);
         addEvalNodeExpression(filterNode, node);
     }
 

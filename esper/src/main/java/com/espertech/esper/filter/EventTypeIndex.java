@@ -75,6 +75,19 @@ public class EventTypeIndex implements EventEvaluator
         }
     }
 
+
+    public void removeType(EventType type) {
+        eventTypesRWLock.writeLock().lock();
+        try
+        {
+            eventTypes.remove(type);
+        }
+        finally
+        {
+            eventTypesRWLock.writeLock().unlock();
+        }
+    }
+
     /**
      * Returns the root node for the given event type, or null if this event type has not been seen before.
      * @param eventType is an event type
@@ -116,6 +129,20 @@ public class EventTypeIndex implements EventEvaluator
     protected int size()
     {
         return eventTypes.size();
+    }
+
+    protected int getFilterCountApprox() {
+
+        eventTypesRWLock.readLock().lock();
+        int count = 0;
+        for (Map.Entry<EventType, FilterHandleSetNode> entry : eventTypes.entrySet()) {
+            count += entry.getValue().getFilterCallbackCount();
+            for (FilterParamIndexBase index : entry.getValue().getIndizes()) {
+                count += index.size();
+            }
+        }
+        eventTypesRWLock.readLock().unlock();
+        return count;
     }
 
     private void matchType(EventType eventType, EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)

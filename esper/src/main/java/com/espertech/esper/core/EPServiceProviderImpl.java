@@ -9,13 +9,14 @@
 package com.espertech.esper.core;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.core.deploy.DeploymentStateService;
 import com.espertech.esper.core.thread.ThreadingOption;
 import com.espertech.esper.core.thread.ThreadingService;
+import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
-import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
@@ -25,8 +26,8 @@ import com.espertech.esper.plugin.PluginLoaderInitContext;
 import com.espertech.esper.schedule.SchedulingMgmtService;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.TimeProvider;
-import com.espertech.esper.timer.TimerService;
 import com.espertech.esper.timer.TimerCallback;
+import com.espertech.esper.timer.TimerService;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.SerializableObjectCopier;
 import com.espertech.esper.util.Version;
@@ -36,10 +37,10 @@ import org.apache.commons.logging.LogFactory;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Service provider encapsulates the engine's services for runtime and administration interfaces.
@@ -53,7 +54,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     private Set<EPServiceStateListener> serviceListeners;
     private Set<EPStatementStateListener> statementListeners;
     private StatementEventDispatcherUnthreaded stmtEventDispatcher;
-    private Map<String, EPServiceProviderImpl> runtimes;
+    private Map<String, EPServiceProviderSPI> runtimes;
 
     /**
      * Constructor - initializes services.
@@ -62,7 +63,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
      * @param runtimes map of URI and runtime
      * @throws ConfigurationException is thrown to indicate a configuraton error
      */
-    public EPServiceProviderImpl(Configuration configuration, String engineURI, Map<String, EPServiceProviderImpl> runtimes) throws ConfigurationException
+    public EPServiceProviderImpl(Configuration configuration, String engineURI, Map<String, EPServiceProviderSPI> runtimes) throws ConfigurationException
     {
         if (configuration == null)
         {
@@ -75,8 +76,10 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         this.runtimes = runtimes;
         this.engineURI = engineURI;
         verifyConfiguration(configuration);
-        configSnapshot = takeSnapshot(configuration);
+
         serviceListeners = new CopyOnWriteArraySet<EPServiceStateListener>();
+
+        configSnapshot = takeSnapshot(configuration);
         statementListeners = new CopyOnWriteArraySet<EPStatementStateListener>();
         doInitialize();
     }
@@ -285,6 +288,20 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         return engine.getServices().getStatementContextFactory();
     }
 
+    public StatementIsolationService getStatementIsolationService() {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
+        return engine.getServices().getStatementIsolationService();
+    }
+
+    public DeploymentStateService getDeploymentStateService() {
+        if (engine == null) {
+            throw new EPServiceDestroyedException(engineURI);
+        }
+        return engine.getServices().getDeploymentStateService();
+    }
+
     public synchronized void destroy()
     {
         if (engine != null)
@@ -365,7 +382,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
     protected void doInitialize()
     {
         log.info("Initializing engine URI '" + engineURI + "' version " + Version.VERSION);
-        
+
         // This setting applies to all engines in a given VM
         ExecutionPathDebugLog.setDebugEnabled(configSnapshot.getEngineDefaults().getLogging().isEnableExecutionDebug());
         ExecutionPathDebugLog.setTimerDebugEnabled(configSnapshot.getEngineDefaults().getLogging().isEnableTimerDebug());
@@ -508,7 +525,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         services.getStatementLifecycleSvc().init();
 
         // New admin
-        ConfigurationOperations configOps = new ConfigurationOperationsImpl(services.getEventAdapterService(), services.getEngineImportService(), services.getVariableService(), services.getEngineSettingsService(), services.getValueAddEventService(), services.getMetricsReportingService(), services.getStatementEventTypeRefService(), services.getStatementVariableRefService());
+        ConfigurationOperations configOps = new ConfigurationOperationsImpl(services.getEventAdapterService(), services.getEventTypeIdGenerator(), services.getEngineImportService(), services.getVariableService(), services.getEngineSettingsService(), services.getValueAddEventService(), services.getMetricsReportingService(), services.getStatementEventTypeRefService(), services.getStatementVariableRefService(), services.getPlugInViews());
         SelectClauseStreamSelectorEnum defaultStreamSelector = SelectClauseStreamSelectorEnum.mapFromSODA(configSnapshot.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
         EPAdministratorSPI adminSPI;
         String adminClassName = configSnapshot.getEngineDefaults().getAlternativeContext().getAdmin();

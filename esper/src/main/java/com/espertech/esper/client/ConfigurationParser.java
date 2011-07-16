@@ -232,15 +232,24 @@ class ConfigurationParser {
 
     private static void handleMap(String name, Configuration configuration, Element eventTypeElement)
     {
+        ConfigurationEventTypeMap config = null;
+        String startTimestampProp = getOptionalAttribute(eventTypeElement, "start-timestamp-property-name");
+        String endTimestampProp = getOptionalAttribute(eventTypeElement, "end-timestamp-property-name");
         Node superTypesList = eventTypeElement.getAttributes().getNamedItem("supertype-names");
-        if (superTypesList != null)
+        if (superTypesList != null || startTimestampProp != null || endTimestampProp != null)
         {
-            String value = superTypesList.getTextContent();
-            String[] names = value.split(",");
-            for (String superTypeName : names)
-            {
-                configuration.addMapSuperType(name, superTypeName.trim());
+            config = new ConfigurationEventTypeMap();
+            if (superTypesList != null) {
+                String value = superTypesList.getTextContent();
+                String[] names = value.split(",");
+                for (String superTypeName : names)
+                {
+                    config.getSuperTypes().add(superTypeName.trim());
+                }
             }
+            config.setEndTimestampPropertyName(endTimestampProp);
+            config.setStartTimestampPropertyName(startTimestampProp);
+            configuration.addMapConfiguration(name, config);
         }
 
         Properties propertyTypeNames = new Properties();
@@ -267,6 +276,8 @@ class ConfigurationParser {
         String xpathFunctionResolverClass = getOptionalAttribute(xmldomElement, "xpath-function-resolver");
         String xpathVariableResolverClass = getOptionalAttribute(xmldomElement, "xpath-variable-resolver");
         String autoFragmentStr = getOptionalAttribute(xmldomElement, "auto-fragment");
+        String startTimestampProperty = getOptionalAttribute(xmldomElement, "start-timestamp-property-name");
+        String endTimestampProperty = getOptionalAttribute(xmldomElement, "end-timestamp-property-name");
 
         ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc = new ConfigurationEventTypeXMLDOM();
         xmlDOMEventTypeDesc.setRootElementName(rootElementName);
@@ -276,6 +287,8 @@ class ConfigurationParser {
         xmlDOMEventTypeDesc.setDefaultNamespace(defaultNamespace);
         xmlDOMEventTypeDesc.setXPathFunctionResolver(xpathFunctionResolverClass);
         xmlDOMEventTypeDesc.setXPathVariableResolver(xpathVariableResolverClass);
+        xmlDOMEventTypeDesc.setStartTimestampPropertyName(startTimestampProperty);
+        xmlDOMEventTypeDesc.setEndTimestampPropertyName(endTimestampProperty);
         if (resolvePropertiesAbsoluteStr != null)
         {
             xmlDOMEventTypeDesc.setXPathResolvePropertiesAbsolute(Boolean.parseBoolean(resolvePropertiesAbsoluteStr));
@@ -373,6 +386,8 @@ class ConfigurationParser {
         String propertyResolution = getRequiredAttribute(xmldomElement, "property-resolution-style");
         String factoryMethod = getOptionalAttribute(xmldomElement, "factory-method");
         String copyMethod = getOptionalAttribute(xmldomElement, "copy-method");
+        String startTimestampProp = getOptionalAttribute(xmldomElement, "start-timestamp-property-name");
+        String endTimestampProp = getOptionalAttribute(xmldomElement, "end-timestamp-property-name");
 
         ConfigurationEventTypeLegacy legacyDesc = new ConfigurationEventTypeLegacy();
         if (accessorStyle != null)
@@ -387,14 +402,10 @@ class ConfigurationParser {
         {
             legacyDesc.setPropertyResolutionStyle(Configuration.PropertyResolutionStyle.valueOf(propertyResolution.toUpperCase()));
         }
-        if (factoryMethod != null)
-        {
-            legacyDesc.setFactoryMethod(factoryMethod);
-        }
-        if (copyMethod != null)
-        {
-            legacyDesc.setCopyMethod(copyMethod);
-        }
+        legacyDesc.setFactoryMethod(factoryMethod);
+        legacyDesc.setCopyMethod(copyMethod);
+        legacyDesc.setStartTimestampPropertyName(startTimestampProp);
+        legacyDesc.setEndTimestampPropertyName(endTimestampProp);
         configuration.addEventType(name, className, legacyDesc);
 
         DOMElementIterator propertyNodeIterator = new DOMElementIterator(xmldomElement.getChildNodes());
@@ -576,7 +587,8 @@ class ConfigurationParser {
         String namespace = getRequiredAttribute(element, "namespace");
         String name = getRequiredAttribute(element, "name");
         String factoryClassName = getRequiredAttribute(element, "factory-class");
-        configuration.addPlugInVirtualDataWindow(namespace, name, factoryClassName);
+        String config = getOptionalAttribute(element, "config");
+        configuration.addPlugInVirtualDataWindow(namespace, name, factoryClassName, config);
     }
 
     private static void handlePlugInAggregation(Configuration configuration, Element element)

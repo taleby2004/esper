@@ -39,4 +39,8 @@ public interface FilterServiceSPI extends FilterService
      * @param filterServiceListener to remove
      */
     public void removeFilterServiceListener(FilterServiceListener filterServiceListener);
+
+    public int getFilterCountApprox();
+
+    public int getCountTypes();
 }

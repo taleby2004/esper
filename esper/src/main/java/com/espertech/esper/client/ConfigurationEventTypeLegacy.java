@@ -24,6 +24,8 @@ public class ConfigurationEventTypeLegacy implements Serializable
     private Configuration.PropertyResolutionStyle propertyResolutionStyle;
     private String factoryMethod;
     private String copyMethod;
+    private String startTimestampPropertyName;
+    private String endTimestampPropertyName;
     private static final long serialVersionUID = 3385356145345570222L;
 
     /**
@@ -211,6 +213,22 @@ public class ConfigurationEventTypeLegacy implements Serializable
     public void setCopyMethod(String copyMethod)
     {
         this.copyMethod = copyMethod;
+    }
+
+    public String getStartTimestampPropertyName() {
+        return startTimestampPropertyName;
+    }
+
+    public void setStartTimestampPropertyName(String startTimestampPropertyName) {
+        this.startTimestampPropertyName = startTimestampPropertyName;
+    }
+
+    public String getEndTimestampPropertyName() {
+        return endTimestampPropertyName;
+    }
+
+    public void setEndTimestampPropertyName(String endTimestampPropertyName) {
+        this.endTimestampPropertyName = endTimestampPropertyName;
     }
 
     /**

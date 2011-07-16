@@ -1,6 +1,18 @@
 Esper Changelog
 ===================
 
+Changes in version 4.3.0
+------------------------
+Major API or EPL changes
+  - Support for specifing consumption on pattern filters
+  - Support for filter expressions as part of aggregation functions
+  - Support for the transpose(...) function for select-clause transposing an expression result object to a stream
+  - Support for @Audit to output nested expression results
+  - Support for {} array operator to be input to enumeration methods
+  - Support for subqueries that return multiple result columns to be used in an expression definition  
+  - Support for interval algebra methods among the existing date-time methods
+  - Support for a new expression-driven data window "win:expr". Use for dynamically shrinking and expanding time or length windows, or for custom expiry logic based on work days, for example.
+
 Changes in version 4.2.0
 ------------------------
 Major API or EPL changes

@@ -11,10 +11,14 @@ import com.espertech.esper.epl.join.exec.base.RangeIndexLookupValueRange;
 import com.espertech.esper.epl.join.plan.*;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.lookup.SubordPropHashKey;
+import com.espertech.esper.epl.lookup.SubordPropPlan;
 import com.espertech.esper.epl.lookup.SubordPropRangeKey;
 import com.espertech.esper.epl.lookup.SubordTableLookupStrategy;
 import com.espertech.esper.epl.named.IndexMultiKey;
 import com.espertech.esper.epl.named.IndexedPropDesc;
+import com.espertech.esper.epl.spec.CreateIndexDesc;
+import com.espertech.esper.epl.spec.CreateIndexItem;
+import com.espertech.esper.epl.spec.CreateIndexType;
 import com.espertech.esper.filter.Range;
 import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
@@ -29,6 +33,8 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
     private final VirtualDataWindow dataExternal;
     private final EventType eventType;
     private final String namedWindowName;
+    private String lastAccessedByStatementName;
+    private int lastAccessedByNum;
 
     public VirtualDWViewImpl(VirtualDataWindow dataExternal, EventType eventType, String namedWindowName) {
         this.dataExternal = dataExternal;
@@ -54,13 +60,21 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
         return new Pair<IndexMultiKey, EventTable>(imk, eventTable);
     }
 
-    public SubordTableLookupStrategy getSubordinateLookupStrategy(EventType[] outerStreamTypes, List<SubordPropHashKey> hashKeys, CoercionDesc hashKeyCoercionTypes, List<SubordPropRangeKey> rangeKeys, CoercionDesc rangeKeyCoercionTypes, boolean nwOnTrigger, EventTable eventTable) {
+    public SubordTableLookupStrategy getSubordinateLookupStrategy(String accessedByStatementName, EventType[] outerStreamTypes, List<SubordPropHashKey> hashKeys, CoercionDesc hashKeyCoercionTypes, List<SubordPropRangeKey> rangeKeys, CoercionDesc rangeKeyCoercionTypes, boolean nwOnTrigger, EventTable eventTable, SubordPropPlan joinDesc, boolean forceTableScan) {
         VirtualDWEventTable noopTable = (VirtualDWEventTable) eventTable;
         for (int i = 0; i < noopTable.getBtreeAccess().size(); i++) {
             VirtualDataWindowLookupOp op = VirtualDataWindowLookupOp.fromOpString(rangeKeys.get(i).getRangeInfo().getType().getStringOp());
             noopTable.getBtreeAccess().get(i).setOperator(op);
         }
-        VirtualDataWindowLookup index = dataExternal.getLookup(new VirtualDataWindowLookupContext(noopTable.getHashAccess(), noopTable.getBtreeAccess()));
+
+        // allocate a number within the statement
+        if (lastAccessedByStatementName == null || !lastAccessedByStatementName.equals(accessedByStatementName)) {
+            lastAccessedByNum = 0;
+        }
+        lastAccessedByNum++;
+
+        VirtualDataWindowLookupContextSPI context = new VirtualDataWindowLookupContextSPI(namedWindowName, noopTable.getHashAccess(), noopTable.getBtreeAccess(), joinDesc, forceTableScan, outerStreamTypes, accessedByStatementName, lastAccessedByNum);
+        VirtualDataWindowLookup index = dataExternal.getLookup(context);
         checkIndex(index);
         return new SubordTableLookupStrategyVirtualDW(namedWindowName, index, hashKeys, hashKeyCoercionTypes, rangeKeys, rangeKeyCoercionTypes, nwOnTrigger, outerStreamTypes.length);
     }
@@ -109,7 +123,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
             }
         }
 
-        VirtualDataWindowLookup index = dataExternal.getLookup(new VirtualDataWindowLookupContext(noopTable.getHashAccess(), noopTable.getBtreeAccess()));
+        VirtualDataWindowLookup index = dataExternal.getLookup(new VirtualDataWindowLookupContext(namedWindowName, noopTable.getHashAccess(), noopTable.getBtreeAccess()));
         checkIndex(index);
         return new JoinExecTableLookupStrategyVirtualDW(namedWindowName, index, keyDescriptor, lookupStreamNum);
     }
@@ -162,7 +176,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
             }
         }
 
-        VirtualDataWindowLookup index = dataExternal.getLookup(new VirtualDataWindowLookupContext(noopTable.getHashAccess(), noopTable.getBtreeAccess()));
+        VirtualDataWindowLookup index = dataExternal.getLookup(new VirtualDataWindowLookupContext(namedWindowName, noopTable.getHashAccess(), noopTable.getBtreeAccess()));
         checkIndex(index);
         if (index == null) {
             throw new EPException("Exception obtaining index from virtual data window '" + namedWindowName + "'");
@@ -170,7 +184,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
 
         Set<EventBean> events = null;
         try {
-            events = index.lookup(keys);
+            events = index.lookup(keys, null);
         }
         catch (RuntimeException ex) {
             log.warn("Exception encountered invoking virtual data window external index for window '" + namedWindowName + "': " + ex.getMessage(), ex);
@@ -197,6 +211,44 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
     }
 
     public Iterator<EventBean> iterator() {
-        return Collections.<EventBean>emptyList().iterator();
+        return dataExternal.iterator();
+    }
+
+    public void handleStartIndex(CreateIndexDesc spec) {
+        try {
+            List<VirtualDataWindowEventStartIndex.VDWCreateIndexField> fields = new ArrayList<VirtualDataWindowEventStartIndex.VDWCreateIndexField>();
+            for (CreateIndexItem col : spec.getColumns()) {
+                fields.add(new VirtualDataWindowEventStartIndex.VDWCreateIndexField(col.getName(), col.getType() == CreateIndexType.HASH));
+            }
+            VirtualDataWindowEventStartIndex create = new VirtualDataWindowEventStartIndex(spec.getWindowName(), spec.getIndexName(), fields);
+            dataExternal.handleEvent(create);
+        }
+        catch (Exception ex) {
+            String message = "Exception encountered invoking virtual data window handle start-index event for window '" + namedWindowName + "': " + ex.getMessage();
+            log.warn(message, ex);
+            throw new EPException(message, ex);
+        }
+    }
+
+    public void handleStopIndex(CreateIndexDesc spec) {
+        try {
+            VirtualDataWindowEventStopIndex event = new VirtualDataWindowEventStopIndex(spec.getWindowName(), spec.getIndexName());
+            dataExternal.handleEvent(event);
+        }
+        catch (Exception ex) {
+            String message = "Exception encountered invoking virtual data window handle stop-index event for window '" + namedWindowName + "': " + ex.getMessage();
+            log.warn(message, ex);
+        }
+    }
+
+    public void handleStopWindow() {
+        try {
+            VirtualDataWindowEventStopWindow event = new VirtualDataWindowEventStopWindow(namedWindowName);
+            dataExternal.handleEvent(event);
+        }
+        catch (Exception ex) {
+            String message = "Exception encountered invoking virtual data window handle stop-window event for window '" + namedWindowName + "': " + ex.getMessage();
+            log.warn(message, ex);
+        }
     }
 }

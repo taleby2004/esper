@@ -10,6 +10,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.soda.ForClauseKeyword;
 import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.epl.core.eval.SelectExprStreamDesc;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.epl.variable.VariableService;
@@ -46,7 +47,8 @@ public class SelectExprProcessorFactory
      * @return select-clause expression processor
      * @throws ExprValidationException to indicate the select expression cannot be validated
      */
-    public static SelectExprProcessor getProcessor(List<SelectClauseElementCompiled> selectionList,
+    public static SelectExprProcessor getProcessor(Collection<Integer> assignedTypeNumberStack,
+                                                   List<SelectClauseElementCompiled> selectionList,
                                                    boolean isUsingWildcard,
                                                    InsertIntoDesc insertIntoDesc,
                                                    ForClauseSpec forClauseSpec,
@@ -65,7 +67,7 @@ public class SelectExprProcessorFactory
                                                    Annotation[] annotations)
         throws ExprValidationException
     {
-        SelectExprProcessor synthetic = getProcessorInternal(selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext, statementId);
+        SelectExprProcessor synthetic = getProcessorInternal(assignedTypeNumberStack, selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext, statementId);
 
         // Handle binding as an optional service
         if (statementResultService != null)
@@ -96,9 +98,9 @@ public class SelectExprProcessorFactory
 
                     StreamTypeService type = new StreamTypeServiceImpl(synthetic.getResultEventType(), null, false, engineURI);
                     groupedDeliveryExpr = new ExprNode[item.getExpressions().size()];
-                    ExprValidationContext validationContext = new ExprValidationContext(type, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, annotations);
+                    ExprValidationContext validationContext = new ExprValidationContext(type, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations);
                     for (int i = 0; i < item.getExpressions().size(); i++) {
-                        groupedDeliveryExpr[i] = ExprNodeUtil.getValidatedSubtree(item.getExpressions().get(i), validationContext);
+                        groupedDeliveryExpr[i] = ExprNodeUtility.getValidatedSubtree(item.getExpressions().get(i), validationContext);
                     }
                     forDelivery = true;
                 }
@@ -113,6 +115,7 @@ public class SelectExprProcessorFactory
     }
 
     private static SelectExprProcessor getProcessorInternal(
+                                                   Collection<Integer> assignedTypeNumberStack,
                                                    List<SelectClauseElementCompiled> selectionList,
                                                    boolean isUsingWildcard,
                                                    InsertIntoDesc insertIntoDesc,
@@ -138,7 +141,7 @@ public class SelectExprProcessorFactory
             if (typeService.getStreamNames().length > 1)
             {
                 log.debug(".getProcessor Using SelectExprJoinWildcardProcessor");
-                return new SelectExprJoinWildcardProcessor(typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService, insertIntoDesc, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext);
+                return new SelectExprJoinWildcardProcessor(assignedTypeNumberStack, statementId, typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService, insertIntoDesc, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext);
             }
             // Single-table selects with no insert-into
             // don't need extra processing
@@ -153,10 +156,9 @@ public class SelectExprProcessorFactory
         verifyNameUniqueness(selectionList);
 
         // Construct processor
-        List<SelectClauseExprCompiledSpec> expressionList = getExpressions(selectionList);
-        List<SelectClauseStreamCompiledSpec> streamWildcards = getStreamWildcards(selectionList);
+        SelectExprBuckets buckets = getSelectExpressionBuckets(selectionList);
 
-        SelectExprProcessorHelper factory = new SelectExprProcessorHelper(expressionList, streamWildcards, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext, statementId);
+        SelectExprProcessorHelper factory = new SelectExprProcessorHelper(assignedTypeNumberStack, buckets.expressions, buckets.selectedStreams, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext, statementId);
         SelectExprProcessor processor = factory.getEvaluator();
 
         // add reference to the type obtained
@@ -214,29 +216,57 @@ public class SelectExprProcessorFactory
         return true;
     }
 
-    private static List<SelectClauseExprCompiledSpec> getExpressions(List<SelectClauseElementCompiled> elements)
+    private static SelectExprBuckets getSelectExpressionBuckets(List<SelectClauseElementCompiled> elements)
     {
-        List<SelectClauseExprCompiledSpec> result = new ArrayList<SelectClauseExprCompiledSpec>();
+        List<SelectClauseExprCompiledSpec> expressions = new ArrayList<SelectClauseExprCompiledSpec>();
+        List<SelectExprStreamDesc> selectedStreams = new ArrayList<SelectExprStreamDesc>();
+
         for (SelectClauseElementCompiled element : elements)
         {
             if (element instanceof SelectClauseExprCompiledSpec)
             {
-                result.add((SelectClauseExprCompiledSpec)element);
+                SelectClauseExprCompiledSpec expr = (SelectClauseExprCompiledSpec) element;
+                if (!isTransposingFunction(expr.getSelectExpression())) {
+                    expressions.add(expr);
+                }
+                else {
+                    selectedStreams.add(new SelectExprStreamDesc(expr));
+                }
+            }
+            else if (element instanceof SelectClauseStreamCompiledSpec)
+            {
+                selectedStreams.add(new SelectExprStreamDesc((SelectClauseStreamCompiledSpec)element));
             }
         }
-        return result;
+        return new SelectExprBuckets(expressions, selectedStreams);
     }
 
-    private static List<SelectClauseStreamCompiledSpec> getStreamWildcards(List<SelectClauseElementCompiled> elements)
-    {
-        List<SelectClauseStreamCompiledSpec> result = new ArrayList<SelectClauseStreamCompiledSpec>();
-        for (SelectClauseElementCompiled element : elements)
-        {
-            if (element instanceof SelectClauseStreamCompiledSpec)
-            {
-                result.add((SelectClauseStreamCompiledSpec)element);
-            }
+    private static boolean isTransposingFunction(ExprNode selectExpression) {
+        if (!(selectExpression instanceof ExprDotNode)) {
+            return false;
         }
-        return result;
+        ExprDotNode dotNode = (ExprDotNode) selectExpression;
+        if (dotNode.getChainSpec().get(0).getName().toLowerCase().equals(EngineImportService.EXT_SINGLEROW_FUNCTION_TRANSPOSE)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static class SelectExprBuckets {
+        private final List<SelectClauseExprCompiledSpec> expressions;
+        private final List<SelectExprStreamDesc> selectedStreams;
+
+        public SelectExprBuckets(List<SelectClauseExprCompiledSpec> expressions, List<SelectExprStreamDesc> selectedStreams) {
+            this.expressions = expressions;
+            this.selectedStreams = selectedStreams;
+        }
+
+        public List<SelectExprStreamDesc> getSelectedStreams() {
+            return selectedStreams;
+        }
+
+        public List<SelectClauseExprCompiledSpec> getExpressions() {
+            return expressions;
+        }
     }
 }

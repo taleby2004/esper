@@ -64,11 +64,6 @@ public class CompositeIndexEnterRemoveRange implements CompositeIndexEnterRemove
                 events = new HashSet<EventBean>();
                 eventMap.put(sortable, events);
             }
-
-            if (events.contains(event))
-            {
-                throw new IllegalArgumentException("Event already in index, event=" + event);
-            }
             events.add(event);
         }
         else {

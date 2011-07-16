@@ -12,7 +12,10 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.event.*;
 import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Event type for variant event streams.
@@ -28,6 +31,8 @@ public class VariantEventType implements EventTypeSPI
     private final String[] propertyNames;
     private final EventPropertyDescriptor[] propertyDescriptors;
     private final Map<String, EventPropertyDescriptor> propertyDescriptorMap;
+    private final int eventTypeId;
+    private final ConfigurationVariantStream config;
 
     /**
      * Ctor.
@@ -35,11 +40,14 @@ public class VariantEventType implements EventTypeSPI
      * @param propertyResStrategy stragegy for resolving properties
      * @param metadata event type metadata
      */
-    public VariantEventType(EventTypeMetadata metadata, VariantSpec variantSpec, VariantPropResolutionStrategy propertyResStrategy)
+    public VariantEventType(EventTypeMetadata metadata, int eventTypeId, VariantSpec variantSpec, VariantPropResolutionStrategy propertyResStrategy, ConfigurationVariantStream config)
     {
         this.metadata = metadata;
+        this.eventTypeId = eventTypeId;
         this.variants = variantSpec.getEventTypes();
         this.propertyResStrategy = propertyResStrategy;
+        this.config = config;
+        
         propertyDesc = new HashMap<String, VariantPropertyDesc>();
 
         for (EventType type : variants)
@@ -71,6 +79,14 @@ public class VariantEventType implements EventTypeSPI
         }
     }
 
+    public String getStartTimestampPropertyName() {
+        return null;
+    }
+
+    public String getEndTimestampPropertyName() {
+        return null;
+    }
+
     public Class getPropertyType(String property)
     {
         VariantPropertyDesc entry = propertyDesc.get(property);
@@ -94,6 +110,14 @@ public class VariantEventType implements EventTypeSPI
     public String getName()
     {
         return metadata.getPublicName();
+    }
+
+    public int getEventTypeId() {
+        return eventTypeId;
+    }
+
+    public ConfigurationVariantStream getConfig() {
+        return config;
     }
 
     public EventPropertyGetter getGetter(String property)

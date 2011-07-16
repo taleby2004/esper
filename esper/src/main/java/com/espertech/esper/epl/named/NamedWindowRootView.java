@@ -13,6 +13,7 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.*;
 import com.espertech.esper.epl.core.ResultSetProcessor;
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.join.exec.base.RangeIndexLookupValue;
@@ -209,7 +210,7 @@ public class NamedWindowRootView extends ViewSupport
             throws ExprValidationException
     {
         // Determine strategy for deletion and index table to use (if any)
-        Pair<NamedWindowLookupStrategy,EventTable> strategy = getStrategyPair(joinExpr, filterEventType);
+        Pair<NamedWindowLookupStrategy,EventTable> strategy = getStrategyPair(statementContext.getStatementName(), joinExpr, filterEventType);
 
         if (queryPlanLogging && queryPlanLog.isInfoEnabled()) {
             queryPlanLog.info("Strategy " + strategy.getFirst().toQueryPlan());
@@ -296,8 +297,8 @@ public class NamedWindowRootView extends ViewSupport
 
         // Get or Create the table for this index (exact match or property names, type of index and coercion type is expected)
         Pair<IndexMultiKey, EventTable> tableDesc;
-        if (this.getViews().get(0) instanceof VirtualDWView) {
-            VirtualDWView viewExternal = (VirtualDWView) this.getViews().get(0);
+        if (isVirtualDataWindow()) {
+            VirtualDWView viewExternal = getVirtualDataWindow();
             tableDesc = viewExternal.getSubordinateQueryDesc(hashedProps, btreeProps);
         }
         else {
@@ -320,7 +321,8 @@ public class NamedWindowRootView extends ViewSupport
             }
             hashesDesc[i] = hashJoinedProps[index];
             hashPropCoercionTypes[i] = indexedKeyProps[i].getCoercionType();
-            if (indexedKeyProps[i].getCoercionType() != hashesDesc[i].getHashKey().getKeyExpr().getExprEvaluator().getType()) {
+            ExprEvaluator evaluatorHashkey = hashesDesc[i].getHashKey().getKeyExpr().getExprEvaluator();
+            if (evaluatorHashkey != null && indexedKeyProps[i].getCoercionType() != evaluatorHashkey.getType()) {   // we allow null evaluator
                 isCoerceHash = true;
             }
         }
@@ -348,7 +350,7 @@ public class NamedWindowRootView extends ViewSupport
         return new Pair<IndexKeyInfo, EventTable>(info, tableDesc.getSecond());
     }
 
-    private Pair<SubordTableLookupStrategy, EventTable> getSubqueryStrategyPair(EventType[] outerStreamTypes, SubordPropPlan joinDesc, boolean isNWOnTrigger, boolean forceTableScan) {
+    private Pair<SubordTableLookupStrategy, EventTable> getSubqueryStrategyPair(String accessedByStatementName, EventType[] outerStreamTypes, SubordPropPlan joinDesc, boolean isNWOnTrigger, boolean forceTableScan) {
 
         Pair<IndexKeyInfo, EventTable> accessDesc = findCreateIndex(joinDesc);
 
@@ -365,10 +367,10 @@ public class NamedWindowRootView extends ViewSupport
         CoercionDesc rangeKeyCoercionTypes = indexKeyInfo.getOrderedRangeCoercionTypes();
 
         SubordTableLookupStrategy lookupStrategy;
-        if (this.getViews().get(0) instanceof VirtualDWView) {
-            VirtualDWView viewExternal = (VirtualDWView) this.getViews().get(0);
-            lookupStrategy = viewExternal.getSubordinateLookupStrategy(outerStreamTypes,
-                    hashKeys, hashKeyCoercionTypes, rangeKeys, rangeKeyCoercionTypes, isNWOnTrigger, eventTable);
+        if (isVirtualDataWindow()) {
+            VirtualDWView viewExternal = getVirtualDataWindow();
+            lookupStrategy = viewExternal.getSubordinateLookupStrategy(accessedByStatementName, outerStreamTypes,
+                    hashKeys, hashKeyCoercionTypes, rangeKeys, rangeKeyCoercionTypes, isNWOnTrigger, eventTable, joinDesc, forceTableScan);
         }
         else {
             if (forceTableScan) {
@@ -383,20 +385,20 @@ public class NamedWindowRootView extends ViewSupport
         return new Pair<SubordTableLookupStrategy,EventTable>(lookupStrategy, eventTable);
     }
 
-    private Pair<NamedWindowLookupStrategy,EventTable> getStrategyPair(ExprNode joinExpr, EventType filterEventType)
+    private Pair<NamedWindowLookupStrategy,EventTable> getStrategyPair(String accessedByStatementName, ExprNode joinExpr, EventType filterEventType)
     {
         EventType[] allStreamsZeroIndexed = new EventType[] {namedWindowEventType, filterEventType};
         EventType[] outerStreams = new EventType[] {filterEventType};
         SubordPropPlan joinedPropPlan = QueryPlanIndexBuilder.getJoinProps(joinExpr, 1, allStreamsZeroIndexed);
 
         // No join expression means delete all
-        if (joinExpr == null && (!(this.getViews().get(0) instanceof VirtualDWView)))
+        if (joinExpr == null && (!(isVirtualDataWindow())))
         {
             return new Pair<NamedWindowLookupStrategy,EventTable>(new NamedWindowLookupStrategyAllRows(dataWindowContents), null);
         }
 
         // Here the stream offset is 1 as the named window lookup provides the arriving event in stream 1
-        Pair<SubordTableLookupStrategy,EventTable> lookupPair = getSubqueryStrategyPair(outerStreams, joinedPropPlan, true, false);
+        Pair<SubordTableLookupStrategy,EventTable> lookupPair = getSubqueryStrategyPair(accessedByStatementName, outerStreams, joinedPropPlan, true, false);
 
         if (lookupPair == null) {
             return new Pair<NamedWindowLookupStrategy,EventTable>(new NamedWindowLookupStrategyTableScan(joinExpr.getExprEvaluator(), dataWindowContents), null);
@@ -444,8 +446,8 @@ public class NamedWindowRootView extends ViewSupport
 
         // Determine virtual data window
         VirtualDWView virtualDataWindow = null;
-        if (this.getViews().get(0) instanceof VirtualDWView) {
-            virtualDataWindow = (VirtualDWView) this.getViews().get(0);
+        if (isVirtualDataWindow()) {
+            virtualDataWindow = getVirtualDataWindow();
         }
 
         if (optionalFilter == null || optionalFilter.getParameters().isEmpty()) {
@@ -464,7 +466,7 @@ public class NamedWindowRootView extends ViewSupport
             if (!(param instanceof FilterSpecParamConstant || param instanceof FilterSpecParamRange)) {
                 continue;
             }
-            if (param.getFilterOperator() == FilterOperator.EQUAL) {
+            if (param.getFilterOperator() == FilterOperator.EQUAL || param.getFilterOperator() == FilterOperator.IS) {
                 keysAvailable.add(param.getPropertyName());
             }
             else if (param.getFilterOperator().isRangeOperator() ||
@@ -548,7 +550,7 @@ public class NamedWindowRootView extends ViewSupport
         return Collections.EMPTY_LIST;
     }
 
-    private RangeIndexLookupValue[] compileRangeLookupValues(String[] rangeIndexProps, List<FilterSpecParam> parameters) {
+    private RangeIndexLookupValue[] compileRangeLookupValues(String[] rangeIndexProps, ArrayDeque<FilterSpecParam> parameters) {
         RangeIndexLookupValue[] result = new RangeIndexLookupValue[rangeIndexProps.length];
 
         for (int rangeIndex = 0; rangeIndex < rangeIndexProps.length; rangeIndex++) {
@@ -557,7 +559,7 @@ public class NamedWindowRootView extends ViewSupport
                     continue;
                 }
 
-                if (param.getFilterOperator() == FilterOperator.EQUAL) {
+                if (param.getFilterOperator() == FilterOperator.EQUAL || param.getFilterOperator() == FilterOperator.IS) {
                     result[rangeIndex] = new RangeIndexLookupValueEquals(param.getFilterValue(null));
                 }
                 else if (param.getFilterOperator().isRangeOperator() || param.getFilterOperator().isInvertedRangeOperator()) {
@@ -623,11 +625,11 @@ public class NamedWindowRootView extends ViewSupport
         isChildBatching = batchView;
     }
 
-    public SubordTableLookupStrategy getAddSubqueryLookupStrategy(EventType[] eventTypesPerStream, SubordPropPlan joinDesc, boolean fullTableScan) {
+    public SubordTableLookupStrategy getAddSubqueryLookupStrategy(String accessedByStatementName, EventType[] eventTypesPerStream, SubordPropPlan joinDesc, boolean fullTableScan) {
 
         // NOTE: key stream nums are relative to the outer streams, i.e. 0=first outer, 1=second outer (index stream is implied and not counted).
         // Here the stream offset for key is zero as in a subquery only the outer events are provided in events-per-stream.
-        Pair<SubordTableLookupStrategy,EventTable> strategyTablePair = getSubqueryStrategyPair(eventTypesPerStream, joinDesc, false, fullTableScan);
+        Pair<SubordTableLookupStrategy,EventTable> strategyTablePair = getSubqueryStrategyPair(accessedByStatementName, eventTypesPerStream, joinDesc, false, fullTableScan);
         if (strategyTablePair == null || strategyTablePair.getFirst() == null) {
             if (queryPlanLogging && queryPlanLog.isInfoEnabled()) {
                 queryPlanLog.info("shared, full table scan");
@@ -651,5 +653,16 @@ public class NamedWindowRootView extends ViewSupport
         if (table != null) {
             indexRepository.removeTableReference(table);
         }
+    }
+
+    public boolean isVirtualDataWindow() {
+        return this.getViews().get(0) instanceof VirtualDWView;
+    }
+
+    public VirtualDWView getVirtualDataWindow() {
+        if (!isVirtualDataWindow()) {
+            return null;
+        }
+        return (VirtualDWView) this.getViews().get(0);
     }
 }

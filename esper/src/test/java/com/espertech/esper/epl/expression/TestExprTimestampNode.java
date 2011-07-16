@@ -53,13 +53,13 @@ public class TestExprTimestampNode extends TestCase
                 return null;
             }
         };
-        node.validate(new ExprValidationContext(null, null, null, provider, null, null, null, null, null));
+        node.validate(new ExprValidationContext(null, null, null, provider, null, null, null, null, null, null));
         assertEquals(99L, node.evaluate(null, false, context));
     }
 
     public void testEquals() throws Exception
     {
-        assertFalse(node.equalsNode(new ExprEqualsNodeImpl(true)));
+        assertFalse(node.equalsNode(new ExprEqualsNodeImpl(true, false)));
         assertTrue(node.equalsNode(new ExprTimestampNode()));
     }
 

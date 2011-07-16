@@ -17,10 +17,8 @@ import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.join.base.JoinSetComposerFactoryImpl;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
-import com.espertech.esper.epl.spec.CreateWindowDesc;
-import com.espertech.esper.epl.spec.OnTriggerDesc;
-import com.espertech.esper.epl.spec.OnTriggerWindowDesc;
-import com.espertech.esper.epl.spec.PluggableObjectCollection;
+import com.espertech.esper.epl.spec.*;
+import com.espertech.esper.filter.FilterServiceSPI;
 import com.espertech.esper.pattern.*;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.schedule.SchedulingServiceSPI;
@@ -28,7 +26,6 @@ import com.espertech.esper.view.StatementStopServiceImpl;
 import com.espertech.esper.view.ViewEnumHelper;
 import com.espertech.esper.view.ViewResolutionService;
 import com.espertech.esper.view.ViewResolutionServiceImpl;
-import com.espertech.esper.filter.FilterServiceSPI;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -38,19 +35,20 @@ import java.util.Map;
  */
 public class StatementContextFactoryDefault implements StatementContextFactory
 {
-    private PluggableObjectCollection viewClasses;
-    private PluggableObjectCollection patternObjectClasses;
+    private final PluggableObjectRegistryImpl viewRegistry;
+    private final PluggableObjectCollection patternObjectClasses;
+    private final Class systemVirtualDWViewFactory;
 
     /**
      * Ctor.
      * @param viewPlugIns is the view plug-in object descriptions
      * @param plugInPatternObj is the pattern plug-in object descriptions
      */
-    public StatementContextFactoryDefault(PluggableObjectCollection viewPlugIns, PluggableObjectCollection plugInPatternObj)
+    public StatementContextFactoryDefault(PluggableObjectCollection viewPlugIns, PluggableObjectCollection plugInPatternObj, Class systemVirtualDWViewFactory)
     {
-        viewClasses = new PluggableObjectCollection();
-        viewClasses.addObjects(viewPlugIns);
-        viewClasses.addObjects(ViewEnumHelper.getBuiltinViews());
+        viewRegistry = new PluggableObjectRegistryImpl(new PluggableObjectCollection[] {ViewEnumHelper.getBuiltinViews(), viewPlugIns});
+
+        this.systemVirtualDWViewFactory = systemVirtualDWViewFactory;
 
         patternObjectClasses = new PluggableObjectCollection();
         patternObjectClasses.addObjects(plugInPatternObj);
@@ -94,7 +92,7 @@ public class StatementContextFactoryDefault implements StatementContextFactory
             if (statementResourceLock == null)
             {
                 statementResourceLock = engineServices.getStatementLockFactory().getStatementLock(statementName, expression);
-                engineServices.getNamedWindowService().addNamedWindowLock(optCreateWindowDesc.getWindowName(), statementResourceLock);
+                engineServices.getNamedWindowService().addNamedWindowLock(optCreateWindowDesc.getWindowName(), statementResourceLock, statementName);
             }
         }
         else
@@ -117,7 +115,7 @@ public class StatementContextFactoryDefault implements StatementContextFactory
 
         PatternContextFactory patternContextFactory = new PatternContextFactoryDefault();
 
-        ViewResolutionService viewResolutionService = new ViewResolutionServiceImpl(viewClasses, optionalCreateNamedWindowName);
+        ViewResolutionService viewResolutionService = new ViewResolutionServiceImpl(viewRegistry, optionalCreateNamedWindowName, systemVirtualDWViewFactory);
         PatternObjectResolutionService patternResolutionService = new PatternObjectResolutionServiceImpl(patternObjectClasses);
 
         SchedulingServiceSPI schedulingService = engineServices.getSchedulingService();
@@ -164,7 +162,8 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 statementFilterVersion,
                 annotations,
                 engineServices.getExceptionHandlingService(),
-                new ExpressionResultCacheService());
+                new ExpressionResultCacheService(),
+                engineServices.getEventTypeIdGenerator());
     }
 
     /**

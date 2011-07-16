@@ -29,7 +29,7 @@ public class TestDatabasePollingViewable extends TestCase
 
         Map<String, Object> resultProperties = new HashMap<String, Object>();
         resultProperties.put("myvarchar", String.class);
-        EventType resultEventType = SupportEventAdapterService.getService().createAnonymousMapType(resultProperties);
+        EventType resultEventType = SupportEventAdapterService.getService().createAnonymousMapType("test", resultProperties);
 
         Map<MultiKey<Object>, List<EventBean>> pollResults = new HashMap<MultiKey<Object>, List<EventBean>>();
         pollResults.put(new MultiKey<Object>(new Object[] {-1}), new LinkedList<EventBean>());
@@ -40,7 +40,7 @@ public class TestDatabasePollingViewable extends TestCase
 
         Map<Integer, List<ExprNode>> sqlParameters = new HashMap<Integer, List<ExprNode>>();
         sqlParameters.put(1, Collections.singletonList((ExprNode) new ExprIdentNodeImpl("intPrimitive", "s0")));
-        pollingViewable.validate(null, new SupportStreamTypeSvc3Stream(), null, null, null, null, null, null, null, sqlParameters, null, null, null);
+        pollingViewable.validate(null, new SupportStreamTypeSvc3Stream(), null, null, null, null, null, null, null, sqlParameters, null, null, null, null);
 
         indexingStrategy = new PollResultIndexingStrategy()
         {

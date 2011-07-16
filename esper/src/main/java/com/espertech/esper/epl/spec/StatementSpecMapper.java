@@ -103,7 +103,9 @@ public class StatementSpecMapper
     private static StatementSpecRaw map(EPStatementObjectModel sodaStatement, StatementSpecMapContext mapContext)
     {
         StatementSpecRaw raw = new StatementSpecRaw(SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
-        mapAnnotations(sodaStatement.getAnnotations(), raw);
+
+        List<AnnotationDesc> annotations = mapAnnotations(sodaStatement.getAnnotations());
+        raw.setAnnotations(annotations);
         mapExpressionDeclaration(sodaStatement.getExpressionDeclarations(), raw, mapContext);
         mapUpdateClause(sodaStatement.getUpdateClause(), raw, mapContext);
         mapCreateWindow(sodaStatement.getCreateWindow(), raw, mapContext);
@@ -363,7 +365,10 @@ public class StatementSpecMapper
             return;
         }
         List<SchemaColumnDesc> columns = unmapColumns(desc.getColumns());
-        model.setCreateSchema(new CreateSchemaClause(desc.getSchemaName(), desc.getTypes(), columns, desc.getInherits(), desc.isVariant()));
+        CreateSchemaClause clause = new CreateSchemaClause(desc.getSchemaName(), desc.getTypes(), columns, desc.getInherits(), desc.isVariant());
+        clause.setStartTimestampProperty(desc.getStartTimestampProperty());
+        clause.setEndTimestampProperty(desc.getEndTimestampProperty());
+        model.setCreateSchema(clause);
     }
 
     private static void unmapOrderBy(List<OrderByItem> orderByList, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
@@ -778,7 +783,7 @@ public class StatementSpecMapper
             ExprTimePeriod timePeriod = (ExprTimePeriod) mapExpressionDeep(clause.getIntervalClause().getExpression(), mapContext);
             try
             {
-                timePeriod.validate(new ExprValidationContext(null, null, null, null, null, null, null, null, null));
+                timePeriod.validate(new ExprValidationContext(null, null, null, null, null, null, null, null, null, null));
             }
             catch (ExprValidationException e)
             {
@@ -1077,7 +1082,7 @@ public class StatementSpecMapper
             return;
         }
         List<ColumnDesc> columns = mapColumns(clause.getColumns());
-        raw.setCreateSchemaDesc(new CreateSchemaDesc(clause.getSchemaName(), clause.getTypes(), columns, clause.getInherits(), clause.isVariant()));
+        raw.setCreateSchemaDesc(new CreateSchemaDesc(clause.getSchemaName(), clause.getTypes(), columns, clause.getInherits(), clause.isVariant(), clause.getStartTimestampProperty(), clause.getEndTimestampProperty()));
     }
 
     private static List<ColumnDesc> mapColumns(List<SchemaColumnDesc> columns) {
@@ -1254,11 +1259,19 @@ public class StatementSpecMapper
             RelationalOpExpression op = (RelationalOpExpression) expr;
             if (op.getOperator().equals("="))
             {
-                return new ExprEqualsNodeImpl(false);
+                return new ExprEqualsNodeImpl(false, false);
             }
-            if (op.getOperator().equals("!="))
+            else if (op.getOperator().equals("!="))
             {
-                return new ExprEqualsNodeImpl(true);
+                return new ExprEqualsNodeImpl(true, false);
+            }
+            else if (op.getOperator().toUpperCase().trim().equals("IS"))
+            {
+                return new ExprEqualsNodeImpl(false, true);
+            }
+            else if (op.getOperator().toUpperCase().trim().equals("IS NOT"))
+            {
+                return new ExprEqualsNodeImpl(true, true);
             }
             else
             {
@@ -1326,22 +1339,22 @@ public class StatementSpecMapper
         }
         else if (expr instanceof CountStarProjectionExpression)
         {
-            return new ExprCountNode(false);
+            return new ExprCountNode(false, !expr.getChildren().isEmpty());
         }
         else if (expr instanceof CountProjectionExpression)
         {
             CountProjectionExpression count = (CountProjectionExpression) expr;
-            return new ExprCountNode(count.isDistinct());
+            return new ExprCountNode(count.isDistinct(), expr.getChildren().size() > 1);
         }
         else if (expr instanceof AvgProjectionExpression)
         {
             AvgProjectionExpression avg = (AvgProjectionExpression) expr;
-            return new ExprAvgNode(avg.isDistinct());
+            return new ExprAvgNode(avg.isDistinct(), expr.getChildren().size() > 1);
         }
         else if (expr instanceof SumProjectionExpression)
         {
             SumProjectionExpression avg = (SumProjectionExpression) expr;
-            return new ExprSumNode(avg.isDistinct());
+            return new ExprSumNode(avg.isDistinct(), expr.getChildren().size() > 1);
         }
         else if (expr instanceof BetweenExpression)
         {
@@ -1369,12 +1382,12 @@ public class StatementSpecMapper
         else if (expr instanceof MinProjectionExpression)
         {
             MinProjectionExpression method = (MinProjectionExpression) expr;
-            return new ExprMinMaxAggrNode(method.isDistinct(), MinMaxTypeEnum.MIN);
+            return new ExprMinMaxAggrNode(method.isDistinct(), MinMaxTypeEnum.MIN, expr.getChildren().size() > 1);
         }
         else if (expr instanceof MaxProjectionExpression)
         {
             MaxProjectionExpression method = (MaxProjectionExpression) expr;
-            return new ExprMinMaxAggrNode(method.isDistinct(), MinMaxTypeEnum.MAX);
+            return new ExprMinMaxAggrNode(method.isDistinct(), MinMaxTypeEnum.MAX, expr.getChildren().size() > 1);
         }
         else if (expr instanceof NotExpression)
         {
@@ -1427,17 +1440,17 @@ public class StatementSpecMapper
         else if (expr instanceof MedianProjectionExpression)
         {
             MedianProjectionExpression median = (MedianProjectionExpression) expr;
-            return new ExprMedianNode(median.isDistinct());
+            return new ExprMedianNode(median.isDistinct(), expr.getChildren().size() > 1);
         }
         else if (expr instanceof AvedevProjectionExpression)
         {
             AvedevProjectionExpression node = (AvedevProjectionExpression) expr;
-            return new ExprAvedevNode(node.isDistinct());
+            return new ExprAvedevNode(node.isDistinct(), expr.getChildren().size() > 1);
         }
         else if (expr instanceof StddevProjectionExpression)
         {
             StddevProjectionExpression node = (StddevProjectionExpression) expr;
-            return new ExprStddevNode(node.isDistinct());
+            return new ExprStddevNode(node.isDistinct(), expr.getChildren().size() > 1);
         }
         else if (expr instanceof LastEverProjectionExpression)
         {
@@ -1697,10 +1710,20 @@ public class StatementSpecMapper
         else if (expr instanceof ExprEqualsNode)
         {
             ExprEqualsNode equals = (ExprEqualsNode) expr;
-            String operator = "=";
-            if (equals.isNotEquals())
-            {
-                operator = "!=";
+            String operator;
+            if (!equals.isIs()) {
+                operator = "=";
+                if (equals.isNotEquals())
+                {
+                    operator = "!=";
+                }
+            }
+            else {
+                operator = "is";
+                if (equals.isNotEquals())
+                {
+                    operator = "is not";
+                }
             }
             return new RelationalOpExpression(operator);
         }
@@ -2225,7 +2248,7 @@ public class StatementSpecMapper
         {
             PatternFilterExpr filterExpr = (PatternFilterExpr) eval;
             FilterSpecRaw filterSpec = mapFilter(filterExpr.getFilter(), mapContext);
-            return mapContext.getPatternNodeFactory().makeFilterNode(filterSpec, filterExpr.getTagName());
+            return mapContext.getPatternNodeFactory().makeFilterNode(filterSpec, filterExpr.getTagName(), filterExpr.getOptionalConsumptionLevel());
         }
         else if (eval instanceof PatternObserverExpr)
         {
@@ -2287,7 +2310,9 @@ public class StatementSpecMapper
         {
             EvalFilterNode filterNode = (EvalFilterNode) eval;
             Filter filter = unmapFilter(filterNode.getRawFilterSpec(), unmapContext);
-            return new PatternFilterExpr(filter, filterNode.getEventAsName());
+            PatternFilterExpr expr = new PatternFilterExpr(filter, filterNode.getEventAsName());
+            expr.setOptionalConsumptionLevel(filterNode.getConsumptionLevel());
+            return expr;
         }
         else if (eval instanceof EvalObserverNode)
         {
@@ -2476,7 +2501,7 @@ public class StatementSpecMapper
         return new AnnotationPart(desc.getName(), attributes);
     }
 
-    private static void mapAnnotations(List<AnnotationPart> annotations, StatementSpecRaw raw) {
+    public static List<AnnotationDesc> mapAnnotations(List<AnnotationPart> annotations) {
         List<AnnotationDesc> result;
         if (annotations != null) {
             result = new ArrayList<AnnotationDesc>();
@@ -2487,7 +2512,7 @@ public class StatementSpecMapper
         else {
             result = Collections.emptyList();
         }
-        raw.setAnnotations(result);
+        return result;
     }
 
     private static void mapExpressionDeclaration(List<ExpressionDeclaration> expressionDeclarations, StatementSpecRaw raw, StatementSpecMapContext mapContext) {
@@ -2589,7 +2614,7 @@ public class StatementSpecMapper
     private static List<ExprChainedSpec> mapChains(List<DotExpressionItem> pairs, StatementSpecMapContext mapContext) {
         List<ExprChainedSpec> chains = new ArrayList<ExprChainedSpec>();
         for (DotExpressionItem item : pairs) {
-            chains.add(new ExprChainedSpec(item.getName(), mapExpressionDeep(item.getParameters(), mapContext), false));
+            chains.add(new ExprChainedSpec(item.getName(), mapExpressionDeep(item.getParameters(), mapContext), item.isProperty()));
         }
         return chains;
     }

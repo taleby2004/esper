@@ -8,12 +8,14 @@ import java.util.*;
 public class MyPlugInPropertiesEventType implements EventType
 {
     private final String name;
+    private final int eventTypeId;
     private final Set<String> properties;
     private final Map<String, EventPropertyDescriptor> descriptors;
 
-    public MyPlugInPropertiesEventType(String name, Set<String> properties, Map<String, EventPropertyDescriptor> descriptors)
+    public MyPlugInPropertiesEventType(String name, int eventTypeId, Set<String> properties, Map<String, EventPropertyDescriptor> descriptors)
     {
         this.name = name;
+        this.eventTypeId = eventTypeId;
         this.properties = properties;
         this.descriptors = descriptors;
     }
@@ -30,6 +32,10 @@ public class MyPlugInPropertiesEventType implements EventType
     public Class getUnderlyingType()
     {
         return Properties.class;
+    }
+
+    public int getEventTypeId() {
+        return eventTypeId;
     }
 
     public EventPropertyGetter getGetter(String property)
@@ -103,5 +109,13 @@ public class MyPlugInPropertiesEventType implements EventType
 
     public EventPropertyGetterIndexed getGetterIndexed(String indexedProperty) {
         return null;    // sample does not provide a getter for indexed properties
+    }
+
+    public String getStartTimestampPropertyName() {
+        return null;
+    }
+
+    public String getEndTimestampPropertyName() {
+        return null;
     }
 }

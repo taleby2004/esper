@@ -450,6 +450,35 @@ public class EventBeanUtility
         }
     }
 
+    public static void appendEvent(StringWriter writer, EventBean event)
+    {
+        String[] properties = event.getEventType().getPropertyNames();
+        String delimiter = "";
+        for (int i = 0; i < properties.length; i++)
+        {
+            String propName = properties[i];
+            Object property = event.get(propName);
+            String printProperty;
+            if (property == null)
+            {
+                printProperty = "null";
+            }
+            else if (property.getClass().isArray())
+            {
+                printProperty = "Array :" + Arrays.toString((Object[]) property);
+            }
+            else
+            {
+                printProperty = property.toString();
+            }
+            writer.append(delimiter);
+            writer.append(propName);
+            writer.append("=");
+            writer.append(printProperty);
+            delimiter = ",";
+        }
+    }
+
     /**
      * Flattens a list of pairs of join result sets.
      * @param joinPostings is the list
@@ -642,6 +671,23 @@ public class EventBeanUtility
         return result;
     }
 
+    public static EventBean[] denaturalize(EventBean[] naturals) {
+        if (naturals == null || naturals.length == 0) {
+            return null;
+        }
+        if (!(naturals[0] instanceof NaturalEventBean)) {
+            return naturals;
+        }
+        if (naturals.length == 1) {
+            return new EventBean[] {((NaturalEventBean) naturals[0]).getOptionalSynthetic()};
+        }
+        EventBean[] result = new EventBean[naturals.length];
+        for (int i = 0; i < naturals.length; i++) {
+            result[i] = ((NaturalEventBean) naturals[i]).getOptionalSynthetic();
+        }
+        return result;
+    }
+
     public static boolean compareReferences(EventBean[] reference, EventBean[] eventsPerStream) {
         if (reference.length != eventsPerStream.length) {
             return false;
@@ -684,5 +730,14 @@ public class EventBeanUtility
             delimiter = ", ";
         }
         return writer.toString();
+    }
+
+    public static void safeArrayCopy(EventBean[] eventsPerStream, EventBean[] eventsLambda) {
+        if (eventsPerStream.length <= eventsLambda.length) {
+            System.arraycopy(eventsPerStream, 0, eventsLambda, 0, eventsPerStream.length);
+        }
+        else {
+            System.arraycopy(eventsPerStream, 0, eventsLambda, 0, eventsLambda.length);
+        }
     }
 }

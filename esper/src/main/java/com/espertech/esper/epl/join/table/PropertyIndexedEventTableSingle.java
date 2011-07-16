@@ -114,11 +114,6 @@ public class PropertyIndexedEventTableSingle implements EventTable
             propertyIndex.put(key, events);
         }
 
-        if (events.contains(event))
-        {
-            throw new IllegalArgumentException("Event already in index, event=" + event);
-        }
-
         events.add(event);
     }
 

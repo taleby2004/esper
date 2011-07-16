@@ -39,6 +39,7 @@ import com.espertech.esper.util.ThreadLogUtil;
 import com.espertech.esper.util.UuidGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Node;
 
 import java.lang.annotation.Annotation;
 import java.net.URI;
@@ -247,9 +248,13 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         else
         {
             // Get it wrapped up, process event
-            EventBean eventBean = services.getEventAdapterService().adapterForDOM(document);
+            EventBean eventBean = wrapEvent(document);
             processEvent(eventBean);
         }
+    }
+
+    public EventBean wrapEvent(Node node) {
+        return services.getEventAdapterService().adapterForDOM(node);
     }
 
     public void route(org.w3c.dom.Node document) throws EPException
@@ -289,9 +294,13 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         else
         {
             // Process event
-            EventBean eventBean = services.getEventAdapterService().adapterForMap(map, eventTypeName);
+            EventBean eventBean = wrapEvent(map, eventTypeName);
             processWrappedEvent(eventBean);
         }
+    }
+
+    public EventBean wrapEvent(Map map, String eventTypeName) {
+        return services.getEventAdapterService().adapterForMap(map, eventTypeName);
     }
 
     public void route(Map map, String eventTypeName) throws EPException
@@ -399,10 +408,14 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
         else
         {
-            eventBean = services.getEventAdapterService().adapterForBean(event);
+            eventBean = wrapEvent(event);
         }
 
         processWrappedEvent(eventBean);
+    }
+
+    public EventBean wrapEvent(Object event) {
+        return services.getEventAdapterService().adapterForBean(event);
     }
 
     public void processWrappedEvent(EventBean eventBean)
@@ -1078,7 +1091,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 {
                     if (callback.isSubSelect())
                     {
-                        callback.matchFound(event);
+                        callback.matchFound(event, callbackList);
                     }
                 }
 
@@ -1086,7 +1099,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 {
                     if (!callback.isSubSelect())
                     {
-                        callback.matchFound(event);
+                        callback.matchFound(event, callbackList);
                     }
                 }
             }
@@ -1097,7 +1110,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 {
                     if (!callback.isSubSelect())
                     {
-                        callback.matchFound(event);
+                        callback.matchFound(event, callbackList);
                     }
                 }
 
@@ -1105,7 +1118,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 {
                     if (callback.isSubSelect())
                     {
-                        callback.matchFound(event);
+                        callback.matchFound(event, callbackList);
                     }
                 }
             }
@@ -1149,11 +1162,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 for (FilterHandle callback : callbackList)
                 {
                     EPStatementHandleCallback handleCallbackFilter = (EPStatementHandleCallback) callback;
-                    handleCallbackFilter.getFilterCallback().matchFound(event);
+                    handleCallbackFilter.getFilterCallback().matchFound(event, null);
                 }
             }
             else {
-                handleCallback.getFilterCallback().matchFound(event);
+                handleCallback.getFilterCallback().matchFound(event, null);
             }
 
             // internal join processing, if applicable

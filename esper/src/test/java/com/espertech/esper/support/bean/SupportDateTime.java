@@ -8,9 +8,17 @@ public class SupportDateTime {
 
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
+    private String key;
     private Long msecdate;
     private Date utildate;
     private Calendar caldate;
+
+    public SupportDateTime(String key, Long msecdate, Date utildate, Calendar caldate) {
+        this.key = key;
+        this.msecdate = msecdate;
+        this.utildate = utildate;
+        this.caldate = caldate;
+    }
 
     public SupportDateTime(Long msecdate, Date utildate, Calendar caldate) {
         this.msecdate = msecdate;
@@ -30,6 +38,27 @@ public class SupportDateTime {
         return caldate;
     }
 
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public static Calendar toCalendar(long value) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(value);
+        return cal;
+    }
+
+    public static Date toDate(long value) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(value);
+        return cal.getTime();
+    }
+
     public static SupportDateTime make(String datestr) {
         if (datestr == null) {
             return new SupportDateTime(null, null, null);
@@ -42,6 +71,12 @@ public class SupportDateTime {
         return new SupportDateTime(date.getTime(), date, cal);
     }
 
+    public static SupportDateTime make(String key, String datestr) {
+        SupportDateTime bean = make(datestr);
+        bean.setKey(key);
+        return bean;
+    }
+
     public static long parseGetMSec(String datestr) {
         return parse(datestr).getTime();
     }
@@ -52,12 +87,11 @@ public class SupportDateTime {
 
     public static Calendar parseGetCal(String datestr) {
         Calendar cal = Calendar.getInstance();
-        parse(datestr);
-        cal.setTimeInMillis(cal.getTimeInMillis());
+        cal.setTimeInMillis(parseGetMSec(datestr));
         return cal;
     }
 
-    private static Date parse(String datestr) {
+    public static Date parse(String datestr) {
         Date date;
         try {
             SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);

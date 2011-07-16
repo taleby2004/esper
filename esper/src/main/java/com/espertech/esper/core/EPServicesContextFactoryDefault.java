@@ -30,9 +30,7 @@ import com.espertech.esper.epl.variable.VariableServiceImpl;
 import com.espertech.esper.epl.variable.VariableTypeException;
 import com.espertech.esper.epl.view.OutputConditionFactory;
 import com.espertech.esper.epl.view.OutputConditionFactoryDefault;
-import com.espertech.esper.event.EventAdapterException;
-import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventAdapterServiceImpl;
+import com.espertech.esper.event.*;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.event.vaevent.ValueAddEventServiceImpl;
 import com.espertech.esper.event.xml.SchemaModel;
@@ -69,8 +67,20 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
 
     public EPServicesContext createServicesContext(EPServiceProvider epServiceProvider, ConfigurationInformation configSnapshot)
     {
+        // JNDI context for binding resources
+        EngineEnvContext jndiContext = new EngineEnvContext();
+
+        EventTypeIdGenerator eventTypeIdGenerator;
+        if (configSnapshot.getEngineDefaults().getAlternativeContext() == null || configSnapshot.getEngineDefaults().getAlternativeContext().getEventTypeIdGeneratorFactory() == null) {
+            eventTypeIdGenerator = new EventTypeIdGeneratorImpl();
+        }
+        else {
+            EventTypeIdGeneratorFactory eventTypeIdGeneratorFactory = (EventTypeIdGeneratorFactory) JavaClassHelper.instantiate(EventTypeIdGeneratorFactory.class, configSnapshot.getEngineDefaults().getAlternativeContext().getEventTypeIdGeneratorFactory());
+            eventTypeIdGenerator = eventTypeIdGeneratorFactory.create(new EventTypeIdGeneratorContext(epServiceProvider.getURI()));
+        }
+
         // Make services that depend on snapshot config entries
-        EventAdapterServiceImpl eventAdapterService = new EventAdapterServiceImpl();
+        EventAdapterServiceImpl eventAdapterService = new EventAdapterServiceImpl(eventTypeIdGenerator);
         init(eventAdapterService, configSnapshot);
 
         // New read-write lock for concurrent event processing
@@ -88,14 +98,23 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         PluggableObjectCollection plugInPatternObj = new PluggableObjectCollection();
         plugInPatternObj.addPatternObjects(configSnapshot.getPlugInPatternObjects());
 
-        // JNDI context for binding resources
-        EngineEnvContext jndiContext = new EngineEnvContext();
-
         // exception handling
         ExceptionHandlingService exceptionHandlingService = initExceptionHandling(epServiceProvider.getURI(), configSnapshot.getEngineDefaults().getExceptionHandling(), configSnapshot.getEngineDefaults().getConditionHandling());
 
         // Statement context factory
-        StatementContextFactory statementContextFactory = new StatementContextFactoryDefault(plugInViews, plugInPatternObj);
+        Class systemVirtualDWViewFactory = null;
+        if (configSnapshot.getEngineDefaults().getAlternativeContext().getVirtualDataWindowViewFactory() != null) {
+            try {
+                systemVirtualDWViewFactory = Class.forName(configSnapshot.getEngineDefaults().getAlternativeContext().getVirtualDataWindowViewFactory());
+                if (!JavaClassHelper.isImplementsInterface(systemVirtualDWViewFactory, VirtualDataWindowFactory.class)) {
+                    throw new ConfigurationException("Class " + systemVirtualDWViewFactory.getName() + " does not implement the interface " + VirtualDataWindowFactory.class.getName());
+                }
+            }
+            catch (ClassNotFoundException e) {
+                throw new ConfigurationException("Failed to look up class " + systemVirtualDWViewFactory);
+            }
+        }
+        StatementContextFactory statementContextFactory = new StatementContextFactoryDefault(plugInViews, plugInPatternObj, systemVirtualDWViewFactory);
 
         OutputConditionFactory outputConditionFactory = new OutputConditionFactoryDefault();
 
@@ -116,7 +135,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory, variableService, engineSettingsService.getEngineSettings().getExecution().isPrioritized(), eventProcessingRWLock, exceptionHandlingService, configSnapshot.getEngineDefaults().getLogging().isEnableQueryPlan(), metricsReporting);
 
         ValueAddEventService valueAddEventService = new ValueAddEventServiceImpl();
-        valueAddEventService.init(configSnapshot.getRevisionEventTypes(), configSnapshot.getVariantStreams(), eventAdapterService);
+        valueAddEventService.init(configSnapshot.getRevisionEventTypes(), configSnapshot.getVariantStreams(), eventAdapterService, eventTypeIdGenerator);
 
         StatementEventTypeRef statementEventTypeRef = new StatementEventTypeRefImpl();
         StatementVariableRef statementVariableRef = new StatementVariableRefImpl(variableService);
@@ -129,6 +148,14 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
 
         DeploymentStateService deploymentStateService = new DeploymentStateServiceImpl();
 
+        StatementMetadataFactory stmtMetadataFactory;
+        if (configSnapshot.getEngineDefaults().getAlternativeContext().getStatementMetadataFactory() == null) {
+            stmtMetadataFactory = new StatementMetadataFactoryDefault();
+        }
+        else {
+            stmtMetadataFactory = (StatementMetadataFactory) JavaClassHelper.instantiate(StatementMetadataFactory.class, configSnapshot.getEngineDefaults().getAlternativeContext().getStatementMetadataFactory());
+        }
+
         // New services context
         EPServicesContext services = new EPServicesContext(epServiceProvider.getURI(), epServiceProvider.getURI(), schedulingService,
                 eventAdapterService, engineImportService, engineSettingsService, databaseConfigService, plugInViews,
@@ -136,7 +163,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
                 plugInPatternObj, outputConditionFactory, timerService, filterService, streamFactoryService,
                 namedWindowService, variableService, timeSourceService, valueAddEventService, metricsReporting, statementEventTypeRef,
                 statementVariableRef, configSnapshot, threadingService, internalEventRouterImpl, statementIsolationService, schedulingMgmtService,
-                deploymentStateService, exceptionHandlingService, new PatternNodeFactoryImpl());
+                deploymentStateService, exceptionHandlingService, new PatternNodeFactoryImpl(), eventTypeIdGenerator, stmtMetadataFactory);
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);
@@ -322,7 +349,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         Set<String> dependentMapOrder;
         try
         {
-            dependentMapOrder = GraphUtil.getTopDownOrder(configSnapshot.getMapSuperTypes());
+            dependentMapOrder = GraphUtil.getTopDownOrder(configSnapshot.getMapTypeConfigurations());
         }
         catch (GraphCircularDependencyException e)
         {
@@ -337,18 +364,18 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         {
             for (String mapName : dependentMapOrder)
             {
-                Set<String> superTypes = configSnapshot.getMapSuperTypes().get(mapName);
+                ConfigurationEventTypeMap mapConfig = configSnapshot.getMapTypeConfigurations().get(mapName);
                 Properties propertiesUnnested = mapNames.get(mapName);
                 if (propertiesUnnested != null)
                 {
                     Map<String, Object> propertyTypes = createPropertyTypes(propertiesUnnested);
-                    eventAdapterService.addNestableMapType(mapName, propertyTypes, superTypes, true, true, true, false, false);
+                    eventAdapterService.addNestableMapType(mapName, propertyTypes, mapConfig, true, true, true, false, false);
                 }
 
                 Map<String, Object> propertiesNestable = nestableMapNames.get(mapName);
                 if (propertiesNestable != null)
                 {
-                    eventAdapterService.addNestableMapType(mapName, propertiesNestable, superTypes, true, true, true, false, false);
+                    eventAdapterService.addNestableMapType(mapName, propertiesNestable, mapConfig, true, true, true, false, false);
                 }
             }
         }

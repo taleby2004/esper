@@ -21,7 +21,7 @@ public class TestEventAdapterServiceImpl extends TestCase
 
     public void setUp()
     {
-        adapterService = new EventAdapterServiceImpl();
+        adapterService = new EventAdapterServiceImpl(new EventTypeIdGeneratorImpl());
     }
 
     public void testSelfRefEvent()
@@ -35,11 +35,11 @@ public class TestEventAdapterServiceImpl extends TestCase
         Map<String, Object> testTypesMap;
         testTypesMap = new HashMap<String, Object>();
         testTypesMap.put("key1", String.class);
-        EventType eventType = adapterService.createAnonymousMapType(testTypesMap);
+        EventType eventType = adapterService.createAnonymousMapType("test", testTypesMap);
 
         assertEquals(Map.class, eventType.getUnderlyingType());
         assertEquals(1, eventType.getPropertyNames().length);
-        assertEquals("key1", eventType.getPropertyNames()[0]);        
+        assertEquals("key1", eventType.getPropertyNames()[0]);
     }
 
     public void testGetType()

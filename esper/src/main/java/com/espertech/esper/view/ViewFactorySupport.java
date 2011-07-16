@@ -150,7 +150,6 @@ public abstract class ViewFactorySupport implements ViewFactory
         if (!visitor.isPlain())
         {
             String message = "Invalid view parameter expression " + index + ", " + visitor.getMessage() + " are not allowed within the expression";
-            log.error(message);
             throw new ViewParameterException(message);
         }
 
@@ -178,15 +177,15 @@ public abstract class ViewFactorySupport implements ViewFactory
         }
     }
 
-    private static ExprNode validateExpr(StatementContext statementContext, ExprNode expression, StreamTypeService streamTypeService, int expressionNumber)
+    public static ExprNode validateExpr(StatementContext statementContext, ExprNode expression, StreamTypeService streamTypeService, int expressionNumber)
             throws ViewParameterException
     {
         ExprNode validated;
         try
         {
             ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, statementContext.getMethodResolutionService(),
-                    null, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getAnnotations());
-            validated = ExprNodeUtil.getValidatedSubtree(expression, validationContext);
+                    null, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations());
+            validated = ExprNodeUtility.getValidatedSubtree(expression, validationContext);
         }
         catch (ExprValidationException ex)
         {

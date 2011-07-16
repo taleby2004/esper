@@ -66,7 +66,7 @@ public class SupportExprNodeFactory
 
     public static ExprEqualsNode makeEqualsNode() throws Exception
     {
-        ExprEqualsNode topNode = new ExprEqualsNodeImpl(false);
+        ExprEqualsNode topNode = new ExprEqualsNodeImpl(false, false);
         ExprIdentNode i1_1 = new ExprIdentNodeImpl("intPrimitive", "s0");
         ExprIdentNode i1_2 = new ExprIdentNodeImpl("intBoxed", "s1");
         topNode.addChildNode(i1_1);
@@ -107,8 +107,8 @@ public class SupportExprNodeFactory
     {
         ExprAndNode topNode = new ExprAndNodeImpl();
 
-        ExprEqualsNode e1 = new ExprEqualsNodeImpl(false);
-        ExprEqualsNode e2 = new ExprEqualsNodeImpl(false);
+        ExprEqualsNode e1 = new ExprEqualsNodeImpl(false, false);
+        ExprEqualsNode e2 = new ExprEqualsNodeImpl(false, false);
 
         topNode.addChildNode(e1);
         topNode.addChildNode(e2);
@@ -135,7 +135,7 @@ public class SupportExprNodeFactory
         ExprEqualsNode[] equalNodes = new ExprEqualsNode[3];
         for (int i = 0; i < equalNodes.length; i++)
         {
-            equalNodes[i] = new ExprEqualsNodeImpl(false);
+            equalNodes[i] = new ExprEqualsNodeImpl(false, false);
             topNode.addChildNode(equalNodes[i]);
         }
 
@@ -191,7 +191,7 @@ public class SupportExprNodeFactory
     public static ExprNode makeSumAndFactorNode() throws Exception
     {
         // sum node
-        ExprSumNode sum = new ExprSumNode(false);
+        ExprSumNode sum = new ExprSumNode(false, false);
         ExprIdentNode ident = new ExprIdentNodeImpl("intPrimitive", "s0");
         sum.addChildNode(ident);
 
@@ -207,7 +207,7 @@ public class SupportExprNodeFactory
 
     public static ExprAggregateNode makeSumAggregateNode() throws Exception
     {
-        ExprSumNode top = new ExprSumNode(false);
+        ExprSumNode top = new ExprSumNode(false, false);
         ExprIdentNode ident = new ExprIdentNodeImpl("intPrimitive", "s0");
         top.addChildNode(ident);
 
@@ -218,7 +218,7 @@ public class SupportExprNodeFactory
 
     public static ExprNode makeCountNode(Object value, Class type) throws Exception
     {
-        ExprCountNode countNode = new ExprCountNode(false);
+        ExprCountNode countNode = new ExprCountNode(false, false);
         countNode.addChildNode(new SupportExprNode(value, type));
         SupportAggregationResultFuture future = new SupportAggregationResultFuture(new Object[] {10, 20});
         countNode.setAggregationResultFuture(future, 1);
@@ -336,7 +336,7 @@ public class SupportExprNodeFactory
 
     private static ExprEqualsNode makeEqualsNode(String ident1, String stream1, Object value) throws Exception
     {
-        ExprEqualsNode topNode = new ExprEqualsNodeImpl(false);
+        ExprEqualsNode topNode = new ExprEqualsNodeImpl(false, false);
         ExprIdentNode i1_1 = new ExprIdentNodeImpl(ident1, stream1);
         SupportExprNode constantNode = new SupportExprNode(value);
         topNode.addChildNode(i1_1);
@@ -361,21 +361,21 @@ public class SupportExprNodeFactory
         variableService.createNewVariable("intPrimitive", Integer.class.getName(), 10, null);
         variableService.createNewVariable("var1", String.class.getName(), "my_variable_value", null);
 
-        ExprNodeUtil.getValidatedSubtree(topNode, new ExprValidationContext(streamTypeService, getMethodResService(), viewResources, null, variableService, null, null, null, null));
+        ExprNodeUtility.getValidatedSubtree(topNode, new ExprValidationContext(streamTypeService, getMethodResService(), viewResources, null, variableService, null, null, null, null, null));
     }
 
     public static void validate1StreamBean(ExprNode topNode) throws Exception
     {
         EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         StreamTypeService streamTypeService = new StreamTypeServiceImpl(eventType, "s0", false, "uri");
-        ExprNodeUtil.getValidatedSubtree(topNode, ExprValidationContextFactory.make(streamTypeService));
+        ExprNodeUtility.getValidatedSubtree(topNode, ExprValidationContextFactory.make(streamTypeService));
     }
 
     public static void validate1StreamMD(ExprNode topNode) throws Exception
     {
         EventType eventType = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
         StreamTypeService streamTypeService = new StreamTypeServiceImpl(eventType, "s0", false, "uri");
-        ExprNodeUtil.getValidatedSubtree(topNode, ExprValidationContextFactory.make(streamTypeService));
+        ExprNodeUtility.getValidatedSubtree(topNode, ExprValidationContextFactory.make(streamTypeService));
     }
 
     public static MethodResolutionService getMethodResService()

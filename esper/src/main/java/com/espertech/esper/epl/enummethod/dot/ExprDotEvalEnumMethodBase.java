@@ -9,6 +9,8 @@ import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.enummethod.eval.EnumEval;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.methodbase.*;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.util.JavaClassHelper;
 
@@ -29,7 +31,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
     }
 
     public abstract EventType[] getAddStreamTypes(String enumMethodUsedName, List<String> goesToNames, EventType inputEventType, Class collectionComponentType, List<ExprDotEvalParam> bodiesAndParameters);
-    public abstract EnumEval getEnumEval(StreamTypeService streamTypeService, String enumMethodUsedName, List<ExprDotEvalParam> bodiesAndParameters, EventType inputEventType, Class collectionComponentType, int numStreamsIncoming) throws ExprValidationException;
+    public abstract EnumEval getEnumEval(EventAdapterService eventAdapterService, StreamTypeService streamTypeService, String statementId, String enumMethodUsedName, List<ExprDotEvalParam> bodiesAndParameters, EventType inputEventType, Class collectionComponentType, int numStreamsIncoming) throws ExprValidationException;
 
     public EnumMethodEnum getEnumMethodEnum() {
         return enumMethodEnum;
@@ -81,7 +83,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
             bodiesAndParameters.add(bodyAndParameter);
         }
 
-        this.enumEval = getEnumEval(validationContext.getStreamTypeService(), enumMethodUsedName, bodiesAndParameters, inputEventType, collectionComponentType, streamCountIncoming);
+        this.enumEval = getEnumEval(validationContext.getEventAdapterService(), validationContext.getStreamTypeService(), validationContext.getStatementId(), enumMethodUsedName, bodiesAndParameters, inputEventType, collectionComponentType, streamCountIncoming);
 
         // determine the stream ids of event properties asked for in the evaluator(s)
         HashSet<Integer> streamsRequired = new HashSet<Integer>();
@@ -133,7 +135,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
                 return null;
             }
             EventBean[] eventsLambda = enumEval.getEventsPrototype();
-            System.arraycopy(eventsPerStream, 0, eventsLambda, 0, eventsPerStream.length);
+            EventBeanUtility.safeArrayCopy(eventsPerStream, eventsLambda);
             Object result = enumEval.evaluateEnumMethod(coll, isNewData, exprEvaluatorContext);
             exprEvaluatorContext.getExpressionResultCacheService().saveEnumerationMethodLastValue(this, result);
             return result;
@@ -147,7 +149,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
                 return null;
             }
             EventBean[] eventsLambda = enumEval.getEventsPrototype();
-            System.arraycopy(eventsPerStream, 0, eventsLambda, 0, eventsPerStream.length);
+            EventBeanUtility.safeArrayCopy(eventsPerStream, eventsLambda);
             return enumEval.evaluateEnumMethod(coll, isNewData, exprEvaluatorContext);
         }
         finally {
@@ -190,7 +192,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
         ExprNode filter = goesNode.getChildNodes().get(0);
         try {
             ExprValidationContext filterValidationContext = new ExprValidationContext(types, validationContext);
-            filter = ExprNodeUtil.getValidatedSubtree(filter, filterValidationContext);
+            filter = ExprNodeUtility.getValidatedSubtree(filter, filterValidationContext);
         }
         catch (ExprValidationException ex) {
             throw new ExprValidationException("Error validating enumeration method '" + enumMethodUsedName + "' parameter " + parameterNum + ": " + ex.getMessage(), ex);
@@ -199,7 +201,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
         ExprEvaluator filterEvaluator = filter.getExprEvaluator();
         DotMethodFPParamTypeEnum expectedType = footprint.getParams()[parameterNum].getType();
         // Lambda-methods don't use a specific expected return-type, so passing null for type is fine.
-        DotMethodUtil.validateSpecificType(enumMethodUsedName, DotMethodTypeEnum.ENUM, expectedType, null, filterEvaluator.getType(), parameterNum);
+        DotMethodUtil.validateSpecificType(enumMethodUsedName, DotMethodTypeEnum.ENUM, expectedType, null, filterEvaluator.getType(), parameterNum, filter);
 
         int numStreamsIncoming = validationContext.getStreamTypeService().getEventTypes().length;
         return new ExprDotEvalParamLambda(parameterNum, filter, filterEvaluator,

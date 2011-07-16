@@ -11,9 +11,8 @@ package com.espertech.esper.view.std;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.view.*;
 
 import java.util.List;
@@ -26,6 +25,7 @@ import java.util.HashMap;
 public class MergeViewFactory implements ViewFactory
 {
     private List<ExprNode> viewParameters;
+    private int streamNumber;
 
     private ExprNode[] criteriaExpressions;
     private EventType eventType;
@@ -33,6 +33,7 @@ public class MergeViewFactory implements ViewFactory
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
         this.viewParameters = expressionParameters;
+        this.streamNumber = viewFactoryContext.getStreamNum();
     }
 
     public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
@@ -98,7 +99,8 @@ public class MergeViewFactory implements ViewFactory
             {
                 additionalProps.put(fieldNames[i], fieldTypes[i]);
             }
-            eventType = statementContext.getEventAdapterService().createAnonymousWrapperType(parentEventType, additionalProps);
+            String outputEventTypeName = statementContext.getStatementId() + "_mergeview_" + streamNumber;
+            eventType = statementContext.getEventAdapterService().createAnonymousWrapperType(outputEventTypeName, parentEventType, additionalProps);
         }
     }
 

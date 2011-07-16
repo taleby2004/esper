@@ -14,9 +14,9 @@ import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.NestedPropertyGetter;
+import com.espertech.esper.event.map.MapEventPropertyGetter;
 import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.map.MapNestedPropertyGetter;
-import com.espertech.esper.event.map.MapEventPropertyGetter;
 import com.espertech.esper.event.xml.*;
 
 import java.io.StringWriter;

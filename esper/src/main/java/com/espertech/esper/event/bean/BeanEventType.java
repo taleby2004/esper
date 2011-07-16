@@ -31,6 +31,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
     private final Class clazz;
     private final EventAdapterService eventAdapterService;
     private final ConfigurationEventTypeLegacy optionalLegacyDef;
+    private final int eventTypeId;
     private String[] propertyNames;
     private Map<String, SimplePropertyInfo> simpleProperties;
     private Map<String, InternalEventPropDescriptor> mappedPropertyDescriptors;
@@ -51,6 +52,8 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
     private Map<String, EventPropertyDescriptor> propertyDescriptorMap;
     private String factoryMethodName;
     private String copyMethodName;
+    private String startTimestampPropertyName;
+    private String endTimestampPropertyName;
 
     /**
      * Constructor takes a java bean class as an argument.
@@ -60,14 +63,17 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
      * @param metadata event type metadata
      */
     public BeanEventType(EventTypeMetadata metadata,
+                         int eventTypeId,
                          Class clazz,
                          EventAdapterService eventAdapterService,
-                         ConfigurationEventTypeLegacy optionalLegacyDef)
+                         ConfigurationEventTypeLegacy optionalLegacyDef
+                         )
     {
         this.metadata = metadata;
         this.clazz = clazz;
         this.eventAdapterService = eventAdapterService;
         this.optionalLegacyDef = optionalLegacyDef;
+        this.eventTypeId = eventTypeId;
         if (optionalLegacyDef != null)
         {
             this.factoryMethodName = optionalLegacyDef.getFactoryMethod();
@@ -81,6 +87,24 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         propertyGetterCache = new HashMap<String, EventPropertyGetter>();
 
         initialize(false);
+
+        if (optionalLegacyDef != null) {
+            startTimestampPropertyName = optionalLegacyDef.getStartTimestampPropertyName();
+            endTimestampPropertyName = optionalLegacyDef.getEndTimestampPropertyName();
+            EventTypeUtility.validateTimestampProperties(this, startTimestampPropertyName, endTimestampPropertyName);
+        }
+    }
+
+    public String getStartTimestampPropertyName() {
+        return startTimestampPropertyName;
+    }
+
+    public String getEndTimestampPropertyName() {
+        return endTimestampPropertyName;
+    }
+
+    public ConfigurationEventTypeLegacy getOptionalLegacyDef() {
+        return optionalLegacyDef;
     }
 
     public String getName()
@@ -91,6 +115,10 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
     public EventPropertyDescriptor getPropertyDescriptor(String propertyName)
     {
         return propertyDescriptorMap.get(propertyName);
+    }
+
+    public int getEventTypeId() {
+        return eventTypeId;
     }
 
     /**

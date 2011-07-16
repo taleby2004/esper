@@ -43,7 +43,8 @@ public class PropertyEvaluatorFactory
                                                   String engineURI,
                                                   String statementId,
                                                   String statementName,
-                                                  Annotation[] annotations)
+                                                  Annotation[] annotations,
+                                                  Collection<Integer> assignedTypeNumberStack)
             throws ExprValidationException
     {
         int length = spec.getAtoms().size();
@@ -104,8 +105,8 @@ public class PropertyEvaluatorFactory
                 boolean[] isIStreamOnly = new boolean[streamNames.size()];
                 Arrays.fill(isIStreamOnly, true);
                 StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
-                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext, eventAdapterService, statementName, annotations);
-                whereClauses[i] = ExprNodeUtil.getValidatedSubtree(atom.getOptionalWhereClause(), validationContext).getExprEvaluator();
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext, eventAdapterService, statementName, statementId, annotations);
+                whereClauses[i] = ExprNodeUtility.getValidatedSubtree(atom.getOptionalWhereClause(), validationContext).getExprEvaluator();
             }
 
             // validate select clause
@@ -116,7 +117,7 @@ public class PropertyEvaluatorFactory
                 boolean[] isIStreamOnly = new boolean[streamNames.size()];
                 Arrays.fill(isIStreamOnly, true);
                 StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
-                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext, eventAdapterService, statementName, annotations);
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext, eventAdapterService, statementName, statementId, annotations);
 
                 for (SelectClauseElementRaw raw : atom.getOptionalSelectClause().getSelectExprList())
                 {
@@ -135,13 +136,13 @@ public class PropertyEvaluatorFactory
                     else if (raw instanceof SelectClauseExprRawSpec)
                     {
                         SelectClauseExprRawSpec exprSpec = (SelectClauseExprRawSpec) raw;
-                        ExprNode exprCompiled = ExprNodeUtil.getValidatedSubtree(exprSpec.getSelectExpression(), validationContext);
+                        ExprNode exprCompiled = ExprNodeUtility.getValidatedSubtree(exprSpec.getSelectExpression(), validationContext);
                         String resultName = exprSpec.getOptionalAsName();
                         if (resultName == null)
                         {
                             resultName = exprCompiled.toExpressionString();
                         }
-                        cumulativeSelectClause.add(new SelectClauseExprCompiledSpec(exprCompiled, resultName));
+                        cumulativeSelectClause.add(new SelectClauseExprCompiledSpec(exprCompiled, resultName, exprSpec.getOptionalAsName()));
 
                         String isMinimal = ExprNodeUtility.isMinimalExpression(exprCompiled);
                         if (isMinimal != null)
@@ -196,7 +197,7 @@ public class PropertyEvaluatorFactory
             Arrays.fill(isIStreamOnly, true);
             StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
 
-            SelectExprProcessor selectExpr = SelectExprProcessorFactory.getProcessor(cumulativeSelectClause, false, null, null, streamTypeService, eventAdapterService, null, null, null, methodResolutionService, validateContext, variableService, timeProvider,engineURI,statementId, statementName, annotations);
+            SelectExprProcessor selectExpr = SelectExprProcessorFactory.getProcessor(assignedTypeNumberStack, cumulativeSelectClause, false, null, null, streamTypeService, eventAdapterService, null, null, null, methodResolutionService, validateContext, variableService, timeProvider,engineURI,statementId, statementName, annotations);
             return new PropertyEvaluatorSelect(selectExpr, accumulative);
         }
     }

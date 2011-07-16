@@ -17,8 +17,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TestAudit extends TestCase {
 
@@ -50,6 +48,21 @@ public class TestAudit extends TestCase {
 
     public void testAudit() {
 
+        // stream
+        auditLog.info("*** Stream: ");
+        EPStatement stmtInput = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('stream') select * from SupportBean(string = 'E1')");
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        stmtInput.destroy();
+        
+        // named window stream: this is not yet enabled
+        EPStatement stmtNW = epService.getEPAdministrator().createEPL("create window WinOne.win:keepall() as SupportBean");
+        EPStatement stmtInsert = epService.getEPAdministrator().createEPL("insert into WinOne select * from SupportBean");
+        EPStatement stmtConsume = epService.getEPAdministrator().createEPL("@Audit select * from WinOne");
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        stmtNW.destroy();
+        stmtInsert.destroy();
+        stmtConsume.destroy();
+
         auditLog.info("*** Schedule: ");
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         EPStatement stmtSchedule = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('schedule') select irstream * from SupportBean.win:time(1 sec)");
@@ -62,15 +75,13 @@ public class TestAudit extends TestCase {
         listener.reset();
         stmtSchedule.destroy();
 
-        // stream
-        auditLog.info("*** Stream: ");
-        EPStatement stmtInput = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('stream') select * from SupportBean(string = 'E1')");
-        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        stmtInput.destroy();
-
         // exprdef-instances
         auditLog.info("*** Expression-Def: ");
-        EPStatement stmtExprDef = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('exprdef') expression DEF { 1 } select DEF() from SupportBean");
+        EPStatement stmtExprDef = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('exprdef') " +
+                "expression DEF { 1 } " +
+                "expression INN {  x => x.string }" +
+                "expression OUT { x => INN(x) } " +
+                "select DEF(), OUT(sb) from SupportBean sb");
         stmtExprDef.addListener(listener);
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         assertEquals(1, listener.assertOneGetNewAndReset().get("DEF()"));
@@ -113,6 +124,14 @@ public class TestAudit extends TestCase {
         assertEquals(5000, listener.assertOneGetNew().get("val0"));
         assertEquals(50, listener.assertOneGetNewAndReset().get("val1"));
         stmtExpr.destroy();
+
+        // expression-detail
+        auditLog.info("*** Expression-Nested: ");
+        EPStatement stmtExprNested = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('expression-nested') select ('A'||string)||'X' as val0 from SupportBean");
+        stmtExprNested.addListener(listener);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 50));
+        assertEquals("AE1X", listener.assertOneGetNewAndReset().get("val0"));
+        stmtExprNested.destroy();
 
         // property
         auditLog.info("*** Property: ");

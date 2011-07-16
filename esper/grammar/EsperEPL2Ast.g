@@ -215,10 +215,12 @@ createVariableExpr
 	;
 
 createSchemaExpr
-	:	^(s=CREATE_SCHEMA_EXPR IDENT (variantList|createColTypeList?) 
-				(^(CREATE_SCHEMA_EXPR_QUAL IDENT))?
-				(^(CREATE_SCHEMA_EXPR_INH IDENT exprCol))? { leaveNode($s); } )
+	:	^(s=CREATE_SCHEMA_EXPR IDENT (variantList|createColTypeList?) (^(CREATE_SCHEMA_EXPR_VAR IDENT))? createSchemaQual* { leaveNode($s); } )
 	;
+	
+createSchemaQual
+	:	^(CREATE_SCHEMA_EXPR_QUAL IDENT exprCol)
+	;	
 
 variantList 	
 	:	^(VARIANT_LIST (STAR|CLASS_IDENT)+)
@@ -446,11 +448,19 @@ evalExprChoice
 	:	^(jo=EVAL_OR_EXPR valueExpr valueExpr (valueExpr)* { leaveNode($jo); } )
 	|	^(ja=EVAL_AND_EXPR valueExpr valueExpr (valueExpr)* { leaveNode($ja); } )
 	|	^(je=EVAL_EQUALS_EXPR valueExpr valueExpr { leaveNode($je); } )
+	|	^(ji=EVAL_IS_EXPR valueExpr valueExpr { leaveNode($ji); } )
 	|	^(jne=EVAL_NOTEQUALS_EXPR valueExpr valueExpr { leaveNode($jne); } )
-	|	^(jge=EVAL_EQUALS_GROUP_EXPR valueExpr (ANY|SOME|ALL) (valueExpr* | subSelectGroupExpr) { leaveNode($jge); } )
-	|	^(jgne=EVAL_NOTEQUALS_GROUP_EXPR valueExpr (ANY|SOME|ALL) (valueExpr* | subSelectGroupExpr) { leaveNode($jgne); } )
+	|	^(jis=EVAL_ISNOT_EXPR valueExpr valueExpr { leaveNode($jis); } )
+	|	^(jge=EVAL_EQUALS_GROUP_EXPR equalsSubquery { leaveNode($jge); } )
+	|	^(jgi=EVAL_IS_GROUP_EXPR equalsSubquery { leaveNode($jgi); } )
+	|	^(jgne=EVAL_NOTEQUALS_GROUP_EXPR equalsSubquery { leaveNode($jgne); } )
+	|	^(jgni=EVAL_ISNOT_GROUP_EXPR equalsSubquery { leaveNode($jgni); } )
 	|	^(n=NOT_EXPR valueExpr { leaveNode($n); } )
 	|	r=relationalExpr
+	;
+
+equalsSubquery
+	:	valueExpr (ANY|SOME|ALL) (valueExpr* | subSelectGroupExpr)
 	;
 	
 valueExpr
@@ -567,12 +577,12 @@ regExpExpr
 	;
 	
 builtinFunc
-	: 	^(f=SUM (DISTINCT)? valueExpr) { leaveNode($f); }
-	|	^(f=AVG (DISTINCT)? valueExpr) { leaveNode($f); }
-	|	^(f=COUNT ((DISTINCT)? valueExpr)? ) { leaveNode($f); }
-	|	^(f=MEDIAN (DISTINCT)? valueExpr) { leaveNode($f); }
-	|	^(f=STDDEV (DISTINCT)? valueExpr) { leaveNode($f); }
-	|	^(f=AVEDEV (DISTINCT)? valueExpr) { leaveNode($f); }
+	: 	^(f=SUM (DISTINCT)? valueExpr aggregationFilterExpr?) { leaveNode($f); }
+	|	^(f=AVG (DISTINCT)? valueExpr aggregationFilterExpr?) { leaveNode($f); }
+	|	^(f=COUNT ((DISTINCT)? valueExpr)? aggregationFilterExpr?) { leaveNode($f); }
+	|	^(f=MEDIAN (DISTINCT)? valueExpr aggregationFilterExpr?) { leaveNode($f); }
+	|	^(f=STDDEV (DISTINCT)? valueExpr aggregationFilterExpr?) { leaveNode($f); }
+	|	^(f=AVEDEV (DISTINCT)? valueExpr aggregationFilterExpr?) { leaveNode($f); }
 	|	^(f=LAST_AGGREG (DISTINCT)? accessValueExpr? valueExpr?) { leaveNode($f); }
 	|	^(f=FIRST_AGGREG (DISTINCT)? accessValueExpr? valueExpr?) { leaveNode($f); }
 	|	^(f=WINDOW_AGGREG (DISTINCT)? accessValueExpr?) { leaveNode($f); }
@@ -587,6 +597,10 @@ builtinFunc
 	| 	^(f=CAST valueExpr CLASS_IDENT) { leaveNode($f); }
 	| 	^(f=EXISTS eventPropertyExpr[true]) { leaveNode($f); }
 	|	^(f=CURRENT_TIMESTAMP {}) { leaveNode($f); }
+	;
+
+aggregationFilterExpr
+	:	^(AGG_FILTER_EXPR valueExpr)
 	;
 
 accessValueExpr
@@ -679,8 +693,12 @@ atomicExpr
 	;
 
 patternFilterExpr
-	:	^( f=PATTERN_FILTER_EXPR IDENT? CLASS_IDENT propertyExpression? (valueExpr)* { leaveNode($f); } )
+	:	^( f=PATTERN_FILTER_EXPR IDENT? CLASS_IDENT propertyExpression? patternFilterAnno? (valueExpr)* { leaveNode($f); } )
 	;
+	
+patternFilterAnno
+	:	^( ATCHAR IDENT number?)
+	;	
 
 matchUntilRange
 	:	^(MATCH_UNTIL_RANGE_CLOSED valueExpr valueExpr)

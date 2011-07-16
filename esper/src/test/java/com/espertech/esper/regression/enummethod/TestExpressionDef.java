@@ -32,6 +32,37 @@ public class TestExpressionDef extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void testSequenceAndNested() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_S0", SupportBean_S0.class);
+        epService.getEPAdministrator().createEPL("create window WindowOne.win:keepall() as (col1 string, col2 string)");
+        epService.getEPAdministrator().createEPL("insert into WindowOne select p00 as col1, p01 as col2 from SupportBean_S0");
+
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_S1", SupportBean_S1.class);
+        epService.getEPAdministrator().createEPL("create window WindowTwo.win:keepall() as (col1 string, col2 string)");
+        epService.getEPAdministrator().createEPL("insert into WindowTwo select p10 as col1, p11 as col2 from SupportBean_S1");
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "A", "B1"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "A", "B2"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(11, "A", "B1"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(12, "A", "B2"));
+
+        String epl =
+                "@Audit('exprdef') " +
+                "expression last2X {\n" +
+                "  p => WindowOne(WindowOne.col1 = p.string).takeLast(2)\n" +
+                "} " +
+                "expression last2Y {\n" +
+                "  p => WindowTwo(WindowTwo.col1 = p.string).takeLast(2).selectFrom(q => q.col2)\n" +
+                "} " +
+                "select last2X(sb).selectFrom(a => a.col2).sequenceEqual(last2Y(sb)) as val from SupportBean as sb";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("A", 1));
+        assertEquals(true, listener.assertOneGetNewAndReset().get("val"));
+    }
+
     public void testCaseNewMultiReturnNoElse() {
         
         String[] fieldsInner = "col1,col2".split(",");
@@ -80,6 +111,46 @@ public class TestExpressionDef extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E1", 1));
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "scalar()".split(","), new Object[] {1});
+
+        stmt.destroy();
+    }
+
+    public void testSubqueryMultiresult() {
+        String eplOne = "" +
+                "expression maxi {" +
+                " (select max(intPrimitive) from SupportBean.win:keepall())" +
+                "} " +
+                "expression mini {" +
+                " (select min(intPrimitive) from SupportBean.win:keepall())" +
+                "} " +
+                "select p00/maxi() as val0, p00/mini() as val1 " +
+                "from SupportBean_ST0.std:lastevent()";
+        runAssertionMultiResult(eplOne);
+
+        String eplTwo = "" +
+                "expression subq {" +
+                " (select max(intPrimitive) as maxi, min(intPrimitive) as mini from SupportBean.win:keepall())" +
+                "} " +
+                "select p00/subq().maxi as val0, p00/subq().mini as val1 " +
+                "from SupportBean_ST0.std:lastevent()";
+        runAssertionMultiResult(eplTwo);
+    }
+
+    private void runAssertionMultiResult(String epl) {
+        String fields[] = new String[] {"val0","val1"};
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 5));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 2));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2/10d, 2/5d});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 20));
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 4));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4/20d, 4/2d});
 
         stmt.destroy();
     }
@@ -340,7 +411,7 @@ public class TestExpressionDef extends TestCase {
         LambdaAssertionUtil.assertTypes(stmt.getEventType(), "val1".split(","), new Class[]{Collection.class});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2,E3,E4"));
-        LambdaAssertionUtil.assertValues(listener, "val1", "E3", "E4");
+        LambdaAssertionUtil.assertValuesArrayScalar(listener, "val1", "E3", "E4");
     }
 
     public void testEventTypeAndSODA() {

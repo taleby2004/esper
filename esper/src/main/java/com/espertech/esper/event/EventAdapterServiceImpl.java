@@ -22,7 +22,6 @@ import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.xml.*;
 import com.espertech.esper.plugin.*;
 import com.espertech.esper.util.URIUtil;
-import com.espertech.esper.util.UuidGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -58,12 +57,15 @@ public class EventAdapterServiceImpl implements EventAdapterService
     private Map<String, EventType> xmldomRootElementNames;
     private LinkedHashSet<String> javaPackageNames;
     private final Map<URI, PlugInEventRepresentation> plugInRepresentations;
+    private final EventTypeIdGenerator eventTypeIdGenerator;
 
     /**
      * Ctor.
      */
-    public EventAdapterServiceImpl()
+    public EventAdapterServiceImpl(EventTypeIdGenerator eventTypeIdGenerator)
     {
+        this.eventTypeIdGenerator = eventTypeIdGenerator;
+
         nameToTypeMap = new HashMap<String, EventType>();
         xmldomRootElementNames = new HashMap<String, EventType>();
         javaPackageNames = new LinkedHashSet<String>();
@@ -71,8 +73,24 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
         // Share the mapping of class to type with the type creation for thread safety
         typesPerJavaBean = new ConcurrentHashMap<Class, BeanEventType>();
-        beanEventAdapter = new BeanEventAdapter(typesPerJavaBean, this);
+        beanEventAdapter = new BeanEventAdapter(typesPerJavaBean, this, eventTypeIdGenerator);
         plugInRepresentations = new HashMap<URI, PlugInEventRepresentation>();
+    }
+
+    public Map<String, EventType> getDeclaredEventTypes() {
+        return new HashMap<String, EventType>(nameToTypeMap);
+    }
+
+    /**
+     * Set the legacy Java class type information.
+     * @param classToLegacyConfigs is the legacy class configs
+     */
+    public void setClassLegacyConfigs(Map<String, ConfigurationEventTypeLegacy> classToLegacyConfigs) {
+        beanEventAdapter.setClassToLegacyConfigs(classToLegacyConfigs);
+    }
+
+    public ConfigurationEventTypeLegacy getClassLegacyConfigs(String className) {
+        return beanEventAdapter.getClassToLegacyConfigs(className);
     }
 
     public Set<WriteablePropertyDescriptor> getWriteableProperties(EventType eventType)
@@ -142,7 +160,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             for (Map.Entry<URI, Object> entry : factories)
             {
                 PlugInEventRepresentation factory = (PlugInEventRepresentation) entry.getValue();
-                PlugInEventTypeHandlerContext context = new PlugInEventTypeHandlerContext(eventTypeURI, initializer, eventTypeName);
+                PlugInEventTypeHandlerContext context = new PlugInEventTypeHandlerContext(eventTypeURI, initializer, eventTypeName, eventTypeIdGenerator.getTypeId(eventTypeName));
                 if (factory.acceptsType(context))
                 {
                     handlingFactory = factory;
@@ -164,7 +182,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
                     + "' and initializer");
         }
 
-        PlugInEventTypeHandlerContext context = new PlugInEventTypeHandlerContext(handledEventTypeURI, initializer, eventTypeName);
+        PlugInEventTypeHandlerContext context = new PlugInEventTypeHandlerContext(handledEventTypeURI, initializer, eventTypeName, eventTypeIdGenerator.getTypeId(eventTypeName));
         PlugInEventTypeHandler handler = handlingFactory.getTypeHandler(context);
         if (handler == null)
         {
@@ -271,15 +289,6 @@ public class EventAdapterServiceImpl implements EventAdapterService
     }
 
     /**
-     * Set the legacy Java class type information.
-     * @param classToLegacyConfigs is the legacy class configs
-     */
-    public void setClassLegacyConfigs(Map<String, ConfigurationEventTypeLegacy> classToLegacyConfigs)
-    {
-        beanEventAdapter.setClassToLegacyConfigs(classToLegacyConfigs);
-    }
-
-    /**
      * Sets the default property resolution style.
      * @param defaultPropertyResolutionStyle is the default style
      */
@@ -302,13 +311,6 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return nameToTypeMap.get(eventTypeName);
     }
 
-    /**
-     * Add an name and class as an event type.
-     * @param eventTypeName is the name
-     * @param clazz is the Java class to add
-     * @return event type
-     * @throws EventAdapterException to indicate an error constructing the type
-     */
     public synchronized EventType addBeanType(String eventTypeName, Class clazz, boolean isPreconfiguredStatic, boolean isPreconfigured, boolean isConfigured) throws EventAdapterException
     {
         if (log.isDebugEnabled())
@@ -430,11 +432,13 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return eventType;
     }
 
-    public synchronized EventType addNestableMapType(String eventTypeName, Map<String, Object> propertyTypes, Set<String> optionalSuperType, boolean isPreconfiguredStatic, boolean isPreconfigured, boolean isConfigured, boolean namedWindow, boolean insertInto) throws EventAdapterException
+    public synchronized EventType addNestableMapType(String eventTypeName, Map<String, Object> propertyTypes, ConfigurationEventTypeMap optionalConfig, boolean isPreconfiguredStatic, boolean isPreconfigured, boolean isConfigured, boolean namedWindow, boolean insertInto) throws EventAdapterException
     {
-        Pair<EventType[], Set<EventType>> mapSuperTypes = getMapSuperTypes(optionalSuperType);
+        Pair<EventType[], Set<EventType>> mapSuperTypes = getMapSuperTypes(optionalConfig);
         EventTypeMetadata metadata = EventTypeMetadata.createMapType(eventTypeName, isPreconfiguredStatic, isPreconfigured, isConfigured, namedWindow, insertInto);
-        MapEventType newEventType = new MapEventType(metadata, eventTypeName, this, propertyTypes, mapSuperTypes.getFirst(), mapSuperTypes.getSecond());
+
+        int typeId = eventTypeIdGenerator.getTypeId(eventTypeName);
+        MapEventType newEventType = new MapEventType(metadata, eventTypeName, typeId, this, propertyTypes, mapSuperTypes.getFirst(), mapSuperTypes.getSecond(), optionalConfig);
 
         EventType existingType = nameToTypeMap.get(eventTypeName);
         if (existingType != null)
@@ -556,7 +560,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         EventType type;
         if ((configurationEventTypeXMLDOM.getSchemaResource() == null) && (configurationEventTypeXMLDOM.getSchemaText() == null))
         {
-            type = new SimpleXMLEventType(metadata, configurationEventTypeXMLDOM, this);
+            type = new SimpleXMLEventType(metadata, eventTypeIdGenerator.getTypeId(eventTypeName), configurationEventTypeXMLDOM, this);
         }
         else
         {
@@ -564,7 +568,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             {
                 throw new EPException("Schema model has not been provided");
             }
-            type = new SchemaXMLEventType(metadata, configurationEventTypeXMLDOM, optionalSchemaModel, this);
+            type = new SchemaXMLEventType(metadata, eventTypeIdGenerator.getTypeId(eventTypeName), configurationEventTypeXMLDOM, optionalSchemaModel, this);
         }
 
         nameToTypeMap.put(eventTypeName, type);
@@ -605,7 +609,8 @@ public class EventAdapterServiceImpl implements EventAdapterService
         }
 
         EventTypeMetadata metadata = EventTypeMetadata.createWrapper(eventTypeName, isNamedWindow, isInsertInto, isPropertyAgnostic);
-        WrapperEventType newEventType = new WrapperEventType(metadata, eventTypeName, underlyingEventType, propertyTypes, this);
+        int typeId = eventTypeIdGenerator.getTypeId(eventTypeName);
+        WrapperEventType newEventType = new WrapperEventType(metadata, eventTypeName, typeId, underlyingEventType, propertyTypes, this);
 
 	    EventType existingType = nameToTypeMap.get(eventTypeName);
 	    if (existingType != null)
@@ -672,14 +677,14 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return "Type '" + existingType.getName() + "' is not compatible";
     }
 
-    public final EventType createAnonymousMapType(Map<String, Object> propertyTypes) throws EventAdapterException
+    public final EventType createAnonymousMapType(String typeName, Map<String, Object> propertyTypes) throws EventAdapterException
     {
-        String name = UuidGenerator.generate();
-        EventTypeMetadata metadata = EventTypeMetadata.createAnonymous(name);
-        return new MapEventType(metadata, name, this, propertyTypes, null, null);
+        String assignedTypeName = EventAdapterService.ANONYMOUS_TYPE_NAME_PREFIX + typeName;
+        EventTypeMetadata metadata = EventTypeMetadata.createAnonymous(assignedTypeName);
+        return new MapEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), this, propertyTypes, null, null, null);
     }
 
-    public EventType createSemiAnonymousMapType(Map<String, Pair<EventType, String>> taggedEventTypes, Map<String, Pair<EventType, String>> arrayEventTypes, boolean isUsedByChildViews)
+    public EventType createSemiAnonymousMapType(String typeName, Map<String, Pair<EventType, String>> taggedEventTypes, Map<String, Pair<EventType, String>> arrayEventTypes, boolean isUsedByChildViews)
     {
         Map<String, Object> mapProperties = new LinkedHashMap<String, Object>();
         for (Map.Entry<String, Pair<EventType, String>> entry : taggedEventTypes.entrySet())
@@ -690,13 +695,13 @@ public class EventAdapterServiceImpl implements EventAdapterService
         {
             mapProperties.put(entry.getKey(), new EventType[] {entry.getValue().getFirst()});
         }
-        return createAnonymousMapType(mapProperties);
+        return createAnonymousMapType(typeName, mapProperties);
     }
 
-    public final EventType createAnonymousWrapperType(EventType underlyingEventType, Map<String, Object> propertyTypes) throws EventAdapterException
+    public final EventType createAnonymousWrapperType(String typeName, EventType underlyingEventType, Map<String, Object> propertyTypes) throws EventAdapterException
     {
-        String name = UuidGenerator.generate();
-        EventTypeMetadata metadata = EventTypeMetadata.createAnonymous(name);
+        String assignedTypeName = EventAdapterService.ANONYMOUS_TYPE_NAME_PREFIX + typeName;
+        EventTypeMetadata metadata = EventTypeMetadata.createAnonymous(assignedTypeName);
 
         // If we are wrapping an underlying type that is itself a wrapper, then this is a special case: unwrap
         if (underlyingEventType instanceof WrapperEventType)
@@ -712,7 +717,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             propertyTypes = propertiesSuperset;
         }
 
-    	return new WrapperEventType(metadata, name, underlyingEventType, propertyTypes, this);
+    	return new WrapperEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), underlyingEventType, propertyTypes, this);
     }
 
 	public final EventBean adaptorForTypedWrapper(EventBean event, Map<String, Object> properties, EventType eventType)
@@ -739,19 +744,19 @@ public class EventAdapterServiceImpl implements EventAdapterService
         javaPackageNames.add(javaPackageName);
     }
 
-    private Pair<EventType[], Set<EventType>> getMapSuperTypes(Set<String> optionalSuperTypes)
+    private Pair<EventType[], Set<EventType>> getMapSuperTypes(ConfigurationEventTypeMap optionalConfig)
             throws EventAdapterException
     {
-        if ((optionalSuperTypes == null) || (optionalSuperTypes.isEmpty()))
+        if (optionalConfig == null || optionalConfig.getSuperTypes() == null || optionalConfig.getSuperTypes().isEmpty())
         {
             return new Pair<EventType[], Set<EventType>>(null,null);
         }
 
-        EventType[] superTypes = new EventType[optionalSuperTypes.size()];
+        EventType[] superTypes = new EventType[optionalConfig.getSuperTypes().size()];
         Set<EventType> deepSuperTypes = new LinkedHashSet<EventType>();
 
         int count = 0;
-        for (String superName : optionalSuperTypes)
+        for (String superName : optionalConfig.getSuperTypes())
         {
             EventType type = this.nameToTypeMap.get(superName);
             if (type == null)

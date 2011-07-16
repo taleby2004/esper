@@ -64,6 +64,9 @@ public class ConfigurationEventTypeXMLDOM implements MetaDefItem, Serializable
     private String xPathFunctionResolver;
     private String xPathVariableResolver;
 
+    private String startTimestampPropertyName;
+    private String endTimestampPropertyName;
+
     private boolean updateStoredType;    // For use with EsperHA to enable new type configuration to overwrite an existing type configuration
     private static final long serialVersionUID = -7488596902855838072L;
 
@@ -530,6 +533,22 @@ public class ConfigurationEventTypeXMLDOM implements MetaDefItem, Serializable
         {
             return optionaleventTypeName;
         }
+    }
+
+    public String getStartTimestampPropertyName() {
+        return startTimestampPropertyName;
+    }
+
+    public void setStartTimestampPropertyName(String startTimestampPropertyName) {
+        this.startTimestampPropertyName = startTimestampPropertyName;
+    }
+
+    public String getEndTimestampPropertyName() {
+        return endTimestampPropertyName;
+    }
+
+    public void setEndTimestampPropertyName(String endTimestampPropertyName) {
+        this.endTimestampPropertyName = endTimestampPropertyName;
     }
 
     public boolean equals(Object otherObj)

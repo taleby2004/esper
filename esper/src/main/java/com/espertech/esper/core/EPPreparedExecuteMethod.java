@@ -19,12 +19,14 @@ import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.join.base.JoinSetComposer;
+import com.espertech.esper.epl.join.base.JoinSetComposerDesc;
 import com.espertech.esper.epl.join.base.JoinSetFilter;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
 import com.espertech.esper.epl.spec.NamedWindowConsumerStreamSpec;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StreamSpecCompiled;
+import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.event.EventBeanReader;
 import com.espertech.esper.event.EventBeanReaderDefaultImpl;
 import com.espertech.esper.event.EventBeanUtility;
@@ -32,7 +34,6 @@ import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecCompiler;
 import com.espertech.esper.util.AuditPath;
-import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -101,8 +102,8 @@ public class EPPreparedExecuteMethod
             processors[i] = services.getNamedWindowService().getProcessor(namedSpec.getWindowName());
             typesPerStream[i] = processors[i].getTailView().getEventType();
 
-            if (processors[i].getRootView().getViews().get(0) instanceof VirtualDWView) {
-                streamJoinAnalysisResult.getViewExternal()[i] = (VirtualDWView) processors[i].getRootView().getViews().get(0);
+            if (processors[i].isVirtualDataWindow()) {
+                streamJoinAnalysisResult.getViewExternal()[i] = processors[i].getVirtualDataWindow();
             }
         }
 
@@ -120,7 +121,7 @@ public class EPPreparedExecuteMethod
                             statementContext.getTimeProvider(),
                             statementContext.getVariableService(),
                             statementContext.getEventAdapterService(),
-                            services.getEngineURI(), null, statementContext);
+                            services.getEngineURI(), null, statementContext, Collections.singleton(i));
                 }
                 catch (Exception ex) {
                     log.warn("Unexpected exception analyzing filter paths: " + ex.getMessage(), ex);
@@ -154,9 +155,10 @@ public class EPPreparedExecuteMethod
             {
                 viewablePerStream[i] = processors[i].getTailView();
             }
-            joinComposer = statementContext.getJoinSetComposerFactory().makeComposer(statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typesPerStream, namesPerStream, viewablePerStream, SelectClauseStreamSelectorEnum.ISTREAM_ONLY, streamJoinAnalysisResult, statementContext, queryPlanLogging, null);
-            if (statementSpec.getFilterRootNode() != null) {
-                joinFilter = new JoinSetFilter(statementSpec.getFilterRootNode().getExprEvaluator());
+            JoinSetComposerDesc joinSetComposerDesc = statementContext.getJoinSetComposerFactory().makeComposer(statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typesPerStream, namesPerStream, viewablePerStream, SelectClauseStreamSelectorEnum.ISTREAM_ONLY, streamJoinAnalysisResult, statementContext, queryPlanLogging, null);
+            joinComposer = joinSetComposerDesc.getJoinSetComposer();
+            if (joinSetComposerDesc.getPostJoinFilterEvaluator() != null) {
+                joinFilter = new JoinSetFilter(joinSetComposerDesc.getPostJoinFilterEvaluator());
             }
             else {
                 joinFilter = null;
@@ -200,6 +202,13 @@ public class EPPreparedExecuteMethod
         }
 
         resultSetProcessor.clear();
+
+        return process(snapshots);
+    }
+
+    public EPPreparedQueryResult process(Collection<EventBean>[] snapshots) {
+
+        int numStreams = processors.length;
 
         UniformPair<EventBean[]> results;
         if (numStreams == 1)
@@ -290,5 +299,13 @@ public class EPPreparedExecuteMethod
         }
 
         return filteredSnapshot;
+    }
+
+    public FilterSpecCompiled[] getFilters() {
+        return filters;
+    }
+
+    public NamedWindowProcessor[] getProcessors() {
+        return processors;
     }
 }

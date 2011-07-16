@@ -1,12 +1,12 @@
 package com.espertech.esper.client;
 
-import com.espertech.esper.client.soda.StreamSelector;
 import com.espertech.esper.client.annotation.Name;
+import com.espertech.esper.client.soda.StreamSelector;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.type.StringPatternSet;
-import com.espertech.esper.type.StringPatternSetRegex;
 import com.espertech.esper.type.StringPatternSetLike;
-import com.espertech.esper.collection.Pair;
+import com.espertech.esper.type.StringPatternSetRegex;
 import junit.framework.TestCase;
 
 import javax.xml.xpath.XPathConstants;
@@ -142,6 +142,8 @@ public class TestConfigurationParser extends TestCase
         assertTrue(schemaDesc.isXPathPropertyExpr());
         assertFalse(schemaDesc.isEventSenderValidatesRoot());
         assertFalse(schemaDesc.isAutoFragment());
+        assertEquals("startts", schemaDesc.getStartTimestampPropertyName());
+        assertEquals("endts", schemaDesc.getEndTimestampPropertyName());
 
         // assert mapped events
         assertEquals(1, config.getEventTypesMapEvents().size());
@@ -150,10 +152,11 @@ public class TestConfigurationParser extends TestCase
         expectedProps.put("myInt", "int");
         expectedProps.put("myString", "string");
         assertEquals(expectedProps, config.getEventTypesMapEvents().get("MyMapEvent"));
-        assertEquals(1, config.getMapSuperTypes().size());
-        Set<String> superTypes = config.getMapSuperTypes().get("MyMapEvent");
-        assertEquals(2, superTypes.size());
-        assertTrue(superTypes.contains("MyMapSuperType1") && superTypes.contains("MyMapSuperType2"));
+        assertEquals(1, config.getMapTypeConfigurations().size());
+        Set<String> superTypes = config.getMapTypeConfigurations().get("MyMapEvent").getSuperTypes();
+        ArrayAssertionUtil.assertEqualsExactOrder(superTypes.toArray(), new Object[] {"MyMapSuperType1", "MyMapSuperType2"});
+        assertEquals("startts", config.getMapTypeConfigurations().get("MyMapEvent").getStartTimestampPropertyName());
+        assertEquals("endts", config.getMapTypeConfigurations().get("MyMapEvent").getEndTimestampPropertyName());
 
         // assert legacy type declaration
         assertEquals(1, config.getEventTypesLegacy().size());
@@ -169,6 +172,8 @@ public class TestConfigurationParser extends TestCase
         assertEquals(Configuration.PropertyResolutionStyle.CASE_INSENSITIVE, legacy.getPropertyResolutionStyle());
         assertEquals("com.mycompany.myapp.MySampleEventFactory.createMyLegacyTypeEvent", legacy.getFactoryMethod());
         assertEquals("myCopyMethod", legacy.getCopyMethod());
+        assertEquals("startts", legacy.getStartTimestampPropertyName());
+        assertEquals("endts", legacy.getEndTimestampPropertyName());
 
         // assert database reference - data source config
         assertEquals(3, config.getDatabaseReferences().size());
@@ -241,6 +246,9 @@ public class TestConfigurationParser extends TestCase
             assertEquals("vdw" + i, entry.getNamespace());
             assertEquals("myvdw" + i, entry.getName());
             assertEquals("com.mycompany.MyVdwFactory" + i, entry.getFactoryClassName());
+            if (i == 1) {
+                assertEquals("abc", entry.getConfig());
+            }
         }
 
         // assert adapter loaders parsed

@@ -101,21 +101,23 @@ public class DatabasePollingViewable implements HistoricalEventViewable
                          String engineURI,
                          Map<Integer, List<ExprNode>> sqlParameters,
                          EventAdapterService eventAdapterService,
-                         String statementName, Annotation[] annotations) throws ExprValidationException
+                         String statementName,
+                         String statementId,
+                         Annotation[] annotations) throws ExprValidationException
     {
         evaluators = new ExprEvaluator[inputParameters.size()];
         subordinateStreams = new TreeSet<Integer>();
         this.exprEvaluatorContext = exprEvaluatorContext;
 
         int count = 0;
-        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, annotations);
+        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations);
         for (String inputParam : inputParameters)
         {
             ExprNode raw = findSQLExpressionNode(myStreamNumber, count, sqlParameters);
             if (raw == null) {
                 throw new ExprValidationException("Internal error find expression for historical stream parameter " + count + " stream " + myStreamNumber);
             }
-            ExprNode evaluator = ExprNodeUtil.getValidatedSubtree(raw, validationContext);
+            ExprNode evaluator = ExprNodeUtility.getValidatedSubtree(raw, validationContext);
             evaluators[count++] = evaluator.getExprEvaluator();
 
             ExprNodeIdentifierCollectVisitor visitor = new ExprNodeIdentifierCollectVisitor();

@@ -12,9 +12,9 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.event.*;
 import com.espertech.esper.util.ClassInstantiationException;
 import com.espertech.esper.util.JavaClassHelper;
-import org.w3c.dom.Node;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Node;
 
 import javax.xml.xpath.*;
 import java.util.*;
@@ -30,6 +30,9 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
     private final String rootElementName;
     private final ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM;
 
+    private String startTimestampPropertyName;
+    private String endTimestampPropertyName;
+
     /**
      * XPath namespace context.
      */
@@ -41,9 +44,9 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
      * @param metadata event type metadata
      * @param eventAdapterService for registration and lookup of types
      */
-    public BaseXMLEventType(EventTypeMetadata metadata, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM, EventAdapterService eventAdapterService)
+    public BaseXMLEventType(EventTypeMetadata metadata, int eventTypeId, ConfigurationEventTypeXMLDOM configurationEventTypeXMLDOM, EventAdapterService eventAdapterService)
     {
-        super(eventAdapterService, metadata, Node.class);
+        super(eventAdapterService, metadata, eventTypeId, Node.class);
         this.rootElementName = configurationEventTypeXMLDOM.getRootElementName();
         this.configurationEventTypeXMLDOM = configurationEventTypeXMLDOM;
         xPathFactory = XPathFactory.newInstance();
@@ -153,6 +156,11 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
         }
 
         super.initialize(new ArrayList<ExplicitPropertyDescriptor>(namedProperties.values()));
+
+        // evaluate start and end timestamp properties if any
+        startTimestampPropertyName = configurationEventTypeXMLDOM.getStartTimestampPropertyName();
+        endTimestampPropertyName = configurationEventTypeXMLDOM.getEndTimestampPropertyName();
+        EventTypeUtility.validateTimestampProperties(this, startTimestampPropertyName, endTimestampPropertyName);
     }
 
     /**
@@ -224,5 +232,13 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
     public EventBeanReader getReader()
     {
         return null;
-    }    
+    }
+
+    public String getStartTimestampPropertyName() {
+        return startTimestampPropertyName;
+    }
+
+    public String getEndTimestampPropertyName() {
+        return endTimestampPropertyName;
+    }
 }

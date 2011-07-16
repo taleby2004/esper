@@ -2,6 +2,7 @@ package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.event.EventTypeIdGeneratorImpl;
 import com.espertech.esper.support.bean.ISupportD;
 import com.espertech.esper.support.bean.ISupportDImpl;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
@@ -19,7 +20,7 @@ public class TestBeanEventAdapter extends TestCase
 
     public void setUp()
     {
-        beanEventTypeFactory = new BeanEventAdapter(new ConcurrentHashMap<Class, BeanEventType>(), SupportEventAdapterService.getService());
+        beanEventTypeFactory = new BeanEventAdapter(new ConcurrentHashMap<Class, BeanEventType>(), SupportEventAdapterService.getService(), new EventTypeIdGeneratorImpl());
     }
 
     public void testCreateBeanType()

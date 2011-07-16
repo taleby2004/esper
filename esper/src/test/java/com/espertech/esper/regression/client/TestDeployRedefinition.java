@@ -4,10 +4,10 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.deploy.DeploymentResult;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
+import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.filter.FilterService;
+import com.espertech.esper.filter.FilterServiceSPI;
 import junit.framework.TestCase;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class TestDeployRedefinition extends TestCase
 {
@@ -41,6 +41,42 @@ public class TestDeployRedefinition extends TestCase
 
         DeploymentResult resultThree = deploySvc.parseDeploy(text, "uri1", "arch1", null);
         deploySvc.undeployRemove(resultThree.getDeploymentId());
+
+        FilterService filterService = ((EPServiceProviderSPI) epService).getFilterService();
+        FilterServiceSPI filterSPI = (FilterServiceSPI) filterService;
+        assertEquals(0, filterSPI.getCountTypes());
+    }
+
+    public void testRedefDeployOrder() throws Exception {
+        String eplClientA = "" +
+                    "create schema InputEvent as (col1 string, col2 string);" +
+                    "\n" +
+                    "@Name('A') " +
+                    "insert into OutOne select col1||col2 as outOneCol from InputEvent;\n" +
+                    "\n" +
+                    "@Name('B') " +
+                    "insert into OutTwo select outOneCol||'x'||outOneCol as finalOut from OutOne;";
+        DeploymentResult deploymentResultOne = deploySvc.parseDeploy(eplClientA);
+
+        String eplClientB = "@Name('C') select * from OutTwo;";   // implicily bound to PN1
+        DeploymentResult deploymentResultTwo = deploySvc.parseDeploy(eplClientB);
+
+        deploySvc.undeploy(deploymentResultOne.getDeploymentId());
+        deploySvc.undeploy(deploymentResultTwo.getDeploymentId());
+
+        String eplClientC = "" +
+                    "create schema InputEvent as (col1 string, col2 string);" +
+                    "\n" +
+                    "@Name('A') " +
+                    "insert into OutOne select col1||col2 as outOneCol from InputEvent;" +
+                    "\n" +
+                    "@Name('B') " +
+                    "insert into OutTwo select col2||col1 as outOneCol from InputEvent;";
+        deploySvc.parseDeploy(eplClientC);
+
+        String eplClientD = "@Name('C') select * from OutOne;" +
+                              "@Name('D') select * from OutTwo;";
+        deploySvc.parseDeploy(eplClientD);
     }
 
     public void testNamedWindow() throws Exception {
@@ -48,8 +84,7 @@ public class TestDeployRedefinition extends TestCase
                 null, null, null);
         deploySvc.undeployRemove(result.getDeploymentId());
         
-        result = deploySvc.parseDeploy("create window MyWindow.win:time(30) as (col1 short, col2 long)",
-                null, null, null);
+        result = deploySvc.parseDeploy("create window MyWindow.win:time(30) as (col1 short, col2 long)");
         deploySvc.undeployRemove(result.getDeploymentId());
     }
 

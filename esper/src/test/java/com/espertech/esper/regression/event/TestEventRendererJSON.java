@@ -7,9 +7,11 @@ import com.espertech.esper.client.util.JSONEventRenderer;
 import com.espertech.esper.event.util.OutputValueRendererJSONString;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportEnum;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -31,6 +33,7 @@ public class TestEventRendererJSON extends TestCase
         bean.setIntPrimitive(1);
         bean.setIntBoxed(992);
         bean.setCharPrimitive('x');
+        bean.setEnumValue(SupportEnum.ENUM_VALUE_1);
         
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         EPStatement statement = epService.getEPAdministrator().createEPL("select * from SupportBean");
@@ -39,7 +42,7 @@ public class TestEventRendererJSON extends TestCase
         String result = epService.getEPRuntime().getEventRenderer().renderJSON("supportBean", statement.iterator().next());
 
         //System.out.println(result);
-        String expected = "{ \"supportBean\": { \"bigDecimal\": null, \"boolBoxed\": null, \"boolPrimitive\": false, \"byteBoxed\": null, \"bytePrimitive\": 0, \"charBoxed\": null, \"charPrimitive\": \"x\", \"doubleBoxed\": null, \"doublePrimitive\": 0.0, \"enumValue\": null, \"floatBoxed\": null, \"floatPrimitive\": 0.0, \"intBoxed\": 992, \"intPrimitive\": 1, \"longBoxed\": null, \"longPrimitive\": 0, \"shortBoxed\": null, \"shortPrimitive\": 0, \"string\": \"a\\nc\", \"this\": { \"bigDecimal\": null, \"boolBoxed\": null, \"boolPrimitive\": false, \"byteBoxed\": null, \"bytePrimitive\": 0, \"charBoxed\": null, \"charPrimitive\": \"x\", \"doubleBoxed\": null, \"doublePrimitive\": 0.0, \"enumValue\": null, \"floatBoxed\": null, \"floatPrimitive\": 0.0, \"intBoxed\": 992, \"intPrimitive\": 1, \"longBoxed\": null, \"longPrimitive\": 0, \"shortBoxed\": null, \"shortPrimitive\": 0, \"string\": \"a\\nc\" } } }";
+        String expected = "{ \"supportBean\": { \"bigDecimal\": null, \"boolBoxed\": null, \"boolPrimitive\": false, \"byteBoxed\": null, \"bytePrimitive\": 0, \"charBoxed\": null, \"charPrimitive\": \"x\", \"doubleBoxed\": null, \"doublePrimitive\": 0.0, \"enumValue\": \"ENUM_VALUE_1\", \"floatBoxed\": null, \"floatPrimitive\": 0.0, \"intBoxed\": 992, \"intPrimitive\": 1, \"longBoxed\": null, \"longPrimitive\": 0, \"shortBoxed\": null, \"shortPrimitive\": 0, \"string\": \"a\\nc\", \"this\": { \"bigDecimal\": null, \"boolBoxed\": null, \"boolPrimitive\": false, \"byteBoxed\": null, \"bytePrimitive\": 0, \"charBoxed\": null, \"charPrimitive\": \"x\", \"doubleBoxed\": null, \"doublePrimitive\": 0.0, \"enumValue\": \"ENUM_VALUE_1\", \"floatBoxed\": null, \"floatPrimitive\": 0.0, \"intBoxed\": 992, \"intPrimitive\": 1, \"longBoxed\": null, \"longPrimitive\": 0, \"shortBoxed\": null, \"shortPrimitive\": 0, \"string\": \"a\\nc\" } } }";
         assertEquals(removeNewline(expected), removeNewline(result));
         
         JSONEventRenderer renderer = epService.getEPRuntime().getEventRenderer().getJSONRenderer(statement.getEventType());
@@ -102,6 +105,27 @@ public class TestEventRendererJSON extends TestCase
         assertEquals(removeNewline(expected), removeNewline(result));
     }
 
+    public void testEmptyMap()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("EmptyMapEvent", EmptyMapEvent.class);
+        EPStatement statement = epService.getEPAdministrator().createEPL("select * from EmptyMapEvent");
+
+        epService.getEPRuntime().sendEvent(new EmptyMapEvent(null));
+        String result = epService.getEPRuntime().getEventRenderer().renderJSON("outer", statement.iterator().next());
+        String expected = "{ \"outer\": { \"props\": null } }";
+        assertEquals(removeNewline(expected), removeNewline(result));
+
+        epService.getEPRuntime().sendEvent(new EmptyMapEvent(Collections.<String, String>emptyMap()));
+        result = epService.getEPRuntime().getEventRenderer().renderJSON("outer", statement.iterator().next());
+        expected = "{ \"outer\": { \"props\": {} } }";
+        assertEquals(removeNewline(expected), removeNewline(result));
+
+        epService.getEPRuntime().sendEvent(new EmptyMapEvent(Collections.singletonMap("a", "b")));
+        result = epService.getEPRuntime().getEventRenderer().renderJSON("outer", statement.iterator().next());
+        expected = "{ \"outer\": { \"props\": { \"a\": \"b\" } } }";
+        assertEquals(removeNewline(expected), removeNewline(result));
+    }
+
     public static void testEnquote()
     {
         String[][] testdata = new String[][] {
@@ -122,5 +146,17 @@ public class TestEventRendererJSON extends TestCase
     private String removeNewline(String text)
     {
         return text.replaceAll("\\s\\s+|\\n|\\r", " ").trim();
+    }
+
+    public static class EmptyMapEvent {
+        private Map<String, String> props;
+
+        public EmptyMapEvent(Map<String, String> props) {
+            this.props = props;
+        }
+
+        public Map<String, String> getProps() {
+            return props;
+        }
     }
 }

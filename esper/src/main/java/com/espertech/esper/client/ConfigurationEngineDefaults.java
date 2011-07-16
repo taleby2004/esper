@@ -33,6 +33,7 @@ public class ConfigurationEngineDefaults implements Serializable
     private ConditionHandling conditionHandling;
     private ConfigurationMetricsReporting metricsReporting;
     private AlternativeContext alternativeContext;
+    private Cluster cluster;
     private static final long serialVersionUID = -528835191586154300L;
 
     /**
@@ -54,6 +55,7 @@ public class ConfigurationEngineDefaults implements Serializable
         exceptionHandling = new ExceptionHandling();
         conditionHandling = new ConditionHandling();
         alternativeContext = new AlternativeContext();
+        cluster = new Cluster();
     }
 
     /**
@@ -206,11 +208,21 @@ public class ConfigurationEngineDefaults implements Serializable
         this.conditionHandling = conditionHandling;
     }
 
+    public Cluster getCluster() {
+        return cluster;
+    }
+
+    public void setCluster(Cluster cluster) {
+        this.cluster = cluster;
+    }
+
     /**
      * Holds threading settings.
      */
     public static class Threading implements Serializable
     {
+        private static final long serialVersionUID = 6504606101119059962L;
+
         private boolean isListenerDispatchPreserveOrder;
         private long listenerDispatchTimeout;
         private Locking listenerDispatchLocking;
@@ -221,7 +233,6 @@ public class ConfigurationEngineDefaults implements Serializable
 
         private long internalTimerMsecResolution;
         private boolean internalTimerEnabled;
-        private static final long serialVersionUID = 6504606101119059962L;
 
         private boolean isThreadPoolTimerExec;
         private boolean isThreadPoolInbound;
@@ -1291,6 +1302,9 @@ public class ConfigurationEngineDefaults implements Serializable
         
         private String runtime;
         private String admin;
+        private String eventTypeIdGeneratorFactory;
+        private String virtualDataWindowViewFactory;
+        private String statementMetadataFactory;
 
         /**
          * Class name of runtime provider.
@@ -1326,6 +1340,30 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setAdmin(String admin)
         {
             this.admin = admin;
+        }
+
+        public String getEventTypeIdGeneratorFactory() {
+            return eventTypeIdGeneratorFactory;
+        }
+
+        public void setEventTypeIdGeneratorFactory(String eventTypeIdGeneratorFactory) {
+            this.eventTypeIdGeneratorFactory = eventTypeIdGeneratorFactory;
+        }
+
+        public void setVirtualDataWindowViewFactory(String virtualDataWindowViewFactory) {
+            this.virtualDataWindowViewFactory = virtualDataWindowViewFactory;
+        }
+
+        public String getVirtualDataWindowViewFactory() {
+            return virtualDataWindowViewFactory;
+        }
+
+        public String getStatementMetadataFactory() {
+            return statementMetadataFactory;
+        }
+
+        public void setStatementMetadataFactory(String statementMetadataFactory) {
+            this.statementMetadataFactory = statementMetadataFactory;
         }
     }
 
@@ -1437,5 +1475,76 @@ public class ConfigurationEngineDefaults implements Serializable
         public void addClass(Class clazz) {
             addClass(clazz.getName());
         }
+    }
+
+    public static class Cluster implements Serializable {
+
+        private boolean enabled = false;
+        private List<String> hosts;
+        private transient Object clusterConfig;
+        private String resource;
+        private String url;
+        private String file;
+        private String xmlDocument;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public List<String> getHosts() {
+            return hosts;
+        }
+
+        public void setHosts(List<String> hosts) {
+            this.hosts = hosts;
+        }
+
+        public Object getClusterConfig() {
+            return clusterConfig;
+        }
+
+        public void setClusterConfig(Object clusterConfig) {
+            this.clusterConfig = clusterConfig;
+        }
+
+        public String getResource() {
+            return resource;
+        }
+
+        public void setResource(String resource) {
+            this.resource = resource;
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getFile() {
+            return file;
+        }
+
+        public void setFile(String file) {
+            this.file = file;
+        }
+
+        public String getXmlDocument() {
+            return xmlDocument;
+        }
+
+        public void setXmlDocument(String xmlDocument) {
+            this.xmlDocument = xmlDocument;
+        }
+    }
+
+    public static interface ClusterConfigurator {
+        public void configure(Configuration configuration);
     }
 }

@@ -139,7 +139,6 @@ tokens
    	OBJECT_PARAM_ORDERED_EXPR;
    	FOLLOWED_BY_EXPR;
    	FOLLOWED_BY_ITEM;
-   	ARRAY_PARAM_LIST;
    	PATTERN_FILTER_EXPR;
    	PATTERN_NOT_EXPR;
    	PATTERN_EVERY_DISTINCT_EXPR;
@@ -170,6 +169,8 @@ tokens
    	EVAL_OR_EXPR;
    	EVAL_EQUALS_EXPR;
    	EVAL_NOTEQUALS_EXPR;
+   	EVAL_IS_EXPR;
+   	EVAL_ISNOT_EXPR;
    	EVAL_EQUALS_GROUP_EXPR;
    	EVAL_NOTEQUALS_GROUP_EXPR;
    	EVAL_IDENT;
@@ -271,7 +272,7 @@ tokens
 	ON_SET_EXPR_ITEM;
 	CREATE_SCHEMA_EXPR;
 	CREATE_SCHEMA_EXPR_QUAL;
-	CREATE_SCHEMA_EXPR_INH;
+	CREATE_SCHEMA_EXPR_VAR;
 	VARIANT_LIST;
 	MERGE_UNM;
 	MERGE_MAT;
@@ -279,6 +280,7 @@ tokens
 	MERGE_INS;
 	MERGE_DEL;
 	NEW_ITEM;
+   	AGG_FILTER_EXPR;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -868,11 +870,15 @@ createSchemaExpr
 	:	CREATE keyword=IDENT? SCHEMA name=IDENT AS? 
 		  (
 			variantList
-		  |   	LPAREN createColumnList? RPAREN (inherits=IDENT columnList)?
-		  )		  
-		-> {$inherits != null}? ^(CREATE_SCHEMA_EXPR $name createColumnList? ^(CREATE_SCHEMA_EXPR_INH $inherits columnList))
-		-> {$keyword != null}? ^(CREATE_SCHEMA_EXPR $name variantList ^(CREATE_SCHEMA_EXPR_QUAL $keyword))
-		-> ^(CREATE_SCHEMA_EXPR $name variantList? createColumnList?)
+		  |   	LPAREN createColumnList? RPAREN 
+		  ) createSchemaQual*		  
+		-> {$keyword != null}? ^(CREATE_SCHEMA_EXPR $name variantList ^(CREATE_SCHEMA_EXPR_VAR $keyword) createSchemaQual*)
+		-> ^(CREATE_SCHEMA_EXPR $name variantList? createColumnList? createSchemaQual*)
+	;
+
+createSchemaQual
+	:	i=IDENT columnList
+		-> ^(CREATE_SCHEMA_EXPR_QUAL $i columnList)
 	;
 
 variantList 	
@@ -1221,10 +1227,12 @@ evalEqualsExpression
 	       	|  (a=ANY | a=SOME | a=ALL) ( (LPAREN expressionList? RPAREN) | subSelectGroupExpression )
 	       )
 	     )*	     
-	    -> {$a == null && ($eq != null || $is != null)}? ^(EVAL_EQUALS_EXPR evalRelationalExpression+)
+	    -> {$a == null && $eq != null}? ^(EVAL_EQUALS_EXPR evalRelationalExpression+)
+	    -> {$a == null && $is != null}? ^(EVAL_IS_EXPR evalRelationalExpression+)
+	    -> {$a == null && ($sqlne != null || $ne != null)}? ^(EVAL_NOTEQUALS_EXPR evalRelationalExpression+)
+	    -> {$a == null && $isnot != null}? ^(EVAL_ISNOT_EXPR evalRelationalExpression+)
 	    -> {$a != null && ($eq != null || $is != null)}? ^(EVAL_EQUALS_GROUP_EXPR evalRelationalExpression $a expressionList? subSelectGroupExpression?)
-	    -> {$a == null && ($isnot != null || $sqlne != null || $ne != null)}? ^(EVAL_NOTEQUALS_EXPR evalRelationalExpression+)
-	    -> {$a != null && ($isnot != null || $sqlne != null || $ne != null)}? ^(EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a expressionList? subSelectGroupExpression?)
+	    -> {$a != null && ($sqlne != null || $ne != null || $isnot != null)}? ^(EVAL_NOTEQUALS_GROUP_EXPR evalRelationalExpression $a expressionList? subSelectGroupExpression?)
 	    -> evalRelationalExpression+
 	;
 
@@ -1352,23 +1360,24 @@ subSelectFilterExpr
 	;
 		
 arrayExpression
-	: LCURLY (expression (COMMA expression)* )? RCURLY
+	: LCURLY (expression (COMMA expression)* )? RCURLY (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(ARRAY_EXPR expression*) libFunctionNoClass+)
 	  -> ^(ARRAY_EXPR expression*)
 	;
 
 builtinFunc
-	: SUM^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
-	| AVG^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
+	: SUM^ LPAREN! (ALL! | DISTINCT)? expression aggregationFilterExpr? RPAREN!
+	| AVG^ LPAREN! (ALL! | DISTINCT)? expression aggregationFilterExpr? RPAREN!
 	| COUNT^ LPAREN!
 		(
 			((ALL! | DISTINCT)? expression)
 		|
 			(STAR!) 
 		)
-		RPAREN!
-	| MEDIAN^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
-	| STDDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
-	| AVEDEV^ LPAREN! (ALL! | DISTINCT)? expression RPAREN!
+		aggregationFilterExpr? RPAREN!
+	| MEDIAN^ LPAREN! (ALL! | DISTINCT)? expression aggregationFilterExpr? RPAREN!
+	| STDDEV^ LPAREN! (ALL! | DISTINCT)? expression aggregationFilterExpr? RPAREN!
+	| AVEDEV^ LPAREN! (ALL! | DISTINCT)? expression aggregationFilterExpr? RPAREN!
 	| firstAggregation
 	| lastAggregation
 	| windowAggregation
@@ -1388,7 +1397,9 @@ builtinFunc
 	// therefore handled in code via libFunction as below
 	| INSTANCEOF^ LPAREN! expression COMMA! classIdentifier (COMMA! classIdentifier)* RPAREN!
 	| TYPEOF^ LPAREN! expression RPAREN!
-	| CAST^ LPAREN! expression (COMMA! | AS!) classIdentifier RPAREN!
+	| CAST LPAREN expression (COMMA | AS) classIdentifier RPAREN (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
+	  -> {$d != null}? ^(DOT_EXPR ^(CAST expression classIdentifier) libFunctionNoClass+)
+	  -> ^(CAST expression classIdentifier)
 	| EXISTS^ LPAREN! eventProperty RPAREN!
 	| CURRENT_TIMESTAMP (LPAREN RPAREN)? (d=DOT libFunctionNoClass (d=DOT libFunctionNoClass)* )?
 	  -> {$d != null}? ^(DOT_EXPR ^(CURRENT_TIMESTAMP) libFunctionNoClass+)
@@ -1419,9 +1430,9 @@ accessAggExpr
 	|	expression -> ^(ACCESS_AGG expression)
 	;
 
-
-maxFunc
-	: (MAX^ | MIN^) LPAREN! expression (COMMA! expression (COMMA! expression)* )? RPAREN!
+aggregationFilterExpr
+	:	COMMA expression
+		-> ^(AGG_FILTER_EXPR expression)
 	;
 	
 eventPropertyOrLibFunction
@@ -1450,6 +1461,7 @@ funcIdent
 	| min=MIN -> IDENT[$min]
 	| w=WHERE -> IDENT[$w]
 	| s=SET -> IDENT[$s]
+	| after=AFTER-> IDENT[$after]
 	;
 	
 libFunctionArgs
@@ -1618,9 +1630,14 @@ patternFilterExpression
     	classIdentifier
        	(LPAREN expressionList? RPAREN)?
        	propertyExpression?
-       	-> ^(PATTERN_FILTER_EXPR $i? classIdentifier propertyExpression? expressionList?)
+       	patternFilterAnnotation?
+       	-> ^(PATTERN_FILTER_EXPR $i? classIdentifier propertyExpression? patternFilterAnnotation? expressionList?)
     ;
-    
+       	
+patternFilterAnnotation
+	:	ATCHAR i=IDENT (LPAREN number RPAREN)?
+		-> ^(ATCHAR $i number?)
+	;
 
 classIdentifier
   @init { String identifier = ""; }
@@ -1646,12 +1663,12 @@ expressionList
     	;
    	
 expressionWithTimeList
-    	:   	expressionWithTime (COMMA! expressionWithTime)*
+    	:   	expressionWithTimeInclLast (COMMA! expressionWithTimeInclLast)*
     	;
 
 expressionWithTime
-	:   	(lastOperand) => lastOperand
-	|	(lastWeekdayOperand) => lastWeekdayOperand
+	:   	
+		(lastWeekdayOperand) => lastWeekdayOperand
 	|	(timePeriod) => timePeriod
 	|	(expressionQualifyable) => expressionQualifyable
 	|	(rangeOperand) => rangeOperand
@@ -1660,6 +1677,11 @@ expressionWithTime
 	|	(weekDayOperator) =>  weekDayOperator
 	| 	(numericParameterList) => numericParameterList
 	|	numberSetStar
+	;
+
+expressionWithTimeInclLast
+	:   	(lastOperand) => lastOperand
+	|	expressionWithTime
 	;
 
 expressionQualifyable
@@ -1827,51 +1849,51 @@ timePeriod
 	;
 
 yearPart
-	:	(number|i=IDENT|substitution) (TIMEPERIOD_YEARS | TIMEPERIOD_YEAR)
+	:	(numberconstant|i=IDENT|substitution) (TIMEPERIOD_YEARS | TIMEPERIOD_YEAR)
 		-> {i!= null}? ^(YEAR_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
-		-> ^(YEAR_PART number? substitution?)
+		-> ^(YEAR_PART numberconstant? substitution?)
 	;
 
 monthPart
-	:	(number|i=IDENT|substitution) (TIMEPERIOD_MONTHS | TIMEPERIOD_MONTH)
+	:	(numberconstant|i=IDENT|substitution) (TIMEPERIOD_MONTHS | TIMEPERIOD_MONTH)
 		-> {i!= null}? ^(MONTH_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
-		-> ^(MONTH_PART number? substitution?)
+		-> ^(MONTH_PART numberconstant? substitution?)
 	;
 
 weekPart
-	:	(number|i=IDENT|substitution) (TIMEPERIOD_WEEKS | TIMEPERIOD_WEEK)
+	:	(numberconstant|i=IDENT|substitution) (TIMEPERIOD_WEEKS | TIMEPERIOD_WEEK)
 		-> {i!= null}? ^(WEEK_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
-		-> ^(WEEK_PART number? substitution?)
+		-> ^(WEEK_PART numberconstant? substitution?)
 	;
 
 dayPart
-	:	(number|i=IDENT|substitution) (TIMEPERIOD_DAYS | TIMEPERIOD_DAY)
+	:	(numberconstant|i=IDENT|substitution) (TIMEPERIOD_DAYS | TIMEPERIOD_DAY)
 		-> {i!= null}? ^(DAY_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
-		-> ^(DAY_PART number? substitution?)
+		-> ^(DAY_PART numberconstant? substitution?)
 	;
 
 hourPart 
-	:	(number|i=IDENT|substitution) (TIMEPERIOD_HOURS | TIMEPERIOD_HOUR)
+	:	(numberconstant|i=IDENT|substitution) (TIMEPERIOD_HOURS | TIMEPERIOD_HOUR)
 		-> {i!= null}? ^(HOUR_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
-		-> ^(HOUR_PART number? substitution?)
+		-> ^(HOUR_PART numberconstant? substitution?)
 	;
 
 minutePart 
-	:	(number|i=IDENT|substitution) (TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN)
+	:	(numberconstant|i=IDENT|substitution) (TIMEPERIOD_MINUTES | TIMEPERIOD_MINUTE | MIN)
 		-> {i!= null}? ^(MINUTE_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
-		-> ^(MINUTE_PART number? substitution?)
+		-> ^(MINUTE_PART numberconstant? substitution?)
 	;
 	
 secondPart 
-	:	(number|i=IDENT|substitution) (TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC)
+	:	(numberconstant|i=IDENT|substitution) (TIMEPERIOD_SECONDS | TIMEPERIOD_SECOND | TIMEPERIOD_SEC)
 		-> {i!= null}? ^(SECOND_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
-		-> ^(SECOND_PART number? substitution?)
+		-> ^(SECOND_PART numberconstant? substitution?)
 	;
 	
 millisecondPart 
-	:	(number|i=IDENT|substitution) (TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC)
+	:	(numberconstant|i=IDENT|substitution) (TIMEPERIOD_MILLISECONDS | TIMEPERIOD_MILLISECOND | TIMEPERIOD_MILLISEC)
 		-> {i!= null}? ^(MILLISECOND_PART ^(EVENT_PROP_EXPR ^(EVENT_PROP_SIMPLE $i)))
-		-> ^(MILLISECOND_PART number? substitution?)
+		-> ^(MILLISECOND_PART numberconstant? substitution?)
 	;
 	
 number
@@ -1964,7 +1986,7 @@ NUM_LONG	: '\u18FF';  // assign bogus unicode characters so the token exists
 NUM_DOUBLE	: '\u18FE';
 NUM_FLOAT	: '\u18FD';
 ESCAPECHAR	: '\\';
-EMAILAT		: '@';
+ATCHAR		: '@';
 
 // Whitespace -- ignored
 WS	:	(	' '

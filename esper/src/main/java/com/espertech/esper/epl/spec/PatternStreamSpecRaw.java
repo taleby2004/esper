@@ -32,6 +32,7 @@ import com.espertech.esper.util.UuidGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.StringWriter;
 import java.util.*;
 
 /**
@@ -70,11 +71,13 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
 
     public StreamSpecCompiled compile(StatementContext context,
                                       Set<String> eventTypeReferences,
-                                      boolean isInsertInto)
+                                      boolean isInsertInto,
+                                      Collection<Integer> assignedTypeNumberStack)
             throws ExprValidationException
     {
         MatchEventSpec tags = new MatchEventSpec();
-        recursiveCompile(evalNode, context, eventTypeReferences, isInsertInto, tags);
+        Deque<Integer> subexpressionIdStack = new ArrayDeque<Integer>(assignedTypeNumberStack);
+        recursiveCompile(evalNode, context, eventTypeReferences, isInsertInto, tags, subexpressionIdStack);
 
         Audit auditPattern = AuditEnum.PATTERN.getAudit(context.getAnnotations());
         Audit auditPatternInstance = AuditEnum.PATTERNINSTANCES.getAudit(context.getAnnotations());
@@ -87,11 +90,14 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         return new PatternStreamSpecCompiled(compiledEvalNode, tags.getTaggedEventTypes(), tags.getArrayEventTypes(), this.getViewSpecs(), this.getOptionalStreamName(), this.getOptions());
     }
 
-    private static void recursiveCompile(EvalNode evalNode, StatementContext context, Set<String> eventTypeReferences, boolean isInsertInto, MatchEventSpec tags) throws ExprValidationException
+    private static void recursiveCompile(EvalNode evalNode, StatementContext context, Set<String> eventTypeReferences, boolean isInsertInto, MatchEventSpec tags, Deque<Integer> subexpressionIdStack) throws ExprValidationException
     {
+        int counter = 0;
         for (EvalNode child : evalNode.getChildNodes())
         {
-            recursiveCompile(child, context, eventTypeReferences, isInsertInto, tags);
+            subexpressionIdStack.addLast(counter++);
+            recursiveCompile(child, context, eventTypeReferences, isInsertInto, tags, subexpressionIdStack);
+            subexpressionIdStack.removeLast();
         }
 
         LinkedHashMap<String, Pair<EventType, String>> newTaggedEventTypes = null;
@@ -109,7 +115,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             // obtain property event type, if final event type is properties
             if (filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec() != null)
             {
-                PropertyEvaluator optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec(), resolvedEventType, filterNode.getEventAsName(), context.getEventAdapterService(), context.getMethodResolutionService(), context.getSchedulingService(), context.getVariableService(), context.getEngineURI(), context.getStatementId(), context.getStatementName(), context.getAnnotations());
+                PropertyEvaluator optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec(), resolvedEventType, filterNode.getEventAsName(), context.getEventAdapterService(), context.getMethodResolutionService(), context.getSchedulingService(), context.getVariableService(), context.getEngineURI(), context.getStatementId(), context.getStatementName(), context.getAnnotations(), subexpressionIdStack);
                 finalEventType = optionalPropertyEvaluator.getFragmentEventType();
                 isPropertyEvaluation = true;
             }
@@ -181,7 +187,8 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             if (tags.getArrayEventTypes() != null)
             {
                 arrayCompositeEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
-                EventType arrayTagCompositeEventType = context.getEventAdapterService().createSemiAnonymousMapType(new HashMap(), tags.getArrayEventTypes(), isInsertInto);
+                String patternSubexEventType = getPatternSubexEventType(context.getStatementId(), "pattern", subexpressionIdStack);
+                EventType arrayTagCompositeEventType = context.getEventAdapterService().createSemiAnonymousMapType(patternSubexEventType, new HashMap(), tags.getArrayEventTypes(), isInsertInto);
                 for (Map.Entry<String, Pair<EventType, String>> entry : tags.getArrayEventTypes().entrySet())
                 {
                     String tag = entry.getKey();
@@ -197,7 +204,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             StreamTypeService streamTypeService = new StreamTypeServiceImpl(filterTypes, context.getEngineURI(), true, false);
             List<ExprNode> exprNodes = filterNode.getRawFilterSpec().getFilterExpressions();
 
-            FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(resolvedEventType, eventName, exprNodes, filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec(),  filterTaggedEventTypes, arrayCompositeEventTypes, streamTypeService, context.getMethodResolutionService(), context.getSchedulingService(), context.getVariableService(), context.getEventAdapterService(), context.getEngineURI(), null, context);
+            FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(resolvedEventType, eventName, exprNodes, filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec(),  filterTaggedEventTypes, arrayCompositeEventTypes, streamTypeService, context.getMethodResolutionService(), context.getSchedulingService(), context.getVariableService(), context.getEventAdapterService(), context.getEngineURI(), null, context, subexpressionIdStack);
             filterNode.setFilterSpec(spec);
         }
         else if (evalNode instanceof EvalObserverNode)
@@ -207,8 +214,8 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             {
                 ObserverFactory observerFactory = context.getPatternResolutionService().create(observerNode.getPatternObserverSpec());
 
-                StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getEventAdapterService(), tags.taggedEventTypes, tags.arrayEventTypes);
-                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getAnnotations());
+                StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getStatementId(), context.getEventAdapterService(), tags.taggedEventTypes, tags.arrayEventTypes, subexpressionIdStack, "observer");
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations());
                 List<ExprNode> validated = validateExpressions(observerNode.getPatternObserverSpec().getObjectParameters(), validationContext);
 
                 MatchedEventConvertor convertor = new MatchedEventConvertorImpl(tags.taggedEventTypes, tags.arrayEventTypes, context.getEventAdapterService());
@@ -232,8 +239,8 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             {
                 GuardFactory guardFactory = context.getPatternResolutionService().create(guardNode.getPatternGuardSpec());
 
-                StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getEventAdapterService(), tags.taggedEventTypes, tags.arrayEventTypes);
-                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getAnnotations());
+                StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getStatementId(), context.getEventAdapterService(), tags.taggedEventTypes, tags.arrayEventTypes, subexpressionIdStack, "guard");
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations());
                 List<ExprNode> validated = validateExpressions(guardNode.getPatternGuardSpec().getObjectParameters(), validationContext);
 
                 MatchedEventConvertor convertor = new MatchedEventConvertorImpl(tags.taggedEventTypes, tags.arrayEventTypes, context.getEventAdapterService());
@@ -254,8 +261,8 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         {
             EvalEveryDistinctNode distinctNode = (EvalEveryDistinctNode) evalNode;
             MatchEventSpec matchEventFromChildNodes = analyzeMatchEvent(distinctNode);
-            StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getEventAdapterService(), matchEventFromChildNodes.getTaggedEventTypes(), matchEventFromChildNodes.getArrayEventTypes());
-            ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getAnnotations());
+            StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getStatementId(), context.getEventAdapterService(), matchEventFromChildNodes.getTaggedEventTypes(), matchEventFromChildNodes.getArrayEventTypes(), subexpressionIdStack, "every-distinct");
+            ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations());
             List<ExprNode> validated;
             try
             {
@@ -299,12 +306,12 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
 
             // compile bounds expressions, if any
             MatchEventSpec untilMatchEventSpec = new MatchEventSpec(tags.getTaggedEventTypes(), tags.getArrayEventTypes());
-            StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getEventAdapterService(), untilMatchEventSpec.getTaggedEventTypes(), untilMatchEventSpec.getArrayEventTypes());
-            ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getAnnotations());
+            StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getStatementId(), context.getEventAdapterService(), untilMatchEventSpec.getTaggedEventTypes(), untilMatchEventSpec.getArrayEventTypes(), subexpressionIdStack, "until");
+            ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations());
 
             String message = "Match-until bounds value expressions must return a numeric value";
             if (matchUntilNode.getLowerBounds() != null) {
-                ExprNode validated = ExprNodeUtil.getValidatedSubtree(matchUntilNode.getLowerBounds(), validationContext);
+                ExprNode validated = ExprNodeUtility.getValidatedSubtree(matchUntilNode.getLowerBounds(), validationContext);
                 matchUntilNode.setLowerBounds(validated);
                 if ((validated.getExprEvaluator().getType() == null) || (!JavaClassHelper.isNumeric(validated.getExprEvaluator().getType()))) {
                     throw new ExprValidationException(message);
@@ -312,7 +319,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             }
 
             if (matchUntilNode.getUpperBounds() != null) {
-                ExprNode validated = ExprNodeUtil.getValidatedSubtree(matchUntilNode.getUpperBounds(), validationContext);
+                ExprNode validated = ExprNodeUtility.getValidatedSubtree(matchUntilNode.getUpperBounds(), validationContext);
                 matchUntilNode.setUpperBounds(validated);
                 if ((validated.getExprEvaluator().getType() == null) || (!JavaClassHelper.isNumeric(validated.getExprEvaluator().getType()))) {
                     throw new ExprValidationException(message);
@@ -355,7 +362,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         {
             EvalFollowedByNode followedByNode = (EvalFollowedByNode) evalNode;
             StreamTypeService streamTypeService = new StreamTypeServiceImpl(context.getEngineURI(), false);
-            ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getAnnotations());
+            ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations());
 
             if (followedByNode.getOptionalMaxExpressions() != null) {
                 List<ExprNode> validated = new ArrayList<ExprNode>();
@@ -373,7 +380,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
                             throw new ExprValidationException(errorMessage);
                         }
 
-                        ExprNode validatedExpr = ExprNodeUtil.getValidatedSubtree(maxExpr, validationContext);
+                        ExprNode validatedExpr = ExprNodeUtility.getValidatedSubtree(maxExpr, validationContext);
                         validated.add(validatedExpr);
                         if ((validatedExpr.getExprEvaluator().getType() == null) || (!JavaClassHelper.isNumeric(validatedExpr.getExprEvaluator().getType()))) {
                             String message = "Invalid maximum expression in followed-by, the expression must return an integer value";
@@ -405,12 +412,12 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         List<ExprNode> validated = new ArrayList<ExprNode>();
         for (ExprNode node : objectParameters)
         {
-            validated.add(ExprNodeUtil.getValidatedSubtree(node, validationContext));
+            validated.add(ExprNodeUtility.getValidatedSubtree(node, validationContext));
         }
         return validated;
     }
 
-    private static StreamTypeService getStreamTypeService(String engineURI, EventAdapterService eventAdapterService, Map<String, Pair<EventType, String>> taggedEventTypes, Map<String, Pair<EventType, String>> arrayEventTypes)
+    private static StreamTypeService getStreamTypeService(String engineURI, String statementId, EventAdapterService eventAdapterService, Map<String, Pair<EventType, String>> taggedEventTypes, Map<String, Pair<EventType, String>> arrayEventTypes, Deque<Integer> subexpressionIdStack, String objectType)
     {
         LinkedHashMap<String, Pair<EventType, String>> filterTypes = new LinkedHashMap<String, Pair<EventType, String>>();
         filterTypes.putAll(taggedEventTypes);
@@ -418,7 +425,8 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         // handle array tags (match-until clause)
         if (arrayEventTypes != null)
         {
-            EventType arrayTagCompositeEventType = eventAdapterService.createSemiAnonymousMapType(new HashMap(), arrayEventTypes, false);
+            String patternSubexEventType = getPatternSubexEventType(statementId, objectType, subexpressionIdStack);
+            EventType arrayTagCompositeEventType = eventAdapterService.createSemiAnonymousMapType(patternSubexEventType, new HashMap(), arrayEventTypes, false);
             for (Map.Entry<String, Pair<EventType, String>> entry : arrayEventTypes.entrySet())
             {
                 String tag = entry.getKey();
@@ -431,6 +439,18 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         }
 
         return new StreamTypeServiceImpl(filterTypes, engineURI, true, false);
+    }
+
+    private static String getPatternSubexEventType(String statementId, String objectType, Deque<Integer> subexpressionIdStack) {
+        StringWriter writer = new StringWriter();
+        writer.append(statementId);
+        writer.append("_");
+        writer.append(objectType);
+        for (Integer num : subexpressionIdStack) {
+            writer.append("_");
+            writer.append(Integer.toString(num));
+        }
+        return writer.toString();
     }
 
     private static EvalNode recursiveAddAuditNode(EvalNode parentNode, boolean auditPattern, boolean auditPatternInstance, EvalNode evalNode, Map<EvalNode, String> evalNodeExpressions, EvalAuditInstanceCount instanceCount) {

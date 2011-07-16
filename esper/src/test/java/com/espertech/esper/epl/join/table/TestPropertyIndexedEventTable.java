@@ -83,19 +83,6 @@ public class TestPropertyIndexedEventTable extends TestCase
         {
             // Expected
         }
-
-        // Same event added twice fails
-        event = makeBean(1, "aa");
-        index.add(new EventBean[] {event});
-        try
-        {
-            index.add(new EventBean[] {event});
-            TestCase.fail();
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected
-        }
     }
 
     public void testRemove()
@@ -115,16 +102,6 @@ public class TestPropertyIndexedEventTable extends TestCase
 
         Set<EventBean> result = index.lookup(new Object[] {1, "b"});
         assertEquals(2, result.size());
-
-        try
-        {
-            index.add(testEvents);
-            fail();
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // expected
-        }
     }
 
     public void testRemoveArray()

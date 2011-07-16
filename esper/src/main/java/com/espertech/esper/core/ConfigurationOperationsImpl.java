@@ -13,14 +13,14 @@ import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineSettingsService;
 import com.espertech.esper.epl.metric.MetricReportingService;
+import com.espertech.esper.epl.spec.PluggableObjectCollection;
 import com.espertech.esper.epl.variable.VariableExistsException;
 import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.epl.variable.VariableTypeException;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventTypeMetadata;
-import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.event.EventTypeIdGenerator;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.event.vaevent.VariantEventType;
@@ -38,6 +38,7 @@ import java.util.*;
 public class ConfigurationOperationsImpl implements ConfigurationOperations
 {
     private final EventAdapterService eventAdapterService;
+    private final EventTypeIdGenerator eventTypeIdGenerator;
     private final EngineImportService engineImportService;
     private final VariableService variableService;
     private final EngineSettingsService engineSettingsService;
@@ -45,6 +46,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     private final MetricReportingService metricReportingService;
     private final StatementEventTypeRef statementEventTypeRef;
     private final StatementVariableRef statementVariableRef;
+    private final PluggableObjectCollection plugInViews;
 
     /**
      * Ctor.
@@ -58,15 +60,18 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
      * @param statementVariableRef - statement to variable reference holding 
      */
     public ConfigurationOperationsImpl(EventAdapterService eventAdapterService,
+                                       EventTypeIdGenerator eventTypeIdGenerator,
                                        EngineImportService engineImportService,
                                        VariableService variableService,
                                        EngineSettingsService engineSettingsService,
                                        ValueAddEventService valueAddEventService,
                                        MetricReportingService metricReportingService,
                                        StatementEventTypeRef statementEventTypeRef,
-                                       StatementVariableRef statementVariableRef)
+                                       StatementVariableRef statementVariableRef,
+                                       PluggableObjectCollection plugInViews)
     {
         this.eventAdapterService = eventAdapterService;
+        this.eventTypeIdGenerator = eventTypeIdGenerator;
         this.engineImportService = engineImportService;
         this.variableService = variableService;
         this.engineSettingsService = engineSettingsService;
@@ -74,11 +79,21 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         this.metricReportingService = metricReportingService;
         this.statementEventTypeRef = statementEventTypeRef;
         this.statementVariableRef = statementVariableRef;
+        this.plugInViews = plugInViews;
     }
 
     public void addEventTypeAutoName(String javaPackageName)
     {
         eventAdapterService.addAutoNamePackage(javaPackageName);
+    }
+
+    public void addPlugInView(String namespace, String name, String viewFactoryClass)
+    {
+        ConfigurationPlugInView configurationPlugInView = new ConfigurationPlugInView();
+        configurationPlugInView.setNamespace(namespace);
+        configurationPlugInView.setName(name);
+        configurationPlugInView.setFactoryClassName(viewFactoryClass);
+        plugInViews.addViews(Collections.singletonList(configurationPlugInView), Collections.<ConfigurationPlugInVirtualDataWindow>emptyList());
     }
 
     public void addPlugInAggregationFunction(String functionName, String aggregationClassName)
@@ -189,15 +204,27 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
 
     public void addEventType(String eventTypeName, Map<String, Object> typeMap, String[] superTypes) throws ConfigurationException
     {
-        Set<String> superTypeNames = null;
+        ConfigurationEventTypeMap optionalConfig = null;
         if ((superTypes != null) && (superTypes.length > 0))
         {
-            superTypeNames = new HashSet<String>(Arrays.asList(superTypes));
+            optionalConfig = new ConfigurationEventTypeMap();
+            optionalConfig.getSuperTypes().addAll(Arrays.asList(superTypes));
         }
 
         try
         {
-            eventAdapterService.addNestableMapType(eventTypeName, typeMap, superTypeNames, false, true, true, false, false);
+            eventAdapterService.addNestableMapType(eventTypeName, typeMap, optionalConfig, false, true, true, false, false);
+        }
+        catch (EventAdapterException t)
+        {
+            throw new ConfigurationException(t.getMessage(), t);
+        }
+    }
+
+    public void addEventType(String eventTypeName, Map<String, Object> typeMap, ConfigurationEventTypeMap mapConfig) throws ConfigurationException {
+        try
+        {
+            eventAdapterService.addNestableMapType(eventTypeName, typeMap, mapConfig, false, true, true, false, false);
         }
         catch (EventAdapterException t)
         {
@@ -320,7 +347,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
 
     public void addVariantStream(String varianteventTypeName, ConfigurationVariantStream variantStreamConfig)
     {
-        valueAddEventService.addVariantStream(varianteventTypeName, variantStreamConfig, eventAdapterService);
+        valueAddEventService.addVariantStream(varianteventTypeName, variantStreamConfig, eventAdapterService, eventTypeIdGenerator);
     }
 
     public void updateMapEventType(String mapeventTypeName, Map<String, Object> typeMap) throws ConfigurationException
@@ -337,7 +364,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
 
     public void replaceXMLEventType(String xmlEventTypeName, ConfigurationEventTypeXMLDOM config) throws ConfigurationException {
         SchemaModel schemaModel = null;
-        if (config.getSchemaResource() != null)
+        if (config.getSchemaResource() != null || config.getSchemaText() != null)
         {
             try
             {
@@ -498,4 +525,18 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     public EventType[] getEventTypes() {
         return eventAdapterService.getAllTypes();
     }
+
+    public void addEventType(String eventTypeName, String eventClass, ConfigurationEventTypeLegacy legacyEventTypeDesc)
+    {
+        try {
+            Map<String, ConfigurationEventTypeLegacy> map = new HashMap<String, ConfigurationEventTypeLegacy>();
+            map.put(eventClass, legacyEventTypeDesc);
+            eventAdapterService.setClassLegacyConfigs(map);
+            eventAdapterService.addBeanType(eventTypeName, eventClass, false, false, false, true);
+        }
+        catch (EventAdapterException ex) {
+            throw new ConfigurationException("Failed to add legacy event type definition for type '" + eventTypeName + "': " + ex.getMessage(), ex);
+        }
+    }
+
 }

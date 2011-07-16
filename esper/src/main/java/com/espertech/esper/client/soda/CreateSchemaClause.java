@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.epl.spec.ColumnDesc;
-
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Set;
@@ -27,6 +25,8 @@ public class CreateSchemaClause implements Serializable
     private List<SchemaColumnDesc> columns;
     private Set<String> inherits;
     private boolean variant;
+    private String startTimestampProperty;
+    private String endTimestampProperty;
 
     /**
      * Ctor.
@@ -167,6 +167,22 @@ public class CreateSchemaClause implements Serializable
         this.variant = variant;
     }
 
+    public String getStartTimestampProperty() {
+        return startTimestampProperty;
+    }
+
+    public void setStartTimestampProperty(String startTimestampProperty) {
+        this.startTimestampProperty = startTimestampProperty;
+    }
+
+    public String getEndTimestampProperty() {
+        return endTimestampProperty;
+    }
+
+    public void setEndTimestampProperty(String endTimestampProperty) {
+        this.endTimestampProperty = endTimestampProperty;
+    }
+
     /**
      * Render as EPL.
      * @param writer to output to
@@ -207,6 +223,15 @@ public class CreateSchemaClause implements Serializable
                 writer.append(name);
                 delimiter = ", ";
             }
+        }
+
+        if (startTimestampProperty != null) {
+            writer.append(" starttimestamp ");
+            writer.append(startTimestampProperty);
+        }
+        if (endTimestampProperty != null) {
+            writer.append(" endtimestamp ");
+            writer.append(endTimestampProperty);
         }
     }
 }

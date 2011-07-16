@@ -1,13 +1,13 @@
 package com.espertech.esper.support.epl;
 
 import com.espertech.esper.epl.expression.*;
-import com.espertech.esper.epl.spec.SelectClauseExprRawSpec;
-import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 import com.espertech.esper.epl.spec.SelectClauseElementCompiled;
+import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
+import com.espertech.esper.epl.spec.SelectClauseExprRawSpec;
 import com.espertech.esper.type.MathArithTypeEnum;
 
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 public class SupportSelectExprFactory
 {
@@ -15,7 +15,7 @@ public class SupportSelectExprFactory
     {
         List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
         ExprIdentNode node = new ExprIdentNodeImpl("xxxx", "s0");
-        selectionList.add(new SelectClauseExprCompiledSpec(node, null));
+        selectionList.add(new SelectClauseExprCompiledSpec(node, null, null));
         return selectionList;
     }
 
@@ -23,7 +23,7 @@ public class SupportSelectExprFactory
     {
         List<SelectClauseExprCompiledSpec> selectionList = new LinkedList<SelectClauseExprCompiledSpec>();
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode(propertyName, streamName);
-        selectionList.add(new SelectClauseExprCompiledSpec(identNode, "propertyName"));
+        selectionList.add(new SelectClauseExprCompiledSpec(identNode, "propertyName", null));
         return selectionList;
     }
 
@@ -32,8 +32,8 @@ public class SupportSelectExprFactory
         List<SelectClauseExprCompiledSpec> selectionList = new LinkedList<SelectClauseExprCompiledSpec>();
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
         ExprNode mathNode = SupportExprNodeFactory.makeMathNode();
-        selectionList.add(new SelectClauseExprCompiledSpec(identNode, "resultOne"));
-        selectionList.add(new SelectClauseExprCompiledSpec(mathNode, "resultTwo"));
+        selectionList.add(new SelectClauseExprCompiledSpec(identNode, "resultOne", null));
+        selectionList.add(new SelectClauseExprCompiledSpec(mathNode, "resultTwo", null));
         return selectionList;
     }
 
@@ -42,33 +42,33 @@ public class SupportSelectExprFactory
         List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
         ExprNode mathNode = SupportExprNodeFactory.makeMathNode();
-        selectionList.add(new SelectClauseExprCompiledSpec(identNode, null));
-        selectionList.add(new SelectClauseExprCompiledSpec(mathNode, "result"));
+        selectionList.add(new SelectClauseExprCompiledSpec(identNode, null, null));
+        selectionList.add(new SelectClauseExprCompiledSpec(mathNode, "result", null));
         return selectionList;
     }
 
     public static List<SelectClauseElementCompiled> makeAggregateSelectListWithProps() throws Exception
     {
-        ExprNode top = new ExprSumNode(false);
+        ExprNode top = new ExprSumNode(false, false);
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
         top.addChildNode(identNode);
 
         List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
-        selectionList.add(new SelectClauseExprCompiledSpec(top, null));
+        selectionList.add(new SelectClauseExprCompiledSpec(top, null, null));
         return selectionList;
     }
 
     public static List<SelectClauseElementCompiled> makeAggregatePlusNoAggregate() throws Exception
     {
-        ExprNode top = new ExprSumNode(false);
+        ExprNode top = new ExprSumNode(false, false);
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
         top.addChildNode(identNode);
 
         ExprNode identNode2 = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
 
         List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
-        selectionList.add(new SelectClauseExprCompiledSpec(top, null));
-        selectionList.add(new SelectClauseExprCompiledSpec(identNode2, null));
+        selectionList.add(new SelectClauseExprCompiledSpec(top, null, null));
+        selectionList.add(new SelectClauseExprCompiledSpec(identNode2, null, null));
         return selectionList;
     }
 
@@ -78,12 +78,12 @@ public class SupportSelectExprFactory
         List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
 
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
-        selectionList.add(new SelectClauseExprCompiledSpec(identNode, null));
+        selectionList.add(new SelectClauseExprCompiledSpec(identNode, null, null));
 
-        ExprNode top = new ExprSumNode(false);
+        ExprNode top = new ExprSumNode(false, false);
         identNode = SupportExprNodeFactory.makeIdentNode("intPrimitive", "s0");
         top.addChildNode(identNode);
-        selectionList.add(new SelectClauseExprCompiledSpec(top, null));
+        selectionList.add(new SelectClauseExprCompiledSpec(top, null, null));
 
         return selectionList;
     }
@@ -97,7 +97,7 @@ public class SupportSelectExprFactory
         */
 
         ExprNode top = new ExprMathNode(MathArithTypeEnum.MULTIPLY, false, false);
-        ExprNode c1 = new ExprSumNode(false);
+        ExprNode c1 = new ExprSumNode(false, false);
         ExprNode c1_1 = new SupportExprNode(5);
         ExprNode c2 = new SupportExprNode(10);
 
@@ -105,7 +105,7 @@ public class SupportSelectExprFactory
         top.addChildNode(c2);
         c1.addChildNode(c1_1);
 
-        ExprNodeUtil.getValidatedSubtree(top, ExprValidationContextFactory.makeEmpty());
+        ExprNodeUtility.getValidatedSubtree(top, ExprValidationContextFactory.makeEmpty());
 
         List<SelectClauseExprRawSpec> selectionList = new LinkedList<SelectClauseExprRawSpec>();
         selectionList.add(new SelectClauseExprRawSpec(top, null));

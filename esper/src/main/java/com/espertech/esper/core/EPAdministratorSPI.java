@@ -2,11 +2,11 @@ package com.espertech.esper.core;
 
 import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPException;
-import com.espertech.esper.client.soda.Expression;
-import com.espertech.esper.client.soda.PatternExpr;
-import com.espertech.esper.client.soda.AnnotationPart;
-import com.espertech.esper.client.soda.MatchRecognizeRegEx;
+import com.espertech.esper.client.EPPreparedStatementImpl;
+import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.soda.*;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.spec.StatementSpecRaw;
 import com.espertech.esper.pattern.EvalNode;
 
 /**
@@ -64,4 +64,12 @@ public interface EPAdministratorSPI extends EPAdministrator
      * Destroy the administrative interface.
      */
     public void destroy();
+
+    public StatementSpecRaw compileEPLToRaw(String epl);
+    public EPStatementObjectModel mapRawToSODA(StatementSpecRaw raw);
+    public StatementSpecRaw mapSODAToRaw(EPStatementObjectModel model);
+    public EPStatement createEPLStatementId(String eplStatement, String statementName, Object userObject, String statementId) throws EPException;
+    public EPStatement createModelStatementId(EPStatementObjectModel sodaStatement, String statementName, Object userObject, String statementId) throws EPException;
+    public EPStatement createPatternStatementId(String pattern, String statementName, Object userObject, String statementId) throws EPException;
+    public EPStatement createPreparedEPLStatementId(EPPreparedStatementImpl prepared, String statementName, Object userObject, String statementId) throws EPException;
 }

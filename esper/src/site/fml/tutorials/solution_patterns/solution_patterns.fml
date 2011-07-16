@@ -146,6 +146,11 @@ where sensor.sensorId = loc.sensorId</pre></div>
       <question>My query presents incorrect or incomplete results? What can I do?</question>
       <answer>
         <p>
+          Use @Audit to turn on statement-level processing debug output which is logged under informational level to your output, please
+          see the documentation for more details. For example: "@Audit select * from MyEvent". @Audit also accepts a number of keywords to control 
+          which aspects of processing are output and which are not.
+        </p>
+        <p>
           Make sure each event object is its own object. As Esper cannot detect when properties of an event object are changed by your application,
           it is best not to change event properties of an existing event object, and it is best not to reuse an existing event object 
           when sending an event into the engine.
@@ -155,13 +160,26 @@ where sensor.sensorId = loc.sensorId</pre></div>
           array output.
         </p>
         <p>
-          Turn on logging as described in the documentation to trace event processing. Ensure to turn off logging when deploying to production.
+          Use @Audit to turn on statement-level processing debug output which is logged under informational level to your output, please
+          see the documentation for more details. For example: "@Audit select * from MyEvent".
+          @Audit also accepts a number of keywords to control which aspects of processing are output and which are not.
+        </p>
+        <p>
+          Consider adding expressions to the select-clause so that you can inspect what the expression result is.
+        </p>
+        <p>
+          Turn on logging as described in the documentation to see warning message that the engine may log, or exceptions raised by the engine or your code, or to trace event processing. 
+          Ensure to turn off logging when deploying to production.
         </p>
         <p>
           Consider adding a user-defined function to your EPL statement to output application information or to set a breakpoint.
         </p>
         <p>
           If you want to see remove stream events posted to listeners, the "irstream" and "rstream" keywords in the select clause select the remove stream.
+        </p>
+        <p>
+          For aggregation queries, note that the presence or absence of an event property in the select clause and with or without group-by clause
+          can change what is output by the engine. See "3.7.2. Output for Aggregation and Group-By" in the doc.
         </p>
         <p>
           The Reporting Issues page on this site provides further information for resolving issues.
@@ -189,18 +207,6 @@ where sensor.sensorId = loc.sensorId</pre></div>
       </answer>
     </faq>    
     <faq id="troubleshooting-3">
-      <question>My query produces unexpected results?</question>
-      <answer>
-        <p>
-          Use @Audit to turn on statement-level processing debug output which is logged under informational level to your output, please
-          see the documentation for more details. For example: "@Audit select * from MyEvent".
-        </p>
-        <p>
-          @Audit also accepts a number of keywords to control which aspects of processing are output and which are not.
-        </p>
-      </answer>
-    </faq>    
-    <faq id="troubleshooting-4">
       <question>I'm getting a stack overflow error?</question>
       <answer>
         <p>
@@ -220,7 +226,12 @@ where sensor.sensorId = loc.sensorId</pre></div>
       <answer>
         <p>
           We recommend keeping your EPL statements simple and easy-to-read. 
+        </p>
+        <p>
           Consider splitting a single, complex statement into multiple EPL statements, where the first statement produces data via insert-into into a stream that a second statement consumes.
+        </p>
+        <p>
+          Consider using expression declarations, which allow factoring out common expressions into a "expression abc{...}".
         </p>
       </answer>
     </faq>    
@@ -269,6 +280,26 @@ where sensor.sensorId = loc.sensorId</pre></div>
       </answer>
     </faq>    
     
+    <faq id="Event Aggregation-2">
+      <question>How to I compute a percentage or ratio?</question>
+      <answer>
+        <p>
+          Let's assume we have an event that indicates whether an item is black or white. Assume the boolean-type "black" property is true when the 
+          item is black. 
+        </p>
+        <p>
+          Most aggregation functions allow passing a filter expression as a parameter to the aggregation function.
+          This solution passes the boolean "black" property as the filter expression to the count aggregation function to compute the
+          running percentage of items that are black compared to all items:
+        </p>
+	<div class="source"><pre>select count(*, black)/count(*) as pct from BlackWhiteItem</pre></div>      
+        <p>
+          One could also formulate the same query as follows:
+        </p>
+	<div class="source"><pre>select count(*, black = true)/count(*) as pct from BlackWhiteItem</pre></div>      
+      </answer>
+    </faq>   
+
     <faq id="correlate">
       <question>How do I correlate events arriving in 2 or more streams?</question>
       <answer>
@@ -1035,9 +1066,12 @@ create schema PairDuplicatesRemoved(a Sensor, b Sensor)</pre></div>
 <div class="source"><pre>// Remove duplicate pairs where either sensor event is from the prior pair
 insert into PairDuplicatesRemoved
 select * from Pair
-where a.id != (select a.id from PairDuplicatesRemoved.std:lastevent())
-	and b.id != (select b.id from PairDuplicatesRemoved.std:lastevent())</pre></div>
+where a.id != coalesce((select a.id from PairDuplicatesRemoved.std:lastevent()), -1)
+	and b.id != coalesce((select b.id from PairDuplicatesRemoved.std:lastevent()), -1)</pre></div>
 
+		<p>
+			The example uses the "coalesce" function to return -1 when there is no last event for PairDuplicatesRemoved, so that the first pair matches as well.
+		</p>
 		<p>
 			Last, select the maximum measurement value between the pair of sensor events and the corresponding confidence and device:
 		</p>
@@ -1888,6 +1922,37 @@ when matched and ce.action = 'LEAVE' then update set carcount = carcount - 1</pr
        	</p>
 	<div class="source"><pre>select userId, (select avg(cpu) from CPUUtilizationWin where timestamp between uw.loginTime and current_timestamp()) as avgUserCPU 
 from pattern[every timer:interval(1 min)] unidirectional, UserWin uw group by userId</pre></div>
+      </answer>
+    </faq>
+
+    <faq id="consuming-join">
+      <question>I have two streams A and B that I want to join based on an "id" value that occurs exactly once per event type, and they can come any order.</question>
+      <answer>
+        <p>
+          For example, if the input sequence is { A(id=1), B(id=1) } the join should match. Same for { B(id=1), A(id=1) }. 
+          The order could be chaotic, for example the sequence { A(id=1), B(id=2), B(id=4), B(id=2) } should not match and { A(id=1), B(id=2), B(id=4), A(id=2) } should match on "id=2".
+        </p>
+        <p>
+    	  This solution uses match-recognize for pattern detection for two reasons. One, the "id" value could be seen as a partition and the pattern matching should take place within each individual "id" partition.
+    	  Second, match-recognize allows us to specify a data window within which to match patterns. So when events leave the data window the engine can forget the partition.
+        </p>        
+       	<p>
+       	  Sample statement:
+       	</p>
+	<div class="source"><pre>select * from MyEvent.win:length(10) 
+match_recognize (
+  partition by value
+  measures E1.value as value
+  pattern (E1 E2 | E2 E1) 
+  define 
+    E1 as E1.string = 'A', 
+    E2 as E2.string = 'B' 
+)</pre></div>
+
+       	<p>
+       	  Note the length-window: when a given event does not match, that event will eventually leave the window and the partition for that "id" value gets removed from memory by the engine.
+       	  Also, when a match occurs in a partition and no remaining matches are active for the same partition the engine removes that partition, reducing memory use.
+       	</p>
       </answer>
     </faq>
 

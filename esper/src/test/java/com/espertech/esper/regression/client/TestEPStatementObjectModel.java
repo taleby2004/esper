@@ -1,5 +1,6 @@
 package com.espertech.esper.regression.client;
 
+import com.espertech.esper.core.soda.SODAAnalyzer;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
@@ -9,6 +10,8 @@ import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.util.SerializableObjectCopier;
+
+import java.util.List;
 
 public class TestEPStatementObjectModel extends TestCase
 {
@@ -38,6 +41,9 @@ public class TestEPStatementObjectModel extends TestCase
         Object event = new SupportBean();
         epService.getEPRuntime().sendEvent(event);
         assertEquals(event, listener.assertOneGetNewAndReset().getUnderlying());
+
+        List<Expression> expressions = SODAAnalyzer.analyzeModelExpressions(model);
+        assertEquals(0, expressions.size());
     }
 
     // This is a simple EPL only.
@@ -58,7 +64,7 @@ public class TestEPStatementObjectModel extends TestCase
         model.setOutputLimitClause(OutputLimitClause.create(Expressions.timePeriod(null, null, null, 10, null)));
         model.setOrderByClause(OrderByClause.create("line"));                
 
-        assertEquals("insert into ReadyStreamAvg(line, avgAge) select line, avg(age) as avgAge from com.espertech.esper.support.bean.SupportBean(line in (1, 8, 10)).win:time(10) as RS where waverId != null group by line having avg(age) < 0 output every 10 seconds order by line", model.toEPL());
+        assertEquals("insert into ReadyStreamAvg(line, avgAge) select line, avg(age) as avgAge from com.espertech.esper.support.bean.SupportBean(line in (1, 8, 10)).win:time(10) as RS where waverId is not null group by line having avg(age) < 0 output every 10 seconds order by line", model.toEPL());
         SerializableObjectCopier.copy(model);
     }
 

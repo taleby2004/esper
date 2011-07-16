@@ -9,16 +9,8 @@ Technology Introduction
 
 	Complex event processing (CEP) delivers high-speed processing of many events across all the layers of an organization, 
 	identifying the most meaningful events within the event cloud, analyzing their impact, and taking subsequent action in real time (source:Wikipedia).
-
 	
-	Esper offers: 
-	
-	* A Domain Specific Language (DSL) for processing events. The Event Processing Language (EPL) is an optimized language for dealing with high frequency time-based event data.
-			
-	* Continuous queries, time and length windows, pattern matching, aggregation plus many other features.
-	
-	[]
-			
+	Esper offers a Domain Specific Language (DSL) for processing events. The Event Processing Language (EPL) is a declarative language for dealing with high frequency time-based event data.				
 
 	Some typical examples of applications are:
 	
@@ -71,11 +63,11 @@ Core Esper Features
 	
 * Event Stream Processing
 
-	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed (value-based windowing)
+	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed (value-based windowing), 
 
 	* Tumbling windows: time, length and multi-policy; first-event
 	
-	* Combine windows with intersection and union semantics. Partitioned windows.
+	* Combine windows with intersection and union semantics. Partitioned windows. Dynamically shrinking or expanding windows. Expiry-expression-driven windows.
 
 	* Grouping, aggregation, sorting, filtering, merging, splitting or duplicating of event streams
 
@@ -99,7 +91,7 @@ Core Esper Features
 		
 		[]
 		
-	* Enumeration methods, date-time methods, lambda-expressions, expression definition and reuse, 'new' operator for returning multiple results from an expression
+	* Enumeration methods, date-time methods, Allan's interval algebra, lambda-expressions, expression definition and reuse, 'new' operator for returning multiple results from an expression
 	
 	[]
 		

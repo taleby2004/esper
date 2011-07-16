@@ -9,13 +9,12 @@
 package com.espertech.esper.view.stat;
 
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.view.ViewFactory;
 import com.espertech.esper.view.ViewParameterException;
 import com.espertech.esper.view.*;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.util.JavaClassHelper;
 
@@ -27,6 +26,7 @@ import java.util.List;
 public class UnivariateStatisticsViewFactory implements ViewFactory
 {
     private List<ExprNode> viewParameters;
+    private int streamNumber;
 
     /**
      * Property name of data field.
@@ -39,6 +39,7 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
         this.viewParameters = expressionParameters;
+        this.streamNumber = viewFactoryContext.getStreamNum();
     }
 
     public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
@@ -55,7 +56,7 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
         fieldExpression = validated[0];
 
         additionalProps = StatViewAdditionalProps.make(validated, 1);
-        eventType = UnivariateStatisticsView.createEventType(statementContext, additionalProps);
+        eventType = UnivariateStatisticsView.createEventType(statementContext, additionalProps, streamNumber);
     }
 
     public boolean canProvideCapability(ViewCapability viewCapability)
