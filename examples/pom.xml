@@ -39,6 +39,7 @@
 		<module>terminalsvc</module>
 		<module>terminalsvc-jse</module>
 		<module>transaction</module>		
+		<module>trivia</module>		
 	</modules>
 	<dependencyManagement>
 		<dependencies>
