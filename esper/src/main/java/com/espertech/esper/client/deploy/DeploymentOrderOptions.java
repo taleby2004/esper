@@ -18,6 +18,8 @@ import java.io.Serializable;
  */
 public class DeploymentOrderOptions implements Serializable
 {
+    private static final long serialVersionUID = -8132499950780690395L;
+
     private boolean checkCircularDependency = true;
     private boolean checkUses = true;
 

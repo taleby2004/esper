@@ -18,8 +18,10 @@ import java.util.Comparator;
  * <p>Sorts double ranges as this:     sort by min asc, max asc.
  * I.e. same minimum value sorts maximum value ascending.
  */
-public final class StringRangeComparator implements Comparator<StringRange>
+public final class StringRangeComparator implements Comparator<StringRange>, Serializable
 {
+    private static final long serialVersionUID = 612230810237318028L;
+
     public final int compare(StringRange r1, StringRange r2)
     {
         if (r1.getMin() == null) {

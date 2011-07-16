@@ -25,8 +25,8 @@ public class CreateSchemaClause implements Serializable
     private List<SchemaColumnDesc> columns;
     private Set<String> inherits;
     private boolean variant;
-    private String startTimestampProperty;
-    private String endTimestampProperty;
+    private String startTimestampPropertyName;
+    private String endTimestampPropertyName;
 
     /**
      * Ctor.
@@ -167,20 +167,36 @@ public class CreateSchemaClause implements Serializable
         this.variant = variant;
     }
 
-    public String getStartTimestampProperty() {
-        return startTimestampProperty;
+    /**
+     * Returns the property name of the property providing the start timestamp value.
+     * @return start timestamp property name
+     */
+    public String getStartTimestampPropertyName() {
+        return startTimestampPropertyName;
     }
 
-    public void setStartTimestampProperty(String startTimestampProperty) {
-        this.startTimestampProperty = startTimestampProperty;
+    /**
+     * Sets the property name of the property providing the start timestamp value.
+     * @param startTimestampPropertyName start timestamp property name
+     */
+    public void setStartTimestampPropertyName(String startTimestampPropertyName) {
+        this.startTimestampPropertyName = startTimestampPropertyName;
     }
 
-    public String getEndTimestampProperty() {
-        return endTimestampProperty;
+    /**
+     * Returns the property name of the property providing the end timestamp value.
+     * @return end timestamp property name
+     */
+    public String getEndTimestampPropertyName() {
+        return endTimestampPropertyName;
     }
 
-    public void setEndTimestampProperty(String endTimestampProperty) {
-        this.endTimestampProperty = endTimestampProperty;
+    /**
+     * Sets the property name of the property providing the end timestamp value.
+     * @param endTimestampPropertyName start timestamp property name
+     */
+    public void setEndTimestampPropertyName(String endTimestampPropertyName) {
+        this.endTimestampPropertyName = endTimestampPropertyName;
     }
 
     /**
@@ -225,13 +241,13 @@ public class CreateSchemaClause implements Serializable
             }
         }
 
-        if (startTimestampProperty != null) {
+        if (startTimestampPropertyName != null) {
             writer.append(" starttimestamp ");
-            writer.append(startTimestampProperty);
+            writer.append(startTimestampPropertyName);
         }
-        if (endTimestampProperty != null) {
+        if (endTimestampPropertyName != null) {
             writer.append(" endtimestamp ");
-            writer.append(endTimestampProperty);
+            writer.append(endTimestampPropertyName);
         }
     }
 }

@@ -27,6 +27,8 @@ import java.io.StringWriter;
  * The archive name and user object are opportunities to attach additional deployment information.
  */
 public class Module implements Serializable {
+    private static final long serialVersionUID = -6365726859286029218L;
+
     private String name;
     private String uri;
     private Set<String> uses;

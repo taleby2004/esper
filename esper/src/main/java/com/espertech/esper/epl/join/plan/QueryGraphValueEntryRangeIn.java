@@ -15,6 +15,8 @@ import com.espertech.esper.epl.expression.ExprNode;
 
 public class QueryGraphValueEntryRangeIn extends QueryGraphValueEntryRange {
 
+    private static final long serialVersionUID = 7727959298465977751L;
+    
     private ExprNode exprStart;
     private ExprNode exprEnd;
     private boolean allowRangeReversal; // indicate whether "a between 60 and 50" should return no results (false, equivalent to a>= X and a <=Y) or should return results (true, equivalent to 'between' and 'in')

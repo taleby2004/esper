@@ -18,6 +18,8 @@ import java.io.Serializable;
  */
 public class StatementMetadata implements Serializable
 {
+    private static final long serialVersionUID = -484497485008513239L;
+
     private StatementType statementType;
 
     /**

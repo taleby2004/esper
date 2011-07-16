@@ -393,7 +393,7 @@ public class MethodResolver
                     appendString = ", ";
                 }
             }
-            throw new EngineNoSuchCtorException("Constructor not found for " + declaringClass.getSimpleName() + " taking (' + params + ')'", conversionFailedCtor);
+            throw new EngineNoSuchCtorException("Constructor not found for " + declaringClass.getSimpleName() + " taking ('" + params + "')'", conversionFailedCtor);
         }
     }
 }

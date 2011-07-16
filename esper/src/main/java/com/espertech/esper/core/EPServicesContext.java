@@ -452,7 +452,6 @@ public final class EPServicesContext
         this.streamFactoryService = null;
         this.plugInViews = null;
         this.statementLockFactory = null;
-        this.eventProcessingRWLock = null;
         this.extensionServicesContext = null;
         this.engineEnvContext = null;
         this.statementContextFactory = null;

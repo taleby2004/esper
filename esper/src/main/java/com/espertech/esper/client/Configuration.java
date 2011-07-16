@@ -314,6 +314,11 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         superTypes.add(mapSupertypeName);
     }
 
+    /**
+     * Add configuration for a map event type.
+     * @param mapeventTypeName configuration to add
+     * @param config map type configuration
+     */
     public void addMapConfiguration(String mapeventTypeName, ConfigurationEventTypeMap config) {
         mapTypeConfigurations.put(mapeventTypeName, config);
     }
@@ -534,6 +539,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
      * @param namespace is the namespace the virtual data window should be available under
      * @param name is the name of the data window
      * @param factoryClass is the view factory class to use
+     * @param customConfigurationObject additional configuration to be passed along
      */
     public void addPlugInVirtualDataWindow(String namespace, String name, String factoryClass, Serializable customConfigurationObject)
     {

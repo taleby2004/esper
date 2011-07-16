@@ -19,6 +19,8 @@ import java.util.List;
  */
 public class ConfigurationEngineDefaults implements Serializable
 {
+    private static final long serialVersionUID = -528835191586154300L;
+
     private Threading threading;
     private ViewResources viewResources;
     private EventMeta eventMeta;
@@ -34,7 +36,6 @@ public class ConfigurationEngineDefaults implements Serializable
     private ConfigurationMetricsReporting metricsReporting;
     private AlternativeContext alternativeContext;
     private Cluster cluster;
-    private static final long serialVersionUID = -528835191586154300L;
 
     /**
      * Ctor.
@@ -208,10 +209,18 @@ public class ConfigurationEngineDefaults implements Serializable
         this.conditionHandling = conditionHandling;
     }
 
+    /**
+     * Returns cluster configuration.
+     * @return cluster configuration
+     */
     public Cluster getCluster() {
         return cluster;
     }
 
+    /**
+     * Sets cluster configuration.
+     * @param cluster cluster configuration
+     */
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
     }
@@ -1342,28 +1351,52 @@ public class ConfigurationEngineDefaults implements Serializable
             this.admin = admin;
         }
 
+        /**
+         * Returns the class name of the event type id generator.
+         * @return class name
+         */
         public String getEventTypeIdGeneratorFactory() {
             return eventTypeIdGeneratorFactory;
         }
 
-        public void setEventTypeIdGeneratorFactory(String eventTypeIdGeneratorFactory) {
-            this.eventTypeIdGeneratorFactory = eventTypeIdGeneratorFactory;
+        /**
+         * Sets the class name of the event type id generator.
+         * @param factory class name
+         */
+        public void setEventTypeIdGeneratorFactory(String factory) {
+            this.eventTypeIdGeneratorFactory = factory;
         }
 
-        public void setVirtualDataWindowViewFactory(String virtualDataWindowViewFactory) {
-            this.virtualDataWindowViewFactory = virtualDataWindowViewFactory;
+        /**
+         * Sets the class name of the virtual data window view factory.
+         * @param factory class name
+         */
+        public void setVirtualDataWindowViewFactory(String factory) {
+            this.virtualDataWindowViewFactory = factory;
         }
 
+        /**
+         * Returns the class name of the virtual data window view factory.
+         * @return factory class name
+         */
         public String getVirtualDataWindowViewFactory() {
             return virtualDataWindowViewFactory;
         }
 
+        /**
+         * Sets the class name of the statement metadata factory.
+         * @return factory class name
+         */
         public String getStatementMetadataFactory() {
             return statementMetadataFactory;
         }
 
-        public void setStatementMetadataFactory(String statementMetadataFactory) {
-            this.statementMetadataFactory = statementMetadataFactory;
+        /**
+         * Sets the class name of the statement metadata factory.
+         * @param factory class name
+         */
+        public void setStatementMetadataFactory(String factory) {
+            this.statementMetadataFactory = factory;
         }
     }
 
@@ -1477,74 +1510,40 @@ public class ConfigurationEngineDefaults implements Serializable
         }
     }
 
+    /**
+     * Cluster configuration.
+     */
     public static class Cluster implements Serializable {
 
+        private static final long serialVersionUID = 6289817340046435823L;
         private boolean enabled = false;
-        private List<String> hosts;
-        private transient Object clusterConfig;
-        private String resource;
-        private String url;
-        private String file;
-        private String xmlDocument;
 
+        /**
+         * Returns true if enabled.
+         * @return enabled flag
+         */
         public boolean isEnabled() {
             return enabled;
         }
 
+        /**
+         * Sets enabled flag
+         * @param enabled to set
+         */
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
         }
-
-        public List<String> getHosts() {
-            return hosts;
-        }
-
-        public void setHosts(List<String> hosts) {
-            this.hosts = hosts;
-        }
-
-        public Object getClusterConfig() {
-            return clusterConfig;
-        }
-
-        public void setClusterConfig(Object clusterConfig) {
-            this.clusterConfig = clusterConfig;
-        }
-
-        public String getResource() {
-            return resource;
-        }
-
-        public void setResource(String resource) {
-            this.resource = resource;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-        public String getFile() {
-            return file;
-        }
-
-        public void setFile(String file) {
-            this.file = file;
-        }
-
-        public String getXmlDocument() {
-            return xmlDocument;
-        }
-
-        public void setXmlDocument(String xmlDocument) {
-            this.xmlDocument = xmlDocument;
-        }
     }
 
+    /**
+     * Interface for cluster configurator.
+     */
     public static interface ClusterConfigurator {
+
+        /**
+         * Provide cluster configuration information.
+         * @param configuration information
+         */
         public void configure(Configuration configuration);
     }
 }

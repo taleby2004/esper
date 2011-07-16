@@ -16,6 +16,8 @@ import java.util.List;
 
 public abstract class QueryGraphValueEntryHashKeyed implements QueryGraphValueEntry, Serializable
 {
+    private static final long serialVersionUID = -2005004980276270795L;
+
     private final ExprNode keyExpr;
 
     public QueryGraphValueEntryHashKeyed(ExprNode keyExpr) {

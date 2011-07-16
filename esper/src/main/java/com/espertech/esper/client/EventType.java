@@ -211,8 +211,21 @@ public interface EventType
      */
     public EventPropertyGetterIndexed getGetterIndexed(String indexedPropertyName);
 
+    /**
+     * Returns the event type id assigned to the event type.
+     * @return event type id
+     */
     public int getEventTypeId();
 
+    /**
+     * Returns the property name of the property providing the start timestamp value.
+     * @return start timestamp property name
+     */
     public String getStartTimestampPropertyName();
+
+    /**
+     * Returns the property name of the property providing the end timestamp value.
+     * @return end timestamp property name
+     */
     public String getEndTimestampPropertyName();
 }

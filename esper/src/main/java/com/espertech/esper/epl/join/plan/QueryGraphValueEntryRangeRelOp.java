@@ -15,6 +15,8 @@ import com.espertech.esper.epl.expression.ExprNode;
 
 public class QueryGraphValueEntryRangeRelOp extends QueryGraphValueEntryRange {
 
+    private static final long serialVersionUID = -4616155064548498888L;
+    
     private final ExprNode expression;
     private final boolean isBetweenPart; // indicate that this is part of a between-clause or in-clause
 

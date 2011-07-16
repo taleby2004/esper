@@ -36,6 +36,7 @@ public class VirtualDataWindowLookupContext {
      * Ctor.
      * @param hashFields operator-equals semantics fields
      * @param btreeFields sorted-access fields, check the {@link VirtualDataWindowLookupOp} operator for what range or relational-operator applies
+     * @param namedWindowName named window name
      */
     public VirtualDataWindowLookupContext(String namedWindowName,
                                           List<VirtualDataWindowLookupFieldDesc> hashFields,
@@ -45,6 +46,10 @@ public class VirtualDataWindowLookupContext {
         this.btreeFields = Collections.unmodifiableList(btreeFields);
     }
 
+    /**
+     * Returns the named window name.
+     * @return named window name
+     */
     public String getNamedWindowName() {
         return namedWindowName;
     }

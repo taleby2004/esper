@@ -459,5 +459,11 @@ public interface ConfigurationOperations
      */
     public void addEventType(String eventTypeName, String eventClass, ConfigurationEventTypeLegacy legacyEventTypeDesc);
 
+    /**
+     * Add a new plug-in view for use as a data window or derived value view.
+     * @param namespace view namespace name
+     * @param name view name
+     * @param viewFactoryClass factory class of view
+     */
     public void addPlugInView(String namespace, String name, String viewFactoryClass);
 }

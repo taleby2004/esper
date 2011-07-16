@@ -17,6 +17,8 @@ import java.util.List;
 
 public abstract class QueryGraphValueEntryRange implements QueryGraphValueEntry, Serializable {
 
+    private static final long serialVersionUID = 8991572541148988925L;
+
     private final QueryGraphRangeEnum type;
 
     protected QueryGraphValueEntryRange(QueryGraphRangeEnum type) {

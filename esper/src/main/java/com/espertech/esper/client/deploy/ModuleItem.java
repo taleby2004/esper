@@ -19,6 +19,8 @@ import java.io.Serializable;
  * Character position start and end are only available for non-comment only.
  */
 public class ModuleItem implements Serializable {
+    private static final long serialVersionUID = 1281976895727342222L;
+
     private String expression;
     private boolean commentOnly;
     private int lineNumber;

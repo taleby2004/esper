@@ -21,6 +21,7 @@ import java.util.Map;
  */
 public class EPPreparedStatementImpl implements EPPreparedStatement, Serializable
 {
+    private static final long serialVersionUID = 821297634350548600L;
     private EPStatementObjectModel model;
     private Map<Integer, SubstitutionParameterExpression> subParams;
 

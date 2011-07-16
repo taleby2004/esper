@@ -87,10 +87,18 @@ public class PatternFilterExpr extends PatternExprBase
         return PatternExprPrecedenceEnum.ATOM;
     }
 
+    /**
+     * Returns the consume level, if assigned.
+     * @return consume level
+     */
     public Integer getOptionalConsumptionLevel() {
         return optionalConsumptionLevel;
     }
 
+    /**
+     * Sets the consume level.
+     * @param optionalConsumptionLevel consume level
+     */
     public void setOptionalConsumptionLevel(Integer optionalConsumptionLevel) {
         this.optionalConsumptionLevel = optionalConsumptionLevel;
     }

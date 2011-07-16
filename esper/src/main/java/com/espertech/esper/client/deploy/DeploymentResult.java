@@ -28,6 +28,7 @@ public class DeploymentResult
      * Ctor.
      * @param deploymentId deployment id
      * @param statements statements deployed and started
+     * @param imports the imports that are part of the deployment
      */
     public DeploymentResult(String deploymentId, List<EPStatement> statements, List<String> imports)
     {
@@ -54,6 +55,10 @@ public class DeploymentResult
         return statements;
     }
 
+    /**
+     * Returns a list of imports that were declared in the deployment.
+     * @return imports
+     */
     public List<String> getImports() {
         return imports;
     }

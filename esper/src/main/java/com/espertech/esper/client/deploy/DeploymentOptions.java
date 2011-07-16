@@ -18,6 +18,8 @@ import java.io.Serializable;
  */
 public class DeploymentOptions implements Serializable {
 
+    private static final long serialVersionUID = 119383576416141182L;
+
     private boolean compile = true;
     private boolean compileOnly = false;
     private boolean rollbackOnFail = true;

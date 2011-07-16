@@ -17,6 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class SubordPropPlan implements Serializable {
+    private static final long serialVersionUID = -8857080184548049650L;
+
     private final Map<String, SubordPropHashKey> hashProps;
     private final Map<String, SubordPropRangeKey> rangeProps;
 

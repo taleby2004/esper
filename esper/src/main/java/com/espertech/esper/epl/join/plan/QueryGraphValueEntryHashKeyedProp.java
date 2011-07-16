@@ -12,6 +12,8 @@ import com.espertech.esper.epl.expression.ExprNode;
 
 public class QueryGraphValueEntryHashKeyedProp extends QueryGraphValueEntryHashKeyed
 {
+    private static final long serialVersionUID = -3745044093486590108L;
+
     private final String keyProperty;
 
     public QueryGraphValueEntryHashKeyedProp(ExprNode keyExpr, String keyProperty) {

@@ -20,6 +20,7 @@ import java.util.Set;
  */
 public class DeploymentInformationItem implements Serializable
 {
+    private static final long serialVersionUID = 6877181100706738876L;
     private String statementName;
     private String expression;
 

@@ -11,20 +11,36 @@
 
 package com.espertech.esper.client.hook;
 
+/**
+ * Event to indicate that for a virtual data window an exitsing index is being stopped or destroyed.
+ */
 public class VirtualDataWindowEventStopIndex extends VirtualDataWindowEvent {
 
     private final String namedWindowName;
     private final String indexName;
 
+    /**
+     * Ctor.
+     * @param namedWindowName named window name
+     * @param indexName index name
+     */
     public VirtualDataWindowEventStopIndex(String namedWindowName, String indexName) {
         this.namedWindowName = namedWindowName;
         this.indexName = indexName;
     }
 
+    /**
+     * Returns the index name.
+     * @return index name
+     */
     public String getIndexName() {
         return indexName;
     }
 
+    /**
+     * Returns the named window name.
+     * @return named window name
+     */
     public String getNamedWindowName() {
         return namedWindowName;
     }

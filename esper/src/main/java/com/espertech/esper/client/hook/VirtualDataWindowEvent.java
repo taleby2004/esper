@@ -11,6 +11,8 @@
 
 package com.espertech.esper.client.hook;
 
+/**
+ * Base class for events related to virtual data windows.
+ */
 public abstract class VirtualDataWindowEvent {
-
 }

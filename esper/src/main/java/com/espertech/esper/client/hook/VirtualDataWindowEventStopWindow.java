@@ -11,14 +11,25 @@
 
 package com.espertech.esper.client.hook;
 
+/**
+ * This event is raised when a virtual data window is stopped.
+ */
 public class VirtualDataWindowEventStopWindow extends VirtualDataWindowEvent {
 
     private final String namedWindowName;
 
+    /**
+     * Ctor.
+     * @param namedWindowName named window name
+     */
     public VirtualDataWindowEventStopWindow(String namedWindowName) {
         this.namedWindowName = namedWindowName;
     }
 
+    /**
+     * Returns the named window name.
+     * @return named window name
+     */
     public String getNamedWindowName() {
         return namedWindowName;
     }

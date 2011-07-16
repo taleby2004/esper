@@ -535,18 +535,34 @@ public class ConfigurationEventTypeXMLDOM implements MetaDefItem, Serializable
         }
     }
 
+    /**
+     * Returns the property name of the property providing the start timestamp value.
+     * @return start timestamp property name
+     */
     public String getStartTimestampPropertyName() {
         return startTimestampPropertyName;
     }
 
+    /**
+     * Sets the property name of the property providing the start timestamp value.
+     * @param startTimestampPropertyName start timestamp property name
+     */
     public void setStartTimestampPropertyName(String startTimestampPropertyName) {
         this.startTimestampPropertyName = startTimestampPropertyName;
     }
 
+    /**
+     * Returns the property name of the property providing the end timestamp value.
+     * @return end timestamp property name
+     */
     public String getEndTimestampPropertyName() {
         return endTimestampPropertyName;
     }
 
+    /**
+     * Sets the property name of the property providing the end timestamp value.
+     * @param endTimestampPropertyName start timestamp property name
+     */
     public void setEndTimestampPropertyName(String endTimestampPropertyName) {
         this.endTimestampPropertyName = endTimestampPropertyName;
     }

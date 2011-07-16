@@ -17,6 +17,8 @@ import java.io.Serializable;
  */
 public class SubordPropHashKey implements Serializable
 {
+    private static final long serialVersionUID = -8830134829029646585L;
+
     private final QueryGraphValueEntryHashKeyed hashKey;
     private final Integer optionalKeyStreamNum;
     private final Class coercionType;

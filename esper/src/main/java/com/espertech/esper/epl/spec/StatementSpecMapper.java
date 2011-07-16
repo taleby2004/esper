@@ -366,8 +366,8 @@ public class StatementSpecMapper
         }
         List<SchemaColumnDesc> columns = unmapColumns(desc.getColumns());
         CreateSchemaClause clause = new CreateSchemaClause(desc.getSchemaName(), desc.getTypes(), columns, desc.getInherits(), desc.isVariant());
-        clause.setStartTimestampProperty(desc.getStartTimestampProperty());
-        clause.setEndTimestampProperty(desc.getEndTimestampProperty());
+        clause.setStartTimestampPropertyName(desc.getStartTimestampProperty());
+        clause.setEndTimestampPropertyName(desc.getEndTimestampProperty());
         model.setCreateSchema(clause);
     }
 
@@ -1082,7 +1082,7 @@ public class StatementSpecMapper
             return;
         }
         List<ColumnDesc> columns = mapColumns(clause.getColumns());
-        raw.setCreateSchemaDesc(new CreateSchemaDesc(clause.getSchemaName(), clause.getTypes(), columns, clause.getInherits(), clause.isVariant(), clause.getStartTimestampProperty(), clause.getEndTimestampProperty()));
+        raw.setCreateSchemaDesc(new CreateSchemaDesc(clause.getSchemaName(), clause.getTypes(), columns, clause.getInherits(), clause.isVariant(), clause.getStartTimestampPropertyName(), clause.getEndTimestampPropertyName()));
     }
 
     private static List<ColumnDesc> mapColumns(List<SchemaColumnDesc> columns) {

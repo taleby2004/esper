@@ -44,6 +44,9 @@ public class VirtualDataWindowContext {
      * @param eventFactory factory for converting row objects to EventBean instances
      * @param outputStream forward the input and output stream received from the update method here
      * @param namedWindowName the name of the named window
+     * @param parameterExpressions parameter expressions passed to the virtual data window
+     * @param viewFactoryContext context of services
+     * @param customConfiguration additional configuration
      */
     public VirtualDataWindowContext(StatementContext statementContext, EventType eventType, Object[] parameters, ExprNode[] parameterExpressions, EventBeanFactory eventFactory, VirtualDataWindowOutStream outputStream, String namedWindowName, ViewFactoryContext viewFactoryContext, Serializable customConfiguration) {
         this.statementContext = statementContext;
@@ -107,14 +110,26 @@ public class VirtualDataWindowContext {
         return namedWindowName;
     }
 
+    /**
+     * Returns the expressions passed as parameters to the virtual data window.
+     * @return parameter expressions
+     */
     public ExprNode[] getParameterExpressions() {
         return parameterExpressions;
     }
 
+    /**
+     * Returns the engine services context.
+     * @return engine services context
+     */
     public ViewFactoryContext getViewFactoryContext() {
         return viewFactoryContext;
     }
 
+    /**
+     * Returns any additional configuration provided.
+     * @return additional config
+     */
     public Serializable getCustomConfiguration() {
         return customConfiguration;
     }

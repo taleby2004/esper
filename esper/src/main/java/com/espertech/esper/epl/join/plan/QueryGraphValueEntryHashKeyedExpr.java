@@ -13,6 +13,8 @@ import com.espertech.esper.epl.expression.ExprNode;
 
 public class QueryGraphValueEntryHashKeyedExpr extends QueryGraphValueEntryHashKeyed
 {
+    private static final long serialVersionUID = 1069112032977675596L;
+
     private final boolean requiresKey;
 
     public QueryGraphValueEntryHashKeyedExpr(ExprNode keyExpr, boolean requiresKey) {

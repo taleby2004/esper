@@ -19,6 +19,8 @@ import java.util.Calendar;
  */
 public class DeploymentInformation implements Serializable
 {
+    private static final long serialVersionUID = -7517475026231263141L;
+
     private String deploymentId;
     private Module module;
     private Calendar addedDate;

@@ -20,6 +20,8 @@ import java.util.List;
  */
 public class DeploymentOrder implements Serializable
 {
+    private static final long serialVersionUID = 2314846279223748146L;
+
     private List<Module> ordered;
 
     /**

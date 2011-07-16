@@ -18,6 +18,8 @@ import java.io.StringWriter;
 import java.util.Collection;
 
 public class SubordPropRangeKey implements Serializable {
+    private static final long serialVersionUID = 8075290397924970479L;
+    
     private QueryGraphValueEntryRange rangeInfo;
     private Class coercionType;
 

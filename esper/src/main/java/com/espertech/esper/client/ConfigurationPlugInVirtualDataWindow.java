@@ -83,10 +83,18 @@ public class ConfigurationPlugInVirtualDataWindow implements Serializable
         this.factoryClassName = factoryClassName;
     }
 
+    /**
+     * Returns any additional configuration passed to the factory as part of the context.
+     * @return optional additional configuration
+     */
     public Serializable getConfig() {
         return config;
     }
 
+    /**
+     * Sets any additional configuration passed to the factory as part of the context.
+     * @param config optional additional configuration
+     */
     public void setConfig(Serializable config) {
         this.config = config;
     }
