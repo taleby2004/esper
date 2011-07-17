@@ -158,6 +158,14 @@
 							</para>
 						</entry>
 					</row>
+					<row>
+						<entry><xref linkend="examples-trivia"/></entry>
+						<entry>
+							<para>
+								Trivia Geeks Club demonstrates EPL for a scoring system computing scores in a trivia game.
+							</para>
+						</entry>
+					</row>
 				</tbody>
 			</tgroup>				
 		</table>
@@ -987,5 +995,23 @@ select Part.zone from pattern [
 		</itemizedlist>
     </sect1>    
     
+	<sect1 id="examples-trivia" revision="2">
+        <title>Trivia Geeks Club</title>
+            
+        <para>
+            This example was developed for the DEBS 2011 conference and demonstrates how scoring rules for a trivia game can be implemented in EPL.
+        </para>
+        
+        <para>
+          The EPL module that implements all scoring rules is located in the <literal>etc</literal> folder in file <literal>trivia.epl</literal>. The EPL is all required to run the solution without any custom functions required.
+        </para>
+        
+        <para>
+           The trivia geeks club rules (the requirements) are provided in the <literal>etc</literal> folder in file <literal>trivia_scoring_requirements.htm</literal>.
+        </para>
+        
+        <para>
+           The implementation we provide tests the questions, answers and scoring according to the data provided in <literal>trivia_test_questions_small.htm</literal> and <literal>trivia_test_questions_large.htm</literal>.
+        </para>
+    </sect1>    
 </chapter>
-

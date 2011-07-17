@@ -4,14 +4,34 @@ Esper Changelog
 Changes in version 4.3.0
 ------------------------
 Major API or EPL changes
-  - Support for specifing consumption on pattern filters
-  - Support for filter expressions as part of aggregation functions
-  - Support for the transpose(...) function for select-clause transposing an expression result object to a stream
-  - Support for @Audit to output nested expression results
-  - Support for {} array operator to be input to enumeration methods
-  - Support for subqueries that return multiple result columns to be used in an expression definition  
-  - Support for interval algebra methods among the existing date-time methods
-  - Support for a new expression-driven data window "win:expr". Use for dynamically shrinking and expanding time or length windows, or for custom expiry logic based on work days, for example.
+  - We have made a change to NULL-value comparison, to closely follow SQL standards, as follows: In version 4.3, the expression "property = NULL" always returns null, use "property is NULL" instead. Version 4.2 and earlier returned true/false.
+    For more information, please see http://jira.codehaus.org/browse/ESPER-569
+  - Support for filter expressions as part of aggregation functions, for example "select count(*, color='black'), count(*) as percentBlack from Marbels"  
+  - Support for interval algebra methods, e.g. before, after, coincides, during, includes, meets etc.
+  - Support for a new expression-driven data window "win:expr". Use for dynamically shrinking and expanding time or length windows, or for custom expiry logic based on work days, for example.    
+  - Support for specifying a consumption policy on pattern filters. Useful when a pattern references the same filter multiple times and the application requires a filter to consume or prioritize one filter over another.  
+  - Support for the transpose(...) function. For use in the select-clause to transpose an expression result object to a stream.  
+  - Support for {} array operator to provide input to enumeration methods.  
+  - Support for subqueries that return multiple result columns to be used in an expression definition.    
+  - Support for @Audit to output nested expression results.
+  - New example "Trivia Geeks Club".
+  
+Minor changes
+  - Fixed issue ESPER-569 Null-value comparison for "not/equals"-operator (!=, =) not fully consistent with SQL standard
+  - Fixed issue ESPER-570 3-way inner join and using outer-join notation not working when where-clause added
+  - Fixed issue ESPER-571 NPE for fully-aggregated and ungrouped query with having clause that selects a non-aggregated property
+  - Fixed issue ESPER-572 Short-circuit evaluation not always performed for filters
+  - Fixed issue ESPER-573 Improve statement checking for on-merge "not matched" clause to not allow access to named window properties when subquery
+  - Fixed issue ESPER-574 Timer:interval pattern observer when a subquery is the parameter throws NPE
+  - Fixed issue ESPER-576 Expose API to dynamically register new views
+  - Fixed issue ESPER-577 Allow chained method invocation on cast() result
+  - Fixed issue ESPER-578 Allowing transposing the result of an aggregation function to a stream
+  - Fixed issue ESPER-579 Memory leak if creating and removing a large numbers of different event types
+  - Fixed issue ESPER-582 Error parsing reserved keyword "last" inside a function call
+  - Fixed issue ESPER-583 Support for filtering aggregation functions
+  - Fixed issue ESPER-584 Filter expression with relational op and constant not matching
+  - Fixed issue ESPER-585 On-merge not dispatching if input stream is also from named window
+
 
 Changes in version 4.2.0
 ------------------------
