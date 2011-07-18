@@ -71,6 +71,9 @@ public interface EPServiceProvider
      * are not guaranteed to operate properly.
      * <p>
      * Removes the service URI from the known URIs. Allows configuration to change for the instance.
+     * <p>
+     * When destroying a service instance your application must make sure that threads that are sending events into the service
+     * have completed their work. More generally, the service should not be currently in use during or after the destroy operation.
      */
     public void destroy();
 

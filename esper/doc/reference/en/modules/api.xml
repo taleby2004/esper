@@ -104,6 +104,10 @@ epService.destroy();]]></programlisting>
         </para>
         
         <para>
+			When destroying an engine instance your application must make sure that threads that are sending events into the engine have completed their work. More generally, the engine should not be currently in use during or after the destroy operation.
+        </para>
+
+        <para>
 			As engine instances are completely independent, your application may not send <literal>EventBean</literal> instances obtained from one engine instance into a second engine instance since the event type space between two engine instances is not shared.
         </para>
 
