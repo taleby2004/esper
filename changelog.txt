@@ -31,6 +31,7 @@ Minor changes
   - Fixed issue ESPER-583 Support for filtering aggregation functions
   - Fixed issue ESPER-584 Filter expression with relational op and constant not matching
   - Fixed issue ESPER-585 On-merge not dispatching if input stream is also from named window
+  - Fixed issue ESPER-586 Crontab-schedule when use with list-parameter and zero give incorrect results
 
 
 Changes in version 4.2.0

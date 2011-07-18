@@ -4,11 +4,15 @@ Presentations, Articles and Books
 * Presentation Materials
 
     The Esper and NEsper team as well as a number of others contributors have presented 
-    Complex Event Processing with Esper and NEsper at conferences.
+    Complex Event Processing with Esper and NEsper at conferences. Select presentations are listed here.
 	
 *------------------------+----------------------------------------------------------------------------+
 | Presentation                       | Date
 *------------------------+----------------------------------------------------------------------------+
+| {{{http://dist.codehaus.org/esper/OpenSpliceDDS-EsperCEP-webinar.pdf} Stream Processing by DDS and CEP by Angelo Corsaro from OpenSplice}} | June, 2011
+*------------------------+-------------+---------------------------------------------------------------+
+| {{{http://lethargy.org/~jesus/writes/using-esper-to-manage-real-time-data} Esperwhispering: Using Esper to find problems in real-time data (also RabbitMQ) by OmniTI}} | Feb, 2011
+*------------------------+-------------+---------------------------------------------------------------+
 | {{{http://www.slideshare.net/intelie/debs2010} HOLMES: An event-driven solution to monitor data centers through continuous queries and machine learning, by Pedro Teixeira et al, DEBS 2010}} | July, 2010
 *------------------------+-------------+---------------------------------------------------------------+
 | {{{http://www.youtube.com/watch?v=ngogsWCGOMw} Complex Event Processing: Queries on Speed Ignite presentation, Denver Open Source User Group}}

@@ -106,7 +106,7 @@ public class ScheduleSpecUtil
         }
 
         NumberSetParameter numberSet = (NumberSetParameter) unitParameter;
-        if (numberSet.isWildcard(unit.min(), unit.min()))
+        if (numberSet.isWildcard(unit.min(), unit.max()))
         {
             return null;
         }

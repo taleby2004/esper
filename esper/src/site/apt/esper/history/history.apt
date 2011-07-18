@@ -12,6 +12,44 @@ change History
 	[]
 
 
+Version 4.3.0
+
+	Released July 18, 2011
+	
+	Built with JDK 6.0 Update 24
+
+* API changes
+
+  * None.
+    
+* Major changes
+
+  * We have made a change to NULL-value comparison, to closely follow SQL standards, as follows: In version 4.3, the expression "property = NULL" always returns null, use "property is NULL" instead. Version 4.2 and earlier returned true/false.
+    For more information, please see http://jira.codehaus.org/browse/ESPER-569
+
+  * Support for filter expressions as part of aggregation functions, for example "select count(*, color='black'), count(*) as percentBlack from Marbels"
+  
+  * Support for interval algebra methods, e.g. before, after, coincides, during, includes, meets etc.
+
+  * Support for a new expression-driven data window "win:expr". Use for dynamically shrinking and expanding time or length windows, or for custom expiry logic based on work days, for example.
+    
+  * Support for specifying a consumption policy on pattern filters. Useful when a pattern references the same filter multiple times and the application requires a filter to consume or prioritize one filter over another.
+  
+  * Support for the transpose(...) function. For use in the select-clause to transpose an expression result object to a stream.
+  
+  * Support for {} array operator to provide input to enumeration methods.
+  
+  * Support for subqueries that return multiple result columns to be used in an expression definition.  
+  
+  * Support for @Audit to output nested expression results.
+  
+  * New example "Trivia Geeks Club".
+  
+  * Many bug fixes and improvements to documentation, code and performance; Please see history or changelog.txt for additional information.
+
+  []
+
+
 Version 4.2.0
 
 	Released April 19, 2011

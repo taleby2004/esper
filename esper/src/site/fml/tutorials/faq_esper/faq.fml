@@ -37,10 +37,6 @@
           Esper features a Statement Object Model API, which is a set of classes to directly construct, manipulate or interrogate EPL statements. 
         </p>
         <p>
-          Esper does not currently have a GUI management, editor or portal application. Esper also does not currently have a server.
-          Esper provides only a small number of key input and output adapters through EsperIO, and provides an adapter framework.
-        </p>
-        <p>
           One customer remarked "Many products expose just a GUI to input simple event definitions. EPL provides a way to express complex events."
         </p>
         <p>
@@ -139,6 +135,28 @@
           Esper design evolved by re-factoring with courage towards higher design quality. 
           Favorite patterns are dependency injection/inversion of control by context injection, 
           Immutable, Specification, GOF patterns (except Singleton :).
+        </p>
+        <p>
+          We did not assume that engine time is the same for all events, or that each event must carry a long-type or nanosecond value that somehow relates to that engine time. 
+          Consider events coming from multiple unsynchronized systems, the concept of engine time can be convenient but not always. 
+          We allow declaring a start timestamp property name and end timestamp property name on event types in connection with support for interval algebra, for example.          
+        </p>
+        <p>
+          We did not assume that every event arrive in order. But if wanted, the engine provides constructs to reorder events. Some constructs rely on events to arrive in order (A -> B for example)
+          and that can be convenient to express many conditions. Interval algebra is also good method to handle events that arrive out-of-order.
+        </p>
+        <p>
+          We did not assume that analysis is only over a few events - the engine optimizes in various ways for evaluating large numbers of events.
+        </p>
+        <p>
+          We did not assume there are only a few or few hundred statements - the engine tries to keep minimal overhead per statement small.
+        </p>
+        <p>
+          We did not assume the application is single-threaded and that the engine must control any threads.
+        </p>
+        <p>
+          We did not limit event types to be a tuple of name-value pairs, and did not limit available types to a few numeric or string types. The engine supports any Java type 
+          including application types.
         </p>
       </answer>
     </faq>
@@ -241,7 +259,7 @@
     </faq>    
 
     <faq id="benchmarks">
-      <question>Do you have any benchmarks available for Esper?  Such as results from Linear Road?</question>
+      <question>Do you have any benchmarks available for Esper?</question>
       <answer>
         <p>
 		  We have published benchmark kit results and have the benchmark kit itself available for download. The results are summarized with further links on the <a href="../../esper/performance/performance.html">performance page</a>.
@@ -324,13 +342,52 @@ variable factor in the statements?</i>".
         <p>
 		  A simple example could be to compute the average stock price of the BEA tick on a sliding window of 30 seconds. 
 		  Given a StockTick event bean with a price and symbol property and the EPL 
-		  "select avg(price) from StockTick.win:time(30 sec) where symbol='BEA'", 
+		  "select avg(price) from StockTick.win:time(30 sec) where symbol='IBM'", 
 		  a POJO would get notified as tick come in - and in real world millions of ticks can come in - 
 		  so there's no way to store them all to later query them using a classical database architecture.
 		  Statements can be much more complex, and also be combined together with "followed by" conditions.
         </p>
         <p>
-		  The internals of Esper are made up of fairly complex algorithms primarily relying on state machines and delta networks in which only changes to data are communicated across object boundaries when required.
+		  The internals of Esper are made up of fairly complex algorithms (see next).
+        </p>
+      </answer>
+    </faq>
+     <faq id="what-algorithms">
+      <question>What algorithms does Esper use? Is it based on research?</question>
+      <answer>
+        <p>
+            The EPL pattern engine is a dynamic state machine in which states can have sub-states. The idea of EPL patterns is from the "Rapide" pattern language of Stanford 
+            University research.
+        </p>
+        <p>
+            The term "delta networks", a network of objects in which only changes to data are communicated across object boundaries and only when required,
+            is at the foundation of engine design.
+        </p>
+        <p>
+            Esper uses indexes, a data structure that improves the speed of data retrieval operations. For sorted access it may prefer a binary tree index while a
+            hash-based index is great for key lookups.
+        </p>
+        <p>
+            For efficient matching of incoming events to statements the engine uses inverted indexes.
+        </p>
+        <p>
+	    Multi-version concurrency control is a concept used for variables and also for filters to allow concurrency and reduce locking. 
+        </p>
+        <p>
+	    The match-recognize pattern matching functionality is built using nondeterministic finite automata (NFA).
+        </p>
+        <p>
+	    Query planning based on the analysis of expressions used in the where-clause is another technique used by the engine. The execution strategy may choose nested-loops versus 
+	    merge joins.
+        </p>
+        <p>
+	    The Esper grammar is built using ANTLR and based on Extended Backus-Naur Form (EBNF).
+        </p>
+        <p>
+	    Allan's interval algebra is the foundation for many of the date-time methods.
+        </p>
+        <p>
+	    Enumeration methods employ lambda expressions aka. closures.
         </p>
       </answer>
     </faq>

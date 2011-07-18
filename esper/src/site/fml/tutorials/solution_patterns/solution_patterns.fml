@@ -160,9 +160,8 @@ where sensor.sensorId = loc.sensorId</pre></div>
           array output.
         </p>
         <p>
-          Use @Audit to turn on statement-level processing debug output which is logged under informational level to your output, please
-          see the documentation for more details. For example: "@Audit select * from MyEvent".
-          @Audit also accepts a number of keywords to control which aspects of processing are output and which are not.
+          Note that the engine does not process statements in the order they are created. Instead the engine processes events as they come in, and therefore the 
+          statements they apply to, in any order. If you do want to dictate to the engine a particular order of execution, use @Priority.
         </p>
         <p>
           Consider adding expressions to the select-clause so that you can inspect what the expression result is.
@@ -182,7 +181,8 @@ where sensor.sensorId = loc.sensorId</pre></div>
           can change what is output by the engine. See "3.7.2. Output for Aggregation and Group-By" in the doc.
         </p>
         <p>
-          The Reporting Issues page on this site provides further information for resolving issues.
+          The Reporting Issues page on this site provides further information for resolving issues. When submitting code to the user mailing list 
+          please submit the smallest test class as can be, remove any randomness and send only the smallest number of events to reproduce the problem.
         </p>
       </answer>
     </faq>    
