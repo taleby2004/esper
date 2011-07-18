@@ -10,6 +10,9 @@ package com.espertech.esperio.jms;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.adapter.BaseSubscription;
+import com.espertech.esper.filter.FilterHandleCallback;
+
+import java.util.Collection;
 
 /**
  * Represents the JMS-aspects of a subscription.
@@ -43,8 +46,8 @@ public class JMSSubscription extends BaseSubscription
         this.jmsMessageMarshaller = jmsMessageMarshaller;
     }
 
-    public void matchFound(EventBean event)
-    {
+    public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches) {
+
         if (!(adapter instanceof JMSOutputAdapter))
         {
             return;
