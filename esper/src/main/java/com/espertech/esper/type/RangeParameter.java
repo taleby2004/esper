@@ -52,7 +52,7 @@ public class RangeParameter implements NumberSetParameter
 
     public boolean isWildcard(int min, int max)
     {
-        if ((min <= low) && (max >= high))
+        if ((min >= low) && (max <= high))
         {
             return true;
         }

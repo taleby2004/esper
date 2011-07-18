@@ -24,9 +24,12 @@ public class TestRangeParameter extends TestCase
     {
         RangeParameter rangeParameter = new RangeParameter(10, 20);
         assertTrue(rangeParameter.isWildcard(10, 20));
-        assertFalse(rangeParameter.isWildcard(11, 20));
-        assertFalse(rangeParameter.isWildcard(10, 19));
-        assertTrue(rangeParameter.isWildcard(9, 21));
+        assertTrue(rangeParameter.isWildcard(11, 20));
+        assertTrue(rangeParameter.isWildcard(10, 19));
+        assertFalse(rangeParameter.isWildcard(9, 21));
+        assertFalse(rangeParameter.isWildcard(10, 21));
+        assertFalse(rangeParameter.isWildcard(9, 20));
+        assertTrue(rangeParameter.isWildcard(11, 19));
     }
 
     public void testGetValues()
