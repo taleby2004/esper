@@ -106,27 +106,6 @@
 	</p>
       </answer>    
     </faq>
-    <faq id="other-solutions">
-      <question>How would you position Esper next to existing solutions (or hacks) in the industry?</question>
-      <answer>
-        <p>
-        	Esper is the only open source Event Stream Processing out there - and this is not to be confused with 
-        	classical rules engines. Compared to commercial ESP engines implementations, 
-        	Esper may lack high availability options in the 1.0 release, but its open source nature is a driver to get the 
-        	Event processing language right, and get the Java community up to speed on those concepts - 
-        	before tackling enterprise grade requirements in upcoming versions.			
-		</p>
-		<p>
-			Generally Rete-based production rule engines can indeed be used to address part of what CEP coins, 
-			especially triggering by correlating events, possibly including a temporal relationship between events.
-			That said the ESP side - Event Stream Processing - is a different beast, where what matters is the "S" for Stream. 
-			In this side of the Esper engine we provide several language facilities to build expressions using time not 
-			for temporal relationship (happened before etc) but for sliding window. As an example, this makes it very valuable 
-			for computing things like volume weighted average price (VWAP) of ticks -
-			which would possibly be awful using something Rete-based like a classical rule engine.
-		</p>
-      </answer>
-    </faq>
      <faq id="philosophy">
       <question>What is the concept or philosophy behind the design?</question>
       <answer>
@@ -149,14 +128,14 @@
           We did not assume that analysis is only over a few events - the engine optimizes in various ways for evaluating large numbers of events.
         </p>
         <p>
-          We did not assume there are only a few or few hundred statements - the engine tries to keep minimal overhead per statement small.
+          We did not assume there are only a few or few hundred statements - the engine tries to keep overhead per statement small.
         </p>
         <p>
           We did not assume the application is single-threaded and that the engine must control any threads.
         </p>
         <p>
           We did not limit event types to be a tuple of name-value pairs, and did not limit available types to a few numeric or string types. The engine supports any Java type 
-          including application types.
+          including application types, inheritance and polymorphism.
         </p>
       </answer>
     </faq>
@@ -164,7 +143,7 @@
       <question>What is the history? Where did it start and come from?</question>
       <answer>
         <p>
-		  Thomas Bernhardt is the project founder and project lead. He works as a software architect for a major financial institution. 
+		  Thomas Bernhardt is the project founder and project lead.
 		  On a project in 2004 Thomas had been asked to evaluate different rules engines for use in an application for monitoring a 
 		  trading system. The rules engines proved cumbersome and slow. There was no budget for a CEP product, thus a custom application 
 		  to solve the monitoring problem was developed. The project lead's interest in CEP and ESP technologies lead to further 
@@ -187,8 +166,8 @@
 		  end-to-end testing against the client API.
         </p>
         <p>          
-          We certify that every minor release (for example 2.x to 2.y) does not break the public interface of the engine.
-          In the public interface we include the 
+          We certify that every minor release (for example 2.x to 2.y) does not break the public interface of the engine
+          and does not substantially break the implied interface (the expected result of EPL statements and typing).
         </p>
         <p>          
           The Esper team follows the practice of test-driven development (TDD) rigorously, ensuring that each feature added has automated test coverage.
@@ -460,17 +439,17 @@ variable factor in the statements?</i>".
       <question>What happens on engine start? I assume that if I have a time based query, since there's no history within the engine, there's no way to get any events to fire until the time and events have been consumed?</question>
       <answer>
         <p>
-			The Named Window feature allows starting queries from a prior event history. Named windows are more similar to traditional tables and help to initialize new queries with data.
+	The Named Window feature allows starting queries from a prior event history. Named windows are more similar to traditional tables and help to initialize new queries with data.
         </p>
         <p>
-			Currently the Esper engine itself does not provide state persistence, fail-over or recovery, or an event replay mechanism.
-			The Esper engine does not write to disk, cluster or persist in any other way engine state. Thus if your application process or your hardware system goes down, then the engine state is lost. 
+	Currently the Esper engine itself does not provide state persistence, fail-over or recovery, or an event replay mechanism.
+	The Esper engine does not write to disk or perform any IO, cluster or persist in any other way engine state. Thus if your application process or your hardware system goes down, then the engine state is lost. 
         </p>			
         <p>
-			If you need fail-over and/or recovery capability, then the EsperHA (Esper High Availability) product by EsperTech can be a good solution. Please contact us for further information.
+	If you need fail-over and/or recovery capability, then the EsperHA (Esper High Availability) product by EsperTech can be a good solution. Please contact us for further information.
         </p>			
         <p>
-			Alternatively your application could replay events into the engine, but that is currently a process the application or middleware must do and that Esper has no facilities for.        	
+	Alternatively your application could replay events into the engine, but that is currently a process the application or middleware must do and that Esper has no facilities for.        	
         </p>
       </answer>
     </faq>
@@ -478,7 +457,7 @@ variable factor in the statements?</i>".
 	  <question>Can queries be added to the system only on engine start, or can they be added dynamically? Will those queries work with any internally stored historical data when they're started?</question>
 	  <answer>
 		<p>
-			Queries can be added, stopped, started, or destroyed while the engine is running in a multithread-safe fashion. The facility to explicitly attach or initialize a new query from a prior query or data window is a feature of named windows.
+		Queries can be added, stopped, started, or destroyed while the engine is running in a multithread-safe fashion. The facility to explicitly attach or initialize a new query from a prior query or data window is a feature of named windows.
 		</p>
 	  </answer>
 	</faq>
@@ -486,7 +465,7 @@ variable factor in the statements?</i>".
 	  <question>The engine can be configured to work with DOM objects and many other event representations. Is that configuration static, or can those configurations be changed or added to on a running system?</question>
 	  <answer>
 		<p>
-			The runtime configuration API allows most configuration actions to be performed at runtime. This API is available via the administrative interface of the engine.
+		The runtime configuration API allows most configuration actions to be performed at runtime. This API is available via the administrative interface of the engine.
 		</p>
 	  </answer>
 	</faq>
@@ -494,15 +473,16 @@ variable factor in the statements?</i>".
 	  <question>When working with composite streams, i.e. when using the 'insert into' mechanism, does the entity being inserted into have to be a registered object in the system or are those created simply by registering the query?</question>
 	  <answer>
 		<p>
-			No, there is no registration required. The creation of the query that contains the insert-into clause creates the new stream and makes it available to use in further statements.		
+		No, there is no registration required. The creation of the query that contains the insert-into clause creates the new stream and makes it available to use in further statements.		
 		</p>
 	  </answer>
 	</faq>
     <faq id="windows">
       <question>Could you explain the concept of data windows for a database programmer?</question>
       <answer>
-        <p>One could perhaps think of a table with a timestamp column containing the time when the row was inserted. We could create a view that sorts by timestamp descending and selects all rows between the current timestamp and say up to 1 minute prior to now. Every time we fire a query against this view, the view returns the recent rows added in the last 1 minute. The rows returned are the contents of a 1 minute time window. Every time the query is fired we get a new window. Older rows would seem to leave the window while new rows would seem to enter the window.
-		</p>
+        <p>
+        	One could perhaps think of a table with a timestamp column containing the time when the row was inserted. We could create a view that sorts by timestamp descending and selects all rows between the current timestamp and say up to 1 minute prior to now. Every time we fire a query against this view, the view returns the recent rows added in the last 1 minute. The rows returned are the contents of a 1 minute time window. Every time the query is fired we get a new window. Older rows would seem to leave the window while new rows would seem to enter the window.
+	</p>
       </answer>  
     </faq>
     <faq id="window_nowindow">
@@ -523,7 +503,9 @@ variable factor in the statements?</i>".
       <question>What happens if I send events to which no query is created yet? Can a time-to-live be specified to retry matching an event?</question>
       <answer>
         <p>
-	  Events that are of no interest to any started EPL statement are simply dropped. There is no internal queue they are retained in. There is also no concept of time-to-live for unmatched events.
+	  Events that are of no interest to any started EPL statement are simply dropped. There is no internal queue they are retained in. 
+	  To specify a time-to-live for unmatched events consider using a data window such as a time-window. When events leave the time window
+	  they are finally no longer considered, but while they are in the time window you can match, filter or aggregate, for example.
 	</p>
         <p>
     	  Your application can use the UnmatchedEventListener interface to catch an event that is dropped because no EPL statement needs to see it. 
@@ -536,11 +518,14 @@ variable factor in the statements?</i>".
       <answer>
         <p>
 	  In Esper the concept of time is under the control of an application via CurrentTimeEvent at the level of the runtime and at the level of statements via 
-	  isolated service provider. The event arrival time is the time the runtime or isolated service is currently at, when the event is made known to the runtime or isolated service. 
+	  isolated service provider.
 	  This allows any number of time dimensions to be controlled separately, such as event originating time or transmitted time for example. 
 	</p>
+	<p>
+	  Esper also allows declaring a start timestamp property name and an end timestamp property name for event types. These work together with interval algebra methods.
+	</p>
         <p>
-	  Use the time-order view (ext:time_order) to reorder events arriving out-of-order. The time order view can operate on a timestamp event property that is part of your event.	  
+	  Use the time-order view (ext:time_order) to reorder events arriving out-of-order. The time order view can operate on a timestamp event property that is part of your event.
 	</p>
       </answer>  
     </faq>
@@ -678,12 +663,12 @@ variable factor in the statements?</i>".
       <answer>
         <p>
             As discussed before, there is no internal event queue, and the application threads process all events.
-			Esper does not have a built-in mechanism to bunch up messages, however the Java concurrent library provides very good infrastructure to do this. A bunch of messages can be collected into a list, and a  threadpool (see java.util.concurrent.Executors) and Callable, that takes the list and sends the events to Esper, could be used here, for example.
-		</p>	  			
+		Esper does not have a built-in mechanism to bunch up messages, however the Java concurrent library provides very good infrastructure to do this. A bunch of messages can be collected into a list, and a  threadpool (see java.util.concurrent.Executors) and Callable, that takes the list and sends the events to Esper, could be used here, for example.
+	</p>	  			
 
         <p>
-			Our benchmark kit provides an example built upon concurrent queues and thread pools.
-		</p>
+		Our benchmark kit provides an example built upon concurrent queues and thread pools.
+	</p>
 
       </answer>
     </faq>    
@@ -836,10 +821,3 @@ public class TestSampleJUnit extends TestCase {
   </part>
 
 </faqs>
-
-
-
-
-
-
-

@@ -11,7 +11,7 @@ DEBS 2011 Challenge - The Trivia Geeks Club game
 
     There are three event producers:
 
-    * Trivia question generator which generates the trivia question and emits an event with trivia question and answer, the question (without the correct answer – of course) is sent to all subscribers;
+    * Trivia question generator which generates the trivia question and emits an event with trivia question and answer, the question (without the correct answer of course) is sent to all subscribers;
     
     * Player which can generate events of three type: answer, answer annulment, and request for most frequent answer, in that case the system generates an answer to this request and sends it as an event to the player;
     
@@ -28,7 +28,7 @@ DEBS 2011 Challenge - The Trivia Geeks Club game
 
     * Get new questions;
     
-    * Get answers – determine if the question is still valid, and if yes match against the answer, and create score event if applicable;
+    * Get answers; Determine if the question is still valid, and if yes match against the answer, and create score event if applicable;
     
     * Enable annulment of answers.
     
