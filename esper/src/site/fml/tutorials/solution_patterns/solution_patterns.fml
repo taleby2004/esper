@@ -225,7 +225,8 @@ where sensor.sensorId = loc.sensorId</pre></div>
       <question>Simple Statements</question>
       <answer>
         <p>
-          We recommend keeping your EPL statements simple and easy-to-read. 
+          We recommend keeping your EPL statements simple and easy-to-read: camelCase or CamelCase for property names works best, and event type names
+          usually are CamelCase as well.
         </p>
         <p>
           Consider splitting a single, complex statement into multiple EPL statements, where the first statement produces data via insert-into into a stream that a second statement consumes.
@@ -235,7 +236,28 @@ where sensor.sensorId = loc.sensorId</pre></div>
         </p>
       </answer>
     </faq>    
-    <faq id="design-0">
+    <faq id="design-1">
+      <question>EPL Editor</question>
+      <answer>
+        <p>
+          While Esper does not ship with an EPL editor, there are a few choices available.
+        </p>
+        <p>
+          Esper Enterprise Edition from EsperTech offers a webbrowser editor based on Adobe Flash/Flex technology.
+        </p>
+        <p>
+          For Netbeans IDE are available following plugins: EPL ErrorChecking, EPL FileSupport, EPL SyntaxHighlighter, EPL dependency visualiser,
+          They were created for usage of company Mycroft Mind by students of Masaryk University and are free to use.
+        </p>
+        <p>
+	  For Eclipse the Eclipse SQL Editor is also quit usable for EPL Statements. 
+	  To use it, do the following: . Open Eclipse . Preferences / Install Software . Work with: http://download.eclipse.org/datatools/updates . 
+	  Select Eclipse Data Tools Platform (latest version) . Windows / Preferences / General/ Editors / File Associations -> assign SQL Editor as default to *.epl Syntax Highlighting does work quit well, 
+	  but of course there is no content assist.
+        </p>
+      </answer>
+    </faq>    
+    <faq id="design-2">
       <question>Understand Joins</question>
       <answer>
         <p>
