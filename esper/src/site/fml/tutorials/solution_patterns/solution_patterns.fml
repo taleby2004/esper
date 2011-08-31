@@ -886,6 +886,31 @@ where login.accountNumber = null</pre></div>
       </answer>
     </faq>    
 
+    <faq id="absence-7">
+      <question>How to filter events based on parent-child relationship? How to detect events that are neither preceded nor followed by a related event?</question>
+      <answer>
+        <p>
+          I have a network scenario in which ports are entities of a device. 
+	  For instance if I am receiving a port down event followed by device down event or device down event followed by port down event, 
+	  I should drop port down event from reporting, since the parent (device) itself down before or after some period of time. 
+	</p>
+        <p>
+	  A solution was to delay events and then outer join, something like:
+	</p>
+	<div class="source"><pre>select * from pattern [every ine=StatusEvent -> timer:interval(2 sec)] as dse 
+    unidirectional left outer join 
+  StatusEvent(status="down").win:time(4 sec) as wsde 
+    on dse.ine.parent=wsde.id 
+  where dse.ine.status="up" or wsde.id is null</pre></div>      
+        <p>
+          This approach uses "unidirectional" to state that only the pattern drives the join, and delays events using a pattern and "timer-interval" as part of the join from-clause.
+	</p>
+        <p>
+          Note the check "where ... is null" in the where-clause that ensures that, if the device id is not null i.e. a matching "down" event is found, the event is suppressed.
+	</p>
+      </answer>
+    </faq>    
+
     <faq id="triple-bottom-pattern">
       <question>How do I detect something really complex, like a triple-bottom pattern?</question>
       <answer>
@@ -1752,7 +1777,32 @@ group by category, subEventType</pre></div>
       </answer>
     </faq>    
 
-    <faq id="buckets">
+    <faq id="buckets-1">
+      <question>How to calculate a weighted average over multible time ranges?</question>
+      <answer>
+        <p>
+	  For example: avgArrival = 0.6 * avg(t-1) + 0.3 * avg(t-2) + 0.1 * avg(t-3)          
+        </p>
+    	<p>
+	  The "t-1" means a range of 1-second size, for example when the current time is 14:00:
+        </p>
+<pre>
+t-1: 13:59-14:00     -> avg(Arrival_13:59-14:00) = 12
+t-2: 13:58-13:59     -> avg(Arrival_13:58-13:59) = 10
+t-3: 13:57-13:58     -> avg(Arrival_13:57-13:58) = 15
+avgArrival = 0.6*12 + 0.3 * 10 + 0.1 * 15 = 11.7
+</pre>
+    	<p>
+	  Here is a sample solution consisting of 2 statements:
+        </p>
+	<div class="source"><pre>// Output the average every 1 second to another stream
+insert into MyAverages select avg(...) as myavg from MyEvent.win:time(1 sec) output snapshot every 1 sec</pre></div>
+	<div class="source"><pre>// Compute a weighted average based on the averages provided by the MyAverages stream
+select 0.6 * prior(1, myavg) + 0.3 * prior(2, myavg) + 0.1 * prior(3, myavg) from MyAverages</pre></div>
+      </answer>
+    </faq>    
+
+    <faq id="buckets-2">
       <question>How to compute for 5-minute buckets? How to aggregate (e.g.vwap) n buckets of k minutes each?</question>
       <answer>
         <p>
