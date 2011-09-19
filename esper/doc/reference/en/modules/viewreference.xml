@@ -366,6 +366,10 @@ win:time(MYINTERVAL)  // MYINTERVAL defined as a variable</programlisting>
 				<programlisting><![CDATA[select * from StockTickEvent.win:time_batch(5 sec)]]></programlisting>
 				
 				<para>
+				  In alternative to batching events and releasing events all-at-once, consider using output rate limiting instead as described in <xref linkend="epl-output-rate"/>.
+				</para>
+				
+				<para>
 					By default, if there are no events arriving in the current interval (insert stream), and no events remain from the prior batch (remove stream), then the view does not post results to listeners. The view allows overriding this
 					default behavior via flow control keywords.
 				</para>
