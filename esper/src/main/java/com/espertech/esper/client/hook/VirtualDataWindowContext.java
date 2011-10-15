@@ -13,7 +13,8 @@ package com.espertech.esper.client.hook;
 
 import com.espertech.esper.client.EventBeanFactory;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.view.ViewFactoryContext;
 
@@ -26,7 +27,7 @@ import java.io.Serializable;
  */
 public class VirtualDataWindowContext {
 
-    private final StatementContext statementContext;
+    private final AgentInstanceContext agentInstanceContext;
     private final EventType eventType;
     private final Object[] parameters;
     private final ExprNode[] parameterExpressions;
@@ -38,7 +39,7 @@ public class VirtualDataWindowContext {
 
     /**
      * Ctor.
-     * @param statementContext statement services and statement information such as statement name, statement id, EPL expression
+     * @param agentInstanceContext statement services and statement information such as statement name, statement id, EPL expression
      * @param eventType the event type that the named window is declared to hold.
      * @param parameters the parameters passed when declaring the named window, for example "create window ABC.my:vdw("10.0.0.1")" passes one paramater here.
      * @param eventFactory factory for converting row objects to EventBean instances
@@ -48,8 +49,8 @@ public class VirtualDataWindowContext {
      * @param viewFactoryContext context of services
      * @param customConfiguration additional configuration
      */
-    public VirtualDataWindowContext(StatementContext statementContext, EventType eventType, Object[] parameters, ExprNode[] parameterExpressions, EventBeanFactory eventFactory, VirtualDataWindowOutStream outputStream, String namedWindowName, ViewFactoryContext viewFactoryContext, Serializable customConfiguration) {
-        this.statementContext = statementContext;
+    public VirtualDataWindowContext(AgentInstanceContext agentInstanceContext, EventType eventType, Object[] parameters, ExprNode[] parameterExpressions, EventBeanFactory eventFactory, VirtualDataWindowOutStream outputStream, String namedWindowName, ViewFactoryContext viewFactoryContext, Serializable customConfiguration) {
+        this.agentInstanceContext = agentInstanceContext;
         this.eventType = eventType;
         this.parameters = parameters;
         this.parameterExpressions = parameterExpressions;
@@ -65,7 +66,7 @@ public class VirtualDataWindowContext {
      * @return statement context
      */
     public StatementContext getStatementContext() {
-        return statementContext;
+        return agentInstanceContext.getStatementContext();
     }
 
     /**
@@ -132,5 +133,9 @@ public class VirtualDataWindowContext {
      */
     public Serializable getCustomConfiguration() {
         return customConfiguration;
+    }
+
+    public AgentInstanceContext getAgentInstanceContext() {
+        return agentInstanceContext;
     }
 }

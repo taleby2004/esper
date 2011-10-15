@@ -10,9 +10,10 @@ package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.annotation.HintEnum;
-import com.espertech.esper.core.StreamJoinAnalysisResult;
+import com.espertech.esper.core.service.StreamJoinAnalysisResult;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.join.base.HistoricalViewableDesc;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.type.OuterJoinType;
@@ -37,11 +38,8 @@ public class QueryPlanBuilder
      * @param outerJoinDescList - list of outer join criteria, or null if there are no outer joins
      * @param queryGraph - relationships between streams based on filter expressions and outer-join on-criteria
      * @param streamNames - names of streams
-     * @param hasHistorical - indicator if there is one or more historical streams in the join
-     * @param isHistorical - indicator for each stream if it is a historical streams or not
      * @param dependencyGraph - dependencies between historical streams
      * @param historicalStreamIndexLists - index management, populated for the query plan
-     * @param exprEvaluatorContext expression evaluation context
      * @param streamJoinAnalysisResult
      * @return query plan
      * @throws ExprValidationException if the query plan fails
@@ -50,14 +48,13 @@ public class QueryPlanBuilder
                                     List<OuterJoinDesc> outerJoinDescList,
                                     QueryGraph queryGraph,
                                     String[] streamNames,
-                                    boolean hasHistorical,
-                                    boolean[] isHistorical,
+                                    HistoricalViewableDesc historicalViewableDesc,
                                     DependencyGraph dependencyGraph,
                                     HistoricalStreamIndexList[] historicalStreamIndexLists,
-                                    ExprEvaluatorContext exprEvaluatorContext,
                                     StreamJoinAnalysisResult streamJoinAnalysisResult,
                                     boolean isQueryPlanLogging,
-                                    Annotation[] annotations)
+                                    Annotation[] annotations,
+                                    ExprEvaluatorContext exprEvaluatorContext)
             throws ExprValidationException
     {
         String methodName = ".getPlan ";
@@ -97,7 +94,7 @@ public class QueryPlanBuilder
         if (isAllInnerJoins && !hasPreferMergeJoin)
         {
             QueryPlan queryPlan = NStreamQueryPlanBuilder.build(queryGraph, typesPerStream,
-                                    hasHistorical, isHistorical, dependencyGraph, historicalStreamIndexLists,
+                                    historicalViewableDesc, dependencyGraph, historicalStreamIndexLists,
                                     hasForceNestedIter);
 
             if (queryPlan != null) {
@@ -116,7 +113,7 @@ public class QueryPlanBuilder
         }
 
         QueryPlan queryPlan = NStreamOuterQueryPlanBuilder.build(queryGraph, outerJoinDescList, streamNames, typesPerStream,
-                                    hasHistorical, isHistorical, dependencyGraph, historicalStreamIndexLists, exprEvaluatorContext);
+                                    historicalViewableDesc, dependencyGraph, historicalStreamIndexLists, exprEvaluatorContext);
         removeUnidirectional(queryPlan, streamJoinAnalysisResult);
         return queryPlan;
     }

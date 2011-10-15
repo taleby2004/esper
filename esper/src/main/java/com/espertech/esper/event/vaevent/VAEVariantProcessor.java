@@ -8,16 +8,16 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.ConfigurationVariantStream;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.named.NamedWindowIndexRepository;
+import com.espertech.esper.epl.named.NamedWindowRootViewInstance;
 import com.espertech.esper.event.EventTypeIdGenerator;
 import com.espertech.esper.event.EventTypeMetadata;
-import com.espertech.esper.epl.named.NamedWindowRootView;
-import com.espertech.esper.epl.named.NamedWindowIndexRepository;
-import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.core.EPStatementHandle;
 import com.espertech.esper.view.Viewable;
-import com.espertech.esper.client.ConfigurationVariantStream;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -114,13 +114,12 @@ public class VAEVariantProcessor implements ValueAddEventProcessor
         return new VariantEventBean(variantEventType, event);
     }
 
-    public void onUpdate(EventBean[] newData, EventBean[] oldData, NamedWindowRootView namedWindowRootView, NamedWindowIndexRepository indexRepository)
+    public void onUpdate(EventBean[] newData, EventBean[] oldData, NamedWindowRootViewInstance namedWindowRootView, NamedWindowIndexRepository indexRepository)
     {
         throw new UnsupportedOperationException();
     }
 
-    public Collection<EventBean> getSnapshot(EPStatementHandle createWindowStmtHandle, Viewable parent)
-    {
+    public Collection<EventBean> getSnapshot(EPStatementAgentInstanceHandle createWindowStmtHandle, Viewable parent) {
         throw new UnsupportedOperationException();
     }
 

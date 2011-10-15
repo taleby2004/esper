@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class EvalNodeUtil
@@ -23,25 +24,25 @@ public class EvalNodeUtil
      * @param currentNode is the root node
      * @return list of filter nodes
      */
-    public static EvalNodeAnalysisResult recursiveAnalyzeChildNodes(EvalNode currentNode)
+    public static EvalNodeAnalysisResult recursiveAnalyzeChildNodes(EvalFactoryNode currentNode)
     {
         EvalNodeAnalysisResult evalNodeAnalysisResult = new EvalNodeAnalysisResult();
         recursiveAnalyzeChildNodes(evalNodeAnalysisResult, currentNode);
         return evalNodeAnalysisResult;
     }
 
-    private static void recursiveAnalyzeChildNodes(EvalNodeAnalysisResult evalNodeAnalysisResult, EvalNode currentNode)
+    private static void recursiveAnalyzeChildNodes(EvalNodeAnalysisResult evalNodeAnalysisResult, EvalFactoryNode currentNode)
     {
-        if ((currentNode instanceof EvalFilterNode) ||
-            (currentNode instanceof EvalGuardNode) ||
-            (currentNode instanceof EvalObserverNode) ||
-            (currentNode instanceof EvalMatchUntilNode) ||
-            (currentNode instanceof EvalEveryDistinctNode))
+        if ((currentNode instanceof EvalFilterFactoryNode) ||
+            (currentNode instanceof EvalGuardFactoryNode) ||
+            (currentNode instanceof EvalObserverFactoryNode) ||
+            (currentNode instanceof EvalMatchUntilFactoryNode) ||
+            (currentNode instanceof EvalEveryDistinctFactoryNode))
         {
             evalNodeAnalysisResult.addNode(currentNode);
         }
 
-        for (EvalNode node : currentNode.getChildNodes())
+        for (EvalFactoryNode node : currentNode.getChildNodes())
         {
             recursiveAnalyzeChildNodes(evalNodeAnalysisResult, node);
         }
@@ -52,19 +53,35 @@ public class EvalNodeUtil
      * @param currentNode parent node
      * @return all child nodes
      */
-    public static Set<EvalNode> recursiveGetChildNodes(EvalNode currentNode)
+    public static Set<EvalFactoryNode> recursiveGetChildNodes(EvalFactoryNode currentNode)
     {
-        Set<EvalNode> result = new HashSet<EvalNode>();
+        Set<EvalFactoryNode> result = new HashSet<EvalFactoryNode>();
         recursiveGetChildNodes(result, currentNode);
         return result;
     }
 
-    private static void recursiveGetChildNodes(Set<EvalNode> set, EvalNode currentNode)
+    private static void recursiveGetChildNodes(Set<EvalFactoryNode> set, EvalFactoryNode currentNode)
     {
-        for (EvalNode node : currentNode.getChildNodes())
+        for (EvalFactoryNode node : currentNode.getChildNodes())
         {
             set.add(node);
             recursiveGetChildNodes(set, node);
         }
+    }
+
+    public static EvalRootNode makeRootNodeFromFactory(EvalRootFactoryNode rootFactoryNode, PatternAgentInstanceContext patternAgentInstanceContext) {
+        return (EvalRootNode) rootFactoryNode.makeEvalNode(patternAgentInstanceContext);
+    }
+
+    public static EvalNode makeEvalNodeSingleChild(List<EvalFactoryNode> childNodes, PatternAgentInstanceContext agentInstanceContext) {
+        return childNodes.get(0).makeEvalNode(agentInstanceContext);
+    }
+
+    public static EvalNode[] makeEvalNodeChildren(List<EvalFactoryNode> childNodes, PatternAgentInstanceContext agentInstanceContext) {
+        EvalNode[] children = new EvalNode[childNodes.size()];
+        for (int i = 0; i < childNodes.size(); i++) {
+            children[i] = childNodes.get(i).makeEvalNode(agentInstanceContext);
+        }
+        return children;
     }
 }

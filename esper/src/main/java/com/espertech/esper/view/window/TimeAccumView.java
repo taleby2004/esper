@@ -8,13 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ViewUpdatedCollection;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.view.*;
@@ -39,7 +38,7 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
 {
     // View parameters
     private final TimeAccumViewFactory factory;
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final long msecIntervalSize;
     private final ViewUpdatedCollection viewUpdatedCollection;
     private final ScheduleSlot scheduleSlot;
@@ -54,19 +53,19 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
      * @param msecIntervalSize is the number of milliseconds to batch events for
      * @param viewUpdatedCollection is a collection that the view must update when receiving events
      * @param timeBatchViewFactory fr copying this view in a group-by
-     * @param statementContext is required view services
+     * @param agentInstanceContext is required view services
      */
     public TimeAccumView(TimeAccumViewFactory timeBatchViewFactory,
-                         StatementContext statementContext,
+                         AgentInstanceViewFactoryChainContext agentInstanceContext,
                          long msecIntervalSize,
                          ViewUpdatedCollection viewUpdatedCollection)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.factory = timeBatchViewFactory;
         this.msecIntervalSize = msecIntervalSize;
         this.viewUpdatedCollection = viewUpdatedCollection;
 
-        this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
+        this.scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
 
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
@@ -74,12 +73,12 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
                 TimeAccumView.this.sendRemoveStream();
             }
         };
-        handle = new EPStatementHandleCallback(statementContext.getEpStatementHandle(), callback);
+        handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return factory.makeView(statementContext);
+        return factory.makeView(agentInstanceContext);
     }
 
     /**
@@ -107,7 +106,7 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
         // If we have an empty window about to be filled for the first time, addSchedule a callback
         boolean removeSchedule = false;
         boolean addSchedule = false;
-        long timestamp = statementContext.getSchedulingService().getTime();
+        long timestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
 
         if (!currentBatch.isEmpty())
         {
@@ -126,11 +125,11 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
 
         if (removeSchedule)
         {
-            statementContext.getSchedulingService().remove(handle, scheduleSlot);
+            agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
         if (addSchedule)
         {
-            statementContext.getSchedulingService().add(msecIntervalSize, handle, scheduleSlot);
+            agentInstanceContext.getStatementContext().getSchedulingService().add(msecIntervalSize, handle, scheduleSlot);
             callbackScheduledTime = msecIntervalSize + timestamp;
         }
 
@@ -203,7 +202,7 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
 
     public void stop() {
     	if (handle != null) {
-        	statementContext.getSchedulingService().remove(handle, scheduleSlot);
+        	agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }
 

@@ -13,6 +13,9 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -47,6 +50,53 @@ public class TestNamedWindowViews extends TestCase
         listenerStmtTwo = new SupportUpdateListener();
         listenerStmtThree = new SupportUpdateListener();
         listenerStmtDelete = new SupportUpdateListener();
+    }
+
+    public void testBeanBacked()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
+
+        // Test create from class
+        EPStatement stmt = epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        stmt.addListener(listenerWindow);
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+
+        EPStatement stmtConsume = epService.getEPAdministrator().createEPL("select * from MyWindow");
+        stmtConsume.addListener(listenerStmtOne);
+
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        assertEvent(listenerWindow.assertOneGetNewAndReset());
+        assertEvent(listenerStmtOne.assertOneGetNewAndReset());
+
+        EPStatement stmtUpdate = epService.getEPAdministrator().createEPL("on SupportBean_A update MyWindow set string='s'");
+        stmtUpdate.addListener(listenerStmtTwo);
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
+        assertEvent(listenerStmtTwo.getLastNewData()[0]);
+    }
+
+    public void testBeanSchemaBacked() {
+
+        // Test create from schema
+        epService.getEPAdministrator().createEPL("create schema ABC as " + SupportBean.class.getName());
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as ABC");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from " + SupportBean.class.getName());
+
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        assertEvent(epService.getEPRuntime().executeQuery("select * from MyWindow").getArray()[0]);
+
+        EPStatement stmtABC = epService.getEPAdministrator().createEPL("select * from ABC");
+        stmtABC.addListener(listenerStmtOne);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        assertTrue(listenerStmtOne.isInvoked());
+    }
+
+    private void assertEvent(EventBean event) {
+        assertTrue(event.getEventType() instanceof BeanEventType);
+        assertTrue(event.getUnderlying() instanceof SupportBean);
+        assertEquals(EventTypeMetadata.TypeClass.NAMED_WINDOW, ((EventTypeSPI) event.getEventType()).getMetadata().getTypeClass());
+        assertEquals("MyWindow", event.getEventType().getName());
     }
 
     public void testDeepSupertypeInsert() {
@@ -1731,8 +1781,10 @@ public class TestNamedWindowViews extends TestCase
     {
         assertEquals("Error starting statement: Named windows require one or more child views that are data window views [create window MyWindow.std:groupwin(value).stat:uni(value) as MyMap]",
                      tryInvalid("create window MyWindow.std:groupwin(value).stat:uni(value) as MyMap"));
+
         assertEquals("Named windows require one or more child views that are data window views [create window MyWindow as MyMap]",
                      tryInvalid("create window MyWindow as MyMap"));
+
         assertEquals("Named window 'dummy' has not been declared [on MyMap delete from dummy]",
                      tryInvalid("on MyMap delete from dummy"));
 

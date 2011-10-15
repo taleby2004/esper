@@ -50,7 +50,7 @@ public final class IndexTreeBuilder
                                     FilterHandleSetNode topNode)
     {
         this.eventType = filterValueSet.getEventType();
-        this.remainingParameters = new ArrayDeque(filterValueSet.getParameters());
+        this.remainingParameters = new ArrayDeque<FilterValueSetParam>(filterValueSet.getParameters());
         this.filterCallback = filterCallback;
         this.currentThreadId = Thread.currentThread().getId();
 

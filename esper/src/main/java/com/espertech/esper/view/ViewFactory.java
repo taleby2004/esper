@@ -9,9 +9,9 @@
 package com.espertech.esper.view;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.core.StatementContext;
 
 import java.util.List;
 
@@ -46,26 +46,11 @@ public interface ViewFactory
                        List<ViewFactory> parentViewFactories) throws ViewParameterException;
 
     /**
-     * Returns true if the view factory can make views that provide a view resource with the
-     * given capability.
-     * @param viewCapability is the view resource needed
-     * @return true to indicate that the view can provide the resource, or false if not
-     */
-    public boolean canProvideCapability(ViewCapability viewCapability);
-
-    /**
-     * Indicates to the view factory to provide the view resource indicated.
-     * @param viewCapability is the required resource descriptor
-     * @param resourceCallback is the callback to use to supply the resource needed
-     */
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback);
-
-    /**
      * Create a new view.
-     * @param statementContext contains view services
-     * @return new view
+     *
+     * @param agentInstanceViewFactoryContext
      */
-    public View makeView(StatementContext statementContext);
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext);
 
     /**
      * Returns the event type that the view that is created by the view factory would create for events posted

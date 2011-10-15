@@ -90,9 +90,4 @@ public class BigDecimalAvgAggregator implements AggregationMethod
     {
         return Double.class;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeAvgAggregator(BigDecimal.class, false);
-    }
 }

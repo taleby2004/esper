@@ -48,7 +48,7 @@ public class PriorEventView extends ViewSupport
      * Returns the underlying buffer used for access to prior events.
      * @return buffer
      */
-    protected ViewUpdatedCollection getBuffer()
+    public ViewUpdatedCollection getBuffer()
     {
         return buffer;
     }

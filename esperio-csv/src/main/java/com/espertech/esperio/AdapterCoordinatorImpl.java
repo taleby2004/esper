@@ -17,7 +17,7 @@ import java.util.Set;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.adapter.AdapterState;

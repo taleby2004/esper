@@ -34,7 +34,7 @@ public class TestRegressionLinestView extends TestCase
     {
         // Set up sum view and a test child view
         EventType type = RegressionLinestView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        myView = new RegressionLinestView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null);
+        myView = new RegressionLinestView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null);
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
@@ -80,7 +80,7 @@ public class TestRegressionLinestView extends TestCase
 
     public void testCopyView() throws Exception
     {
-        RegressionLinestView copied = (RegressionLinestView) myView.cloneView(SupportStatementContextFactory.makeContext());
+        RegressionLinestView copied = (RegressionLinestView) myView.cloneView();
         assertTrue(myView.getExpressionX().equals(copied.getExpressionX()));
         assertTrue(myView.getExpressionY().equals(copied.getExpressionY()));
     }

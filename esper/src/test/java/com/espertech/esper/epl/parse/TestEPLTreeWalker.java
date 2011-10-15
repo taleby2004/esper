@@ -260,7 +260,7 @@ public class TestEPLTreeWalker extends TestCase
         StatementSpecRaw raw = walker.getStatementSpec();
 
         PatternStreamSpecRaw streamSpec = (PatternStreamSpecRaw) raw.getStreamSpecs().get(0);
-        assertTrue(streamSpec.getEvalNode() instanceof EvalFilterNode);
+        assertTrue(streamSpec.getEvalFactoryNode() instanceof EvalFilterFactoryNode);
         assertEquals("pat", streamSpec.getOptionalStreamName());
 
         OnTriggerWindowDesc windowDesc = (OnTriggerWindowDesc) raw.getOnTriggerDesc();
@@ -345,7 +345,7 @@ public class TestEPLTreeWalker extends TestCase
         raw = walker.getStatementSpec();
 
         PatternStreamSpecRaw patternSpec = (PatternStreamSpecRaw) raw.getStreamSpecs().get(0);
-        assertTrue(patternSpec.getEvalNode() instanceof EvalEveryNode);
+        assertTrue(patternSpec.getEvalFactoryNode() instanceof EvalEveryFactoryNode);
     }
 
     public void testWalkCreateWindow() throws Exception
@@ -429,12 +429,12 @@ public class TestEPLTreeWalker extends TestCase
         EPLTreeWalker walker = parseAndWalkPattern("A until (B or C)");
         StatementSpecRaw raw = walker.getStatementSpec();
         PatternStreamSpecRaw a = (PatternStreamSpecRaw) raw.getStreamSpecs().get(0);
-        EvalMatchUntilNode matchNode = (EvalMatchUntilNode) a.getEvalNode();
+        EvalMatchUntilFactoryNode matchNode = (EvalMatchUntilFactoryNode) a.getEvalFactoryNode();
         assertEquals(2, matchNode.getChildNodes().size());
-        assertTrue(matchNode.getChildNodes().get(0) instanceof EvalFilterNode);
-        assertTrue(matchNode.getChildNodes().get(1) instanceof EvalOrNode);
+        assertTrue(matchNode.getChildNodes().get(0) instanceof EvalFilterFactoryNode);
+        assertTrue(matchNode.getChildNodes().get(1) instanceof EvalOrFactoryNode);
 
-        EvalMatchUntilNode spec = getMatchUntilSpec("A until (B or C)");
+        EvalMatchUntilFactoryNode spec = getMatchUntilSpec("A until (B or C)");
         assertNull(spec.getLowerBounds());
         assertNull(spec.getUpperBounds());
 
@@ -471,12 +471,12 @@ public class TestEPLTreeWalker extends TestCase
         assertEquals(2, spec.getUpperBounds().getExprEvaluator().evaluate(null, true, null));
     }
 
-    private EvalMatchUntilNode getMatchUntilSpec(String text) throws Exception
+    private EvalMatchUntilFactoryNode getMatchUntilSpec(String text) throws Exception
     {
         EPLTreeWalker walker = parseAndWalkPattern(text);
         StatementSpecRaw raw = walker.getStatementSpec();
         PatternStreamSpecRaw a = (PatternStreamSpecRaw) raw.getStreamSpecs().get(0);
-        return (EvalMatchUntilNode) a.getEvalNode();
+        return (EvalMatchUntilFactoryNode) a.getEvalFactoryNode();
     }
 
     public void testWalkSimpleWhere() throws Exception
@@ -908,7 +908,7 @@ public class TestEPLTreeWalker extends TestCase
         assertEquals(1, walker.getStatementSpec().getStreamSpecs().size());
         PatternStreamSpecRaw patternStreamSpec = (PatternStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);
 
-        assertEquals(EvalFollowedByNode.class, patternStreamSpec.getEvalNode().getClass());
+        assertEquals(EvalFollowedByFactoryNode.class, patternStreamSpec.getEvalFactoryNode().getClass());
         assertNull(patternStreamSpec.getOptionalStreamName());
 
         // Test case with "as s0"
@@ -921,11 +921,11 @@ public class TestEPLTreeWalker extends TestCase
         assertEquals(2, walker.getStatementSpec().getStreamSpecs().size());
         patternStreamSpec = (PatternStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);
         assertEquals("s0", patternStreamSpec.getOptionalStreamName());
-        assertEquals(EvalFollowedByNode.class, patternStreamSpec.getEvalNode().getClass());
+        assertEquals(EvalFollowedByFactoryNode.class, patternStreamSpec.getEvalFactoryNode().getClass());
 
         patternStreamSpec = (PatternStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(1);
         assertEquals("s1", patternStreamSpec.getOptionalStreamName());
-        assertEquals(EvalOrNode.class, patternStreamSpec.getEvalNode().getClass());
+        assertEquals(EvalOrFactoryNode.class, patternStreamSpec.getEvalFactoryNode().getClass());
 
         // Test 3 patterns
         walker = parseAndWalkEPL("select * from pattern [" + patternOne + "], pattern [" + patternTwo + "] as s1," +
@@ -1072,17 +1072,17 @@ public class TestEPLTreeWalker extends TestCase
         assertEquals(1, walker.getStatementSpec().getStreamSpecs().size());
         PatternStreamSpecRaw patternStreamSpec = (PatternStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);
 
-        EvalNode rootNode = patternStreamSpec.getEvalNode();
+        EvalFactoryNode rootNode = patternStreamSpec.getEvalFactoryNode();
 
-        EvalEveryNode everyNode = (EvalEveryNode) rootNode;
+        EvalEveryFactoryNode everyNode = (EvalEveryFactoryNode) rootNode;
 
         assertEquals(1, everyNode.getChildNodes().size());
-        assertTrue(everyNode.getChildNodes().get(0) instanceof EvalGuardNode);
-        EvalGuardNode guardNode = (EvalGuardNode) everyNode.getChildNodes().get(0);
+        assertTrue(everyNode.getChildNodes().get(0) instanceof EvalGuardFactoryNode);
+        EvalGuardFactoryNode guardNode = (EvalGuardFactoryNode) everyNode.getChildNodes().get(0);
 
         assertEquals(1, guardNode.getChildNodes().size());
-        assertTrue(guardNode.getChildNodes().get(0) instanceof EvalFilterNode);
-        EvalFilterNode filterNode = (EvalFilterNode) guardNode.getChildNodes().get(0);
+        assertTrue(guardNode.getChildNodes().get(0) instanceof EvalFilterFactoryNode);
+        EvalFilterFactoryNode filterNode = (EvalFilterFactoryNode) guardNode.getChildNodes().get(0);
 
         assertEquals("g", filterNode.getEventAsName());
         assertEquals(0, filterNode.getChildNodes().size());
@@ -1315,7 +1315,7 @@ public class TestEPLTreeWalker extends TestCase
         assertEquals(1, walker.getStatementSpec().getStreamSpecs().size());
         PatternStreamSpecRaw patternStreamSpec = (PatternStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0);
 
-        EvalFilterNode filterNode = (EvalFilterNode) patternStreamSpec.getEvalNode();
+        EvalFilterFactoryNode filterNode = (EvalFilterFactoryNode) patternStreamSpec.getEvalFactoryNode();
         assertEquals(1, filterNode.getRawFilterSpec().getFilterExpressions().size());
         ExprNode node = filterNode.getRawFilterSpec().getFilterExpressions().get(0);
         ExprIdentNode identNode = (ExprIdentNode) node.getChildNodes().get(0);

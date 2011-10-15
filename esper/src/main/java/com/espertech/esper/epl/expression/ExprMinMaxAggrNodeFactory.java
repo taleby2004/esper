@@ -23,8 +23,7 @@ public class ExprMinMaxAggrNodeFactory implements AggregationMethodFactory
     private final boolean distinct;
     private final boolean hasFilter;
 
-    public ExprMinMaxAggrNodeFactory(MinMaxTypeEnum minMaxTypeEnum, Class type, boolean hasDataWindows, boolean distinct, boolean hasFilter)
-    {
+    public ExprMinMaxAggrNodeFactory(MinMaxTypeEnum minMaxTypeEnum, Class type, boolean hasDataWindows, boolean distinct, boolean hasFilter) {
         this.minMaxTypeEnum = minMaxTypeEnum;
         this.type = type;
         this.hasDataWindows = hasDataWindows;
@@ -37,15 +36,6 @@ public class ExprMinMaxAggrNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
-        AggregationMethod method = methodResolutionService.makeMinMaxAggregator(minMaxTypeEnum, type, hasDataWindows, hasFilter);
-        if (!distinct) {
-            return method;
-        }
-        return methodResolutionService.makeDistinctAggregator(method, type, hasFilter);
-    }
-
     public AggregationSpec getSpec(boolean isMatchRecognize)
     {
         return null;  // defaults apply
@@ -54,5 +44,17 @@ public class ExprMinMaxAggrNodeFactory implements AggregationMethodFactory
     public Class getResultType()
     {
         return type;
+    }
+
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
+    }
+
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeMinMaxAggregator(agentInstanceIds, groupId, aggregationId, minMaxTypeEnum, type, hasDataWindows, hasFilter);
+        if (!distinct) {
+            return method;
+        }
+        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, type, hasFilter);
     }
 }

@@ -8,15 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.view.stat;
 
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
-import com.espertech.esper.view.ViewFactory;
-import com.espertech.esper.view.ViewParameterException;
-import com.espertech.esper.view.*;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.view.*;
 
 import java.util.List;
 
@@ -44,7 +42,7 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
 
     public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
     {
-        ExprNode[] validated = ViewFactorySupport.validate("Univariate statistics", parentEventType, statementContext, viewParameters, false);
+        ExprNode[] validated = ViewFactorySupport.validate("Univariate statistics", parentEventType, statementContext, viewParameters, true);
         String errorMessage = "Univariate statistics view require a single expression returning a numeric value as a parameter";
         if (validated.length < 1) {
             throw new ViewParameterException(errorMessage);
@@ -55,23 +53,13 @@ public class UnivariateStatisticsViewFactory implements ViewFactory
         }
         fieldExpression = validated[0];
 
-        additionalProps = StatViewAdditionalProps.make(validated, 1);
+        additionalProps = StatViewAdditionalProps.make(validated, 1, parentEventType);
         eventType = UnivariateStatisticsView.createEventType(statementContext, additionalProps, streamNumber);
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        return false;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        return new UnivariateStatisticsView(statementContext, fieldExpression, eventType, additionalProps);
+        return new UnivariateStatisticsView(agentInstanceViewFactoryContext.getAgentInstanceContext(), fieldExpression, eventType, additionalProps);
     }
 
     public EventType getEventType()

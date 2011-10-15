@@ -13,24 +13,22 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.hook.VirtualDataWindow;
-import com.espertech.esper.client.hook.VirtualDataWindowKeyRange;
-import com.espertech.esper.client.hook.VirtualDataWindowLookupContext;
-import com.espertech.esper.client.hook.VirtualDataWindowLookupFieldDesc;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.epl.lookup.SubordTableLookupStrategy;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
+import com.espertech.esper.epl.named.NamedWindowProcessorInstance;
 import com.espertech.esper.epl.virtualdw.VirtualDataWindowLookupContextSPI;
-import com.espertech.esper.support.bean.*;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.virtualdw.SupportVirtualDW;
 import com.espertech.esper.support.virtualdw.SupportVirtualDWFactory;
-import com.espertech.esper.support.virtualdw.SupportVirtualDWInvalidFactory;
 import junit.framework.TestCase;
 
 import javax.naming.NamingException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
 
 public class TestVirtualDataWindowToLookup extends TestCase {
 
@@ -67,7 +65,8 @@ public class TestVirtualDataWindowToLookup extends TestCase {
         epService.getEPAdministrator().createEPL("create window MyWin.std:unique(string) as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWin select * from SupportBean");
         NamedWindowProcessor processor = spi.getNamedWindowService().getProcessor("MyWin");
-        SubordTableLookupStrategy strategy = processor.getRootView().getAddSubqueryLookupStrategy("ABC", spiContext.getOuterTypePerStream(), spiContext.getJoinDesc(), spiContext.isForceTableScan());
+        NamedWindowProcessorInstance processorInstance = processor.getProcessorInstance(null);
+        SubordTableLookupStrategy strategy = processorInstance.getRootViewInstance().getAddSubqueryLookupStrategy("ABC", "001", null, spiContext.getOuterTypePerStream(), spiContext.getJoinDesc(), spiContext.isForceTableScan());
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 200));
 
         // trigger

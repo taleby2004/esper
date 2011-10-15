@@ -22,8 +22,8 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.core.EPStatementSPI;
-import com.espertech.esper.core.StatementType;
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.core.service.StatementType;
 
 import java.util.Arrays;
 import java.util.Map;

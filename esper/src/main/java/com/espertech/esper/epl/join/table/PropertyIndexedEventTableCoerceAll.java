@@ -8,9 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.table;
 
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.util.SimpleNumberCoercer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.util.JavaClassHelper;
@@ -29,19 +30,9 @@ import java.util.Set;
 public class PropertyIndexedEventTableCoerceAll extends PropertyIndexedEventTableCoerceAdd
 {
     private static Log log = LogFactory.getLog(PropertyIndexedEventTableCoerceAll.class);
-    private final Class[] coercionTypes;
 
-    /**
-     * Ctor.
-     * @param streamNum is the stream number of the indexed stream
-     * @param eventType is the event type of the indexed stream
-     * @param propertyNames are the property names to get property values
-     * @param coercionType are the classes to coerce indexed values to
-     */
-    public PropertyIndexedEventTableCoerceAll(int streamNum, EventType eventType, String[] propertyNames, Class[] coercionType)
-    {
-        super(streamNum, eventType, propertyNames, coercionType);
-        this.coercionTypes = coercionType;
+    public PropertyIndexedEventTableCoerceAll(int streamNum, EventPropertyGetter[] propertyGetters, SimpleNumberCoercer[] coercers, Class[] coercionType) {
+        super(streamNum, propertyGetters, coercers, coercionType);
     }
 
     /**

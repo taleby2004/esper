@@ -12,7 +12,7 @@ import com.espertech.esper.client.ConfigurationException;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.epl.db.DatabaseConfigServiceImpl;
 import com.espertech.esper.epl.db.DatabaseConnectionFactory;
 import com.espertech.esper.util.SQLTypeMapUtil;

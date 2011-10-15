@@ -88,7 +88,12 @@ startEPLExpressionRule
 	;
 
 eplExpressionRule
-	:	(selectExpr | createWindowExpr | createIndexExpr | createVariableExpr | createSchemaExpr | onExpr | updateExpr) forExpr?		 
+	:	(contextExpr? (selectExpr | createWindowExpr | createIndexExpr | createVariableExpr | createSchemaExpr | onExpr | updateExpr) forExpr?)
+	|	createContextExpr
+	;
+	
+contextExpr
+	:	^(i=CONTEXT IDENT { leaveNode($i); } )
 	;
 
 onExpr 
@@ -98,7 +103,7 @@ onExpr
 	;
 	
 onStreamExpr
-	:	^(s=ON_STREAM (eventFilterExpr | patternInclusionExpression) IDENT? { leaveNode($s); })
+	:	^(s=ON_STREAM (eventFilterExpr[true] | patternInclusionExpression) IDENT? { leaveNode($s); })
 	;
 
 onMergeExpr
@@ -214,6 +219,29 @@ createVariableExpr
 	:	^(i=CREATE_VARIABLE_EXPR CLASS_IDENT IDENT (valueExpr)? { leaveNode($i); } )
 	;
 
+createContextExpr
+	:	^(s=CREATE_CTX IDENT createContextDetail { leaveNode($s); } )
+	;
+
+createContextDetail
+	:	^(CREATE_CTX_FIXED crontabLimitParameterSet crontabLimitParameterSet)
+	|	^(CREATE_CTX_PART createContextPartitionItem+)
+	|	^(CREATE_CTX_CAT createContextCategoryItem+ eventFilterExpr[false])
+	|	^(CREATE_CTX_INIT (createContextFilter | patternInclusionExpression) timePeriod)
+	;
+	
+createContextFilter
+	:	^(STREAM_EXPR eventFilterExpr[false] IDENT)
+	;
+		
+createContextPartitionItem
+	:	^(PARTITIONITEM eventFilterExpr[false] eventPropertyExpr[false]+)	
+	;	
+
+createContextCategoryItem
+	:	^(CREATE_CTX_CATITEM valueExpr IDENT)	
+	;	
+
 createSchemaExpr
 	:	^(s=CREATE_SCHEMA_EXPR IDENT (variantList|createColTypeList?) (^(CREATE_SCHEMA_EXPR_VAR IDENT))? createSchemaQual* { leaveNode($s); } )
 	;
@@ -270,7 +298,7 @@ matchRecogClause
 	;
 	
 matchRecogPartitionBy
-	:	^(p=MATCHREC_PARTITION valueExpr+ { leaveNode($p); })
+	:	^(p=PARTITIONITEM valueExpr+ { leaveNode($p); })
 	;
 	
 matchRecogMatchesAfterSkip
@@ -346,11 +374,11 @@ outerJoinIdent
 	;
 
 streamExpression
-	:	^(v=STREAM_EXPR (eventFilterExpr | patternInclusionExpression | databaseJoinExpression | methodJoinExpression) (viewListExpr)? (IDENT)? (UNIDIRECTIONAL)? (RETAINUNION|RETAININTERSECTION)? { leaveNode($v); } )
+	:	^(v=STREAM_EXPR (eventFilterExpr[true] | patternInclusionExpression | databaseJoinExpression | methodJoinExpression) (viewListExpr)? (IDENT)? (UNIDIRECTIONAL)? (RETAINUNION|RETAININTERSECTION)? { leaveNode($v); } )
 	;
 
-eventFilterExpr
-	:	^( f=EVENT_FILTER_EXPR IDENT? CLASS_IDENT propertyExpression? (valueExpr)* { leaveNode($f); } )
+eventFilterExpr[boolean isLeaveNode]
+	:	^( f=EVENT_FILTER_EXPR IDENT? CLASS_IDENT propertyExpression? (valueExpr)* { if ($isLeaveNode) leaveNode($f); } )
 	;
 	
 propertyExpression
@@ -408,11 +436,12 @@ havingClause
 	;
 
 outputLimitExpr
-	:	^(e=EVENT_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) outputLimitAfter? { leaveNode($e); } ) 
-	|   	^(tp=TIMEPERIOD_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? timePeriod outputLimitAfter? { leaveNode($tp); } )
-	|   	^(cron=CRONTAB_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? crontabLimitParameterSet outputLimitAfter? { leaveNode($cron); } )
-	|   	^(when=WHEN_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? valueExpr onSetExpr? outputLimitAfter? { leaveNode($when); } )
-	|	^(after=AFTER_LIMIT_EXPR outputLimitAfter { leaveNode($after); })
+	:	^(e=EVENT_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) outputLimitAfter? TERMINATED? { leaveNode($e); } ) 
+	|   	^(tp=TIMEPERIOD_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? timePeriod outputLimitAfter? TERMINATED? { leaveNode($tp); } )
+	|   	^(cron=CRONTAB_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? crontabLimitParameterSet outputLimitAfter? TERMINATED? { leaveNode($cron); } )
+	|   	^(when=WHEN_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? valueExpr onSetExpr? outputLimitAfter? TERMINATED? { leaveNode($when); } )
+	|   	^(term=TERM_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? outputLimitAfter? TERMINATED? { leaveNode($term); } )
+	|	^(after=AFTER_LIMIT_EXPR outputLimitAfter TERMINATED? { leaveNode($after); })
 	;
 
 outputLimitAfter
@@ -546,7 +575,7 @@ subQueryExpr
 	;
 	
 subSelectFilterExpr
-	:	^(v=STREAM_EXPR eventFilterExpr (viewListExpr)? (IDENT)? RETAINUNION? RETAININTERSECTION? { leaveNode($v); } )
+	:	^(v=STREAM_EXPR eventFilterExpr[true] (viewListExpr)? (IDENT)? RETAINUNION? RETAININTERSECTION? { leaveNode($v); } )
 	;
 	
 caseExpr

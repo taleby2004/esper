@@ -11,7 +11,6 @@
 
 package com.espertech.esper.schedule;
 
-import com.espertech.esper.core.SchedulingServiceAudit;
 import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;

@@ -12,10 +12,10 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.view.*;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.core.service.StatementContext;
 
 import java.util.List;
 
@@ -49,9 +49,9 @@ public class MyTrendSpotterViewFactory extends ViewFactorySupport
         eventType = MyTrendSpotterView.createEventType(statementContext);
     }
 
-    public View makeView(StatementContext statementContext)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        return new MyTrendSpotterView(statementContext, expression);
+        return new MyTrendSpotterView(agentInstanceViewFactoryContext, expression);
     }
 
     public EventType getEventType()

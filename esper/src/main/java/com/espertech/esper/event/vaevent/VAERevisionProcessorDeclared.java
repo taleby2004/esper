@@ -13,10 +13,10 @@ import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.collection.MultiKeyUntyped;
-import com.espertech.esper.core.EPStatementHandle;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.named.NamedWindowIndexRepository;
-import com.espertech.esper.epl.named.NamedWindowRootView;
+import com.espertech.esper.epl.named.NamedWindowRootViewInstance;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeIdGenerator;
 import com.espertech.esper.event.EventTypeMetadata;
@@ -77,7 +77,7 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
         return new RevisionEventBeanDeclared(revisionEventType, event);
     }
 
-    public void onUpdate(EventBean[] newData, EventBean[] oldData, NamedWindowRootView namedWindowRootView, NamedWindowIndexRepository indexRepository)
+    public void onUpdate(EventBean[] newData, EventBean[] oldData, NamedWindowRootViewInstance namedWindowRootView, NamedWindowIndexRepository indexRepository)
     {
         // If new data is filled, it is not a delete
         if ((newData == null) || (newData.length == 0))
@@ -243,9 +243,8 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
         namedWindowRootView.updateChildren(newDataPost, oldDataPost);
     }
 
-    public Collection<EventBean> getSnapshot(EPStatementHandle createWindowStmtHandle, Viewable parent)
-    {
-        createWindowStmtHandle.getStatementLock().acquireReadLock();
+    public Collection<EventBean> getSnapshot(EPStatementAgentInstanceHandle createWindowStmtHandle, Viewable parent) {
+        createWindowStmtHandle.getStatementAgentInstanceLock().acquireReadLock();
         try
         {
             Iterator<EventBean> it = parent.iterator();
@@ -265,7 +264,7 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
         }
         finally
         {
-            createWindowStmtHandle.getStatementLock().releaseReadLock();
+            createWindowStmtHandle.getStatementAgentInstanceLock().releaseReadLock();
         }
     }
 

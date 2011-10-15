@@ -8,35 +8,41 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.epl.spec.FilterSpecRaw;
-import com.espertech.esper.filter.FilterSpecCompiled;
+import com.espertech.esper.filter.FilterValueSetParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.List;
 
 /**
  * This class represents a filter of events in the evaluation tree representing any event expressions.
  */
 public class EvalFilterNode extends EvalNodeBase
 {
-    private static final long serialVersionUID = 0L;
-    private final FilterSpecRaw rawFilterSpec;
-    private final String eventAsName;
-    private transient FilterSpecCompiled filterSpec;
-    private final Integer consumptionLevel;
+    private final EvalFilterFactoryNode factoryNode;
+    private final List<FilterValueSetParam> addendumFilters;
 
-    /**
-     * Constructor.
-     * @param filterSpecification specifies the filter properties
-     * @param eventAsName is the name to use for adding matching events to the MatchedEventMap
-     * table used when indicating truth value of true.
-     */
-    protected EvalFilterNode(FilterSpecRaw filterSpecification,
-                             String eventAsName,
-                             Integer consumptionLevel)
-    {
-        this.rawFilterSpec = filterSpecification;
-        this.eventAsName = eventAsName;
-        this.consumptionLevel = consumptionLevel;
+    public EvalFilterNode(PatternAgentInstanceContext context, EvalFilterFactoryNode factoryNode) {
+        super(context);
+        this.factoryNode = factoryNode;
+        if (context.getAgentInstanceContext().getAgentInstanceFilterProxy() != null) {
+            this.addendumFilters = context.getAgentInstanceContext().getAgentInstanceFilterProxy().getAddendumFilters(factoryNode.getFilterSpec());
+        }
+        else {
+            this.addendumFilters = null;
+        }
+    }
+
+    public EvalFilterFactoryNode getFactoryNode() {
+        return factoryNode;
+    }
+
+    public EvalNodeNumber getNodeNumber() {
+        return factoryNode.getNodeNumber();
+    }
+
+    public List<FilterValueSetParam> getAddendumFilters() {
+        return addendumFilters;
     }
 
     public EvalStateNode newState(Evaluator parentNode,
@@ -47,56 +53,6 @@ public class EvalFilterNode extends EvalNodeBase
             return new EvalFilterStateNodeConsumeImpl(parentNode, this, beginState);
         }
         return new EvalFilterStateNode(parentNode, this, beginState);
-    }
-
-    /**
-     * Returns the raw (unoptimized/validated) filter definition.
-     * @return filter def
-     */
-    public FilterSpecRaw getRawFilterSpec()
-    {
-        return rawFilterSpec;
-    }
-
-    /**
-     * Returns filter specification.
-     * @return filter definition
-     */
-    public final FilterSpecCompiled getFilterSpec()
-    {
-        return filterSpec;
-    }
-
-    /**
-     * Sets a validated and optimized filter specification
-     * @param filterSpec is the optimized filter
-     */
-    public void setFilterSpec(FilterSpecCompiled filterSpec)
-    {
-        this.filterSpec = filterSpec;
-    }
-
-    /**
-     * Returns the tag for any matching events to this filter, or null since tags are optional.
-     * @return tag string for event
-     */
-    public final String getEventAsName()
-    {
-        return eventAsName;
-    }
-
-    public Integer getConsumptionLevel() {
-        return consumptionLevel;
-    }
-
-    @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})
-    public final String toString()
-    {
-        StringBuilder buffer = new StringBuilder();
-        buffer.append("EvalFilterNode rawFilterSpec=" + this.rawFilterSpec);
-        buffer.append(" filterSpec=" + this.filterSpec);
-        buffer.append(" eventAsName=" + this.eventAsName);
-        return buffer.toString();
     }
 
     private static final Log log = LogFactory.getLog(EvalFilterNode.class);

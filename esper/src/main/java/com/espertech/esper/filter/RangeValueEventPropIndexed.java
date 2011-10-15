@@ -12,6 +12,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,7 +57,7 @@ public class RangeValueEventPropIndexed implements FilterSpecParamRangeValue
         return resultEventIndex;
     }
 
-    public final Double getFilterValue(MatchedEventMap matchedEvents)
+    public final Double getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
         EventBean[] events = (EventBean[]) matchedEvents.getMatchingEventAsObject(resultEventAsName);
 

@@ -28,4 +28,8 @@ public class EventBeanFactoryXML implements EventBeanFactory {
     public EventBean wrap(Object underlying) {
         return eventAdapterService.adapterForTypedDOM((Node)underlying, type);
     }
+
+    public Class getUnderlyingType() {
+        return type.getUnderlyingType();
+    }
 }

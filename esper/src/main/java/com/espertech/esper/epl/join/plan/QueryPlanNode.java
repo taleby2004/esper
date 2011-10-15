@@ -10,6 +10,7 @@ package com.espertech.esper.epl.join.plan;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -29,14 +30,17 @@ public abstract class QueryPlanNode
     /**
      * Make execution node from this specification.
      *
+     *
+     * @param statementName
+     * @param statementId
+     *@param annotations
      * @param indexesPerStream - tables build for each stream
      * @param streamTypes - event type of each stream
      * @param streamViews - viewable per stream for access to historical data
      * @param historicalStreamIndexLists index management for historical streams
-     * @param viewExternal
-     * @return execution node matching spec
+     * @param viewExternal      @return execution node matching spec
      */
-    public abstract ExecNode makeExec(Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal);
+    public abstract ExecNode makeExec(String statementName, String statementId, Annotation[] annotations, Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal);
 
     public abstract void addIndexes(HashSet<String> usedIndexes);
 

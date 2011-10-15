@@ -8,15 +8,17 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.client.ConfigurationEngineDefaults;
+import com.espertech.esper.client.ConfigurationInformation;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.Pair;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeVariableVisitor;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.collection.Pair;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventBean;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,6 +34,7 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
     private final transient EventAdapterService eventAdapterService;
     private final transient VariableService variableService;
     private final boolean hasVariable;
+    private final boolean useLargeThreadingProfile;
     private static final long serialVersionUID = 2298436088557677833L;
 
     /**
@@ -51,7 +54,8 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
                              LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes,
                              LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes,
                              VariableService variableService,
-                             EventAdapterService eventAdapterService)
+                             EventAdapterService eventAdapterService,
+                             ConfigurationInformation configurationInformation)
         throws IllegalArgumentException
     {
         super(propertyName, filterOperator);
@@ -64,6 +68,7 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
         this.arrayEventTypes = arrayEventTypes;
         this.variableService = variableService;
         this.eventAdapterService = eventAdapterService;
+        this.useLargeThreadingProfile = configurationInformation.getEngineDefaults().getExecution().getThreadingProfile() == ConfigurationEngineDefaults.ThreadingProfile.LARGE;
 
         ExprNodeVariableVisitor visitor = new ExprNodeVariableVisitor();
         exprNode.accept(visitor);
@@ -88,11 +93,11 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
         return taggedEventTypes;
     }
 
-    public final Object getFilterValue(MatchedEventMap matchedEvents)
+    public final Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
         EventBean[] events = null;
 
-        if ((taggedEventTypes != null) || (arrayEventTypes != null))
+        if ((taggedEventTypes != null && !taggedEventTypes.isEmpty()) || (arrayEventTypes != null && !arrayEventTypes.isEmpty()))
         {
             int size = 0;
             size += (taggedEventTypes != null) ? taggedEventTypes.size() : 0;
@@ -114,19 +119,29 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
                 for (Map.Entry<String, Pair<EventType, String>> entry : arrayEventTypes.entrySet())
                 {
                     EventType compositeEventType = entry.getValue().getFirst();
-                    events[count] = eventAdapterService.adaptorForTypedMap(matchedEvents.getMatchingEvents(), compositeEventType);
+                    events[count] = eventAdapterService.adapterForTypedMap(matchedEvents.getMatchingEvents(), compositeEventType);
                     count++;
                 }
             }
         }
 
-        if (hasVariable)
-        {
-            return new ExprNodeAdapter(exprNode, events, variableService);
+        if (!hasVariable && events == null) {
+            // no-variable no-prior event evaluation
+            return new ExprNodeAdapterBase(exprNode, exprEvaluatorContext);
         }
-        else
-        {
-            return new ExprNodeAdapter(exprNode, events, null);
+        else if (events == null) {
+            // with-variable no-prior event evaluation
+            return new ExprNodeAdapterBaseVariables(exprNode, exprEvaluatorContext, variableService);
+        }
+
+        VariableService variableServiceToUse = hasVariable == false ? null : variableService;
+        if (useLargeThreadingProfile) {
+            // no-threadlocal evaluation
+            return new ExprNodeAdapterMultiStreamNoTL(exprNode, exprEvaluatorContext, variableServiceToUse, events);
+        }
+        else {
+            // evaluation with threadlocal cache
+            return new ExprNodeAdapterMultiStream(exprNode, exprEvaluatorContext, variableServiceToUse, events);
         }
     }
 

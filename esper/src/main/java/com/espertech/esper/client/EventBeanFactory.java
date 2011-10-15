@@ -24,4 +24,10 @@ public interface EventBeanFactory {
      * @return event bean
      */
     public EventBean wrap(Object underlying);
+
+    /**
+     * Returns the type of the underlying class expected for successful wrapping.
+     * @return underlying type expected
+     */
+    public Class getUnderlyingType();
 }

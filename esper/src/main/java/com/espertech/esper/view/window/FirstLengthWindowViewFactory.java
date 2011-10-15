@@ -8,11 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
 
@@ -27,11 +26,6 @@ public class FirstLengthWindowViewFactory implements AsymetricDataWindowViewFact
      * Size of length first window.
      */
     protected int size;
-
-    /**
-     * Flag to indicate that the view must handle the removed events from a parent view.
-     */
-    protected boolean isRemoveStreamHandling;
 
     private EventType eventType;
 
@@ -68,22 +62,9 @@ public class FirstLengthWindowViewFactory implements AsymetricDataWindowViewFact
         this.eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        return (viewCapability instanceof RemoveStreamViewCapability);
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        return new FirstLengthWindowView(this, size);
+        return new FirstLengthWindowView(agentInstanceViewFactoryContext, this, size);
     }
 
     public EventType getEventType()

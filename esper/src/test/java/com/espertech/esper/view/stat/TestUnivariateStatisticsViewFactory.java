@@ -38,9 +38,6 @@ public class TestUnivariateStatisticsViewFactory extends TestCase
         tryParameter(new Object[] {"price"}, "price");
 
         tryInvalidParameter(new Object[] {});
-        tryInvalidParameter(new Object[] {1.1d, "symbol"});
-        tryInvalidParameter(new Object[] {1.1d});
-        tryInvalidParameter(new Object[] {"symbol", "symbol", "symbol"});
     }
 
     public void testCanReuse() throws Exception
@@ -49,8 +46,8 @@ public class TestUnivariateStatisticsViewFactory extends TestCase
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
         assertFalse(factory.canReuse(new FirstElementView()));
         EventType type = UnivariateStatisticsView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        assertFalse(factory.canReuse(new UnivariateStatisticsView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("symbol"), type, null)));
-        assertTrue(factory.canReuse(new UnivariateStatisticsView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null)));
+        assertFalse(factory.canReuse(new UnivariateStatisticsView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("symbol"), type, null)));
+        assertTrue(factory.canReuse(new UnivariateStatisticsView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null)));
     }
 
     public void testAttaches() throws Exception
@@ -92,7 +89,7 @@ public class TestUnivariateStatisticsViewFactory extends TestCase
     {
         factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
-        UnivariateStatisticsView view = (UnivariateStatisticsView) factory.makeView(SupportStatementContextFactory.makeContext());
+        UnivariateStatisticsView view = (UnivariateStatisticsView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldName, view.getFieldExpression().toExpressionString());
     }
 }

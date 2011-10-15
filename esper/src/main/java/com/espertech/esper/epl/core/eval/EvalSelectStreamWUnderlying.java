@@ -16,6 +16,7 @@ import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 import com.espertech.esper.event.DecoratingEventBean;
 import org.apache.commons.logging.Log;
@@ -54,7 +55,7 @@ public class EvalSelectStreamWUnderlying extends EvalSelectStreamBase implements
         this.underlyingExprEvaluator = underlyingExprEvaluator;
     }
 
-    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream)
+    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext)
     {
         // In case of a wildcard and single stream that is itself a
         // wrapper bean, we also need to add the map properties
@@ -83,7 +84,7 @@ public class EvalSelectStreamWUnderlying extends EvalSelectStreamBase implements
             }
         }
         else if (underlyingExprEvaluator != null) {
-            Object value = underlyingExprEvaluator.evaluate(eventsPerStream, true, super.getSelectExprContext().getExprEvaluatorContext());
+            Object value = underlyingExprEvaluator.evaluate(eventsPerStream, true, exprEvaluatorContext);
             if (value != null)
             {
                 event = super.getSelectExprContext().getEventAdapterService().adapterForBean(value);
@@ -96,6 +97,6 @@ public class EvalSelectStreamWUnderlying extends EvalSelectStreamBase implements
 
         // Using a wrapper bean since we cannot use the same event type else same-type filters match.
         // Wrapping it even when not adding properties is very inexpensive.
-        return super.getSelectExprContext().getEventAdapterService().adaptorForTypedWrapper(event, props, super.getResultEventType());
+        return super.getSelectExprContext().getEventAdapterService().adapterForTypedWrapper(event, props, super.getResultEventType());
     }
 }

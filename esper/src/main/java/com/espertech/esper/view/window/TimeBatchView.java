@@ -11,9 +11,9 @@ package com.espertech.esper.view.window;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ViewUpdatedCollection;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.view.*;
@@ -39,11 +39,10 @@ import java.util.LinkedList;
  * If there are no events in the current and prior batch, the view will not invoke the update method of child views.
  * In that case also, no next callback is scheduled with the scheduling service until the next event arrives.
  */
-public final class TimeBatchView extends ViewSupport implements CloneableView, BatchingDataWindowView, StoppableView
-{
+public final class TimeBatchView extends ViewSupport implements CloneableView, StoppableView, DataWindowView {
     // View parameters
     private final TimeBatchViewFactory timeBatchViewFactory;
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final long msecIntervalSize;
     private final Long initialReferencePoint;
     private final boolean isForceOutput;
@@ -67,17 +66,16 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
      * @param timeBatchViewFactory for copying this view in a group-by
      * @param forceOutput is true if the batch should produce empty output if there is no value to output following time intervals
      * @param isStartEager is true for start-eager
-     * @param statementContext is required view services
      */
     public TimeBatchView(TimeBatchViewFactory timeBatchViewFactory,
-                         StatementContext statementContext,
+                         AgentInstanceViewFactoryChainContext agentInstanceContext,
                          long msecIntervalSize,
                          Long referencePoint,
                          boolean forceOutput,
                          boolean isStartEager,
                          ViewUpdatedCollection viewUpdatedCollection)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.timeBatchViewFactory = timeBatchViewFactory;
         this.msecIntervalSize = msecIntervalSize;
         this.initialReferencePoint = referencePoint;
@@ -85,23 +83,23 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
         this.viewUpdatedCollection = viewUpdatedCollection;
         this.isForceOutput = forceOutput;
 
-        this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
+        this.scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
 
         // schedule the first callback
         if (isStartEager)
         {
             if (currentReferencePoint == null)
             {
-                currentReferencePoint = statementContext.getSchedulingService().getTime();
+                currentReferencePoint = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
             }
             scheduleCallback();
             isCallbackScheduled = true;
         }
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return timeBatchViewFactory.makeView(statementContext);
+        return timeBatchViewFactory.makeView(agentInstanceContext);
     }
 
     /**
@@ -161,7 +159,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
                 currentReferencePoint = initialReferencePoint;
                 if (currentReferencePoint == null)
                 {
-                    currentReferencePoint = statementContext.getSchedulingService().getTime();
+                    currentReferencePoint = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
                 }
             }
 
@@ -258,7 +256,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
 
     private void scheduleCallback()
     {
-        long current = statementContext.getSchedulingService().getTime();
+        long current = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         long afterMSec = computeWaitMSec(current, this.currentReferencePoint, this.msecIntervalSize);
 
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
@@ -267,8 +265,8 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
                 TimeBatchView.this.sendBatch();
             }
         };
-        handle = new EPStatementHandleCallback(statementContext.getEpStatementHandle(), callback);
-        statementContext.getSchedulingService().add(afterMSec, handle, scheduleSlot);
+        handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
+        agentInstanceContext.getStatementContext().getSchedulingService().add(afterMSec, handle, scheduleSlot);
     }
 
     /**
@@ -306,7 +304,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, B
 
     public void stop() {
         if (handle != null) {
-            statementContext.getSchedulingService().remove(handle, scheduleSlot);
+            agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }    
 

@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.util.MetaDefItem;
 
@@ -38,7 +39,7 @@ public abstract class FilterSpecParam implements MetaDefItem, Serializable
      * @param matchedEvents is the prior results that can be used to determine filter parameters
      * @return filter parameter constant's value
      */
-    public abstract Object getFilterValue(MatchedEventMap matchedEvents);
+    public abstract Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext);
 
     /**
      * Returns a hash code for use in computing a filter expression hash code that matches

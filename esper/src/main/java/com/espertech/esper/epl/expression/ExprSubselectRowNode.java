@@ -12,7 +12,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -157,7 +156,7 @@ public class ExprSubselectRowNode extends ExprSubselectNode
 
     public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
         Map<String, Object> row = evaluateRow(eventsPerStream, true, context);
-        return subselectMultirowType.getEventAdapterService().adaptorForTypedMap(row, subselectMultirowType.getEventType());
+        return subselectMultirowType.getEventAdapterService().adapterForTypedMap(row, subselectMultirowType.getEventType());
     }
 
     public EventType getEventTypeCollection(EventAdapterService eventAdapterService) throws ExprValidationException {

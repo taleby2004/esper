@@ -31,6 +31,7 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
     private final ExprTimePeriod timePeriodExpr;
     private final ExprTimePeriod afterTimePeriodExpr;
     private final Integer afterNumberOfEvents;
+    private final boolean andAfterTerminate;
     private static final long serialVersionUID = 7314871194757342071L;
 
     /**
@@ -47,7 +48,7 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
      * @param afterTimePeriodExpr - after-keyword time period
      * @param afterNumberOfEvents - after-keyword number of events
      */
-    public OutputLimitSpec(Double rate, String variableForRate, OutputLimitRateType rateType, OutputLimitLimitType displayLimit, ExprNode whenExpressionNode, List<OnTriggerSetAssignment> thenExpressions, List<ExprNode> crontabAtSchedule, ExprTimePeriod timePeriodExpr, ExprTimePeriod afterTimePeriodExpr, Integer afterNumberOfEvents)
+    public OutputLimitSpec(Double rate, String variableForRate, OutputLimitRateType rateType, OutputLimitLimitType displayLimit, ExprNode whenExpressionNode, List<OnTriggerSetAssignment> thenExpressions, List<ExprNode> crontabAtSchedule, ExprTimePeriod timePeriodExpr, ExprTimePeriod afterTimePeriodExpr, Integer afterNumberOfEvents, boolean andAfterTerminate)
 	{
 		this.rate = rate;
 		this.displayLimit = displayLimit;
@@ -59,6 +60,7 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
         this.timePeriodExpr = timePeriodExpr;
         this.afterTimePeriodExpr = afterTimePeriodExpr;
         this.afterNumberOfEvents = afterNumberOfEvents;
+        this.andAfterTerminate = andAfterTerminate;
     }
 
     /**
@@ -158,5 +160,9 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
     public Integer getAfterNumberOfEvents()
     {
         return afterNumberOfEvents;
+    }
+
+    public boolean isAndAfterTerminate() {
+        return andAfterTerminate;
     }
 }

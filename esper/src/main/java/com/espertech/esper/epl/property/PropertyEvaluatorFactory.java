@@ -14,7 +14,7 @@ package com.espertech.esper.epl.property;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.FragmentEventType;
-import com.espertech.esper.core.ExpressionResultCacheService;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.*;
@@ -68,17 +68,7 @@ public class PropertyEvaluatorFactory
         List<String> streamNames = new ArrayList<String>();
         Map<String, Integer> streamNameAndNumber = new HashMap<String,Integer>();
         List<String> propertyNames = new ArrayList<String>();
-        ExprEvaluatorContext validateContext = new ExprEvaluatorContext()
-        {
-            public TimeProvider getTimeProvider()
-            {
-                return timeProvider;
-            }
-
-            public ExpressionResultCacheService getExpressionResultCacheService() {
-                return null;
-            }
-        };
+        ExprEvaluatorContext validateContext = new ExprEvaluatorContextTimeOnly(timeProvider);
 
         streamEventTypes.add(sourceEventType);
         streamNames.add(optionalSourceStreamName);
@@ -116,7 +106,7 @@ public class PropertyEvaluatorFactory
                 boolean[] isIStreamOnly = new boolean[streamNames.size()];
                 Arrays.fill(isIStreamOnly, true);
                 StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
-                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext, eventAdapterService, statementName, statementId, annotations);
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext, eventAdapterService, statementName, statementId, annotations, null);
                 whereClauses[i] = ExprNodeUtility.getValidatedSubtree(atom.getOptionalWhereClause(), validationContext).getExprEvaluator();
             }
 
@@ -128,7 +118,7 @@ public class PropertyEvaluatorFactory
                 boolean[] isIStreamOnly = new boolean[streamNames.size()];
                 Arrays.fill(isIStreamOnly, true);
                 StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
-                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext, eventAdapterService, statementName, statementId, annotations);
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext, eventAdapterService, statementName, statementId, annotations, null);
 
                 for (SelectClauseElementRaw raw : atom.getOptionalSelectClause().getSelectExprList())
                 {
@@ -208,7 +198,7 @@ public class PropertyEvaluatorFactory
             Arrays.fill(isIStreamOnly, true);
             StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
 
-            SelectExprProcessor selectExpr = SelectExprProcessorFactory.getProcessor(assignedTypeNumberStack, cumulativeSelectClause, false, null, null, streamTypeService, eventAdapterService, null, null, null, methodResolutionService, validateContext, variableService, timeProvider,engineURI,statementId, statementName, annotations);
+            SelectExprProcessor selectExpr = SelectExprProcessorFactory.getProcessor(assignedTypeNumberStack, cumulativeSelectClause, false, null, null, streamTypeService, eventAdapterService, null, null, null, methodResolutionService, validateContext, variableService, timeProvider, engineURI, statementId, statementName, annotations, null);
             return new PropertyEvaluatorSelect(selectExpr, accumulative);
         }
     }

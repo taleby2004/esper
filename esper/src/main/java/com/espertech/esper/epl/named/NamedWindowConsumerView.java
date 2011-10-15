@@ -15,8 +15,7 @@ import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.property.PropertyEvaluator;
-import com.espertech.esper.view.StatementStopCallback;
-import com.espertech.esper.view.StatementStopService;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,30 +27,26 @@ import java.util.Iterator;
  * <p>
  * The view simply dispatches directly to child views, and keeps the last new event for iteration.
  */
-public class NamedWindowConsumerView extends ViewSupport implements StatementStopCallback
+public class NamedWindowConsumerView extends ViewSupport implements StopCallback
 {
     private static final Log log = LogFactory.getLog(NamedWindowConsumerView.class);
     private final ExprEvaluator[] filterList;
     private final EventType eventType;
-    private final NamedWindowTailView tailView;
+    private final NamedWindowConsumerCallback consumerCallback;
     private final ExprEvaluatorContext exprEvaluatorContext;
     private final PropertyEvaluator optPropertyEvaluator;
-    private EventBean[] eventPerStream = new EventBean[1];
     private final FlushedEventBuffer optPropertyContainedBuffer;
 
     /**
      * Ctor.
      * @param eventType the event type of the named window
-     * @param statementStopService for registering a callback when the view stopped, to unregister the statement as a consumer
-     * @param tailView to indicate when the consumer stopped to remove the consumer
      * @param filterList is a list of filter expressions
      * @param exprEvaluatorContext context for expression evalauation
      */
     public NamedWindowConsumerView(ExprEvaluator[] filterList,
                                    PropertyEvaluator optPropertyEvaluator,
                                    EventType eventType,
-                                   StatementStopService statementStopService,
-                                   NamedWindowTailView tailView,
+                                   NamedWindowConsumerCallback consumerCallback,
                                    ExprEvaluatorContext exprEvaluatorContext)
     {
         this.filterList = filterList;
@@ -63,9 +58,8 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
             optPropertyContainedBuffer = null;
         }
         this.eventType = eventType;
-        this.tailView = tailView;
+        this.consumerCallback = consumerCallback;
         this.exprEvaluatorContext = exprEvaluatorContext;
-        statementStopService.addSubscriber(this);
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)
@@ -73,8 +67,9 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
         // if we have a filter for the named window,
         if (filterList.length != 0)
         {
-            newData = passFilter(newData, true, exprEvaluatorContext);
-            oldData = passFilter(oldData, false, exprEvaluatorContext);
+            EventBean[] eventPerStream = new EventBean[1];
+            newData = passFilter(newData, true, exprEvaluatorContext, eventPerStream);
+            oldData = passFilter(oldData, false, exprEvaluatorContext, eventPerStream);
         }
 
         if (optPropertyEvaluator != null) {
@@ -104,7 +99,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
         return optPropertyContainedBuffer.getAndFlush();
     }
 
-    private EventBean[] passFilter(EventBean[] eventData, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+    private EventBean[] passFilter(EventBean[] eventData, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext, EventBean[] eventPerStream)
     {
         if ((eventData == null) || (eventData.length == 0))
         {
@@ -153,11 +148,11 @@ public class NamedWindowConsumerView extends ViewSupport implements StatementSto
 
     public Iterator<EventBean> iterator()
     {
-        return new FilteredEventIterator(filterList, tailView.iterator(), exprEvaluatorContext);
+        return new FilteredEventIterator(filterList, consumerCallback.getIterator(), exprEvaluatorContext);
     }
 
-    public void statementStopped()
+    public void stop()
     {
-        tailView.removeConsumer(this);
+        consumerCallback.stopped(this);
     }
 }

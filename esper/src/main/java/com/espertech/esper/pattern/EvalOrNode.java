@@ -8,17 +8,33 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class represents an 'or' operator in the evaluation tree representing any event expressions.
  */
 public class EvalOrNode extends EvalNodeBase
 {
-    private static final long serialVersionUID = -7512529701280258859L;
+    private final EvalOrFactoryNode factoryNode;
+    private final EvalNode[] childNodes;
 
-    protected EvalOrNode() {
+    public EvalOrNode(PatternAgentInstanceContext context, EvalOrFactoryNode factoryNode, EvalNode[] childNodes) {
+        super(context);
+        this.factoryNode = factoryNode;
+        this.childNodes = childNodes;
+    }
+
+    public EvalOrFactoryNode getFactoryNode() {
+        return factoryNode;
+    }
+
+    public EvalNode[] getChildNodes() {
+        return childNodes;
+    }
+
+    public EvalNodeNumber getNodeNumber() {
+        return factoryNode.getNodeNumber();
     }
 
     public EvalStateNode newState(Evaluator parentNode,
@@ -26,11 +42,6 @@ public class EvalOrNode extends EvalNodeBase
                                   EvalStateNodeNumber stateNodeId)
     {
         return new EvalOrStateNode(parentNode, this, beginState);
-    }
-
-    public final String toString()
-    {
-        return ("EvalOrNode children=" + this.getChildNodes().size());
     }
 
     private static final Log log = LogFactory.getLog(EvalOrNode.class);

@@ -8,7 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.StatementContext;
 
 /**
  * Default pattern context factory.
@@ -17,24 +18,12 @@ public class PatternContextFactoryDefault implements PatternContextFactory
 {
     public PatternContext createContext(StatementContext statementContext,
                                         int streamId,
-                                        EvalRootNode rootNode,
-                                        boolean hasArrayProperties,
-                                        boolean hasConsumingFilter)
-    {
-        EvalFilterConsumptionHandler consumptionHandler = null;
-        if (hasConsumingFilter) {
-            consumptionHandler = new EvalFilterConsumptionHandler();
-        }
-
-        PatternContext context = new PatternContext(statementContext, streamId, consumptionHandler);
-        recursiveAssignContext(context, rootNode);
-        return context;
+                                        EvalRootFactoryNode rootNode,
+                                        boolean hasArrayProperties) {
+        return new PatternContext(statementContext, streamId);
     }
 
-    public static void recursiveAssignContext(PatternContext context, EvalNode parent) {
-        parent.setContext(context);
-        for (EvalNode child : parent.getChildNodes()) {
-            recursiveAssignContext(context, child);
-        }
+    public PatternAgentInstanceContext createPatternAgentContext(PatternContext patternContext, AgentInstanceContext agentInstanceContext, boolean hasConsumingFilter) {
+        return new PatternAgentInstanceContext(patternContext, agentInstanceContext, hasConsumingFilter);
     }
 }

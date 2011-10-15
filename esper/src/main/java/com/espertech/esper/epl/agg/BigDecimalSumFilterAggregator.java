@@ -36,10 +36,4 @@ public class BigDecimalSumFilterAggregator extends BigDecimalSumAggregator
         }
         super.leave(paramArray[0]);
     }
-
-    @Override
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeSumAggregator(BigDecimal.class, true);
-    }
 }

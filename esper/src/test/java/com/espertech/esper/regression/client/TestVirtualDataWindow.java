@@ -246,6 +246,11 @@ public class TestVirtualDataWindow extends TestCase {
         // test no-criteria FAF
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select col1 from MyVDW vdw");
         assertIndexSpec(window.getLastRequestedIndex(), "", "");
+        assertEquals("MyVDW", window.getLastRequestedIndex().getNamedWindowName());
+        assertNull(window.getLastRequestedIndex().getStatementId());
+        assertNull(window.getLastRequestedIndex().getStatementName());
+        assertNotNull(window.getLastRequestedIndex().getStatementAnnotations());
+        assertTrue(window.getLastRequestedIndex().isFireAndForget());
         ArrayAssertionUtil.assertProps(result.getArray()[0], "col1".split(","), new Object[] {"key1"});
         ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[0]);
 
@@ -295,10 +300,15 @@ public class TestVirtualDataWindow extends TestCase {
         stmtOnDeleteSingleKey.destroy();
 
         // test multie-criteria on-delete
-        EPStatement stmtOnDeleteMultiKey = epService.getEPAdministrator().createEPL("on SupportBeanRange r delete " +
+        EPStatement stmtOnDeleteMultiKey = epService.getEPAdministrator().createEPL("@Name('ABC') on SupportBeanRange r delete " +
                 "from MyVDW vdw where col1=r.id and col2=r.key and col3 between r.rangeStart and r.rangeEnd");
         stmtOnDeleteMultiKey.addListener(listener);
         assertIndexSpec(window.getLastRequestedIndex(), "col1=(String)|col2=(String)", "col3[,](Integer)");
+        assertEquals("MyVDW", window.getLastRequestedIndex().getNamedWindowName());
+        assertNotNull(window.getLastRequestedIndex().getStatementId());
+        assertEquals("ABC", window.getLastRequestedIndex().getStatementName());
+        assertEquals(1, window.getLastRequestedIndex().getStatementAnnotations().length);
+        assertFalse(window.getLastRequestedIndex().isFireAndForget());
 
         epService.getEPRuntime().sendEvent(new SupportBeanRange("key1", "key2", 5, 10));
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1".split(","), new Object[]{"key1"});

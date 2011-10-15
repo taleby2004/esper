@@ -11,7 +11,8 @@
 
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.core.ExpressionResultCacheService;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.core.service.ExpressionResultCacheService;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.support.epl.SupportExprNode;
 import junit.framework.TestCase;
@@ -63,8 +64,16 @@ public class TestExprTimestampNode extends TestCase
             public ExpressionResultCacheService getExpressionResultCacheService() {
                 return null;
             }
+
+            public int[] getAgentInstanceIds() {
+                return new int[0];
+            }
+
+            public EventBean getContextProperties() {
+                return null;
+            }
         };
-        node.validate(new ExprValidationContext(null, null, null, provider, null, null, null, null, null, null));
+        node.validate(new ExprValidationContext(null, null, null, provider, null, null, null, null, null, null, null));
         assertEquals(99L, node.evaluate(null, false, context));
     }
 

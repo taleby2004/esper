@@ -13,7 +13,7 @@ package com.espertech.esper.multithread;
 
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPOnDemandQueryResult;
-import com.espertech.esper.core.EPRuntimeSPI;
+import com.espertech.esper.core.service.EPRuntimeSPI;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import junit.framework.Assert;
 import org.apache.commons.logging.Log;

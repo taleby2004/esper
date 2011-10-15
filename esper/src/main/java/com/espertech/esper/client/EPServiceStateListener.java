@@ -11,8 +11,6 @@
 
 package com.espertech.esper.client;
 
-import com.espertech.esper.core.EPServiceProviderImpl;
-
 /**
  * A listener interface for callbacks regarding {@link EPServiceProvider} state changes.
  */

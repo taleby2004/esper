@@ -12,6 +12,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.util.SimpleNumberCoercer;
 import org.apache.commons.logging.Log;
@@ -102,7 +103,7 @@ public final class FilterSpecParamEventPropIndexed extends FilterSpecParam
         return resultEventProperty;
     }
 
-    public Object getFilterValue(MatchedEventMap matchedEvents)
+    public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext)
     {
         EventBean[] events = (EventBean[]) matchedEvents.getMatchingEventAsObject(resultEventAsName);
 

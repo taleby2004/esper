@@ -13,7 +13,6 @@ package com.espertech.esper.pattern.guard;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.pattern.*;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.MetaDefItem;
@@ -62,16 +61,16 @@ public class TimerWithinOrMaxCountGuardFactory implements GuardFactory, MetaDefI
         this.convertor = convertor;
     }
 
-    public Guard makeGuard(PatternContext context, MatchedEventMap matchedEventMap, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState)
+    public Guard makeGuard(PatternAgentInstanceContext context, MatchedEventMap beginState, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState)
     {
-        Object millisecondVal = PatternExpressionUtil.evaluate("Timer-Within-Or-Max-Count guard", matchedEventMap, millisecondsExpr, convertor, context);
+        Object millisecondVal = PatternExpressionUtil.evaluate("Timer-Within-Or-Max-Count guard", beginState, millisecondsExpr, convertor, context.getAgentInstanceContext());
         if (null == millisecondVal) {
             throw new EPException("Timer-within-or-max first parameter evaluated to a null-value");
         }
         Number param = (Number) millisecondVal;
         long milliseconds = Math.round(1000d * param.doubleValue());
 
-        Object numCountToVal = PatternExpressionUtil.evaluate("Timer-Within-Or-Max-Count guard", matchedEventMap, numCountToExpr, convertor,context);
+        Object numCountToVal = PatternExpressionUtil.evaluate("Timer-Within-Or-Max-Count guard", beginState, numCountToExpr, convertor,context.getAgentInstanceContext());
         if (null == numCountToVal) {
             throw new EPException("Timer-within-or-max second parameter evaluated to a null-value");
         }

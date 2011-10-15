@@ -10,11 +10,11 @@ package com.espertech.esper.epl.datetime.eval;
 
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.expression.ExprIdentNode;
-import com.espertech.esper.epl.expression.ExprIdentNodeImpl;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.epl.join.plan.QueryGraph;
 import com.espertech.esper.type.RelationalOpEnum;
 
-public class ExprDotNodeFilterAnalyzerDTIntervalDesc
+public class ExprDotNodeFilterAnalyzerDTIntervalDesc implements ExprDotNodeFilterAnalyzerDesc
 {
     private final DatetimeMethodEnum currentMethod;
     private final EventType[] typesPerStream;
@@ -42,10 +42,10 @@ public class ExprDotNodeFilterAnalyzerDTIntervalDesc
             return;
         }
 
-        ExprIdentNode targetStartExpr = getExprNode(typesPerStream, targetStreamNum, targetStartProp);
-        ExprIdentNode targetEndExpr = getExprNode(typesPerStream, targetStreamNum, targetEndProp);
-        ExprIdentNode parameterStartExpr = getExprNode(typesPerStream, parameterStreamNum, parameterStartProp);
-        ExprIdentNode parameterEndExpr = getExprNode(typesPerStream, parameterStreamNum, parameterEndProp);
+        ExprIdentNode targetStartExpr = ExprNodeUtility.getExprIdentNode(typesPerStream, targetStreamNum, targetStartProp);
+        ExprIdentNode targetEndExpr = ExprNodeUtility.getExprIdentNode(typesPerStream, targetStreamNum, targetEndProp);
+        ExprIdentNode parameterStartExpr = ExprNodeUtility.getExprIdentNode(typesPerStream, parameterStreamNum, parameterStartProp);
+        ExprIdentNode parameterEndExpr = ExprNodeUtility.getExprIdentNode(typesPerStream, parameterStreamNum, parameterEndProp);
 
         if (targetStartExpr.getExprEvaluator().getType() != parameterStartExpr.getExprEvaluator().getType()) {
             return;
@@ -70,8 +70,8 @@ public class ExprDotNodeFilterAnalyzerDTIntervalDesc
 
             boolean noDuration = parameterEndProp.equals(parameterStartProp) && targetEndProp.equals(targetStartProp);
             if (!noDuration) {
-                ExprIdentNode leftEndExpr = getExprNode(typesPerStream, targetStreamNum, targetEndProp);
-                ExprIdentNode rightEndExpr = getExprNode(typesPerStream, parameterStreamNum, parameterEndProp);
+                ExprIdentNode leftEndExpr = ExprNodeUtility.getExprIdentNode(typesPerStream, targetStreamNum, targetEndProp);
+                ExprIdentNode rightEndExpr = ExprNodeUtility.getExprIdentNode(typesPerStream, parameterStreamNum, parameterEndProp);
                 queryGraph.addStrictEquals(targetStreamNum, targetEndProp, leftEndExpr,
                         parameterStreamNum, parameterEndProp, rightEndExpr);
             }
@@ -143,10 +143,6 @@ public class ExprDotNodeFilterAnalyzerDTIntervalDesc
                     parameterStreamNum, parameterEndProp, parameterEndExpr,
                     relop);
         }
-    }
-
-    private ExprIdentNode getExprNode(EventType[] typesPerStream, int streamId, String property) {
-        return new ExprIdentNodeImpl(typesPerStream[streamId], property, streamId);
     }
 }
 

@@ -53,5 +53,11 @@ public class SupportConditionHandlerFactory implements ConditionHandlerFactory {
         public List<ConditionHandlerContext> getContexts() {
             return contexts;
         }
+
+        public List<ConditionHandlerContext> getAndResetContexts() {
+            List<ConditionHandlerContext> result = new ArrayList<ConditionHandlerContext>(contexts);
+            contexts.clear();
+            return result;
+        }
     }
 }

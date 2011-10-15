@@ -44,6 +44,7 @@ public enum DatetimeMethodEnum {
     GETSECONDOFMINUTE("getSecondOfMinute", DatetimeMethodEnumStatics.reformatOpFactory, DatetimeMethodEnumParams.NOPARAM),
     GETWEEKYEAR("getWeekyear", DatetimeMethodEnumStatics.reformatOpFactory, DatetimeMethodEnumParams.NOPARAM),
     GETYEAR("getYear", DatetimeMethodEnumStatics.reformatOpFactory, DatetimeMethodEnumParams.NOPARAM),
+    BETWEEN("between", DatetimeMethodEnumStatics.reformatOpFactory, DatetimeMethodEnumParams.BETWEEN),
 
     // interval ops
     BEFORE("before", DatetimeMethodEnumStatics.intervalOpFactory, DatetimeMethodEnumParams.INTERVAL_BEFORE_AFTER),
@@ -55,7 +56,6 @@ public enum DatetimeMethodEnum {
     FINISHEDBY("finishedBy", DatetimeMethodEnumStatics.intervalOpFactory, DatetimeMethodEnumParams.INTERVAL_FINISHES_FINISHEDBY),
     MEETS("meets", DatetimeMethodEnumStatics.intervalOpFactory, DatetimeMethodEnumParams.INTERVAL_MEETS_METBY),
     METBY("metBy", DatetimeMethodEnumStatics.intervalOpFactory, DatetimeMethodEnumParams.INTERVAL_MEETS_METBY),
-
     OVERLAPS("overlaps", DatetimeMethodEnumStatics.intervalOpFactory, DatetimeMethodEnumParams.INTERVAL_DURING_OVERLAPS_OVERLAPBY),
     OVERLAPPEDBY("overlappedBy", DatetimeMethodEnumStatics.intervalOpFactory, DatetimeMethodEnumParams.INTERVAL_DURING_OVERLAPS_OVERLAPBY),
     STARTS("starts", DatetimeMethodEnumStatics.intervalOpFactory, DatetimeMethodEnumParams.INTERVAL_STARTS_STARTEDBY),

@@ -15,29 +15,11 @@ import com.espertech.esper.epl.core.MethodResolutionService;
  */
 public interface AggregationMethodFactory
 {
-    /**
-     * Returns the result type of an aggregation.
-     * @return result
-     */
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId);
+
     public Class getResultType();
 
-    /**
-     * Returns the spec for aggregation.
-     * @param isMatchRecognize true if match-recognize pattern
-     * @return spec
-     */
     public AggregationSpec getSpec(boolean isMatchRecognize);
 
-    /**
-     * Returns the prototype aggregation method for copying
-     * @param methodResolutionService to obtain prototype from
-     * @return prototype aggregation method
-     */
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService);
-
-    /**
-     * Returns the accessor to use.
-     * @return accessor
-     */
     public AggregationAccessor getAccessor();
 }

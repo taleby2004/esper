@@ -43,12 +43,12 @@ public class TestTimeBatchViewFactory extends TestCase
     {
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {1000}));
         assertFalse(factory.canReuse(new FirstElementView()));
-        assertFalse(factory.canReuse(new TimeBatchView(factory, SupportStatementContextFactory.makeContext(), 1, null, false, false, null)));
-        assertTrue(factory.canReuse(new TimeBatchView(factory, SupportStatementContextFactory.makeContext(), 1000000, null, false, false, null)));
+        assertFalse(factory.canReuse(new TimeBatchView(factory, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), 1, null, false, false, null)));
+        assertTrue(factory.canReuse(new TimeBatchView(factory, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), 1000000, null, false, false, null)));
 
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {1000, 2000L}));
-        assertFalse(factory.canReuse(new TimeBatchView(factory, SupportStatementContextFactory.makeContext(), 1, null, false, false, null)));
-        assertTrue(factory.canReuse(new TimeBatchView(factory, SupportStatementContextFactory.makeContext(), 1000000, 2000L, false, false, null)));
+        assertFalse(factory.canReuse(new TimeBatchView(factory, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), 1, null, false, false, null)));
+        assertTrue(factory.canReuse(new TimeBatchView(factory, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), 1000000, 2000L, false, false, null)));
     }
 
     private void tryInvalidParameter(Object param) throws Exception
@@ -69,7 +69,7 @@ public class TestTimeBatchViewFactory extends TestCase
     {
         TimeBatchViewFactory factory = new TimeBatchViewFactory();
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(param));
-        TimeBatchView view = (TimeBatchView) factory.makeView(SupportStatementContextFactory.makeContext());
+        TimeBatchView view = (TimeBatchView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(msec, view.getMsecIntervalSize());
         assertEquals(referencePoint, view.getInitialReferencePoint());
     }

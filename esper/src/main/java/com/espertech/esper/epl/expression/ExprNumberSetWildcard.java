@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Expression for use within crontab to specify a wildcard.
  */
-public class ExprNumberSetWildcard extends ExprNodeBase implements ExprEvaluator
+public class ExprNumberSetWildcard extends ExprNodeBase implements ExprEvaluator, ExprNumberSetWildcardMarker
 {
     private static final WildcardParameter wildcardParameter = new WildcardParameter();
     private static final long serialVersionUID = -6098833102154556698L;

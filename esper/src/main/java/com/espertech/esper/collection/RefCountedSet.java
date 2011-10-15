@@ -92,7 +92,7 @@ public class RefCountedSet<K>
         Integer value = refSet.get(key);
         if (value == null)
         {
-            throw new IllegalStateException("Attempting to remove key from map that wasn't added");
+            return true; // ignore duplcate removals
         }
 
         if (value == 1)

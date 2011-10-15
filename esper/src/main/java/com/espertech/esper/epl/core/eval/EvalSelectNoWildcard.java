@@ -20,7 +20,6 @@ import com.espertech.esper.event.EventAdapterService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,31 +35,21 @@ public class EvalSelectNoWildcard implements SelectExprProcessor {
         this.resultEventType = resultEventType;
     }
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
         ExprEvaluator[] expressionNodes = selectExprContext.getExpressionNodes();
         String[] columnNames = selectExprContext.getColumnNames();
-        ExprEvaluatorContext exprEvaluatorContext = selectExprContext.getExprEvaluatorContext();
         EventAdapterService eventAdapterService = selectExprContext.getEventAdapterService();
 
         // Evaluate all expressions and build a map of name-value pairs
-        Map<String, Object> props;
-
-        if (expressionNodes.length == 0)
+        Map<String, Object> props = new HashMap<String, Object>();
+        for (int i = 0; i < expressionNodes.length; i++)
         {
-            props = Collections.EMPTY_MAP;
-        }
-        else
-        {
-            props = new HashMap<String, Object>();
-            for (int i = 0; i < expressionNodes.length; i++)
-            {
-                Object evalResult = expressionNodes[i].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
-                props.put(columnNames[i], evalResult);
-            }
+            Object evalResult = expressionNodes[i].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
+            props.put(columnNames[i], evalResult);
         }
 
-        return eventAdapterService.adaptorForTypedMap(props, resultEventType);
+        return eventAdapterService.adapterForTypedMap(props, resultEventType);
     }
 
     public EventType getResultEventType()

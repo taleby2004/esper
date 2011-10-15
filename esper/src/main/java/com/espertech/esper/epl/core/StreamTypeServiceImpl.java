@@ -11,7 +11,7 @@ package com.espertech.esper.epl.core;
 import com.espertech.esper.client.EventPropertyDescriptor;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.util.LevenshteinDistance;

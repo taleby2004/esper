@@ -22,7 +22,7 @@ import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

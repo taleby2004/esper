@@ -11,20 +11,20 @@
 
 package com.espertech.esper.epl.join.exec;
 
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.join.exec.base.IndexedTableLookupStrategy;
 import com.espertech.esper.epl.join.exec.base.TableLookupExecNode;
+import com.espertech.esper.epl.join.table.PropertyIndexedEventTable;
+import com.espertech.esper.epl.join.table.PropertyIndexedEventTableFactory;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
-import com.espertech.esper.epl.join.table.PropertyIndexedEventTable;
-
-import java.util.List;
-import java.util.LinkedList;
-
 import junit.framework.TestCase;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class TestTableLookupExecNode extends TestCase
 {
@@ -34,7 +34,8 @@ public class TestTableLookupExecNode extends TestCase
     public void setUp()
     {
         EventType eventTypeIndex = SupportEventTypeFactory.createBeanType(SupportBean.class);
-        index = new PropertyIndexedEventTable(0, eventTypeIndex, new String[] {"string"});
+        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(0, eventTypeIndex, new String[] {"string"});
+        index = (PropertyIndexedEventTable) factory.makeEventTable();
 
         EventType eventTypeKeyGen = SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class);
 

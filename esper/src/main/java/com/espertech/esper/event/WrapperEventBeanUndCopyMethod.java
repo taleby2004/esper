@@ -44,6 +44,6 @@ public class WrapperEventBeanUndCopyMethod implements EventBeanCopyMethod
         {
             return null;
         }
-        return eventAdapterService.adaptorForTypedWrapper(copiedUnderlying, decorated.getDecoratingProperties(), wrapperEventType);        
+        return eventAdapterService.adapterForTypedWrapper(copiedUnderlying, decorated.getDecoratingProperties(), wrapperEventType);
     }
 }

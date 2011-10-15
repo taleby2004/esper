@@ -112,7 +112,7 @@ public class MethodPollingViewable implements HistoricalEventViewable
         requiredStreams = new TreeSet<Integer>();
         ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(true);
 
-        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations);
+        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations, null);
         for (ExprNode exprNode : inputParameters)
         {
             ExprNode validated = ExprNodeUtility.getValidatedSubtree(exprNode, validationContext);

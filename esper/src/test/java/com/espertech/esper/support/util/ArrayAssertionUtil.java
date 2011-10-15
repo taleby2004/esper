@@ -12,6 +12,7 @@
 package com.espertech.esper.support.util;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.SafeIterator;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -440,6 +441,12 @@ public class ArrayAssertionUtil
 
         // Must have matched exactly the number of objects times
         TestCase.assertEquals(numMatches, expected.length);
+    }
+
+    public static void assertPropsPerRow(Iterator<EventBean> iterator, SafeIterator<EventBean> safeIterator, String[] props, Object[][] propertiesPerRow) {
+        assertPropsPerRow(ArrayAssertionUtil.iteratorToArray(iterator), props, propertiesPerRow);
+        assertPropsPerRow(ArrayAssertionUtil.iteratorToArray(safeIterator), props, propertiesPerRow);
+        safeIterator.close();
     }
 
     public static void assertPropsPerRow(Iterator<EventBean> received, String[] props, Object[][] propertiesPerRow) {
@@ -1159,5 +1166,52 @@ public class ArrayAssertionUtil
             Assert.assertEquals("Field " + field, value, event.get(field));
         }
         assertAllValuesSame(event, exceptions, exceptionValue);
+    }
+
+    public static Object[] eventsToObjectArr(EventBean[] events, String field) {
+        if (events == null) {
+            return null;
+        }
+        Object[] objects = new Object[events.length];
+        for (int i = 0; i < events.length; i++) {
+            objects[i] = events[i].get(field);
+        }
+        return objects;
+    }
+
+    public static Object[][] eventsToObjectArr(EventBean[] events, String[] fields) {
+        if (events == null) {
+            return null;
+        }
+        Object[][] objects = new Object[events.length][];
+        for (int i = 0; i < events.length; i++) {
+            EventBean event = events[i];
+            Object[] values = new Object[fields.length];
+            for (int j = 0; j < fields.length; j++) {
+                values[j] = event.get(fields[j]);
+            }
+            objects[i] = values;
+        }
+        return objects;
+    }
+
+    public static Object[] iteratorToObjectArr(Iterator<EventBean> iterator, String field) {
+        if (iterator == null) {
+            return null;
+        }
+        if (!iterator.hasNext()) {
+            return new Object[0];
+        }
+        return eventsToObjectArr(iteratorToArray(iterator), field);
+    }
+
+    public static Object[][] iteratorToObjectArr(Iterator<EventBean> iterator, String[] fields) {
+        if (iterator == null) {
+            return null;
+        }
+        if (!iterator.hasNext()) {
+            return new Object[0][];
+        }
+        return eventsToObjectArr(iteratorToArray(iterator), fields);
     }
 }

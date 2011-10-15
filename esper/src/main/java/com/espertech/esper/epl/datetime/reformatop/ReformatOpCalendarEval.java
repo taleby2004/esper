@@ -11,8 +11,17 @@
 
 package com.espertech.esper.epl.datetime.reformatop;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.datetime.eval.DatetimeMethodEnum;
+import com.espertech.esper.epl.datetime.eval.ExprDotNodeFilterAnalyzerDesc;
+import com.espertech.esper.epl.expression.ExprDotNodeFilterAnalyzerInput;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.ExprNode;
+
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class ReformatOpCalendarEval implements ReformatOp {
 
@@ -22,23 +31,27 @@ public class ReformatOpCalendarEval implements ReformatOp {
         this.calendarEval = calendarEval;
     }
 
-    public Object evaluate(Long ts) {
+    public Object evaluate(Long ts, EventBean[] eventsPerStream, boolean newData, ExprEvaluatorContext exprEvaluatorContext) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(ts);
         return calendarEval.evaluateInternal(cal);
     }
 
-    public Object evaluate(Date d) {
+    public Object evaluate(Date d, EventBean[] eventsPerStream, boolean newData, ExprEvaluatorContext exprEvaluatorContext) {
         Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(d.getTime());
         return calendarEval.evaluateInternal(cal);
     }
 
-    public Object evaluate(Calendar cal) {
+    public Object evaluate(Calendar cal, EventBean[] eventsPerStream, boolean newData, ExprEvaluatorContext exprEvaluatorContext) {
         return calendarEval.evaluateInternal(cal);
     }
 
     public Class getReturnType() {
         return Integer.class;
+    }
+
+    public ExprDotNodeFilterAnalyzerDesc getFilterDesc(EventType[] typesPerStream, DatetimeMethodEnum currentMethod, List<ExprNode> currentParameters, ExprDotNodeFilterAnalyzerInput inputDesc) {
+        return null;
     }
 }

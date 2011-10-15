@@ -12,14 +12,20 @@
 package com.espertech.esper.view.stream;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.annotation.Audit;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.event.EventBeanUtility;
+import com.espertech.esper.filter.FilterSpecCompiled;
+import com.espertech.esper.filter.FilterSpecParam;
 import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.EventStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.StringWriter;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 public class EventStreamProxy implements java.lang.reflect.InvocationHandler {
@@ -29,6 +35,30 @@ public class EventStreamProxy implements java.lang.reflect.InvocationHandler {
     private final String statementName;
     private final String eventTypeAndFilter;
     private final EventStream eventStream;
+
+    public static EventStream getAuditProxy(String statementName, Annotation[] annotations, FilterSpecCompiled filterSpec, EventStream designated) {
+        Audit audit = AuditEnum.STREAM.getAudit(annotations);
+        if (audit == null) {
+            return designated;
+        }
+
+        StringWriter filterAndParams = new StringWriter();
+        filterAndParams.write(filterSpec.getFilterForEventType().getName());
+        if (filterSpec.getParameters() != null && !filterSpec.getParameters().isEmpty()) {
+            filterAndParams.write('(');
+            String delimiter = "";
+            for (FilterSpecParam param : filterSpec.getParameters()) {
+                filterAndParams.write(delimiter);
+                filterAndParams.write(param.getPropertyName());
+                filterAndParams.write(param.getFilterOperator().getTextualOp());
+                filterAndParams.write("...");
+                delimiter = ",";
+            }
+            filterAndParams.write(')');
+        }
+
+        return (EventStream) EventStreamProxy.newInstance(statementName, filterAndParams.toString(), designated);
+    }
 
     public static Object newInstance(String statementName, String eventTypeAndFilter, EventStream eventStream) {
         return java.lang.reflect.Proxy.newProxyInstance(

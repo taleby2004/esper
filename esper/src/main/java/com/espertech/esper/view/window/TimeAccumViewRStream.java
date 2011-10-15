@@ -8,12 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.view.CloneableView;
@@ -37,7 +36,7 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
 {
     // View parameters
     private final TimeAccumViewFactory factory;
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final long msecIntervalSize;
     private final ScheduleSlot scheduleSlot;
 
@@ -51,17 +50,16 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
      * Constructor.
      * @param msecIntervalSize is the number of milliseconds to batch events for
      * @param timeBatchViewFactory fr copying this view in a group-by
-     * @param statementContext is required view services
      */
     public TimeAccumViewRStream(TimeAccumViewFactory timeBatchViewFactory,
-                         StatementContext statementContext,
+                         AgentInstanceViewFactoryChainContext agentInstanceContext,
                          long msecIntervalSize)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.factory = timeBatchViewFactory;
         this.msecIntervalSize = msecIntervalSize;
 
-        this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
+        this.scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
 
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
@@ -69,12 +67,12 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
                 TimeAccumViewRStream.this.sendRemoveStream();
             }
         };
-        handle = new EPStatementHandleCallback(statementContext.getEpStatementHandle(), callback);
+        handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return factory.makeView(statementContext);
+        return factory.makeView(agentInstanceContext);
     }
 
     /**
@@ -98,7 +96,7 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
             // If we have an empty window about to be filled for the first time, add a callback
             boolean removeSchedule = false;
             boolean addSchedule = false;
-            long timestamp = statementContext.getSchedulingService().getTime();
+            long timestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
 
             // if the window is already filled, then we may need to reschedule
             if (!currentBatch.isEmpty())
@@ -118,12 +116,12 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
 
             if (removeSchedule)
             {
-                statementContext.getSchedulingService().remove(handle, scheduleSlot);
+                agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
                 callbackScheduledTime = -1;
             }
             if (addSchedule)
             {
-                statementContext.getSchedulingService().add(msecIntervalSize, handle, scheduleSlot);
+                agentInstanceContext.getStatementContext().getSchedulingService().add(msecIntervalSize, handle, scheduleSlot);
                 callbackScheduledTime = msecIntervalSize + timestamp;
             }
 
@@ -150,7 +148,7 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
             // we may need to reschedule as the newest event may have been deleted
             if (currentBatch.size() == 0)
             {
-                statementContext.getSchedulingService().remove(handle, scheduleSlot);
+                agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
                 callbackScheduledTime = -1;
                 lastEvent = null;
             }
@@ -165,13 +163,13 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
                     long lastTimestamp = currentBatch.get(lastEvent);
 
                     // reschedule, newest event deleted
-                    long timestamp = statementContext.getSchedulingService().getTime();
+                    long timestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
                     long callbackTime = lastTimestamp + msecIntervalSize;
                     long deltaFromNow = callbackTime - timestamp;
                     if (callbackTime != callbackScheduledTime)
                     {
-                        statementContext.getSchedulingService().remove(handle, scheduleSlot);
-                        statementContext.getSchedulingService().add(deltaFromNow, handle, scheduleSlot);
+                        agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
+                        agentInstanceContext.getStatementContext().getSchedulingService().add(deltaFromNow, handle, scheduleSlot);
                         callbackScheduledTime = callbackTime;
                     }
                 }

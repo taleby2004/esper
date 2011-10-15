@@ -14,7 +14,7 @@ package com.espertech.esper.regression.event;
 import com.espertech.esper.plugin.PlugInEventTypeHandler;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventSender;
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 
 public class MyPlugInPropertiesEventTypeHandler implements PlugInEventTypeHandler
 {

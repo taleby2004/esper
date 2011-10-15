@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 
 /**
@@ -43,13 +44,13 @@ public final class FilterSpecParamRange extends FilterSpecParam
         }
     }
 
-    public final Object getFilterValue(MatchedEventMap matchedEvents)
+    public final Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext)
     {
         if (type == String.class) {
-            return new StringRange((String)min.getFilterValue(matchedEvents), (String) max.getFilterValue(matchedEvents));
+            return new StringRange((String)min.getFilterValue(matchedEvents, evaluatorContext), (String) max.getFilterValue(matchedEvents, evaluatorContext));
         }
-        Double begin = (Double) min.getFilterValue(matchedEvents);
-        Double end = (Double) max.getFilterValue(matchedEvents);
+        Double begin = (Double) min.getFilterValue(matchedEvents, evaluatorContext);
+        Double end = (Double) max.getFilterValue(matchedEvents, evaluatorContext);
         return new DoubleRange(begin, end);
     }
 

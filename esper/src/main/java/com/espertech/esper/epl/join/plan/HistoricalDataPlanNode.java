@@ -23,6 +23,7 @@ import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.view.HistoricalEventViewable;
 import com.espertech.esper.view.Viewable;
 
+import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -56,7 +57,7 @@ public class HistoricalDataPlanNode extends QueryPlanNode
         this.outerJoinExprNode = exprNode;
     }
 
-    public ExecNode makeExec(Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
+    public ExecNode makeExec(String statementName, String statementId, Annotation[] annotations, Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
     {
         Pair<HistoricalIndexLookupStrategy, PollResultIndexingStrategy> pair = historicalStreamIndexLists[streamNum].getStrategy(lookupStreamNum);
         HistoricalEventViewable viewable = (HistoricalEventViewable) streamViews[streamNum];

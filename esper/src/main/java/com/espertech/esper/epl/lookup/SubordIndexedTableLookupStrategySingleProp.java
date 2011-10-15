@@ -10,10 +10,8 @@ package com.espertech.esper.epl.lookup;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.join.table.PropertyIndexedEventTableSingle;
-import com.espertech.esper.event.EventBeanUtility;
 
 import java.util.Collection;
 
@@ -22,17 +20,10 @@ import java.util.Collection;
  */
 public class SubordIndexedTableLookupStrategySingleProp implements SubordTableLookupStrategy
 {
-    private final String property;
-
     /**
      * Stream numbers to get key values from.
      */
     protected final int keyStreamNum;
-
-    /**
-     * Index to look up in.
-     */
-    protected final PropertyIndexedEventTableSingle index;
 
     /**
      * Getters to use to get key values.
@@ -40,19 +31,14 @@ public class SubordIndexedTableLookupStrategySingleProp implements SubordTableLo
     protected final EventPropertyGetter propertyGetter;
 
     /**
-     * Ctor.
-     * @param eventTypes is the event types per stream
-     * @param keyStreamNum is the stream number per property
-     * @param property is the key properties
-     * @param index is the table carrying the data to lookup into
+     * Index to look up in.
      */
-    public SubordIndexedTableLookupStrategySingleProp(boolean isNWOnTrigger, EventType[] eventTypes, int keyStreamNum, String property, PropertyIndexedEventTableSingle index)
-    {
-        this.keyStreamNum = keyStreamNum + (isNWOnTrigger ? 1 : 0); // for on-trigger the key will be provided in a {1,2,...} stream and not {0,...}
-        this.property = property;
-        this.index = index;
+    protected final PropertyIndexedEventTableSingle index;
 
-        propertyGetter = EventBeanUtility.getAssertPropertyGetter(eventTypes, keyStreamNum, property);
+    public SubordIndexedTableLookupStrategySingleProp(int keyStreamNum, EventPropertyGetter propertyGetter, PropertyIndexedEventTableSingle index) {
+        this.keyStreamNum = keyStreamNum;
+        this.propertyGetter = propertyGetter;
+        this.index = index;
     }
 
     /**
@@ -91,6 +77,6 @@ public class SubordIndexedTableLookupStrategySingleProp implements SubordTableLo
     }
 
     public String toQueryPlan() {
-        return this.getClass().getSimpleName() + " property=" + property + " stream=" + keyStreamNum;
+        return this.getClass().getSimpleName() + " stream=" + keyStreamNum;
     }
 }

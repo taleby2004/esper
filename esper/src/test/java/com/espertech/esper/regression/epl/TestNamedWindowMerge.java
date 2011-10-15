@@ -26,7 +26,9 @@ import com.espertech.esper.support.util.SupportSubscriberMRD;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class TestNamedWindowMerge extends TestCase {
 
@@ -421,13 +423,30 @@ public class TestNamedWindowMerge extends TestCase {
         assertEquals("Y4", event.get("in1"));
     }
 
+    public void testPropertyInsertBean() {
+        EPStatement stmtWindow = epService.getEPAdministrator().createEPL("create window MergeWindow.std:unique(string) as SupportBean");
+
+        String epl = "on SupportBean as up merge MergeWindow as mv where mv.string=up.string when not matched then insert select intPrimitive";
+        EPStatement stmtMerge = epService.getEPAdministrator().createEPL(epl);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
+
+        EventBean event = stmtWindow.iterator().next();
+        ArrayAssertionUtil.assertProps(event, "string,intPrimitive".split(","), new Object[] {null, 10});
+        stmtMerge.destroy();
+
+        epl = "on SupportBean as up merge MergeWindow as mv where mv.string=up.string when not matched then insert select string, intPrimitive";
+        epService.getEPAdministrator().createEPL(epl);
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
+
+        ArrayAssertionUtil.assertPropsPerRow(stmtWindow.iterator(), "string,intPrimitive".split(","), new Object[][] {{null, 10}, {"E2", 20}});
+    }
+
     public void testInvalid() {
         String epl;
         epService.getEPAdministrator().createEPL("create window MergeWindow.std:unique(string) as SupportBean");
         epService.getEPAdministrator().createEPL("create schema ABCSchema as (val int)");
         epService.getEPAdministrator().createEPL("create window ABCWindow.win:keepall() as ABCSchema");
 
-        //epl = "on SupportBean_A merge MergeWindow as windowevent where id = string when not matched and cast(1, int)=1 then insert into ABC select '1'";
         epl = "on SupportBean_A merge MergeWindow as windowevent where id = string when not matched and exists(select * from MergeWindow mw where mw.string = windowevent.string) is not null then insert into ABC select '1'";
         tryInvalid(epl, "Error starting statement: On-Merge not-matched filter expression may not use properties that are provided by the named window event [on SupportBean_A merge MergeWindow as windowevent where id = string when not matched and exists(select * from MergeWindow mw where mw.string = windowevent.string) is not null then insert into ABC select '1']");
 
@@ -438,7 +457,7 @@ public class TestNamedWindowMerge extends TestCase {
         tryInvalid(epl, "Incorrect syntax near 'update' (a reserved keyword) expecting 'insert' but found 'update' at line 1 column 97 [on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then update set intPrimitive = 1]");
 
         epl = "on SupportBean_A as up merge MergeWindow as mv where mv.string=id when matched then insert select *";
-        tryInvalid(epl, "Error starting statement: Exception encountered in when-not-matched (clause 1): Event type named 'MergeWindow' has already been declared with differing column name or type information: Type 'MergeWindow' is not compatible [on SupportBean_A as up merge MergeWindow as mv where mv.string=id when matched then insert select *]");
+        tryInvalid(epl, "Error starting statement: Exception encountered in when-not-matched (clause 1): Expression-returned event type 'SupportBean_A' with underlying type 'com.espertech.esper.support.bean.SupportBean_A' cannot be converted target event type 'MergeWindow' with underlying type 'com.espertech.esper.support.bean.SupportBean' [on SupportBean_A as up merge MergeWindow as mv where mv.string=id when matched then insert select *]");
 
         epl = "on SupportBean as up merge MergeWindow as mv";
         tryInvalid(epl, "Unexpected end of input string, check for an invalid identifier or missing additional keywords near 'mv' at line 1 column 42  [on SupportBean as up merge MergeWindow as mv]");
@@ -451,9 +470,6 @@ public class TestNamedWindowMerge extends TestCase {
 
         epl = "on SupportBean as up merge MergeWindow as mv where boolPrimitive=true when not matched then insert select *";
         tryInvalid(epl, "Error starting statement: Property named 'boolPrimitive' is ambigous as is valid for more then one stream [on SupportBean as up merge MergeWindow as mv where boolPrimitive=true when not matched then insert select *]");
-
-        epl = "on SupportBean as up merge MergeWindow as mv where mv.string=up.string when not matched then insert select intPrimitive";
-        tryInvalid(epl, "Error starting statement: Exception encountered in when-not-matched (clause 1): Event type named 'MergeWindow' has already been declared with differing column name or type information: Type by name 'MergeWindow' is not a compatible type (target type underlying is 'SupportBean') [on SupportBean as up merge MergeWindow as mv where mv.string=up.string when not matched then insert select intPrimitive]");
 
         epl = "on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then insert select intPrimitive";
         tryInvalid(epl, "Error starting statement: Property named 'intPrimitive' is not valid in any stream [on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then insert select intPrimitive]");

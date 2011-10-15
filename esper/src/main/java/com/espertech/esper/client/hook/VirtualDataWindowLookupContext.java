@@ -13,6 +13,7 @@ package com.espertech.esper.client.hook;
 
 import com.espertech.esper.epl.lookup.SubordPropPlan;
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
 
@@ -28,6 +29,10 @@ import java.util.List;
  * indicates a single hash-field "prop" and a single btree field "prop2" with a range operator.
  */
 public class VirtualDataWindowLookupContext {
+    private String statementName;
+    private String statementId;
+    private Annotation[] statementAnnotations;
+    private boolean isFireAndForget;
     private String namedWindowName;
     private List<VirtualDataWindowLookupFieldDesc> hashFields;
     private List<VirtualDataWindowLookupFieldDesc> btreeFields;
@@ -37,13 +42,18 @@ public class VirtualDataWindowLookupContext {
      * @param hashFields operator-equals semantics fields
      * @param btreeFields sorted-access fields, check the {@link VirtualDataWindowLookupOp} operator for what range or relational-operator applies
      * @param namedWindowName named window name
+     * @param statementName the statement name of the statement performing the lookup; Null for fire-and-forget queries
+     * @param statementAnnotations the statement annotations of the statement performing the lookup; Null for fire-and-forget queries
+     * @param fireAndForget true for fire-and-forget queries
      */
-    public VirtualDataWindowLookupContext(String namedWindowName,
-                                          List<VirtualDataWindowLookupFieldDesc> hashFields,
-                                          List<VirtualDataWindowLookupFieldDesc> btreeFields) {
+    public VirtualDataWindowLookupContext(String statementName, String statementId, Annotation[] statementAnnotations, boolean fireAndForget, String namedWindowName, List<VirtualDataWindowLookupFieldDesc> hashFields, List<VirtualDataWindowLookupFieldDesc> btreeFields) {
+        this.statementName = statementName;
+        this.statementId = statementId;
+        this.statementAnnotations = statementAnnotations;
+        isFireAndForget = fireAndForget;
         this.namedWindowName = namedWindowName;
-        this.hashFields = Collections.unmodifiableList(hashFields);
-        this.btreeFields = Collections.unmodifiableList(btreeFields);
+        this.hashFields = hashFields;
+        this.btreeFields = btreeFields;
     }
 
     /**
@@ -68,5 +78,37 @@ public class VirtualDataWindowLookupContext {
      */
     public List<VirtualDataWindowLookupFieldDesc> getBtreeFields() {
         return btreeFields;
+    }
+
+    /**
+     * Returns the statement name of the statement to be performing the lookup, or null for fire-and-forget statements.
+     * @return statement name
+     */
+    public String getStatementName() {
+        return statementName;
+    }
+
+    /**
+     * Returns the statement id of the statement to be performing the lookup, or null for fire-and-forget statements.
+     * @return statement name
+     */
+    public String getStatementId() {
+        return statementId;
+    }
+
+    /**
+     * Returns the statement annotations of the statement to be performing the lookup, or null for fire-and-forget statements.
+     * @return statement name
+     */
+    public Annotation[] getStatementAnnotations() {
+        return statementAnnotations;
+    }
+
+    /**
+     * Returns true for fire-and-forget queries.
+     * @return indicator whether fire-and-forget query
+     */
+    public boolean isFireAndForget() {
+        return isFireAndForget;
     }
 }

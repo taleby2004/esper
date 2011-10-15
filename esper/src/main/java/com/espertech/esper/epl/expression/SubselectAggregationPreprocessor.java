@@ -15,7 +15,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.agg.AggregationService;
 
 import java.util.Collection;
-import java.util.Set;
 
 public class SubselectAggregationPreprocessor {
 
@@ -29,7 +28,7 @@ public class SubselectAggregationPreprocessor {
 
     public void evaluate(EventBean[] eventsPerStream, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext) {
 
-        aggregationService.clearResults();
+        aggregationService.clearResults(exprEvaluatorContext);
 
         if (matchingEvents == null) {
             return;

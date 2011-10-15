@@ -15,7 +15,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.parse.EPLTreeWalker;
 import com.espertech.esper.filter.*;
-import com.espertech.esper.pattern.EvalFilterNode;
+import com.espertech.esper.pattern.EvalFilterFactoryNode;
 import com.espertech.esper.pattern.EvalNodeAnalysisResult;
 import com.espertech.esper.pattern.EvalNodeUtil;
 import com.espertech.esper.support.bean.SupportBean;
@@ -87,12 +87,12 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(1, spec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getFirst().getUnderlyingType());
 
-        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalNode());
-        List<EvalFilterNode> filters = evalNodeAnalysisResult.getFilterNodes();
+        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalFactoryNode());
+        List<EvalFilterFactoryNode> filters = evalNodeAnalysisResult.getFilterNodes();
         assertEquals(1, filters.size());
 
         // node 0
-        EvalFilterNode filterNode = filters.get(0);
+        EvalFilterFactoryNode filterNode = filters.get(0);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
         assertEquals(1, filterNode.getFilterSpec().getParameters().size());
         FilterSpecParamExprNode exprParam = (FilterSpecParamExprNode) filterNode.getFilterSpec().getParameters().getFirst();
@@ -110,12 +110,12 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(1, spec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getFirst().getUnderlyingType());
 
-        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalNode());
-        List<EvalFilterNode> filters = evalNodeAnalysisResult.getFilterNodes();
+        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalFactoryNode());
+        List<EvalFilterFactoryNode> filters = evalNodeAnalysisResult.getFilterNodes();
         assertEquals(2, filters.size());
 
         // node 0
-        EvalFilterNode filterNode = filters.get(0);
+        EvalFilterFactoryNode filterNode = filters.get(0);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
         assertEquals(0, filterNode.getFilterSpec().getParameters().size());
 
@@ -150,12 +150,12 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(1, spec.getTaggedEventTypes().size());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getFirst().getUnderlyingType());
 
-        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalNode());
-        List<EvalFilterNode> filters = evalNodeAnalysisResult.getFilterNodes();
+        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalFactoryNode());
+        List<EvalFilterFactoryNode> filters = evalNodeAnalysisResult.getFilterNodes();
         assertEquals(2, filters.size());
 
         // node 0
-        EvalFilterNode filterNode = filters.get(0);
+        EvalFilterFactoryNode filterNode = filters.get(0);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
         assertEquals(0, filterNode.getFilterSpec().getParameters().size());
 
@@ -185,12 +185,12 @@ public class TestPatternStreamSpecRaw extends TestCase
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("s").getFirst().getUnderlyingType());
         assertEquals(SupportBean.class, spec.getTaggedEventTypes().get("t").getFirst().getUnderlyingType());
 
-        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalNode());
-        List<EvalFilterNode> filters = evalNodeAnalysisResult.getFilterNodes();
+        EvalNodeAnalysisResult evalNodeAnalysisResult = EvalNodeUtil.recursiveAnalyzeChildNodes(spec.getEvalFactoryNode());
+        List<EvalFilterFactoryNode> filters = evalNodeAnalysisResult.getFilterNodes();
         assertEquals(2, filters.size());
 
         // node 0
-        EvalFilterNode filterNode = filters.get(0);
+        EvalFilterFactoryNode filterNode = filters.get(0);
         assertEquals(SupportBean.class, filterNode.getFilterSpec().getFilterForEventType().getUnderlyingType());
         assertEquals(1, filterNode.getFilterSpec().getParameters().size());
 

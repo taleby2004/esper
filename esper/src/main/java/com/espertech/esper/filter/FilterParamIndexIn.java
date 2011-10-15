@@ -11,7 +11,6 @@ package com.espertech.esper.filter;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKeyUntyped;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -117,7 +116,7 @@ public final class FilterParamIndexIn extends FilterParamIndexPropBase
         return constantsMapRWLock;
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
         Object attributeValue = this.getGetter().get(eventBean);
 
@@ -139,7 +138,7 @@ public final class FilterParamIndexIn extends FilterParamIndexPropBase
 
         for (EventEvaluator evaluator : evaluators)
         {
-            evaluator.matchEvent(eventBean, matches, exprEvaluatorContext);
+            evaluator.matchEvent(eventBean, matches);
         }
 
         constantsMapRWLock.readLock().unlock();

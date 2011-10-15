@@ -130,7 +130,7 @@ public abstract class ExprAggregateNodeBase extends ExprNodeBase implements Expr
 
 	public final Object evaluate(EventBean[] events, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
 	{
-		return aggregationResultFuture.getValue(column);
+		return aggregationResultFuture.getValue(column, exprEvaluatorContext.getAgentInstanceIds());
 	}
 
     /**

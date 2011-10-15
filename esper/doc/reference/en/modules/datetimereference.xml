@@ -65,6 +65,17 @@
 						</entry>
 					</row>
 					<row>
+						<entry>between(timestamp, timestamp, boolean, boolean)</entry>
+						<entry>
+							<para>
+								Returns true if a timestamp is between two timestamps. 
+							</para>
+							<para>
+								<xref linkend="datetime-method-between"/>.
+							</para>
+						</entry>
+					</row>
+					<row>
 						<entry>coincides(event or timestamp)</entry>
 						<entry>
 							<para>
@@ -465,6 +476,45 @@ from RFIDEvent.std:lastevent() rfid, WifiEvent.std:lastevent() wifi]]></programl
 	<sect1 id="datetime-method-calref">
 		<title>Calendar and Formatting Reference</title>
 		
+		<sect2 id="datetime-method-between">
+		  <title>Between</title>
+		  
+		  	<para>
+				The <literal>between</literal> date-time method compares the input date-time value to the two date-time values passed in and returns true if the input value falls between the two parameter values.
+			</para>
+			
+			<para>
+				The synopsis is:
+			</para>
+			<synopsis><emphasis>input_val</emphasis>.<emphasis>between</emphasis>(<emphasis>range_start</emphasis>, <emphasis>range_end</emphasis> [, <emphasis>include_start</emphasis>, <emphasis>include_end</emphasis>])</synopsis>
+
+			<para>
+				The method takes either 2 or 4 parameters. The first two parameters <emphasis>range_start</emphasis> and <emphasis>range_end</emphasis> are expressions or properties that yield either a long-typed, Date-typed or Calendar-typed range start and end value.
+			</para>
+
+			<para>
+				The next two parameters <emphasis>include_start</emphasis> and <emphasis>include_end</emphasis> are optional. If not specified, the range start value and range end value are included in the range i.e. specify a closed range where both endpoints are included. If specified, the expressions must return a boolean-value indicating whether to include the range start value and range end value in the range. 
+			</para>
+
+			<para>
+				The example below outputs true when the time-taken property value of the RFID event falls between the time-start property value and the time-end property value (closed range includes endpoints):
+			</para>
+			<programlisting>select timeTaken.between(timeStart, timeEnd) from RFIDEvent</programlisting>
+
+			<para>
+				The example below performs the same test as above but does not include endpoints (open range includes neither endpoint):
+			</para>
+			<programlisting>select timeTaken.between(timeStart, timeEnd, false, false) from RFIDEvent</programlisting>
+			
+			<para>
+				If the range end value is less then the range start value, the algorithm reverses the range start and end value.
+			</para>
+
+			<para>
+				If the input date-time value or any of the parameter values evaluate to null the method returns a null result value.
+			</para>
+		</sect2>
+
 		<sect2 id="datetime-method-format">
 		  <title>Format</title>
 		  
@@ -871,7 +921,7 @@ from RFIDEvent.std:lastevent() rfid, WifiEvent.std:lastevent() wifi]]></programl
 		  <title>Performance</title>
 		  
 		   <para>
-			  The engine analyzes interval algebra methods in the where-clause and builds a query plan for execution of joins and subqueries. The query plan can include hash and btree index lookups using the start and end timestamps as computed by expressions or provided by events as applicable. Consider turning on query plan logging to obtain information on the query plan used.
+			  The engine analyzes interval algebra methods as well as the <literal>between</literal> date-time method in the where-clause and builds a query plan for execution of joins and subqueries. The query plan can include hash and btree index lookups using the start and end timestamps as computed by expressions or provided by events as applicable. Consider turning on query plan logging to obtain information on the query plan used.
 		   </para>
 		   
 		   <para>

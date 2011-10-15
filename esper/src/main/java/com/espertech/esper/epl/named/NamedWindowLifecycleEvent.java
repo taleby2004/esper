@@ -11,9 +11,6 @@
 
 package com.espertech.esper.epl.named;
 
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.core.StatementLifecycleEvent;
-
 /**
  * Event indicating named window lifecycle management.
  */

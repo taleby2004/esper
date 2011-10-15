@@ -19,8 +19,8 @@ import com.espertech.esper.support.client.SupportServiceStateListener;
 import com.espertech.esper.support.client.SupportStmtLifecycleObserver;
 import com.espertech.esper.support.client.SupportStatementStateListener;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.core.StatementLifecycleEvent;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
+import com.espertech.esper.core.service.StatementLifecycleEvent;
 import com.espertech.esper.client.EventBean;
 
 import java.util.Arrays;

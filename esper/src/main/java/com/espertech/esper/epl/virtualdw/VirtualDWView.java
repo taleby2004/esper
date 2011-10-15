@@ -29,19 +29,20 @@ import com.espertech.esper.epl.named.IndexMultiKey;
 import com.espertech.esper.epl.named.IndexedPropDesc;
 import com.espertech.esper.epl.spec.CreateIndexDesc;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 public interface VirtualDWView {
     public Pair<IndexMultiKey,EventTable> getSubordinateQueryDesc(List<IndexedPropDesc> hashedProps, List<IndexedPropDesc> btreeProps);
-    public SubordTableLookupStrategy getSubordinateLookupStrategy(String accessedByStatementName, EventType[] outerStreamTypes, List<SubordPropHashKey> hashKeys, CoercionDesc hashKeyCoercionTypes, List<SubordPropRangeKey> rangeKeys, CoercionDesc rangeKeyCoercionTypes, boolean nwOnTrigger, EventTable eventTable, SubordPropPlan joinDesc, boolean forceTableScan);
+    public SubordTableLookupStrategy getSubordinateLookupStrategy(String accessedByStatementName, String accessedByStatementId, Annotation[] accessedByStmtAnnotations, EventType[] outerStreamTypes, List<SubordPropHashKey> hashKeys, CoercionDesc hashKeyCoercionTypes, List<SubordPropRangeKey> rangeKeys, CoercionDesc rangeKeyCoercionTypes, boolean nwOnTrigger, EventTable eventTable, SubordPropPlan joinDesc, boolean forceTableScan);
 
     public EventTable getJoinIndexTable(QueryPlanIndexItem queryPlanIndexItem);
-    public JoinExecTableLookupStrategy getJoinLookupStrategy(EventTable eventTable, TableLookupKeyDesc keyDescriptor, int lookupStreamNum);
+    public JoinExecTableLookupStrategy getJoinLookupStrategy(String accessedByStatementName, String accessedByStatementId, Annotation[] accessedByStmtAnnotations, EventTable eventTable, TableLookupKeyDesc keyDescriptor, int lookupStreamNum);
 
     public Pair<IndexMultiKey,EventTable> getFireAndForgetDesc(Set<String> keysAvailable, Set<String> rangesAvailable);
-    public Collection<EventBean> getFireAndForgetData(EventTable eventTable, Object[] keyValues, RangeIndexLookupValue[] rangeValues);
+    public Collection<EventBean> getFireAndForgetData(EventTable eventTable, Object[] keyValues, RangeIndexLookupValue[] rangeValues, Annotation[] accessedByStmtAnnotations);
 
     public VirtualDataWindow getVirtualDataWindow();
 

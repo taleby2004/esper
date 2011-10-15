@@ -10,7 +10,6 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
 
@@ -24,7 +23,7 @@ public final class FilterParamIndexEquals extends FilterParamIndexEqualsBase
         super(propertyName, FilterOperator.EQUAL, eventType);
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
         Object attributeValue = this.getGetter().get(eventBean);
         if (attributeValue == null) {   //  null cannot match, not even null: requires use of "is"
@@ -49,6 +48,6 @@ public final class FilterParamIndexEquals extends FilterParamIndexEqualsBase
             return;
         }
 
-        evaluator.matchEvent(eventBean, matches, exprEvaluatorContext);
+        evaluator.matchEvent(eventBean, matches);
     }
 }

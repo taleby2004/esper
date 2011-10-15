@@ -15,7 +15,9 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatementException;
-import com.espertech.esper.support.bean.*;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBean_ST0_Container;
+import com.espertech.esper.support.bean.SupportDateTime;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
@@ -61,6 +63,18 @@ public class TestDTInvalid extends TestCase {
         // invalid wrong parameter
         epl = "select utildate.set(1) from SupportDateTime";
         tryInvalid(epl, "Error starting statement: Parameters mismatch for date-time method 'set', the method requires an expression providing a string-type calendar field name and an expression providing an integer-type value [select utildate.set(1) from SupportDateTime]");
+
+        // invalid wrong parameter
+        epl = "select utildate.between('a', 'b') from SupportDateTime";
+        tryInvalid(epl, "Error starting statement: Error validating date-time method 'between', expected a long-typed, Date-typed or Calendar-typed result for expression parameter 0 but received java.lang.String [select utildate.between('a', 'b') from SupportDateTime]");
+
+        // invalid wrong parameter
+        epl = "select utildate.between(utildate, utildate, 1, true) from SupportDateTime";
+        tryInvalid(epl, "Error starting statement: Error validating date-time method 'between', expected a boolean-type result for expression parameter 2 but received java.lang.Integer [select utildate.between(utildate, utildate, 1, true) from SupportDateTime]");
+
+        // invalid wrong parameter
+        epl = "select utildate.between(utildate, utildate, 1, true) from SupportDateTime";
+        tryInvalid(epl, "Error starting statement: Error validating date-time method 'between', expected a boolean-type result for expression parameter 2 but received java.lang.Integer [select utildate.between(utildate, utildate, 1, true) from SupportDateTime]");
     }
 
     private void tryInvalid(String epl, String message) {

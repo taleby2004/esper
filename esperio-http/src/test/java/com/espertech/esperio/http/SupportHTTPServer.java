@@ -1,10 +1,5 @@
 package com.espertech.esperio.http;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.DefaultHttpResponseFactory;
 import org.apache.http.params.HttpParams;
@@ -16,17 +11,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.net.ServerSocket;
-import java.util.Map;
-import java.util.LinkedHashMap;
 
-import com.espertech.esperio.http.config.Service;
-import com.espertech.esperio.http.config.GetHandler;
 import com.espertech.esperio.http.core.EsperHttpServiceClassicRunnable;
-import com.espertech.esper.core.EPServiceProviderSPI;
 
 public class SupportHTTPServer {
     private static Log log = LogFactory.getLog(SupportHTTPServer.class);

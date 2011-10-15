@@ -14,6 +14,7 @@ package com.espertech.esper.support.epl;
 import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
 
@@ -24,7 +25,7 @@ public class SupportSelectExprProcessor implements SelectExprProcessor
         return SupportEventTypeFactory.createBeanType(SupportBean.class);
     }
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
         return eventsPerStream[0];
     }

@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.epl.agg.AggregationMethod;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
 /**
@@ -57,10 +56,5 @@ public class FloatSumAggregator implements AggregationMethod
     public Class getValueType()
     {
         return Float.class;
-    }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeSumAggregator(Float.class, false);
     }
 }

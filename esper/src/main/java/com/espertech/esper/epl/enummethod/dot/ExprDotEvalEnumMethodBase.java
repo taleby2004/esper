@@ -13,8 +13,8 @@ package com.espertech.esper.epl.enummethod.dot;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.ExpressionResultCacheEntry;
-import com.espertech.esper.core.ExpressionResultCacheStackEntry;
+import com.espertech.esper.core.service.ExpressionResultCacheEntry;
+import com.espertech.esper.core.service.ExpressionResultCacheStackEntry;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.enummethod.eval.EnumEval;

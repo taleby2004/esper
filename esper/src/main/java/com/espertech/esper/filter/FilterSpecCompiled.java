@@ -9,6 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.property.PropertyEvaluator;
 import com.espertech.esper.pattern.MatchedEventMap;
 
@@ -104,20 +105,30 @@ public final class FilterSpecCompiled
      * @param matchedEvents contains the result events to use for determining filter values
      * @return filter values
      */
-    public FilterValueSet getValueSet(MatchedEventMap matchedEvents)
+    public FilterValueSet getValueSet(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext, List<FilterValueSetParam> addendum)
     {
-        ArrayDeque<FilterValueSetParam> valueList = new ArrayDeque<FilterValueSetParam>(parameters.size());
+        ArrayDeque<FilterValueSetParam> valueList;
+        if (addendum != null) {
+            valueList = new ArrayDeque<FilterValueSetParam>(parameters.size() + addendum.size());
+            valueList.addAll(addendum);
+        }
+        else {
+            valueList = new ArrayDeque<FilterValueSetParam>(parameters.size());
+        }
+        populateValueSet(valueList, matchedEvents, evaluatorContext);
+        return new FilterValueSetImpl(filterForEventType, valueList);
+    }
 
+    private void populateValueSet(ArrayDeque<FilterValueSetParam> valueList, MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext) {
         // Ask each filter specification parameter for the actual value to filter for
         for (FilterSpecParam specParam : parameters)
         {
-            Object filterForValue = specParam.getFilterValue(matchedEvents);
+            Object filterForValue = specParam.getFilterValue(matchedEvents, exprEvaluatorContext);
 
             FilterValueSetParam valueParam = new FilterValueSetParamImpl(specParam.getPropertyName(),
                     specParam.getFilterOperator(), filterForValue);
             valueList.add(valueParam);
         }
-        return new FilterValueSetImpl(filterForEventType, valueList);
     }
 
     @SuppressWarnings({"StringConcatenationInsideStringBufferAppend"})

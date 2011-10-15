@@ -9,9 +9,10 @@
 package com.espertech.esper.view;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.spec.ViewSpec;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.spec.StreamSpecOptions;
+import com.espertech.esper.epl.spec.ViewSpec;
 
 import java.util.List;
 
@@ -50,12 +51,13 @@ public interface ViewService
      * indicated by each view factories reuse method.
      * @param eventStreamViewable is the event stream to hook into
      * @param viewFactoryChain defines the list of view factorys to call makeView or canReuse on
-     * @param context provides services
+     * @param viewFactoryChainContext provides services
      * @return last viewable in chain, or the eventStreamViewable if no view factories are supplied
      */
     public Viewable createViews(Viewable eventStreamViewable,
                                 List<ViewFactory> viewFactoryChain,
-                                StatementContext context);
+                                AgentInstanceViewFactoryChainContext viewFactoryChainContext,
+                                boolean hasPreviousNode);
 
     /**
      * Removes a view discoupling the view and any of it's parent views up the tree to the last shared parent view.

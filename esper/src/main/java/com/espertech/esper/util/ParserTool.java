@@ -12,8 +12,7 @@
 package com.espertech.esper.util;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Tools to transform the ANTLR-generated parser (EsperEPL2GrammarParser.java) method "specialStateTransition"
@@ -45,10 +44,51 @@ public class ParserTool {
             result.add(line);
         }
 
+        // transform the state transition method
         transformSpecialStateTransition(result);
 
-        writeFile(filename, result);
-        System.out.println("Wrote " + result.size() + " lines to file " + filename);
+        // transform the DFA197_transitionS
+        Map<String, List<String>> files = transformDFA197Array(filename, result);
+
+        for (Map.Entry<String, List<String>> linesPerFile : files.entrySet()) {
+            String filenameToWrite = linesPerFile.getKey();
+            writeFile(filenameToWrite, linesPerFile.getValue());
+            System.out.println("Wrote " + linesPerFile.getValue().size() + " lines to file " + filenameToWrite);
+        }
+    }
+
+    public static Map<String, List<String>> transformDFA197Array(String filename, List<String> lines) {
+        String regexDFA = "(.*)static final String\\[\\] DFA(.*)_transitionS(.*)";
+        int startDFA = findLineNumRegEx(lines, regexDFA, 0);
+        if (startDFA == -1) {
+            throw new RuntimeException("Failed to find line: " + regexDFA);
+        }
+        String dfaNum = lines.get(startDFA).split("DFA")[1].substring(0,3);
+
+        int endDFA = findMethodEndLine(lines, startDFA);
+        if (endDFA == -1) {
+            throw new RuntimeException("Failed to end of array declaration: " + regexDFA);
+        }
+
+        // build new class
+        List<String> dfaDeclBuf = new ArrayList<String>();
+        dfaDeclBuf.add("package com.espertech.esper.epl.generated;");
+        dfaDeclBuf.add("public class EsperEPL2GrammarParser_DFAS {");
+        List<String> dfaDeclaration = getLinesBetween(lines, startDFA, endDFA);
+        dfaDeclBuf.addAll(dfaDeclaration);
+        dfaDeclBuf.add("};");
+        dfaDeclBuf.add("}");
+
+        // remove from old, replace in old
+        replaceLines(lines, startDFA, endDFA + 1, Collections.<String>emptyList());
+        replaceContent(lines, "DFA" + dfaNum + "_transitionS", "EsperEPL2GrammarParser_DFAS.DFA" + dfaNum + "_transitionS");
+
+        String[] filenameSplit = filename.split("\\.java");
+        Map<String, List<String>> items = new LinkedHashMap<String, List<String>>();
+        items.put(filename, lines);
+        items.put(filenameSplit[0] + "_DFAS.java", dfaDeclBuf);
+
+        return items;
     }
 
     public static String transform(String text) {
@@ -58,7 +98,7 @@ public class ParserTool {
     }
 
     private static void transformSpecialStateTransition(List<String> inputbuf) {
-        int startLineNum = findLineNum(inputbuf, "public int specialStateTransition", 0);
+        int startLineNum = findLineNumStartWith(inputbuf, "public int specialStateTransition", 0);
         if (startLineNum == -1) {
             return;
         }
@@ -68,8 +108,8 @@ public class ParserTool {
             return;
         }
 
-        int firstCaseLineNum = findLineNum(inputbuf, "case 0", startLineNum);
-        int caseEndLineNum = findLineNum(inputbuf, "if (state.backtracking>0)", startLineNum);
+        int firstCaseLineNum = findLineNumStartWith(inputbuf, "case 0", startLineNum);
+        int caseEndLineNum = findLineNumStartWith(inputbuf, "if (state.backtracking>0)", startLineNum);
         List<String> headerLines = getLinesBetween(inputbuf, startLineNum, firstCaseLineNum);
         List<String> trailerLines = getLinesBetween(inputbuf, caseEndLineNum, endLineNum + 1);
 
@@ -77,11 +117,11 @@ public class ParserTool {
         List<List<String>> methods = new ArrayList<List<String>>();
         int caseNum = 0;
         while(true) {
-            int caseLineNum = findLineNum(inputbuf, "case " + caseNum + " :", startLineNum);
+            int caseLineNum = findLineNumStartWith(inputbuf, "case " + caseNum + " :", startLineNum);
             if (caseLineNum == -1) {
                 break;
             }
-            int breakLineNum = findLineNum(inputbuf, "break", caseLineNum);
+            int breakLineNum = findLineNumStartWith(inputbuf, "break", caseLineNum);
 
             List<String> method = new ArrayList<String>();
             method.add("  private int sst_" + caseNum + "() {");
@@ -113,6 +153,15 @@ public class ParserTool {
         }
 
         replaceLines(inputbuf, startLineNum, endLineNum + 1, replacementMethod);
+    }
+
+    private static void replaceContent(List<String> lines, String toReplace, String replaceWith) {
+        List<String> result = new ArrayList<String>();
+        for (String line : lines) {
+            result.add(line.replace(toReplace, replaceWith));
+        }
+        lines.clear();
+        lines.addAll(result);
     }
 
     private static void replaceLines(List<String> input, int start, int end, List<String> replacement) {
@@ -155,9 +204,18 @@ public class ParserTool {
         return -1;
     }
 
-    private static int findLineNum(List<String> lines, String name, int startIndex) {
+    private static int findLineNumStartWith(List<String> lines, String name, int startIndex) {
         for (int i = startIndex; i < lines.size(); i++) {
             if (lines.get(i).trim().startsWith(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private static int findLineNumRegEx(List<String> lines, String regex, int startIndex) {
+        for (int i = startIndex; i < lines.size(); i++) {
+            if (lines.get(i).trim().matches(regex)) {
                 return i;
             }
         }

@@ -39,18 +39,18 @@ public class TestAggregationServiceFactory extends TestCase
     {
         // Test with aggregates but no group by
         selectAggregateNodes.add(SupportExprNodeFactory.makeSumAggregateNode());
-        AggregationService service = AggregationServiceFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, false, methodResolutionService, null, null, null, null, false, null, null);
-        assertTrue(service instanceof AggSvcGroupAllNoAccessImpl);
+        AggregationServiceFactoryDesc service = AggregationServiceFactoryFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, false, methodResolutionService, null, null, null, false, null, null);
+        assertTrue(service.getAggregationServiceFactory() instanceof AggSvcGroupAllNoAccessFactory);
 
         // Test with aggregates and group by
-        service = AggregationServiceFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, true, methodResolutionService, null, null, null, null, false, null, null);
-        assertTrue(service instanceof AggSvcGroupByRefcountedNoAccessImpl);
+        service = AggregationServiceFactoryFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, true, methodResolutionService, null, null, null, false, null, null);
+        assertTrue(service.getAggregationServiceFactory() instanceof AggSvcGroupByRefcountedNoAccessFactory);
     }
 
     public void testGetNullService() throws Exception
     {
         // Test no aggregates and no group-by
-    	AggregationService service = AggregationServiceFactory.getService(selectAggregateNodes,havingAggregateNodes, orderByAggregateNodes, false, methodResolutionService, null, null, null, null, false, null, null);
-    	assertTrue(service instanceof AggregationServiceNull);
+    	AggregationServiceFactoryDesc service = AggregationServiceFactoryFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, false, methodResolutionService, null, null, null, false, null, null);
+    	assertTrue(service.getAggregationServiceFactory() instanceof AggregationServiceNullFactory);
     }
 }

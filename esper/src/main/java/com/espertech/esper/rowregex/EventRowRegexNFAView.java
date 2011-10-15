@@ -16,9 +16,9 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.SingleEventIterator;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.epl.agg.AggregationServiceMatchRecognize;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -55,7 +55,7 @@ public class EventRowRegexNFAView extends ViewSupport
 
     private final EventType compositeEventType;
     private final EventType rowEventType;
-    private final StatementContext statementContext;
+    private final AgentInstanceContext agentInstanceContext;
     private final AggregationServiceMatchRecognize aggregationService;
 
     // for interval-handling
@@ -87,7 +87,6 @@ public class EventRowRegexNFAView extends ViewSupport
      * @param variableStreams variables and their assigned stream number
      * @param streamsVariables stream number and the assigned variable
      * @param variablesSingle single variables
-     * @param statementContext statement context
      * @param callbacksPerIndex  for handling the 'prev' function
      * @param aggregationService handles aggregations
      * @param isUnbound true if unbound stream
@@ -100,7 +99,7 @@ public class EventRowRegexNFAView extends ViewSupport
                                 LinkedHashMap<String, Pair<Integer, Boolean>> variableStreams,
                                 Map<Integer, String> streamsVariables,
                                 Set<String> variablesSingle,
-                                StatementContext statementContext,
+                                AgentInstanceContext agentInstanceContext,
                                 TreeMap<Integer, List<ExprPreviousMatchRecognizeNode>> callbacksPerIndex,
                                 AggregationServiceMatchRecognize aggregationService,
                                 boolean isUnbound,
@@ -117,19 +116,19 @@ public class EventRowRegexNFAView extends ViewSupport
         this.aggregationService = aggregationService;
         this.isUnbound = isUnbound;
         this.isIterateOnly = isIterateOnly;
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.isSelectAsksMultimatches = isSelectAsksMultimatches;
 
         if (matchRecognizeSpec.getInterval() != null)
         {
-            scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
+            scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
             ScheduleHandleCallback callback = new ScheduleHandleCallback() {
                 public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
                 {
                     EventRowRegexNFAView.this.triggered();
                 }
             };
-            handle = new EPStatementHandleCallback(statementContext.getEpStatementHandle(), callback);
+            handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
             schedule = new TreeMap<Long, Object>();
         }
         else
@@ -207,7 +206,7 @@ public class EventRowRegexNFAView extends ViewSupport
         }
         else
         {
-            regexPartitionStateRepo = new RegexPartitionStateRepoGroup(randomAccessByIndexGetter, ExprNodeUtility.getEvaluators(matchRecognizeSpec.getPartitionByExpressions()), matchRecognizeSpec.getInterval() != null, statementContext);
+            regexPartitionStateRepo = new RegexPartitionStateRepoGroup(randomAccessByIndexGetter, ExprNodeUtility.getEvaluators(matchRecognizeSpec.getPartitionByExpressions()), matchRecognizeSpec.getInterval() != null, agentInstanceContext);
         }
     }
 
@@ -301,7 +300,7 @@ public class EventRowRegexNFAView extends ViewSupport
                 long time = 0;
                 if (matchRecognizeSpec.getInterval() != null)
                 {
-                    time = statementContext.getSchedulingService().getTime();
+                    time = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
                 }
                 currentStates.add(new RegexNFAStateEntry(eventSequenceNumber, time, startState, new EventBean[variableStreams.size()], new int[allStates.length], null, partitionState.getOptionalKeys()));
             }
@@ -357,7 +356,7 @@ public class EventRowRegexNFAView extends ViewSupport
                 }
 
                 long matchBeginTime = endState.getMatchBeginEventTime();
-                long current = statementContext.getSchedulingService().getTime();
+                long current = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
                 long deltaFromStart = current - matchBeginTime;
                 long deltaUntil = matchRecognizeSpec.getInterval().getMSec() - deltaFromStart;
 
@@ -548,7 +547,7 @@ public class EventRowRegexNFAView extends ViewSupport
                 long time = 0;
                 if (matchRecognizeSpec.getInterval() != null)
                 {
-                    time = statementContext.getSchedulingService().getTime();
+                    time = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
                 }
                 currentStates.add(new RegexNFAStateEntry(eventSequenceNumber, time, startState, new EventBean[variableStreams.size()], new int[allStates.length], null, partitionState.getOptionalKeys()));
             }
@@ -812,7 +811,7 @@ public class EventRowRegexNFAView extends ViewSupport
             int currentStateStreamNum = currentState.getState().getStreamNum();
             eventsPerStream[currentStateStreamNum] = event;
 
-            if (currentState.getState().matches(eventsPerStream, statementContext))
+            if (currentState.getState().matches(eventsPerStream, agentInstanceContext))
             {
                 if (isRetainEventSet)
                 {
@@ -1054,23 +1053,23 @@ public class EventRowRegexNFAView extends ViewSupport
                     for (EventBean multimatchEvent : multimatchEvents)
                     {
                         eventsPerStream[i] = multimatchEvent;
-                        aggregationService.applyEnter(eventsPerStream, i, statementContext);
+                        aggregationService.applyEnter(eventsPerStream, i, agentInstanceContext);
                     }
                 }
             }
         }
-        EventBean rowRaw = statementContext.getEventAdapterService().adaptorForTypedMap(rowDataRaw, compositeEventType);
+        EventBean rowRaw = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(rowDataRaw, compositeEventType);
 
         Map<String, Object> row = new HashMap<String, Object>();
         int columnNum = 0;
         for (ExprEvaluator expression : columnEvaluators)
         {
-            Object result = expression.evaluate(new EventBean[] {rowRaw}, true, statementContext);
+            Object result = expression.evaluate(new EventBean[] {rowRaw}, true, agentInstanceContext);
             row.put(columnNames[columnNum], result);
             columnNum++;
         }
 
-        return statementContext.getEventAdapterService().adaptorForTypedMap(row, rowEventType);
+        return agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(row, rowEventType);
     }
 
     private void scheduleCallback(long msecAfterCurrentTime, RegexNFAStateEntry endState)
@@ -1079,7 +1078,7 @@ public class EventRowRegexNFAView extends ViewSupport
         if (schedule.isEmpty())
         {
             schedule.put(matchBeginTime, endState);
-            statementContext.getSchedulingService().add(msecAfterCurrentTime, handle, scheduleSlot);
+            agentInstanceContext.getStatementContext().getSchedulingService().add(msecAfterCurrentTime, handle, scheduleSlot);
         }
         else
         {
@@ -1089,8 +1088,8 @@ public class EventRowRegexNFAView extends ViewSupport
                 long currentFirstKey = schedule.firstKey();
                 if (currentFirstKey > matchBeginTime)
                 {
-                    statementContext.getSchedulingService().remove(handle, scheduleSlot);
-                    statementContext.getSchedulingService().add(msecAfterCurrentTime, handle, scheduleSlot);
+                    agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
+                    agentInstanceContext.getStatementContext().getSchedulingService().add(msecAfterCurrentTime, handle, scheduleSlot);
                 }
 
                 schedule.put(matchBeginTime, endState);
@@ -1113,7 +1112,7 @@ public class EventRowRegexNFAView extends ViewSupport
 
     private void triggered()
     {
-        long currentTime = statementContext.getSchedulingService().getTime();
+        long currentTime = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         if (schedule.isEmpty())
         {
             return;
@@ -1150,8 +1149,8 @@ public class EventRowRegexNFAView extends ViewSupport
         // schedule next
         if (!schedule.isEmpty())
         {
-            long msecAfterCurrentTime = schedule.firstKey() + this.matchRecognizeSpec.getInterval().getMSec() - statementContext.getSchedulingService().getTime();
-            statementContext.getSchedulingService().add(msecAfterCurrentTime, handle, scheduleSlot);
+            long msecAfterCurrentTime = schedule.firstKey() + this.matchRecognizeSpec.getInterval().getMSec() - agentInstanceContext.getStatementContext().getSchedulingService().getTime();
+            agentInstanceContext.getStatementContext().getSchedulingService().add(msecAfterCurrentTime, handle, scheduleSlot);
         }
 
         if (!matchRecognizeSpec.isAllMatches())

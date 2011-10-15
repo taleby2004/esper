@@ -1549,11 +1549,81 @@ select fname, lname, 'HIRED' as type from HRSystemEvent(type='NEW')</programlist
 			</listitem>
 		</itemizedlist>
 	</sect1>
+
+    <sect1 id="eventrep_comparing">
+        <title>Comparing Event Types</title>
+        
+        <para>
+			Each of the event representations of Java object, Map and XML document has advantages and disadvantages that are summarized in the table below:
+        </para>
+        
+		<table frame="topbot">
+			<title>Comparing Event Representations</title>
+			<tgroup cols="4">
+				<colspec colwidth="1.5*"/>
+				<colspec colwidth="1.5*"/>
+				<colspec colwidth="1.5*"/>
+				<colspec colwidth="1.5*"/>
+				<thead>
+					<row>
+						<entry></entry>
+						<entry>Java Object (POJO/Bean or other)</entry>
+						<entry>Map</entry>
+						<entry>XML Document</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>Performance</entry>
+						<entry>Good</entry>
+						<entry>Good</entry>
+						<entry>Not comparable and depending on use of XPath</entry>
+					</row>
+					<row>
+						<entry>Memory Use</entry>
+						<entry>Good</entry>
+						<entry>Good</entry>
+						<entry>Depends on DOM and XPath implementation used</entry>
+					</row>
+					<row>
+						<entry>Call Method on Event</entry>
+						<entry>Yes</entry>
+						<entry>Yes, if contains Object(s)</entry>
+						<entry>No</entry>
+					</row>
+					<row>
+						<entry>Nested, Indexed, Mapped and Dynamic Properties</entry>
+						<entry>Yes</entry>
+						<entry>Yes</entry>
+						<entry>Yes</entry>
+					</row>
+					<row>
+						<entry>Course-grained event syntax</entry>
+						<entry>Yes</entry>
+						<entry>Yes</entry>
+						<entry>Yes</entry>
+					</row>
+					<row>
+						<entry>Insert-into that Representation</entry>
+						<entry>Yes</entry>
+						<entry>Yes</entry>
+						<entry>No</entry>
+					</row>
+					<row>
+						<entry>Runtime Type Change</entry>
+						<entry>Reload class, yes</entry>
+						<entry>Yes</entry>
+						<entry>Yes</entry>
+					</row>
+					<row>
+						<entry>Create-schema Syntax</entry>
+						<entry>Yes</entry>
+						<entry>Yes</entry>
+						<entry>No, runtime and static configuration</entry>
+					</row>
+				</tbody>
+			</tgroup>
+		</table>
+        
+     </sect1>
 </chapter>
-
-
-
-
-
-
-

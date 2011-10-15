@@ -8,11 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.view.*;
 
 import java.util.List;
@@ -20,13 +19,8 @@ import java.util.List;
 /**
  * Factory for {@link com.espertech.esper.view.window.KeepAllView}.
  */
-public class KeepAllViewFactory implements DataWindowViewFactory
+public class KeepAllViewFactory implements DataWindowViewFactory, DataWindowViewWithPrevious
 {
-    /**
-     * The access into the data window.
-     */
-    protected RandomAccessByIndexGetter randomAccessGetterImpl;
-
     private EventType eventType;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
@@ -44,43 +38,14 @@ public class KeepAllViewFactory implements DataWindowViewFactory
         this.eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        if (viewCapability instanceof ViewCapDataWindowAccess)
-        {
-            return true;
-        }
-        return viewCapability instanceof RemoveStreamViewCapability;
+    public Object makePreviousGetter() {
+        return new RandomAccessByIndexGetter();
     }
 
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return;
-        }
-        if (randomAccessGetterImpl == null)
-        {
-            randomAccessGetterImpl = new RandomAccessByIndexGetter();
-        }
-        resourceCallback.setViewResource(randomAccessGetterImpl);
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        IStreamRandomAccess randomAccess = null;
-
-        if (randomAccessGetterImpl != null)
-        {
-            randomAccess = new IStreamRandomAccess(randomAccessGetterImpl);
-            randomAccessGetterImpl.updated(randomAccess);
-        }
-
-        return new KeepAllView(this, randomAccess);
+        IStreamRandomAccess randomAccess = ViewServiceHelper.getOptPreviousExprRandomAccess(agentInstanceViewFactoryContext);
+        return new KeepAllView(agentInstanceViewFactoryContext, this, randomAccess);
     }
 
     public EventType getEventType()
@@ -90,10 +55,6 @@ public class KeepAllViewFactory implements DataWindowViewFactory
 
     public boolean canReuse(View view)
     {
-        if (randomAccessGetterImpl != null)
-        {
-            return false;
-        }
         if (!(view instanceof KeepAllView))
         {
             return false;

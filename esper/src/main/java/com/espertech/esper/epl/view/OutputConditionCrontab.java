@@ -8,79 +8,35 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.StreamTypeServiceImpl;
-import com.espertech.esper.epl.expression.*;
-import com.espertech.esper.schedule.*;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
+import com.espertech.esper.schedule.ScheduleHandleCallback;
+import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.List;
-
 /**
  * Output condition handling crontab-at schedule output.
  */
-public final class OutputConditionCrontab implements OutputCondition
+public final class OutputConditionCrontab extends OutputConditionBase implements OutputCondition
 {
     private static final boolean DO_OUTPUT = true;
 	private static final boolean FORCE_UPDATE = true;
 
-    private final OutputCallback outputCallback;
+    private final AgentInstanceContext context;
+    private final OutputConditionCrontabFactory factory;
+
     private final ScheduleSlot scheduleSlot;
-
     private Long currentReferencePoint;
-    private StatementContext context;
     private boolean isCallbackScheduled;
-    private ScheduleSpec scheduleSpec;
 
-    /**
-     * Constructor.
-     * @param context is the view context for time scheduling
-     * @param outputCallback is the callback to make once the condition is satisfied
-     * @param scheduleSpecExpressionList list of schedule parameters
-     * @throws ExprValidationException if the crontab expression failed to validate
-     */
-    public OutputConditionCrontab(List<ExprNode> scheduleSpecExpressionList,
-                                   StatementContext context,
-                                   OutputCallback outputCallback)
-            throws ExprValidationException
-    {
-		if(outputCallback ==  null)
-		{
-			throw new NullPointerException("Output condition crontab requires a non-null callback");
-		}
-        if (context == null)
-        {
-            String message = "OutputConditionTime requires a non-null view context";
-            throw new NullPointerException(message);
-        }
-
+    public OutputConditionCrontab(OutputCallback outputCallback, AgentInstanceContext context, OutputConditionCrontabFactory factory) {
+        super(outputCallback);
         this.context = context;
-        this.outputCallback = outputCallback;
-        this.scheduleSlot = context.getScheduleBucket().allocateSlot();
-
-        // Validate the expression
-        ExprEvaluator[] expressions = new ExprEvaluator[scheduleSpecExpressionList.size()];
-        int count = 0;
-        for (ExprNode parameters : scheduleSpecExpressionList)
-        {
-            ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(context.getEngineURI(), false), context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations());
-            ExprNode node = ExprNodeUtility.getValidatedSubtree(parameters, validationContext);
-            expressions[count++] = node.getExprEvaluator();
-        }
-
-        try
-        {
-            Object[] scheduleSpecParameterList = evaluate(expressions, context);
-            scheduleSpec = ScheduleSpecUtil.computeValues(scheduleSpecParameterList);
-        }
-        catch (ScheduleParameterException e)
-        {
-            throw new IllegalArgumentException("Invalid schedule specification : " + e.getMessage(), e);
-        }
+        this.factory = factory;
+        scheduleSlot = context.getStatementContext().getScheduleBucket().allocateSlot();
     }
 
     public final void updateOutputCondition(int newEventsCount, int oldEventsCount)
@@ -94,7 +50,7 @@ public final class OutputConditionCrontab implements OutputCondition
 
         if (currentReferencePoint == null)
         {
-        	currentReferencePoint = context.getSchedulingService().getTime();
+        	currentReferencePoint = context.getStatementContext().getSchedulingService().getTime();
         }
 
         // Schedule the next callback if there is none currently scheduled
@@ -107,20 +63,20 @@ public final class OutputConditionCrontab implements OutputCondition
     public final String toString()
     {
         return this.getClass().getName() +
-                " spec=" + scheduleSpec;
+                " spec=" + factory.getScheduleSpec();
     }
 
     private void scheduleCallback()
     {
     	isCallbackScheduled = true;
-        long current = context.getSchedulingService().getTime();
+        long current = context.getStatementContext().getSchedulingService().getTime();
 
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".scheduleCallback Scheduled new callback for " +
                     " now=" + current +
                     " currentReferencePoint=" + currentReferencePoint +
-                    " spec=" + scheduleSpec);
+                    " spec=" + factory.getScheduleSpec());
         }
 
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
@@ -131,29 +87,12 @@ public final class OutputConditionCrontab implements OutputCondition
                 scheduleCallback();
             }
         };
-        EPStatementHandleCallback handle = new EPStatementHandleCallback(context.getEpStatementHandle(), callback);
-        context.getSchedulingService().add(scheduleSpec, handle, scheduleSlot);
+        EPStatementHandleCallback handle = new EPStatementHandleCallback(context.getEpStatementAgentInstanceHandle(), callback);
+        context.getStatementContext().getSchedulingService().add(factory.getScheduleSpec(), handle, scheduleSlot);
     }
 
-    private static Object[] evaluate(ExprEvaluator[] parameters, ExprEvaluatorContext exprEvaluatorContext)
-    {
-        Object[] results = new Object[parameters.length];
-        int count = 0;
-        for (ExprEvaluator expr : parameters)
-        {
-            try
-            {
-                results[count] = expr.evaluate(null, true, exprEvaluatorContext);
-                count++;
-            }
-            catch (RuntimeException ex)
-            {
-                String message = "Failed expression evaluation in crontab timer-at for parameter " + count + ": " + ex.getMessage();
-                log.error(message, ex);
-                throw new IllegalArgumentException(message);
-            }
-        }
-        return results;
+    public void terminated() {
+        outputCallback.continueOutputProcessing(true, true);
     }
 
     private static final Log log = LogFactory.getLog(OutputConditionCrontab.class);

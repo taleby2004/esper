@@ -11,8 +11,8 @@
 
 package com.espertech.esper.core.thread;
 
-import com.espertech.esper.core.EPRuntimeImpl;
-import com.espertech.esper.core.EPServicesContext;
+import com.espertech.esper.core.service.EPRuntimeImpl;
+import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.client.EventBean;
 
 import java.util.Map;

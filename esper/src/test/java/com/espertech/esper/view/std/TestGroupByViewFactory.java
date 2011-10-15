@@ -47,12 +47,12 @@ public class TestGroupByViewFactory extends TestCase
         factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(new Object[] {"string", "longPrimitive"}));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
         assertFalse(factory.canReuse(new FirstElementView()));
-        assertFalse(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodesBean("string"), null)));
-        assertTrue(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodesBean("string", "longPrimitive"), null)));
+        assertFalse(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("string"), null)));
+        assertTrue(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("string", "longPrimitive"), null)));
 
         factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(new Object[] {SupportExprNodeFactory.makeIdentNodesBean("string", "longPrimitive")}));
-        assertFalse(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodesBean("string"), null)));
-        assertTrue(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodesBean("string", "longPrimitive"), null)));
+        assertFalse(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("string"), null)));
+        assertTrue(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("string", "longPrimitive"), null)));
     }
 
     public void testAttaches() throws Exception
@@ -84,7 +84,7 @@ public class TestGroupByViewFactory extends TestCase
         GroupByViewFactory factory = new GroupByViewFactory();
         factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(params));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
-        GroupByView view = (GroupByView) factory.makeView(SupportStatementContextFactory.makeContext());
+        GroupByView view = (GroupByView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldNames[0], view.getCriteriaExpressions()[0].toExpressionString());
     }
 }

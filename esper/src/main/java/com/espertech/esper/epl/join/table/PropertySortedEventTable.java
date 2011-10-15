@@ -10,13 +10,11 @@ package com.espertech.esper.epl.join.table;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.SuperIterator;
 import com.espertech.esper.epl.join.exec.base.RangeIndexLookupValue;
 import com.espertech.esper.epl.join.exec.base.RangeIndexLookupValueEquals;
 import com.espertech.esper.epl.join.exec.base.RangeIndexLookupValueRange;
 import com.espertech.esper.epl.join.plan.QueryGraphRangeEnum;
-import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.filter.Range;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,11 +28,6 @@ import java.util.*;
 public class PropertySortedEventTable implements EventTable
 {
     protected final int streamNum;
-    protected final String propertyName;
-
-    /**
-     * Getters for properties.
-     */
     protected final EventPropertyGetter propertyGetter;
 
     /**
@@ -53,13 +46,11 @@ public class PropertySortedEventTable implements EventTable
     /**
      * Ctor.
      * @param streamNum - the stream number that is indexed
-     * @param eventType - types of events indexed
      */
-    public PropertySortedEventTable(int streamNum, EventType eventType, String propertyName)
+    public PropertySortedEventTable(int streamNum, EventPropertyGetter propertyGetter)
     {
         this.streamNum = streamNum;
-        this.propertyName = propertyName;
-        propertyGetter = EventBeanUtility.getAssertPropertyGetter(eventType, propertyName);
+        this.propertyGetter = propertyGetter;
         propertyIndex = new TreeMap<Object, Set<EventBean>>();
         nullKeyedValues = new LinkedHashSet<EventBean>();
     }
@@ -375,15 +366,10 @@ public class PropertySortedEventTable implements EventTable
         propertyIndex.clear();
     }
 
-    public String toString()
-    {
-        return toQueryPlan();
-    }
-
     public String toQueryPlan() {
         return this.getClass().getSimpleName() +
                 " streamNum=" + streamNum +
-                " propertyName=" + propertyName;
+                " propertyGetter=" + propertyGetter;
     }
 
     private static Log log = LogFactory.getLog(PropertySortedEventTable.class);

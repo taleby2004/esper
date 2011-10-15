@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.table;
 
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,19 +17,12 @@ public class PropertySortedEventTableCoerced extends PropertySortedEventTable
 {
     private Class coercionType;
 
-   /**
-     * Ctor.
-     * @param streamNum - the stream number that is indexed
-     * @param eventType - types of events indexed
-     * @param propertyName - property names to use for indexing
-     * @param coercionType - property types
-     */
-    public PropertySortedEventTableCoerced(int streamNum, EventType eventType, String propertyName, Class coercionType)
-    {
-        super(streamNum, eventType, propertyName);
+    public PropertySortedEventTableCoerced(int streamNum, EventPropertyGetter propertyGetter, Class coercionType) {
+        super(streamNum, propertyGetter);
         this.coercionType = coercionType;
     }
 
+    @Override
     protected Object coerce(Object value) {
         if (!value.getClass().equals(coercionType))
         {
@@ -45,7 +38,7 @@ public class PropertySortedEventTableCoerced extends PropertySortedEventTable
     {
         return "PropertySortedEventTableCoerced" +
                 " streamNum=" + streamNum +
-                " propertyName=" + propertyName +
+                " propertyGetter=" + propertyGetter +
                 " coercionType=" + coercionType;
     }
 

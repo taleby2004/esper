@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.util.MetaDefItem;
 
@@ -24,7 +25,7 @@ public interface FilterSpecParamRangeValue extends MetaDefItem, Serializable
      * @param matchedEvents is the prior results
      * @return filter value
      */
-    public Object getFilterValue(MatchedEventMap matchedEvents);
+    public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * Returns a hash code for use in computing a filter range hash code that matches

@@ -13,9 +13,10 @@ package com.espertech.esper.view.internal;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.InternalEventRouter;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.EPStatementHandle;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
+import com.espertech.esper.core.service.InternalEventRouter;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -32,6 +33,7 @@ public class RouteResultViewHandlerFirst implements RouteResultViewHandler
     private final ExprEvaluator[] whereClauses;
     private final EventBean[] eventsPerStream = new EventBean[1];
     private final StatementContext statementContext;
+    private final ExprEvaluatorContextStatement exprEvaluatorContextStatement;
 
     /**
      * Ctor.
@@ -49,6 +51,7 @@ public class RouteResultViewHandlerFirst implements RouteResultViewHandler
         this.processors = processors;
         this.whereClauses = whereClauses;
         this.statementContext = statementContext;
+        this.exprEvaluatorContextStatement = new ExprEvaluatorContextStatement(statementContext);
     }
 
     public boolean handle(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
@@ -77,7 +80,7 @@ public class RouteResultViewHandlerFirst implements RouteResultViewHandler
             UniformPair<EventBean[]> result = processors[index].processViewResult(eventsPerStream, null, false);
             if ((result != null) && (result.getFirst() != null) && (result.getFirst().length > 0))
             {
-                internalEventRouter.route(result.getFirst()[0], epStatementHandle, statementContext.getInternalEventEngineRouteDest(), statementContext, isNamedWindowInsert[index]);
+                internalEventRouter.route(result.getFirst()[0], epStatementHandle, statementContext.getInternalEventEngineRouteDest(), exprEvaluatorContextStatement, isNamedWindowInsert[index]);
             }
         }
         

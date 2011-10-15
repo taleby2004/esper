@@ -11,10 +11,9 @@ package com.espertech.esper.epl.join.pollindex;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.join.table.EventTable;
-import com.espertech.esper.epl.join.table.PropertyIndexedEventTableSingle;
+import com.espertech.esper.epl.join.table.PropertyIndexedEventTableSingleFactory;
 import com.espertech.esper.epl.join.table.UnindexedEventTableList;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,7 +44,8 @@ public class PollResultIndexingStrategyIndexSingle implements PollResultIndexing
         {
             return new UnindexedEventTableList(pollResult);
         }
-        PropertyIndexedEventTableSingle table = new PropertyIndexedEventTableSingle(streamNum, eventType, propertyName);
+        PropertyIndexedEventTableSingleFactory factory = new PropertyIndexedEventTableSingleFactory(streamNum, eventType, propertyName);
+        EventTable table = factory.makeEventTable();
         table.add(pollResult.toArray(new EventBean[pollResult.size()]));
         return table;
     }

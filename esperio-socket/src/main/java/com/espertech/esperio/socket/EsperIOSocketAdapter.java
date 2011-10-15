@@ -10,7 +10,7 @@ package com.espertech.esperio.socket;
 
 import com.espertech.esper.client.ConfigurationException;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esperio.socket.config.ConfigurationSocketAdapter;
 import com.espertech.esperio.socket.config.SocketConfig;
 import com.espertech.esperio.socket.core.EsperSocketService;

@@ -45,17 +45,4 @@ public class TestOutputConditionNull extends TestCase
     	condition.updateOutputCondition(0,0);
     	assertTrue(listener.getAndClearIsInvoked());
     }
-
-    public void testIncorrectUse()
-	{
-	    try
-	    {
-	    	condition = new OutputConditionNull(null);
-	    	fail();
-	    }
-	    catch (NullPointerException ex)
-	    {
-	    	// Expected exception
-	    }
-	}
 }

@@ -76,14 +76,14 @@ public class TestFilterParamIndexNotEquals extends TestCase
     private void verifyBooleanPrimitive(FilterParamIndexBase index, boolean testValue, int numExpected)
     {
         testBean.setBoolPrimitive(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }
 
     private void verifyString(FilterParamIndexBase index, String testValue, int numExpected)
     {
         testBean.setString(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }
 }

@@ -11,18 +11,18 @@
 
 package com.espertech.esper.support.filter;
 
-import java.util.Random;
-import java.util.Vector;
-import java.util.List;
-import java.util.LinkedList;
-
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.filter.*;
+import com.espertech.esper.support.util.ObjectReservationSingleton;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.filter.*;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.support.util.ObjectReservationSingleton;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.Vector;
 
 public class IndexTreeBuilderRunnable implements Runnable
 {
@@ -63,14 +63,14 @@ public class IndexTreeBuilderRunnable implements Runnable
         while(!ObjectReservationSingleton.getInstance().reserve(filterSpec));
 
         // Add expression
-        FilterValueSet filterValues = filterSpec.getValueSet(null);
+        FilterValueSet filterValues = filterSpec.getValueSet(null, null, null);
         FilterHandle filterCallback = new SupportFilterHandle();
         IndexTreeBuilder treeBuilder = new IndexTreeBuilder();
         IndexTreePath pathAddedTo = treeBuilder.add(filterValues, filterCallback, topNode);
 
         // Fire a no-match
         List<FilterHandle> matches = new LinkedList<FilterHandle>();
-        topNode.matchEvent(unmatchedEvent, matches, null);
+        topNode.matchEvent(unmatchedEvent, matches);
 
         if (matches.size() != 0)
         {
@@ -80,7 +80,7 @@ public class IndexTreeBuilderRunnable implements Runnable
         }
 
         // Fire a match
-        topNode.matchEvent(matchedEvent, matches, null);
+        topNode.matchEvent(matchedEvent, matches);
 
         if (matches.size() != 1)
         {

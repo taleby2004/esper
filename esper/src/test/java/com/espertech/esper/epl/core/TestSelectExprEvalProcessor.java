@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.HashSet;
 
 import com.espertech.esper.epl.core.eval.SelectExprStreamDesc;
-import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
@@ -70,11 +69,11 @@ public class TestSelectExprEvalProcessor extends TestCase
     {
         EventBean[] events = new EventBean[] {makeEvent(8.8, 3, 4)};
 
-        EventBean result = methodOne.getEvaluator().process(events, true, false);
+        EventBean result = methodOne.getEvaluator().process(events, true, false, null);
         assertEquals(8.8d, result.get("resultOne"));
         assertEquals(12, result.get("resultTwo"));
 
-        result = methodTwo.getEvaluator().process(events, true, false);
+        result = methodTwo.getEvaluator().process(events, true, false, null);
         assertEquals(8.8d, result.get("a"));
         assertEquals(12, result.get("b"));
         assertSame(result.getEventType(), methodTwo.getEvaluator().getResultEventType());

@@ -11,9 +11,11 @@
 
 package com.espertech.esper.pattern.guard;
 
+import com.espertech.esper.pattern.PatternAgentInstanceContext;
+import com.espertech.esper.support.pattern.SupportPatternContextFactory;
 import junit.framework.TestCase;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.pattern.PatternContext;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.SchedulingServiceImpl;
@@ -30,10 +32,10 @@ public class TestTimerWithinOrMaxCountGuard extends TestCase {
     public void setUp()
     {
         StatementContext stmtContext = SupportStatementContextFactory.makeContext(new SchedulingServiceImpl(new TimeSourceServiceImpl()));
-        PatternContext context = new PatternContext(stmtContext, 1, null);
         scheduleService = stmtContext.getSchedulingService();
+        PatternAgentInstanceContext agentInstanceContext = SupportPatternContextFactory.makePatternAgentInstanceContext(scheduleService);
 
-        quitable = new SupportQuitable(context);
+        quitable = new SupportQuitable(agentInstanceContext);
 
         guard =  new TimerWithinOrMaxCountGuard(1000, 2, quitable);
     }

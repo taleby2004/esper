@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.epl.core.MethodResolutionService;
-
 /**
  * Sum for any number value.
  */
@@ -33,11 +31,5 @@ public class NumIntegerSumFilterAggregator extends NumIntegerSumAggregator
             return;
         }
         super.leave(paramArray[0]);
-    }
-
-    @Override
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeSumAggregator(null, true);
     }
 }

@@ -4059,7 +4059,7 @@ where asset.assetid = desc.assetid]]></programlisting>
 				</para>
 					
 				<para>				
-					The <literal>select</literal> clause and <emphasis>list_of_properties</emphasis> are optional. If present, they specify the column names and, implicitly by definition of the event type, the column types of events held by the named window. Expressions other then column names are not allowed in the <literal>select</literal> list of properties. Wildcards (*) and wildcards with additional properties can also be used.
+					The <literal>select</literal> clause and <emphasis>list_of_properties</emphasis> are optional. If present, they specify the column names and, implicitly by definition of the event type, the column types of events held by the named window. Expressions other than column names are not allowed in the <literal>select</literal> list of properties. Wildcards (*) and wildcards with additional properties can also be used.
 				</para>
 	
 				<para>				
@@ -4067,7 +4067,7 @@ where asset.assetid = desc.assetid]]></programlisting>
 				</para>
 	
 				<para>				
-					Finally, the <literal>insert</literal> clause and optional <emphasis>filter_expression</emphasis> are used if the new named windows is modelled after an existing named window, and the data of the existing named window is to be populated, upon time of creation of the new window, from the existing named window. The optional <emphasis>filter_expression</emphasis> can be used to exclude events.
+					Finally, the <literal>insert</literal> clause and optional <emphasis>filter_expression</emphasis> are used if the new named windows is modelled after an existing named window, and the data of the new named window is to be populated from the existing named window upon creation. The optional <emphasis>filter_expression</emphasis> can be used to exclude events.
 				</para>
 
 				<para>
@@ -5084,7 +5084,8 @@ select * from TickEventWindow where symbol='GE' and buyPrice between 10 and 20]]
 			<synopsis>create schema <emphasis>schema_name</emphasis> [as] (<emphasis>property_name</emphasis> <emphasis>property_type</emphasis> [,<emphasis>property_name</emphasis> <emphasis>property_type</emphasis> [,...])
   [inherits <emphasis>inherited_event_type</emphasis>[, <emphasis>inherited_event_type</emphasis>] [,...]]
   [starttimestamp <emphasis>timestamp_property_name</emphasis>]
-  [endtimestamp <emphasis>timestamp_property_name</emphasis>]</synopsis>
+  [endtimestamp <emphasis>timestamp_property_name</emphasis>]
+  [copyfrom <emphasis>copy_type_name</emphasis> [, <emphasis>copy_type_name</emphasis>] [,...]]</synopsis>
 
 			<para>				
 				The <emphasis>property_name</emphasis> is an identifier providing the event property name. The <emphasis>property_type</emphasis> is also required for each property. Valid property types are listed in <xref linkend="variable_create"/>
@@ -5124,6 +5125,10 @@ select * from TickEventWindow where symbol='GE' and buyPrice between 10 and 20]]
 			</para>
 
 			<para>
+				The optional <literal>copyfrom</literal> keyword is followed by a comma-separate list of event type names. For each event type listed, the engine looks up that type and adds all event property definitions to the newly-defined type, in addition to those listed explicitly (if any).				
+			</para>
+
+			<para>
 				A few example event type declarations follow:
 			</para>
 			<programlisting><![CDATA[// Declare type SecurityEvent
@@ -5141,7 +5146,45 @@ create schema WebPageVisitEvent(userId String) inherits PageHitEvent
 
 // Declare a type with start and end timestamp (i.e. event with duration).
 create schema RoboticArmMovement (robotId string, startts long, endts long) 
-  starttimestamp startts endtimestamp endts]]></programlisting>	
+  starttimestamp startts endtimestamp endts
+  
+// Create a type that has all properties of SecurityEvent plus a userName property
+create schema ExtendedSecurityEvent (userName string) copyfrom SecurityEvent
+
+// Create a type that has all properties of SecurityEvent 
+create schema SimilarSecurityEvent () copyfrom SecurityEvent
+
+// Create a type that has all properties of SecurityEvent and WebPageVisitEvent plus a userName property
+create schema WebSecurityEvent (userName string) copyfrom SecurityEvent, WebPageVisitEvent]]></programlisting>	
+  
+			  <para>
+				  To elaborate on the <literal>inherits</literal> keyword, consider the following two schema definitions:
+			  </para>
+			  <programlisting><![CDATA[create schema Foo as (string prop1)]]></programlisting>
+			  <programlisting><![CDATA[create schema Bar() inherits Foo]]></programlisting>
+
+			  <para>
+			      Following above schema,  Foo is a supertype or Bar and therefore any Bar event also fulfills Foo and matches where Foo matches. An EPL statement such as <literal>select * from Foo</literal> 
+			      returns any Foo event as well as any event that is a subtype of Foo such as all Bar events. When your EPL queries don't use any Foo events there is no cost, thus <literal>inherits</literal> is 
+			      generally an effective way to share properties between types.
+			  </para>
+
+			  <para>
+				  The optional <literal>copyfrom</literal> keyword is for defining a schema based on another schema. This keyword causes the engine to copy property definitions: There is no inherits, extends, supertype or subtype relationship between the types listed.
+			  </para>
+			  
+			  <para>
+				  To define an event type <literal>Bar</literal> that has the same properties as <literal>Foo</literal>:
+			  </para>
+			  <programlisting><![CDATA[create schema Foo as (string prop1)]]></programlisting>
+			  <programlisting><![CDATA[create schema Bar() copyfrom Foo]]></programlisting>
+			  
+			  <para>
+				  To define an event type <literal>Bar</literal> that has the same properties as <literal>Foo</literal> and that adds its own property <literal>prop2</literal>:
+			  </para>
+			  <programlisting><![CDATA[create schema Foo as (string prop1)]]></programlisting>
+			  <programlisting><![CDATA[create schema Bar(string prop2) copyfrom Foo]]></programlisting>
+
 		</sect2>
 
 		<sect2 id="epl_createschema_class" revision="1">
@@ -5150,12 +5193,18 @@ create schema RoboticArmMovement (robotId string, startts long, endts long)
 			<para>
 				When using Java classes as the underlying event representation your application may simply provide the class name:
 			</para>
-			<synopsis>create schema <emphasis>schema_name</emphasis> [as] <emphasis>class_name</emphasis></synopsis>
+			<synopsis>create schema <emphasis>schema_name</emphasis> [as] <emphasis>class_name</emphasis>
+  [starttimestamp <emphasis>timestamp_property_name</emphasis>]
+  [endtimestamp <emphasis>timestamp_property_name</emphasis>]</synopsis>
 
 			<para>				
 				The <emphasis>class_name</emphasis> must be a fully-qualified class name (including the package name) if imports are not configured. If you application configures imports then the simple class name suffices without package name.
 			</para>
 	
+			<para>
+				The optional <literal>starttimestamp</literal> and <literal>endtimestamp</literal> keywords have a meaning as defined earlier.
+			</para>
+
 			<para>
 				The next example statements declare an event type based on a class:
 			</para>

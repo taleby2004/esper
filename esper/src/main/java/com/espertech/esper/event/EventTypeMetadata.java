@@ -73,7 +73,7 @@ public class EventTypeMetadata
      * @param isConfigured whether the class was made known or is discovered
      * @return instance
      */
-    public static EventTypeMetadata createBeanType(String name, Class clazz, boolean isPreConfiguredStatic, boolean isPreConfigured, boolean isConfigured)
+    public static EventTypeMetadata createBeanType(String name, Class clazz, boolean isPreConfiguredStatic, boolean isPreConfigured, boolean isConfigured, TypeClass typeClass)
     {
         Set<String> secondaryNames = null;
         if (name == null)
@@ -88,7 +88,8 @@ public class EventTypeMetadata
                 secondaryNames.add(clazz.getName());
             }
         }
-        return new EventTypeMetadata(name, secondaryNames, TypeClass.APPLICATION, isPreConfiguredStatic, isPreConfigured, isConfigured, ApplicationType.CLASS, false);
+
+        return new EventTypeMetadata(name, secondaryNames, typeClass, isPreConfiguredStatic, isPreConfigured, isConfigured, ApplicationType.CLASS, false);
     }
 
     /**

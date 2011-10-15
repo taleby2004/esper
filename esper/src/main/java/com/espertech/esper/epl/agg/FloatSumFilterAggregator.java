@@ -34,10 +34,4 @@ public class FloatSumFilterAggregator extends FloatSumAggregator
         }
         super.leave(paramArray[0]);
     }
-
-    @Override
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeSumAggregator(Float.class, true);
-    }
 }

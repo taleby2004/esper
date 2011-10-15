@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.epl.agg.AggregationMethod;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.type.MinMaxTypeEnum;
 import com.espertech.esper.collection.SortedRefCountedSet;
@@ -74,10 +73,5 @@ public class MinMaxAggregator implements AggregationMethod
     public Class getValueType()
     {
         return returnType;
-    }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeMinMaxAggregator(minMaxTypeEnum, returnType, true, false);
     }
 }

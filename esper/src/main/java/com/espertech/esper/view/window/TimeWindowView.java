@@ -12,9 +12,9 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.TimeWindow;
 import com.espertech.esper.collection.ViewUpdatedCollection;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleAdjustmentCallback;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
@@ -42,7 +42,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
     private final long millisecondsBeforeExpiry;
     private final TimeWindow timeWindow;
     private final ViewUpdatedCollection viewUpdatedCollection;
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final ScheduleSlot scheduleSlot;
     private final EPStatementHandleCallback handle;
 
@@ -51,19 +51,16 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
      * @param millisecondsBeforeExpiry is the number of milliseconds before events gets pushed
      * out of the timeWindow as oldData in the update method.
      * @param viewUpdatedCollection is a collection the view must update when receiving events
-     * @param statementContext is required view services
      * @param timeWindowViewFactory for copying the view in a group-by
-     * @param isRemoveStreamHandling flag to indicate that the view must handle the removed events from a parent view
      */
-    public TimeWindowView(StatementContext statementContext, TimeWindowViewFactory timeWindowViewFactory, long millisecondsBeforeExpiry, ViewUpdatedCollection viewUpdatedCollection,
-                          boolean isRemoveStreamHandling)
+    public TimeWindowView(AgentInstanceViewFactoryChainContext agentInstanceContext, TimeWindowViewFactory timeWindowViewFactory, long millisecondsBeforeExpiry, ViewUpdatedCollection viewUpdatedCollection)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.timeWindowViewFactory = timeWindowViewFactory;
         this.millisecondsBeforeExpiry = millisecondsBeforeExpiry;
         this.viewUpdatedCollection = viewUpdatedCollection;
-        this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
-        this.timeWindow = new TimeWindow(isRemoveStreamHandling);
+        this.scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
+        this.timeWindow = new TimeWindow(agentInstanceContext.isRemoveStream());
 
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
@@ -71,9 +68,9 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
                 TimeWindowView.this.expire();
             }
         };
-        this.handle = new EPStatementHandleCallback(statementContext.getEpStatementHandle(), callback);
+        this.handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
 
-        statementContext.getScheduleAdjustmentService().addCallback(this);
+        agentInstanceContext.getStatementContext().getScheduleAdjustmentService().addCallback(this);
     }
 
     public void adjust(long delta)
@@ -81,9 +78,9 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
         timeWindow.adjust(delta);
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return timeWindowViewFactory.makeView(statementContext);
+        return timeWindowViewFactory.makeView(agentInstanceContext);
     }
 
     /**
@@ -111,7 +108,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        long timestamp = statementContext.getSchedulingService().getTime();
+        long timestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
 
         if (oldData != null)
         {
@@ -156,7 +153,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
      */
     protected final void expire()
     {
-        long expireBeforeTimestamp = statementContext.getSchedulingService().getTime() - millisecondsBeforeExpiry + 1;
+        long expireBeforeTimestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime() - millisecondsBeforeExpiry + 1;
 
         // Remove from the timeWindow any events that have an older or timestamp then the given timestamp
         // The window extends from X to (X - millisecondsBeforeExpiry + 1)
@@ -182,14 +179,14 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
             return;
         }
         Long oldestTimestamp = timeWindow.getOldestTimestamp();
-        long currentTimestamp = statementContext.getSchedulingService().getTime();
+        long currentTimestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         long scheduleMillisec = millisecondsBeforeExpiry - (currentTimestamp - oldestTimestamp);
         scheduleCallback(scheduleMillisec);
     }
 
     private void scheduleCallback(long msecAfterCurrentTime)
     {
-        statementContext.getSchedulingService().add(msecAfterCurrentTime, handle, scheduleSlot);
+        agentInstanceContext.getStatementContext().getSchedulingService().add(msecAfterCurrentTime, handle, scheduleSlot);
     }
 
     public final Iterator<EventBean> iterator()
@@ -214,9 +211,9 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
 
     public void stop() {
         if (handle != null) {
-            statementContext.getSchedulingService().remove(handle, scheduleSlot);
+            agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
-        statementContext.getScheduleAdjustmentService().removeCallback(this);
+        agentInstanceContext.getStatementContext().getScheduleAdjustmentService().removeCallback(this);
     }
 
     private static final Log log = LogFactory.getLog(TimeWindowView.class);

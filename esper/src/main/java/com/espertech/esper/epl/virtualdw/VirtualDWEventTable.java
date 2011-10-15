@@ -57,4 +57,8 @@ public class VirtualDWEventTable implements EventTable
     public List<VirtualDataWindowLookupFieldDesc> getBtreeAccess() {
         return btreeAccess;
     }
+
+    public EventTable copyShallow() {
+        throw new UnsupportedOperationException();
+    }
 }

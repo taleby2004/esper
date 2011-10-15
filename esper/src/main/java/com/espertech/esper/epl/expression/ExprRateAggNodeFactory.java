@@ -32,14 +32,17 @@ public class ExprRateAggNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
         if (isEver) {
-            return methodResolutionService.makeRateEverAggregator(intervalMSec);
+            return methodResolutionService.makeRateEverAggregator(agentInstanceIds, groupId, aggregationId, intervalMSec);
         }
         else {
-            return methodResolutionService.makeRateAggregator();
+            return methodResolutionService.makeRateAggregator(agentInstanceIds, groupId, aggregationId);
         }
+    }
+
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
     }
 
     public AggregationAccessor getAccessor()

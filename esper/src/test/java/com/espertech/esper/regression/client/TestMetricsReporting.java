@@ -97,6 +97,9 @@ public class TestMetricsReporting extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
         EventBean[] received = ArrayHandlingUtil.reorder("statementName", listener.getNewDataListFlattened());
+        for (EventBean event : received) {
+            System.out.println(event.get("statementName") + " = " + event.get("numInput"));
+        }
         ArrayAssertionUtil.assertPropsPerRow(received, fields, new Object[][] {{"A", 2L}, {"B1", 1L}, {"B2", 1L}, {"C", 2L}, {"D", 2L}, {"M", 1L}, {"W", 1L}});
 
         /* Comment-in for printout.

@@ -13,7 +13,7 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.join.base.HistoricalIndexLookupStrategy;
-import com.espertech.esper.epl.join.base.JoinSetComposerFactoryImpl;
+import com.espertech.esper.epl.join.base.JoinSetComposerPrototypeFactory;
 import com.espertech.esper.epl.join.pollindex.PollResultIndexingStrategy;
 import com.espertech.esper.epl.join.plan.QueryGraph;
 import com.espertech.esper.epl.join.plan.QueryGraphValue;
@@ -73,7 +73,7 @@ public class HistoricalStreamIndexList
         // If there is only a single polling stream, then build a single index
         if (pollingStreams.size() == 1)
         {
-            return JoinSetComposerFactoryImpl.determineIndexing(queryGraph, typesPerStream[historicalStreamNum], typesPerStream[streamViewStreamNum], historicalStreamNum, streamViewStreamNum);
+            return JoinSetComposerPrototypeFactory.determineIndexing(queryGraph, typesPerStream[historicalStreamNum], typesPerStream[streamViewStreamNum], historicalStreamNum, streamViewStreamNum);
         }
 
         // If there are multiple polling streams, determine if a single index is appropriate.
@@ -116,7 +116,7 @@ public class HistoricalStreamIndexList
                 for (Map.Entry<HistoricalStreamIndexDesc, List<Integer>> desc : indexesUsedByStreams.entrySet())
                 {
                     int sampleStreamViewStreamNum = desc.getValue().get(0);
-                    indexingStrategies[count] = JoinSetComposerFactoryImpl.determineIndexing(queryGraph, typesPerStream[historicalStreamNum], typesPerStream[sampleStreamViewStreamNum], historicalStreamNum, sampleStreamViewStreamNum).getSecond();
+                    indexingStrategies[count] = JoinSetComposerPrototypeFactory.determineIndexing(queryGraph, typesPerStream[historicalStreamNum], typesPerStream[sampleStreamViewStreamNum], historicalStreamNum, sampleStreamViewStreamNum).getSecond();
                     count++;
                 }
 
@@ -149,7 +149,7 @@ public class HistoricalStreamIndexList
         // there is one type of index
         if (indexesUsedByStreams.size() == 1)
         {
-            return JoinSetComposerFactoryImpl.determineIndexing(queryGraph, typesPerStream[historicalStreamNum], typesPerStream[streamViewStreamNum], historicalStreamNum, streamViewStreamNum);
+            return JoinSetComposerPrototypeFactory.determineIndexing(queryGraph, typesPerStream[historicalStreamNum], typesPerStream[streamViewStreamNum], historicalStreamNum, streamViewStreamNum);
         }
 
         // determine which index number the polling stream must use
@@ -170,7 +170,7 @@ public class HistoricalStreamIndexList
 
         // Use one of the indexes built by the master index and a lookup strategy
         final int indexNumber = indexUsed;
-        final HistoricalIndexLookupStrategy innerLookupStrategy = JoinSetComposerFactoryImpl.determineIndexing(queryGraph, typesPerStream[historicalStreamNum], typesPerStream[streamViewStreamNum], historicalStreamNum, streamViewStreamNum).getFirst();
+        final HistoricalIndexLookupStrategy innerLookupStrategy = JoinSetComposerPrototypeFactory.determineIndexing(queryGraph, typesPerStream[historicalStreamNum], typesPerStream[streamViewStreamNum], historicalStreamNum, streamViewStreamNum).getFirst();
 
         HistoricalIndexLookupStrategy lookupStrategy = new HistoricalIndexLookupStrategy()
         {

@@ -20,7 +20,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 import com.espertech.esper.schedule.*;
-import com.espertech.esper.core.EPStatementHandleCallback;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
 
 public class SupportSchedulingServiceImpl implements SchedulingService
 {

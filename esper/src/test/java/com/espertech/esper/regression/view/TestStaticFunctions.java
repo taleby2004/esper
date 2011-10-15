@@ -439,6 +439,7 @@ public class TestStaticFunctions extends TestCase
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addImport(SupportStaticMethodLib.class.getName());
         configuration.addEventType("Temperature", SupportTemperatureBean.class);
+        configuration.addPlugInSingleRowFunction("sleepme", SupportStaticMethodLib.class.getName(), "sleep", ConfigurationPlugInSingleRowFunction.ValueCache.ENABLED);
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
@@ -457,7 +458,7 @@ public class TestStaticFunctions extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
 
-        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        assertTrue("Failed perf test, delta=" + delta, delta < 2000);
         stmt.destroy();
 
         // test case with non-cache
@@ -477,6 +478,25 @@ public class TestStaticFunctions extends TestCase
         delta = endTime - startTime;
 
         assertTrue("Failed perf test, delta=" + delta, delta > 120);
+        stmt.destroy();
+        
+        // test plug-in single-row function
+        String textSingleRow = "select " +
+                "sleepme(100) as val" +
+                " from Temperature as temp";
+        EPStatement stmtSingleRow = epService.getEPAdministrator().createEPL(textSingleRow);
+        SupportUpdateListener listenerSingleRow = new SupportUpdateListener();
+        stmtSingleRow.addListener(listenerSingleRow);
+
+        startTime = System.currentTimeMillis();
+        for (int i = 0; i < 1000; i++)
+        {
+            epService.getEPRuntime().sendEvent(new SupportTemperatureBean("a"));
+        }
+        delta = System.currentTimeMillis() - startTime;
+
+        assertTrue("Failed perf test, delta=" + delta, delta < 1000);
+        stmtSingleRow.destroy();
     }
 
     public void testPerfConstantParametersNested()

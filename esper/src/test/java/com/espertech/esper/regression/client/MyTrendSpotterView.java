@@ -14,8 +14,8 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.SingleEventIterator;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
@@ -28,7 +28,7 @@ public class MyTrendSpotterView extends ViewSupport
 {
     private static final String PROPERTY_NAME = "trendcount";
 
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final EventType eventType;
     private final ExprNode expression;
     private final EventBean[] eventsPerStream = new EventBean[1];
@@ -42,18 +42,18 @@ public class MyTrendSpotterView extends ViewSupport
     /**
      * Constructor requires the name of the field to use in the parent view to compute a trend.
      * @param expression is the name of the field within the parent view to use to get numeric data points for this view
-     * @param statementContext contains required view services
+     * @param agentInstanceContext contains required view services
      */
-    public MyTrendSpotterView(StatementContext statementContext, ExprNode expression)
+    public MyTrendSpotterView(AgentInstanceViewFactoryChainContext agentInstanceContext, ExprNode expression)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.expression = expression;
-        eventType = createEventType(statementContext);
+        eventType = createEventType(agentInstanceContext.getStatementContext());
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView(AgentInstanceViewFactoryChainContext agentInstanceContext)
     {
-        return new MyTrendSpotterView(statementContext, expression);
+        return new MyTrendSpotterView(agentInstanceContext, expression);
     }
 
     /**
@@ -130,12 +130,11 @@ public class MyTrendSpotterView extends ViewSupport
     {
         Map<String, Object> result = new HashMap<String, Object>();
         result.put(PROPERTY_NAME, trendcount);
-        return statementContext.getEventAdapterService().adaptorForTypedMap(result, eventType);
+        return agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(result, eventType);
     }
 
     /**
      * Creates the event type for this view.
-     * @param statementContext is the event adapter service
      * @return event type of view
      */
     protected static EventType createEventType(StatementContext statementContext)

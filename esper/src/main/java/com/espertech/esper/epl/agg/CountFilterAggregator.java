@@ -46,11 +46,6 @@ public class CountFilterAggregator implements AggregationMethod
         return Long.class;
     }
 
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeCountAggregator(false, true);
-    }
-
     private boolean checkPass(Object object) {
         Boolean first = (Boolean) object;
         if (first != null) {

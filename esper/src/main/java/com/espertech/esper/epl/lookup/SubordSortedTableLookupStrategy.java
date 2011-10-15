@@ -11,7 +11,6 @@ package com.espertech.esper.epl.lookup;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.join.exec.sorted.SortedAccessStrategy;
-import com.espertech.esper.epl.join.exec.sorted.SortedAccessStrategyFactory;
 import com.espertech.esper.epl.join.table.PropertySortedEventTable;
 
 import java.util.Collection;
@@ -21,24 +20,16 @@ import java.util.Collection;
  */
 public class SubordSortedTableLookupStrategy implements SubordTableLookupStrategy
 {
-    private final SubordPropRangeKey rangeKey;
+    protected final SortedAccessStrategy strategy;
 
     /**
      * Index to look up in.
      */
     protected final PropertySortedEventTable index;
 
-    protected final SortedAccessStrategy strategy;
-
-    /**
-     * Ctor.
-     * @param index is the table carrying the data to lookup into
-     */
-    public SubordSortedTableLookupStrategy(boolean isNWOnTrigger, int numStreams, SubordPropRangeKey rangeKey, PropertySortedEventTable index)
-    {
-        this.rangeKey = rangeKey;
+    public SubordSortedTableLookupStrategy(SortedAccessStrategy strategy, PropertySortedEventTable index) {
+        this.strategy = strategy;
         this.index = index;
-        this.strategy = SortedAccessStrategyFactory.make(isNWOnTrigger, -1, numStreams, rangeKey);
     }
 
     public Collection<EventBean> lookup(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
@@ -49,12 +40,7 @@ public class SubordSortedTableLookupStrategy implements SubordTableLookupStrateg
         return null;
     }
 
-    public String toString()
-    {
-        return toQueryPlan();
-    }
-
     public String toQueryPlan() {
-        return this.getClass().getSimpleName() + " range " + rangeKey.toQueryPlan();
+        return this.getClass().getSimpleName();
     }
 }

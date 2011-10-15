@@ -11,7 +11,7 @@ package com.espertech.esper.view.stat;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.SingleEventIterator;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.event.EventAdapterService;
@@ -39,7 +39,8 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
     /**
      * Services required by implementing classes.
      */
-    protected final StatementContext statementContext;
+    protected final AgentInstanceContext agentInstanceContext;
+
     /**
      * Add tional properties.
      */
@@ -68,18 +69,18 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
      * Constructor requires the name of the two fields to use in the parent view to compute the statistics.
      * @param expressionX is the expression to get the X values from
      * @param expressionY is the expression to get the Y values from
-     * @param statementContext contains required view services
+     * @param agentInstanceContext contains required view services
      * @param eventType type of event
      * @param additionalProps additional props
      */
-    public BaseBivariateStatisticsView(StatementContext statementContext,
+    public BaseBivariateStatisticsView(AgentInstanceContext agentInstanceContext,
                                        ExprNode expressionX,
                                        ExprNode expressionY,
                                        EventType eventType,
                                        StatViewAdditionalProps additionalProps
                                        )
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.expressionX = expressionX;
         this.expressionXEval = expressionX.getExprEvaluator();
         this.expressionY = expressionY;
@@ -96,7 +97,7 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
         {
             if (this.hasViews())
             {
-                oldValues = populateMap(statisticsBean, statementContext.getEventAdapterService(), eventType, additionalProps, null);
+                oldValues = populateMap(statisticsBean, agentInstanceContext.getStatementContext().getEventAdapterService(), eventType, additionalProps, null);
             }
         }
 
@@ -106,8 +107,8 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
             for (int i = 0; i < newData.length; i++)
             {
                 eventsPerStream[0] = newData[i];
-                Number xnum = (Number) expressionXEval.evaluate(eventsPerStream, true, statementContext);
-                Number ynum = (Number) expressionYEval.evaluate(eventsPerStream, true, statementContext);
+                Number xnum = (Number) expressionXEval.evaluate(eventsPerStream, true, agentInstanceContext);
+                Number ynum = (Number) expressionYEval.evaluate(eventsPerStream, true, agentInstanceContext);
                 if (xnum != null && ynum != null) {
                     double X = xnum.doubleValue();
                     double Y = ynum.doubleValue();
@@ -120,7 +121,7 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
                     lastValuesEventNew = new Object[additionalProps.getAdditionalExpr().length];
                 }
                 for (int val = 0; val < additionalProps.getAdditionalExpr().length; val++) {
-                    lastValuesEventNew[val] = additionalProps.getAdditionalExpr()[val].evaluate(eventsPerStream, true, statementContext);
+                    lastValuesEventNew[val] = additionalProps.getAdditionalExpr()[val].evaluate(eventsPerStream, true, agentInstanceContext);
                 }
             }
         }
@@ -131,8 +132,8 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
             for (int i = 0; i < oldData.length; i++)
             {
                 eventsPerStream[0] = oldData[i];
-                Number xnum = (Number) expressionXEval.evaluate(eventsPerStream, true, statementContext);
-                Number ynum = (Number) expressionYEval.evaluate(eventsPerStream, true, statementContext);
+                Number xnum = (Number) expressionXEval.evaluate(eventsPerStream, true, agentInstanceContext);
+                Number ynum = (Number) expressionYEval.evaluate(eventsPerStream, true, agentInstanceContext);
                 if (xnum != null && ynum != null) {
                     double X = xnum.doubleValue();
                     double Y = ynum.doubleValue();
@@ -144,7 +145,7 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
         // If there are child view, fireStatementStopped update method
         if (this.hasViews())
         {
-            EventBean newDataMap = populateMap(statisticsBean, statementContext.getEventAdapterService(), eventType, additionalProps, lastValuesEventNew);
+            EventBean newDataMap = populateMap(statisticsBean, agentInstanceContext.getStatementContext().getEventAdapterService(), eventType, additionalProps, lastValuesEventNew);
 
             if (lastNewEvent == null)
             {
@@ -162,7 +163,7 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
     public final Iterator<EventBean> iterator()
     {
         return new SingleEventIterator(populateMap(statisticsBean,
-                statementContext.getEventAdapterService(),
+                agentInstanceContext.getStatementContext().getEventAdapterService(),
                 eventType, additionalProps, lastValuesEventNew));
     }
 

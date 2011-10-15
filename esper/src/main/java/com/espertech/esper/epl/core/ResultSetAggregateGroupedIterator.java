@@ -84,7 +84,7 @@ public class ResultSetAggregateGroupedIterator implements Iterator<EventBean>
             eventsPerStream[0] = candidate;
 
             MultiKeyUntyped groupKey = resultSetProcessor.generateGroupKey(eventsPerStream, true);
-            aggregationService.setCurrentAccess(groupKey);
+            aggregationService.setCurrentAccess(groupKey, exprEvaluatorContext.getAgentInstanceIds());
 
             Boolean pass = true;
             if (resultSetProcessor.getOptionalHavingNode() != null)
@@ -96,7 +96,7 @@ public class ResultSetAggregateGroupedIterator implements Iterator<EventBean>
                 continue;
             }
 
-            nextResult = resultSetProcessor.getSelectExprProcessor().process(eventsPerStream, true, true);
+            nextResult = resultSetProcessor.getSelectExprProcessor().process(eventsPerStream, true, true, exprEvaluatorContext);
 
             break;
         }

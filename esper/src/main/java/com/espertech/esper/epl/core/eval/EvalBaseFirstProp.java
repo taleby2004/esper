@@ -34,10 +34,9 @@ public abstract class EvalBaseFirstProp implements SelectExprProcessor {
 
     public abstract EventBean processFirstCol(Object result);
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
         ExprEvaluator[] expressionNodes = selectExprContext.getExpressionNodes();
-        ExprEvaluatorContext exprEvaluatorContext = selectExprContext.getExprEvaluatorContext();
 
         Object first = expressionNodes[0].evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         return processFirstCol(first);

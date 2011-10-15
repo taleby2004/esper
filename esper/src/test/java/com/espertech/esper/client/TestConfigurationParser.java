@@ -68,6 +68,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(null, config.getEngineDefaults().getThreading().getThreadPoolOutboundCapacity());
         assertEquals(null, config.getEngineDefaults().getThreading().getThreadPoolRouteExecCapacity());
         assertEquals(null, config.getEngineDefaults().getThreading().getThreadPoolTimerExecCapacity());
+        assertFalse(config.getEngineDefaults().getThreading().isEngineFairlock());
 
         assertEquals(Configuration.PropertyResolutionStyle.CASE_SENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
         assertEquals(ConfigurationEventTypeLegacy.AccessorStyle.JAVABEAN, config.getEngineDefaults().getEventMeta().getDefaultAccessorStyle());
@@ -79,9 +80,12 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getLogging().isEnableQueryPlan());
         assertFalse(config.getEngineDefaults().getLogging().isEnableJDBC());
         assertEquals(15000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
+        assertEquals(null, config.getEngineDefaults().getPatterns().getMaxSubexpressions());
+        assertEquals(true, config.getEngineDefaults().getPatterns().isMaxSubexpressionPreventStart());
         assertEquals(ConfigurationEngineDefaults.TimeSourceType.MILLI, config.getEngineDefaults().getTimeSource().getTimeSourceType());
         assertFalse(config.getEngineDefaults().getExecution().isPrioritized());
-        assertFalse(config.getEngineDefaults().getExecution().isFairlock());
+        assertFalse(config.getEngineDefaults().getExecution().isDisableLocking());
+        assertEquals(ConfigurationEngineDefaults.ThreadingProfile.NORMAL, config.getEngineDefaults().getExecution().getThreadingProfile());
 
         assertEquals(StreamSelector.ISTREAM_ONLY, config.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
         assertFalse(config.getEngineDefaults().getLanguage().isSortUsingCollator());
@@ -297,6 +301,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals("com.mycompany.MyMatrixSingleRowMethod1", pluginSingleRow.getFunctionClassName());
         assertEquals("func4", pluginSingleRow.getName());
         assertEquals("method2", pluginSingleRow.getFunctionMethodName());
+        assertEquals(ConfigurationPlugInSingleRowFunction.ValueCache.ENABLED, pluginSingleRow.getValueCache());
 
         // assert plug-in guard objects loaded
         assertEquals(4, config.getPlugInPatternObjects().size());
@@ -353,11 +358,15 @@ public class TestConfigurationParser extends TestCase
         assertTrue(config.getEngineDefaults().getLogging().isEnableQueryPlan());
         assertTrue(config.getEngineDefaults().getLogging().isEnableJDBC());
         assertEquals(30000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
+        assertEquals(3L, (long) config.getEngineDefaults().getPatterns().getMaxSubexpressions());
+        assertEquals(false, config.getEngineDefaults().getPatterns().isMaxSubexpressionPreventStart());
         assertEquals(StreamSelector.RSTREAM_ISTREAM_BOTH, config.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
 
         assertEquals(ConfigurationEngineDefaults.TimeSourceType.NANO, config.getEngineDefaults().getTimeSource().getTimeSourceType());
         assertTrue(config.getEngineDefaults().getExecution().isPrioritized());
         assertTrue(config.getEngineDefaults().getExecution().isFairlock());
+        assertTrue(config.getEngineDefaults().getExecution().isDisableLocking());
+        assertEquals(ConfigurationEngineDefaults.ThreadingProfile.LARGE, config.getEngineDefaults().getExecution().getThreadingProfile());
 
         ConfigurationMetricsReporting metrics = config.getEngineDefaults().getMetricsReporting();
         assertTrue(metrics.isEnableMetricsReporting());

@@ -93,13 +93,25 @@ public class PluggableObjectCollection
      */
     public void addObject(String namespace, String name, Class clazz, PluggableObjectType type)
     {
+        addObject(namespace, name, clazz, type, null);
+    }
+
+    /**
+     * Add a single object to the collection also adding additional configuration.
+     * @param namespace is the object's namespace
+     * @param name is the object's name
+     * @param clazz is the class the object resolves to
+     * @param type is the object type
+     */
+    public void addObject(String namespace, String name, Class clazz, PluggableObjectType type, Serializable configuration)
+    {
         Map<String, Pair<Class, PluggableObjectEntry>> namespaceMap = pluggables.get(namespace);
         if (namespaceMap == null)
         {
             namespaceMap = new HashMap<String, Pair<Class, PluggableObjectEntry>>();
             pluggables.put(namespace, namespaceMap);
         }
-        namespaceMap.put(name, new Pair<Class, PluggableObjectEntry>(clazz, new PluggableObjectEntry(type, null)));
+        namespaceMap.put(name, new Pair<Class, PluggableObjectEntry>(clazz, new PluggableObjectEntry(type, configuration)));
     }
 
     /**

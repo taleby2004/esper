@@ -8,10 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.guard;
 
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.pattern.PatternContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 
@@ -41,7 +40,7 @@ public class TimerWithinOrMaxCountGuard implements Guard, ScheduleHandleCallback
         this.msec = msec;
         this.numCountTo = numCountTo;
         this.quitable = quitable;
-        this.scheduleSlot = quitable.getContext().getScheduleBucket().allocateSlot();
+        this.scheduleSlot = quitable.getContext().getPatternContext().getScheduleBucket().allocateSlot();
     }
 
     public void startGuard() {
@@ -49,8 +48,8 @@ public class TimerWithinOrMaxCountGuard implements Guard, ScheduleHandleCallback
             throw new IllegalStateException("Timer already active");
         }
 
-        scheduleHandle = new EPStatementHandleCallback(quitable.getContext().getEpStatementHandle(), this);
-        quitable.getContext().getSchedulingService().add(msec, scheduleHandle, scheduleSlot);
+        scheduleHandle = new EPStatementHandleCallback(quitable.getContext().getAgentInstanceContext().getEpStatementAgentInstanceHandle(), this);
+        quitable.getContext().getPatternContext().getSchedulingService().add(msec, scheduleHandle, scheduleSlot);
         isTimerActive = true;
         counter = 0;
     }
@@ -79,7 +78,7 @@ public class TimerWithinOrMaxCountGuard implements Guard, ScheduleHandleCallback
 
     private void deactivateTimer() {
         if (scheduleHandle != null) {
-            quitable.getContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
+            quitable.getContext().getPatternContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
         }
         scheduleHandle = null;
         isTimerActive = false;

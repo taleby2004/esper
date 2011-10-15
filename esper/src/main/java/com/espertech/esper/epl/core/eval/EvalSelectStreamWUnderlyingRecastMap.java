@@ -14,6 +14,7 @@ package com.espertech.esper.epl.core.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.event.MappedEventBean;
 
 public class EvalSelectStreamWUnderlyingRecastMap implements SelectExprProcessor {
@@ -32,8 +33,8 @@ public class EvalSelectStreamWUnderlyingRecastMap implements SelectExprProcessor
         return resultType;
     }
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize) {
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
         MappedEventBean event = (MappedEventBean) eventsPerStream[underlyingStreamNumber];
-        return selectExprContext.getEventAdapterService().adaptorForTypedMap(event.getProperties(), resultType);
+        return selectExprContext.getEventAdapterService().adapterForTypedMap(event.getProperties(), resultType);
     }
 }

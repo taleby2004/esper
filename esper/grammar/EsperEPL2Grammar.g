@@ -132,6 +132,10 @@ tokens
 	MATCHED='matched';
 	EXPRESSIONDECL='expression';
 	NEWKW='new';
+	START='start';
+	CONTEXT='context';
+	INITIATED='initiated';
+	TERMINATED='terminated';
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -199,6 +203,7 @@ tokens
 	CRONTAB_LIMIT_EXPR;
 	CRONTAB_LIMIT_EXPR_PARAM;
 	WHEN_LIMIT_EXPR;
+	TERM_LIMIT_EXPR;
 	INSERTINTO_EXPR;
 	EXPRCOL;
 	INDEXCOL;
@@ -281,6 +286,13 @@ tokens
 	MERGE_DEL;
 	NEW_ITEM;
    	AGG_FILTER_EXPR;
+   	CREATE_CTX;
+   	CREATE_CTX_FIXED;
+   	CREATE_CTX_PART;
+   	CREATE_CTX_CAT;
+   	CREATE_CTX_INIT;
+   	CREATE_CTX_CATITEM;
+   	PARTITIONITEM;
 	
    	INT_TYPE;
    	LONG_TYPE;
@@ -303,7 +315,6 @@ tokens
    	MATCHREC_DEFINE_ITEM;
    	MATCHREC_MEASURES;
    	MATCHREC_MEASURE_ITEM;
-   	MATCHREC_PARTITION;
 }
 
 @header {
@@ -535,6 +546,8 @@ tokens
 	parserTokenParaphases.put(WHILE, "'while'");
 	parserTokenParaphases.put(MERGE, "'merge'");
 	parserTokenParaphases.put(MATCHED, "'matched'");
+	parserTokenParaphases.put(CONTEXT, "'context'");
+	parserTokenParaphases.put(START, "'start'");
 
 	parserKeywordSet = new java.util.TreeSet<String>(parserTokenParaphases.values());
     }
@@ -656,13 +669,20 @@ elementValueArrayEnum
 // EPL expression
 //----------------------------------------------------------------------------
 eplExpression 
-	:	(selectExpr
+	:	contextExpr? 
+		(selectExpr
 	|	createWindowExpr
 	|	createIndexExpr
 	|	createVariableExpr
 	|	createSchemaExpr
+	|	createContextExpr
 	|	onExpr
 	|	updateExpr) forExpr?
+	;
+	
+contextExpr
+	:	CONTEXT i=IDENT
+		-> ^(CONTEXT $i)
 	;
 	
 selectExpr
@@ -872,9 +892,40 @@ createSchemaExpr
 			variantList
 		  |   	LPAREN createColumnList? RPAREN 
 		  ) createSchemaQual*		  
-		-> {$keyword != null}? ^(CREATE_SCHEMA_EXPR $name variantList ^(CREATE_SCHEMA_EXPR_VAR $keyword) createSchemaQual*)
+		-> {$keyword != null}? ^(CREATE_SCHEMA_EXPR $name variantList? ^(CREATE_SCHEMA_EXPR_VAR $keyword) createSchemaQual*)
 		-> ^(CREATE_SCHEMA_EXPR $name variantList? createColumnList? createSchemaQual*)
 	;
+
+createContextExpr
+	:	CREATE CONTEXT name=IDENT AS? createContextDetail
+		-> ^(CREATE_CTX $name createContextDetail)
+	;
+
+createContextDetail
+	:	START crontabLimitParameterSet END crontabLimitParameterSet
+		-> ^(CREATE_CTX_FIXED crontabLimitParameterSet crontabLimitParameterSet)
+	|	PARTITION (BY)? createContextPartitionItem (COMMA createContextPartitionItem)* 
+		-> ^(CREATE_CTX_PART createContextPartitionItem+)
+	|	createContextGroupItem (COMMA createContextGroupItem)* FROM eventFilterExpression
+		-> ^(CREATE_CTX_CAT createContextGroupItem+ eventFilterExpression)
+	|	INITIATED (BY)? (createContextFilter | patternInclusionExpression) TERMINATED AFTER timePeriod
+		-> ^(CREATE_CTX_INIT createContextFilter? patternInclusionExpression? timePeriod)
+	;
+	
+createContextFilter
+	:	eventFilterExpression AS i=IDENT
+		-> ^(STREAM_EXPR eventFilterExpression $i)
+	;
+
+createContextPartitionItem
+	:	eventProperty ((AND_EXPR|COMMA) eventProperty)* FROM eventFilterExpression
+		-> ^(PARTITIONITEM eventFilterExpression eventProperty*)	
+	;
+	
+createContextGroupItem
+	:	GROUP expression AS i=IDENT
+		-> ^(CREATE_CTX_CATITEM expression $i?)		
+	;	
 
 createSchemaQual
 	:	i=IDENT columnList
@@ -1010,7 +1061,7 @@ matchRecog
 
 matchRecogPartitionBy
 	:	PARTITION BY expression (COMMA expression)*
-		-> ^(MATCHREC_PARTITION expression+)
+		-> ^(PARTITIONITEM expression+)
 	;		
 		
 matchRecogMeasures 
@@ -1148,12 +1199,16 @@ outputLimit
 		  |
 		  ( wh=WHEN expression (THEN onSetExpr)? )
 		  |
-	        )
-	    -> {$ev != null && $e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i? outputLimitAfter?)
-	    -> {$ev != null}? ^(TIMEPERIOD_LIMIT_EXPR $k? timePeriod outputLimitAfter?)		
-	    -> {$at != null}? ^(CRONTAB_LIMIT_EXPR $k? crontabLimitParameterSet outputLimitAfter?)		
-	    -> {$wh != null}? ^(WHEN_LIMIT_EXPR $k? expression onSetExpr? outputLimitAfter?)
-	    -> ^(AFTER_LIMIT_EXPR outputLimitAfter)
+		  ( t=WHEN TERMINATED )
+		  |
+	        ) 
+	       (AND_EXPR WHEN t1=TERMINATED)?
+	    -> {$ev != null && $e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i? outputLimitAfter? $t1?)
+	    -> {$ev != null}? ^(TIMEPERIOD_LIMIT_EXPR $k? timePeriod outputLimitAfter? $t1?)		
+	    -> {$at != null}? ^(CRONTAB_LIMIT_EXPR $k? crontabLimitParameterSet outputLimitAfter? $t1?)		
+	    -> {$wh != null}? ^(WHEN_LIMIT_EXPR $k? expression onSetExpr? outputLimitAfter? $t1?)
+	    -> {$t != null}? ^(TERM_LIMIT_EXPR $k? outputLimitAfter? $t1?)
+	    -> ^(AFTER_LIMIT_EXPR outputLimitAfter $t1?)
 	;	
 
 outputLimitAfter
@@ -1462,6 +1517,7 @@ funcIdent
 	| w=WHERE -> IDENT[$w]
 	| s=SET -> IDENT[$s]
 	| after=AFTER-> IDENT[$after]
+	| between=BETWEEN-> IDENT[$between]
 	;
 	
 libFunctionArgs
@@ -1821,6 +1877,7 @@ keywordAllowedIdent returns [String result]
 		|DEFINE { $result = "define"; }
 		|PARTITION { $result = "partition"; }
 		|MATCHES { $result = "matches"; }
+		|CONTEXT { $result = "context"; }
 	;
 		
 escapableStr returns [String result]

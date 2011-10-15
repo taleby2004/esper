@@ -10,7 +10,6 @@ package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKeyUntyped;
-import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
@@ -19,31 +18,15 @@ import java.util.Collection;
 /**
  * Implementation for handling aggregation without any grouping (no group-by).
  */
-public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBase
+public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBaseUngrouped
 {
     private final AggregationAccessorSlotPair[] accessors;
     private AggregationAccess[] accesses;
 
-    /**
-     * Ctor.
-     * @param evaluators - evaluate the sub-expression within the aggregate function (ie. sum(4*myNum))
-     * @param aggregators - collect the aggregation state that evaluators evaluate to
-     * @param methodResolutionService factory service for implementations
-     * @param accessors accessor definitions
-     * @param streams streams in join
-     * @param isJoin true for join, false for single-stream
-     */
-    public AggSvcGroupAllMixedAccessImpl(ExprEvaluator evaluators[],
-                                         AggregationMethod aggregators[],
-                                         MethodResolutionService methodResolutionService,
-                                         AggregationAccessorSlotPair[] accessors,
-                                         int[] streams,
-                                         boolean isJoin)
-    {
+    public AggSvcGroupAllMixedAccessImpl(ExprEvaluator evaluators[], AggregationMethod aggregators[], AggregationAccessorSlotPair[] accessors, AggregationAccess[] accesses) {
         super(evaluators, aggregators);
-
         this.accessors = accessors;
-        accesses = AggregationAccessUtil.getNewAccesses(isJoin, streams, methodResolutionService, null);
+        this.accesses = accesses;
     }
 
     public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext)
@@ -72,12 +55,12 @@ public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBase
         }        
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
     {
         // no action needed - this implementation does not group and the current row is the single group
     }
 
-    public Object getValue(int column)
+    public Object getValue(int column, int[] agentInstanceIds)
     {
         if (column < aggregators.length) {
             return aggregators[column].getValue();
@@ -88,7 +71,7 @@ public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBase
         }
     }
 
-    public Collection<EventBean> getCollection(int column) {
+    public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context) {
         if (column < aggregators.length) {
             return null;
         }
@@ -98,7 +81,7 @@ public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBase
         }
     }
 
-    public EventBean getEventBean(int column) {
+    public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         if (column < aggregators.length) {
             return null;
         }
@@ -108,7 +91,7 @@ public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBase
         }
     }
 
-    public void clearResults()
+    public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
     {
         for (AggregationAccess access : accesses) {
             access.clear();

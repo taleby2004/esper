@@ -34,7 +34,7 @@ public class TestUnivariateStatisticsView extends TestCase
     {
         // Set up sum view and a test child view
         EventType type = UnivariateStatisticsView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        myView = new UnivariateStatisticsView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null);
+        myView = new UnivariateStatisticsView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null);
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
@@ -87,7 +87,7 @@ public class TestUnivariateStatisticsView extends TestCase
 
     public void testCopyView() throws Exception
     {
-        UnivariateStatisticsView copied = (UnivariateStatisticsView) myView.cloneView(SupportStatementContextFactory.makeContext());
+        UnivariateStatisticsView copied = (UnivariateStatisticsView) myView.cloneView();
         assertTrue(myView.getFieldExpression().equals(copied.getFieldExpression()));
     }
 

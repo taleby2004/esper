@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprSubstitutionNode;
 import com.espertech.esper.util.MetaDefItem;
 
@@ -47,6 +46,8 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
     private ForClauseSpec forClauseSpec;
     private Map<Integer, List<ExprNode>> sqlParameters;
     private List<ExprSubstitutionNode> substitutionParameters;
+    private CreateContextDesc createContextDesc;
+    private String optionalContextName;
 
     private static final long serialVersionUID = 5390766716794133693L;
 
@@ -458,5 +459,21 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
 
     public void setExpressionDeclDesc(ExpressionDeclDesc expressionDeclDesc) {
         this.expressionDeclDesc = expressionDeclDesc;
+    }
+
+    public CreateContextDesc getCreateContextDesc() {
+        return createContextDesc;
+    }
+
+    public void setCreateContextDesc(CreateContextDesc createContextDesc) {
+        this.createContextDesc = createContextDesc;
+    }
+
+    public String getOptionalContextName() {
+        return optionalContextName;
+    }
+
+    public void setOptionalContextName(String optionalContextName) {
+        this.optionalContextName = optionalContextName;
     }
 }

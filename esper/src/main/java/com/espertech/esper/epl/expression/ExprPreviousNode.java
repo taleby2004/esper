@@ -10,12 +10,8 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.view.ViewCapDataWindowAccess;
-import com.espertech.esper.view.window.RandomAccessByIndexGetter;
-import com.espertech.esper.view.window.RelativeAccessByEventNIndexMap;
 
 import java.util.Collection;
 import java.util.Map;
@@ -23,7 +19,7 @@ import java.util.Map;
 /**
  * Represents the 'prev' previous event function in an expression node tree.
  */
-public class ExprPreviousNode extends ExprNodeBase implements ViewResourceCallback, ExprEvaluator, ExprEvaluatorEnumeration
+public class ExprPreviousNode extends ExprNodeBase implements ExprEvaluator, ExprEvaluatorEnumeration
 {
     private static final long serialVersionUID = 0L;
 
@@ -35,7 +31,7 @@ public class ExprPreviousNode extends ExprNodeBase implements ViewResourceCallba
     private boolean isConstantIndex;
     private transient EventType enumerationMethodType;
 
-    private transient ExprPreviousEval evaluator;
+    private transient ExprPreviousEvalStrategy evaluator;
 
     public ExprPreviousNode(PreviousType previousType)
     {
@@ -49,6 +45,26 @@ public class ExprPreviousNode extends ExprNodeBase implements ViewResourceCallba
 
     public Map<String, Object> getEventType() {
         return null;
+    }
+
+    public void setEvaluator(ExprPreviousEvalStrategy evaluator) {
+        this.evaluator = evaluator;
+    }
+
+    public int getStreamNumber() {
+        return streamNumber;
+    }
+
+    public Integer getConstantIndexNumber() {
+        return constantIndexNumber;
+    }
+
+    public boolean isConstantIndex() {
+        return isConstantIndex;
+    }
+
+    public Class getResultType() {
+        return resultType;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
@@ -127,12 +143,7 @@ public class ExprPreviousNode extends ExprNodeBase implements ViewResourceCallba
         {
             throw new ExprValidationException("Previous function cannot be used in this context");
         }
-
-        // Request a callback that provides the required access
-        if (!validationContext.getViewResourceDelegate().requestCapability(streamNumber, new ViewCapDataWindowAccess(), this))
-        {
-            throw new ExprValidationException("Previous function requires a single data window view onto the stream");
-        }
+        validationContext.getViewResourceDelegate().addPreviousRequest(this);
     }
 
     public PreviousType getPreviousType()
@@ -239,36 +250,5 @@ public class ExprPreviousNode extends ExprNodeBase implements ViewResourceCallba
         }
 
         return true;
-    }
-
-    public void setViewResource(Object resource)
-    {
-        RandomAccessByIndexGetter randomAccessGetter = null;
-        RelativeAccessByEventNIndexMap relativeAccessGetter = null;
-
-        if (resource instanceof RandomAccessByIndexGetter)
-        {
-            randomAccessGetter = (RandomAccessByIndexGetter) resource;
-        }
-        else if (resource instanceof RelativeAccessByEventNIndexMap)
-        {
-            relativeAccessGetter = (RelativeAccessByEventNIndexMap) resource;
-        }
-        else
-        {
-            throw new IllegalArgumentException("View resource " + resource.getClass() + " not recognized by expression node");
-        }
-
-        if (previousType == PreviousType.PREVWINDOW) {
-            evaluator = new ExprPreviousEvalWindow(streamNumber, this.getChildNodes().get(1).getExprEvaluator(), resultType.getComponentType(),
-                    randomAccessGetter, relativeAccessGetter);
-        }
-        else if (previousType == PreviousType.PREVCOUNT) {
-            evaluator = new ExprPreviousEvalCount(streamNumber, randomAccessGetter, relativeAccessGetter);
-        }
-        else {
-            evaluator = new ExprPreviousEvalPrev(streamNumber, this.getChildNodes().get(0).getExprEvaluator(), this.getChildNodes().get(1).getExprEvaluator(),
-                    randomAccessGetter, relativeAccessGetter, isConstantIndex, constantIndexNumber, previousType == PreviousType.PREVTAIL);
-        }
     }
 }

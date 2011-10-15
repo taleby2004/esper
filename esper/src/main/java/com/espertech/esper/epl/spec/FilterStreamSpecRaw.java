@@ -9,8 +9,8 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -115,7 +115,7 @@ public class FilterStreamSpecRaw extends StreamSpecBase implements StreamSpecRaw
 
         FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(eventType, eventName, rawFilterSpec.getFilterExpressions(), rawFilterSpec.getOptionalPropertyEvalSpec(),
                 null, null,  // no tags
-                streamTypeService, context.getMethodResolutionService(), context.getSchedulingService(), context.getVariableService(), context.getEventAdapterService(), context.getEngineURI(), this.getOptionalStreamName(), context, assignedTypeNumberStack);
+                streamTypeService, context.getMethodResolutionService(), context.getSchedulingService(), context.getVariableService(), context.getEventAdapterService(), context.getEngineURI(), this.getOptionalStreamName(), context, assignedTypeNumberStack, context.getContextDescriptor(), context.getConfigSnapshot());
 
         return new FilterStreamSpecCompiled(spec, this.getViewSpecs(), this.getOptionalStreamName(), this.getOptions());
     }

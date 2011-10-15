@@ -8,11 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
 
@@ -21,22 +20,12 @@ import java.util.List;
 /**
  * Factory for {@link LengthWindowView}.
  */
-public class LengthWindowViewFactory implements DataWindowViewFactory
+public class LengthWindowViewFactory implements DataWindowViewFactory, DataWindowViewWithPrevious
 {
     /**
      * Size of length window.
      */
     protected int size;
-
-    /**
-     * The access into the data window.
-     */
-    protected RandomAccessByIndexGetter randomAccessGetterImpl;
-
-    /**
-     * Flag to indicate that the view must handle the removed events from a parent view.
-     */
-    protected boolean isRemoveStreamHandling;
 
     private EventType eventType;
 
@@ -73,57 +62,20 @@ public class LengthWindowViewFactory implements DataWindowViewFactory
         this.eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
+    public Object makePreviousGetter() {
+        return new RandomAccessByIndexGetter();
+    }
+
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (viewCapability instanceof ViewCapDataWindowAccess)
+        IStreamRandomAccess randomAccess = ViewServiceHelper.getOptPreviousExprRandomAccess(agentInstanceViewFactoryContext);
+        if (agentInstanceViewFactoryContext.isRemoveStream())
         {
-            return true;
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
+            return new LengthWindowViewRStream(agentInstanceViewFactoryContext, this, size);
         }
         else
         {
-            return false;
-        }
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            isRemoveStreamHandling = true;
-            return;
-        }
-        if (randomAccessGetterImpl == null)
-        {
-            randomAccessGetterImpl = new RandomAccessByIndexGetter();
-        }
-        resourceCallback.setViewResource(randomAccessGetterImpl);
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        IStreamRandomAccess randomAccess = null;
-
-        if (randomAccessGetterImpl != null)
-        {
-            randomAccess = new IStreamRandomAccess(randomAccessGetterImpl);
-            randomAccessGetterImpl.updated(randomAccess);
-        }
-
-        if (isRemoveStreamHandling)
-        {
-            return new LengthWindowViewRStream(this, size);
-        }
-        else
-        {
-            return new LengthWindowView(this, size, randomAccess);
+            return new LengthWindowView(agentInstanceViewFactoryContext, this, size, randomAccess);
         }
     }
 
@@ -135,11 +87,6 @@ public class LengthWindowViewFactory implements DataWindowViewFactory
     public boolean canReuse(View view)
     {
         if (!(view instanceof LengthWindowView))
-        {
-            return false;
-        }
-
-        if (randomAccessGetterImpl != null)
         {
             return false;
         }

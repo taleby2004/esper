@@ -29,8 +29,8 @@ public class EvalInsertNative implements SelectExprProcessor {
         this.exprEvaluatorContext = exprEvaluatorContext;
     }
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize) {
-        return selectExprInsertEventBean.manufacture(eventsPerStream, isNewData, exprEvaluatorContext);
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
+        return selectExprInsertEventBean.manufacture(eventsPerStream, isNewData, this.exprEvaluatorContext);
     }
 
     public EventType getResultEventType() {

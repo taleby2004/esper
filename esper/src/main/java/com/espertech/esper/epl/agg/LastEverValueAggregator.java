@@ -49,9 +49,4 @@ public class LastEverValueAggregator implements AggregationMethod
     {
         return type;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeLastEverValueAggregator(type, false);
-    }
 }

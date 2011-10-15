@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.client.ConfigurationInformation;
+import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.variable.VariableService;
@@ -33,10 +34,12 @@ public class StatementSpecMapContext
     private final String engineURI;
     private final PatternNodeFactory patternNodeFactory;
     private final NamedWindowService namedWindowService;
+    private final ContextManagementService contextManagementService;
 
     private boolean hasVariables;
     private Set<String> variableNames;
     private Map<String, ExpressionDeclItem> expressionDeclarations;
+    private String contextName;
 
     /**
      * Ctor.
@@ -44,7 +47,7 @@ public class StatementSpecMapContext
      * @param variableService variable names
      * @param configuration the configuration
      */
-    public StatementSpecMapContext(EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI, PatternNodeFactory patternNodeFactory, NamedWindowService namedWindowService)
+    public StatementSpecMapContext(EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI, PatternNodeFactory patternNodeFactory, NamedWindowService namedWindowService, ContextManagementService contextManagementService)
     {
         this.engineImportService = engineImportService;
         this.variableService = variableService;
@@ -54,6 +57,7 @@ public class StatementSpecMapContext
         this.engineURI = engineURI;
         this.patternNodeFactory = patternNodeFactory;
         this.namedWindowService = namedWindowService;
+        this.contextManagementService = contextManagementService;
     }
 
     /**
@@ -136,5 +140,17 @@ public class StatementSpecMapContext
             expressionDeclarations = new HashMap<String, ExpressionDeclItem>();
         }
         expressionDeclarations.put(item.getName(), item);
+    }
+
+    public ContextManagementService getContextManagementService() {
+        return contextManagementService;
+    }
+
+    public String getContextName() {
+        return contextName;
+    }
+
+    public void setContextName(String contextName) {
+        this.contextName = contextName;
     }
 }

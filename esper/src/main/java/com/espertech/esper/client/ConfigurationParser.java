@@ -603,7 +603,12 @@ class ConfigurationParser {
         String name = element.getAttributes().getNamedItem("name").getTextContent();
         String functionClassName = element.getAttributes().getNamedItem("function-class").getTextContent();
         String functionMethodName = element.getAttributes().getNamedItem("function-method").getTextContent();
-        configuration.addPlugInSingleRowFunction(name, functionClassName, functionMethodName);
+        ConfigurationPlugInSingleRowFunction.ValueCache valueCache = ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED;
+        String valueCacheStr = getOptionalAttribute(element, "value-cache");
+        if (valueCacheStr != null) {
+            valueCache = ConfigurationPlugInSingleRowFunction.ValueCache.valueOf(valueCacheStr.toUpperCase());
+        }
+        configuration.addPlugInSingleRowFunction(name, functionClassName, functionMethodName, valueCache);
     }
 
     private static void handlePlugInPatternGuard(Configuration configuration, Element element)
@@ -918,6 +923,10 @@ class ConfigurationParser {
             {
                 handleDefaultsVariables(configuration, subElement);
             }
+            if (subElement.getNodeName().equals("patterns"))
+            {
+                handleDefaultsPatterns(configuration, subElement);
+            }
             if (subElement.getNodeName().equals("stream-selection"))
             {
                 handleDefaultsStreamSelection(configuration, subElement);
@@ -955,6 +964,13 @@ class ConfigurationParser {
 
     private static void handleDefaultsThreading(Configuration configuration, Element parentElement)
     {
+        String engineFairlockStr = getOptionalAttribute(parentElement, "engine-fairlock");
+        if (engineFairlockStr != null)
+        {
+            boolean isEngineFairlock = Boolean.parseBoolean(engineFairlockStr);
+            configuration.getEngineDefaults().getThreading().setEngineFairlock(isEngineFairlock);
+        }
+
         DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
         while (nodeIterator.hasNext())
         {
@@ -1122,6 +1138,26 @@ class ConfigurationParser {
                 String valueText = getRequiredAttribute(subElement, "value");
                 Long value = Long.parseLong(valueText);
                 configuration.getEngineDefaults().getVariables().setMsecVersionRelease(value);
+            }
+        }
+    }
+
+    private static void handleDefaultsPatterns(Configuration configuration, Element parentElement)
+    {
+        DOMElementIterator nodeIterator = new DOMElementIterator(parentElement.getChildNodes());
+        while (nodeIterator.hasNext())
+        {
+            Element subElement = nodeIterator.next();
+            if (subElement.getNodeName().equals("max-subexpression"))
+            {
+                String valueText = getRequiredAttribute(subElement, "value");
+                Long value = Long.parseLong(valueText);
+                configuration.getEngineDefaults().getPatterns().setMaxSubexpressions(value);
+
+                String preventText = getOptionalAttribute(subElement, "prevent-start");
+                if (preventText != null) {
+                    configuration.getEngineDefaults().getPatterns().setMaxSubexpressionPreventStart(Boolean.parseBoolean(preventText));
+                }
             }
         }
     }
@@ -1317,6 +1353,18 @@ class ConfigurationParser {
         {
             boolean isFairlock = Boolean.parseBoolean(fairlockStr);
             configuration.getEngineDefaults().getExecution().setFairlock(isFairlock);
+        }
+        String disableLockingStr = getOptionalAttribute(parentElement, "disable-locking");
+        if (disableLockingStr != null)
+        {
+            boolean isDisablelock = Boolean.parseBoolean(disableLockingStr);
+            configuration.getEngineDefaults().getExecution().setDisableLocking(isDisablelock);
+        }
+        String threadingProfileStr = getOptionalAttribute(parentElement, "threading-profile");
+        if (threadingProfileStr != null)
+        {
+            ConfigurationEngineDefaults.ThreadingProfile profile = ConfigurationEngineDefaults.ThreadingProfile.valueOf(threadingProfileStr.toUpperCase());
+            configuration.getEngineDefaults().getExecution().setThreadingProfile(profile);
         }
     }
 

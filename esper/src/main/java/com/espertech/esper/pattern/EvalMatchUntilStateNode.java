@@ -46,15 +46,15 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
 
         this.nodes = new HashMap<EvalStateNode, Integer>();
         this.beginState = beginState;
-        this.matchedEventArrays = (ArrayList<EventBean>[]) new ArrayList[evalMatchUntilNode.getTagsArrayed().length];
+        this.matchedEventArrays = (ArrayList<EventBean>[]) new ArrayList[evalMatchUntilNode.getFactoryNode().getTagsArrayed().length];
         this.evalMatchUntilNode = evalMatchUntilNode;
 
-        EvalNode childMatcher = evalMatchUntilNode.getChildNodes().get(0);
+        EvalNode childMatcher = evalMatchUntilNode.getChildNodeSub();
         stateMatcher = childMatcher.newState(this, beginState, null);
 
-        if (evalMatchUntilNode.getChildNodes().size() > 1)
+        if (evalMatchUntilNode.getChildNodeUntil() != null)
         {
-            EvalNode childUntil = evalMatchUntilNode.getChildNodes().get(1);
+            EvalNode childUntil = evalMatchUntilNode.getChildNodeUntil();
             stateUntil = childUntil.newState(this, beginState, null);
         }
     }
@@ -73,12 +73,12 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
             stateUntil.start();
         }
 
-        EventBean[] eventsPerStream = evalMatchUntilNode.getConvertor().convert(beginState);
-        if (evalMatchUntilNode.getLowerBounds() != null) {
-            lowerbounds = (Integer) evalMatchUntilNode.getLowerBounds().getExprEvaluator().evaluate(eventsPerStream, true, evalMatchUntilNode.getContext());
+        EventBean[] eventsPerStream = evalMatchUntilNode.getFactoryNode().getConvertor().convert(beginState);
+        if (evalMatchUntilNode.getFactoryNode().getLowerBounds() != null) {
+            lowerbounds = (Integer) evalMatchUntilNode.getFactoryNode().getLowerBounds().getExprEvaluator().evaluate(eventsPerStream, true, evalMatchUntilNode.getContext().getAgentInstanceContext());
         }
-        if (evalMatchUntilNode.getUpperBounds() != null) {
-            upperbounds = (Integer) evalMatchUntilNode.getUpperBounds().getExprEvaluator().evaluate(eventsPerStream, true, evalMatchUntilNode.getContext());
+        if (evalMatchUntilNode.getFactoryNode().getUpperBounds() != null) {
+            upperbounds = (Integer) evalMatchUntilNode.getFactoryNode().getUpperBounds().getExprEvaluator().evaluate(eventsPerStream, true, evalMatchUntilNode.getContext().getAgentInstanceContext());
         }
         if (upperbounds != null && lowerbounds != null) {
             if (upperbounds < lowerbounds) {
@@ -101,7 +101,7 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
             // Add the additional tagged events to the list for later posting
             isMatcher = true;
             numMatches++;
-            String[] tags = evalMatchUntilNode.getTagsArrayed();
+            String[] tags = evalMatchUntilNode.getFactoryNode().getTagsArrayed();
             for (int i = 0; i < tags.length; i++)
             {
                 Object event = matchEvent.getMatchingEventAsObject(tags[i]);
@@ -141,7 +141,7 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
             if ((isTightlyBound()) && (numMatches == lowerbounds))
             {
                 quit();
-                MatchedEventMap consolidated = consolidate(matchEvent, matchedEventArrays, evalMatchUntilNode.getTagsArrayed());
+                MatchedEventMap consolidated = consolidate(matchEvent, matchedEventArrays, evalMatchUntilNode.getFactoryNode().getTagsArrayed());
                 this.getParentEvaluator().evaluateTrue(consolidated, this, true);
             }
             else
@@ -154,7 +154,7 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
                 {
                     if (restart)
                     {
-                        EvalNode childMatcher = evalMatchUntilNode.getChildNodes().get(0);
+                        EvalNode childMatcher = evalMatchUntilNode.getChildNodeSub();
                         stateMatcher = childMatcher.newState(this, beginState, null);
                         stateMatcher.start();
                     }
@@ -175,7 +175,7 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
             quit();
 
             // consolidate multiple matched events into a single event
-            MatchedEventMap consolidated = consolidate(matchEvent, matchedEventArrays, evalMatchUntilNode.getTagsArrayed());
+            MatchedEventMap consolidated = consolidate(matchEvent, matchedEventArrays, evalMatchUntilNode.getFactoryNode().getTagsArrayed());
 
             if ((lowerbounds != null) && (numMatches < lowerbounds))
             {

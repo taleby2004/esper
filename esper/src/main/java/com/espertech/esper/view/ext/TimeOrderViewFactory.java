@@ -8,12 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.view.ext;
 
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
 import com.espertech.esper.view.window.RandomAccessByIndexGetter;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Factory for views for time-ordering events.
  */
-public class TimeOrderViewFactory implements DataWindowViewFactory
+public class TimeOrderViewFactory implements DataWindowViewFactory, DataWindowViewWithPrevious
 {
     private List<ExprNode> viewParameters;
 
@@ -36,16 +36,6 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
      * The interval to wait for newer events to arrive.
      */
     protected long intervalSize;
-
-    /**
-     * The access into the collection for use with 'previous'.
-     */
-    protected RandomAccessByIndexGetter randomAccessGetterImpl;
-
-    /**
-     * Indicates if the view must handle the remove stream of parent views.
-     */
-    protected boolean isRemoveStreamHandling;
 
     private EventType eventType;
 
@@ -70,7 +60,8 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
         }
         timestampExpression = validated[0];
 
-        Object parameter = ViewFactorySupport.evaluateAssertNoProperties("Externally-timed window", validated[1], 1, statementContext);
+        ExprEvaluatorContextStatement exprEvaluatorContext = new ExprEvaluatorContextStatement(statementContext);
+        Object parameter = ViewFactorySupport.evaluateAssertNoProperties("Externally-timed window", validated[1], 1, exprEvaluatorContext);
         if (!(parameter instanceof Number))
         {
             throw new ViewParameterException(errorMessage);
@@ -96,51 +87,14 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
         eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        if (viewCapability instanceof ViewCapDataWindowAccess)
-        {
-            return true;
-        }
-        else if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+    public Object makePreviousGetter() {
+        return new RandomAccessByIndexGetter();
     }
 
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            isRemoveStreamHandling = true;
-            return;
-        }
-        if (randomAccessGetterImpl == null)
-        {
-            randomAccessGetterImpl = new RandomAccessByIndexGetter();
-        }
-        resourceCallback.setViewResource(randomAccessGetterImpl);
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        IStreamTimeOrderRandomAccess sortedRandomAccess = null;
-
-        if (randomAccessGetterImpl != null)
-        {
-            sortedRandomAccess = new IStreamTimeOrderRandomAccess(randomAccessGetterImpl);
-            randomAccessGetterImpl.updated(sortedRandomAccess);
-        }
-
-        return new TimeOrderView(statementContext, this, timestampExpression, timestampExpression.getExprEvaluator(), intervalSize, sortedRandomAccess, isRemoveStreamHandling);
+        IStreamTimeOrderRandomAccess sortedRandomAccess = ViewServiceHelper.getOptPreviousExprTimeOrderAccess(agentInstanceViewFactoryContext);
+        return new TimeOrderView(agentInstanceViewFactoryContext, this, timestampExpression, timestampExpression.getExprEvaluator(), intervalSize, sortedRandomAccess);
     }
 
     public EventType getEventType()
@@ -150,11 +104,6 @@ public class TimeOrderViewFactory implements DataWindowViewFactory
 
     public boolean canReuse(View view)
     {
-        if (randomAccessGetterImpl != null)
-        {
-            return false;
-        }
-
         if (!(view instanceof TimeOrderView))
         {
             return false;

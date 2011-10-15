@@ -49,7 +49,7 @@ public class TestFilterSpecParamEventProp extends TestCase
         MatchedEventMap matchedEvents = new MatchedEventMapImpl();
         matchedEvents.add("asName", event);
 
-        assertEquals(1000, params.getFilterValue(matchedEvents));
+        assertEquals(1000, params.getFilterValue(matchedEvents, null));
     }
 
     private FilterSpecParamEventProp makeParam(String eventAsName, String property)

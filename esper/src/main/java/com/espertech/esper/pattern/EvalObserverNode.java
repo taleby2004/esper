@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.pattern.observer.ObserverFactory;
-import com.espertech.esper.epl.spec.PatternObserverSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -19,44 +17,19 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalObserverNode extends EvalNodeBase
 {
-    private final PatternObserverSpec patternObserverSpec;
-    private transient ObserverFactory observerFactory;
-    private static final long serialVersionUID = 9045310817018028026L;
+    private final EvalObserverFactoryNode factoryNode;
 
-    /**
-     * Constructor.
-     * @param patternObserverSpec is the factory to use to get an observer instance
-     */
-    protected EvalObserverNode(PatternObserverSpec patternObserverSpec)
-    {
-        this.patternObserverSpec = patternObserverSpec;
+    public EvalObserverNode(PatternAgentInstanceContext context, EvalObserverFactoryNode factoryNode) {
+        super(context);
+        this.factoryNode = factoryNode;
     }
 
-    /**
-     * Returns the observer object specification to use for instantiating the observer factory and observer.
-     * @return observer specification
-     */
-    public PatternObserverSpec getPatternObserverSpec()
-    {
-        return patternObserverSpec;
+    public EvalObserverFactoryNode getFactoryNode() {
+        return factoryNode;
     }
 
-    /**
-     * Supplies the observer factory to the node.
-     * @param observerFactory is the observer factory
-     */
-    public void setObserverFactory(ObserverFactory observerFactory)
-    {
-        this.observerFactory = observerFactory;
-    }
-
-    /**
-     * Returns the observer factory.
-     * @return factory for observer instances
-     */
-    public ObserverFactory getObserverFactory()
-    {
-        return observerFactory;
+    public EvalNodeNumber getNodeNumber() {
+        return factoryNode.getNodeNumber();
     }
 
     public EvalStateNode newState(Evaluator parentNode,
@@ -64,12 +37,6 @@ public class EvalObserverNode extends EvalNodeBase
                                   EvalStateNodeNumber stateNodeId)
     {
         return new EvalObserverStateNode(parentNode, this, beginState);
-    }
-
-    public final String toString()
-    {
-        return ("EvalObserverNode observerFactory=" + observerFactory +
-                "  children=" + this.getChildNodes().size());
     }
 
     private static final Log log = LogFactory.getLog(EvalObserverNode.class);

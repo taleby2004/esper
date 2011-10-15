@@ -35,7 +35,9 @@ public class RegexNFAStateOneOptional extends RegexNFAStateBase implements Regex
     public RegexNFAStateOneOptional(String nodeNum, String variableName, int streamNum, boolean multiple, boolean isGreedy, ExprNode exprNode)
     {
         super(nodeNum, variableName, streamNum, multiple, isGreedy);
-        this.exprNode = exprNode.getExprEvaluator();
+        if (exprNode != null) {
+            this.exprNode = exprNode.getExprEvaluator();
+        }
     }
 
     public boolean matches(EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext)

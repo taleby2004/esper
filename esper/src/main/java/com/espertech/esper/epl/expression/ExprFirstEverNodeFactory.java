@@ -16,8 +16,7 @@ public class ExprFirstEverNodeFactory implements AggregationMethodFactory
     private final Class childType;
     private final boolean hasFilter;
 
-    public ExprFirstEverNodeFactory(Class childType, boolean hasFilter)
-    {
+    public ExprFirstEverNodeFactory(Class childType, boolean hasFilter) {
         this.childType = childType;
         this.hasFilter = hasFilter;
     }
@@ -32,13 +31,17 @@ public class ExprFirstEverNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeFirstEverValueAggregator(childType, hasFilter);
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
     }
 
     public AggregationAccessor getAccessor()
     {
         throw new UnsupportedOperationException();
     }
+
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+        return methodResolutionService.makeFirstEverValueAggregator(agentInstanceIds, groupId, aggregationId, childType, hasFilter);
+    }
 }
+

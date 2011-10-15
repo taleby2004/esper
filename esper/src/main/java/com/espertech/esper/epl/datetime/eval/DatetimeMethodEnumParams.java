@@ -55,6 +55,16 @@ public class DatetimeMethodEnumParams {
                     new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY)
             };
 
+    public static final DotMethodFP[] BETWEEN = new DotMethodFP[] {
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY,
+                            new DotMethodFPParam("a date-time type", DotMethodFPParamTypeEnum.DATETIME, null),
+                            new DotMethodFPParam("a date-time type", DotMethodFPParamTypeEnum.DATETIME, null)),
+                    new DotMethodFP(DotMethodFPInputEnum.SCALAR_ANY,
+                            new DotMethodFPParam("a date-time type", DotMethodFPParamTypeEnum.DATETIME, null),
+                            new DotMethodFPParam("a date-time type", DotMethodFPParamTypeEnum.DATETIME, null),
+                            new DotMethodFPParam("boolean", DotMethodFPParamTypeEnum.BOOLEAN, null),
+                            new DotMethodFPParam("boolean", DotMethodFPParamTypeEnum.BOOLEAN, null)),
+            };
 
     /**
      * Interval.

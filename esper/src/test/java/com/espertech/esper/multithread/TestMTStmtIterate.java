@@ -11,11 +11,13 @@
 
 package com.espertech.esper.multithread;
 
-import junit.framework.TestCase;
-import com.espertech.esper.client.*;
+import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.core.StatementContext;
+import junit.framework.TestCase;
 
 import java.util.concurrent.*;
 
@@ -26,12 +28,6 @@ public class TestMTStmtIterate extends TestCase
 {
     private EPServiceProvider engine;
 
-    public void setUp()
-    {
-        Configuration config = SupportConfigFactory.getConfiguration();
-        engine = EPServiceProviderManager.getProvider("TestMTStmtIterate", config);
-    }
-
     public void tearDown()
     {
         engine.initialize();
@@ -39,22 +35,47 @@ public class TestMTStmtIterate extends TestCase
 
     public void testIteratorSingleStmt() throws Exception
     {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        engine = EPServiceProviderManager.getProvider("TestMTStmtIterate", config);
+
         EPStatement stmt[] = new EPStatement[] {engine.getEPAdministrator().createEPL(
                 " select string from " + SupportBean.class.getName() + ".win:time(5 min)")};
 
         trySend(2, 10, stmt);
     }
 
-    public void testIteratorMultiStmt() throws Exception
+    public void testIteratorMultiStmtNoViewShare() throws Exception
     {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getViewResources().setShareViews(false);
+        engine = EPServiceProviderManager.getProvider("TestMTStmtIterate", config);
+
         EPStatement stmt[] = new EPStatement[3];
         for (int i = 0; i < stmt.length; i++)
         {
-            String stmtText = " select string from " + SupportBean.class.getName() + ".win:time(5 min)";
+            String name = "Stmt_" + i;
+            String stmtText = "@Name('" + name + "') select string from " + SupportBean.class.getName() + ".win:time(5 min)";
             stmt[i] = engine.getEPAdministrator().createEPL(stmtText);
         }
 
-        trySend(2, 10, stmt);
+        trySend(4, 100, stmt);
+    }
+
+    public void testIteratorMultiStmtViewShare() throws Exception
+    {
+        Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getViewResources().setShareViews(true);
+        engine = EPServiceProviderManager.getProvider("TestMTStmtIterate", config);
+
+        EPStatement stmt[] = new EPStatement[3];
+        for (int i = 0; i < stmt.length; i++)
+        {
+            String name = "Stmt_" + i;
+            String stmtText = "@Name('" + name + "') select string from " + SupportBean.class.getName() + ".win:time(5 min)";
+            stmt[i] = engine.getEPAdministrator().createEPL(stmtText);
+        }
+
+        trySend(4, 100, stmt);
     }
 
     private void trySend(int numThreads, int numRepeats, EPStatement stmt[]) throws Exception

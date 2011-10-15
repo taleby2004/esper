@@ -47,7 +47,7 @@ public class ExpressionGuard implements Guard
 
         try
         {
-            Object result = expression.evaluate(eventsPerStream, true, quitable.getContext());
+            Object result = expression.evaluate(eventsPerStream, true, quitable.getContext().getAgentInstanceContext());
             if (result == null) {
                 return false;
             }
@@ -61,7 +61,7 @@ public class ExpressionGuard implements Guard
         }
         catch (RuntimeException ex)
         {
-            String message = "Failed to evaluate expression for pattern-guard for statement '" + quitable.getContext().getStatementName() + "'";
+            String message = "Failed to evaluate expression for pattern-guard for statement '" + quitable.getContext().getPatternContext().getStatementName() + "'";
             if (ex.getMessage() != null)
             {
                 message += ": " + ex.getMessage();

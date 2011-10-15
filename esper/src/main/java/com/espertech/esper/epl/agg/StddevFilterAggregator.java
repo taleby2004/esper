@@ -34,9 +34,4 @@ public class StddevFilterAggregator extends StddevAggregator
         }
         super.leave(paramArray[0]);
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeStddevAggregator(true);
-    }
 }

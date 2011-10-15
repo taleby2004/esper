@@ -12,7 +12,6 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import org.apache.commons.logging.Log;
@@ -30,12 +29,12 @@ public class PatternExpressionUtil
 
     public static MultiKeyUntyped getKeys(MatchedEventMap currentState, EvalEveryDistinctNode everyDistinctNode)
     {
-        EventBean[] eventsPerStream = everyDistinctNode.getConvertor().convert(currentState);
-        ExprEvaluator[] expressions = everyDistinctNode.getExpressionsArray();
+        EventBean[] eventsPerStream = everyDistinctNode.getFactoryNode().getConvertor().convert(currentState);
+        ExprEvaluator[] expressions = everyDistinctNode.getFactoryNode().getExpressionsArray();
         Object[] keys = new Object[expressions.length];
         for (int i = 0; i < keys.length; i++)
         {
-            keys[i] = expressions[i].evaluate(eventsPerStream, true, everyDistinctNode.getContext());
+            keys[i] = expressions[i].evaluate(eventsPerStream, true, everyDistinctNode.getContext().getAgentInstanceContext());
         }
         return new MultiKeyUntyped(keys);
     }

@@ -8,18 +8,18 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.ViewUpdatedCollection;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.CloneableView;
+import com.espertech.esper.view.DataWindowView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
-import com.espertech.esper.view.DataWindowView;
-import com.espertech.esper.collection.ViewUpdatedCollection;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.Arrays;
 
 /**
  * This view is a keep-all data window that simply keeps all events added.
@@ -27,6 +27,7 @@ import java.util.Arrays;
  */
 public final class KeepAllView extends ViewSupport implements DataWindowView, CloneableView
 {
+    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final KeepAllViewFactory keepAllViewFactory;
     private LinkedHashSet<EventBean> indexedEvents;
     private final ViewUpdatedCollection viewUpdatedCollection;
@@ -36,16 +37,17 @@ public final class KeepAllView extends ViewSupport implements DataWindowView, Cl
      * @param keepAllViewFactory for copying this view in a group-by
      * @param viewUpdatedCollection for satisfying queries that select previous events in window order
      */
-    public KeepAllView(KeepAllViewFactory keepAllViewFactory, ViewUpdatedCollection viewUpdatedCollection)
+    public KeepAllView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext, KeepAllViewFactory keepAllViewFactory, ViewUpdatedCollection viewUpdatedCollection)
     {
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
         this.keepAllViewFactory = keepAllViewFactory;
         indexedEvents = new LinkedHashSet<EventBean>();
         this.viewUpdatedCollection = viewUpdatedCollection;
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return keepAllViewFactory.makeView(statementContext);
+        return keepAllViewFactory.makeView(agentInstanceViewFactoryContext);
     }
 
     /**

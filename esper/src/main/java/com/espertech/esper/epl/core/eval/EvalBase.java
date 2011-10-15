@@ -36,13 +36,12 @@ public abstract class EvalBase implements SelectExprProcessor {
         this.resultEventType = resultEventType;
     }
 
-    public abstract EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize);
+    public abstract EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext);
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
         ExprEvaluator[] expressionNodes = selectExprContext.getExpressionNodes();
         String[] columnNames = selectExprContext.getColumnNames();
-        ExprEvaluatorContext exprEvaluatorContext = selectExprContext.getExprEvaluatorContext();
 
         // Evaluate all expressions and build a map of name-value pairs
         Map<String, Object> props;
@@ -60,7 +59,7 @@ public abstract class EvalBase implements SelectExprProcessor {
             }
         }
 
-        return processSpecific(props, eventsPerStream, isNewData, isSynthesize);
+        return processSpecific(props, eventsPerStream, isNewData, isSynthesize, exprEvaluatorContext);
     }
 
     public EventAdapterService getEventAdapterService() {

@@ -12,7 +12,6 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.pattern.*;
 import com.espertech.esper.pattern.observer.*;
 import com.espertech.esper.client.EPException;
@@ -40,7 +39,7 @@ public class MyFileExistsObserverFactory extends ObserverFactorySupport
         this.convertor = convertor;
     }
 
-    public EventObserver makeObserver(PatternContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator, EvalStateNodeNumber stateNodeId, Object observerState)
+    public EventObserver makeObserver(PatternAgentInstanceContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator, EvalStateNodeNumber stateNodeId, Object observerState)
     {
         Object filename = PatternExpressionUtil.evaluate("File-exists observer ", beginState, filenameExpression, convertor, null);
         if (filename == null)

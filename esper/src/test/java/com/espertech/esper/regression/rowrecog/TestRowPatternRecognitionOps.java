@@ -14,6 +14,8 @@ package com.espertech.esper.regression.rowrecog;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.rowregex.RegexPartitionStateRepoGroup;
+import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
@@ -272,6 +274,21 @@ public class TestRowPatternRecognitionOps extends TestCase {
                 new Object[][] {{"E2", null, "E3"}, {"E4", "E5", "E6"}});
 
         stmt.stop();
+
+        // test optional event not defined
+        epService.getEPAdministrator().getConfiguration().addEventType("A", SupportBean_A.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("B", SupportBean_B.class);
+
+        String epl = "select * from A match_recognize (" +
+                "measures A.id as id, B.id as b_id " +
+                "pattern (A B?) " +
+                "define " +
+                " A as typeof(A) = 'A'" +
+                ")";
+        epService.getEPAdministrator().createEPL(epl).addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
+        assertTrue(listener.isInvoked());
     }
 
     public void testPartitionBy()

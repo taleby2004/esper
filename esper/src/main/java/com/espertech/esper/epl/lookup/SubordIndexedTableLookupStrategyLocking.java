@@ -9,7 +9,7 @@
 package com.espertech.esper.epl.lookup;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.core.StatementLock;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.*;
@@ -20,9 +20,9 @@ import java.util.*;
 public class SubordIndexedTableLookupStrategyLocking implements SubordTableLookupStrategy
 {
     private final SubordTableLookupStrategy inner;
-    private final StatementLock statementLock;
+    private final StatementAgentInstanceLock statementLock;
 
-    public SubordIndexedTableLookupStrategyLocking(SubordTableLookupStrategy inner, StatementLock statementLock) {
+    public SubordIndexedTableLookupStrategyLocking(SubordTableLookupStrategy inner, StatementAgentInstanceLock statementLock) {
         this.inner = inner;
         this.statementLock = statementLock;
     }

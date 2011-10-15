@@ -31,6 +31,7 @@ public class OutputLimitClause implements Serializable
     private Expression timePeriodExpression;
     private Expression afterTimePeriodExpression;
     private Integer afterNumberOfEvents;
+    private boolean andAfterTerminate;
 
     /**
      * Ctor.
@@ -363,6 +364,14 @@ public class OutputLimitClause implements Serializable
         return crontabAtParameters;
     }
 
+    public boolean isAndAfterTerminate() {
+        return andAfterTerminate;
+    }
+
+    public void setAndAfterTerminate(boolean andAfterTerminate) {
+        this.andAfterTerminate = andAfterTerminate;
+    }
+
     /**
      * Renders the clause in textual representation.
      * @param writer to output to
@@ -440,6 +449,10 @@ public class OutputLimitClause implements Serializable
                 writer.write(frequencyVariable);
             }
             writer.write(" events");
+        }
+
+        if (andAfterTerminate) {
+            writer.write(" and when terminated");
         }
     }
 

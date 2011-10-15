@@ -16,7 +16,10 @@ import com.espertech.esper.epl.datetime.eval.OpFactory;
 import com.espertech.esper.epl.datetime.calop.CalendarFieldEnum;
 import com.espertech.esper.epl.datetime.calop.CalendarOpUtil;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.epl.expression.ExprValidationException;
+
+import java.util.List;
 
 public class ReformatOpFactory implements OpFactory {
 
@@ -25,9 +28,9 @@ public class ReformatOpFactory implements OpFactory {
     private static ReformatOp ToMsec = new ReformatOpToMillisec();
     private static ReformatOp ToDate = new ReformatOpToDate();
 
-    public ReformatOp getOp(DatetimeMethodEnum method, String methodNameUsed, ExprNode first) throws ExprValidationException {
+    public ReformatOp getOp(DatetimeMethodEnum method, String methodNameUsed, List<ExprNode> parameters) throws ExprValidationException {
         if (method == DatetimeMethodEnum.GET) {
-            CalendarFieldEnum fieldNum = CalendarOpUtil.getEnum(methodNameUsed, first);
+            CalendarFieldEnum fieldNum = CalendarOpUtil.getEnum(methodNameUsed, parameters.get(0));
             return new ReformatOpGetField(fieldNum);
         }
         if (method == DatetimeMethodEnum.FORMAT) {
@@ -74,6 +77,12 @@ public class ReformatOpFactory implements OpFactory {
         }
         if (method == DatetimeMethodEnum.GETYEAR) {
             return new ReformatOpCalendarEval(CalendarEvalStatics.Year);
+        }
+        if (method == DatetimeMethodEnum.BETWEEN) {
+            if (ExprNodeUtility.isAllConstants(parameters)) {
+                return new ReformatOpBetweenConstantParams(parameters);
+            }
+            return new ReformatOpBetweenNonConstantParams(parameters);
         }
         throw new IllegalStateException("Unrecognized date-time method code '" + method + "'");
     }

@@ -8,20 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
-import com.espertech.esper.core.StatementContext;
 
 import java.util.List;
 
 /**
  * Factory for {@link FirstTimeView}.
  */
-public class FirstTimeViewFactory implements AsymetricDataWindowViewFactory
+public class FirstTimeViewFactory implements AsymetricDataWindowViewFactory, DataWindowBatchingViewFactory
 {
     private EventType eventType;
 
@@ -68,26 +67,9 @@ public class FirstTimeViewFactory implements AsymetricDataWindowViewFactory
         this.eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        return new FirstTimeView(this, statementContext, millisecondsBeforeExpiry);
+        return new FirstTimeView(this, agentInstanceViewFactoryContext, millisecondsBeforeExpiry);
     }
 
     public EventType getEventType()

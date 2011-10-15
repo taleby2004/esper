@@ -10,9 +10,9 @@ package com.espertech.esper.epl.db;
 
 import com.espertech.esper.client.ConfigurationDBRef;
 import com.espertech.esper.client.ConfigurationDataCache;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.ScheduleBucket;
-import com.espertech.esper.core.EPStatementHandle;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -110,7 +110,7 @@ public class DatabaseConfigServiceImpl implements DatabaseConfigService
         return factory;
     }
 
-    public DataCache getDataCache(String databaseName, EPStatementHandle epStatementHandle) throws DatabaseConfigException
+    public DataCache getDataCache(String databaseName, EPStatementAgentInstanceHandle epStatementAgentInstanceHandle) throws DatabaseConfigException
     {
         ConfigurationDBRef config = mapDatabaseRef.get(databaseName);
         if (config == null)
@@ -119,7 +119,7 @@ public class DatabaseConfigServiceImpl implements DatabaseConfigService
         }
 
         ConfigurationDataCache dataCacheDesc = config.getDataCacheDesc();
-        return DataCacheFactory.getDataCache(dataCacheDesc, epStatementHandle, schedulingService, scheduleBucket);
+        return DataCacheFactory.getDataCache(dataCacheDesc, epStatementAgentInstanceHandle, schedulingService, scheduleBucket);
     }
 
     public ColumnSettings getQuerySetting(String databaseName) throws DatabaseConfigException

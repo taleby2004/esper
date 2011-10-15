@@ -10,13 +10,10 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Index for filter parameter constants for the range operators (range open/closed/half).
@@ -33,7 +30,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
         }
     }
     
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
         Object objAttributeValue = this.getGetter().get(eventBean);
 
@@ -59,7 +56,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
                 if ((attributeValue > entry.getKey().getMin()) &&
                     (attributeValue < entry.getKey().getMax()))
                 {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }
@@ -70,7 +67,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
                 if ((attributeValue >= entry.getKey().getMin()) &&
                     (attributeValue <= entry.getKey().getMax()))
                 {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }
@@ -81,7 +78,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
                 if ((attributeValue > entry.getKey().getMin()) &&
                     (attributeValue <= entry.getKey().getMax()))
                 {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }
@@ -92,7 +89,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
                 if ((attributeValue >= entry.getKey().getMin()) &&
                     (attributeValue < entry.getKey().getMax()))
                 {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }

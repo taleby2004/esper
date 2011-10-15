@@ -14,10 +14,9 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.*;
 import com.espertech.esper.regression.event.SupportXML;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import junit.framework.TestCase;
 
 import java.util.HashMap;

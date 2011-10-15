@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.ConfigurationMethodRef;
+import com.espertech.esper.client.ConfigurationPlugInSingleRowFunction;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.epl.expression.*;
@@ -34,7 +35,7 @@ public class EngineImportServiceImpl implements EngineImportService
 
 	private final List<String> imports;
     private final Map<String, String> aggregationFunctions;
-    private final Map<String, Pair<String, String>> singleRowFunctions;
+    private final Map<String, EngineImportSingleRowDesc> singleRowFunctions;
     private final Map<String, ConfigurationMethodRef> methodInvocationRef;
     private final boolean allowExtendedAggregationFunc;
     private final boolean isUdfCache;
@@ -48,7 +49,7 @@ public class EngineImportServiceImpl implements EngineImportService
     {
         imports = new ArrayList<String>();
         aggregationFunctions = new HashMap<String, String>();
-        singleRowFunctions = new HashMap<String, Pair<String, String>>();
+        singleRowFunctions = new HashMap<String, EngineImportSingleRowDesc>();
         methodInvocationRef = new HashMap<String, ConfigurationMethodRef>();
         this.allowExtendedAggregationFunc = allowExtendedAggregationFunc;
         this.isUdfCache = isUdfCache;
@@ -112,9 +113,9 @@ public class EngineImportServiceImpl implements EngineImportService
         aggregationFunctions.put(functionName.toLowerCase(), aggregationClass);
     }
 
-    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName) throws EngineImportException
+    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws EngineImportException
     {
-        Pair<String, String> existing = singleRowFunctions.get(functionName);
+        EngineImportSingleRowDesc existing = singleRowFunctions.get(functionName);
         if (existing != null)
         {
             throw new EngineImportException("Single-Row function by name '" + functionName + "' is already defined");
@@ -131,7 +132,7 @@ public class EngineImportServiceImpl implements EngineImportService
         {
             throw new EngineImportException("Invalid class name for aggregation '" + singleRowFuncClass + "'");
         }
-        singleRowFunctions.put(functionName.toLowerCase(), new Pair<String, String>(singleRowFuncClass, methodName));
+        singleRowFunctions.put(functionName.toLowerCase(), new EngineImportSingleRowDesc(singleRowFuncClass, methodName, valueCache));
     }
 
     public AggregationSupport resolveAggregation(String name) throws EngineImportException, EngineImportUndefinedException
@@ -178,9 +179,9 @@ public class EngineImportServiceImpl implements EngineImportService
         return (AggregationSupport) object;
     }
 
-    public Pair<Class, String> resolveSingleRow(String name) throws EngineImportException, EngineImportUndefinedException
+    public Pair<Class, EngineImportSingleRowDesc> resolveSingleRow(String name) throws EngineImportException, EngineImportUndefinedException
     {
-        Pair<String, String> pair = singleRowFunctions.get(name);
+        EngineImportSingleRowDesc pair = singleRowFunctions.get(name);
         if (pair == null)
         {
             pair = singleRowFunctions.get(name.toLowerCase());
@@ -194,13 +195,13 @@ public class EngineImportServiceImpl implements EngineImportService
         try
         {
             ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            clazz = Class.forName(pair.getFirst(), true, cl);
+            clazz = Class.forName(pair.getClassName(), true, cl);
         }
         catch (ClassNotFoundException ex)
         {
-            throw new EngineImportException("Could not load single-row function class by name '" + pair.getFirst() + "'", ex);
+            throw new EngineImportException("Could not load single-row function class by name '" + pair.getClassName() + "'", ex);
         }
-        return new Pair<Class, String>(clazz, pair.getSecond());
+        return new Pair<Class, EngineImportSingleRowDesc>(clazz, pair);
     }
 
     public Method resolveMethod(String className, String methodName, Class[] paramTypes)

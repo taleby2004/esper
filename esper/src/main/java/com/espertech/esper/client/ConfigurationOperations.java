@@ -8,11 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
+import java.io.Serializable;
+import java.net.URI;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.net.URI;
-import java.io.Serializable;
 
 /**
  * Provides configuration operations for configuration-time and runtime parameters.
@@ -43,6 +43,18 @@ public interface ConfigurationOperations
      * @throws ConfigurationException is thrown to indicate a problem adding the aggregation function
      */
     public void addPlugInAggregationFunction(String functionName, String aggregationClassName) throws ConfigurationException;
+
+    /**
+     * Adds a plug-in single-row function given a EPL function name, a class name, method name and setting for value-cache behavior.
+     * <p>
+     * The same function name cannot be added twice.
+     * @param functionName is the new single-row function name for use in EPL
+     * @param className is the fully-qualified class name of the class implementing the single-row function
+     * @param methodName is the public static method provided by the class that implements the single-row function
+     * @param valueCache set the behavior for caching the return value when constant parameters are provided
+     * @throws ConfigurationException is thrown to indicate a problem adding the single-row function
+     */
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws ConfigurationException;
 
     /**
      * Adds a plug-in single-row function given a EPL function name, a class name and a method name.
@@ -466,4 +478,12 @@ public interface ConfigurationOperations
      * @param viewFactoryClass factory class of view
      */
     public void addPlugInView(String namespace, String name, String viewFactoryClass);
+
+    /**
+     * Set the current maximum pattern sub-expression count.
+     * <p>
+     * Use null to indicate that there is not current maximum.
+     * @param maxSubexpressions to set
+     */
+    public void setPatternMaxSubexpressions(Long maxSubexpressions);
 }

@@ -9,7 +9,7 @@
 package com.espertech.esper.collection;
 
 import com.espertech.esper.client.SafeIterator;
-import com.espertech.esper.core.StatementLock;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 
 import java.util.Iterator;
 
@@ -19,7 +19,7 @@ import java.util.Iterator;
  */
 public class SafeIteratorImpl<E> implements SafeIterator<E>
 {
-    private final StatementLock iteratorLock;
+    private final StatementAgentInstanceLock iteratorLock;
     private final Iterator<E> underlying;
     private boolean lockTaken;
 
@@ -28,7 +28,7 @@ public class SafeIteratorImpl<E> implements SafeIterator<E>
      * @param iteratorLock for locking resources to safely-iterate over
      * @param underlying is the underlying iterator to protect
      */
-    public SafeIteratorImpl(StatementLock iteratorLock, Iterator<E> underlying)
+    public SafeIteratorImpl(StatementAgentInstanceLock iteratorLock, Iterator<E> underlying)
     {
         this.iteratorLock = iteratorLock;
         this.underlying = underlying;

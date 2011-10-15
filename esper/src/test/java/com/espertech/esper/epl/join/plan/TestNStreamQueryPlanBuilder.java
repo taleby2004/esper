@@ -12,6 +12,7 @@
 package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.join.base.HistoricalViewableDesc;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.util.DependencyGraph;
@@ -25,7 +26,6 @@ public class TestNStreamQueryPlanBuilder extends TestCase
 {
     private EventType[] typesPerStream;
     private QueryGraph queryGraph;
-    private boolean[] isHistorical;
     private DependencyGraph dependencyGraph;
 
     public void setUp()
@@ -46,12 +46,11 @@ public class TestNStreamQueryPlanBuilder extends TestCase
         queryGraph.addStrictEquals(4, "p42", null, 2, "p21", null);
 
         dependencyGraph = new DependencyGraph(5);
-        isHistorical = new boolean[5];
     }
 
     public void testBuild()
     {
-        QueryPlan plan = NStreamQueryPlanBuilder.build(queryGraph, typesPerStream, false, isHistorical, dependencyGraph, null, false);
+        QueryPlan plan = NStreamQueryPlanBuilder.build(queryGraph, typesPerStream, new HistoricalViewableDesc(6), dependencyGraph, null, false);
 
         log.debug(".testBuild plan=" + plan);
     }
@@ -64,7 +63,7 @@ public class TestNStreamQueryPlanBuilder extends TestCase
             log.debug(".testCreateStreamPlan index " + i + " = " + indexes[i]);
         }
 
-        QueryPlanNode plan = NStreamQueryPlanBuilder.createStreamPlan(0, new int[] {2, 4, 3, 1}, queryGraph,indexes, typesPerStream, isHistorical, null);
+        QueryPlanNode plan = NStreamQueryPlanBuilder.createStreamPlan(0, new int[] {2, 4, 3, 1}, queryGraph,indexes, typesPerStream, new boolean[5], null);
 
         log.debug(".testCreateStreamPlan plan=" + plan);
 

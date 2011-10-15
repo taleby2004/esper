@@ -10,7 +10,6 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,7 +31,7 @@ public final class FilterParamIndexStringRangeInverted extends FilterParamIndexS
         }
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
         Object objAttributeValue = this.getGetter().get(eventBean);
 
@@ -47,14 +46,14 @@ public final class FilterParamIndexStringRangeInverted extends FilterParamIndexS
         {
             for (Map.Entry<StringRange, EventEvaluator> entry : ranges.entrySet()) {
                 if (entry.getKey().getMin().compareTo(attributeValue) > 0 || entry.getKey().getMax().compareTo(attributeValue) < 0) {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }
         else if (this.getFilterOperator() == FilterOperator.NOT_RANGE_OPEN) {  // include neither endpoint
             for (Map.Entry<StringRange, EventEvaluator> entry : ranges.entrySet()) {
                 if (entry.getKey().getMin().compareTo(attributeValue) >= 0 || entry.getKey().getMax().compareTo(attributeValue) <= 0) {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }
@@ -62,7 +61,7 @@ public final class FilterParamIndexStringRangeInverted extends FilterParamIndexS
         {
             for (Map.Entry<StringRange, EventEvaluator> entry : ranges.entrySet()) {
                 if (entry.getKey().getMin().compareTo(attributeValue) >= 0 || entry.getKey().getMax().compareTo(attributeValue) < 0) {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }
@@ -70,7 +69,7 @@ public final class FilterParamIndexStringRangeInverted extends FilterParamIndexS
         {
             for (Map.Entry<StringRange, EventEvaluator> entry : ranges.entrySet()) {
                 if (entry.getKey().getMin().compareTo(attributeValue) > 0 || entry.getKey().getMax().compareTo(attributeValue) <= 0) {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }

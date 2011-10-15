@@ -13,6 +13,7 @@ import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.virtualdw.VirtualDWView;
 
+import java.lang.annotation.Annotation;
 import java.util.Map;
 
 /**
@@ -33,10 +34,10 @@ public abstract class TableLookupPlan
      * @param eventTypes - types of events in stream
      * @return lookup strategy instance
      */
-    public final JoinExecTableLookupStrategy makeStrategy(Map<String,EventTable>[] indexesPerStream, EventType[] eventTypes, VirtualDWView[] viewExternals) {
+    public final JoinExecTableLookupStrategy makeStrategy(String statementName, String statementId, Annotation[] accessedByStmtAnnotations, Map<String,EventTable>[] indexesPerStream, EventType[] eventTypes, VirtualDWView[] viewExternals) {
         EventTable eventTable = indexesPerStream[this.getIndexedStream()].get(getIndexNum());
         if (viewExternals[indexedStream] != null) {
-            return viewExternals[indexedStream].getJoinLookupStrategy(eventTable, getKeyDescriptor(), lookupStream);
+            return viewExternals[indexedStream].getJoinLookupStrategy(statementName, statementId, accessedByStmtAnnotations, eventTable, getKeyDescriptor(), lookupStream);
         }
         return makeStrategyInternal(eventTable, eventTypes);
     }

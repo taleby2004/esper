@@ -42,7 +42,7 @@ public class TestRangeValueEventProp extends TestCase
 
         tryInvalidGetFilterValue(matchedEvents, params[0]);
         tryInvalidGetFilterValue(matchedEvents, params[1]);
-        assertEquals(1000.0, params[3].getFilterValue(matchedEvents));
+        assertEquals(1000.0, params[3].getFilterValue(matchedEvents, null));
     }
 
     public void testEquals()
@@ -56,7 +56,7 @@ public class TestRangeValueEventProp extends TestCase
     {
         try
         {
-            value.getFilterValue(matchedEvents);
+            value.getFilterValue(matchedEvents, null);
             fail();
         }
         catch (IllegalStateException ex)

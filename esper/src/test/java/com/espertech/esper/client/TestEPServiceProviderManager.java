@@ -13,7 +13,7 @@ package com.espertech.esper.client;
 
 import junit.framework.TestCase;
 
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
 public class TestEPServiceProviderManager extends TestCase

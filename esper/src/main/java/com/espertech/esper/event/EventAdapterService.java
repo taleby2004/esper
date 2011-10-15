@@ -10,7 +10,7 @@ package com.espertech.esper.event;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.event.bean.BeanEventTypeFactory;
@@ -132,7 +132,7 @@ public interface EventAdapterService
      * @param eventType os the type metadata for any wrappers of this type
      * @return wrapper event bean
      */
-    public EventBean adaptorForTypedWrapper(EventBean event, Map<String, Object> properties, EventType eventType);
+    public EventBean adapterForTypedWrapper(EventBean event, Map<String, Object> properties, EventType eventType);
 
     /**
      * Add an event type with the given name and Java fully-qualified class name.
@@ -169,6 +169,8 @@ public interface EventAdapterService
      */
     public EventType addBeanType(String eventTypeName, Class clazz, boolean isPreconfiguredStatic, boolean isPreconfigured, boolean isConfigured) throws EventAdapterException;
 
+    public EventType addBeanTypeByName(String eventTypeName, Class clazz, boolean isNamedWindow) throws EventAdapterException;
+
     /**
      * Wrap the native event returning an {@link EventBean}.
      * @param event to be wrapped
@@ -193,7 +195,7 @@ public interface EventAdapterService
      * @param eventType is the type metadata for any maps of that type
      * @return EventBean instance
      */
-    public EventBean adaptorForTypedMap(Map<String, Object> properties, EventType eventType);
+    public EventBean adapterForTypedMap(Map<String, Object> properties, EventType eventType);
 
     /**
      * Returns an adapter for the XML DOM document that exposes it's data as event properties for use in statements.

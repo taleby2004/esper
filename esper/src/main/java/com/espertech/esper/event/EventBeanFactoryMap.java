@@ -27,6 +27,10 @@ public class EventBeanFactoryMap implements EventBeanFactory {
     }
 
     public EventBean wrap(Object underlying) {
-        return eventAdapterService.adaptorForTypedMap((Map)underlying, type);
+        return eventAdapterService.adapterForTypedMap((Map) underlying, type);
+    }
+
+    public Class getUnderlyingType() {
+        return Map.class;
     }
 }

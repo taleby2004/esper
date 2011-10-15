@@ -13,7 +13,6 @@ package com.espertech.esper.support.client;
 
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceStateListener;
-import com.espertech.esper.core.EPServiceProviderImpl;
 
 import java.util.ArrayList;
 import java.util.List;

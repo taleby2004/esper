@@ -11,7 +11,6 @@
 
 package com.espertech.esper.view.window;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.event.EventFactoryHelper;
@@ -20,6 +19,7 @@ import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.view.SupportBeanClassView;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.support.view.SupportViewDataChecker;
+import junit.framework.TestCase;
 
 import java.util.Map;
 
@@ -37,7 +37,7 @@ public class TestTimeWindowView extends TestCase
         schedulingServiceStub = new SupportSchedulingServiceImpl();
 
         // Set up length window view and a test child view
-        myView = new TimeWindowView(SupportStatementContextFactory.makeContext(schedulingServiceStub), null, TEST_WINDOW_MSEC, null, false);
+        myView = new TimeWindowView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(schedulingServiceStub), null, TEST_WINDOW_MSEC, null);
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
     }

@@ -8,13 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.base;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKey;
-import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-
-import java.util.Set;
 
 public class JoinSetComposerDesc
 {

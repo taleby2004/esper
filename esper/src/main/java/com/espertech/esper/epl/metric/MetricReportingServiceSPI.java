@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.metric;
 
-import com.espertech.esper.core.StatementResultListener;
+import com.espertech.esper.core.service.StatementResultListener;
 
 import java.util.Set;
 

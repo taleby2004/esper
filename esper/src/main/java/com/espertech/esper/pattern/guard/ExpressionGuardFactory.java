@@ -10,10 +10,7 @@ package com.espertech.esper.pattern.guard;
 
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.pattern.EvalStateNodeNumber;
-import com.espertech.esper.pattern.MatchedEventConvertor;
-import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.pattern.PatternContext;
+import com.espertech.esper.pattern.*;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.MetaDefItem;
 
@@ -51,8 +48,7 @@ public class ExpressionGuardFactory implements GuardFactory, MetaDefItem, Serial
         this.convertor = convertor;
     }
 
-    public Guard makeGuard(PatternContext context, MatchedEventMap matchedEventMap, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState)
-    {
+    public Guard makeGuard(PatternAgentInstanceContext context, MatchedEventMap beginState, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState) {
         return new ExpressionGuard(convertor, expression.getExprEvaluator(), quitable);
     }
 }

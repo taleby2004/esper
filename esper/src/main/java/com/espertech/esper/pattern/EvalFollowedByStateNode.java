@@ -37,7 +37,7 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
         this.evalFollowedByNode = evalFollowedByNode;
         this.nodes = new HashMap<EvalStateNode, Integer>();
 
-        EvalNode child = evalFollowedByNode.getChildNodes().get(0);
+        EvalNode child = evalFollowedByNode.getChildNodes()[0];
         EvalStateNode childState = child.newState(this, beginState, null);
         nodes.put(childState, 0);
     }
@@ -77,7 +77,7 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
         }
 
         // If the match came from the very last filter, need to escalate
-        int numChildNodes = getFactoryNode().getChildNodes().size();
+        int numChildNodes = evalFollowedByNode.getChildNodes().length;
         if (index == (numChildNodes - 1))
         {
             boolean isFollowedByQuitted = false;
@@ -91,7 +91,7 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
         // Else start a new sub-expression for the next-in-line filter
         else
         {
-            EvalNode child = getFactoryNode().getChildNodes().get(index + 1);
+            EvalNode child = evalFollowedByNode.getChildNodes()[index + 1];
             EvalStateNode childState = child.newState(this, matchEvent, null);
             nodes.put(childState, index + 1);
             childState.start();

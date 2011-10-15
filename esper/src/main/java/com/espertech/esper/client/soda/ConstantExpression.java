@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.core.EPStatementObjectModelHelper;
+import com.espertech.esper.core.service.EPStatementObjectModelHelper;
 
 import java.io.StringWriter;
 

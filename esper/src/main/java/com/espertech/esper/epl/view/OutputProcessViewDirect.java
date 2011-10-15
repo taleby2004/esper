@@ -11,43 +11,25 @@ package com.espertech.esper.epl.view;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.UpdateDispatchView;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprTimePeriod;
 import com.espertech.esper.util.AuditPath;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
+import java.util.Iterator;
 import java.util.Set;
 
 /**
  * Output process view that does not enforce any output policies and may simply
  * hand over events to child views, does not handle distinct.
  */
-public class OutputProcessViewDirect extends OutputProcessView
+public class OutputProcessViewDirect extends OutputProcessViewBase
 {
-	private static final Log log = LogFactory.getLog(OutputProcessViewDirect.class);
+    private final OutputProcessViewDirectFactory parent;
 
-    /**
-     * Ctor.
-     * @param resultSetProcessor is processing the result set for publishing it out
-     * @param outputStrategy is the execution of output to sub-views or natively
-     * @param isInsertInto is true if the statement is a insert-into
-     * @param statementContext statement services
-     * @param isDistinct true for distinct
-     * @param afterTimePeriod after-keyword time period
-     * @param afterConditionNumberOfEvents after-keyword number of events
-     */
-    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor, OutputStrategy outputStrategy, boolean isInsertInto, StatementContext statementContext, boolean isDistinct, ExprTimePeriod afterTimePeriod, Integer afterConditionNumberOfEvents)
-    {
-        super(resultSetProcessor, outputStrategy, isInsertInto, statementContext, isDistinct, afterTimePeriod, afterConditionNumberOfEvents);
-
-        log.debug(".ctor");
-        if (resultSetProcessor == null)
-        {
-            throw new IllegalArgumentException("Null result set processor, no output processor required");
-        }
+    public OutputProcessViewDirect(ResultSetProcessor resultSetProcessor, OutputProcessViewDirectFactory parent) {
+        super(resultSetProcessor);
+        this.parent = parent;
     }
 
     /**
@@ -57,15 +39,15 @@ public class OutputProcessViewDirect extends OutputProcessView
      */
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        boolean isGenerateSynthetic = statementResultService.isMakeSynthetic();
-        boolean isGenerateNatural = statementResultService.isMakeNatural();
+        boolean isGenerateSynthetic = parent.getStatementResultService().isMakeSynthetic();
+        boolean isGenerateNatural = parent.getStatementResultService().isMakeNatural();
 
         UniformPair<EventBean[]> newOldEvents = resultSetProcessor.processViewResult(newData, oldData, isGenerateSynthetic);
 
         if ((!isGenerateSynthetic) && (!isGenerateNatural))
         {
             if (AuditPath.isAuditEnabled) {
-                super.indicateEarlyReturn(newOldEvents);
+                OutputStrategyUtil.indicateEarlyReturn(parent.getStatementContext(), newOldEvents);
             }
             return;
         }
@@ -80,7 +62,7 @@ public class OutputProcessViewDirect extends OutputProcessView
         // Child view can be null in replay from named window
         if (childView != null)
         {
-            outputStrategy.output(forceOutput, newOldEvents, childView);
+            postProcess(forceOutput, newOldEvents, childView);
         }
     }
 
@@ -91,15 +73,15 @@ public class OutputProcessViewDirect extends OutputProcessView
      */
     public void process(Set<MultiKey<EventBean>> newEvents, Set<MultiKey<EventBean>> oldEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
-        boolean isGenerateSynthetic = statementResultService.isMakeSynthetic();
-        boolean isGenerateNatural = statementResultService.isMakeNatural();
+        boolean isGenerateSynthetic = parent.getStatementResultService().isMakeSynthetic();
+        boolean isGenerateNatural = parent.getStatementResultService().isMakeNatural();
 
         UniformPair<EventBean[]> newOldEvents = resultSetProcessor.processJoinResult(newEvents, oldEvents, isGenerateSynthetic);
 
         if ((!isGenerateSynthetic) && (!isGenerateNatural))
         {
             if (AuditPath.isAuditEnabled) {
-                super.indicateEarlyReturn(newOldEvents);
+                OutputStrategyUtil.indicateEarlyReturn(parent.getStatementContext(), newOldEvents);
             }
             return;
         }
@@ -112,7 +94,19 @@ public class OutputProcessViewDirect extends OutputProcessView
         // Child view can be null in replay from named window
         if (childView != null)
         {
-            outputStrategy.output(false, newOldEvents, childView);
+            postProcess(false, newOldEvents, childView);
         }
+    }
+
+    protected void postProcess(boolean force, UniformPair<EventBean[]> newOldEvents, UpdateDispatchView childView) {
+        OutputStrategyUtil.output(force, newOldEvents, childView);
+    }
+
+    public Iterator<EventBean> iterator() {
+        return OutputStrategyUtil.getIterator(joinExecutionStrategy, resultSetProcessor, parentView, false);
+    }
+
+    public void terminated() {
+        // Not applicable
     }
 }

@@ -11,13 +11,13 @@
 
 package com.espertech.esper.epl.expression;
 
-import junit.framework.TestCase;
-import com.espertech.esper.support.epl.SupportExprNodeFactory;
-import com.espertech.esper.support.epl.SupportExprNode;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.epl.SupportExprNode;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.view.internal.PriorEventBufferUnbound;
-import com.espertech.esper.client.EventBean;
+import junit.framework.TestCase;
 
 public class TestExprPriorNode extends TestCase
 {
@@ -48,7 +48,7 @@ public class TestExprPriorNode extends TestCase
     public void testEvaluate() throws Exception
     {
         PriorEventBufferUnbound buffer = new PriorEventBufferUnbound(10);
-        priorNode.setViewResource(buffer);
+        priorNode.setPriorStrategy(new ExprPriorEvalStrategyRandomAccess(buffer));
         EventBean[] events = new EventBean[] {makeEvent(1d), makeEvent(10d)};
         buffer.update(events, null);
 

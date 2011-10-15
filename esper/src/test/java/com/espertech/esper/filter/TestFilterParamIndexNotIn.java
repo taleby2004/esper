@@ -92,7 +92,7 @@ public class TestFilterParamIndexNotIn extends TestCase
     private void verify(FilterParamIndexBase index, Long testValue, boolean[] expected)
     {
         testBean.setLongBoxed(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         for (int i = 0; i < expected.length; i++)
         {
             assertEquals(expected[i], testEvaluators[i].getAndResetCountInvoked() == 1);

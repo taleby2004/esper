@@ -38,9 +38,4 @@ public class FirstEverValueFilterAggregator extends FirstEverValueAggregator
         }
         super.leave(paramArray[0]);
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeFirstEverValueAggregator(type, true);
-    }
 }

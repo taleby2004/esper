@@ -11,7 +11,7 @@
 
 package com.espertech.esper.core.thread;
 
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.client.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

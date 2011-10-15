@@ -11,18 +11,19 @@
 
 package com.espertech.esper.regression.view;
 
-import java.util.Iterator;
-
-import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.view.ViewFieldEnum;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.DoubleValueAssertionUtil;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.DoubleValueAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.view.ViewFieldEnum;
+import junit.framework.TestCase;
+
+import java.util.Iterator;
 
 public class TestViewLengthWindowStats extends TestCase
 {
@@ -111,6 +112,19 @@ public class TestViewLengthWindowStats extends TestCase
         sendEvent(SYMBOL, 100.9);
         checkOld(false, 3, 301.8, 100.6, 0.081649658, 0.1, 0.01);
         checkNew(3, 302.2, 100.733333333, 0.124721913, 0.152752523, 0.023333333);
+        statement.destroy();
+
+        // Test copying all properties
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        String viewExprWildcard = "select * from SupportBean.win:length(3).stat:uni(intPrimitive, *)";
+        statement = epService.getEPAdministrator().createEPL(viewExprWildcard);
+        statement.addListener(testListener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        EventBean event = testListener.assertOneGetNewAndReset();
+        assertEquals(1.0, event.get("average"));
+        assertEquals("E1", event.get("string"));
+        assertEquals(1, event.get("intPrimitive"));
     }
 
     private void sendEvent(String symbol, double price)

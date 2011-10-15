@@ -11,7 +11,8 @@ package com.espertech.esper.view.std;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.SingleEventIterator;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewFieldEnum;
@@ -29,7 +30,7 @@ import java.util.Map;
  */
 public final class SizeView extends ViewSupport implements CloneableView
 {
-    private final StatementContext statementContext;
+    private final AgentInstanceContext agentInstanceContext;
     private final EventType eventType;
     private final StatViewAdditionalProps additionalProps;
 
@@ -39,18 +40,18 @@ public final class SizeView extends ViewSupport implements CloneableView
 
     /**
      * Ctor.
-     * @param statementContext is services
+     * @param agentInstanceContext is services
      */
-    public SizeView(StatementContext statementContext, EventType eventType, StatViewAdditionalProps additionalProps)
+    public SizeView(AgentInstanceContext agentInstanceContext, EventType eventType, StatViewAdditionalProps additionalProps)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.eventType = eventType;
         this.additionalProps = additionalProps;
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return new SizeView(statementContext, eventType, additionalProps);
+        return new SizeView(agentInstanceContext, eventType, additionalProps);
     }
 
     public final EventType getEventType()
@@ -72,7 +73,7 @@ public final class SizeView extends ViewSupport implements CloneableView
                     lastValuesEventNew = new Object[additionalProps.getAdditionalExpr().length];
                 }
                 for (int val = 0; val < additionalProps.getAdditionalExpr().length; val++) {
-                    lastValuesEventNew[val] = additionalProps.getAdditionalExpr()[val].evaluate(new EventBean[] {newData[newData.length - 1]}, true, statementContext);
+                    lastValuesEventNew[val] = additionalProps.getAdditionalExpr()[val].evaluate(new EventBean[] {newData[newData.length - 1]}, true, agentInstanceContext);
                 }
             }
         }
@@ -88,7 +89,7 @@ public final class SizeView extends ViewSupport implements CloneableView
             Map<String, Object> postNewData = new HashMap<String, Object>();
             postNewData.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), size);
             addProperties(postNewData);
-            EventBean newEvent = statementContext.getEventAdapterService().adaptorForTypedMap(postNewData, eventType);
+            EventBean newEvent = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(postNewData, eventType);
 
             if (lastSizeEvent != null)
             {
@@ -98,7 +99,7 @@ public final class SizeView extends ViewSupport implements CloneableView
             {
                 Map<String, Object> postOldData = new HashMap<String, Object>();
                 postOldData.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), priorSize);
-                EventBean oldEvent = statementContext.getEventAdapterService().adaptorForTypedMap(postOldData, eventType);
+                EventBean oldEvent = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(postOldData, eventType);
 
                 updateChildren(new EventBean[] {newEvent}, new EventBean[] {oldEvent});
             }
@@ -112,7 +113,7 @@ public final class SizeView extends ViewSupport implements CloneableView
         HashMap<String, Object> current = new HashMap<String, Object>();
         current.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), size);
         addProperties(current);
-        return new SingleEventIterator(statementContext.getEventAdapterService().adaptorForTypedMap(current, eventType));
+        return new SingleEventIterator(agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(current, eventType));
     }
 
     public final String toString()

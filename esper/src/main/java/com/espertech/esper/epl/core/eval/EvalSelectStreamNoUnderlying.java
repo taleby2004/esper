@@ -14,6 +14,7 @@ package com.espertech.esper.epl.core.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,8 +30,8 @@ public class EvalSelectStreamNoUnderlying extends EvalSelectStreamBase implement
         super(selectExprContext, resultEventType, namedStreams, usingWildcard);
     }
 
-    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream)
+    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext)
     {
-        return super.getSelectExprContext().getEventAdapterService().adaptorForTypedMap(props, super.getResultEventType());
+        return super.getSelectExprContext().getEventAdapterService().adapterForTypedMap(props, super.getResultEventType());
     }
 }

@@ -34,17 +34,20 @@ public class ExprNthAggNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
-        AggregationMethod method = methodResolutionService.makeNthAggregator(childType, size + 1);
-        if (!isDistinct) {
-            return method;
-        }
-        return methodResolutionService.makeDistinctAggregator(method, childType, false);
-    }
-
     public AggregationAccessor getAccessor()
     {
         throw new UnsupportedOperationException();
+    }
+
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeNthAggregator(agentInstanceIds, groupId, aggregationId, childType, size + 1);
+        if (!isDistinct) {
+            return method;
+        }
+        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, childType, false);
+    }
+
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
     }
 }

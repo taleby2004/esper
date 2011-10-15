@@ -18,6 +18,7 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
     private String name;
     private String functionClassName;
     private String functionMethodName;
+    private ValueCache valueCache = ValueCache.DISABLED;
     private static final long serialVersionUID = 4096734947283212246L;
 
     /**
@@ -80,4 +81,39 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
     {
         this.functionMethodName = functionMethodName;
     }
+
+    /**
+     * Returns the setting for the cache behavior.
+     * @return cache behavior
+     */
+    public ValueCache getValueCache() {
+        return valueCache;
+    }
+
+    /**
+     * Sets the cache behavior.
+     * @param valueCache cache behavior
+     */
+    public void setValueCache(ValueCache valueCache) {
+        this.valueCache = valueCache;
+    }
+
+    public enum ValueCache {
+        /**
+         * The default, the result of a single-row function is always computed anew.
+         */
+        DISABLED,
+
+        /**
+         * Causes the engine to not actually invoke the single-row function and instead return a cached precomputed value
+         * when all parameters are constants or there are no parameters.
+         */
+        ENABLED,
+
+        /**
+         * Causes the engine to follow the engine-wide policy as configured for user-defined functions.
+         */
+        CONFIGURED
+    }
+
 }

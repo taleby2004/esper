@@ -8,10 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.guard;
 
-import com.espertech.esper.pattern.EvalStateNodeNumber;
-import com.espertech.esper.pattern.PatternContext;
-import com.espertech.esper.pattern.MatchedEventConvertor;
-import com.espertech.esper.pattern.MatchedEventMap;
+import com.espertech.esper.pattern.*;
 import com.espertech.esper.epl.expression.ExprNode;
 
 import java.util.List;
@@ -38,7 +35,7 @@ public interface GuardFactory
      * @param guardState - state node for guard
      * @return guard instance
      */
-    public Guard makeGuard(PatternContext context,
+    public Guard makeGuard(PatternAgentInstanceContext context,
                            MatchedEventMap beginState,
                            Quitable quitable,
                            EvalStateNodeNumber stateNodeId,

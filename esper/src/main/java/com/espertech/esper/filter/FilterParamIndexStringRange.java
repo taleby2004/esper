@@ -14,13 +14,10 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Index for filter parameter constants for the range operators (range open/closed/half).
@@ -37,7 +34,7 @@ public final class FilterParamIndexStringRange extends FilterParamIndexStringRan
         }
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
         Object objAttributeValue = this.getGetter().get(eventBean);
 
@@ -60,7 +57,7 @@ public final class FilterParamIndexStringRange extends FilterParamIndexStringRan
             for (Map.Entry<StringRange, EventEvaluator> entry : subMap.entrySet())
             {
                 if (entry.getKey().getMin().compareTo(attributeValue) < 0 && entry.getKey().getMax().compareTo(attributeValue) > 0) {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }
@@ -69,7 +66,7 @@ public final class FilterParamIndexStringRange extends FilterParamIndexStringRan
             for (Map.Entry<StringRange, EventEvaluator> entry : subMap.entrySet())
             {
                 if (entry.getKey().getMin().compareTo(attributeValue) <= 0 && entry.getKey().getMax().compareTo(attributeValue) >= 0) {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }
@@ -78,7 +75,7 @@ public final class FilterParamIndexStringRange extends FilterParamIndexStringRan
             for (Map.Entry<StringRange, EventEvaluator> entry : subMap.entrySet())
             {
                 if (entry.getKey().getMin().compareTo(attributeValue) < 0 && entry.getKey().getMax().compareTo(attributeValue) >= 0) {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }
@@ -87,7 +84,7 @@ public final class FilterParamIndexStringRange extends FilterParamIndexStringRan
             for (Map.Entry<StringRange, EventEvaluator> entry : subMap.entrySet())
             {
                 if (entry.getKey().getMin().compareTo(attributeValue) <= 0 && entry.getKey().getMax().compareTo(attributeValue) > 0) {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
             }
         }

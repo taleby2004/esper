@@ -11,12 +11,14 @@
 
 package com.espertech.esper.pattern.observer;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.pattern.MatchedEventMapImpl;
+import com.espertech.esper.pattern.PatternAgentInstanceContext;
 import com.espertech.esper.pattern.PatternContext;
 import com.espertech.esper.schedule.SchedulingServiceImpl;
 import com.espertech.esper.support.guard.SupportObserverEvaluator;
+import com.espertech.esper.support.pattern.SupportPatternContextFactory;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.timer.TimeSourceServiceImpl;
@@ -25,6 +27,8 @@ import junit.framework.TestCase;
 public class TestTimerIntervalObserver extends TestCase
 {
     private PatternContext context;
+    private PatternAgentInstanceContext agentContext;
+
     private TimerIntervalObserver observer;
     private SchedulingServiceImpl scheduleService;
     private SupportObserverEvaluator evaluator;
@@ -37,9 +41,10 @@ public class TestTimerIntervalObserver extends TestCase
 
         scheduleService = new SchedulingServiceImpl(new TimeSourceServiceImpl());
         StatementContext stmtContext = SupportStatementContextFactory.makeContext(scheduleService);
-        context = new PatternContext(stmtContext, 1, null);
+        context = new PatternContext(stmtContext, 1);
+        agentContext = SupportPatternContextFactory.makePatternAgentInstanceContext(scheduleService);
 
-        evaluator = new SupportObserverEvaluator(context);
+        evaluator = new SupportObserverEvaluator(agentContext);
 
         observer =  new TimerIntervalObserver(1000, beginState, evaluator);
     }

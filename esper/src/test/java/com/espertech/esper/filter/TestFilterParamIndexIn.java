@@ -76,7 +76,7 @@ public class TestFilterParamIndexIn extends TestCase
     private void verify(FilterParamIndexBase index, Long testValue, int numExpected)
     {
         testBean.setLongBoxed(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }
 }

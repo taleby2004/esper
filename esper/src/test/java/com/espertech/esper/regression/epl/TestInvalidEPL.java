@@ -39,7 +39,7 @@ public class TestInvalidEPL extends TestCase
         assertEquals("Incorrect syntax near '*' at line 1 column 14, please check the from clause [select * from *]", exceptionText);
 
         exceptionText = getSyntaxExceptionEPL("select * from SupportBean a where a.intPrimitive between r.start and r.end");
-        assertEquals("Incorrect syntax near 'r' ('end' is a reserved keyword) at line 1 column 69, please check the where clause [select * from SupportBean a where a.intPrimitive between r.start and r.end]", exceptionText);
+        assertEquals("Incorrect syntax near 'r' ('end' is a reserved keyword) at line 1 column 57, please check the where clause near reserved keyword 'start' [select * from SupportBean a where a.intPrimitive between r.start and r.end]", exceptionText);
     }
 
     public void testLongTypeConstant()

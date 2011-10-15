@@ -10,7 +10,6 @@ package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprSubselectNode;
 
 import java.lang.annotation.Annotation;
@@ -21,6 +20,13 @@ import java.util.*;
  */
 public class StatementSpecCompiled
 {
+    public static final StatementSpecCompiled DEFAULT_SELECT_ALL_EMPTY;
+
+    static {
+        DEFAULT_SELECT_ALL_EMPTY = new StatementSpecCompiled();
+        DEFAULT_SELECT_ALL_EMPTY.getSelectClauseSpec().add(new SelectClauseElementWildcard());
+    }
+
     private final OnTriggerDesc onTriggerDesc;
     private final CreateWindowDesc createWindowDesc;
     private final CreateIndexDesc createIndexDesc;
@@ -46,6 +52,8 @@ public class StatementSpecCompiled
     private final MatchRecognizeSpec matchRecognizeSpec;
     private final ForClauseSpec forClauseSpec;
     private final Map<Integer, List<ExprNode>> sqlParameters;
+    private final CreateContextDesc contextDesc;
+    private final String optionalContextName;
 
     /**
      * Ctor.
@@ -95,7 +103,9 @@ public class StatementSpecCompiled
                                  UpdateDesc updateSpec,
                                  MatchRecognizeSpec matchRecognizeSpec,
                                  ForClauseSpec forClauseSpec,
-                                 Map<Integer, List<ExprNode>> sqlParameters)
+                                 Map<Integer, List<ExprNode>> sqlParameters,
+                                 CreateContextDesc contextDesc,
+                                 String optionalContextName)
     {
         this.onTriggerDesc = onTriggerDesc;
         this.createWindowDesc = createWindowDesc;
@@ -122,6 +132,8 @@ public class StatementSpecCompiled
         this.matchRecognizeSpec = matchRecognizeSpec;
         this.forClauseSpec = forClauseSpec;
         this.sqlParameters = sqlParameters;
+        this.contextDesc = contextDesc;
+        this.optionalContextName = optionalContextName;
     }
 
     /**
@@ -154,6 +166,8 @@ public class StatementSpecCompiled
         matchRecognizeSpec = null;
         forClauseSpec = null;
         sqlParameters = null;
+        contextDesc = null;
+        optionalContextName = null;
     }
 
     /**
@@ -403,5 +417,13 @@ public class StatementSpecCompiled
 
     public List<ExprDeclaredNode> getDeclaredExpressions() {
         return declaredExpressions;
+    }
+
+    public CreateContextDesc getContextDesc() {
+        return contextDesc;
+    }
+
+    public String getOptionalContextName() {
+        return optionalContextName;
     }
 }

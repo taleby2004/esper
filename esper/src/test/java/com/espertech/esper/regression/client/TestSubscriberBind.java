@@ -11,14 +11,14 @@
 
 package com.espertech.esper.regression.client;
 
-import com.espertech.esper.collection.Pair;
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 import java.util.Map;
 
@@ -339,6 +339,15 @@ public class TestSubscriberBind extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean());
         ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetIndicate().get(0), new Object[] {null, null});
+        stmt.destroy();
+
+        // test null-delivery for no-parameter subscriber
+        LocalSubscriberNoParams subscriberNoParams = new LocalSubscriberNoParams();
+        stmt = epService.getEPAdministrator().createEPL("select null from SupportBean");
+        stmt.setSubscriber(subscriberNoParams);
+
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        assertTrue(subscriberNoParams.isCalled());
     }
 
     public void testObjectArrayDelivery()
@@ -371,5 +380,22 @@ public class TestSubscriberBind extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
         ArrayAssertionUtil.assertPropsMap(subscriber.getAndResetIndicateIStream().get(0), fields, new Object[]{"E1", 2});
         ArrayAssertionUtil.assertPropsMap(subscriber.getAndResetIndicateRStream().get(0), fields, new Object[]{"E1", 1});
+    }
+
+    private static class LocalSubscriberNoParams {
+
+        private boolean called = false;
+
+        public void update() {
+            called = true;
+        }
+
+        public boolean isCalled() {
+            return called;
+        }
+
+        public void setCalled(boolean called) {
+            this.called = called;
+        }
     }
 }

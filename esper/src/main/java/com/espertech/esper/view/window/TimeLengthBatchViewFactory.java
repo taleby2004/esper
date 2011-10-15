@@ -8,30 +8,24 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.view.*;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.view.*;
 
 import java.util.List;
 
 /**
  * Factory for {@link com.espertech.esper.view.window.TimeLengthBatchView}.
  */
-public class TimeLengthBatchViewFactory extends TimeBatchViewFactoryParams implements DataWindowViewFactory
+public class TimeLengthBatchViewFactory extends TimeBatchViewFactoryParams implements DataWindowViewFactory, DataWindowViewWithPrevious, DataWindowBatchingViewFactory
 {
     /**
      * Number of events to collect before batch fires.
      */
     protected long numberOfEvents;
-
-    /**
-     * The access into the data window.
-     */
-    protected RelativeAccessByEventNIndexMap relativeAccessGetterImpl;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
@@ -64,43 +58,14 @@ public class TimeLengthBatchViewFactory extends TimeBatchViewFactoryParams imple
         this.eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
-        }
-        return viewCapability instanceof ViewCapDataWindowAccess;
+    public Object makePreviousGetter() {
+        return new RelativeAccessByEventNIndexMap();
     }
 
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return;
-        }
-        if (relativeAccessGetterImpl == null)
-        {
-            relativeAccessGetterImpl = new RelativeAccessByEventNIndexMap();
-        }
-        resourceCallback.setViewResource(relativeAccessGetterImpl);
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        IStreamRelativeAccess relativeAccessByEvent = null;
-
-        if (relativeAccessGetterImpl != null)
-        {
-            relativeAccessByEvent = new IStreamRelativeAccess(relativeAccessGetterImpl);
-            relativeAccessGetterImpl.updated(relativeAccessByEvent, null);
-        }
-
-        return new TimeLengthBatchView(this, statementContext, millisecondsBeforeExpiry, numberOfEvents, isForceUpdate, isStartEager, relativeAccessByEvent);
+        IStreamRelativeAccess relativeAccessByEvent = ViewServiceHelper.getOptPreviousExprRelativeAccess(agentInstanceViewFactoryContext);
+        return new TimeLengthBatchView(this, agentInstanceViewFactoryContext, millisecondsBeforeExpiry, numberOfEvents, isForceUpdate, isStartEager, relativeAccessByEvent);
     }
 
     public EventType getEventType()
@@ -110,10 +75,6 @@ public class TimeLengthBatchViewFactory extends TimeBatchViewFactoryParams imple
 
     public boolean canReuse(View view)
     {
-        if (relativeAccessGetterImpl != null)
-        {
-            return false;
-        }
         if (!(view instanceof TimeLengthBatchView))
         {
             return false;

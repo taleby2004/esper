@@ -86,31 +86,27 @@ public class IndexFactory
         {
             Class type = eventType.getPropertyType(propertyName);
             if (type != String.class) {
-                index = new FilterParamIndexDoubleRangeInverted(propertyName, filterOperator, eventType);
+                return new FilterParamIndexDoubleRangeInverted(propertyName, filterOperator, eventType);
             }
             else {
-                index = new FilterParamIndexStringRangeInverted(propertyName, filterOperator, eventType);
+                return new FilterParamIndexStringRangeInverted(propertyName, filterOperator, eventType);
             }
-            return index;
         }
 
         // Handle all IN and NOT IN comparisons
         if (filterOperator == FilterOperator.IN_LIST_OF_VALUES)
         {
-            index = new FilterParamIndexIn(propertyName, eventType);
-            return index;
+            return new FilterParamIndexIn(propertyName, eventType);
         }
         if (filterOperator == FilterOperator.NOT_IN_LIST_OF_VALUES)
         {
-            index = new FilterParamIndexNotIn(propertyName, eventType);
-            return index;
+            return new FilterParamIndexNotIn(propertyName, eventType);
         }
 
         // Handle all boolean expression
         if (filterOperator == FilterOperator.BOOLEAN_EXPRESSION)
         {
-            index = new FilterParamIndexBooleanExpr(eventType);
-            return index;
+            return new FilterParamIndexBooleanExpr();
         }
         throw new IllegalArgumentException("Cannot create filter index instance for filter operator " + filterOperator);
     }

@@ -46,6 +46,6 @@ public class EventBeanManufacturerMap implements EventBeanManufacturer
         {
             values.put(writables[i].getPropertyName(), properties[i]);
         }
-        return eventAdapterService.adaptorForTypedMap(values, mapEventType);
+        return eventAdapterService.adapterForTypedMap(values, mapEventType);
     }
 }

@@ -27,9 +27,12 @@ public class ExprLeavingAggNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeLeavingAggregator();
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+        return methodResolutionService.makeLeavingAggregator(agentInstanceIds, groupId, aggregationId);
+    }
+
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
     }
 
     public AggregationAccessor getAccessor()

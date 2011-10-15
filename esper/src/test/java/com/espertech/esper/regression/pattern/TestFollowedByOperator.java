@@ -13,8 +13,8 @@ package com.espertech.esper.regression.pattern;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.core.EPStatementSPI;
-import com.espertech.esper.core.StatementType;
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.core.service.StatementType;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;

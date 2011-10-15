@@ -35,7 +35,7 @@ public class EvalInsertNoWildcardSingleColCoercionRevisionMap extends EvalBaseFi
     }
 
     public EventBean processFirstCol(Object result) {
-        EventBean wrappedEvent = super.getEventAdapterService().adaptorForTypedMap((Map)result, super.getResultEventType());
-        return vaeProcessor.getValueAddEventBean(super.getEventAdapterService().adaptorForTypedWrapper(wrappedEvent, Collections.EMPTY_MAP, vaeInnerEventType));
+        EventBean wrappedEvent = super.getEventAdapterService().adapterForTypedMap((Map) result, super.getResultEventType());
+        return vaeProcessor.getValueAddEventBean(super.getEventAdapterService().adapterForTypedWrapper(wrappedEvent, Collections.EMPTY_MAP, vaeInnerEventType));
     }
 }

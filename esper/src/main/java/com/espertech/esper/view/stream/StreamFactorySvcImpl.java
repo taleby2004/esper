@@ -10,21 +10,21 @@ package com.espertech.esper.view.stream;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.annotation.Audit;
-import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.RefCountedMap;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.StatementLock;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.filter.*;
+import com.espertech.esper.filter.FilterHandleCallback;
+import com.espertech.esper.filter.FilterService;
+import com.espertech.esper.filter.FilterSpecCompiled;
+import com.espertech.esper.filter.FilterValueSet;
 import com.espertech.esper.view.EventStream;
 import com.espertech.esper.view.ZeroDepthStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.StringWriter;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -58,7 +58,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
 
     // Using identify hash map - ignoring the equals semantics on filter specs
     // Thus two filter specs objects are always separate entries in the map
-    private final IdentityHashMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>> eventStreamsIdentity;
+    private final IdentityHashMap<Object, Pair<EventStream, EPStatementHandleCallback>> eventStreamsIdentity;
 
     // Using a reference-counted map for non-join statements
     private final RefCountedMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>> eventStreamsRefCounted;
@@ -72,7 +72,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
     public StreamFactorySvcImpl(boolean isReuseViews)
     {
         this.eventStreamsRefCounted = new RefCountedMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>>();
-        this.eventStreamsIdentity = new IdentityHashMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>>();
+        this.eventStreamsIdentity = new IdentityHashMap<Object, Pair<EventStream, EPStatementHandleCallback>>();
         this.isReuseViews = isReuseViews;
     }
 
@@ -85,11 +85,14 @@ public class StreamFactorySvcImpl implements StreamFactoryService
     /**
      * See the method of the same name in {@link com.espertech.esper.view.stream.StreamFactoryService}. Always attempts to reuse an existing event stream.
      * May thus return a new event stream or an existing event stream depending on whether filter criteria match.
+     *
      * @param filterSpec is the filter definition
-     * @param epStatementHandle is the statement resource lock
+     * @param epStatementAgentInstanceHandle is the statement resource lock
      * @return newly createdStatement event stream, not reusing existing instances
      */
-    public Pair<EventStream, StatementLock> createStream(final String statementId, final FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle, boolean isJoin, final boolean isSubSelect, final ExprEvaluatorContext exprEvaluatorContext, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect, Annotation[] annotations)
+    public Pair<EventStream, StatementAgentInstanceLock> createStream(final String statementId, final FilterSpecCompiled filterSpec, FilterService filterService,
+                                                                      EPStatementAgentInstanceHandle epStatementAgentInstanceHandle,
+                                                                      boolean isJoin, final boolean isSubSelect, final ExprEvaluatorContext exprEvaluatorContext, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect, Annotation[] annotations)
     {
         if (log.isDebugEnabled())
         {
@@ -121,10 +124,10 @@ public class StreamFactorySvcImpl implements StreamFactoryService
                 eventStreamsRefCounted.reference(filterSpec);
 
                 // audit proxy
-                EventStream eventStream = getAuditProxy(epStatementHandle.getStatementName(), annotations, filterSpec, pair.getFirst());
+                EventStream eventStream = EventStreamProxy.getAuditProxy(epStatementAgentInstanceHandle.getStatementHandle().getStatementName(), annotations, filterSpec, pair.getFirst());
 
                 // We return the lock of the statement first establishing the stream to use that as the new statement's lock
-                return new Pair<EventStream, StatementLock>(eventStream, pair.getSecond().getEpStatementHandle().getStatementLock());
+                return new Pair<EventStream, StatementAgentInstanceLock>(eventStream, pair.getSecond().getAgentInstanceHandle().getStatementAgentInstanceLock());
             }
         }
 
@@ -133,7 +136,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
         EventStream zeroDepthStream = new ZeroDepthStream(resultEventType);
 
         // audit proxy
-        EventStream inputStream = getAuditProxy(epStatementHandle.getStatementName(), annotations, filterSpec, zeroDepthStream);
+        EventStream inputStream = EventStreamProxy.getAuditProxy(epStatementAgentInstanceHandle.getStatementHandle().getStatementName(), annotations, filterSpec, zeroDepthStream);
 
         final EventStream eventStream = inputStream;
         FilterHandleCallback filterCallback;
@@ -181,7 +184,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
                 }
             };
         }
-        EPStatementHandleCallback handle = new EPStatementHandleCallback(epStatementHandle, filterCallback);
+        EPStatementHandleCallback handle = new EPStatementHandleCallback(epStatementAgentInstanceHandle, filterCallback);
 
         // Store stream for reuse
         pair = new Pair<EventStream, EPStatementHandleCallback>(eventStream, handle);
@@ -195,34 +198,10 @@ public class StreamFactorySvcImpl implements StreamFactoryService
         }
 
         // Activate filter
-        FilterValueSet filterValues = filterSpec.getValueSet(null);
+        FilterValueSet filterValues = filterSpec.getValueSet(null, exprEvaluatorContext, null);
         filterService.add(filterValues, handle);
 
-        return new Pair<EventStream, StatementLock>(inputStream, null);
-    }
-
-    private EventStream getAuditProxy(String statementName, Annotation[] annotations, FilterSpecCompiled filterSpec, EventStream designated) {
-        Audit audit = AuditEnum.STREAM.getAudit(annotations);
-        if (audit == null) {
-            return designated;
-        }
-
-        StringWriter filterAndParams = new StringWriter();
-        filterAndParams.write(filterSpec.getFilterForEventType().getName());
-        if (filterSpec.getParameters() != null && !filterSpec.getParameters().isEmpty()) {
-            filterAndParams.write('(');
-            String delimiter = "";
-            for (FilterSpecParam param : filterSpec.getParameters()) {
-                filterAndParams.write(delimiter);
-                filterAndParams.write(param.getPropertyName());
-                filterAndParams.write(param.getFilterOperator().getTextualOp());
-                filterAndParams.write("...");
-                delimiter = ",";
-            }
-            filterAndParams.write(')');
-        }
-
-        return (EventStream) EventStreamProxy.newInstance(statementName, filterAndParams.toString(), designated);
+        return new Pair<EventStream, StatementAgentInstanceLock>(inputStream, null);
     }
 
     /**

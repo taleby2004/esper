@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 
 /**
@@ -27,7 +28,7 @@ public class RangeValueDouble implements FilterSpecParamRangeValue
         this.doubleValue = doubleValue;
     }
 
-    public final Double getFilterValue(MatchedEventMap matchedEvents)
+    public final Double getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
         return doubleValue;
     }

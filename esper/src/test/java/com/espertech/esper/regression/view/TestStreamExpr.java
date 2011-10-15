@@ -11,6 +11,8 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.event.bean.BeanEventBean;
+import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.support.bean.*;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
@@ -277,6 +279,7 @@ public class TestStreamExpr extends TestCase
         SupportMarketDataBean eventA = new SupportMarketDataBean("ACME", 0, 0L, null);
         epService.getEPRuntime().sendEvent(eventA);
         EventBean event = listenerTwo.assertOneGetNewAndReset();
+        assertTrue(event.getEventType() instanceof BeanEventType);
         assertTrue (event.getUnderlying() instanceof SupportBean);
         assertEquals("ACME", event.get("string"));
     }

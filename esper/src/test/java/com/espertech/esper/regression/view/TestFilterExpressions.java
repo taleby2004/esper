@@ -291,7 +291,6 @@ public class TestFilterExpressions extends TestCase
         assertTrue(listener.isInvoked());
     }
 
-    // TODO - output warning if comparing to null
     public void testNotEqualsNull() {
         SupportUpdateListener[] listeners = new SupportUpdateListener[6];
         for (int i = 0; i < listeners.length; i++) {

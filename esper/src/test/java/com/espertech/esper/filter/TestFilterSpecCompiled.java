@@ -97,7 +97,7 @@ public class TestFilterSpecCompiled extends TestCase
         EventBean event = SupportEventBeanFactory.createObject(eventBean);
         MatchedEventMap matchedEvents = new MatchedEventMapImpl();
         matchedEvents.add("asName", event);
-        FilterValueSet valueSet = filterSpec.getValueSet(matchedEvents);
+        FilterValueSet valueSet = filterSpec.getValueSet(matchedEvents, null, null);
 
         // Assert the generated filter value container
         assertSame(eventType, valueSet.getEventType());

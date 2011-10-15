@@ -1,6 +1,6 @@
 package com.espertech.esperio.http.core;
 
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esperio.http.EsperHttpRequestHandler;
 import com.espertech.esperio.http.config.GetHandler;
 import com.espertech.esperio.http.config.Service;

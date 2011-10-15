@@ -24,7 +24,7 @@ import java.util.Date;
  * Utility class for date-time functions.
  */
 public class DateTime {
-    private static final Log log = LogFactory.getLog(ReformatOpToCalendar.class);
+    private static final Log log = LogFactory.getLog(DateTime.class);
 
     /**
      * Returns a calendar from a given string using the default SimpleDateFormat for parsing.

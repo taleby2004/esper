@@ -10,7 +10,8 @@ package com.espertech.esper.view.stat;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.view.CloneableView;
@@ -32,16 +33,16 @@ public final class RegressionLinestView extends BaseBivariateStatisticsView impl
      * Constructor.
      * @param xFieldName is the field name of the field providing X data points
      * @param yFieldName is the field name of the field providing X data points
-     * @param statementContext contains required view services
+     * @param agentInstanceContext contains required view services
      */
-    public RegressionLinestView(StatementContext statementContext, ExprNode xFieldName, ExprNode yFieldName, EventType eventType, StatViewAdditionalProps additionalProps)
+    public RegressionLinestView(AgentInstanceContext agentInstanceContext, ExprNode xFieldName, ExprNode yFieldName, EventType eventType, StatViewAdditionalProps additionalProps)
     {
-        super(statementContext, xFieldName, yFieldName, eventType, additionalProps);
+        super(agentInstanceContext, xFieldName, yFieldName, eventType, additionalProps);
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return new RegressionLinestView(statementContext, this.getExpressionX(), this.getExpressionY(), eventType, additionalProps);
+        return new RegressionLinestView(agentInstanceContext, this.getExpressionX(), this.getExpressionY(), eventType, additionalProps);
     }
 
     public EventType getEventType()
@@ -94,7 +95,7 @@ public final class RegressionLinestView extends BaseBivariateStatisticsView impl
         if (additionalProps != null) {
             additionalProps.addProperties(result, decoration);
         }
-        return eventAdapterService.adaptorForTypedMap(result, eventType);
+        return eventAdapterService.adapterForTypedMap(result, eventType);
     }
 
     /**

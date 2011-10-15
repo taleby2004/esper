@@ -2,7 +2,7 @@ package com.espertech.esperio.socket.core;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.event.EventBeanManufactureException;
 import com.espertech.esper.event.EventBeanManufacturer;
 import com.espertech.esper.event.EventTypeSPI;

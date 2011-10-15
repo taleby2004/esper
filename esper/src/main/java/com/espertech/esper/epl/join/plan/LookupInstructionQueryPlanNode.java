@@ -8,20 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.plan;
 
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.join.assemble.BaseAssemblyNode;
 import com.espertech.esper.epl.join.exec.base.ExecNode;
-import com.espertech.esper.epl.join.exec.base.LookupInstructionExecNode;
 import com.espertech.esper.epl.join.exec.base.LookupInstructionExec;
+import com.espertech.esper.epl.join.exec.base.LookupInstructionExecNode;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
-import com.espertech.esper.epl.join.assemble.BaseAssemblyNode;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.view.Viewable;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -61,14 +62,14 @@ public class LookupInstructionQueryPlanNode extends QueryPlanNode
         this.assemblyInstructions = assemblyInstructions;
     }
 
-    public ExecNode makeExec(Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
+    public ExecNode makeExec(String statementName, String statementId, Annotation[] annotations, Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
     {
         LookupInstructionExec execs[] = new LookupInstructionExec[lookupInstructions.size()];
 
         int count = 0;
         for (LookupInstructionPlan instruction : lookupInstructions)
         {
-            LookupInstructionExec exec = instruction.makeExec(indexesPerStream, streamTypes, streamViews, historicalStreamIndexLists, viewExternal);
+            LookupInstructionExec exec = instruction.makeExec(statementName, statementId, annotations, indexesPerStream, streamTypes, streamViews, historicalStreamIndexLists, viewExternal);
             execs[count] = exec;
             count++;
         }

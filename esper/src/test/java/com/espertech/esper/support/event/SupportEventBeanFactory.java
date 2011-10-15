@@ -26,7 +26,7 @@ public class SupportEventBeanFactory
 
     public static EventBean createMapFromValues(Map<String, Object> testValuesMap, EventType eventType)
     {
-        return SupportEventAdapterService.getService().adaptorForTypedMap(testValuesMap, eventType);
+        return SupportEventAdapterService.getService().adapterForTypedMap(testValuesMap, eventType);
     }   
 
     public static EventBean[] makeEvents(String[] ids)

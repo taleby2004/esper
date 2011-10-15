@@ -38,9 +38,9 @@ public final class EvalFollowedByWithMaxStateNode extends EvalStateNode implemen
 
         this.evalFollowedByNode = evalFollowedByNode;
         this.nodes = new HashMap<EvalStateNode, Integer>();
-        this.countActivePerChild = new int[evalFollowedByNode.getChildNodes().size() - 1];
+        this.countActivePerChild = new int[evalFollowedByNode.getChildNodes().length - 1];
 
-        EvalNode child = evalFollowedByNode.getChildNodes().get(0);
+        EvalNode child = evalFollowedByNode.getChildNodes()[0];
         EvalStateNode childState = child.newState(this, beginState, null);
         nodes.put(childState, 0);
     }
@@ -83,7 +83,7 @@ public final class EvalFollowedByWithMaxStateNode extends EvalStateNode implemen
         }
 
         // If the match came from the very last filter, need to escalate
-        int numChildNodes = getFactoryNode().getChildNodes().size();
+        int numChildNodes = evalFollowedByNode.getChildNodes().length;
         if (index == (numChildNodes - 1))
         {
             boolean isFollowedByQuitted = false;
@@ -97,16 +97,16 @@ public final class EvalFollowedByWithMaxStateNode extends EvalStateNode implemen
         // Else start a new sub-expression for the next-in-line filter
         else
         {
-            int max = evalFollowedByNode.getMax(index);
+            int max = evalFollowedByNode.getFactoryNode().getMax(index);
             if ((max != -1) && (max >=0)) {
                 if (countActivePerChild[index] >= max) {
-                    evalFollowedByNode.getContext().getExceptionHandlingService().handleCondition(new ConditionPatternSubexpressionMax(max), evalFollowedByNode.getContext().getEpStatementHandle());
+                    evalFollowedByNode.getContext().getPatternContext().getExceptionHandlingService().handleCondition(new ConditionPatternSubexpressionMax(max), evalFollowedByNode.getContext().getPatternContext().getEpStatementHandle());
                     return;
                 }
             }
             countActivePerChild[index]++;
 
-            EvalNode child = getFactoryNode().getChildNodes().get(index + 1);
+            EvalNode child = evalFollowedByNode.getChildNodes()[index + 1];
             EvalStateNode childState = child.newState(this, matchEvent, null);
             nodes.put(childState, index + 1);
             childState.start();

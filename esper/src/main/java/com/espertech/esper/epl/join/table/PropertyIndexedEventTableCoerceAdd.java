@@ -8,12 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.table;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.util.SimpleNumberCoercer;
-import com.espertech.esper.util.SimpleNumberCoercerFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,35 +28,22 @@ public class PropertyIndexedEventTableCoerceAdd extends PropertyIndexedEventTabl
 {
     private static Log log = LogFactory.getLog(PropertyIndexedEventTableCoerceAdd.class);
     private final SimpleNumberCoercer[] coercers;
-    private final Class[] coercionType;
+    protected final Class[] coercionTypes;
 
-    /**
-     * Ctor.
-     * @param streamNum is the stream number of the indexed stream
-     * @param eventType is the event type of the indexed stream
-     * @param propertyNames are the property names to get property values
-     * @param coercionType are the classes to coerce indexed values to
-     */
-    public PropertyIndexedEventTableCoerceAdd(int streamNum, EventType eventType, String[] propertyNames, Class[] coercionType)
-    {
-        super(streamNum, eventType, propertyNames);
-        this.coercionType = coercionType;
-        coercers = new SimpleNumberCoercer[coercionType.length];
-        for (int i = 0; i < coercionType.length; i++)
-        {
-            if (JavaClassHelper.isNumeric(coercionType[i])) {
-                coercers[i] = SimpleNumberCoercerFactory.getCoercer(null, coercionType[i]);
-            }
-        }
+    public PropertyIndexedEventTableCoerceAdd(int streamNum, EventPropertyGetter[] propertyGetters, SimpleNumberCoercer[] coercers, Class[] coercionTypes) {
+        super(streamNum, propertyGetters);
+        this.coercers = coercers;
+        this.coercionTypes = coercionTypes;
     }
 
+    @Override
     protected MultiKeyUntyped getMultiKey(EventBean event)
     {
         Object[] keyValues = new Object[propertyGetters.length];
         for (int i = 0; i < propertyGetters.length; i++)
         {
             Object value = propertyGetters[i].get(event);
-            if ((value != null) && (!value.getClass().equals(coercionType[i])))
+            if ((value != null) && (!value.getClass().equals(coercionTypes[i])))
             {
                 if (value instanceof Number)
                 {

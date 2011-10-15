@@ -9,6 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 
 import java.util.Arrays;
@@ -43,7 +44,7 @@ public final class FilterSpecParamIn extends FilterSpecParam
         boolean isAllConstants = false;
         for (FilterSpecParamInValue value : listofValues)
         {
-            if (value instanceof InSetOfValuesEventProp)
+            if (value instanceof InSetOfValuesEventProp || value instanceof InSetOfValuesContextProp)
             {
                 isAllConstants = false;
                 break;
@@ -56,7 +57,7 @@ public final class FilterSpecParamIn extends FilterSpecParam
             int count = 0;
             for (FilterSpecParamInValue valuePlaceholder : listOfValues)
             {
-                constants[count++] = valuePlaceholder.getFilterValue(null);
+                constants[count++] = valuePlaceholder.getFilterValue(null, null);
             }
             inListConstantsOnly = new MultiKeyUntyped(constants);
         }
@@ -68,7 +69,7 @@ public final class FilterSpecParamIn extends FilterSpecParam
         }
     }
 
-    public final Object getFilterValue(MatchedEventMap matchedEvents)
+    public final Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext)
     {
         // If the list of values consists of all-constants and no event properties, then use cached version
         if (inListConstantsOnly != null)
@@ -81,7 +82,7 @@ public final class FilterSpecParamIn extends FilterSpecParam
         int count = 0;
         for (FilterSpecParamInValue valuePlaceholder : listOfValues)
         {
-            actualValues[count++] = valuePlaceholder.getFilterValue(matchedEvents);
+            actualValues[count++] = valuePlaceholder.getFilterValue(matchedEvents, evaluatorContext);
         }
         return new MultiKeyUntyped(actualValues);
     }

@@ -38,9 +38,4 @@ public class LastEverValueFilterAggregator extends LastEverValueAggregator
         }
         super.leave(paramArray[0]);
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeLastEverValueAggregator(type, true);
-    }
 }

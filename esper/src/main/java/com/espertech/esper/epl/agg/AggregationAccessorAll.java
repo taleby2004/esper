@@ -12,7 +12,6 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.IteratorCollectionRO;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 
 import java.lang.reflect.Array;

@@ -9,16 +9,11 @@
 package com.espertech.esper.epl.view;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.expression.*;
-import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.epl.variable.VariableChangeCallback;
-import com.espertech.esper.epl.variable.VariableReadWritePackage;
 import com.espertech.esper.epl.variable.VariableReader;
-import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.util.ExecutionPathDebugLog;
@@ -27,107 +22,56 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Output condition for output rate limiting that handles when-then expressions for controlling output.
  */
-public class OutputConditionExpression implements OutputCondition, VariableChangeCallback
+public class OutputConditionExpression extends OutputConditionBase implements OutputCondition, VariableChangeCallback
 {
     private static final Log log = LogFactory.getLog(OutputConditionExpression.class);
-    private final ExprNode whenExpressionNode;
-    private final ExprEvaluator whenExpressionNodeEval;
-    private final OutputCallback outputCallback;
-    private final ScheduleSlot scheduleSlot;
-    private final StatementContext context;
-    private final VariableReadWritePackage variableReadWritePackage;
+    private final AgentInstanceContext agentInstanceContext;
+    private final OutputConditionExpressionFactory parent;
 
+    private final ScheduleSlot scheduleSlot;
     private boolean isCallbackScheduled;
     private boolean ignoreVariableCallbacks;
     private Map<String, Object> builtinProperties;
     private EventBean[] eventsPerStream;
-    private EventType builtinPropertiesEventType;
 
     // ongoing builtin properties
     private int totalNewEventsCount;
     private int totalOldEventsCount;
     private Long lastOutputTimestamp;
 
-    /**
-     * Ctor.
-     * @param whenExpressionNode the expression to evaluate, returning true when to output
-     * @param assignments is the optional then-clause variable assignments, or null or empty if none
-     * @param context statement context
-     * @param outputCallback callback
-     * @throws ExprValidationException when validation fails
-     */
-    public OutputConditionExpression(ExprNode whenExpressionNode, List<OnTriggerSetAssignment> assignments, final StatementContext context, OutputCallback outputCallback)
-            throws ExprValidationException
-    {
-        this.whenExpressionNode = whenExpressionNode;
-        this.whenExpressionNodeEval = whenExpressionNode.getExprEvaluator();
-        this.outputCallback = outputCallback;
-        this.scheduleSlot = context.getScheduleBucket().allocateSlot();
-        this.context = context;
+    public OutputConditionExpression(OutputCallback outputCallback, final AgentInstanceContext agentInstanceContext, OutputConditionExpressionFactory parent) {
+        super(outputCallback);
+        this.agentInstanceContext = agentInstanceContext;
+        this.parent = parent;
+
+        scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
         this.eventsPerStream = new EventBean[1];
 
-        // determine if using variables
-        ExprNodeVariableVisitor variableVisitor = new ExprNodeVariableVisitor();
-        whenExpressionNode.accept(variableVisitor);
-        Set<String> variableNames = variableVisitor.getVariableNames();
-
-        // determine if using properties
-        boolean containsBuiltinProperties = false;
-        if (containsBuiltinProperties(whenExpressionNode))
-        {
-            containsBuiltinProperties = true;
-        }
-        else
-        {
-            if (assignments != null)
-            {
-                for (OnTriggerSetAssignment assignment : assignments)
-                {
-                    if (containsBuiltinProperties(assignment.getExpression()))
-                    {
-                        containsBuiltinProperties = true;
-                    }
-                }
-            }
-        }
-
-        if (containsBuiltinProperties)
+        if (parent.getBuiltinPropertiesEventType() != null)
         {
             builtinProperties = new HashMap<String, Object>();
-            builtinPropertiesEventType = getBuiltInEventType(context.getEventAdapterService());
-            lastOutputTimestamp = context.getSchedulingService().getTime();
+            lastOutputTimestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         }
 
-        if (variableNames != null)
+        if (parent.getVariableNames() != null)
         {
             // if using variables, register a callback on the change of the variable
-            for (String variableName : variableNames)
+            for (String variableName : parent.getVariableNames())
             {
-                final VariableReader reader = context.getVariableService().getReader(variableName);
-                context.getVariableService().registerCallback(reader.getVariableNumber(), this);
-                context.getStatementStopService().addSubscriber(new StatementStopCallback() {
+                final VariableReader reader = agentInstanceContext.getStatementContext().getVariableService().getReader(variableName);
+                agentInstanceContext.getStatementContext().getVariableService().registerCallback(reader.getVariableNumber(), this);
+                agentInstanceContext.getStatementContext().getStatementStopService().addSubscriber(new StatementStopCallback() {
                     public void statementStopped()
                     {
-                        context.getVariableService().unregisterCallback(reader.getVariableNumber(), OutputConditionExpression.this);
+                        agentInstanceContext.getStatementContext().getVariableService().unregisterCallback(reader.getVariableNumber(), OutputConditionExpression.this);
                     }
                 });
             }
-        }
-
-        if (assignments != null)
-        {
-            variableReadWritePackage = new VariableReadWritePackage(assignments, context.getVariableService(), context.getEventAdapterService());
-        }
-        else
-        {
-            variableReadWritePackage = null;
         }
     }
 
@@ -152,7 +96,7 @@ public class OutputConditionExpression implements OutputCondition, VariableChang
             return;
         }
 
-        context.getVariableService().setLocalVersion();
+        agentInstanceContext.getStatementContext().getVariableService().setLocalVersion();
         boolean isOutput = evaluate();
         if ((isOutput) && (!isCallbackScheduled))
         {
@@ -167,11 +111,11 @@ public class OutputConditionExpression implements OutputCondition, VariableChang
             builtinProperties.put("count_insert", totalNewEventsCount);
             builtinProperties.put("count_remove", totalOldEventsCount);
             builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
-            eventsPerStream[0] = context.getEventAdapterService().adaptorForTypedMap(builtinProperties, builtinPropertiesEventType);
+            eventsPerStream[0] = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(builtinProperties, parent.getBuiltinPropertiesEventType());
         }
 
         boolean result = false;
-        Boolean output = (Boolean) whenExpressionNodeEval.evaluate(eventsPerStream, true, context);
+        Boolean output = (Boolean) parent.getWhenExpressionNodeEval().evaluate(eventsPerStream, true, agentInstanceContext);
         if ((output != null) && (output))
         {
             result = true;
@@ -183,7 +127,7 @@ public class OutputConditionExpression implements OutputCondition, VariableChang
     private void scheduleCallback()
     {
     	isCallbackScheduled = true;
-        long current = context.getSchedulingService().getTime();
+        long current = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
 
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
@@ -200,42 +144,28 @@ public class OutputConditionExpression implements OutputCondition, VariableChang
                 resetBuiltinProperties();
             }
         };
-        EPStatementHandleCallback handle = new EPStatementHandleCallback(context.getEpStatementHandle(), callback);
-        context.getSchedulingService().add(0, handle, scheduleSlot);
+        EPStatementHandleCallback handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
+        agentInstanceContext.getStatementContext().getSchedulingService().add(0, handle, scheduleSlot);
 
         // execute assignments
-        if (variableReadWritePackage != null)
+        if (parent.getVariableReadWritePackage() != null)
         {
             if (builtinProperties != null)
             {
                 builtinProperties.put("count_insert", totalNewEventsCount);
                 builtinProperties.put("count_remove", totalOldEventsCount);
                 builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
-                eventsPerStream[0] = context.getEventAdapterService().adaptorForTypedMap(builtinProperties, builtinPropertiesEventType);
+                eventsPerStream[0] = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(builtinProperties, parent.getBuiltinPropertiesEventType());
             }
 
             ignoreVariableCallbacks = true;
             try {
-                variableReadWritePackage.writeVariables(context.getVariableService(), eventsPerStream, null, context);
+                parent.getVariableReadWritePackage().writeVariables(agentInstanceContext.getStatementContext().getVariableService(), eventsPerStream, null, agentInstanceContext);
             }
             finally {
                 ignoreVariableCallbacks = false;
             }
         }
-    }
-
-    /**
-     * Build the event type for built-in properties.
-     * @param eventAdapterService event adapters
-     * @return event type
-     */
-    public static EventType getBuiltInEventType(EventAdapterService eventAdapterService)
-    {
-        Map<String, Object> outputLimitProperties = new HashMap<String, Object>();
-        outputLimitProperties.put("count_insert", Integer.class);
-        outputLimitProperties.put("count_remove", Integer.class);
-        outputLimitProperties.put("last_output_timestamp", Long.class);
-        return eventAdapterService.createAnonymousMapType(OutputConditionExpression.class.getName(), outputLimitProperties);
     }
 
     private void resetBuiltinProperties()
@@ -244,14 +174,7 @@ public class OutputConditionExpression implements OutputCondition, VariableChang
         {
             totalNewEventsCount = 0;
             totalOldEventsCount = 0;
-            lastOutputTimestamp = context.getSchedulingService().getTime();
+            lastOutputTimestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         }
-    }
-
-    private boolean containsBuiltinProperties(ExprNode expr)
-    {
-        ExprNodeIdentifierVisitor propertyVisitor = new ExprNodeIdentifierVisitor(false);
-        expr.accept(propertyVisitor);
-        return !propertyVisitor.getExprProperties().isEmpty();
     }
 }

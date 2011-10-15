@@ -9,7 +9,8 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.soda.ForClauseKeyword;
-import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.core.context.util.ContextDescriptor;
+import com.espertech.esper.core.service.StatementResultService;
 import com.espertech.esper.epl.core.eval.SelectExprStreamDesc;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.*;
@@ -64,7 +65,8 @@ public class SelectExprProcessorFactory
                                                    String engineURI,
                                                    String statementId,
                                                    String statementName,
-                                                   Annotation[] annotations)
+                                                   Annotation[] annotations,
+                                                   ContextDescriptor contextDescriptor)
         throws ExprValidationException
     {
         SelectExprProcessor synthetic = getProcessorInternal(assignedTypeNumberStack, selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext, statementId);
@@ -98,7 +100,7 @@ public class SelectExprProcessorFactory
 
                     StreamTypeService type = new StreamTypeServiceImpl(synthetic.getResultEventType(), null, false, engineURI);
                     groupedDeliveryExpr = new ExprNode[item.getExpressions().size()];
-                    ExprValidationContext validationContext = new ExprValidationContext(type, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations);
+                    ExprValidationContext validationContext = new ExprValidationContext(type, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations, contextDescriptor);
                     for (int i = 0; i < item.getExpressions().size(); i++) {
                         groupedDeliveryExpr[i] = ExprNodeUtility.getValidatedSubtree(item.getExpressions().get(i), validationContext);
                     }

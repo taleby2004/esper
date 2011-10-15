@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
@@ -29,7 +30,7 @@ public class SelectExprWildcardProcessor implements SelectExprProcessor
         this.eventType = eventType;
     }
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
         return eventsPerStream[0];
     }

@@ -48,7 +48,7 @@ public class PropertyEvaluatorSelect implements PropertyEvaluator
         ArrayDeque<EventBean> result = new ArrayDeque<EventBean>();
         for (EventBean[] row : rows)
         {
-            EventBean bean = selectExprProcessor.process(row, true, false);
+            EventBean bean = selectExprProcessor.process(row, true, false, exprEvaluatorContext);
             result.add(bean);
         }
         return result.toArray(new EventBean[result.size()]);

@@ -55,40 +55,10 @@ public class TestRefCountedSet extends TestCase
         assertFalse(refSet.remove("b"));
         assertTrue(refSet.remove("b"));
         
-        try
-        {
-            refSet.remove("c");
-            fail();
-        }
-        catch (IllegalStateException ex)
-        {
-            // expected
-        }
-
-        try
-        {
-            refSet.add("a");
-            refSet.remove("a");
-            refSet.remove("a");
-            fail();
-        }
-        catch (IllegalStateException ex)
-        {
-            // expected
-        }
 
         refSet.add("C");
         refSet.add("C");
         assertTrue(refSet.removeAll("C"));
-        try
-        {
-            refSet.remove("C");
-            fail();
-        }
-        catch (IllegalStateException ex)
-        {
-            // expected
-        }
         assertFalse(refSet.removeAll("C"));
     }
 }

@@ -28,22 +28,22 @@ public interface FilterService
 {
     /**
      * Finds matching filters to the event passed in and collects their associated callback method.
+     *
      * @param event is the event to be matched against filters
      * @param matches is a collection that is populated via add method with any handles for matching filters
-     * @param exprEvaluatorContext context for expression evalauation
      * @return filter current version
      */
-    public long evaluate(EventBean event, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext);
+    public long evaluate(EventBean event, Collection<FilterHandle> matches);
 
     /**
      * Finds matching filters to the event passed in and collects their associated callback method, for a particular statement only
+     *
      * @param event is the event to be matched against filters
      * @param matches is a collection that is populated via add method with any handles for matching filters
-     * @param exprEvaluatorContext context for expression evalauation
      * @param statementId statement for which to return results for
      * @return filter current version
      */
-    public long evaluate(EventBean event, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext, String statementId);
+    public long evaluate(EventBean event, Collection<FilterHandle> matches, String statementId);
 
     /**
      * Add a filter for events as defined by the filter specification, and register a

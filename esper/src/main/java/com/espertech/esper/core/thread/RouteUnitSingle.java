@@ -12,8 +12,8 @@
 package com.espertech.esper.core.thread;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.core.EPRuntimeImpl;
-import com.espertech.esper.core.EPStatementHandleCallback;
+import com.espertech.esper.core.service.EPRuntimeImpl;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -48,7 +48,7 @@ public class RouteUnitSingle implements RouteUnitRunnable
     {
         try
         {
-            epRuntime.processStatementFilterSingle(handleCallback.getEpStatementHandle(), handleCallback, event, filterVersion);
+            epRuntime.processStatementFilterSingle(handleCallback.getAgentInstanceHandle(), handleCallback, event, filterVersion);
 
             epRuntime.dispatch();
 

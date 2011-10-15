@@ -9,15 +9,12 @@
 package com.espertech.esper.view.window;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.ExpressionResultCacheService;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
-import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.expression.*;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
 import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
 
@@ -26,18 +23,8 @@ import java.util.*;
 /**
  * Factory for {@link com.espertech.esper.view.window.ExpressionWindowView}.
  */
-public class ExpressionWindowViewFactory implements DataWindowViewFactory
+public class ExpressionWindowViewFactory implements DataWindowViewFactory, DataWindowViewWithPrevious
 {
-    /**
-     * The access into the data window.
-     */
-    protected RandomAccessByIndexGetter randomAccessGetterImpl;
-
-    /**
-     * Flag to indicate that the view must handle the removed events from a parent view.
-     */
-    protected boolean isRemoveStreamHandling;
-
     private EventType eventType;
     protected ExprNode expiryExpression;
     protected MapEventBean builtinMapBean;
@@ -87,62 +74,14 @@ public class ExpressionWindowViewFactory implements DataWindowViewFactory
         variableNames = visitor.getVariableNames();
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        if (viewCapability instanceof ViewCapDataWindowAccess)
-        {
-            return true;
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+    public Object makePreviousGetter() {
+        return new RandomAccessByIndexGetter();
     }
 
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
+    public View makeView(final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            isRemoveStreamHandling = true;
-            return;
-        }
-        if (randomAccessGetterImpl == null)
-        {
-            randomAccessGetterImpl = new RandomAccessByIndexGetter();
-        }
-        resourceCallback.setViewResource(randomAccessGetterImpl);
-    }
-
-    public View makeView(final StatementContext statementContext)
-    {
-        IStreamRandomAccess randomAccess = null;
-
-        if (randomAccessGetterImpl != null)
-        {
-            randomAccess = new IStreamRandomAccess(randomAccessGetterImpl);
-            randomAccessGetterImpl.updated(randomAccess);
-        }
-
-        ExprEvaluatorContext evaluatorContext = new ExprEvaluatorContext()
-        {
-            public TimeProvider getTimeProvider()
-            {
-                return statementContext.getTimeProvider();
-            }
-
-            public ExpressionResultCacheService getExpressionResultCacheService() {
-                return null;
-            }
-        };
-        return new ExpressionWindowView(this, randomAccess, expiryExpression.getExprEvaluator(), evaluatorContext, builtinMapBean, variableNames, statementContext);
+        IStreamRandomAccess randomAccess = ViewServiceHelper.getOptPreviousExprRandomAccess(agentInstanceViewFactoryContext);
+        return new ExpressionWindowView(this, randomAccess, expiryExpression.getExprEvaluator(), builtinMapBean, variableNames, agentInstanceViewFactoryContext);
     }
 
     public EventType getEventType()

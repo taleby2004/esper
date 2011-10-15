@@ -34,7 +34,7 @@ public class TestWeightedAverageView extends TestCase
     {
         // Set up sum view and a test child view
         EventType type = WeightedAverageView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        myView = new WeightedAverageView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null);
+        myView = new WeightedAverageView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null);
         
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
@@ -79,7 +79,7 @@ public class TestWeightedAverageView extends TestCase
 
     public void testCopyView() throws Exception
     {
-        WeightedAverageView copied = (WeightedAverageView) myView.cloneView(SupportStatementContextFactory.makeContext());
+        WeightedAverageView copied = (WeightedAverageView) myView.cloneView();
         assertTrue(myView.getFieldNameWeight().equals(copied.getFieldNameWeight()));
         assertTrue(myView.getFieldNameX().equals(copied.getFieldNameX()));
     }

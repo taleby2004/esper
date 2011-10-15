@@ -221,7 +221,7 @@ public class PollExecStrategyDBQuery implements PollExecStrategy
 
                 EventBean eventBeanRow = null;
                 if (this.outputRowConversionHook == null) {
-                    eventBeanRow = eventAdapterService.adaptorForTypedMap(row, eventType);
+                    eventBeanRow = eventAdapterService.adapterForTypedMap(row, eventType);
                 }
                 else {
                     rowContext.setValues(row);

@@ -20,15 +20,15 @@ import java.util.List;
 
 public interface PatternNodeFactory {
 
-    public EvalNode makeAndNode();
-    public EvalNode makeEveryDistinctNode(List<ExprNode> expressions);
-    public EvalNode makeEveryNode();
-    public EvalNode makeFilterNode(FilterSpecRaw filterSpecification,String eventAsName, Integer consumptionLevel);
-    public EvalNode makeFollowedByNode(List<ExprNode> maxExpressions);
-    public EvalNode makeGuardNode(PatternGuardSpec patternGuardSpec);
-    public EvalNode makeMatchUntilNode(ExprNode lowerBounds, ExprNode upperBounds);
-    public EvalNode makeNotNode();
-    public EvalNode makeObserverNode(PatternObserverSpec patternObserverSpec);
-    public EvalNode makeOrNode();
-    public EvalRootNode makeRootNode();
+    public EvalFactoryNode makeAndNode();
+    public EvalFactoryNode makeEveryDistinctNode(List<ExprNode> expressions);
+    public EvalFactoryNode makeEveryNode();
+    public EvalFactoryNode makeFilterNode(FilterSpecRaw filterSpecification,String eventAsName, Integer consumptionLevel);
+    public EvalFactoryNode makeFollowedByNode(List<ExprNode> maxExpressions, boolean hasEngineWideMax);
+    public EvalFactoryNode makeGuardNode(PatternGuardSpec patternGuardSpec);
+    public EvalFactoryNode makeMatchUntilNode(ExprNode lowerBounds, ExprNode upperBounds);
+    public EvalFactoryNode makeNotNode();
+    public EvalFactoryNode makeObserverNode(PatternObserverSpec patternObserverSpec);
+    public EvalFactoryNode makeOrNode();
+    public EvalRootFactoryNode makeRootNode();
 }

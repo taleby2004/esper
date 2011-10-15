@@ -8,10 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.collection.OneEventCollection;
-import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.OneEventCollection;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.DataWindowView;
 import com.espertech.esper.view.View;
@@ -28,6 +28,7 @@ import java.util.LinkedHashSet;
  */
 public final class FirstLengthWindowView extends ViewSupport implements DataWindowView, CloneableView
 {
+    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final FirstLengthWindowViewFactory lengthFirstFactory;
     private final int size;
     private LinkedHashSet<EventBean> indexedEvents;
@@ -37,21 +38,22 @@ public final class FirstLengthWindowView extends ViewSupport implements DataWind
      * @param size the first N events to consider
      * @param lengthFirstWindowViewFactory for copying this view in a group-by
      */
-    public FirstLengthWindowView(FirstLengthWindowViewFactory lengthFirstWindowViewFactory, int size)
+    public FirstLengthWindowView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext, FirstLengthWindowViewFactory lengthFirstWindowViewFactory, int size)
     {
         if (size < 1)
         {
             throw new IllegalArgumentException("Illegal argument for size of length window");
         }
 
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
         this.lengthFirstFactory = lengthFirstWindowViewFactory;
         this.size = size;
         indexedEvents = new LinkedHashSet<EventBean>();
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return lengthFirstFactory.makeView(statementContext);
+        return lengthFirstFactory.makeView(agentInstanceViewFactoryContext);
     }
 
     /**

@@ -10,7 +10,7 @@ package com.espertech.esper.epl.view;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeIdentifierVisitor;
@@ -32,7 +32,7 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
 {
     private static final Log log = LogFactory.getLog(OutputConditionPolledExpression.class);
     private final ExprEvaluator whenExpressionNode;
-    private final StatementContext context;
+    private final AgentInstanceContext agentInstanceContext;
     private final VariableReadWritePackage variableReadWritePackage;
 
     private Map<String, Object> builtinProperties;
@@ -48,14 +48,13 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
      * Ctor.
      * @param whenExpressionNode the expression to evaluate, returning true when to output
      * @param assignments is the optional then-clause variable assignments, or null or empty if none
-     * @param context statement context
      * @throws com.espertech.esper.epl.expression.ExprValidationException when validation fails
      */
-    public OutputConditionPolledExpression(ExprNode whenExpressionNode, List<OnTriggerSetAssignment> assignments, final StatementContext context)
+    public OutputConditionPolledExpression(ExprNode whenExpressionNode, List<OnTriggerSetAssignment> assignments, AgentInstanceContext agentInstanceContext)
             throws ExprValidationException
     {
         this.whenExpressionNode = whenExpressionNode.getExprEvaluator();
-        this.context = context;
+        this.agentInstanceContext = agentInstanceContext;
         this.eventsPerStream = new EventBean[1];
 
         // determine if using properties
@@ -81,13 +80,13 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
         if (containsBuiltinProperties)
         {
             builtinProperties = new HashMap<String, Object>();
-            builtinPropertiesEventType = getBuiltInEventType(context.getEventAdapterService());
-            lastOutputTimestamp = context.getSchedulingService().getTime();
+            builtinPropertiesEventType = getBuiltInEventType(agentInstanceContext.getStatementContext().getEventAdapterService());
+            lastOutputTimestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         }
 
         if (assignments != null)
         {
-            variableReadWritePackage = new VariableReadWritePackage(assignments, context.getVariableService(), context.getEventAdapterService());
+            variableReadWritePackage = new VariableReadWritePackage(assignments, agentInstanceContext.getStatementContext().getVariableService(), agentInstanceContext.getStatementContext().getEventAdapterService());
         }
         else
         {
@@ -113,11 +112,11 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
                     builtinProperties.put("count_insert", totalNewEventsCount);
                     builtinProperties.put("count_remove", totalOldEventsCount);
                     builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
-                    eventsPerStream[0] = context.getEventAdapterService().adaptorForTypedMap(builtinProperties, builtinPropertiesEventType);
+                    eventsPerStream[0] = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(builtinProperties, builtinPropertiesEventType);
                 }
 
                 try {
-                    variableReadWritePackage.writeVariables(context.getVariableService(), eventsPerStream, null, context);
+                    variableReadWritePackage.writeVariables(agentInstanceContext.getStatementContext().getVariableService(), eventsPerStream, null, agentInstanceContext);
                 }
                 finally {
                 }
@@ -133,11 +132,11 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
             builtinProperties.put("count_insert", totalNewEventsCount);
             builtinProperties.put("count_remove", totalOldEventsCount);
             builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
-            eventsPerStream[0] = context.getEventAdapterService().adaptorForTypedMap(builtinProperties, builtinPropertiesEventType);
+            eventsPerStream[0] = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(builtinProperties, builtinPropertiesEventType);
         }
 
         boolean result = false;
-        Boolean output = (Boolean) whenExpressionNode.evaluate(eventsPerStream, true, context);
+        Boolean output = (Boolean) whenExpressionNode.evaluate(eventsPerStream, true, agentInstanceContext);
         if ((output != null) && (output))
         {
             result = true;
@@ -167,7 +166,7 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
         {
             totalNewEventsCount = 0;
             totalOldEventsCount = 0;
-            lastOutputTimestamp = context.getSchedulingService().getTime();
+            lastOutputTimestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         }
     }
 

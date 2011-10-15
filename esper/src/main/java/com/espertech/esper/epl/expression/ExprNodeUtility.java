@@ -9,14 +9,18 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.core.context.util.ContextPropertyRegistry;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.epl.core.EngineImportException;
-import com.espertech.esper.epl.core.EngineImportUndefinedException;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.enummethod.dot.ExprLambdaGoesNode;
 import com.espertech.esper.event.EventBeanUtility;
+import com.espertech.esper.schedule.ScheduleParameterException;
+import com.espertech.esper.schedule.ScheduleSpec;
+import com.espertech.esper.schedule.ScheduleSpecUtil;
 import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +29,19 @@ import java.io.StringWriter;
 import java.util.*;
 
 public class ExprNodeUtility {
+
+    /**
+     * Walk expression returning properties used.
+     * @param exprNode to walk
+     * @param visitAggregateNodes true to visit aggregation nodes
+     * @return list of props
+     */
+    public static List<Pair<Integer, String>> getExpressionProperties(ExprNode exprNode, boolean visitAggregateNodes)
+    {
+        ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(visitAggregateNodes);
+        exprNode.accept(visitor);
+        return visitor.getExprProperties();
+    }
 
     /**
      * Validates the expression node subtree that has this
@@ -172,10 +189,10 @@ public class ExprNodeUtility {
         String functionName = parse.getMethodName();
         try
         {
-            Pair<Class, String> classMethodPair = validationContext.getMethodResolutionService().resolveSingleRow(functionName);
+            Pair<Class, EngineImportSingleRowDesc> classMethodPair = validationContext.getMethodResolutionService().resolveSingleRow(functionName);
             List<ExprNode> params = Collections.singletonList((ExprNode) new ExprConstantNodeImpl(parse.getArgString()));
-            List<ExprChainedSpec> chain = Collections.singletonList(new ExprChainedSpec(classMethodPair.getSecond(), params, false));
-            ExprNode result = new ExprPlugInSingleRowNode(functionName, classMethodPair.getFirst(), chain, false);
+            List<ExprChainedSpec> chain = Collections.singletonList(new ExprChainedSpec(classMethodPair.getSecond().getMethodName(), params, false));
+            ExprNode result = new ExprPlugInSingleRowNode(functionName, classMethodPair.getFirst(), chain, classMethodPair.getSecond().getValueCache());
 
             // Validate
             try
@@ -356,6 +373,19 @@ public class ExprNodeUtility {
         return new MappedPropertyParseResult(clazz.toString(), method, argument);
     }
 
+    public static boolean isAllConstants(List<ExprNode> parameters) {
+        for (ExprNode node : parameters) {
+            if (!node.isConstantResult()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static ExprIdentNode getExprIdentNode(EventType[] typesPerStream, int streamId, String property) {
+        return new ExprIdentNodeImpl(typesPerStream[streamId], property, streamId);
+    }
+
     /**
      * Encapsulates the parse result parsing a mapped property as a class and method name with args.
      */
@@ -449,16 +479,21 @@ public class ExprNodeUtility {
         }
     }
 
-        public static Set<Pair<Integer, String>> getNonAggregatedProps(List<ExprNode> exprNodes)
-    {
+    public static Set<Pair<Integer, String>> getNonAggregatedProps(EventType[] types, List<ExprNode> exprNodes, ContextPropertyRegistry contextPropertyRegistry)
+    { 
         // Determine all event properties in the clause
         Set<Pair<Integer, String>> nonAggProps = new HashSet<Pair<Integer, String>>();
         for (ExprNode node : exprNodes)
         {
             ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(false);
             node.accept(visitor);
-            List<Pair<Integer, String>> propertiesNode = visitor.getExprProperties();
-            nonAggProps.addAll(propertiesNode);
+            List<Pair<Integer, String>> propertiesNodes = visitor.getExprProperties();
+            for (Pair<Integer, String> pair : propertiesNodes) {
+                EventType originType = types.length > pair.getFirst() ? types[pair.getFirst()] : null;
+                if (originType == null || contextPropertyRegistry == null || !contextPropertyRegistry.isPartitionProperty(originType, pair.getSecond())) {
+                    nonAggProps.add(pair);
+                }                
+            }
         }
 
         return nonAggProps;
@@ -776,6 +811,53 @@ public class ExprNodeUtility {
             delimiter = ", ";
         }
         return writer.toString();
+    }
+
+    public static ScheduleSpec toCrontabSchedule(List<ExprNode> scheduleSpecExpressionList, StatementContext context)
+        throws ExprValidationException {
+
+        // Validate the expressions
+        ExprEvaluator[] expressions = new ExprEvaluator[scheduleSpecExpressionList.size()];
+        int count = 0;
+        ExprEvaluatorContextStatement evaluatorContextStmt = new ExprEvaluatorContextStatement(context);
+        for (ExprNode parameters : scheduleSpecExpressionList)
+        {
+            ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(context.getEngineURI(), false), context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), evaluatorContextStmt, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations(), context.getContextDescriptor());
+            ExprNode node = ExprNodeUtility.getValidatedSubtree(parameters, validationContext);
+            expressions[count++] = node.getExprEvaluator();
+        }
+
+        // Build a schedule
+        try
+        {
+            Object[] scheduleSpecParameterList = evaluateExpressions(expressions, evaluatorContextStmt);
+            return ScheduleSpecUtil.computeValues(scheduleSpecParameterList);
+        }
+        catch (ScheduleParameterException e)
+        {
+            throw new IllegalArgumentException("Invalid schedule specification : " + e.getMessage(), e);
+        }
+    }
+
+    public static Object[] evaluateExpressions(ExprEvaluator[] parameters, ExprEvaluatorContext exprEvaluatorContext)
+    {
+        Object[] results = new Object[parameters.length];
+        int count = 0;
+        for (ExprEvaluator expr : parameters)
+        {
+            try
+            {
+                results[count] = expr.evaluate(null, true, exprEvaluatorContext);
+                count++;
+            }
+            catch (RuntimeException ex)
+            {
+                String message = "Failed expression evaluation in crontab timer-at for parameter " + count + ": " + ex.getMessage();
+                log.error(message, ex);
+                throw new IllegalArgumentException(message);
+            }
+        }
+        return results;
     }
 
     private static final Log log = LogFactory.getLog(ExprNodeUtility.class);

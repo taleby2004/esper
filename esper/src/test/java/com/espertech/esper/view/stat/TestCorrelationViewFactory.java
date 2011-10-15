@@ -50,9 +50,9 @@ public class TestCorrelationViewFactory extends TestCase
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
         assertFalse(factory.canReuse(new FirstElementView()));
         EventType type = CorrelationView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        assertFalse(factory.canReuse(new CorrelationView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("volume"), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null)));
-        assertFalse(factory.canReuse(new CorrelationView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("feed"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null)));
-        assertTrue(factory.canReuse(new CorrelationView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null)));
+        assertFalse(factory.canReuse(new CorrelationView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("volume"), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null)));
+        assertFalse(factory.canReuse(new CorrelationView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("feed"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null)));
+        assertTrue(factory.canReuse(new CorrelationView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null)));
     }
 
     public void testAttaches() throws Exception
@@ -94,7 +94,7 @@ public class TestCorrelationViewFactory extends TestCase
     {
         factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
-        CorrelationView view = (CorrelationView) factory.makeView(SupportStatementContextFactory.makeContext());
+        CorrelationView view = (CorrelationView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldNameX, view.getExpressionX().toExpressionString());
         assertEquals(fieldNameY, view.getExpressionY().toExpressionString());
     }

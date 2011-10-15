@@ -54,7 +54,7 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
 
     public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped groupKey, ExprEvaluatorContext exprEvaluatorContext)
     {
-        AggregationAccess[] row = getAssertRow(groupKey);
+        AggregationAccess[] row = getAssertRow(exprEvaluatorContext.getAgentInstanceIds(), groupKey);
         for (AggregationAccess access : row) {
             access.applyEnter(eventsPerStream);
         }
@@ -62,45 +62,45 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
 
     public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped groupKey, ExprEvaluatorContext exprEvaluatorContext)
     {
-        AggregationAccess[] row = getAssertRow(groupKey);
+        AggregationAccess[] row = getAssertRow(exprEvaluatorContext.getAgentInstanceIds(), groupKey);
         for (AggregationAccess access : row) {
             access.applyLeave(eventsPerStream);
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
     {
-        currentAccess = getAssertRow(groupKey);
+        currentAccess = getAssertRow(agentInstanceIds, groupKey);
     }
 
-    public Object getValue(int column)
+    public Object getValue(int column, int[] agentInstanceIds)
     {
         AggregationAccessorSlotPair pair = accessors[column];
         return pair.getAccessor().getValue(currentAccess[pair.getSlot()]);
     }
 
-    public Collection<EventBean> getCollection(int column) {
+    public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context) {
         AggregationAccessorSlotPair pair = accessors[column];
         return pair.getAccessor().getCollectionReadOnly(currentAccess[pair.getSlot()]);
     }
 
-    public EventBean getEventBean(int column) {
+    public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         AggregationAccessorSlotPair pair = accessors[column];
         return pair.getAccessor().getEventBean(currentAccess[pair.getSlot()]);
     }
 
-    public void clearResults()
+    public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
     {
         accessMap.clear();
     }
 
-    private AggregationAccess[] getAssertRow(MultiKeyUntyped groupKey) {
+    private AggregationAccess[] getAssertRow(int[] agentInstanceId, MultiKeyUntyped groupKey) {
         AggregationAccess[] row = accessMap.get(groupKey);
         if (row != null) {
             return row;
         }
 
-        row = AggregationAccessUtil.getNewAccesses(isJoin, streams, methodResolutionService, groupKey);
+        row = AggregationAccessUtil.getNewAccesses(agentInstanceId, isJoin, streams, methodResolutionService, groupKey);
         accessMap.put(groupKey, row);
         return row;
     }

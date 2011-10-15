@@ -10,7 +10,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.core.service.StatementResultService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.event.NaturalEventBean;
@@ -38,7 +38,6 @@ public class SelectExprResultProcessor implements SelectExprProcessor
                                      SelectExprProcessor syntheticProcessor,
                                      BindProcessor bindProcessor,
                                      ExprEvaluatorContext exprEvaluatorContext)
-            throws ExprValidationException
     {
         this.statementResultService = statementResultService;
         this.syntheticProcessor = syntheticProcessor;
@@ -51,18 +50,18 @@ public class SelectExprResultProcessor implements SelectExprProcessor
         return syntheticProcessor.getResultEventType();
     }
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
         if ((isSynthesize) && (!statementResultService.isMakeNatural()))
         {
-            return syntheticProcessor.process(eventsPerStream, isNewData, isSynthesize);
+            return syntheticProcessor.process(eventsPerStream, isNewData, isSynthesize, exprEvaluatorContext);
         }
 
         EventBean syntheticEvent = null;
         EventType syntheticEventType = null;
         if (statementResultService.isMakeSynthetic() || isSynthesize)
         {
-            syntheticEvent = syntheticProcessor.process(eventsPerStream, isNewData, isSynthesize);
+            syntheticEvent = syntheticProcessor.process(eventsPerStream, isNewData, isSynthesize, exprEvaluatorContext);
 
             if (!statementResultService.isMakeNatural())
             {
@@ -77,7 +76,7 @@ public class SelectExprResultProcessor implements SelectExprProcessor
             return null; // neither synthetic nor natural required, be cheap and generate no output event
         }
 
-        Object[] parameters = bindProcessor.process(eventsPerStream, isNewData, exprEvaluatorContext);
+        Object[] parameters = bindProcessor.process(eventsPerStream, isNewData, this.exprEvaluatorContext);
         return new NaturalEventBean(syntheticEventType, parameters, syntheticEvent);
     }
 }

@@ -10,8 +10,6 @@ package com.espertech.esper.epl.join.table;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.event.EventBeanUtility;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,27 +22,13 @@ import java.util.*;
 public class PropertyIndexedEventTableSingle implements EventTable
 {
     private final int streamNum;
-    private final String propertyName;
-
     protected final EventPropertyGetter propertyGetter;
-
-    /**
-     * Index table.
-     */
     protected final Map<Object, Set<EventBean>> propertyIndex;
 
-    /**
-     * Ctor.
-     * @param streamNum - the stream number that is indexed
-     * @param eventType - types of events indexed
-     */
-    public PropertyIndexedEventTableSingle(int streamNum, EventType eventType, String propertyName)
+    public PropertyIndexedEventTableSingle(int streamNum, EventPropertyGetter propertyGetter)
     {
         this.streamNum = streamNum;
-        this.propertyName = propertyName;
-
-        // Init getters
-        propertyGetter = EventBeanUtility.getAssertPropertyGetter(eventType, propertyName);
+        this.propertyGetter = propertyGetter;
         propertyIndex = new HashMap<Object, Set<EventBean>>();
     }
 
@@ -163,7 +147,7 @@ public class PropertyIndexedEventTableSingle implements EventTable
     public String toQueryPlan() {
         return this.getClass().getSimpleName() +
                 " streamNum=" + streamNum +
-                " propertyName=" + propertyName;
+                " propertyGetter=" + propertyGetter;
     }
 
     private static Log log = LogFactory.getLog(PropertyIndexedEventTableSingle.class);

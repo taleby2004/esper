@@ -13,20 +13,25 @@ package com.espertech.esper.pattern;
  */
 public class EvalAuditNode extends EvalNodeBase
 {
-    private static final long serialVersionUID = 2024418131446981960L;
+    private final EvalAuditFactoryNode factoryNode;
+    private final EvalNode childNode;
 
-    private final boolean auditPattern;
-    private final boolean auditPatternInstance;
-    private final String patternExpr;
-    private final transient EvalAuditInstanceCount instanceCount;
-    private final boolean filterChildNonQuitting;
+    public EvalAuditNode(PatternAgentInstanceContext context, EvalAuditFactoryNode factoryNode, EvalNode childNode) {
+        super(context);
+        this.factoryNode = factoryNode;
+        this.childNode = childNode;
+    }
 
-    public EvalAuditNode(boolean auditPattern, boolean auditPatternInstance, String patternExpr, EvalAuditInstanceCount instanceCount, boolean filterChildNonQuitting) {
-        this.auditPattern = auditPattern;
-        this.auditPatternInstance = auditPatternInstance;
-        this.patternExpr = patternExpr;
-        this.instanceCount = instanceCount;
-        this.filterChildNonQuitting = filterChildNonQuitting;
+    public EvalAuditFactoryNode getFactoryNode() {
+        return factoryNode;
+    }
+
+    public EvalNode getChildNode() {
+        return childNode;
+    }
+
+    public EvalNodeNumber getNodeNumber() {
+        return childNode.getNodeNumber();
     }
 
     public EvalStateNode newState(Evaluator parentNode,
@@ -34,36 +39,5 @@ public class EvalAuditNode extends EvalNodeBase
                                   EvalStateNodeNumber stateNodeId)
     {
         return new EvalAuditStateNode(parentNode, this, beginState);
-    }
-
-    public boolean isAuditPattern() {
-        return auditPattern;
-    }
-
-    public String getPatternExpr() {
-        return patternExpr;
-    }
-
-    public final String toString()
-    {
-        return ("EvalAuditStateNode children=" + this.getChildNodes().size());
-    }
-
-    public void decreaseRefCount(EvalAuditStateNode current) {
-        if (!auditPatternInstance) {
-            return;
-        }
-        instanceCount.decreaseRefCount(this.getChildNodes().get(0), current, patternExpr, getContext().getStatementName());
-    }
-
-    public void increaseRefCount(EvalAuditStateNode current) {
-        if (!auditPatternInstance) {
-            return;
-        }
-        instanceCount.increaseRefCount(this.getChildNodes().get(0), current, patternExpr, getContext().getStatementName());
-    }
-
-    public boolean isFilterChildNonQuitting() {
-        return filterChildNonQuitting;
     }
 }

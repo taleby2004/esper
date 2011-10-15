@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.guard;
 
+import com.espertech.esper.pattern.PatternAgentInstanceContext;
 import com.espertech.esper.pattern.PatternContext;
 
 /**
@@ -27,5 +28,5 @@ public interface Quitable
      * is provided by the quitable so the guard instance does not need to retain the pattern context.
      * @return pattern context
      */
-    public PatternContext getContext();
+    public PatternAgentInstanceContext getContext();
 }

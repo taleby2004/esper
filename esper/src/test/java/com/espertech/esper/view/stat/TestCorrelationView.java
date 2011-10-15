@@ -34,7 +34,7 @@ public class TestCorrelationView extends TestCase
     {
         // Set up sum view and a test child view
         EventType type = CorrelationView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        myView = new CorrelationView(SupportStatementContextFactory.makeContext(),
+        myView = new CorrelationView(SupportStatementContextFactory.makeAgentInstanceContext(),
                 SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null);
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
@@ -80,7 +80,7 @@ public class TestCorrelationView extends TestCase
 
     public void testCopyView() throws Exception
     {
-        CorrelationView copied = (CorrelationView) myView.cloneView(SupportStatementContextFactory.makeContext());
+        CorrelationView copied = (CorrelationView) myView.cloneView();
         assertTrue(myView.getExpressionX().equals(copied.getExpressionX()));
         assertTrue(myView.getExpressionY().equals(copied.getExpressionY()));
     }

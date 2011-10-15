@@ -48,11 +48,6 @@ public class NonNullCountFilterAggregator implements AggregationMethod
         return Long.class;
     }
 
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeCountAggregator(true, true);
-    }
-
     private boolean checkPass(Object object) {
         Boolean first = (Boolean) Array.get(object, 1);
         if (first != null) {

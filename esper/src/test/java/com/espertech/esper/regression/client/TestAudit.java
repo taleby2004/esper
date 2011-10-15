@@ -16,7 +16,7 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.core.EPRuntimeImpl;
+import com.espertech.esper.core.service.EPRuntimeImpl;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST1;
@@ -126,6 +126,12 @@ public class TestAudit extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 50));
         assertEquals(50, listener.assertOneGetNewAndReset().get("intPrimitive"));
         stmtView.destroy();
+
+        EPStatement stmtGroupedView = epService.getEPAdministrator().createEPL("@Audit Select * From SupportBean.std:groupwin(string).win:length(2)");
+        stmtGroupedView.addListener(listener);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 50));
+        listener.reset();
+        stmtGroupedView.destroy();
 
         // expression
         auditLog.info("*** Expression: ");

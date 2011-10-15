@@ -11,11 +11,15 @@ package com.espertech.esper.epl.named;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.*;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.service.ExceptionHandlingService;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
+import com.espertech.esper.core.service.StatementLockFactory;
+import com.espertech.esper.core.service.StatementResultService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.metric.MetricReportingPath;
 import com.espertech.esper.epl.metric.MetricReportingService;
+import com.espertech.esper.epl.metric.StatementMetricHandle;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.util.ManagedReadWriteLock;
@@ -49,11 +53,11 @@ public class NamedWindowServiceImpl implements NamedWindowService
         }
     };
 
-    private ThreadLocal<Map<EPStatementHandle, Object>> dispatchesPerStmtTL = new ThreadLocal<Map<EPStatementHandle, Object>>()
+    private ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>> dispatchesPerStmtTL = new ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>>()
     {
-        protected synchronized Map<EPStatementHandle, Object> initialValue()
+        protected synchronized Map<EPStatementAgentInstanceHandle, Object> initialValue()
         {
-            return new HashMap<EPStatementHandle, Object>();
+            return new HashMap<EPStatementAgentInstanceHandle, Object>();
         }
     };
 
@@ -92,7 +96,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
         return names.toArray(new String[names.size()]);
     }
 
-    public StatementLock getNamedWindowLock(String windowName)
+    public StatementAgentInstanceLock getNamedWindowLock(String windowName)
     {
         NamedWindowLockPair pair = windowStatementLocks.get(windowName);
         if (pair == null) {
@@ -101,7 +105,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
         return pair.getLock();
     }
 
-    public void addNamedWindowLock(String windowName, StatementLock statementResourceLock, String statementName)
+    public void addNamedWindowLock(String windowName, StatementAgentInstanceLock statementResourceLock, String statementName)
     {
         windowStatementLocks.put(windowName, new NamedWindowLockPair(statementName, statementResourceLock));
     }
@@ -120,14 +124,9 @@ public class NamedWindowServiceImpl implements NamedWindowService
         return processors.containsKey(name);
     }
 
-    public NamedWindowProcessor getProcessor(String name) throws ExprValidationException
+    public NamedWindowProcessor getProcessor(String name)
     {
-        NamedWindowProcessor processor = processors.get(name);
-        if (processor == null)
-        {
-            throw new ExprValidationException("A named window by name '" + name + "' does not exist");
-        }
-        return processor;
+        return processors.get(name);
     }
 
     public IndexMultiKey[] getNamedWindowIndexes(String windowName) {
@@ -136,24 +135,20 @@ public class NamedWindowServiceImpl implements NamedWindowService
         {
             return null;
         }
-        return processor.getIndexDescriptors();
+        return processor.getProcessorInstance(null).getIndexDescriptors();
     }
 
-    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService,
+    public NamedWindowProcessor addProcessor(String name, String contextName, boolean singleInstanceContext, EventType eventType, StatementResultService statementResultService,
                                              ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized,
-                                             ExprEvaluatorContext exprEvaluatorContext, boolean isEnableSubqueryIndexShare) throws ViewProcessingException
+                                             boolean isEnableSubqueryIndexShare, boolean isBatchingDataWindow,
+                                             boolean isVirtualDataWindow, StatementMetricHandle statementMetricHandle) throws ViewProcessingException
     {
         if (processors.containsKey(name))
         {
             throw new ViewProcessingException("A named window by name '" + name + "' has already been created");
         }
 
-        NamedWindowLockPair lockPair = windowStatementLocks.get(name);
-        if (lockPair == null || lockPair.getLock() == null) {
-            throw new ViewProcessingException("A lock for named window by name '" + name + "' is not allocated");
-        }
-
-        NamedWindowProcessor processor = new NamedWindowProcessor(this, name, eventType, createWindowStmtHandle, statementResultService, revisionProcessor, eplExpression, statementName, isPrioritized, exprEvaluatorContext, lockPair.getLock(), isEnableSubqueryIndexShare, enableQueryPlanLog, metricReportingService);
+        NamedWindowProcessor processor = new NamedWindowProcessor(name, this, contextName, singleInstanceContext, eventType, statementResultService, revisionProcessor, eplExpression, statementName, isPrioritized, isEnableSubqueryIndexShare, enableQueryPlanLog, metricReportingService, isBatchingDataWindow, isVirtualDataWindow, statementMetricHandle);
         processors.put(name, processor);
 
         if (!observers.isEmpty())
@@ -187,10 +182,12 @@ public class NamedWindowServiceImpl implements NamedWindowService
         }
     }
 
-    public void addDispatch(NamedWindowDeltaData delta, Map<EPStatementHandle, List<NamedWindowConsumerView>> consumers)
+    public void addDispatch(NamedWindowDeltaData delta, Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> consumers)
     {
-        NamedWindowConsumerDispatchUnit unit = new NamedWindowConsumerDispatchUnit(delta, consumers);
-        threadLocal.get().add(unit);
+        if (!consumers.isEmpty()) {
+            NamedWindowConsumerDispatchUnit unit = new NamedWindowConsumerDispatchUnit(delta, consumers);
+            threadLocal.get().add(unit);
+        }
     }
 
     public boolean dispatch(ExprEvaluatorContext exprEvaluatorContext)
@@ -234,10 +231,10 @@ public class NamedWindowServiceImpl implements NamedWindowService
 
             if (MetricReportingPath.isMetricsEnabled)
             {
-                for (Map.Entry<EPStatementHandle, List<NamedWindowConsumerView>> entry : unit.getDispatchTo().entrySet())
+                for (Map.Entry<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> entry : unit.getDispatchTo().entrySet())
                 {
-                    EPStatementHandle handle = entry.getKey();
-                    if (handle.getMetricsHandle().isEnabled()) {
+                    EPStatementAgentInstanceHandle handle = entry.getKey();
+                    if (handle.getStatementHandle().getMetricsHandle().isEnabled()) {
                         long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                         long wallTimeBefore = MetricUtil.getWall();
 
@@ -247,7 +244,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
                         long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
                         long deltaCPU = cpuTimeAfter - cpuTimeBefore;
                         long deltaWall = wallTimeAfter - wallTimeBefore;
-                        metricReportingService.accountTime(handle.getMetricsHandle(), deltaCPU, deltaWall, 1);
+                        metricReportingService.accountTime(handle.getStatementHandle().getMetricsHandle(), deltaCPU, deltaWall, 1);
                     }
                     else {
                         processHandle(handle, entry.getValue(), newData, oldData, exprEvaluatorContext);
@@ -260,9 +257,9 @@ public class NamedWindowServiceImpl implements NamedWindowService
                 }
             }
             else {
-                for (Map.Entry<EPStatementHandle, List<NamedWindowConsumerView>> entry : unit.getDispatchTo().entrySet())
+                for (Map.Entry<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> entry : unit.getDispatchTo().entrySet())
                 {
-                    EPStatementHandle handle = entry.getKey();
+                    EPStatementAgentInstanceHandle handle = entry.getKey();
                     processHandle(handle, entry.getValue(), newData, oldData, exprEvaluatorContext);
 
                     if ((isPrioritized) && (handle.isPreemptive()))
@@ -282,12 +279,12 @@ public class NamedWindowServiceImpl implements NamedWindowService
 
         // Most likely all dispatches go to different statements since most statements are not joins of
         // named windows that produce results at the same time. Therefore sort by statement handle.
-        Map<EPStatementHandle, Object> dispatchesPerStmt = dispatchesPerStmtTL.get();
+        Map<EPStatementAgentInstanceHandle, Object> dispatchesPerStmt = dispatchesPerStmtTL.get();
         for (NamedWindowConsumerDispatchUnit unit : dispatches)
         {
-            for (Map.Entry<EPStatementHandle, List<NamedWindowConsumerView>> entry : unit.getDispatchTo().entrySet())
+            for (Map.Entry<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> entry : unit.getDispatchTo().entrySet())
             {
-                EPStatementHandle handle = entry.getKey();
+                EPStatementAgentInstanceHandle handle = entry.getKey();
                 Object perStmtObj = dispatchesPerStmt.get(handle);
                 if (perStmtObj == null)
                 {
@@ -312,9 +309,9 @@ public class NamedWindowServiceImpl implements NamedWindowService
         // Dispatch - with or without metrics reporting
         if (MetricReportingPath.isMetricsEnabled)
         {
-            for (Map.Entry<EPStatementHandle, Object> entry : dispatchesPerStmt.entrySet())
+            for (Map.Entry<EPStatementAgentInstanceHandle, Object> entry : dispatchesPerStmt.entrySet())
             {
-                EPStatementHandle handle = entry.getKey();
+                EPStatementAgentInstanceHandle handle = entry.getKey();
                 Object perStmtObj = entry.getValue();
 
                 // dispatch of a single result to the statement
@@ -324,7 +321,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
                     EventBean[] newData = unit.getDeltaData().getNewData();
                     EventBean[] oldData = unit.getDeltaData().getOldData();
 
-                    if (handle.getMetricsHandle().isEnabled()) {
+                    if (handle.getStatementHandle().getMetricsHandle().isEnabled()) {
                         long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                         long wallTimeBefore = MetricUtil.getWall();
 
@@ -334,10 +331,10 @@ public class NamedWindowServiceImpl implements NamedWindowService
                         long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
                         long deltaCPU = cpuTimeAfter - cpuTimeBefore;
                         long deltaWall = wallTimeAfter - wallTimeBefore;
-                        metricReportingService.accountTime(handle.getMetricsHandle(), deltaCPU, deltaWall, 1);
+                        metricReportingService.accountTime(handle.getStatementHandle().getMetricsHandle(), deltaCPU, deltaWall, 1);
                     }
                     else {
-                        Map<EPStatementHandle, List<NamedWindowConsumerView>> entries = unit.getDispatchTo();
+                        Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> entries = unit.getDispatchTo();
                     	List<NamedWindowConsumerView> items = entries.get(handle);
                     	if (items != null) {
 							processHandle(handle, items, newData, oldData, exprEvaluatorContext);
@@ -354,7 +351,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
 
                 // dispatch of multiple results to a the same statement, need to aggregate per consumer view
                 LinkedHashMap<NamedWindowConsumerView, NamedWindowDeltaData> deltaPerConsumer = getDeltaPerConsumer(perStmtObj, handle);
-                if (handle.getMetricsHandle().isEnabled()) {
+                if (handle.getStatementHandle().getMetricsHandle().isEnabled()) {
                     long cpuTimeBefore = MetricUtil.getCPUCurrentThread();
                     long wallTimeBefore = MetricUtil.getWall();
 
@@ -364,7 +361,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
                     long cpuTimeAfter = MetricUtil.getCPUCurrentThread();
                     long deltaCPU = cpuTimeAfter - cpuTimeBefore;
                     long deltaWall = wallTimeAfter - wallTimeBefore;
-                    metricReportingService.accountTime(handle.getMetricsHandle(), deltaCPU, deltaWall, 1);
+                    metricReportingService.accountTime(handle.getStatementHandle().getMetricsHandle(), deltaCPU, deltaWall, 1);
                 }
                 else {
                     processHandleMultiple(handle, deltaPerConsumer, exprEvaluatorContext);
@@ -378,9 +375,9 @@ public class NamedWindowServiceImpl implements NamedWindowService
         }
         else {
 
-            for (Map.Entry<EPStatementHandle, Object> entry : dispatchesPerStmt.entrySet())
+            for (Map.Entry<EPStatementAgentInstanceHandle, Object> entry : dispatchesPerStmt.entrySet())
             {
-                EPStatementHandle handle = entry.getKey();
+                EPStatementAgentInstanceHandle handle = entry.getKey();
                 Object perStmtObj = entry.getValue();
 
                 // dispatch of a single result to the statement
@@ -415,8 +412,8 @@ public class NamedWindowServiceImpl implements NamedWindowService
         return;
     }
 
-    private void processHandleMultiple(EPStatementHandle handle, Map<NamedWindowConsumerView, NamedWindowDeltaData> deltaPerConsumer, ExprEvaluatorContext exprEvaluatorContext) {
-        handle.getStatementLock().acquireWriteLock(statementLockFactory);
+    private void processHandleMultiple(EPStatementAgentInstanceHandle handle, Map<NamedWindowConsumerView, NamedWindowDeltaData> deltaPerConsumer, ExprEvaluatorContext exprEvaluatorContext) {
+        handle.getStatementAgentInstanceLock().acquireWriteLock(statementLockFactory);
         try
         {
             if (handle.isHasVariables())
@@ -438,12 +435,12 @@ public class NamedWindowServiceImpl implements NamedWindowService
         }
         finally
         {
-            handle.getStatementLock().releaseWriteLock(null);
+            handle.getStatementAgentInstanceLock().releaseWriteLock(null);
         }
     }
 
-    private void processHandle(EPStatementHandle handle, List<NamedWindowConsumerView> value, EventBean[] newData, EventBean[] oldData, ExprEvaluatorContext exprEvaluatorContext) {
-        handle.getStatementLock().acquireWriteLock(statementLockFactory);
+    private void processHandle(EPStatementAgentInstanceHandle handle, List<NamedWindowConsumerView> value, EventBean[] newData, EventBean[] oldData, ExprEvaluatorContext exprEvaluatorContext) {
+        handle.getStatementAgentInstanceLock().acquireWriteLock(statementLockFactory);
         try
         {
             if (handle.isHasVariables())
@@ -464,7 +461,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
         }
         finally
         {
-            handle.getStatementLock().releaseWriteLock(null);
+            handle.getStatementAgentInstanceLock().releaseWriteLock(null);
         }
     }
 
@@ -478,7 +475,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
         observers.remove(observer);
     }
 
-    public LinkedHashMap<NamedWindowConsumerView, NamedWindowDeltaData> getDeltaPerConsumer(Object perStmtObj, EPStatementHandle handle) {
+    public LinkedHashMap<NamedWindowConsumerView, NamedWindowDeltaData> getDeltaPerConsumer(Object perStmtObj, EPStatementAgentInstanceHandle handle) {
         List<NamedWindowConsumerDispatchUnit> list = (List<NamedWindowConsumerDispatchUnit>) perStmtObj;
         LinkedHashMap<NamedWindowConsumerView, NamedWindowDeltaData> deltaPerConsumer = new LinkedHashMap<NamedWindowConsumerView, NamedWindowDeltaData>();
         for (NamedWindowConsumerDispatchUnit unit : list)   // for each unit
@@ -502,9 +499,9 @@ public class NamedWindowServiceImpl implements NamedWindowService
 
     private static class NamedWindowLockPair {
         private final String statementName;
-        private final StatementLock lock;
+        private final StatementAgentInstanceLock lock;
 
-        private NamedWindowLockPair(String statementName, StatementLock lock) {
+        private NamedWindowLockPair(String statementName, StatementAgentInstanceLock lock) {
             this.statementName = statementName;
             this.lock = lock;
         }
@@ -513,7 +510,7 @@ public class NamedWindowServiceImpl implements NamedWindowService
             return statementName;
         }
 
-        public StatementLock getLock() {
+        public StatementAgentInstanceLock getLock() {
             return lock;
         }
     }

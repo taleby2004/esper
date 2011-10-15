@@ -12,7 +12,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.event.EventBeanUtility;
@@ -30,7 +30,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
 {
     private final ExprNode[] criteriaExpressions;
     private final ExprEvaluator[] criteriaEvaluators;
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final long reclaimMaxAge;
     private final long reclaimFrequency;
 
@@ -43,17 +43,17 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
 
     /**
      * Constructor.
-     * @param statementContext contains required view services
+     * @param agentInstanceContext contains required view services
      * @param criteriaExpressions is the fields from which to pull the values to group by
      * @param reclaimMaxAge age after which to reclaim group
      * @param reclaimFrequency frequency in which to check for groups to reclaim
      */
-    public GroupByViewReclaimAged(StatementContext statementContext,
+    public GroupByViewReclaimAged(AgentInstanceViewFactoryChainContext agentInstanceContext,
                                   ExprNode[] criteriaExpressions,
                                   ExprEvaluator[] criteriaEvaluators,
                                   double reclaimMaxAge, double reclaimFrequency)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.criteriaExpressions = criteriaExpressions;
         this.criteriaEvaluators = criteriaEvaluators;
         this.reclaimMaxAge = (long) (reclaimMaxAge * 1000d);
@@ -66,9 +66,9 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         }
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return new GroupByViewReclaimAged(statementContext, criteriaExpressions, criteriaEvaluators, reclaimMaxAge, reclaimFrequency);
+        return new GroupByViewReclaimAged(agentInstanceContext, criteriaExpressions, criteriaEvaluators, reclaimMaxAge, reclaimFrequency);
     }
 
     /**
@@ -88,7 +88,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        long currentTime = statementContext.getTimeProvider().getTime();
+        long currentTime = agentInstanceContext.getTimeProvider().getTime();
         if ((nextSweepTime == null) || (nextSweepTime <= currentTime))
         {
             if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
@@ -109,7 +109,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
             eventsPerStream[0] = event;
             for (int i = 0; i < criteriaEvaluators.length; i++)
             {
-                groupByValues[i] = criteriaEvaluators[i].evaluate(eventsPerStream, true, statementContext);
+                groupByValues[i] = criteriaEvaluators[i].evaluate(eventsPerStream, true, agentInstanceContext);
             }
             MultiKey<Object> groupByValuesKey = new MultiKey<Object>(groupByValues);
 
@@ -119,7 +119,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
             // If this is a new group-by value, the list of subviews is null and we need to make clone sub-views
             if (subViews == null)
             {
-                List<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey.getArray(), statementContext);
+                List<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey.getArray(), agentInstanceContext);
                 subViews = new GroupByViewAgedEntry(subviewsList, currentTime);
                 subViewsPerKey.put(groupByValuesKey, subViews);
             }
@@ -168,7 +168,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         eventsPerStream[0] = event;
         for (int i = 0; i < criteriaEvaluators.length; i++)
         {
-            groupByValues[i] = criteriaEvaluators[i].evaluate(eventsPerStream, true, statementContext);
+            groupByValues[i] = criteriaEvaluators[i].evaluate(eventsPerStream, true, agentInstanceContext);
         }
         MultiKey<Object> groupByValuesKey = new MultiKey<Object>(groupByValues);
 
@@ -178,13 +178,13 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         // If this is a new group-by value, the list of subviews is null and we need to make clone sub-views
         if (subViews == null)
         {
-            List<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey.getArray(), statementContext);
-            long currentTime = statementContext.getTimeProvider().getTime();
+            List<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey.getArray(), agentInstanceContext);
+            long currentTime = agentInstanceContext.getStatementContext().getTimeProvider().getTime();
             subViews = new GroupByViewAgedEntry(subviewsList, currentTime);
             subViewsPerKey.put(groupByValuesKey, subViews);
         }
         else {
-            subViews.setLastUpdateTime(statementContext.getTimeProvider().getTime());
+            subViews.setLastUpdateTime(agentInstanceContext.getStatementContext().getTimeProvider().getTime());
         }
 
         // Construct a pair of lists to hold the events for the grouped value if not already there

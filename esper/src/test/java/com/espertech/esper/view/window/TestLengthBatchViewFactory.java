@@ -42,8 +42,8 @@ public class TestLengthBatchViewFactory extends TestCase
     {
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {1000}));
         assertFalse(factory.canReuse(new FirstElementView()));
-        assertFalse(factory.canReuse(new LengthBatchView(factory, 1, null)));
-        assertTrue(factory.canReuse(new LengthBatchView(factory, 1000, null)));
+        assertFalse(factory.canReuse(new LengthBatchView(null, factory, 1, null)));
+        assertTrue(factory.canReuse(new LengthBatchView(null, factory, 1000, null)));
     }
 
     private void tryInvalidParameter(Object param) throws Exception
@@ -63,7 +63,7 @@ public class TestLengthBatchViewFactory extends TestCase
     {
         LengthBatchViewFactory factory = new LengthBatchViewFactory();
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(param));
-        LengthBatchView view = (LengthBatchView) factory.makeView(SupportStatementContextFactory.makeContext());
+        LengthBatchView view = (LengthBatchView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(size, view.getSize());
     }
 }

@@ -43,7 +43,7 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
 
         this.evalAuditNode = evalAuditNode;
 
-        EvalNode child = evalAuditNode.getChildNodes().get(0);
+        EvalNode child = evalAuditNode.getChildNode();
         EvalStateNode childState = child.newState(this, beginState, null);
         this.childState = childState;
     }
@@ -55,19 +55,19 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
     public final void start()
     {
         childState.start();
-        evalAuditNode.increaseRefCount(this);
+        evalAuditNode.getFactoryNode().increaseRefCount(this, evalAuditNode.getContext().getPatternContext());
     }
 
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
     {
-        if (evalAuditNode.isAuditPattern() && auditLog.isInfoEnabled()) {
-            auditLog.info(toStringEvaluateTrue(this, evalAuditNode.getPatternExpr(), evalAuditNode.getContext().getStatementName(), matchEvent, fromNode, isQuitted));
+        if (evalAuditNode.getFactoryNode().isAuditPattern() && auditLog.isInfoEnabled()) {
+            auditLog.info(toStringEvaluateTrue(this, evalAuditNode.getFactoryNode().getPatternExpr(), evalAuditNode.getContext().getPatternContext().getStatementName(), matchEvent, fromNode, isQuitted));
         }
 
         if (isQuitted)
         {
             childState = null;
-            evalAuditNode.decreaseRefCount(this);
+            evalAuditNode.getFactoryNode().decreaseRefCount(this, evalAuditNode.getContext().getPatternContext());
         }
 
         this.getParentEvaluator().evaluateTrue(matchEvent, this, isQuitted);
@@ -75,8 +75,8 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
-        if (evalAuditNode.isAuditPattern() && auditLog.isInfoEnabled()) {
-            auditLog.info(toStringEvaluateFalse(this, evalAuditNode.getPatternExpr(), evalAuditNode.getContext().getStatementName(), fromNode));
+        if (evalAuditNode.getFactoryNode().isAuditPattern() && auditLog.isInfoEnabled()) {
+            auditLog.info(toStringEvaluateFalse(this, evalAuditNode.getFactoryNode().getPatternExpr(), evalAuditNode.getContext().getPatternContext().getStatementName(), fromNode));
         }
 
         this.getParentEvaluator().evaluateFalse(this);
@@ -88,7 +88,7 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
             childState.quit();
         }
         childState = null;
-        evalAuditNode.decreaseRefCount(this);
+        evalAuditNode.getFactoryNode().decreaseRefCount(this, evalAuditNode.getContext().getPatternContext());
     }
 
     public final Object accept(EvalStateNodeVisitor visitor, Object data)
@@ -110,16 +110,16 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
     }
 
     public boolean isNotOperator() {
-        EvalNode evalNode = evalAuditNode.getChildNodes().get(0);
+        EvalNode evalNode = evalAuditNode.getChildNode();
         return evalNode instanceof EvalNotNode;
     }
 
     public boolean isFilterChildNonQuitting() {
-        return evalAuditNode.isFilterChildNonQuitting();
+        return evalAuditNode.getFactoryNode().isFilterChildNonQuitting();
     }
 
     public boolean isFilterStateNode() {
-        return evalAuditNode.getChildNodes().get(0) instanceof EvalFilterNode;
+        return evalAuditNode.getChildNode() instanceof EvalFilterNode;
     }
 
     private static String toStringEvaluateTrue(EvalAuditStateNode current, String patternExpression, String statementName, MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted) {

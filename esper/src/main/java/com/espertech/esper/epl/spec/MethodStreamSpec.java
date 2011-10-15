@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.spec;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.util.MetaDefItem;

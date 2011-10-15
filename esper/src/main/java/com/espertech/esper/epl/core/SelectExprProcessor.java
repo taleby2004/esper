@@ -10,6 +10,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
  * Interface for processors of select-clause items, implementors are computing results based on matching events.
@@ -25,10 +26,13 @@ public interface SelectExprProcessor
     /**
      * Computes the select-clause results and returns an event of the result event type that contains, in it's
      * properties, the selected items.
+     *
+     *
      * @param eventsPerStream - is per stream the event
      * @param isNewData - indicates whether we are dealing with new data (istream) or old data (rstream)
      * @param isSynthesize - set to true to indicate that synthetic events are required for an iterator result set
+     * @param exprEvaluatorContext
      * @return event with properties containing selected items
      */
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize);
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext);
 }

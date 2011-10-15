@@ -14,9 +14,9 @@ package com.espertech.esper.regression.epl;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.core.EPStatementSPI;
-import com.espertech.esper.core.StatementType;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.core.service.StatementType;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -610,6 +610,6 @@ public class TestNamedWindowDelete extends TestCase
     private long getCount(String windowName) throws Exception
     {
         NamedWindowProcessor processor = ((EPServiceProviderSPI)epService).getNamedWindowService().getProcessor(windowName);
-        return processor.getCountDataWindow();
+        return processor.getProcessorInstance(null).getCountDataWindow();
     }
 }

@@ -8,8 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.observer;
 
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
@@ -41,7 +41,7 @@ public class TimerAtObserver implements EventObserver, ScheduleHandleCallback
         this.scheduleSpec = scheduleSpec;
         this.beginState = beginState;
         this.observerEventEvaluator = observerEventEvaluator;
-        this.scheduleSlot = observerEventEvaluator.getContext().getScheduleBucket().allocateSlot();
+        this.scheduleSlot = observerEventEvaluator.getContext().getPatternContext().getScheduleBucket().allocateSlot();
     }
 
     public final void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
@@ -57,8 +57,8 @@ public class TimerAtObserver implements EventObserver, ScheduleHandleCallback
             throw new IllegalStateException("Timer already active");
         }
 
-        scheduleHandle = new EPStatementHandleCallback(observerEventEvaluator.getContext().getEpStatementHandle(), this);
-        observerEventEvaluator.getContext().getSchedulingService().add(scheduleSpec, scheduleHandle, scheduleSlot);
+        scheduleHandle = new EPStatementHandleCallback(observerEventEvaluator.getContext().getAgentInstanceContext().getEpStatementAgentInstanceHandle(), this);
+        observerEventEvaluator.getContext().getPatternContext().getSchedulingService().add(scheduleSpec, scheduleHandle, scheduleSlot);
         isTimerActive = true;
     }
 
@@ -66,7 +66,7 @@ public class TimerAtObserver implements EventObserver, ScheduleHandleCallback
     {
         if (isTimerActive)
         {
-            observerEventEvaluator.getContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
+            observerEventEvaluator.getContext().getPatternContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
             isTimerActive = false;
             scheduleHandle = null;
         }

@@ -11,7 +11,7 @@ package com.espertech.esperio.http;
 import com.espertech.esper.client.ConfigurationException;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esperio.http.config.ConfigurationHTTPAdapter;
 import com.espertech.esperio.http.config.GetHandler;
 import com.espertech.esperio.http.config.Request;

@@ -16,6 +16,7 @@ import com.espertech.esper.client.hook.VirtualDataWindowLookupContext;
 import com.espertech.esper.client.hook.VirtualDataWindowLookupFieldDesc;
 import com.espertech.esper.epl.lookup.SubordPropPlan;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 
 public class VirtualDataWindowLookupContextSPI extends VirtualDataWindowLookupContext {
@@ -25,8 +26,8 @@ public class VirtualDataWindowLookupContextSPI extends VirtualDataWindowLookupCo
     private String accessedByStatementName;
     private int accessedByStatementSequenceNum;
 
-    public VirtualDataWindowLookupContextSPI(String namedWindowName, List<VirtualDataWindowLookupFieldDesc> hashFields, List<VirtualDataWindowLookupFieldDesc> btreeFields, SubordPropPlan joinDesc, boolean forceTableScan, EventType[] outerTypePerStream, String accessedByStatementName, int accessedByStatementSequenceNum) {
-        super(namedWindowName, hashFields, btreeFields);
+    public VirtualDataWindowLookupContextSPI(String statementName, String statementId, Annotation[] statementAnnotations, boolean fireAndForget, String namedWindowName, List<VirtualDataWindowLookupFieldDesc> hashFields, List<VirtualDataWindowLookupFieldDesc> btreeFields, SubordPropPlan joinDesc, boolean forceTableScan, EventType[] outerTypePerStream, String accessedByStatementName, int accessedByStatementSequenceNum) {
+        super(statementName, statementId, statementAnnotations, fireAndForget, namedWindowName, hashFields, btreeFields);
         this.joinDesc = joinDesc;
         this.forceTableScan = forceTableScan;
         this.outerTypePerStream = outerTypePerStream;
@@ -44,13 +45,5 @@ public class VirtualDataWindowLookupContextSPI extends VirtualDataWindowLookupCo
 
     public EventType[] getOuterTypePerStream() {
         return outerTypePerStream;
-    }
-
-    public String getAccessedByStatementName() {
-        return accessedByStatementName;
-    }
-
-    public int getAccessedByStatementSequenceNum() {
-        return accessedByStatementSequenceNum;
     }
 }

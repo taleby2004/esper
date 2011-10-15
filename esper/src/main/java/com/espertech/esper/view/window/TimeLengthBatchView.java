@@ -8,12 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.collection.ViewUpdatedCollection;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.ViewUpdatedCollection;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.view.*;
@@ -21,8 +21,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Arrays;
+import java.util.Iterator;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch if either one of these
@@ -35,13 +35,12 @@ import java.util.Arrays;
  * <p>
  * The view starts the first interval when the view is created.
  */
-public final class TimeLengthBatchView extends ViewSupport implements CloneableView, BatchingDataWindowView, StoppableView
-{
+public final class TimeLengthBatchView extends ViewSupport implements CloneableView, StoppableView, DataWindowView {
     private static final Log log = LogFactory.getLog(TimeLengthBatchView.class);
 
     // View parameters
     private final TimeLengthBatchViewFactory timeLengthBatchViewFactory;
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final long msecIntervalSize;
     private final long numberOfEvents;
     private final boolean isForceOutput;
@@ -62,18 +61,17 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
      * @param viewUpdatedCollection is a collection that the view must update when receiving events
      * @param timeBatchViewFactory for copying this view in a group-by
      * @param forceOutput is true if the batch should produce empty output if there is no value to output following time intervals
-     * @param statementContext is required view services
      * @param isStartEager is true for start-eager
      */
     public TimeLengthBatchView(TimeLengthBatchViewFactory timeBatchViewFactory,
-                         StatementContext statementContext,
+                         AgentInstanceViewFactoryChainContext agentInstanceContext,
                          long msecIntervalSize,
                          long numberOfEvents,
                          boolean forceOutput,
                          boolean isStartEager,
                          ViewUpdatedCollection viewUpdatedCollection)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.timeLengthBatchViewFactory = timeBatchViewFactory;
         this.msecIntervalSize = msecIntervalSize;
         this.numberOfEvents = numberOfEvents;
@@ -81,7 +79,7 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
         this.viewUpdatedCollection = viewUpdatedCollection;
         this.isForceOutput = forceOutput;
 
-        this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
+        this.scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
 
         // schedule the first callback
         if (isStartEager)
@@ -91,9 +89,9 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
         }
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return timeLengthBatchViewFactory.makeView(statementContext);
+        return timeLengthBatchViewFactory.makeView(agentInstanceContext);
     }
 
     /**
@@ -190,7 +188,7 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
             // Remove schedule if called from on overflow due to number of events
             if (isCallbackScheduled)
             {
-                statementContext.getSchedulingService().remove(handle, scheduleSlot);
+                agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
                 isCallbackScheduled = false;
             }
         }
@@ -272,13 +270,13 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
                 TimeLengthBatchView.this.sendBatch(true);
             }
         };
-        handle = new EPStatementHandleCallback(statementContext.getEpStatementHandle(), callback);
-        statementContext.getSchedulingService().add(msecIntervalSize, handle, scheduleSlot);
+        handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
+        agentInstanceContext.getStatementContext().getSchedulingService().add(msecIntervalSize, handle, scheduleSlot);
     }
 
     public void stop() {
         if (handle != null) {
-            statementContext.getSchedulingService().remove(handle, scheduleSlot);
+            agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }
 }

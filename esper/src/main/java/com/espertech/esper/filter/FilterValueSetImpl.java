@@ -49,4 +49,11 @@ public class FilterValueSetImpl implements FilterValueSet
     {
         return parameters;
     }
+
+    public String toString() {
+        return "FilterValueSetImpl{" +
+                "eventType=" + eventType.getName() +
+                ", parameters=" + parameters +
+                '}';
+    }
 }

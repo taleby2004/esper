@@ -52,4 +52,13 @@ public class ScheduleBucket
     {
         return new ScheduleSlot(bucketNum, lastSlot++);
     }
+
+    /**
+     * Returns a new slot in the bucket, given a slot number
+     * @return slot
+     */
+    public ScheduleSlot allocateSlot(int slotNumber)
+    {
+        return new ScheduleSlot(bucketNum, slotNumber);
+    }
 }

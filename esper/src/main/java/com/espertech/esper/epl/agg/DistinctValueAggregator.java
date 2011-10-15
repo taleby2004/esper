@@ -66,10 +66,4 @@ public class DistinctValueAggregator implements AggregationMethod
     {
         return inner.getValueType();
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        AggregationMethod innerCopy = inner.newAggregator(methodResolutionService);
-        return methodResolutionService.makeDistinctAggregator(innerCopy, childType, false);
-    }
 }

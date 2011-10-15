@@ -8,35 +8,24 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
-import com.espertech.esper.core.StatementContext;
 
 import java.util.List;
 
 /**
  * Factory for {@link com.espertech.esper.view.window.TimeBatchView}.
  */
-public class LengthBatchViewFactory implements DataWindowViewFactory
+public class LengthBatchViewFactory implements DataWindowViewFactory, DataWindowViewWithPrevious, DataWindowBatchingViewFactory
 {
     /**
      * The length window size.
      */
     protected int size;
-
-    /**
-     * The access into the window.
-     */
-    protected RelativeAccessByEventNIndexMap relativeAccessGetterImpl;
-
-    /**
-     * Flag to indicate that the view must handle the removed events from a parent view.
-     */
-    protected boolean isRemoveStreamHandling;
 
     private EventType eventType;
 
@@ -73,50 +62,20 @@ public class LengthBatchViewFactory implements DataWindowViewFactory
         this.eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
-        }
-        return viewCapability instanceof ViewCapDataWindowAccess;
+    public Object makePreviousGetter() {
+        return new RelativeAccessByEventNIndexMap();
     }
 
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (!canProvideCapability(viewCapability))
+        IStreamRelativeAccess relativeAccessByEvent = ViewServiceHelper.getOptPreviousExprRelativeAccess(agentInstanceViewFactoryContext);
+        if (agentInstanceViewFactoryContext.isRemoveStream())
         {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            isRemoveStreamHandling = true;
-            return;
-        }
-        if (relativeAccessGetterImpl == null)
-        {
-            relativeAccessGetterImpl = new RelativeAccessByEventNIndexMap();
-        }
-        resourceCallback.setViewResource(relativeAccessGetterImpl);
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        IStreamRelativeAccess relativeAccessByEvent = null;
-
-        if (relativeAccessGetterImpl != null)
-        {
-            relativeAccessByEvent = new IStreamRelativeAccess(relativeAccessGetterImpl);
-            relativeAccessGetterImpl.updated(relativeAccessByEvent, null);
-        }
-
-        if (isRemoveStreamHandling)
-        {
-            return new LengthBatchViewRStream(this, size);
+            return new LengthBatchViewRStream(agentInstanceViewFactoryContext, this, size);
         }
         else
         {
-            return new LengthBatchView(this, size, relativeAccessByEvent);
+            return new LengthBatchView(agentInstanceViewFactoryContext, this, size, relativeAccessByEvent);
         }
     }
 
@@ -127,10 +86,6 @@ public class LengthBatchViewFactory implements DataWindowViewFactory
 
     public boolean canReuse(View view)
     {
-        if (relativeAccessGetterImpl != null)
-        {
-            return false;
-        }
         if (!(view instanceof LengthBatchView))
         {
             return false;

@@ -15,7 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleHandle;
-import com.espertech.esper.core.ExtensionServicesContext;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 
 public class SupportScheduleCallback implements ScheduleHandle, ScheduleHandleCallback 
 {

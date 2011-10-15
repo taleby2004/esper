@@ -11,11 +11,10 @@
 
 package com.espertech.esper.view.std;
 
-import junit.framework.TestCase;
-
-import com.espertech.esper.view.ViewParameterException;
-import com.espertech.esper.view.TestViewSupport;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
+import com.espertech.esper.view.TestViewSupport;
+import com.espertech.esper.view.ViewParameterException;
+import junit.framework.TestCase;
 
 public class TestLastElementViewFactory extends TestCase
 {
@@ -56,6 +55,6 @@ public class TestLastElementViewFactory extends TestCase
     {
         LastElementViewFactory factory = new LastElementViewFactory();
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(param));
-        assertTrue(factory.makeView(SupportStatementContextFactory.makeContext()) instanceof LastElementView);
+        assertTrue(factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext()) instanceof LastElementView);
     }
 }

@@ -140,5 +140,10 @@ public class DotMethodUtil {
                 throw new ExprValidationException(message + "expected a time-period expression or a numeric-type result for expression parameter " + parameterNum + " but received " + JavaClassHelper.getClassNameFullyQualPretty(providedType));
             }
         }
+        if (expectedTypeEnum == DotMethodFPParamTypeEnum.DATETIME) {
+            if (!(JavaClassHelper.isDatetimeClass(providedType))) {
+                throw new ExprValidationException(message + "expected a long-typed, Date-typed or Calendar-typed result for expression parameter " + parameterNum + " but received " + JavaClassHelper.getClassNameFullyQualPretty(providedType));
+            }
+        }
     }
 }

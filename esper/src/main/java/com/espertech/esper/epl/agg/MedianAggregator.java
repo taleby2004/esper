@@ -77,9 +77,4 @@ public class MedianAggregator implements AggregationMethod
     {
         return Double.class;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeMedianAggregator(false);
-    }
 }

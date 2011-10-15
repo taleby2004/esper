@@ -9,7 +9,7 @@
 package com.espertech.esperio.jms;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.core.*;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.adapter.*;
 import org.apache.commons.logging.*;

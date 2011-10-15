@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.schedule;
 
-import com.espertech.esper.core.ExtensionServicesContext;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 
 /**
  * Interface for scheduled callbacks.

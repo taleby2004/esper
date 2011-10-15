@@ -10,7 +10,6 @@ package com.espertech.esper.epl.join.table;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.event.EventBeanUtility;
 import org.apache.commons.logging.Log;
@@ -28,36 +27,12 @@ import java.util.*;
 public class PropertyIndexedEventTable implements EventTable
 {
     private final int streamNum;
-    private final String[] propertyNames;
-
-    /**
-     * Getters for properties.
-     */
     protected final EventPropertyGetter[] propertyGetters;
-
-    /**
-     * Index table.
-     */
     protected final Map<MultiKeyUntyped, Set<EventBean>> propertyIndex;
 
-    /**
-     * Ctor.
-     * @param streamNum - the stream number that is indexed
-     * @param eventType - types of events indexed
-     * @param propertyNames - property names to use for indexing
-     */
-    public PropertyIndexedEventTable(int streamNum, EventType eventType, String[] propertyNames)
-    {
+    public PropertyIndexedEventTable(int streamNum, EventPropertyGetter[] propertyGetters) {
         this.streamNum = streamNum;
-        this.propertyNames = propertyNames;
-
-        // Init getters
-        propertyGetters = new EventPropertyGetter[propertyNames.length];
-        for (int i = 0; i < propertyNames.length; i++)
-        {
-            propertyGetters[i] = eventType.getGetter(propertyNames[i]);
-        }
-
+        this.propertyGetters = propertyGetters;
         propertyIndex = new HashMap<MultiKeyUntyped, Set<EventBean>>();
     }
 
@@ -169,23 +144,11 @@ public class PropertyIndexedEventTable implements EventTable
         propertyIndex.clear();
     }
 
-    /**
-     * Returns index property names.
-     * @return property names
-     */
-    public String[] getPropertyNames() {
-        return propertyNames;
-    }
-
-    public String toString() {
-        return toQueryPlan();
-    }
-
     public String toQueryPlan()
     {
         return this.getClass().getSimpleName() +
                 " streamNum=" + streamNum +
-                " propertyNames=" + Arrays.toString(propertyNames);
+                " propertyGetters=" + Arrays.toString(propertyGetters);
     }
 
     private static Log log = LogFactory.getLog(PropertyIndexedEventTable.class);

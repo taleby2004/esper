@@ -11,9 +11,10 @@
 
 package com.espertech.esper.epl.expression;
 
+import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.AggregationMethodFactory;
 import com.espertech.esper.support.epl.SupportExprNode;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
-import com.espertech.esper.epl.agg.AggregationMethod;
 
 public class TestExprAvedevNode extends TestExprAggregateNodeAdapter
 {
@@ -40,7 +41,9 @@ public class TestExprAvedevNode extends TestExprAggregateNodeAdapter
 
     public void testAggregateFunction()
     {
-        AggregationMethod agg = validatedNodeToTest.getFactory().getPrototypeAggregator(SupportExprNodeFactory.getMethodResService());
+        AggregationMethodFactory aggFactory = validatedNodeToTest.getFactory();
+        AggregationMethod agg = aggFactory.make(SupportExprNodeFactory.getMethodResService(), null, 1, 1);
+
         assertEquals(Double.class, agg.getValueType());
 
         assertNull(agg.getValue());

@@ -11,8 +11,8 @@
 
 package com.espertech.esper.support.client;
 
-import com.espertech.esper.core.StatementLifecycleObserver;
-import com.espertech.esper.core.StatementLifecycleEvent;
+import com.espertech.esper.core.service.StatementLifecycleObserver;
+import com.espertech.esper.core.service.StatementLifecycleEvent;
 
 import java.util.List;
 import java.util.ArrayList;

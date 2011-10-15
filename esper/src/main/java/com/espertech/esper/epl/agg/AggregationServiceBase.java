@@ -24,23 +24,11 @@ public abstract class AggregationServiceBase implements AggregationService
     protected ExprEvaluator evaluators[];
 
     /**
-     * Aggregation states and factories.
-     */
-    protected AggregationMethod aggregators[];
-
-    /**
      * Ctor.
      * @param evaluators - are the child node of each aggregation function used for computing the value to be aggregated
-     * @param aggregators - aggregation states/factories
      */
-    public AggregationServiceBase(ExprEvaluator evaluators[], AggregationMethod aggregators[])
+    public AggregationServiceBase(ExprEvaluator evaluators[])
     {
         this.evaluators = evaluators;
-        this.aggregators = aggregators;
-
-        if (evaluators.length != aggregators.length)
-        {
-            throw new IllegalArgumentException("Expected the same number of evaluates as computer prototypes");
-        }
     }
 }

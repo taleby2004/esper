@@ -15,7 +15,7 @@ import com.espertech.esper.plugin.*;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventSender;
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 
 import java.net.URI;
 

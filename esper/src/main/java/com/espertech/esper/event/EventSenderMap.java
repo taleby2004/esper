@@ -11,7 +11,7 @@ package com.espertech.esper.event;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventSender;
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.core.thread.InboundUnitSendWrapped;
 import com.espertech.esper.core.thread.ThreadingOption;
 import com.espertech.esper.core.thread.ThreadingService;
@@ -54,7 +54,7 @@ public class EventSenderMap implements EventSender
         }
         
         Map<String, Object> map = (Map<String, Object>) event;
-        EventBean mapEvent = eventAdapterService.adaptorForTypedMap(map, mapEventType);
+        EventBean mapEvent = eventAdapterService.adapterForTypedMap(map, mapEventType);
 
         if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
         {
@@ -73,7 +73,7 @@ public class EventSenderMap implements EventSender
             throw new EPException("Unexpected event object of type " + event.getClass().getName() + ", expected " + Map.class.getName());
         }
         Map<String, Object> map = (Map<String, Object>) event;
-        EventBean mapEvent = eventAdapterService.adaptorForTypedMap(map, mapEventType);
+        EventBean mapEvent = eventAdapterService.adapterForTypedMap(map, mapEventType);
         runtimeEventSender.routeEventBean(mapEvent);
     }
 }

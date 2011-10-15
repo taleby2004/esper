@@ -38,7 +38,7 @@ public class ExprDotNodeUtility
         ExprDotEvalTypeInfo currentInputType = inputType;
         EnumMethodEnum lastLambdaFunc = null;
         ExprChainedSpec lastElement = chainSpec.isEmpty() ? null : chainSpec.get(chainSpec.size() - 1);
-        ExprDotNodeFilterAnalyzerDTIntervalDesc datetimeIntervalFilterDesc = null;
+        ExprDotNodeFilterAnalyzerDesc filterAnalyzerDesc = null;
 
         Deque<ExprChainedSpec> chainSpecStack = new ArrayDeque<ExprChainedSpec>(chainSpec);
         while (!chainSpecStack.isEmpty()) {
@@ -94,7 +94,7 @@ public class ExprDotNodeUtility
                     throw new IllegalStateException("Date-time method '" + chainElement.getName() + "' has not returned type information");
                 }
                 methodEvals.add(datetimeImpl.getEval());
-                datetimeIntervalFilterDesc = datetimeImpl.getIntervalFilterDesc();
+                filterAnalyzerDesc = datetimeImpl.getIntervalFilterDesc();
                 continue;
             }
 
@@ -176,7 +176,7 @@ public class ExprDotNodeUtility
         }
 
         ExprDotEval[] unpackingEvals = methodEvals.toArray(new ExprDotEval[methodEvals.size()]);
-        return new ExprDotNodeRealizedChain(intermediateEvals, unpackingEvals, datetimeIntervalFilterDesc);
+        return new ExprDotNodeRealizedChain(intermediateEvals, unpackingEvals, filterAnalyzerDesc);
     }
 
     public static MapEventType makeTransientMapType(String enumMethod, String propertyName, Class type) {

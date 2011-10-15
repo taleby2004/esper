@@ -9,8 +9,9 @@
 package com.espertech.esper.pattern;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.core.EPStatementHandleCallback;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.filter.FilterHandleCallback;
+import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.filter.FilterValueSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +52,7 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
 
     public String getStatementId()
     {
-        return evalFilterNode.getContext().getStatementId();
+        return evalFilterNode.getContext().getPatternContext().getStatementId();
     }
 
     public final void start()
@@ -90,25 +91,25 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
 
         MatchedEventMap passUp = beginState.shallowCopy();
 
-        if (evalFilterNode.getFilterSpec().getOptionalPropertyEvaluator() != null)
+        if (evalFilterNode.getFactoryNode().getFilterSpec().getOptionalPropertyEvaluator() != null)
         {
-            EventBean[] propertyEvents = evalFilterNode.getFilterSpec().getOptionalPropertyEvaluator().getProperty(event, evalFilterNode.getContext());
+            EventBean[] propertyEvents = evalFilterNode.getFactoryNode().getFilterSpec().getOptionalPropertyEvaluator().getProperty(event, evalFilterNode.getContext().getAgentInstanceContext());
             if (propertyEvents == null)
             {
                 return; // no results, ignore match
             }
             // Add event itself to the match event structure if a tag was provided
-            if (evalFilterNode.getEventAsName() != null)
+            if (evalFilterNode.getFactoryNode().getEventAsName() != null)
             {
-                passUp.add(evalFilterNode.getEventAsName(), propertyEvents);
+                passUp.add(evalFilterNode.getFactoryNode().getEventAsName(), propertyEvents);
             }
         }
         else
         {
             // Add event itself to the match event structure if a tag was provided
-            if (evalFilterNode.getEventAsName() != null)
+            if (evalFilterNode.getFactoryNode().getEventAsName() != null)
             {
-                passUp.add(evalFilterNode.getEventAsName(), event);
+                passUp.add(evalFilterNode.getFactoryNode().getEventAsName(), event);
             }
         }
 
@@ -147,9 +148,9 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
         StringBuilder buffer = new StringBuilder();
         buffer.append("EvalFilterStateNode");
         buffer.append(" tag=");
-        buffer.append(evalFilterNode.getFilterSpec());
+        buffer.append(evalFilterNode.getFactoryNode().getFilterSpec());
         buffer.append(" spec=");
-        buffer.append(evalFilterNode.getFilterSpec());
+        buffer.append(evalFilterNode.getFactoryNode().getFilterSpec());
         return buffer.toString();
     }
 
@@ -163,24 +164,24 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
 
     private void startFiltering()
     {
-        PatternContext context = evalFilterNode.getContext();
-        handle = new EPStatementHandleCallback(context.getEpStatementHandle(), this);
-        FilterValueSet filterValues = evalFilterNode.getFilterSpec().getValueSet(beginState);
-        context.getFilterService().add(filterValues, handle);
-        long filtersVersion = context.getFilterService().getFiltersVersion();
-        context.getStatementFilterVersion().setStmtFilterVersion(filtersVersion);
+        FilterService filterService = evalFilterNode.getContext().getPatternContext().getFilterService();
+        handle = new EPStatementHandleCallback(evalFilterNode.getContext().getAgentInstanceContext().getEpStatementAgentInstanceHandle(), this);
+        FilterValueSet filterValues = evalFilterNode.getFactoryNode().getFilterSpec().getValueSet(beginState, evalFilterNode.getContext().getAgentInstanceContext(), evalFilterNode.getAddendumFilters());
+        filterService.add(filterValues, handle);
+        long filtersVersion = filterService.getFiltersVersion();
+        evalFilterNode.getContext().getAgentInstanceContext().getEpStatementAgentInstanceHandle().getStatementFilterVersion().setStmtFilterVersion(filtersVersion);
     }
 
     private void stopFiltering()
     {
-        PatternContext context = evalFilterNode.getContext();
+        PatternContext context = evalFilterNode.getContext().getPatternContext();
         if (handle != null) {
             context.getFilterService().remove(handle);
         }
         handle = null;
         isStarted = false;
         long filtersVersion = context.getFilterService().getFiltersVersion();
-        context.getStatementFilterVersion().setStmtFilterVersion(filtersVersion);
+        evalFilterNode.getContext().getAgentInstanceContext().getEpStatementAgentInstanceHandle().getStatementFilterVersion().setStmtFilterVersion(filtersVersion);
     }
 
     private static final Log log = LogFactory.getLog(EvalFilterStateNode.class);

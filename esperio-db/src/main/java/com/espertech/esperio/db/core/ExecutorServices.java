@@ -9,7 +9,7 @@
 package com.espertech.esperio.db.core;
 
 import com.espertech.esper.client.ConfigurationException;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esperio.db.config.Executor;
 
 import javax.naming.NamingException;

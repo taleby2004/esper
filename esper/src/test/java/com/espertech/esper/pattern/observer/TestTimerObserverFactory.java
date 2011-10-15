@@ -11,23 +11,20 @@
 
 package com.espertech.esper.pattern.observer;
 
-import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.pattern.PatternContext;
-import com.espertech.esper.pattern.MatchedEventConvertorImpl;
-import com.espertech.esper.support.pattern.SupportPatternContextFactory;
+import com.espertech.esper.pattern.PatternAgentInstanceContext;
 import com.espertech.esper.support.pattern.SupportMatchedEventConvertor;
-import com.espertech.esper.support.view.SupportStatementContextFactory;
+import com.espertech.esper.support.pattern.SupportPatternContextFactory;
 import com.espertech.esper.view.TestViewSupport;
 import junit.framework.TestCase;
 
 public class TestTimerObserverFactory extends TestCase
 {
-    private PatternContext patternContext;
+    private PatternAgentInstanceContext patternContext;
 
     public void setUp()
     {
-        patternContext = SupportPatternContextFactory.makeContext();
+        patternContext = SupportPatternContextFactory.makePatternAgentInstanceContext();
     }
 
     public void testIntervalWait() throws Exception
@@ -40,9 +37,9 @@ public class TestTimerObserverFactory extends TestCase
     }
 
     private static class SupportObserverEventEvaluator implements ObserverEventEvaluator {
-        private final PatternContext patternContext;
+        private final PatternAgentInstanceContext patternContext;
 
-        private SupportObserverEventEvaluator(PatternContext patternContext) {
+        private SupportObserverEventEvaluator(PatternAgentInstanceContext patternContext) {
             this.patternContext = patternContext;
         }
 
@@ -52,7 +49,7 @@ public class TestTimerObserverFactory extends TestCase
         public void observerEvaluateFalse() {
         }
 
-        public PatternContext getContext() {
+        public PatternAgentInstanceContext getContext() {
             return patternContext;
         }
     }

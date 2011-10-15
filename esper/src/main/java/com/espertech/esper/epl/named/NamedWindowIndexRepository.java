@@ -13,7 +13,7 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.join.plan.QueryPlanIndexItem;
 import com.espertech.esper.epl.join.table.EventTable;
-import com.espertech.esper.epl.join.table.EventTableFactory;
+import com.espertech.esper.epl.join.table.EventTableUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -85,7 +85,7 @@ public class NamedWindowIndexRepository
         Class[] rangeCoercionTypes = IndexedPropDesc.getCoercionTypes(rangePropDescs);
 
         QueryPlanIndexItem indexItem = new QueryPlanIndexItem(indexProps, indexCoercionTypes, rangeProps, rangeCoercionTypes);
-        EventTable table = EventTableFactory.buildIndex(0, indexItem, indexedType, true);
+        EventTable table = EventTableUtil.buildIndex(0, indexItem, indexedType, true);
 
         // fill table since its new
         EventBean[] events = new EventBean[1];

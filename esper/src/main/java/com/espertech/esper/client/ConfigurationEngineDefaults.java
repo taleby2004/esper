@@ -36,6 +36,7 @@ public class ConfigurationEngineDefaults implements Serializable
     private ConfigurationMetricsReporting metricsReporting;
     private AlternativeContext alternativeContext;
     private Cluster cluster;
+    private Patterns patterns;
 
     /**
      * Ctor.
@@ -57,6 +58,7 @@ public class ConfigurationEngineDefaults implements Serializable
         conditionHandling = new ConditionHandling();
         alternativeContext = new AlternativeContext();
         cluster = new Cluster();
+        patterns = new Patterns();
     }
 
     /**
@@ -225,6 +227,14 @@ public class ConfigurationEngineDefaults implements Serializable
         this.cluster = cluster;
     }
 
+    public Patterns getPatterns() {
+        return patterns;
+    }
+
+    public void setPatterns(Patterns patterns) {
+        this.patterns = patterns;
+    }
+
     /**
      * Holds threading settings.
      */
@@ -255,6 +265,8 @@ public class ConfigurationEngineDefaults implements Serializable
         private Integer threadPoolInboundCapacity;
         private Integer threadPoolRouteExecCapacity;
         private Integer threadPoolOutboundCapacity;
+
+        private boolean engineFairlock;
 
         /**
          * Ctor - sets up defaults.
@@ -667,6 +679,30 @@ public class ConfigurationEngineDefaults implements Serializable
         }
 
         /**
+         * Returns true if the engine-level lock is configured as a fair lock (default is false).
+         * <p>
+         * This lock coordinates
+         * event processing threads (threads that send events) with threads that
+         * perform administrative functions (threads that start or destroy statements, for example).
+         * @return
+         */
+        public boolean isEngineFairlock() {
+            return engineFairlock;
+        }
+
+        /**
+         * Set to true to configured the engine-level lock as a fair lock (default is false).
+         * <p>
+         * This lock coordinates
+         * event processing threads (threads that send events) with threads that
+         * perform administrative functions (threads that start or destroy statements, for example).
+         * @param engineFairlock true for fair lock
+         */
+        public void setEngineFairlock(boolean engineFairlock) {
+            this.engineFairlock = engineFairlock;
+        }
+
+        /**
          * Enumeration of blocking techniques.
          */
         public enum Locking
@@ -951,6 +987,31 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setMsecVersionRelease(long msecVersionRelease)
         {
             this.msecVersionRelease = msecVersionRelease;
+        }
+    }
+
+    /**
+     * Holds variables settings.
+     */
+    public static class Patterns implements Serializable
+    {
+        private Long maxSubexpressions;
+        private boolean maxSubexpressionPreventStart = true;
+
+        public Long getMaxSubexpressions() {
+            return maxSubexpressions;
+        }
+
+        public void setMaxSubexpressions(Long maxSubexpressions) {
+            this.maxSubexpressions = maxSubexpressions;
+        }
+
+        public boolean isMaxSubexpressionPreventStart() {
+            return maxSubexpressionPreventStart;
+        }
+
+        public void setMaxSubexpressionPreventStart(boolean maxSubexpressionPreventStart) {
+            this.maxSubexpressionPreventStart = maxSubexpressionPreventStart;
         }
     }
 
@@ -1240,6 +1301,9 @@ public class ConfigurationEngineDefaults implements Serializable
     {
         private boolean prioritized;
         private boolean fairlock;
+        private boolean disableLocking;
+        private ThreadingProfile threadingProfile = ThreadingProfile.NORMAL;
+
         private static final long serialVersionUID = 0L;
 
         /**
@@ -1285,6 +1349,50 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setFairlock(boolean fairlock) {
             this.fairlock = fairlock;
         }
+
+        /**
+         * Returns indicator whether statement-level locks are disabled.
+         * The default is false meaning statement-level locks are taken by default and depending on EPL optimizations.
+         * If set to true statement-level locks are never taken.
+         * @return indicator for statement-level locks
+         */
+        public boolean isDisableLocking() {
+            return disableLocking;
+        }
+
+        /**
+         * Set to true to indicate that statement-level locks are disabled.
+         * The default is false meaning statement-level locks are taken by default and depending on EPL optimizations.
+         * If set to true statement-level locks are never taken.
+         * @param disableLocking false to take statement-level locks as required, or true to disable statement-level locking
+         */
+        public void setDisableLocking(boolean disableLocking) {
+            this.disableLocking = disableLocking;
+        }
+
+        public ThreadingProfile getThreadingProfile() {
+            return threadingProfile;
+        }
+
+        public void setThreadingProfile(ThreadingProfile threadingProfile) {
+            this.threadingProfile = threadingProfile;
+        }
+    }
+
+    /**
+     * Threading profile.
+     */
+    public enum ThreadingProfile
+    {
+        /**
+         * Large for use with 100 threads or more. Please see the documentation for more information.
+         */
+        LARGE,
+
+        /**
+         * For use with 100 threads or less.
+         */
+        NORMAL
     }
 
     /**

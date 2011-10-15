@@ -18,9 +18,6 @@ import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Collections;
-import java.util.Map;
-
 public class EvalInsertNoWildcardSingleColCoercionRevisionBean extends EvalBaseFirstProp implements SelectExprProcessor {
 
     private static final Log log = LogFactory.getLog(EvalInsertNoWildcardSingleColCoercionRevisionBean.class);
@@ -35,7 +32,6 @@ public class EvalInsertNoWildcardSingleColCoercionRevisionBean extends EvalBaseF
     }
 
     public EventBean processFirstCol(Object result) {
-        EventBean wrappedEvent = super.getEventAdapterService().adapterForBean(result);
-        return vaeProcessor.getValueAddEventBean(super.getEventAdapterService().adaptorForTypedWrapper(wrappedEvent, Collections.EMPTY_MAP, vaeInnerEventType));
+        return vaeProcessor.getValueAddEventBean(super.getEventAdapterService().adapterForTypedBean(result, vaeInnerEventType));
     }
 }

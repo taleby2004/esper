@@ -13,7 +13,7 @@ package com.espertech.esper.support.view;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.view.Viewable;
-import com.espertech.esper.core.UpdateDispatchView;
+import com.espertech.esper.core.service.UpdateDispatchView;
 import com.espertech.esper.collection.UniformPair;
 
 public class SupportSchemaNeutralView extends SupportBaseView implements UpdateDispatchView

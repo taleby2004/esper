@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.lookup;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.join.table.PropertyIndexedEventTableSingle;
 import com.espertech.esper.event.EventBeanUtility;
@@ -20,15 +21,12 @@ public class SubordIndexedTableLookupStrategySingleCoercing extends SubordIndexe
 {
     private Class coercionType;
 
-    /**
-     * Ctor.
-     * @param index is the table to look into
-     */
-    public SubordIndexedTableLookupStrategySingleCoercing(boolean isNWOnTrigger, int streamCountOuter, SubordPropHashKey hashKey, PropertyIndexedEventTableSingle index, Class coercionType) {
-        super(isNWOnTrigger, streamCountOuter, hashKey, index);
+    public SubordIndexedTableLookupStrategySingleCoercing(int streamCountOuter, ExprEvaluator evaluator, PropertyIndexedEventTableSingle index, Class coercionType) {
+        super(streamCountOuter, evaluator, index);
         this.coercionType = coercionType;
     }
 
+    @Override
     protected Object getKey(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
         Object key = super.getKey(eventsPerStream, context);
         return EventBeanUtility.coerce(key, coercionType);

@@ -35,16 +35,6 @@ public class TestUniqueValueAggregator extends TestCase
     {
         agg.enter(1);
         agg.leave(1);
-
-        try
-        {
-            agg.leave(1);
-            fail();
-        }
-        catch (IllegalStateException ex)
-        {
-            // expected
-        }
     }
 
     public void testGetValue()

@@ -29,7 +29,7 @@ public class EvalInsertNoWildcardSingleColCoercionMap extends EvalBaseFirstProp 
     }
 
     public EventBean processFirstCol(Object result) {
-        EventBean wrappedEvent = super.getEventAdapterService().adaptorForTypedMap((Map)result, super.getResultEventType());
-        return super.getEventAdapterService().adaptorForTypedWrapper(wrappedEvent, Collections.EMPTY_MAP, super.getResultEventType());
+        EventBean wrappedEvent = super.getEventAdapterService().adapterForTypedMap((Map) result, super.getResultEventType());
+        return super.getEventAdapterService().adapterForTypedWrapper(wrappedEvent, Collections.EMPTY_MAP, super.getResultEventType());
     }
 }

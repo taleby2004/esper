@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.metric;
 
-import com.espertech.esper.core.EPServicesContext;
+import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.client.EPRuntime;
 
 /**

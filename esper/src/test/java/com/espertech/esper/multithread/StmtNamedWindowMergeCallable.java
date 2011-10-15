@@ -12,13 +12,11 @@
 package com.espertech.esper.multithread;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.core.EPRuntimeSPI;
+import com.espertech.esper.core.service.EPRuntimeSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 public class StmtNamedWindowMergeCallable implements Callable<Boolean>

@@ -117,6 +117,6 @@ public class MapArrayMaptypedUndPropertyGetter implements MapEventPropertyGetter
             return null;
         }
 
-        return eventAdapterService.adaptorForTypedMap(value, fragmentType);
+        return eventAdapterService.adapterForTypedMap(value, fragmentType);
     }
 }

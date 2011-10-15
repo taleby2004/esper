@@ -11,23 +11,22 @@
 
 package com.espertech.esper.filter;
 
-import com.espertech.esper.support.filter.SupportFilterSpecBuilder;
-import com.espertech.esper.support.filter.SupportFilterHandle;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanSimple;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventBean;
-
-import java.util.Collection;
-import java.util.Vector;
-import java.util.List;
-import java.util.LinkedList;
-
+import com.espertech.esper.support.filter.SupportFilterHandle;
+import com.espertech.esper.support.filter.SupportFilterSpecBuilder;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
 public class TestFilterServiceImpl extends TestCase
 {
@@ -47,16 +46,16 @@ public class TestFilterServiceImpl extends TestCase
         eventTypeTwo = SupportEventTypeFactory.createBeanType(SupportBeanSimple.class);
 
         filterSpecs = new Vector<FilterValueSet>();
-        filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeOne, new Object[0]).getValueSet(null));
+        filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeOne, new Object[0]).getValueSet(null, null, null));
         filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeOne, new Object[] {
                 "intPrimitive", FilterOperator.RANGE_CLOSED, 10, 20,
                 "string", FilterOperator.EQUAL, "HELLO",
                 "boolPrimitive", FilterOperator.EQUAL, false,
-                "doubleBoxed", FilterOperator.GREATER, 100d} ).getValueSet(null));
-        filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeTwo, new Object[0]).getValueSet(null));
+                "doubleBoxed", FilterOperator.GREATER, 100d} ).getValueSet(null, null, null));
+        filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeTwo, new Object[0]).getValueSet(null, null, null));
         filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeTwo, new Object[] {
                 "myInt", FilterOperator.RANGE_HALF_CLOSED, 1, 10,
-                "myString", FilterOperator.EQUAL, "Hello" }).getValueSet(null));
+                "myString", FilterOperator.EQUAL, "Hello" }).getValueSet(null, null, null));
 
         // Create callbacks and add
         filterCallbacks = new Vector<SupportFilterHandle>();
@@ -109,7 +108,7 @@ public class TestFilterServiceImpl extends TestCase
         for (int i = 0; i < events.size(); i++)
         {
             List<FilterHandle> matchList = new LinkedList<FilterHandle>();
-            filterService.evaluate(events.get(i), matchList, null);
+            filterService.evaluate(events.get(i), matchList);
             for (FilterHandle match : matchList)
             {
                 SupportFilterHandle handle = (SupportFilterHandle) match;
@@ -137,7 +136,7 @@ public class TestFilterServiceImpl extends TestCase
         try
         {
             FilterValueSet spec = SupportFilterSpecBuilder.build(eventTypeTwo, new Object[] {
-                "myString", FilterOperator.GREATER, 2 }).getValueSet(null);
+                "myString", FilterOperator.GREATER, 2 }).getValueSet(null, null, null);
             filterService.add(spec, new SupportFilterHandle());
             assertTrue(false);
         }
@@ -167,7 +166,7 @@ public class TestFilterServiceImpl extends TestCase
      */
     public void testActiveCallbackRemove()
     {
-        FilterValueSet spec = SupportFilterSpecBuilder.build(eventTypeOne, new Object[0]).getValueSet(null);
+        FilterValueSet spec = SupportFilterSpecBuilder.build(eventTypeOne, new Object[0]).getValueSet(null, null, null);
         final SupportFilterHandle callbackTwo = new SupportFilterHandle();
 
         // callback that removes another matching filter spec callback
@@ -196,7 +195,7 @@ public class TestFilterServiceImpl extends TestCase
         // send event
         EventBean event = makeTypeOneEvent(1, "HELLO", false, 1);
         List<FilterHandle> matches = new LinkedList<FilterHandle>();
-        filterService.evaluate(event, matches, null);
+        filterService.evaluate(event, matches);
         for (FilterHandle match : matches)
         {
             FilterHandleCallback handle = (FilterHandleCallback) match;

@@ -8,17 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import java.util.*;
-
-import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.view.*;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.TimeWindow;
 import com.espertech.esper.collection.ViewUpdatedCollection;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.view.CloneableView;
+import com.espertech.esper.view.DataWindowView;
+import com.espertech.esper.view.View;
+import com.espertech.esper.view.ViewSupport;
+
+import java.util.*;
 
 /**
  * View for a moving window extending the specified amount of time into the past, driven entirely by external timing
@@ -48,8 +50,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
     private final EventBean[] eventsPerStream = new EventBean[1];
     private final TimeWindow timeWindow;
     private ViewUpdatedCollection viewUpdatedCollection;
-    private boolean isRemoveStreamHandling;
-    private ExprEvaluatorContext exprEvaluatorContext;
+    private AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
 
     /**
      * Constructor.
@@ -62,26 +63,24 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
      * greater then secondsBeforeExpiry are pushed out of the window.
      * @param viewUpdatedCollection is a collection that the view must update when receiving events
      * @param externallyTimedWindowViewFactory for copying this view in a group-by
-     * @param isRemoveStreamHandling flag to indicate that the view must handle the removed events from a parent view
-     * @param exprEvaluatorContext context for expression evalauation
+     * @param agentInstanceViewFactoryContext context for expression evalauation
      */
     public ExternallyTimedWindowView(ExternallyTimedWindowViewFactory externallyTimedWindowViewFactory,
                                      ExprNode timestampExpression, ExprEvaluator timestampExpressionEval, long msecBeforeExpiry, ViewUpdatedCollection viewUpdatedCollection,
-                                     boolean isRemoveStreamHandling, ExprEvaluatorContext exprEvaluatorContext)
+                                     AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
         this.externallyTimedWindowViewFactory = externallyTimedWindowViewFactory;
         this.timestampExpression = timestampExpression;
         this.timestampExpressionEval = timestampExpressionEval;
         this.millisecondsBeforeExpiry = msecBeforeExpiry;
         this.viewUpdatedCollection = viewUpdatedCollection;
-        this.isRemoveStreamHandling = isRemoveStreamHandling;
-        this.timeWindow = new TimeWindow(isRemoveStreamHandling);
-        this.exprEvaluatorContext = exprEvaluatorContext;
+        this.timeWindow = new TimeWindow(agentInstanceViewFactoryContext.isRemoveStream());
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return externallyTimedWindowViewFactory.makeView(statementContext);
+        return externallyTimedWindowViewFactory.makeView(agentInstanceViewFactoryContext);
     }
 
     /**
@@ -136,7 +135,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
             oldDataUpdate = expired.toArray(new EventBean[expired.size()]);
         }
 
-        if ((oldData != null) && (isRemoveStreamHandling))
+        if ((oldData != null) && (agentInstanceViewFactoryContext.isRemoveStream()))
         {
             for (EventBean anOldData : oldData)
             {
@@ -183,7 +182,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
     private long getLongValue(EventBean obj)
     {
         eventsPerStream[0] = obj;
-        Number num = (Number) timestampExpressionEval.evaluate(eventsPerStream, true, exprEvaluatorContext);
+        Number num = (Number) timestampExpressionEval.evaluate(eventsPerStream, true, agentInstanceViewFactoryContext);
         return num.longValue();
     }
 

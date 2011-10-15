@@ -11,8 +11,9 @@
 
 package com.espertech.esper.filter;
 
-import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,8 +50,7 @@ public class InSetOfValuesEventPropIndexed implements FilterSpecParamInValue
         this.statementName = statementName;
     }
 
-    public final Object getFilterValue(MatchedEventMap matchedEvents)
-    {
+    public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext) {
         EventBean[] events = (EventBean[]) matchedEvents.getMatchingEventAsObject(resultEventAsName);
 
         Object value = null;

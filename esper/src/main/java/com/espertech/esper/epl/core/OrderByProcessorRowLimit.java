@@ -32,67 +32,11 @@ public class OrderByProcessorRowLimit implements OrderByProcessor {
     private int currentRowLimit;
     private int currentOffset;
 
-    /**
-     * Ctor.
-     * @param rowLimitSpec specification for row limit, or null if no row limit is defined
-     * @param variableService for retrieving variable state for use with row limiting
-     * @throws ExprValidationException if row limit specification validation fails
-     */
-    public OrderByProcessorRowLimit(RowLimitSpec rowLimitSpec, VariableService variableService)
-            throws ExprValidationException
-    {
-        if (rowLimitSpec.getNumRowsVariable() != null)
-        {
-            numRowsVariableReader = variableService.getReader(rowLimitSpec.getNumRowsVariable());
-            if (numRowsVariableReader == null)
-            {
-                throw new ExprValidationException("Limit clause variable by name '" + rowLimitSpec.getNumRowsVariable() + "' has not been declared");
-            }
-            if (!JavaClassHelper.isNumeric(numRowsVariableReader.getType()))
-            {
-                throw new ExprValidationException("Limit clause requires a variable of numeric type");
-            }
-        }
-        else
-        {
-            numRowsVariableReader = null;
-            currentRowLimit = rowLimitSpec.getNumRows();
-
-            if (currentRowLimit < 0)
-            {
-                currentRowLimit = Integer.MAX_VALUE;
-            }
-        }
-
-        if (rowLimitSpec.getOptionalOffsetVariable() != null)
-        {
-            offsetVariableReader = variableService.getReader(rowLimitSpec.getOptionalOffsetVariable());
-            if (offsetVariableReader == null)
-            {
-                throw new ExprValidationException("Limit clause variable by name '" + rowLimitSpec.getOptionalOffsetVariable() + "' has not been declared");
-            }
-            if (!JavaClassHelper.isNumeric(offsetVariableReader.getType()))
-            {
-                throw new ExprValidationException("Limit clause requires a variable of numeric type");
-            }
-        }
-        else
-        {
-            offsetVariableReader = null;
-            if (rowLimitSpec.getOptionalOffset() != null)
-            {
-                currentOffset = rowLimitSpec.getOptionalOffset();
-
-                if (currentOffset <= 0)
-                {
-                    throw new ExprValidationException("Limit clause requires a positive offset");
-                }
-            }
-            else
-            {
-                currentOffset = 0;
-            }
-        }
+    public OrderByProcessorRowLimit(VariableReader numRowsVariableReader, VariableReader offsetVariableReader, int currentRowLimit, int currentOffset) {
+        this.numRowsVariableReader = numRowsVariableReader;
+        this.offsetVariableReader = offsetVariableReader;
+        this.currentRowLimit = currentRowLimit;
+        this.currentOffset = currentOffset;
     }
 
     public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)

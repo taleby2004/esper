@@ -10,7 +10,7 @@ package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.client.soda.ExpressionBase;
 import com.espertech.esper.client.soda.ExpressionPrecedenceEnum;
-import com.espertech.esper.core.EPStatementObjectModelHelper;
+import com.espertech.esper.core.service.EPStatementObjectModelHelper;
 
 import java.io.StringWriter;
 

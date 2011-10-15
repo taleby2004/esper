@@ -11,14 +11,14 @@
 
 package com.espertech.esper.view.internal;
 
-import com.espertech.esper.collection.RefCountedSet;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.RefCountedSet;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.StoppableView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
-import com.espertech.esper.view.CloneableView;
-import com.espertech.esper.core.StatementContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -36,6 +36,7 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
 {
     private static final Log log = LogFactory.getLog(UnionView.class);
 
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final UnionViewFactory unionViewFactory;
     private final EventType eventType;
     private final View[] views;
@@ -53,8 +54,9 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
      * @param eventType the parent event type
      * @param viewList the list of data window views
      */
-    public UnionView(UnionViewFactory factory, EventType eventType, List<View> viewList)
+    public UnionView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext, UnionViewFactory factory, EventType eventType, List<View> viewList)
     {
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
         this.unionViewFactory = factory;
         this.eventType = eventType;
         this.views = viewList.toArray(new View[viewList.size()]);
@@ -81,9 +83,9 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
         }
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return unionViewFactory.makeView(statementContext);
+        return unionViewFactory.makeView(agentInstanceViewFactoryContext);
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)

@@ -11,7 +11,7 @@ package com.espertech.esper.view;
 /**
  * This exception is thrown to indicate a problem with a view expression.
  */
-public final class ViewProcessingException extends Exception
+public final class ViewProcessingException extends RuntimeException
 {
     private static final long serialVersionUID = -4098966582612999347L;
 

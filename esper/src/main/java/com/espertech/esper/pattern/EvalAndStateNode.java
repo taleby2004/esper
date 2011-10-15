@@ -101,7 +101,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
         eventList.add(matchEvent);
 
         // If all nodes have events received, the AND expression turns true
-        if (eventsPerChild.size() < getFactoryNode().getChildNodes().size())
+        if (eventsPerChild.size() < evalAndNode.getChildNodes().length)
         {
             return;
         }

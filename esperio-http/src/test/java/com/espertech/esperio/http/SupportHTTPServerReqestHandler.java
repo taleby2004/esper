@@ -1,12 +1,10 @@
 package com.espertech.esperio.http;
 
-import com.espertech.esper.core.EPServiceProviderSPI;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.*;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
-import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.Locale;

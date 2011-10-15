@@ -62,6 +62,5 @@ public class BeanEventBeanSerializableCopyMethod implements EventBeanCopyMethod
         }
 
         return eventAdapterService.adapterForTypedBean(copied, beanEventType);
-
     }
 }

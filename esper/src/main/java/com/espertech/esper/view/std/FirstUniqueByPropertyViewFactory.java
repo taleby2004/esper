@@ -8,12 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.view.std;
 
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.*;
 
 import java.util.List;
@@ -53,27 +52,9 @@ public class FirstUniqueByPropertyViewFactory implements AsymetricDataWindowView
         this.eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return;
-        }
-        throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        return new FirstUniqueByPropertyView(criteriaExpressions, statementContext);
+        return new FirstUniqueByPropertyView(criteriaExpressions, agentInstanceViewFactoryContext.getAgentInstanceContext());
     }
 
     public EventType getEventType()

@@ -14,15 +14,27 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class represents an 'every' operator in the evaluation tree representing an event expression.
  */
-public class EvalEveryNode extends EvalNodeBase implements EvalNodeFilterChildNonQuitting
+public class EvalEveryNode extends EvalNodeBase
 {
-    private static final long serialVersionUID = 3672732014060588205L;
+    private final EvalEveryFactoryNode factoryNode;
+    private final EvalNode childNode;
 
-    /**
-     * Ctor.
-     */
-    protected EvalEveryNode()
-    {
+    public EvalEveryNode(PatternAgentInstanceContext context, EvalEveryFactoryNode factoryNode, EvalNode childNode) {
+        super(context);
+        this.factoryNode = factoryNode;
+        this.childNode = childNode;
+    }
+
+    public EvalEveryFactoryNode getFactoryNode() {
+        return factoryNode;
+    }
+
+    public EvalNodeNumber getNodeNumber() {
+        return factoryNode.getNodeNumber();
+    }
+
+    public EvalNode getChildNode() {
+        return childNode;
     }
 
     public EvalStateNode newState(Evaluator parentNode,
@@ -30,11 +42,6 @@ public class EvalEveryNode extends EvalNodeBase implements EvalNodeFilterChildNo
                                   EvalStateNodeNumber stateNodeId)
     {
         return new EvalEveryStateNode(parentNode, this, beginState);
-    }
-
-    public final String toString()
-    {
-        return "EvalEveryNode children=" + this.getChildNodes().size();
     }
 
     private static final Log log = LogFactory.getLog(EvalEveryNode.class);

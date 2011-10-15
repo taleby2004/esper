@@ -8,7 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.agg.*;
+import com.espertech.esper.epl.agg.AggregationAccessor;
+import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.AggregationMethodFactory;
+import com.espertech.esper.epl.agg.AggregationSpec;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
 public class ExprMedianNodeFactory implements AggregationMethodFactory
@@ -34,17 +37,20 @@ public class ExprMedianNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
-        AggregationMethod method = methodResolutionService.makeMedianAggregator(hasFilter);
-        if (!isDistinct) {
-            return method;
-        }
-        return methodResolutionService.makeDistinctAggregator(method, aggregatedValueType, hasFilter);
-    }
-
     public AggregationAccessor getAccessor()
     {
         throw new UnsupportedOperationException();
+    }
+
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeMedianAggregator(agentInstanceIds, groupId, aggregationId, hasFilter);
+        if (!isDistinct) {
+            return method;
+        }
+        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, aggregatedValueType, hasFilter);
+    }
+
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
     }
 }

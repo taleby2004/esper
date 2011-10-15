@@ -14,7 +14,7 @@ package com.espertech.esper.view.internal;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.RefCountedSet;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.StoppableView;
 import com.espertech.esper.view.View;
@@ -38,6 +38,7 @@ public class UnionAsymetricView extends ViewSupport implements LastPostObserver,
 {
     private static final Log log = LogFactory.getLog(UnionAsymetricView.class);
 
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final UnionViewFactory unionViewFactory;
     private final EventType eventType;
     private final View[] views;
@@ -57,8 +58,9 @@ public class UnionAsymetricView extends ViewSupport implements LastPostObserver,
      * @param eventType the parent event type
      * @param viewList the list of data window views
      */
-    public UnionAsymetricView(UnionViewFactory factory, EventType eventType, List<View> viewList)
+    public UnionAsymetricView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext, UnionViewFactory factory, EventType eventType, List<View> viewList)
     {
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
         this.unionViewFactory = factory;
         this.eventType = eventType;
         this.views = viewList.toArray(new View[viewList.size()]);
@@ -85,9 +87,9 @@ public class UnionAsymetricView extends ViewSupport implements LastPostObserver,
         }
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return unionViewFactory.makeView(statementContext);
+        return unionViewFactory.makeView(agentInstanceViewFactoryContext);
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)

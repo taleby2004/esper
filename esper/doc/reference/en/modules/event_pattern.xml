@@ -1451,7 +1451,7 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
 				</para>
 				
 				<para>
-					When the limit is reached the pattern engine issues a notification to any condition handlers registered with the engine as described in <xref linkend="api-condition"/> and does not start a new pattern sub-expression instance for the right-hand side pattern sub-expression.
+					When the limit is reached the pattern engine issues a <literal>com.espertech.esper.client.hook.ConditionPatternSubexpressionMax</literal> notification object to any condition handlers registered with the engine as described in <xref linkend="api-condition"/> and does not start a new pattern sub-expression instance for the right-hand side pattern sub-expression.
 				</para>
 								
 				<para>
@@ -1481,6 +1481,31 @@ a=A -> (B(id = a.id) and C(id = a.id))]]></programlisting>
 					If your followed-by operator lists multiple sub-expressions with limits, each limit applies to the immediate right-hand side. For example, the pattern below limits the number of filters for B events to 2 and the number of filters for C events to 3:
 				</para>
 				<programlisting><![CDATA[every a=A -[2]> b=B(id = a.id) -[3]> c=C(id = a.id)]]></programlisting>
+			</sect3>
+
+			<sect3 id="pattern-temporal-followed-by-engine-max" >
+			   <title>Limiting Engine-wide Sub-Expression Count</title>
+			   
+			   <para>
+			     Esper allows setting a maximum number of pattern sub-expressions in the configuration, applicable to all followed-by operators of all statements. 
+			   </para>
+			   
+			   <para>
+			     If your application has patterns in multiple EPL statements and all such patterns should count towards a total number of pattern sub-expression counts, you may consider setting a maximum number of pattern sub-expression instances, engine-wide, via the 
+			     configuration described in <xref linkend="config-engine-patterns-max"/>.
+			   </para>
+			   
+				<para>
+				  When the limit is reached the pattern engine issues a notification object  to any condition handlers registered with the engine as described in <xref linkend="api-condition"/>. Depending on your configuration the engine can prevent the start of a new pattern sub-expression instance for the right-hand side pattern sub-expression, until pattern sub-expression instances end or statements are stopped or destroyed.
+				</para>
+
+				<para>
+				  The notification object issued to condition handlers is an instance of <literal>com.espertech.esper.client.hook.ConditionPatternEngineSubexpressionMax</literal>. The notification object contains information which statement triggered the limit and the pattern counts per statement for all statements.
+				</para>
+				
+				<para>
+				  For information on static and runtime configuration, please consult <xref linkend="config-engine-patterns-max"/>. The limit can be changed and disabled or enabled at runtime via the runtime configuration API.
+				</para>
 			</sect3>
         </sect2>
                     

@@ -39,9 +39,9 @@ public final class EvalGuardStateNode extends EvalStateNode implements Evaluator
         super(parentNode, null);
         this.evalGuardNode = evalGuardNode;
 
-        guard = evalGuardNode.getGuardFactory().makeGuard(evalGuardNode.getContext(), beginState, this, stateObjectId, null);
+        guard = evalGuardNode.getFactoryNode().getGuardFactory().makeGuard(evalGuardNode.getContext(), beginState, this, stateObjectId, null);
 
-        this.activeChildNode = evalGuardNode.getChildNodes().get(0).newState(this, beginState, null);
+        this.activeChildNode = evalGuardNode.getChildNode().newState(this, beginState, null);
     }
 
     @Override
@@ -49,8 +49,7 @@ public final class EvalGuardStateNode extends EvalStateNode implements Evaluator
         return evalGuardNode;
     }
 
-    @Override
-    public PatternContext getContext() {
+    public PatternAgentInstanceContext getContext() {
         return evalGuardNode.getContext();
     }
 

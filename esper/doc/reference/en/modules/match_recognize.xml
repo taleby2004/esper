@@ -389,7 +389,7 @@ match_recognize (
   define 
     A as A.temp >= 50,
     B as B.temp <= 45,
-    C as Math.abs(B.temp - A.temp) >= 10)]]></programlisting>
+    C as Math.abs(C.temp - A.temp) >= 10)]]></programlisting>
 
 			<para>
 			  Below table is an example sequence of events and output of the pattern:

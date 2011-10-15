@@ -8,11 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.plan;
 
-import com.espertech.esper.epl.datetime.eval.DatetimeMethodEnum;
-import com.espertech.esper.epl.datetime.eval.ExprDotNodeFilterAnalyzerDTIntervalDesc;
+import com.espertech.esper.epl.datetime.eval.ExprDotNodeFilterAnalyzerDesc;
 import com.espertech.esper.epl.expression.*;
-
-import java.util.Set;
+import com.espertech.esper.epl.join.util.Eligibility;
+import com.espertech.esper.epl.join.util.EligibilityDesc;
+import com.espertech.esper.epl.join.util.EligibilityUtil;
+import com.espertech.esper.epl.join.util.RangeFilterAnalyzer;
 
 /**
  * Analyzes a filter expression and builds a query graph model.
@@ -59,7 +60,7 @@ public class FilterExprAnalyzer
     }
 
     private static void analyzeDotNode(ExprDotNode dotNode, QueryGraph queryGraph) {
-        ExprDotNodeFilterAnalyzerDTIntervalDesc interval = dotNode.getIntervalFilterDesc();
+        ExprDotNodeFilterAnalyzerDesc interval = dotNode.getExprDotNodeFilterAnalyzerDesc();
         if (interval == null) {
             return;
         }
@@ -101,7 +102,7 @@ public class FilterExprAnalyzer
             return;     // require property of right/left side of equals
         }
 
-        EligibilityDesc eligibility = verifyInputStream(exprNodeNoIdent, indexedStream);
+        EligibilityDesc eligibility = EligibilityUtil.verifyInputStream(exprNodeNoIdent, indexedStream);
         if (!eligibility.getEligibility().isEligible()) {
             return;
         }
@@ -110,63 +111,9 @@ public class FilterExprAnalyzer
     }
 
     private static void analyzeBetweenNode(ExprBetweenNode betweenNode, QueryGraph queryGraph) {
-        if ( ((betweenNode.getChildNodes().get(0) instanceof ExprIdentNode)) &&
-             ((betweenNode.getChildNodes().get(1) instanceof ExprIdentNode)) &&
-             ((betweenNode.getChildNodes().get(2) instanceof ExprIdentNode)) )
-        {
-            ExprIdentNode identNodeValue = (ExprIdentNode) betweenNode.getChildNodes().get(0);
-            ExprIdentNode identNodeStart = (ExprIdentNode) betweenNode.getChildNodes().get(1);
-            ExprIdentNode identNodeEnd = (ExprIdentNode) betweenNode.getChildNodes().get(2);
-            boolean includeStart = betweenNode.isLowEndpointIncluded();
-            boolean includeEnd = betweenNode.isHighEndpointIncluded();
-            boolean isNot = betweenNode.isNotBetween();
-
-            int keyStreamStart = identNodeStart.getStreamId();
-            int keyStreamEnd = identNodeEnd.getStreamId();
-            int valueStream = identNodeValue.getStreamId();
-            queryGraph.addRangeStrict(keyStreamStart, identNodeStart.getResolvedPropertyName(), identNodeStart, keyStreamEnd,
-                    identNodeEnd.getResolvedPropertyName(), identNodeEnd, valueStream,
-                    identNodeValue.getResolvedPropertyName(), identNodeValue,
-                    includeStart, includeEnd, isNot);
-            return;
-        }
-
-        // handle constant-compare or transformation case
-        if (betweenNode.getChildNodes().get(0) instanceof ExprIdentNode) {
-            ExprIdentNode identNode = (ExprIdentNode) betweenNode.getChildNodes().get(0);
-            int indexedStream = identNode.getStreamId();
-            String indexedProp = identNode.getResolvedPropertyName();
-
-            ExprNode startNode = betweenNode.getChildNodes().get(1);
-            ExprNode endNode = betweenNode.getChildNodes().get(2);
-
-            EligibilityDesc eligibilityStart = verifyInputStream(startNode, indexedStream);
-            if (!eligibilityStart.getEligibility().isEligible()) {
-                return;
-            }
-            EligibilityDesc eligibilityEnd = verifyInputStream(endNode, indexedStream);
-            if (!eligibilityEnd.getEligibility().isEligible()) {
-                return;
-            }
-
-            queryGraph.addRangeExpr(indexedStream, indexedProp, startNode, eligibilityStart.getStreamNum(), endNode, eligibilityEnd.getStreamNum());
-        }
-    }
-
-    private static EligibilityDesc verifyInputStream(ExprNode expression, int indexedStream) {
-        ExprNodeIdentifierCollectVisitor visitor = new ExprNodeIdentifierCollectVisitor();
-        expression.accept(visitor);
-        Set<Integer> inputStreamsRequired = visitor.getStreamsRequired();
-        if (inputStreamsRequired.size() > 1) {  // multi-stream dependency no optimization (i.e. a+b=c)
-            return new EligibilityDesc(FilterExprAnalyzer.Eligibility.INELIGIBLE, null);
-        }
-        if (inputStreamsRequired.size() == 1 && inputStreamsRequired.iterator().next() == indexedStream) {  // self-compared no optimization
-            return new EligibilityDesc(FilterExprAnalyzer.Eligibility.INELIGIBLE, null);
-        }
-        if (inputStreamsRequired.isEmpty()) {
-            return new EligibilityDesc(FilterExprAnalyzer.Eligibility.REQUIRE_NONE, null);
-        }
-        return new EligibilityDesc(FilterExprAnalyzer.Eligibility.REQUIRE_ONE, inputStreamsRequired.iterator().next());
+        RangeFilterAnalyzer.apply(betweenNode.getChildNodes().get(0), betweenNode.getChildNodes().get(1), betweenNode.getChildNodes().get(2),
+                betweenNode.isLowEndpointIncluded(), betweenNode.isHighEndpointIncluded(), betweenNode.isNotBetween(),
+                queryGraph);
     }
 
     /**
@@ -215,7 +162,7 @@ public class FilterExprAnalyzer
             return;     // require property of right/left side of equals
         }
 
-        EligibilityDesc eligibility = verifyInputStream(exprNodeNoIdent, indexedStream);
+        EligibilityDesc eligibility = EligibilityUtil.verifyInputStream(exprNodeNoIdent, indexedStream);
         if (!eligibility.getEligibility().isEligible()) {
             return;
         }
@@ -238,34 +185,6 @@ public class FilterExprAnalyzer
         for (ExprNode childNode : andNode.getChildNodes())
         {
             analyze(childNode, queryGraph, isOuterJoin);
-        }
-    }
-
-    private static enum Eligibility {
-        REQUIRE_NONE,
-        REQUIRE_ONE,
-        INELIGIBLE;
-
-        public boolean isEligible() {
-            return this != INELIGIBLE;
-        }
-    }
-
-    private static class EligibilityDesc {
-        private Eligibility eligibility;
-        private Integer streamNum;
-
-        private EligibilityDesc(Eligibility eligibility, Integer streamNum) {
-            this.eligibility = eligibility;
-            this.streamNum = streamNum;
-        }
-
-        public Eligibility getEligibility() {
-            return eligibility;
-        }
-
-        public Integer getStreamNum() {
-            return streamNum;
         }
     }
 }

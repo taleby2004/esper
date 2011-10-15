@@ -79,9 +79,4 @@ public class MinMaxEverAggregator implements AggregationMethod
     {
         return returnType;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeMinMaxAggregator(minMaxTypeEnum, returnType, false, false);
-    }
 }

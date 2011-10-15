@@ -18,7 +18,7 @@ import java.util.Collection;
 /**
  * Implementation for handling aggregation without any grouping (no group-by).
  */
-public class AggSvcGroupAllNoAccessImpl extends AggregationServiceBase
+public class AggSvcGroupAllNoAccessImpl extends AggregationServiceBaseUngrouped
 {
     /**
      * Ctor.
@@ -48,25 +48,25 @@ public class AggSvcGroupAllNoAccessImpl extends AggregationServiceBase
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
     {
         // no action needed - this implementation does not group and the current row is the single group
     }
 
-    public Object getValue(int column)
+    public Object getValue(int column, int[] agentInstanceIds)
     {
         return aggregators[column].getValue();
     }
 
-    public Collection<EventBean> getCollection(int column) {
+    public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context) {
         return null;
     }
 
-    public EventBean getEventBean(int column) {
+    public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         return null;
     }
 
-    public void clearResults()
+    public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
     {
         for (AggregationMethod aggregator : aggregators)
         {

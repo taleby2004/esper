@@ -15,7 +15,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.View;
-import com.espertech.esper.core.StatementContext;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -37,7 +36,7 @@ public class SupportBeanClassView extends SupportBaseView implements CloneableVi
         instances.add(this);
     }
 
-    public View cloneView(StatementContext context)
+    public View cloneView()
     {
         return new SupportBeanClassView(clazz);
     }

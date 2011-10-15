@@ -10,7 +10,6 @@ package com.espertech.esper.pattern.observer;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.pattern.*;
 import com.espertech.esper.schedule.ScheduleParameterException;
 import com.espertech.esper.schedule.ScheduleSpec;
@@ -83,10 +82,10 @@ public class TimerAtObserverFactory implements ObserverFactory, MetaDefItem, Ser
         }
     }
 
-    public EventObserver makeObserver(PatternContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator,
+    public EventObserver makeObserver(PatternAgentInstanceContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator,
                                       EvalStateNodeNumber stateNodeId, Object observerState)
     {
-        List<Object> observerParameters = PatternExpressionUtil.evaluate("Timer-at observer", beginState, params, convertor, context);
+        List<Object> observerParameters = PatternExpressionUtil.evaluate("Timer-at observer", beginState, params, convertor, context.getAgentInstanceContext());
 
         try
         {

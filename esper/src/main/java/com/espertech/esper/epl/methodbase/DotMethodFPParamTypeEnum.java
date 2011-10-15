@@ -17,5 +17,6 @@ public enum DotMethodFPParamTypeEnum {
     NUMERIC,
     ANY,
     SPECIFIC,
-    TIME_PERIOD_OR_SEC
+    TIME_PERIOD_OR_SEC,
+    DATETIME
 }

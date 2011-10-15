@@ -15,7 +15,6 @@ import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.core.StatementContext;
 
 /**
  * A view that retains the last update.
@@ -43,7 +42,7 @@ public final class LastPostObserverView extends ViewSupport implements Cloneable
         this.observer = observer;
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
         return new LastPostObserverView(streamId);
     }

@@ -28,4 +28,8 @@ public class EventBeanFactoryBean implements EventBeanFactory {
     public EventBean wrap(Object underlying) {
         return eventAdapterService.adapterForTypedBean(underlying, type);
     }
+
+    public Class getUnderlyingType() {
+        return type.getUnderlyingType();
+    }
 }

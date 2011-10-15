@@ -11,12 +11,12 @@
 
 package com.espertech.esper.core.thread;
 
-import com.espertech.esper.core.EPRuntimeImpl;
-import com.espertech.esper.core.EPServicesContext;
-import com.espertech.esper.core.EPStatementHandle;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.service.EPRuntimeImpl;
+import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Timer unit for multiple callbacks for a statement.
@@ -28,7 +28,7 @@ public class TimerUnitMultiple implements TimerUnit
     private final EPServicesContext services;
     private final EPRuntimeImpl runtime;
     private final Object callbackObject;
-    private final EPStatementHandle handle;
+    private final EPStatementAgentInstanceHandle handle;
     private final ExprEvaluatorContext exprEvaluatorContext;
 
     /**
@@ -39,7 +39,7 @@ public class TimerUnitMultiple implements TimerUnit
      * @param callbackObject callback list
      * @param exprEvaluatorContext expression evaluation context
      */
-    public TimerUnitMultiple(EPServicesContext services, EPRuntimeImpl runtime, EPStatementHandle handle, Object callbackObject, ExprEvaluatorContext exprEvaluatorContext)
+    public TimerUnitMultiple(EPServicesContext services, EPRuntimeImpl runtime, EPStatementAgentInstanceHandle handle, Object callbackObject, ExprEvaluatorContext exprEvaluatorContext)
     {
         this.services = services;
         this.handle = handle;

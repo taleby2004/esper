@@ -11,6 +11,7 @@ package com.espertech.esper.epl.join.plan;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.NumberSetPermutationEnumeration;
 import com.espertech.esper.collection.NumberSetShiftGroupEnumeration;
+import com.espertech.esper.epl.join.base.HistoricalViewableDesc;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.util.DependencyGraph;
 import com.espertech.esper.util.JavaClassHelper;
@@ -104,16 +105,13 @@ public class NStreamQueryPlanBuilder
      * Build a query plan based on the stream property relationships indicated in queryGraph.
      * @param queryGraph - navigation info between streams
      * @param typesPerStream - event types for each stream
-     * @param hasHistorical - indicator if there is one or more historical streams in the join
-     * @param isHistorical - indicator for each stream if it is a historical streams or not
      * @param dependencyGraph - dependencies between historical streams
      * @param historicalStreamIndexLists - index management, populated for the query plan
      * @return query plan
      */
     protected static QueryPlan build(QueryGraph queryGraph,
                                      EventType[] typesPerStream,
-                                     boolean hasHistorical,
-                                     boolean[] isHistorical,
+                                     HistoricalViewableDesc historicalViewableDesc,
                                      DependencyGraph dependencyGraph,
                                      HistoricalStreamIndexList[] historicalStreamIndexLists,
                                      boolean hasForceNestedIter)
@@ -131,11 +129,11 @@ public class NStreamQueryPlanBuilder
         }
 
         // any historical streams don't get indexes, the lookup strategy accounts for cached indexes
-        if (hasHistorical)
+        if (historicalViewableDesc.isHasHistorical())
         {
-            for (int i = 0; i < isHistorical.length; i++)
+            for (int i = 0; i < historicalViewableDesc.getHistorical().length; i++)
             {
-                if (isHistorical[i])
+                if (historicalViewableDesc.getHistorical()[i])
                 {
                     indexSpecs[i] = null;
                 }
@@ -147,7 +145,7 @@ public class NStreamQueryPlanBuilder
         for (int streamNo = 0; streamNo < numStreams; streamNo++)
         {
             // no plan for historical streams that are dependent upon other streams
-            if ((isHistorical[streamNo]) && (dependencyGraph.hasDependency(streamNo)))
+            if ((historicalViewableDesc.getHistorical()[streamNo]) && (dependencyGraph.hasDependency(streamNo)))
             {
                 planNodeSpecs[streamNo] = new QueryPlanNodeNoOp();
                 continue;
@@ -164,7 +162,7 @@ public class NStreamQueryPlanBuilder
                 worstDepth = bestChainResult.depth;
             }
 
-            planNodeSpecs[streamNo] = createStreamPlan(streamNo, bestChain, queryGraph, indexSpecs, typesPerStream, isHistorical, historicalStreamIndexLists);
+            planNodeSpecs[streamNo] = createStreamPlan(streamNo, bestChain, queryGraph, indexSpecs, typesPerStream, historicalViewableDesc.getHistorical(), historicalStreamIndexLists);
             if (log.isDebugEnabled())
             {
                 log.debug(".build spec=" + planNodeSpecs[streamNo]);

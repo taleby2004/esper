@@ -11,38 +11,62 @@
 
 package com.espertech.esper.support.view;
 
+import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.ConfigurationEngineDefaults;
 import com.espertech.esper.client.hook.ConditionHandler;
 import com.espertech.esper.client.hook.ExceptionHandler;
-import com.espertech.esper.core.ExceptionHandlingService;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.core.StatementResultServiceImpl;
-import com.espertech.esper.core.StatementFilterVersion;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.ExceptionHandlingService;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.core.service.StatementResultServiceImpl;
+import com.espertech.esper.core.thread.ThreadingServiceImpl;
+import com.espertech.esper.epl.core.EngineImportServiceImpl;
+import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.named.NamedWindowServiceImpl;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
 import com.espertech.esper.epl.spec.PluggableObjectRegistryImpl;
+import com.espertech.esper.epl.variable.VariableServiceImpl;
 import com.espertech.esper.event.EventTypeIdGeneratorImpl;
-import com.espertech.esper.schedule.SchedulingService;
+import com.espertech.esper.event.vaevent.ValueAddEventServiceImpl;
+import com.espertech.esper.pattern.PatternObjectResolutionServiceImpl;
 import com.espertech.esper.schedule.ScheduleBucket;
+import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
 import com.espertech.esper.util.ManagedReadWriteLock;
-import com.espertech.esper.view.ViewResolutionServiceImpl;
 import com.espertech.esper.view.ViewEnumHelper;
 import com.espertech.esper.view.ViewFactoryContext;
-import com.espertech.esper.pattern.PatternObjectResolutionServiceImpl;
-import com.espertech.esper.epl.view.OutputConditionFactoryDefault;
-import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
-import com.espertech.esper.epl.core.EngineImportServiceImpl;
-import com.espertech.esper.epl.named.NamedWindowServiceImpl;
-import com.espertech.esper.epl.variable.VariableServiceImpl;
-import com.espertech.esper.core.thread.ThreadingServiceImpl;
-import com.espertech.esper.event.vaevent.ValueAddEventServiceImpl;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.ConfigurationEngineDefaults;
+import com.espertech.esper.view.ViewResolutionServiceImpl;
 
 import java.util.Collections;
 
 public class SupportStatementContextFactory
 {
+    public static ExprEvaluatorContext makeEvaluatorContext() {
+        return new ExprEvaluatorContextStatement(null);
+    }
+
+    public static AgentInstanceContext makeAgentInstanceContext(SchedulingService stub) {
+        return new AgentInstanceContext(makeContext(stub), null, null, null, null);
+    }
+
+    public static AgentInstanceContext makeAgentInstanceContext() {
+        return new AgentInstanceContext(makeContext(), null, null, null, null);
+    }
+
+    public static AgentInstanceViewFactoryChainContext makeAgentInstanceViewFactoryContext(SchedulingService stub) {
+        AgentInstanceContext agentInstanceContext = makeAgentInstanceContext(stub);
+        return new AgentInstanceViewFactoryChainContext(agentInstanceContext, false, null, null);
+    }
+
+    public static AgentInstanceViewFactoryChainContext makeAgentInstanceViewFactoryContext() {
+        AgentInstanceContext agentInstanceContext = makeAgentInstanceContext();
+        return new AgentInstanceViewFactoryChainContext(agentInstanceContext, false, null, null);
+    }
+
     public static StatementContext makeContext()
     {
         SupportSchedulingServiceImpl sched = new SupportSchedulingServiceImpl();
@@ -64,6 +88,7 @@ public class SupportStatementContextFactory
         return new StatementContext("engURI",
                 "engInstId",
                 "stmtId",
+                null,
                 "stmtName",
                 "exprHere",
                 stub,
@@ -77,8 +102,6 @@ public class SupportStatementContextFactory
                 new MethodResolutionServiceImpl(new EngineImportServiceImpl(true, true, true), null),
                 null,
                 null,
-                null,
-                new OutputConditionFactoryDefault(),
                 new NamedWindowServiceImpl(null, variableService, false, new ManagedReadWriteLock("dummyeplock", true), new ExceptionHandlingService("engURI", Collections.<ExceptionHandler>emptyList(), Collections.<ConditionHandler>emptyList()), false, null),
                 null,
                 new StatementResultServiceImpl("name", null, null, new ThreadingServiceImpl(new ConfigurationEngineDefaults.Threading())), // statement result svc
@@ -88,9 +111,8 @@ public class SupportStatementContextFactory
                 null,
                 null,
                 null,
-                new StatementFilterVersion(),
                 null,
                 null,
-                null, new EventTypeIdGeneratorImpl());
+                null, new EventTypeIdGeneratorImpl(), null, null, null, null);
     }
 }

@@ -8,12 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationAccess;
-import com.espertech.esper.type.MinMaxTypeEnum;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.AggregationMethodFactory;
 import com.espertech.esper.epl.agg.AggregationSupport;
+import com.espertech.esper.type.MinMaxTypeEnum;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -96,7 +97,7 @@ public interface MethodResolutionService
      * @throws EngineImportUndefinedException if the function is not a configured single-row function
      * @throws EngineImportException if the function providing class could not be loaded or doesn't match
      */
-    public Pair<Class, String> resolveSingleRow(String functionName) throws EngineImportUndefinedException, EngineImportException;
+    public Pair<Class, EngineImportSingleRowDesc> resolveSingleRow(String functionName) throws EngineImportUndefinedException, EngineImportException;
 
     /**
      * Makes a new plug-in aggregation instance by name.
@@ -107,104 +108,137 @@ public interface MethodResolutionService
 
     /**
      * Makes a new count-aggregator.
-     * @param isIgnoreNull is true to ignore nulls, or false to count nulls
-     * @return aggregator
+     *
+     * @param agentInstanceIds
+     * @param groupId
+     *@param aggregationId
+     * @param isIgnoreNull is true to ignore nulls, or false to count nulls  @return aggregator
      */
-    public AggregationMethod makeCountAggregator(boolean isIgnoreNull, boolean hasFilter);
+    public AggregationMethod makeCountAggregator(int[] agentInstanceIds, int groupId, int aggregationId, boolean isIgnoreNull, boolean hasFilter);
 
     /**
      * Makes a new first-value aggregator.
-     * @param type of value
-     * @return aggregator
+     *
+     * @param agentInstanceIds
+     * @param groupId
+     *@param aggregationId
+     * @param type of value  @return aggregator
      */
-    public AggregationMethod makeFirstEverValueAggregator(Class type, boolean hasFilter);
+    public AggregationMethod makeFirstEverValueAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class type, boolean hasFilter);
 
     /**
      * Makes a new last-value aggregator.
-     * @param type of value
-     * @return aggregator
+     *
+     * @param agentInstanceIds
+     * @param groupId
+     *@param aggregationId
+     * @param type of value  @return aggregator
      */
-    public AggregationMethod makeLastEverValueAggregator(Class type, boolean hasFilter);
+    public AggregationMethod makeLastEverValueAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class type, boolean hasFilter);
 
     /**
      * Makes a new sum-aggregator.
-     * @param type is the type to be summed up, i.e. float, long etc.
-     * @return aggregator
+     *
+     * @param agentInstanceIds
+     * @param groupId
+     *@param aggregationId
+     * @param type is the type to be summed up, i.e. float, long etc.  @return aggregator
      */
-    public AggregationMethod makeSumAggregator(Class type, boolean hasFilter);
+    public AggregationMethod makeSumAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class type, boolean hasFilter);
 
     public Class getSumAggregatorType(Class inputValueType);
 
     /**
      * Makes a new distinct-value-aggregator.
+     *
+     * @param agentInstanceIds
+     * @param groupId
+     *@param aggregationId
      * @param aggregationMethod is the inner aggregation method
-     * @param childType is the return type of the inner expression to aggregate, if any
-     * @return aggregator
+     * @param childType is the return type of the inner expression to aggregate, if any   @return aggregator
      */
-    public AggregationMethod makeDistinctAggregator(AggregationMethod aggregationMethod, Class childType, boolean hasFilter);
+    public AggregationMethod makeDistinctAggregator(int[] agentInstanceIds, int groupId, int aggregationId, AggregationMethod aggregationMethod, Class childType, boolean hasFilter);
 
     /**
      * Makes a new avg-aggregator.
-     * @param type the expression return type
-     * @return aggregator
+     *
+     * @param agentInstanceIds
+     * @param groupId
+     *@param aggregationId
+     * @param type the expression return type  @return aggregator
      */
-    public AggregationMethod makeAvgAggregator(Class type, boolean hasFilter);
+    public AggregationMethod makeAvgAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class type, boolean hasFilter);
     public Class getAvgAggregatorType(Class childType);
 
     /**
      * Makes a new avedev-aggregator.
      * @return aggregator
      */
-    public AggregationMethod makeAvedevAggregator(boolean hasFilter);
+    public AggregationMethod makeAvedevAggregator(int[] agentInstanceIds, int groupId, int aggregationId, boolean hasFilter);
 
     /**
      * Makes a new median-aggregator.
      * @return aggregator
+     * @param agentInstanceIds
+     * @param groupId
+     * @param aggregationId
      * @param hasFilter
      */
-    public AggregationMethod makeMedianAggregator(boolean hasFilter);
+    public AggregationMethod makeMedianAggregator(int[] agentInstanceIds, int groupId, int aggregationId, boolean hasFilter);
 
     /**
      * Makes a new min-max-aggregator.
+     *
+     * @param agentInstanceIds
+     * @param groupId
+     *@param aggregationId
      * @param minMaxType dedicates whether to do min or max
      * @param targetType is the type to max or min
-     * @param isHasDataWindows true for has data windows
-     * @return aggregator to use
+     * @param isHasDataWindows true for has data windows    @return aggregator to use
      */
-    public AggregationMethod makeMinMaxAggregator(MinMaxTypeEnum minMaxType, Class targetType, boolean isHasDataWindows, boolean hasFilter);
+    public AggregationMethod makeMinMaxAggregator(int[] agentInstanceIds, int groupId, int aggregationId, MinMaxTypeEnum minMaxType, Class targetType, boolean isHasDataWindows, boolean hasFilter);
 
     /**
      * Makes a new stddev-aggregator.
      * @return aggregator
      */
-    public AggregationMethod makeStddevAggregator(boolean hasFilter);
+    public AggregationMethod makeStddevAggregator(int[] agentInstanceIds, int groupId, int aggregationId, boolean hasFilter);
 
     /**
      * Makes a new rate-aggregator.
      * @return aggregator
+     * @param agentInstanceIds
+     * @param groupId
+     * @param aggregationId
      */
-    public AggregationMethod makeRateAggregator();
+    public AggregationMethod makeRateAggregator(int[] agentInstanceIds, int groupId, int aggregationId);
 
     /**
      * Makes a new rate-aggregator.
      * @param interval seconds
      * @return aggregator to use
      */
-    public AggregationMethod makeRateEverAggregator(long interval);
+    public AggregationMethod makeRateEverAggregator(int[] agentInstanceIds, int groupId, int aggregationId, long interval);
 
     /**
      * Makes a Nth element aggregator.
+     *
+     * @param agentInstanceIds
+     * @param groupId
+     *@param aggregationId
      * @param returnType of aggregation
-     * @param size of elements
-     * @return aggregator
+     * @param size of elements   @return aggregator
      */
-    public AggregationMethod makeNthAggregator(Class returnType, int size);
+    public AggregationMethod makeNthAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class returnType, int size);
 
     /**
      * Make leaving agg.
      * @return agg
+     * @param agentInstanceIds
+     * @param groupId
+     * @param aggregationId
      */
-    public AggregationMethod makeLeavingAggregator();
+    public AggregationMethod makeLeavingAggregator(int[] agentInstanceIds, int groupId, int aggregationId);
 
     /**
      * Sets the group key types.
@@ -213,18 +247,27 @@ public interface MethodResolutionService
     public void setGroupKeyTypes(Class[] groupKeyTypes);
     
     /**
-     * Returns a new set of aggregators given an existing prototype-set of aggregators for a given group key.
+     * Returns a new set of aggregators given an existing prototype-set of aggregators for a given context partition and group key.
+     * @param agentInstanceId context partition
      * @param prototypes is the prototypes
      * @param groupKey is the key to group-by for
      * @return new set of aggregators for this group
      */
-    public AggregationMethod[] newAggregators(AggregationMethod[] prototypes, MultiKeyUntyped groupKey);
+    public AggregationMethod[] newAggregators(AggregationMethodFactory[] prototypes, int[] agentInstanceId, MultiKeyUntyped groupKey);
+
+    /**
+     * Returns a new set of aggregators given an existing prototype-set of aggregators for a given context partition (no groups).
+     * @param agentInstanceId context partition
+     * @return new set of aggregators for this group
+     */
+    public AggregationMethod[] newAggregators(AggregationMethodFactory[] aggregators, int[] agentInstanceId);
 
     /**
      * Opportunity to remove aggregations for a group.
+     * @param agentInstanceIds
      * @param groupKey that is no longer used
      */
-    public void removeAggregators(MultiKeyUntyped groupKey);
+    public void removeAggregators(int[] agentInstanceIds, MultiKeyUntyped groupKey);
 
     /**
      * Returns the current row count of an aggregation, for use with resilience.
@@ -233,7 +276,5 @@ public interface MethodResolutionService
      */
     public long getCurrentRowCount(AggregationMethod[] aggregators, AggregationAccess[] accesses);
 
-    public AggregationAccess makeAccessStreamId(boolean isJoin, int streamId, MultiKeyUntyped mk);
-
-
+    public AggregationAccess makeAccessStreamId(int[] agentInstanceIds, boolean isJoin, int streamId, MultiKeyUntyped mk);
 }

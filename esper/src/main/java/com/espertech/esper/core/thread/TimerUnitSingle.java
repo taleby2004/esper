@@ -11,9 +11,9 @@
 
 package com.espertech.esper.core.thread;
 
-import com.espertech.esper.core.EPRuntimeImpl;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.EPServicesContext;
+import com.espertech.esper.core.service.EPRuntimeImpl;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -10,11 +10,8 @@ package com.espertech.esper.view.window;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.view.BatchingDataWindowView;
-import com.espertech.esper.view.CloneableView;
-import com.espertech.esper.view.View;
-import com.espertech.esper.view.ViewSupport;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,9 +22,9 @@ import java.util.LinkedHashSet;
 /**
 * Same as the {@link LengthBatchView}, this view also supports fast-remove from the batch for remove stream events.
 */
-public final class LengthBatchViewRStream extends ViewSupport implements CloneableView, BatchingDataWindowView
-{
+public final class LengthBatchViewRStream extends ViewSupport implements CloneableView, DataWindowView {
     // View parameters
+    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final LengthBatchViewFactory lengthBatchViewFactory;
     private final int size;
 
@@ -40,11 +37,13 @@ public final class LengthBatchViewRStream extends ViewSupport implements Cloneab
      * @param size is the number of events to batch
      * @param lengthBatchViewFactory for copying this view in a group-by
      */
-    public LengthBatchViewRStream(LengthBatchViewFactory lengthBatchViewFactory,
-                         int size)
+    public LengthBatchViewRStream(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext,
+                                  LengthBatchViewFactory lengthBatchViewFactory,
+                                  int size)
     {
         this.lengthBatchViewFactory = lengthBatchViewFactory;
         this.size = size;
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
 
         if (size <= 0)
         {
@@ -52,9 +51,9 @@ public final class LengthBatchViewRStream extends ViewSupport implements Cloneab
         }
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return lengthBatchViewFactory.makeView(statementContext);
+        return lengthBatchViewFactory.makeView(agentInstanceViewFactoryContext);
     }
 
     /**

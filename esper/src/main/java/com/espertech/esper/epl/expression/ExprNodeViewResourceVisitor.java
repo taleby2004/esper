@@ -8,13 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.core.ViewResourceCallback;
-
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Visitor that collects expression nodes that require view resources as provided by {@link com.espertech.esper.epl.core.ViewResourceCallback}.
+ * Visitor that collects expression nodes that require view resources.
  */
 public class ExprNodeViewResourceVisitor implements ExprNodeVisitor
 {
@@ -44,7 +42,7 @@ public class ExprNodeViewResourceVisitor implements ExprNodeVisitor
 
     public void visit(ExprNode exprNode)
     {
-        if (exprNode instanceof ViewResourceCallback)
+        if (exprNode instanceof ExprPreviousNode || exprNode instanceof ExprPriorNode)
         {
             exprNodes.add(exprNode);
         }

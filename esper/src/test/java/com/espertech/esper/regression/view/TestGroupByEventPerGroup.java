@@ -164,7 +164,7 @@ public class TestGroupByEventPerGroup extends TestCase
 
         listener.reset();
 
-        for (int i = 0; i < 890; i++)
+        for (int i = 0; i < 900; i++)
         {
             SupportBean event = new SupportBean();
             event.setLongPrimitive(i * 1000);
@@ -172,7 +172,7 @@ public class TestGroupByEventPerGroup extends TestCase
             assertEquals("Failed at " + i, 1L, listener.assertOneGetNewAndReset().get("count(*)"));
         }
 
-        for (int i = 891; i < 1000; i++)
+        for (int i = 900; i < 1000; i++)
         {
             SupportBean event = new SupportBean();
             event.setLongPrimitive(i * 1000);

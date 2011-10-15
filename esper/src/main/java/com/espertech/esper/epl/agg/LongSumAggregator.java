@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.epl.agg.AggregationMethod;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
 /**
@@ -57,11 +56,6 @@ public class LongSumAggregator implements AggregationMethod
     public Class getValueType()
     {
         return Long.class;
-    }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeSumAggregator(Long.class, false);
     }
 }
 

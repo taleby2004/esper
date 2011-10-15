@@ -13,10 +13,11 @@ import com.espertech.esper.epl.join.exec.base.JoinExecTableLookupStrategy;
 import com.espertech.esper.epl.join.exec.base.LookupInstructionExec;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
-import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.epl.virtualdw.VirtualDWView;
+import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.view.Viewable;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -68,20 +69,23 @@ public class LookupInstructionPlan
 
     /**
      * Constructs the executable from the plan.
+     *
+     * @param statementName
+     * @param statementId
+     *@param annotations
      * @param indexesPerStream is the index objects for use in lookups
      * @param streamTypes is the types of each stream
      * @param streamViews the viewable representing each stream
-     * @param historicalStreamIndexLists index management for historical streams
-     * @return executable instruction
+     * @param historicalStreamIndexLists index management for historical streams     @return executable instruction
      */
-    public LookupInstructionExec makeExec(Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
+    public LookupInstructionExec makeExec(String statementName, String statementId, Annotation[] annotations, Map<String, EventTable>[] indexesPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
     {
         JoinExecTableLookupStrategy strategies[] = new JoinExecTableLookupStrategy[lookupPlans.length];
         for (int i = 0; i < lookupPlans.length; i++)
         {
             if (lookupPlans[i] != null)
             {
-                strategies[i] = lookupPlans[i].makeStrategy(indexesPerStream, streamTypes, viewExternal);
+                strategies[i] = lookupPlans[i].makeStrategy(statementName, statementId, annotations, indexesPerStream, streamTypes, viewExternal);
             }
             else
             {

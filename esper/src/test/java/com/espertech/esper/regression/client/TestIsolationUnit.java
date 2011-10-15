@@ -474,7 +474,7 @@ public class TestIsolationUnit extends TestCase
 
         epService.getEPAdministrator().destroyAllStatements();
 
-        stmt = epService.getEPAdministrator().createEPL("select string as ct from SupportBean(current_timestamp() >= 10000)");
+        stmt = epService.getEPAdministrator().createEPL("select string as ct from SupportBean where current_timestamp() >= 10000");
         stmt.addListener(listener);
         
         unit.getEPRuntime().sendEvent(new SupportBean());
@@ -490,7 +490,7 @@ public class TestIsolationUnit extends TestCase
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
 
         stmt.destroy();
-        stmt = epService.getEPAdministrator().createEPL("select string as ct from SupportBean(current_timestamp() >= 120000)");
+        stmt = epService.getEPAdministrator().createEPL("select string as ct from SupportBean where current_timestamp() >= 120000");
         stmt.addListener(listener);
         unit.getEPAdministrator().addStatement(new EPStatement[] {stmt});
 

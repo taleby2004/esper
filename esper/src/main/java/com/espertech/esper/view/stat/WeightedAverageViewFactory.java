@@ -9,8 +9,8 @@
 package com.espertech.esper.view.stat;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.util.JavaClassHelper;
@@ -47,7 +47,7 @@ public class WeightedAverageViewFactory implements ViewFactory
 
     public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
     {
-        ExprNode[] validated = ViewFactorySupport.validate("Weighted average view", parentEventType, statementContext, viewParameters, false);
+        ExprNode[] validated = ViewFactorySupport.validate("Weighted average view", parentEventType, statementContext, viewParameters, true);
 
         String errorMessage = "Weighted average view requires two expressions returning numeric values as parameters";
         if (validated.length < 2) {
@@ -60,23 +60,13 @@ public class WeightedAverageViewFactory implements ViewFactory
 
         fieldNameX = validated[0];
         fieldNameWeight = validated[1];
-        additionalProps = StatViewAdditionalProps.make(validated, 2);
+        additionalProps = StatViewAdditionalProps.make(validated, 2, parentEventType);
         eventType = WeightedAverageView.createEventType(statementContext, additionalProps, streamNumber);
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        return false;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        return new WeightedAverageView(statementContext, fieldNameX, fieldNameWeight, eventType, additionalProps);
+        return new WeightedAverageView(agentInstanceViewFactoryContext.getAgentInstanceContext(), fieldNameX, fieldNameWeight, eventType, additionalProps);
     }
 
     public EventType getEventType()

@@ -11,7 +11,8 @@ package com.espertech.esper.adapter;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.*;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.service.*;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.filter.FilterSpecCompiled;
@@ -94,12 +95,13 @@ public abstract class BaseSubscription implements Subscription, FilterHandleCall
     {
         EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
         EventType eventType = spi.getEventAdapterService().getExistsTypeByName(eventTypeName);
-        FilterValueSet fvs = new FilterSpecCompiled(eventType, null, new LinkedList<FilterSpecParam>(), null).getValueSet(null);
+        FilterValueSet fvs = new FilterSpecCompiled(eventType, null, new LinkedList<FilterSpecParam>(), null).getValueSet(null, null, null);
 
         String name = "subscription:" + subscriptionName;
         StatementMetricHandle metricsHandle = spi.getMetricReportingService().getStatementHandle(name, name);
-        EPStatementHandle statementHandle = new EPStatementHandle(name, name, name, new StatementRWLockImpl(name, false), name, false, metricsHandle, 0, false, new StatementFilterVersion());
-        EPStatementHandleCallback registerHandle = new EPStatementHandleCallback(statementHandle, this);
+        EPStatementHandle statementHandle = new EPStatementHandle(name, name, name, name, false, metricsHandle, 0, false);
+        EPStatementAgentInstanceHandle agentHandle = new EPStatementAgentInstanceHandle(statementHandle, new StatementAgentInstanceRWLockImpl(name, false), null, new StatementAgentInstanceFilterVersion());
+        EPStatementHandleCallback registerHandle = new EPStatementHandleCallback(agentHandle, this);
         spi.getFilterService().add(fvs, registerHandle);
     }
 }

@@ -13,7 +13,7 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.event.EventTypeMetadata;
 import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.MappedEventBean;
@@ -232,8 +232,8 @@ public class TestNamedWindowTypes extends TestCase
     {
         epService.getEPAdministrator().createEPL("create schema EventTypeOne (hsi int)");
         epService.getEPAdministrator().createEPL("create schema EventTypeTwo (event EventTypeOne)");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("create window NamedWidnow.std:unique(event.hsi) as EventTypeTwo");
-        epService.getEPAdministrator().createEPL("on EventTypeOne as ev insert into NamedWidnow select ev as event");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("create window NamedWindow.std:unique(event.hsi) as EventTypeTwo");
+        epService.getEPAdministrator().createEPL("on EventTypeOne as ev insert into NamedWindow select ev as event");
 
         Map<String, Object> event = new HashMap<String, Object>();
         event.put("hsi", 10);

@@ -34,17 +34,20 @@ public class ExprStddevNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
-        AggregationMethod method = methodResolutionService.makeStddevAggregator(hasFilter);
-        if (!isDistinct) {
-            return method;
-        }
-        return methodResolutionService.makeDistinctAggregator(method, aggregatedValueType, hasFilter);
-    }
-
     public AggregationAccessor getAccessor()
     {
         throw new UnsupportedOperationException();
+    }
+
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeStddevAggregator(agentInstanceIds, groupId, aggregationId, hasFilter);
+        if (!isDistinct) {
+            return method;
+        }
+        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, aggregatedValueType, hasFilter);
+    }
+
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
     }
 }

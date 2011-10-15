@@ -12,11 +12,10 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.collection.ViewUpdatedCollection;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.variable.VariableChangeCallback;
 import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.epl.variable.VariableService;
@@ -45,9 +44,8 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
     private final ExprEvaluator expiryExpression;
     private final MapEventBean builtinEventProps;
     private final EventBean[] eventsPerStream;
-    private final ExprEvaluatorContext exprEvaluatorContext;
     private final Set<String> variableNames;
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final ScheduleSlot scheduleSlot;
     private final EPStatementHandleCallback scheduleHandle;
 
@@ -60,26 +58,24 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
     public ExpressionWindowView(ExpressionWindowViewFactory dataWindowViewFactory,
                                 ViewUpdatedCollection viewUpdatedCollection,
                                 ExprEvaluator expiryExpression,
-                                ExprEvaluatorContext exprEvaluatorContext,
                                 MapEventBean builtinEventProps,
                                 Set<String> variableNames,
-                                StatementContext statementContext)
+                                AgentInstanceViewFactoryChainContext agentInstanceContext)
     {
         this.dataWindowViewFactory = dataWindowViewFactory;
         this.viewUpdatedCollection = viewUpdatedCollection;
         this.expiryExpression = expiryExpression;
-        this.exprEvaluatorContext = exprEvaluatorContext;
         this.builtinEventProps = builtinEventProps;
         this.eventsPerStream = new EventBean[] {null, builtinEventProps};
         this.variableNames = variableNames;
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
 
         if (variableNames != null && !variableNames.isEmpty()) {
             for (String variable : variableNames) {
-                final VariableService variableService = statementContext.getVariableService();
+                final VariableService variableService = agentInstanceContext.getStatementContext().getVariableService();
                 final VariableReader reader = variableService.getReader(variable);
-                statementContext.getVariableService().registerCallback(reader.getVariableNumber(), this);
-                statementContext.getStatementStopService().addSubscriber(new StatementStopCallback() {
+                agentInstanceContext.getStatementContext().getVariableService().registerCallback(reader.getVariableNumber(), this);
+                agentInstanceContext.getStatementContext().getStatementStopService().addSubscriber(new StatementStopCallback() {
                     public void statementStopped()
                     {
                         variableService.unregisterCallback(reader.getVariableNumber(), ExpressionWindowView.this);
@@ -93,8 +89,8 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
                     ExpressionWindowView.this.expire(null, null);
                 }
             };
-            scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
-            scheduleHandle = new EPStatementHandleCallback(statementContext.getEpStatementHandle(), callback);
+            scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
+            scheduleHandle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
         }
         else {
             scheduleSlot = null;
@@ -102,9 +98,9 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
         }
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return dataWindowViewFactory.makeView(statementContext);
+        return dataWindowViewFactory.makeView(agentInstanceContext);
     }
 
     /**
@@ -137,7 +133,7 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
         if (newData != null)
         {
             for (EventBean newEvent : newData) {
-                window.add(new TimestampEventPair(exprEvaluatorContext.getTimeProvider().getTime(), newEvent));
+                window.add(new TimestampEventPair(agentInstanceContext.getTimeProvider().getTime(), newEvent));
             }
         }
 
@@ -221,7 +217,7 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
         builtinEventProps.getProperties().put(EXPIRED_COUNT, numExpired);
         eventsPerStream[0] = pair.getEvent();
 
-        Boolean result = (Boolean) expiryExpression.evaluate(eventsPerStream, true, exprEvaluatorContext);
+        Boolean result = (Boolean) expiryExpression.evaluate(eventsPerStream, true, agentInstanceContext);
         if (result == null) {
             return false;
         }
@@ -241,22 +237,22 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
     public void stop() {
         if (variableNames != null && !variableNames.isEmpty()) {
             for (String variable : variableNames) {
-                VariableReader reader = statementContext.getVariableService().getReader(variable);
+                VariableReader reader = agentInstanceContext.getStatementContext().getVariableService().getReader(variable);
                 if (reader != null) {
-                    statementContext.getVariableService().unregisterCallback(reader.getVariableNumber(), this);
+                    agentInstanceContext.getStatementContext().getVariableService().unregisterCallback(reader.getVariableNumber(), this);
                 }
             }
             
-            if (statementContext.getSchedulingService().isScheduled(scheduleHandle)) {
-                statementContext.getSchedulingService().remove(scheduleHandle, scheduleSlot);
+            if (agentInstanceContext.getStatementContext().getSchedulingService().isScheduled(scheduleHandle)) {
+                agentInstanceContext.getStatementContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
             }
         }
     }
 
     // Handle variable updates by scheduling a re-evaluation with timers
     public void update(Object newValue, Object oldValue) {
-        if (!statementContext.getSchedulingService().isScheduled(scheduleHandle)) {
-            statementContext.getSchedulingService().add(0, scheduleHandle, scheduleSlot);
+        if (!agentInstanceContext.getStatementContext().getSchedulingService().isScheduled(scheduleHandle)) {
+            agentInstanceContext.getStatementContext().getSchedulingService().add(0, scheduleHandle, scheduleSlot);
         }
     }
 

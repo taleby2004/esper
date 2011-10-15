@@ -10,8 +10,8 @@ package com.espertech.esper.client.soda;
 
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a create-schema syntax for creating a new event type.
@@ -27,6 +27,7 @@ public class CreateSchemaClause implements Serializable
     private boolean variant;
     private String startTimestampPropertyName;
     private String endTimestampPropertyName;
+    private Set<String> copyFrom;
 
     /**
      * Ctor.
@@ -191,6 +192,14 @@ public class CreateSchemaClause implements Serializable
         return endTimestampPropertyName;
     }
 
+    public Set<String> getCopyFrom() {
+        return copyFrom;
+    }
+
+    public void setCopyFrom(Set<String> copyFrom) {
+        this.copyFrom = copyFrom;
+    }
+
     /**
      * Sets the property name of the property providing the end timestamp value.
      * @param endTimestampPropertyName start timestamp property name
@@ -248,6 +257,16 @@ public class CreateSchemaClause implements Serializable
         if (endTimestampPropertyName != null) {
             writer.append(" endtimestamp ");
             writer.append(endTimestampPropertyName);
+        }
+
+        if ((copyFrom != null) && (!copyFrom.isEmpty())) {
+            writer.append(" copyFrom ");
+            String delimiter = "";
+            for (String name : copyFrom) {
+                writer.append(delimiter);
+                writer.append(name);
+                delimiter = ", ";
+            }
         }
     }
 }

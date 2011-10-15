@@ -1186,7 +1186,6 @@ public class MapEventType implements EventTypeSPI
                 {
                     throw new EPException("Nestable map type configuration encountered an unexpected property type name '"
                         + entry.getValue() + "' for property '" + name + "', expected java.lang.Class or java.util.Map or the name of a previously-declared Map type");
-
                 }
 
                 Class underlyingType = eventType.getUnderlyingType();

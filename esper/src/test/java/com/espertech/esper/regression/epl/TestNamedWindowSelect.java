@@ -11,18 +11,17 @@
 
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.core.service.StatementType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.core.StatementType;
-import com.espertech.esper.core.EPStatementSPI;
+import junit.framework.TestCase;
 
 public class TestNamedWindowSelect extends TestCase
 {
@@ -45,11 +44,10 @@ public class TestNamedWindowSelect extends TestCase
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
-        String[] fields = new String[] {"sumb"};
 
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as (a string, b int)";
-        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
+        epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from SupportBean";
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);

@@ -15,6 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.espertech.esper.pattern.MatchedEventMap;
+import com.espertech.esper.pattern.PatternAgentInstanceContext;
 import com.espertech.esper.pattern.PatternContext;
 import com.espertech.esper.pattern.observer.ObserverEventEvaluator;
 
@@ -22,9 +23,9 @@ public class SupportObserverEvaluator implements ObserverEventEvaluator
 {
     private List<MatchedEventMap> matchEvents = new LinkedList<MatchedEventMap>();
     private int evaluateFalseCounter;
-    private PatternContext context;
+    private PatternAgentInstanceContext context;
 
-    public SupportObserverEvaluator(PatternContext context) {
+    public SupportObserverEvaluator(PatternAgentInstanceContext context) {
         this.context = context;
     }
 
@@ -57,8 +58,7 @@ public class SupportObserverEvaluator implements ObserverEventEvaluator
         return value;
     }
 
-    @Override
-    public PatternContext getContext() {
+    public PatternAgentInstanceContext getContext() {
         return context;
     }
 }

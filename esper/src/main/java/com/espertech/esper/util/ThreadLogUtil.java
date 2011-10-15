@@ -34,12 +34,12 @@ public class ThreadLogUtil
     /**
      * Enable trace logging.
      */
-    public final static Boolean ENABLED_TRACE = false;
+    public final static boolean ENABLED_TRACE = false;
 
     /**
      * Enable info logging.
      */
-    public final static Boolean ENABLED_INFO = false;
+    public final static boolean ENABLED_INFO = false;
 
     /**
      * If enabled, logs for trace level the given objects and text

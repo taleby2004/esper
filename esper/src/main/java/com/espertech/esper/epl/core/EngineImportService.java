@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.ConfigurationMethodRef;
+import com.espertech.esper.client.ConfigurationPlugInSingleRowFunction;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -50,9 +51,10 @@ public interface EngineImportService
      * @param functionName is the name of the function to make known.
      * @param singleRowFuncClass is the class that provides the single row function
      * @param methodName is the name of the public static method provided by the class that provides the single row function
+     * @param valueCache setting to control value cache behavior which may cache a result value when constant parameters are passed
      * @throws EngineImportException throw if format or information is invalid
      */
-    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName) throws EngineImportException;
+    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws EngineImportException;
 
     /**
      * Used at statement compile-time to try and resolve a given function name into an
@@ -72,7 +74,7 @@ public interface EngineImportService
      * @throws EngineImportUndefinedException if the function is not a configured single-row function
      * @throws EngineImportException if the function providing class could not be loaded or doesn't match
      */
-    public Pair<Class, String> resolveSingleRow(String functionName) throws EngineImportUndefinedException, EngineImportException;
+    public Pair<Class, EngineImportSingleRowDesc> resolveSingleRow(String functionName) throws EngineImportUndefinedException, EngineImportException;
 
     /**
      * Resolves a given class, method and list of parameter types to a static method.

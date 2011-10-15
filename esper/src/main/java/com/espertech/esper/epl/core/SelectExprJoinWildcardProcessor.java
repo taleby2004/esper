@@ -103,11 +103,11 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
         }
     }
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (isPopulateUnderlying)
         {
-            return selectExprInsertEventBean.manufacture(eventsPerStream, isNewData, exprEvaluatorContext);
+            return selectExprInsertEventBean.manufacture(eventsPerStream, isNewData, this.exprEvaluatorContext);
         }
 
         Map<String, Object> tuple = new HashMap<String, Object>();
@@ -128,7 +128,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
             }
         }
 
-        return eventAdapterService.adaptorForTypedMap(tuple, resultEventType);
+        return eventAdapterService.adapterForTypedMap(tuple, resultEventType);
     }
 
     public EventType getResultEventType()

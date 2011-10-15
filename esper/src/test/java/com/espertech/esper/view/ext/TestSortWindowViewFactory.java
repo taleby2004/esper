@@ -11,7 +11,7 @@
 
 package com.espertech.esper.view.ext;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
@@ -100,7 +100,7 @@ public class TestSortWindowViewFactory extends TestCase
     {
         factory.setViewParameters(null, TestViewSupport.toExprListMD(params));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
-        SortWindowView view = (SortWindowView) factory.makeView(SupportStatementContextFactory.makeContext());
+        SortWindowView view = (SortWindowView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(size, view.getSortWindowSize());
         assertEquals(fieldNames[0], view.getSortCriteriaExpressions()[0].toExpressionString());
         if (fieldNames.length > 0)

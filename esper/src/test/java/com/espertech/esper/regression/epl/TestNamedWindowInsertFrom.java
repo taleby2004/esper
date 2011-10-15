@@ -13,18 +13,16 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.core.service.StatementType;
+import com.espertech.esper.epl.named.NamedWindowProcessor;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.epl.named.NamedWindowProcessor;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.core.StatementType;
-import com.espertech.esper.core.EPStatementSPI;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -220,7 +218,7 @@ public class TestNamedWindowInsertFrom extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
         EventBean[] events = ArrayAssertionUtil.iteratorToArray(stmt.iterator());
-        System.out.println(events[0].get("id?"));
+        assertEquals("A1", events[0].get("id?"));
         ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), "id?".split(","), new Object[][] {{"A1"}, {"B1"}});
     }
 
@@ -287,7 +285,7 @@ public class TestNamedWindowInsertFrom extends TestCase
     private long getCount(String windowName) throws Exception
     {
         NamedWindowProcessor processor = ((EPServiceProviderSPI)epService).getNamedWindowService().getProcessor(windowName);
-        return processor.getCountDataWindow();
+        return processor.getProcessorInstance(null).getCountDataWindow();
     }    
 
     private String getStatementName(String windowName) throws Exception

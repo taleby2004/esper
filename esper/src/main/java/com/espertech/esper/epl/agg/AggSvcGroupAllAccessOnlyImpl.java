@@ -13,7 +13,6 @@ package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKeyUntyped;
-import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
@@ -26,20 +25,9 @@ public class AggSvcGroupAllAccessOnlyImpl implements AggregationService, Aggrega
     private final AggregationAccessorSlotPair[] accessors;
     private final AggregationAccess[] accesses;
 
-    /**
-     * Ctor.
-     * @param methodResolutionService factory service for implementations
-     * @param accessors accessor definitions
-     * @param streams streams in join
-     * @param isJoin true for join, false for single-stream
-     */
-    public AggSvcGroupAllAccessOnlyImpl(MethodResolutionService methodResolutionService,
-                                                   AggregationAccessorSlotPair[] accessors,
-                                                   int[] streams,
-                                                   boolean isJoin)
-    {
+    public AggSvcGroupAllAccessOnlyImpl(AggregationAccessorSlotPair[] accessors, AggregationAccess[] accesses) {
         this.accessors = accessors;
-        accesses = AggregationAccessUtil.getNewAccesses(isJoin, streams, methodResolutionService, null);
+        this.accesses = accesses;
     }
 
     public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped groupKey, ExprEvaluatorContext exprEvaluatorContext)
@@ -56,29 +44,29 @@ public class AggSvcGroupAllAccessOnlyImpl implements AggregationService, Aggrega
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
     {
         // no implementation required
     }
 
-    public Object getValue(int column)
+    public Object getValue(int column, int[] agentInstanceIds)
     {
         AggregationAccessorSlotPair pair = accessors[column];
         return pair.getAccessor().getValue(accesses[pair.getSlot()]);
     }
 
-    public EventBean getEventBean(int column) {
+    public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         AggregationAccessorSlotPair pair = accessors[column];
         return pair.getAccessor().getEventBean(accesses[pair.getSlot()]);
     }
 
-    public Collection<EventBean> getCollection(int column)
+    public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context)
     {
         AggregationAccessorSlotPair pair = accessors[column];
         return pair.getAccessor().getCollectionReadOnly(accesses[pair.getSlot()]);
     }
 
-    public void clearResults()
+    public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
     {
         for (AggregationAccess access : accesses) {
             access.clear();

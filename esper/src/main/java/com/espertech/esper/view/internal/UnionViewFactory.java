@@ -11,11 +11,10 @@
 
 package com.espertech.esper.view.internal;
 
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.view.*;
 
 import java.util.ArrayList;
@@ -70,47 +69,19 @@ public class UnionViewFactory implements ViewFactory, DataWindowViewFactory
     {
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        for (ViewFactory viewFactory : viewFactories)
-        {
-            if (!viewFactory.canProvideCapability(viewCapability))
-            {
-                return false;
-            }
-        }
-        return viewCapability instanceof RemoveStreamViewCapability;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            for (ViewFactory viewFactory : viewFactories)
-            {
-                viewFactory.setProvideCapability(viewCapability, resourceCallback);
-            }
-        }
-    }
-
-    public View makeView(StatementContext statementContext)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
         boolean hasAsymetric = false;
         List<View> views = new ArrayList<View>();
         for (ViewFactory viewFactory : viewFactories)
         {
-            views.add(viewFactory.makeView(statementContext));
+            views.add(viewFactory.makeView(agentInstanceViewFactoryContext));
             hasAsymetric |= viewFactory instanceof AsymetricDataWindowViewFactory;
         }
         if (hasAsymetric) {
-            return new UnionAsymetricView(this, parentEventType, views);
+            return new UnionAsymetricView(agentInstanceViewFactoryContext, this, parentEventType, views);
         }
-        return new UnionView(this, parentEventType, views);
+        return new UnionView(agentInstanceViewFactoryContext, this, parentEventType, views);
     }
 
     public EventType getEventType()

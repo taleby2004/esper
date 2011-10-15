@@ -9,10 +9,7 @@
 package com.espertech.esper.pattern.observer;
 
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.pattern.EvalStateNodeNumber;
-import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.pattern.PatternContext;
-import com.espertech.esper.pattern.MatchedEventConvertor;
+import com.espertech.esper.pattern.*;
 
 import java.util.List;
 
@@ -31,6 +28,7 @@ public interface ObserverFactory
 
     /**
      * Make an observer instance.
+     *
      * @param context - services that may be required by observer implementation
      * @param beginState - start state for observer
      * @param observerEventEvaluator - receiver for events observed
@@ -38,7 +36,7 @@ public interface ObserverFactory
      * @param observerState - state node for observer
      * @return observer instance
      */
-    public EventObserver makeObserver(PatternContext context,
+    public EventObserver makeObserver(PatternAgentInstanceContext context,
                                       MatchedEventMap beginState,
                                       ObserverEventEvaluator observerEventEvaluator,
                                       EvalStateNodeNumber stateNodeId,

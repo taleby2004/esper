@@ -52,9 +52,9 @@ public class TestRegressionLinestViewFactory extends TestCase
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
         assertFalse(factory.canReuse(new FirstElementView()));
         EventType type = RegressionLinestView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        assertFalse(factory.canReuse(new RegressionLinestView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null)));
-        assertFalse(factory.canReuse(new RegressionLinestView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("volume"), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null)));
-        assertTrue(factory.canReuse(new RegressionLinestView(SupportStatementContextFactory.makeContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null)));
+        assertFalse(factory.canReuse(new RegressionLinestView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null)));
+        assertFalse(factory.canReuse(new RegressionLinestView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("volume"), SupportExprNodeFactory.makeIdentNodeMD("price"), type, null)));
+        assertTrue(factory.canReuse(new RegressionLinestView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null)));
     }
 
     public void testAttaches() throws Exception
@@ -97,7 +97,7 @@ public class TestRegressionLinestViewFactory extends TestCase
     {
         factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
-        RegressionLinestView view = (RegressionLinestView) factory.makeView(SupportStatementContextFactory.makeContext());
+        RegressionLinestView view = (RegressionLinestView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldNameX, view.getExpressionX().toExpressionString());
         assertEquals(fieldNameY, view.getExpressionY().toExpressionString());
     }

@@ -175,7 +175,7 @@ public class ExprDotEvalDT implements ExprDotEval
         }
 
         public Object evaluate(Object target, EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
-            return reformatOp.evaluate((Calendar) target);
+            return reformatOp.evaluate((Calendar) target, eventsPerStream, isNewData, exprEvaluatorContext);
         }
     }
 
@@ -187,7 +187,7 @@ public class ExprDotEvalDT implements ExprDotEval
         public Object evaluate(Object target, EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
             Calendar cal = (Calendar) ((Calendar) target).clone();
             evaluateCalOps(calendarOps, cal, eventsPerStream, isNewData, exprEvaluatorContext);
-            return reformatOp.evaluate(cal);
+            return reformatOp.evaluate(cal, eventsPerStream, isNewData, exprEvaluatorContext);
         }
     }
 
@@ -197,7 +197,7 @@ public class ExprDotEvalDT implements ExprDotEval
         }
 
         public Object evaluate(Object target, EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
-            return reformatOp.evaluate((Date) target);
+            return reformatOp.evaluate((Date) target, eventsPerStream, isNewData, exprEvaluatorContext);
         }
     }
 
@@ -210,7 +210,7 @@ public class ExprDotEvalDT implements ExprDotEval
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(((Date) target).getTime());
             evaluateCalOps(calendarOps, cal, eventsPerStream, isNewData, exprEvaluatorContext);
-            return reformatOp.evaluate(cal);
+            return reformatOp.evaluate(cal, eventsPerStream, isNewData, exprEvaluatorContext);
         }
     }
 
@@ -220,7 +220,7 @@ public class ExprDotEvalDT implements ExprDotEval
         }
 
         public Object evaluate(Object target, EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
-            return reformatOp.evaluate((Long) target);
+            return reformatOp.evaluate((Long) target, eventsPerStream, isNewData, exprEvaluatorContext);
         }
     }
 
@@ -233,7 +233,7 @@ public class ExprDotEvalDT implements ExprDotEval
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis((Long) target);
             evaluateCalOps(calendarOps, cal, eventsPerStream, isNewData, exprEvaluatorContext);
-            return reformatOp.evaluate(cal);
+            return reformatOp.evaluate(cal, eventsPerStream, isNewData, exprEvaluatorContext);
         }
     }
 

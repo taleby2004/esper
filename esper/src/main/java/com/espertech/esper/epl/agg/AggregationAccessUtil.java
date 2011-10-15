@@ -24,11 +24,11 @@ public class AggregationAccessUtil
      * @param groupKey group by key
      * @return array of accessors
      */
-    protected static AggregationAccess[] getNewAccesses(boolean isJoin, int[] streams, MethodResolutionService methodResolutionService, MultiKeyUntyped groupKey) {
+    protected static AggregationAccess[] getNewAccesses(int[] agentInstanceIds, boolean isJoin, int[] streams, MethodResolutionService methodResolutionService, MultiKeyUntyped groupKey) {
         AggregationAccess[] row = new AggregationAccess[streams.length];
         int i = 0;
         for (int stream : streams) {
-            row[i] = methodResolutionService.makeAccessStreamId(isJoin, stream, groupKey);
+            row[i] = methodResolutionService.makeAccessStreamId(agentInstanceIds, isJoin, stream, groupKey);
             i++;
         }
         return row;

@@ -13,9 +13,9 @@ package com.espertech.esper.view.window;
 
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
-import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.view.TestViewSupport;
 import com.espertech.esper.view.ViewParameterException;
 import com.espertech.esper.view.std.FirstElementView;
@@ -47,9 +47,9 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {"longBoxed", 1000}));
         factory.attach(parentType, SupportStatementContextFactory.makeContext(), null, null);
         assertFalse(factory.canReuse(new FirstElementView()));
-        assertFalse(factory.canReuse(new ExternallyTimedWindowView(factory, SupportExprNodeFactory.makeIdentNodeBean("longPrimitive"), null, 1000, null, false, null)));
-        assertFalse(factory.canReuse(new ExternallyTimedWindowView(factory, SupportExprNodeFactory.makeIdentNodeBean("longBoxed"), null, 999, null, false, null)));
-        assertTrue(factory.canReuse(new ExternallyTimedWindowView(factory, SupportExprNodeFactory.makeIdentNodeBean("longBoxed"), null, 1000000, null, false, null)));
+        assertFalse(factory.canReuse(new ExternallyTimedWindowView(factory, SupportExprNodeFactory.makeIdentNodeBean("longPrimitive"), null, 1000, null, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext())));
+        assertFalse(factory.canReuse(new ExternallyTimedWindowView(factory, SupportExprNodeFactory.makeIdentNodeBean("longBoxed"), null, 999, null, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext())));
+        assertTrue(factory.canReuse(new ExternallyTimedWindowView(factory, SupportExprNodeFactory.makeIdentNodeBean("longBoxed"), null, 1000000, null, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext())));
     }
 
     public void testInvalid() throws Exception
@@ -83,7 +83,7 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
 
         assertSame(parentType, factory.getEventType());
     }
-    
+
     private void tryInvalidParameter(Object[] param) throws Exception
     {
         try
@@ -104,7 +104,7 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
         ExternallyTimedWindowViewFactory factory = new ExternallyTimedWindowViewFactory();
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(params));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
-        ExternallyTimedWindowView view = (ExternallyTimedWindowView) factory.makeView(SupportStatementContextFactory.makeContext());
+        ExternallyTimedWindowView view = (ExternallyTimedWindowView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldName, view.getTimestampExpression().toExpressionString());
         assertEquals(msec, view.getMillisecondsBeforeExpiry());
     }

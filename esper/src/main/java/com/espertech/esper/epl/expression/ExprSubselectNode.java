@@ -11,15 +11,12 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.lookup.SubordTableLookupStrategy;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Represents a subselect in an expression tree.
@@ -51,16 +48,9 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
     private transient StreamTypeService filterSubqueryStreamTypes;
     private StatementSpecRaw statementSpecRaw;
     private transient StatementSpecCompiled statementSpecCompiled;
-    private transient SubordTableLookupStrategy strategy;
-    private transient SubselectAggregationPreprocessor subselectAggregationPreprocessor;
+    private transient ExprSubselectStrategy strategy;
     private transient boolean aggregatedSubquery;
     private int subselectNumber;
-
-    private static Set<EventBean> singleNullRowEventSet = new HashSet<EventBean>();
-    static
-    {
-        singleNullRowEventSet.add(null);
-    }
 
     /**
      * Evaluate the lookup expression returning an evaluation result object.
@@ -126,30 +116,22 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Collection<EventBean> matchingEvents = strategy.lookup(eventsPerStream, exprEvaluatorContext);
-        if (subselectAggregationPreprocessor != null) {
-            subselectAggregationPreprocessor.evaluate(eventsPerStream, matchingEvents, exprEvaluatorContext);
-            matchingEvents = singleNullRowEventSet;
-        }
+        Collection<EventBean> matchingEvents = evaluateMatching(eventsPerStream, exprEvaluatorContext);
         return evaluate(eventsPerStream, isNewData, matchingEvents, exprEvaluatorContext);
     }
 
     public Collection<EventBean> evaluateGetROCollectionEvents(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
-        Collection<EventBean> matchingEvents = strategy.lookup(eventsPerStream, exprEvaluatorContext);
-        if (subselectAggregationPreprocessor != null) {
-            subselectAggregationPreprocessor.evaluate(eventsPerStream, matchingEvents, exprEvaluatorContext);
-            matchingEvents = singleNullRowEventSet;
-        }
+        Collection<EventBean> matchingEvents = evaluateMatching(eventsPerStream, exprEvaluatorContext);
         return evaluateGetCollEvents(eventsPerStream, isNewData, matchingEvents, exprEvaluatorContext);
     }
 
-    public Collection evaluateGetROCollectionScalar(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
-        Collection<EventBean> matchingEvents = strategy.lookup(eventsPerStream, context);
-        if (subselectAggregationPreprocessor != null) {
-            subselectAggregationPreprocessor.evaluate(eventsPerStream, matchingEvents, context);
-            matchingEvents = singleNullRowEventSet;
-        }
-        return evaluateGetCollScalar(eventsPerStream, isNewData, matchingEvents, context);
+    public Collection evaluateGetROCollectionScalar(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext) {
+        Collection<EventBean> matchingEvents = evaluateMatching(eventsPerStream, exprEvaluatorContext);
+        return evaluateGetCollScalar(eventsPerStream, isNewData, matchingEvents, exprEvaluatorContext);
+    }
+
+    private Collection<EventBean> evaluateMatching(EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext) {
+        return strategy.evaluateMatching(eventsPerStream, exprEvaluatorContext);
     }
 
     /**
@@ -201,7 +183,7 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
      * Sets the strategy for boiling down the table of lookup events into a subset against which to run the filter.
      * @param strategy is the looking strategy (full table scan or indexed)
      */
-    public void setStrategy(SubordTableLookupStrategy strategy)
+    public void setStrategy(ExprSubselectStrategy strategy)
     {
         this.strategy = strategy;
     }
@@ -258,10 +240,6 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
     public void setFilterSubqueryStreamTypes(StreamTypeService filterSubqueryStreamTypes)
     {
         this.filterSubqueryStreamTypes = filterSubqueryStreamTypes;
-    }
-
-    public void setSubselectAggregationPreprocessor(SubselectAggregationPreprocessor subselectAggregationPreprocessor) {
-        this.subselectAggregationPreprocessor = subselectAggregationPreprocessor;
     }
 
     public boolean isAggregatedSubquery() {

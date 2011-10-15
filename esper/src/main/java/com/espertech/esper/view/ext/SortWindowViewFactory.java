@@ -9,10 +9,10 @@
 package com.espertech.esper.view.ext;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.*;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
 import com.espertech.esper.view.*;
 import com.espertech.esper.view.window.RandomAccessByIndexGetter;
 
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Factory for sort window views.
  */
-public class SortWindowViewFactory implements DataWindowViewFactory
+public class SortWindowViewFactory implements DataWindowViewFactory, DataWindowViewWithPrevious
 {
     private final static String NAME = "Sort view";
 
@@ -42,11 +42,6 @@ public class SortWindowViewFactory implements DataWindowViewFactory
      * The sort window size.
      */
     protected int sortWindowSize;
-
-    /**
-     * The access into the collection for use with 'previous'.
-     */
-    protected RandomAccessByIndexGetter randomAccessGetterImpl;
 
     private EventType eventType;
 
@@ -70,7 +65,8 @@ public class SortWindowViewFactory implements DataWindowViewFactory
             ViewFactorySupport.assertReturnsNonConstant(NAME, validated[i], i);
         }
 
-        Object sortSize = ViewFactorySupport.evaluateAssertNoProperties(NAME, validated[0], 0, statementContext);
+        ExprEvaluatorContextStatement exprEvaluatorContext = new ExprEvaluatorContextStatement(statementContext);
+        Object sortSize = ViewFactorySupport.evaluateAssertNoProperties(NAME, validated[0], 0, exprEvaluatorContext);
         if ((sortSize == null) || (!(sortSize instanceof Number)))
         {
             throw new ViewParameterException(message);
@@ -94,57 +90,22 @@ public class SortWindowViewFactory implements DataWindowViewFactory
         }
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
-        }
-        if (viewCapability instanceof ViewCapDataWindowAccess)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return;
-        }
-        if (randomAccessGetterImpl == null)
-        {
-            randomAccessGetterImpl = new RandomAccessByIndexGetter();
-        }
-        resourceCallback.setViewResource(randomAccessGetterImpl);
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        IStreamSortedRandomAccess sortedRandomAccess = null;
-
-        if (randomAccessGetterImpl != null)
-        {
-            sortedRandomAccess = new IStreamSortedRandomAccess(randomAccessGetterImpl);
-            randomAccessGetterImpl.updated(sortedRandomAccess);
-        }
+        IStreamSortedRandomAccess sortedRandomAccess = ViewServiceHelper.getOptPreviousExprSortedAccess(agentInstanceViewFactoryContext);
 
         boolean useCollatorSort = false;
-        if (statementContext.getConfigSnapshot() != null)
+        if (agentInstanceViewFactoryContext.getAgentInstanceContext().getStatementContext().getConfigSnapshot() != null)
         {
-            useCollatorSort = statementContext.getConfigSnapshot().getEngineDefaults().getLanguage().isSortUsingCollator();
+            useCollatorSort = agentInstanceViewFactoryContext.getAgentInstanceContext().getStatementContext().getConfigSnapshot().getEngineDefaults().getLanguage().isSortUsingCollator();
         }
 
         ExprEvaluator[] childEvals = ExprNodeUtility.getEvaluators(sortCriteriaExpressions);
-        return new SortWindowView(this, sortCriteriaExpressions, childEvals, isDescendingValues, sortWindowSize, sortedRandomAccess, useCollatorSort, statementContext);
+        return new SortWindowView(this, sortCriteriaExpressions, childEvals, isDescendingValues, sortWindowSize, sortedRandomAccess, useCollatorSort, agentInstanceViewFactoryContext);
+    }
+
+    public Object makePreviousGetter() {
+        return new RandomAccessByIndexGetter();
     }
 
     public EventType getEventType()
@@ -154,11 +115,6 @@ public class SortWindowViewFactory implements DataWindowViewFactory
 
     public boolean canReuse(View view)
     {
-        if (randomAccessGetterImpl != null)
-        {
-            return false;
-        }
-
         if (!(view instanceof SortWindowView))
         {
             return false;

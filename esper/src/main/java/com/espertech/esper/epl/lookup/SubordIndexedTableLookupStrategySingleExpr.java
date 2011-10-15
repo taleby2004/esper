@@ -20,30 +20,22 @@ import java.util.Collection;
  */
 public class SubordIndexedTableLookupStrategySingleExpr implements SubordTableLookupStrategy
 {
-    private final EventBean[] events;
-
     /**
      * Stream numbers to get key values from.
      */
     protected final ExprEvaluator evaluator;
+
+    private final EventBean[] events;
 
     /**
      * Index to look up in.
      */
     protected final PropertyIndexedEventTableSingle index;
 
-    private boolean isNWOnTrigger;
-
-    /**
-     * Ctor.
-     * @param index is the table carrying the data to lookup into
-     */
-    public SubordIndexedTableLookupStrategySingleExpr(boolean isNWOnTrigger, int streamCountOuter, SubordPropHashKey hashKey, PropertyIndexedEventTableSingle index)
-    {
+    public SubordIndexedTableLookupStrategySingleExpr(int streamCountOuter, ExprEvaluator evaluator, PropertyIndexedEventTableSingle index) {
+        this.evaluator = evaluator;
         this.index = index;
-        this.evaluator = hashKey.getHashKey().getKeyExpr().getExprEvaluator();
         this.events = new EventBean[streamCountOuter+1];
-        this.isNWOnTrigger = isNWOnTrigger;
     }
 
     /**
@@ -72,19 +64,8 @@ public class SubordIndexedTableLookupStrategySingleExpr implements SubordTableLo
      */
     protected Object getKey(EventBean[] eventsPerStream, ExprEvaluatorContext context)
     {
-        if (isNWOnTrigger) {
-            return evaluator.evaluate(eventsPerStream, true, context);
-        }
-        else {
-            System.arraycopy(eventsPerStream, 0, events, 1, eventsPerStream.length);
-            return evaluator.evaluate(events, true, context);
-        }
-    }
-
-    public String toString()
-    {
-        return "IndexedTableLookupStrategySingle indexProp " +
-                " index=(" + index + ')';
+        System.arraycopy(eventsPerStream, 0, events, 1, eventsPerStream.length);
+        return evaluator.evaluate(events, true, context);
     }
 
     public String toQueryPlan() {

@@ -1,6 +1,6 @@
 package com.espertech.esperio.socket.core;
 
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esperio.socket.config.SocketConfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

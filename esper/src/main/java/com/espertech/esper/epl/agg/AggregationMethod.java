@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.epl.core.MethodResolutionService;
-
 /**
  * Maintains aggregation state applying values as entering and leaving the state.
  * <P>Implementations must also act as a factory for further independent copies of aggregation states such that
@@ -47,11 +45,4 @@ public interface AggregationMethod
      * Clear out the collection.
      */
     public void clear();
-
-    /**
-     * Make a new, initalized aggregation state.
-     * @param methodResolutionService for use in creating new aggregation method instances as a factory
-     * @return initialized copy of the aggregator
-     */
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService);
 }

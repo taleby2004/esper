@@ -11,6 +11,7 @@
 
 package com.espertech.esper.support.epl;
 
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.spec.OutputLimitLimitType;
 import com.espertech.esper.client.EventType;
@@ -27,6 +28,10 @@ import java.util.List;
 
 public class SupportResultSetProcessor implements ResultSetProcessor
 {
+    public ResultSetProcessor copy(AgentInstanceContext agentInstanceContext) {
+        return null;
+    }
+
     public EventType getResultEventType()
     {
         return SupportEventTypeFactory.createBeanType(SupportBean.class);

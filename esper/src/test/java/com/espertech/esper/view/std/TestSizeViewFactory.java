@@ -36,13 +36,13 @@ public class TestSizeViewFactory extends TestCase
     {
         assertFalse(factory.canReuse(new LastElementView()));
         EventType type = SizeView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        assertTrue(factory.canReuse(new SizeView(SupportStatementContextFactory.makeContext(), type, null)));
+        assertTrue(factory.canReuse(new SizeView(SupportStatementContextFactory.makeAgentInstanceContext(), type, null)));
     }
 
     private void tryParameter(Object[] param) throws Exception
     {
         SizeViewFactory factory = new SizeViewFactory();
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(param));
-        assertTrue(factory.makeView(SupportStatementContextFactory.makeContext()) instanceof SizeView);
+        assertTrue(factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext()) instanceof SizeView);
     }
 }

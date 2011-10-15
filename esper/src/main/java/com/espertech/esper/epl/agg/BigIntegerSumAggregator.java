@@ -67,9 +67,4 @@ public class BigIntegerSumAggregator implements AggregationMethod
     {
         return BigInteger.class;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeSumAggregator(BigInteger.class, false);
-    }
 }

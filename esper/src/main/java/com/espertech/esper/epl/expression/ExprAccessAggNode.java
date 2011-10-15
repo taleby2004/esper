@@ -193,7 +193,7 @@ public class ExprAccessAggNode extends ExprAggregateNodeBase implements ExprEval
     }
 
     public Collection<EventBean> evaluateGetROCollectionEvents(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
-        return super.aggregationResultFuture.getCollection(column);
+        return super.aggregationResultFuture.getCollection(column, context);
     }
 
     public Collection evaluateGetROCollectionScalar(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
@@ -231,7 +231,7 @@ public class ExprAccessAggNode extends ExprAggregateNodeBase implements ExprEval
     }
 
     public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
-        return super.aggregationResultFuture.getEventBean(column);
+        return super.aggregationResultFuture.getEventBean(column, context);
     }
 
     @Override

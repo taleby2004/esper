@@ -29,21 +29,16 @@ public class SubordIndexedTableLookupStrategyExpr implements SubordTableLookupSt
 
     protected final ExprEvaluator[] evaluators;
     private EventBean[] events;
-    private final boolean isNWOnTrigger;
 
     /**
      * Ctor.
      * @param index is the table carrying the data to lookup into
      */
-    public SubordIndexedTableLookupStrategyExpr(boolean isNWOnTrigger, int numStreamsOuter, List<SubordPropHashKey> hashKeys, PropertyIndexedEventTable index)
+    public SubordIndexedTableLookupStrategyExpr(int numStreamsOuter, ExprEvaluator[] evaluators, PropertyIndexedEventTable index)
     {
-        evaluators = new ExprEvaluator[hashKeys.size()];
+        this.evaluators = evaluators;
         events = new EventBean[numStreamsOuter + 1];
-        for (int i = 0; i < hashKeys.size(); i++) {
-            evaluators[i] = hashKeys.get(i).getHashKey().getKeyExpr().getExprEvaluator();
-        }
         this.index = index;
-        this.isNWOnTrigger = isNWOnTrigger;
     }
 
     /**
@@ -72,25 +67,13 @@ public class SubordIndexedTableLookupStrategyExpr implements SubordTableLookupSt
      */
     protected Object[] getKeys(EventBean[] eventsPerStream, ExprEvaluatorContext context)
     {
-        EventBean[] eventsToUse;
-        if (isNWOnTrigger) {
-            eventsToUse = eventsPerStream;
-        }
-        else {
-            System.arraycopy(eventsPerStream, 0, events, 1, eventsPerStream.length);
-            eventsToUse = events;
-        }
+        System.arraycopy(eventsPerStream, 0, events, 1, eventsPerStream.length);
         Object[] keyValues = new Object[evaluators.length];
         for (int i = 0; i < evaluators.length; i++)
         {
-            keyValues[i] = evaluators[i].evaluate(eventsToUse, true, context);
+            keyValues[i] = evaluators[i].evaluate(events, true, context);
         }
         return keyValues;
-    }
-
-    public String toString()
-    {
-        return toQueryPlan();
     }
 
     public String toQueryPlan() {

@@ -8,20 +8,20 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.core.MethodResolutionService;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Implementation for handling aggregation with grouping by group-keys.
  */
-public class AggSvcGroupByNoAccessImpl extends AggregationServiceBase
+public class AggSvcGroupByNoAccessImpl extends AggregationServiceBaseGrouped
 {
     // maintain for each group a row of aggregator states that the expression node canb pull the data from via index
     private Map<MultiKeyUntyped, AggregationMethod[]> aggregatorsPerGroup;
@@ -39,14 +39,14 @@ public class AggSvcGroupByNoAccessImpl extends AggregationServiceBase
      * aggregation states for each group
      * @param methodResolutionService - factory for creating additional aggregation method instances per group key
      */
-    public AggSvcGroupByNoAccessImpl(ExprEvaluator evaluators[], AggregationMethod prototypes[], MethodResolutionService methodResolutionService)
+    public AggSvcGroupByNoAccessImpl(ExprEvaluator evaluators[], AggregationMethodFactory prototypes[], MethodResolutionService methodResolutionService)
     {
         super(evaluators, prototypes);
         this.methodResolutionService = methodResolutionService;
         this.aggregatorsPerGroup = new HashMap<MultiKeyUntyped, AggregationMethod[]>();
     }
 
-    public void clearResults()
+    public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
     {
         aggregatorsPerGroup.clear();
     }
@@ -58,7 +58,7 @@ public class AggSvcGroupByNoAccessImpl extends AggregationServiceBase
         // The aggregators for this group do not exist, need to create them from the prototypes
         if (groupAggregators == null)
         {
-            groupAggregators = methodResolutionService.newAggregators(aggregators, groupByKey);
+            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
             aggregatorsPerGroup.put(groupByKey, groupAggregators);
         }
         currentAggregatorRow = groupAggregators;
@@ -78,7 +78,7 @@ public class AggSvcGroupByNoAccessImpl extends AggregationServiceBase
         // The aggregators for this group do not exist, need to create them from the prototypes
         if (groupAggregators == null)
         {
-            groupAggregators = methodResolutionService.newAggregators(aggregators, groupByKey);
+            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
             aggregatorsPerGroup.put(groupByKey, groupAggregators);
         }
         currentAggregatorRow = groupAggregators;
@@ -91,27 +91,27 @@ public class AggSvcGroupByNoAccessImpl extends AggregationServiceBase
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey)
+    public void setCurrentAccess(MultiKeyUntyped groupByKey, int[] agentInstanceIds)
     {
         currentAggregatorRow = aggregatorsPerGroup.get(groupByKey);
 
         if (currentAggregatorRow == null)
         {
-            currentAggregatorRow = methodResolutionService.newAggregators(aggregators, groupByKey);
+            currentAggregatorRow = methodResolutionService.newAggregators(aggregators, agentInstanceIds, groupByKey);
             aggregatorsPerGroup.put(groupByKey, currentAggregatorRow);
         }
     }
 
-    public Object getValue(int column)
+    public Object getValue(int column, int[] agentInstanceIds)
     {
         return currentAggregatorRow[column].getValue();
     }
 
-    public Collection<EventBean> getCollection(int column) {
+    public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context) {
         return null;
     }
 
-    public EventBean getEventBean(int column) {
+    public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         return null;
     }
 }

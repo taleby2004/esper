@@ -81,6 +81,6 @@ public class MapMaptypedPropertyGetter implements MapEventPropertyGetter
             return null;
         }
         Map mapTypedSubEvent = (Map) value;
-        return eventAdapterService.adaptorForTypedMap(mapTypedSubEvent, fragmentEventType);
+        return eventAdapterService.adapterForTypedMap(mapTypedSubEvent, fragmentEventType);
     }
 }

@@ -21,19 +21,16 @@ import junit.framework.TestCase;
 
 public class TestRowPatternRecognitionVariantStream extends TestCase {
 
-    public void testInstanceOfDynamicVariantStream()
+    public void testInstanceOfDynamicVariantStream() throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();
-        config.addEventType("S0", SupportBean_S0.class);
-        config.addEventType("S1", SupportBean_S1.class);
-
-        ConfigurationVariantStream variantStreamConfig = new ConfigurationVariantStream();
-        variantStreamConfig.addEventTypeName("S0");
-        variantStreamConfig.addEventTypeName("S1");
-        config.addVariantStream("MyVariantType", variantStreamConfig);
 
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+        
+        epService.getEPAdministrator().createEPL("create schema S0 as " + SupportBean_S0.class.getName());
+        epService.getEPAdministrator().createEPL("create schema S1 as " + SupportBean_S1.class.getName());
+        epService.getEPAdministrator().createEPL("create variant schema MyVariantType as S0, S1");
 
         String[] fields = "a,b".split(",");
         String text = "select * from MyVariantType.win:keepall() " +
@@ -41,8 +38,8 @@ public class TestRowPatternRecognitionVariantStream extends TestCase {
                 "  measures A.id? as a, B.id? as b" +
                 "  pattern (A B) " +
                 "  define " +
-                "    A as instanceof(A, " + SupportBean_S0.class.getName() + ")," +
-                "    B as instanceof(B, " + SupportBean_S1.class.getName() + ")" +
+                "    A as typeof(A) = 'S0'," +
+                "    B as typeof(B) = 'S1'" +
                 ")";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -58,5 +55,26 @@ public class TestRowPatternRecognitionVariantStream extends TestCase {
                 new Object[][] {{1, 2}});
         ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
                 new Object[][] {{1, 2}});
+
+        String epl = "// Declare one sample type\n" +
+                "create schema ST0 as (col string)\n;" +
+                "// Declare second sample type\n" +
+                "create schema ST1 as (col string)\n;" +
+                "// Declare variant stream holding either type\n" +
+                "create variant schema MyVariantStream as ST0, ST1\n;" +
+                "// Populate variant stream\n" +
+                "insert into MyVariantStream select * from ST0\n;" +
+                "// Populate variant stream\n" +
+                "insert into MyVariantStream select * from ST1\n;" +
+                "// Simple pattern to match ST0 ST1 pairs\n" +
+                "select * from MyVariantType.win:time(1 min)\n" +
+                "match_recognize (\n" +
+                "measures A.id? as a, B.id? as b\n" +
+                "pattern (A B)\n" +
+                "define\n" +
+                "A as typeof(A) = 'ST0',\n" +
+                "B as typeof(B) = 'ST1'\n" +
+                ");";
+        epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(epl);
     }
 }

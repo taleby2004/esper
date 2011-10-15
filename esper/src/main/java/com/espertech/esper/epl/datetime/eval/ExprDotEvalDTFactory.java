@@ -26,7 +26,10 @@ import com.espertech.esper.epl.methodbase.DotMethodTypeEnum;
 import com.espertech.esper.epl.methodbase.DotMethodUtil;
 import com.espertech.esper.util.JavaClassHelper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
 
 public class ExprDotEvalDTFactory {
 
@@ -57,7 +60,7 @@ public class ExprDotEvalDTFactory {
         String currentMethodName = dtMethodName;
 
         // drain all calendar ops
-        ExprDotNodeFilterAnalyzerDTIntervalDesc intervalFilterDesc = null;
+        ExprDotNodeFilterAnalyzerDesc filterAnalyzerDesc = null;
         while(true) {
 
             // handle the first one only if its a calendar op
@@ -75,17 +78,25 @@ public class ExprDotEvalDTFactory {
                 calendarOps.add(calendarOp);
             }
             else if (opFactory instanceof ReformatOpFactory) {
-                reformatOp = ((ReformatOpFactory) opFactory).getOp(currentMethod, currentMethodName, currentParameters.isEmpty() ? null : currentParameters.get(0));
+                reformatOp = ((ReformatOpFactory) opFactory).getOp(currentMethod, currentMethodName, currentParameters);
+
+                // compile filter analyzer information if there are no calendar ops in the chain
+                if (calendarOps.isEmpty()) {
+                    filterAnalyzerDesc = reformatOp.getFilterDesc(typesPerStream, currentMethod, currentParameters, inputDesc);
+                }
+                else {
+                    filterAnalyzerDesc = null;
+                }
             }
             else if (opFactory instanceof IntervalOpFactory) {
                 intervalOp = ((IntervalOpFactory) opFactory).getOp(typesPerStream, currentMethod, currentMethodName, currentParameters, evaluators);
 
                 // compile filter analyzer information if there are no calendar ops in the chain
                 if (calendarOps.isEmpty()) {
-                    intervalFilterDesc = intervalOp.getFilterDesc(typesPerStream, currentMethod, currentParameters, inputDesc);
+                    filterAnalyzerDesc = intervalOp.getFilterDesc(typesPerStream, currentMethod, currentParameters, inputDesc);
                 }
                 else {
-                    intervalFilterDesc = null;
+                    filterAnalyzerDesc = null;
                 }
             }
             else {
@@ -113,7 +124,7 @@ public class ExprDotEvalDTFactory {
 
         dotEval = new ExprDotEvalDT(calendarOps, reformatOp, intervalOp, inputType.getScalar(), inputType.getEventType());
         returnType = dotEval.getTypeInfo();
-        return new ExprDotEvalDTMethodDesc(dotEval, returnType, intervalFilterDesc);
+        return new ExprDotEvalDTMethodDesc(dotEval, returnType, filterAnalyzerDesc);
     }
 
     private static ExprEvaluator[] getEvaluators(List<ExprNode> parameters) {

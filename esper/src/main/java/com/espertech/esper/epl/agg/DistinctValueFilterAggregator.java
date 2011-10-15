@@ -79,12 +79,6 @@ public class DistinctValueFilterAggregator implements AggregationMethod
         return inner.getValueType();
     }
 
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        AggregationMethod innerCopy = inner.newAggregator(methodResolutionService);
-        return methodResolutionService.makeDistinctAggregator(innerCopy, childType, true);
-    }
-
     private boolean checkPass(Object[] object) {
         Boolean first = (Boolean) object[1];
         if (first != null) {

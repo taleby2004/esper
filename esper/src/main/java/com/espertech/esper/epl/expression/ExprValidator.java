@@ -8,16 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.collection.Pair;
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.schedule.TimeProvider;
-
 /**
  * Validation interface for expression nodes.
  */

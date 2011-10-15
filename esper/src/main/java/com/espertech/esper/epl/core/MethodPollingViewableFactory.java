@@ -11,7 +11,7 @@ package com.espertech.esper.epl.core;
 import com.espertech.esper.client.ConfigurationMethodRef;
 import com.espertech.esper.client.ConfigurationDataCache;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPStatementHandle;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.epl.db.DataCache;
 import com.espertech.esper.epl.db.DataCacheFactory;
 import com.espertech.esper.epl.db.PollExecStrategy;
@@ -44,7 +44,7 @@ public class MethodPollingViewableFactory
      * @param streamNumber the stream number
      * @param methodStreamSpec defines the class and method to call
      * @param eventAdapterService for creating event types and events
-     * @param epStatementHandle for time-based callbacks
+     * @param epStatementAgentInstanceHandle for time-based callbacks
      * @param methodResolutionService for resolving classes and imports
      * @param engineImportService for resolving configurations
      * @param schedulingService for scheduling callbacks in expiry-time based caches
@@ -57,7 +57,7 @@ public class MethodPollingViewableFactory
     public static HistoricalEventViewable createPollMethodView(int streamNumber,
                                                                MethodStreamSpec methodStreamSpec,
                                                                EventAdapterService eventAdapterService,
-                                                               EPStatementHandle epStatementHandle,
+                                                               EPStatementAgentInstanceHandle epStatementAgentInstanceHandle,
                                                                MethodResolutionService methodResolutionService,
                                                                EngineImportService engineImportService,
                                                                SchedulingService schedulingService,
@@ -145,7 +145,7 @@ public class MethodPollingViewableFactory
             configCache = engineImportService.getConfigurationMethodRef(declaringClass.getSimpleName());
         }
         ConfigurationDataCache dataCacheDesc = (configCache != null) ? configCache.getDataCacheDesc() : null;
-        DataCache dataCache = DataCacheFactory.getDataCache(dataCacheDesc, epStatementHandle, schedulingService, scheduleBucket);
+        DataCache dataCache = DataCacheFactory.getDataCache(dataCacheDesc, epStatementAgentInstanceHandle, schedulingService, scheduleBucket);
         PollExecStrategy methodPollStrategy = new MethodPollingExecStrategy(eventAdapterService, staticMethod, mapTypeName != null, eventType);
 
         return new MethodPollingViewable(methodStreamSpec, streamNumber, methodStreamSpec.getExpressions(), methodPollStrategy, dataCache, eventType, exprEvaluatorContext);

@@ -21,9 +21,9 @@ import java.util.Map;
 /**
  * Implementation for handling aggregation with grouping by group-keys.
  */
-public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBase
+public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
 {
-    private final AggregationAccessorSlotPair[] accessors;
+    private final AggregationAccessorSlotPair[] accessorsFactory;
     private final int[] streams;
     private final boolean isJoin;
 
@@ -42,26 +42,26 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBase
      * @param prototypes - collect the aggregation state that evaluators evaluate to, act as prototypes for new aggregations
      * aggregation states for each group
      * @param methodResolutionService - factory for creating additional aggregation method instances per group key
-     * @param accessors accessor definitions
+     * @param accessorsFactory accessor definitions
      * @param streams streams in join
      * @param isJoin true for join, false for single-stream
      */
     public AggSvcGroupByMixedAccessImpl(ExprEvaluator evaluators[],
-                                        AggregationMethod prototypes[],
+                                        AggregationMethodFactory prototypes[],
                                         MethodResolutionService methodResolutionService,
-                                        AggregationAccessorSlotPair[] accessors,
+                                        AggregationAccessorSlotPair[] accessorsFactory,
                                         int[] streams,
                                         boolean isJoin)
     {
         super(evaluators, prototypes);
-        this.accessors = accessors;
+        this.accessorsFactory = accessorsFactory;
         this.streams = streams;
         this.isJoin = isJoin;
         this.methodResolutionService = methodResolutionService;
         this.aggregatorsPerGroup = new HashMap<MultiKeyUntyped, AggregationRowPair>();
     }
 
-    public void clearResults()
+    public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
     {
         aggregatorsPerGroup.clear();
     }
@@ -73,8 +73,8 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBase
         // The aggregators for this group do not exist, need to create them from the prototypes
         if (groupAggregators == null)
         {
-            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, groupByKey);
-            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(isJoin, streams, methodResolutionService, groupByKey);
+            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
+            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceIds(), isJoin, streams, methodResolutionService, groupByKey);
             groupAggregators = new AggregationRowPair(methods, accesses);
             aggregatorsPerGroup.put(groupByKey, groupAggregators);
         }
@@ -99,8 +99,8 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBase
         // The aggregators for this group do not exist, need to create them from the prototypes
         if (groupAggregators == null)
         {
-            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, groupByKey);
-            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(isJoin, streams, methodResolutionService, groupByKey);
+            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
+            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceIds(), isJoin, streams, methodResolutionService, groupByKey);
             groupAggregators = new AggregationRowPair(methods, accesses);
             aggregatorsPerGroup.put(groupByKey, groupAggregators);
         }
@@ -118,46 +118,46 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBase
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey)
+    public void setCurrentAccess(MultiKeyUntyped groupByKey, int[] agentInstanceIds)
     {
         currentAggregatorRow = aggregatorsPerGroup.get(groupByKey);
 
         if (currentAggregatorRow == null)
         {
-            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, groupByKey);
-            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(isJoin, streams, methodResolutionService, groupByKey);
+            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, agentInstanceIds, groupByKey);
+            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(agentInstanceIds, isJoin, streams, methodResolutionService, groupByKey);
             currentAggregatorRow = new AggregationRowPair(methods, accesses);
             aggregatorsPerGroup.put(groupByKey, currentAggregatorRow);
         }
     }
 
-    public Object getValue(int column)
+    public Object getValue(int column, int[] agentInstanceIds)
     {
         if (column < aggregators.length) {
             return currentAggregatorRow.getMethods()[column].getValue();
         }
         else {
-            AggregationAccessorSlotPair pair = accessors[column - aggregators.length];
+            AggregationAccessorSlotPair pair = accessorsFactory[column - aggregators.length];
             return pair.getAccessor().getValue(currentAggregatorRow.getAccesses()[pair.getSlot()]);
         }
     }
     
-    public Collection<EventBean> getCollection(int column) {
+    public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context) {
         if (column < aggregators.length) {
             return null;
         }
         else {
-            AggregationAccessorSlotPair pair = accessors[column - aggregators.length];
+            AggregationAccessorSlotPair pair = accessorsFactory[column - aggregators.length];
             return pair.getAccessor().getCollectionReadOnly(currentAggregatorRow.getAccesses()[pair.getSlot()]);
         }
     }
 
-    public EventBean getEventBean(int column) {
+    public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         if (column < aggregators.length) {
             return null;
         }
         else {
-            AggregationAccessorSlotPair pair = accessors[column - aggregators.length];
+            AggregationAccessorSlotPair pair = accessorsFactory[column - aggregators.length];
             return pair.getAccessor().getEventBean(currentAggregatorRow.getAccesses()[pair.getSlot()]);
         }
     }

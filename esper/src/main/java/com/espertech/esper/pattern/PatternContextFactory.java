@@ -8,7 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.StatementContext;
 
 /**
  * Factory for pattern context instances, creating context objects for each distinct pattern based on the
@@ -26,7 +27,10 @@ public interface PatternContextFactory
      */
     public PatternContext createContext(StatementContext statementContext,
                                         int streamId,
-                                        EvalRootNode rootNode,
-                                        boolean hasArrayProperties,
-                                        boolean hasConsumingFilter);
+                                        EvalRootFactoryNode rootNode,
+                                        boolean hasArrayProperties);
+
+    public PatternAgentInstanceContext createPatternAgentContext(PatternContext patternContext,
+                                                                 AgentInstanceContext agentInstanceContext,
+                                                                 boolean hasConsumingFilter);
 }

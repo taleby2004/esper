@@ -13,9 +13,9 @@ package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.OneEventCollection;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.InternalEventRouteDest;
-import com.espertech.esper.core.InternalEventRouter;
+import com.espertech.esper.core.service.EPStatementHandle;
+import com.espertech.esper.core.service.InternalEventRouteDest;
+import com.espertech.esper.core.service.InternalEventRouter;
 import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -35,7 +35,7 @@ public class NamedWindowOnMergeActionIns extends NamedWindowOnMergeAction {
     }
 
     public void apply(EventBean matchingEvent, EventBean[] eventsPerStream, OneEventCollection newData, OneEventCollection oldData, ExprEvaluatorContext exprEvaluatorContext) {
-        EventBean event = insertHelper.process(eventsPerStream, true, true);
+        EventBean event = insertHelper.process(eventsPerStream, true, true, exprEvaluatorContext);
         if (internalEventRouter == null) {
             newData.add(event);
             return;

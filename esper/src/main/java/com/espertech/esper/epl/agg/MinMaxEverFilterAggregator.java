@@ -10,8 +10,6 @@ package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.type.MinMaxTypeEnum;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Min/max aggregator for all values, not considering events leaving the aggregation (i.e. ever).
@@ -40,10 +38,5 @@ public class MinMaxEverFilterAggregator extends MinMaxEverAggregator
             return;
         }
         super.leave(paramArray[0]);
-    }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeMinMaxAggregator(minMaxTypeEnum, returnType, false, true);
     }
 }

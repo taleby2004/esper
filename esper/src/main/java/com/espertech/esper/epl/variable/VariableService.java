@@ -8,8 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.variable;
 
-import com.espertech.esper.core.StatementExtensionSvcContext;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.service.StatementExtensionSvcContext;
 
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.Map;

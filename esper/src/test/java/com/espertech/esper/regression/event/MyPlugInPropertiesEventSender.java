@@ -13,7 +13,7 @@ package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventSender;
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.client.EventBean;
 
 import java.util.Properties;

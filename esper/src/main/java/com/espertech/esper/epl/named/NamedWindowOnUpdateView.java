@@ -12,12 +12,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.OneEventCollection;
-import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.spec.OnTriggerWindowUpdateDesc;
-import com.espertech.esper.event.EventTypeSPI;
-import com.espertech.esper.view.StatementStopService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -29,33 +24,13 @@ import java.util.Iterator;
 public class NamedWindowOnUpdateView extends NamedWindowOnExprBaseView
 {
     private static final Log log = LogFactory.getLog(NamedWindowOnUpdateView.class);
-    private EventBean[] lastResult;
-    private final StatementResultService statementResultService;
-    private final EventTypeSPI eventTypeSPI;
-    private final NamedWindowUpdateHelper updateHelper;
 
-    /**
-     * Ctor.
-     * @param statementStopService for indicating a statement was stopped or destroyed for cleanup
-     * @param lookupStrategy for handling trigger events to determine deleted events
-     * @param removeStreamView to indicate which events to delete
-     * @param statementResultService for coordinating on whether insert and remove stream events should be posted
-     * @param exprEvaluatorContext context for expression evalauation
-     * @param onTriggerDesc describes on-update
-     * @throws com.espertech.esper.epl.expression.ExprValidationException when expression validation fails
-     */
-    public NamedWindowOnUpdateView(StatementStopService statementStopService,
-                                 NamedWindowLookupStrategy lookupStrategy,
-                                 NamedWindowRootView removeStreamView,
-                                 StatementResultService statementResultService,
-                                 ExprEvaluatorContext exprEvaluatorContext,
-                                 OnTriggerWindowUpdateDesc onTriggerDesc)
-            throws ExprValidationException
-    {
-        super(statementStopService, lookupStrategy, removeStreamView, exprEvaluatorContext);
-        this.statementResultService = statementResultService;
-        eventTypeSPI = (EventTypeSPI) removeStreamView.getEventType();
-        updateHelper = NamedWindowUpdateHelper.make(eventTypeSPI, onTriggerDesc.getAssignments(), onTriggerDesc.getOptionalAsName());
+    private NamedWindowOnUpdateViewFactory parent;
+    private EventBean[] lastResult;
+
+    public NamedWindowOnUpdateView(NamedWindowLookupStrategy lookupStrategy, NamedWindowRootViewInstance rootView, ExprEvaluatorContext exprEvaluatorContext, NamedWindowOnUpdateViewFactory parent) {
+        super(lookupStrategy, rootView, exprEvaluatorContext);
+        this.parent = parent;
     }
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
@@ -71,7 +46,7 @@ public class NamedWindowOnUpdateView extends NamedWindowOnExprBaseView
         for (EventBean triggerEvent : triggerEvents) {
             eventsPerStream[1] = triggerEvent;
             for (EventBean matchingEvent : matchingEvents) {
-                EventBean copy = updateHelper.update(matchingEvent, eventsPerStream, super.getExprEvaluatorContext());
+                EventBean copy = parent.getUpdateHelper().update(matchingEvent, eventsPerStream, super.getExprEvaluatorContext());
                 newData.add(copy);
                 oldData.add(matchingEvent);
             }
@@ -83,7 +58,7 @@ public class NamedWindowOnUpdateView extends NamedWindowOnExprBaseView
             this.rootView.update(newData.toArray(), oldData.toArray());
 
             // The on-delete listeners receive the events deleted, but only if there is interest
-            if (statementResultService.isMakeNatural() || statementResultService.isMakeSynthetic()) {
+            if (parent.getStatementResultService().isMakeNatural() || parent.getStatementResultService().isMakeSynthetic()) {
                 updateChildren(newData.toArray(), oldData.toArray());
             }
         }
@@ -92,13 +67,11 @@ public class NamedWindowOnUpdateView extends NamedWindowOnExprBaseView
         lastResult = matchingEvents;
     }
 
-    public EventType getEventType()
-    {
-        return namedWindowEventType;
+    public EventType getEventType() {
+        return rootView.getEventType();
     }
 
-    public Iterator<EventBean> iterator()
-    {
+    public Iterator<EventBean> iterator() {
         return new ArrayEventIterator(lastResult);
     }
 }

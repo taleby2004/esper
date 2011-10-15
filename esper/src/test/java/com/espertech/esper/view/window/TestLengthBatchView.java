@@ -31,7 +31,7 @@ public class TestLengthBatchView extends TestCase
     public void setUp()
     {
         // Set up length window view and a test child view
-        myView = new LengthBatchView(null, 5, null);
+        myView = new LengthBatchView(null, null, 5, null);
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
     }
@@ -40,7 +40,7 @@ public class TestLengthBatchView extends TestCase
     {
         try
         {
-            myView = new LengthBatchView(null, 0, null);
+            myView = new LengthBatchView(null, null, 0, null);
             fail();
         }
         catch (IllegalArgumentException ex)

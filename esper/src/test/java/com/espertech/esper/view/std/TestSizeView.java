@@ -31,7 +31,7 @@ public class TestSizeView extends TestCase
     {
         // Set up length window view and a test child view
         EventType type = SizeView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        myView = new SizeView(SupportStatementContextFactory.makeContext(), type, null);
+        myView = new SizeView(SupportStatementContextFactory.makeAgentInstanceContext(), type, null);
 
         childView = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.addView(childView);
@@ -98,7 +98,7 @@ public class TestSizeView extends TestCase
     public void testSchema()
     {
         EventType type = SizeView.createEventType(SupportStatementContextFactory.makeContext(), null, 1);
-        SizeView view = new SizeView(SupportStatementContextFactory.makeContext(), type, null);
+        SizeView view = new SizeView(SupportStatementContextFactory.makeAgentInstanceContext(), type, null);
 
         EventType eventType = view.getEventType();
         assertEquals(long.class, eventType.getPropertyType(ViewFieldEnum.SIZE_VIEW__SIZE.getName()));
@@ -106,7 +106,7 @@ public class TestSizeView extends TestCase
 
     public void testCopyView() throws Exception
     {
-        assertTrue(myView.cloneView(SupportStatementContextFactory.makeContext()) instanceof SizeView);
+        assertTrue(myView.cloneView() instanceof SizeView);
     }
 
     private void checkNewData(long expectedSize)

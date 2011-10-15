@@ -13,7 +13,6 @@ package com.espertech.esper.support.plugin;
 
 import com.espertech.esper.plugin.PluginLoader;
 import com.espertech.esper.plugin.PluginLoaderInitContext;
-import com.espertech.esper.core.EPServiceProviderSPI;
 
 import java.util.Properties;
 import java.util.List;

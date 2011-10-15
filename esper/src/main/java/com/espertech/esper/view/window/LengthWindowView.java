@@ -11,7 +11,7 @@ package com.espertech.esper.view.window;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ViewUpdatedCollection;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.DataWindowView;
 import com.espertech.esper.view.View;
@@ -26,6 +26,7 @@ import java.util.Iterator;
  */
 public final class LengthWindowView extends ViewSupport implements DataWindowView, CloneableView
 {
+    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final LengthWindowViewFactory lengthWindowViewFactory;
     private final int size;
     private final ViewUpdatedCollection viewUpdatedCollection;
@@ -37,21 +38,22 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
      * @param viewUpdatedCollection is a collection that the view must update when receiving events
      * @param lengthWindowViewFactory for copying this view in a group-by
      */
-    public LengthWindowView(LengthWindowViewFactory lengthWindowViewFactory, int size, ViewUpdatedCollection viewUpdatedCollection)
+    public LengthWindowView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext, LengthWindowViewFactory lengthWindowViewFactory, int size, ViewUpdatedCollection viewUpdatedCollection)
     {
         if (size < 1)
         {
             throw new IllegalArgumentException("Illegal argument for size of length window");
         }
 
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
         this.lengthWindowViewFactory = lengthWindowViewFactory;
         this.size = size;
         this.viewUpdatedCollection = viewUpdatedCollection;
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return lengthWindowViewFactory.makeView(statementContext);
+        return lengthWindowViewFactory.makeView(agentInstanceViewFactoryContext);
     }
 
     /**

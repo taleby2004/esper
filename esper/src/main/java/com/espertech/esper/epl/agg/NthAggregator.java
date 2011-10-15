@@ -67,8 +67,4 @@ public class NthAggregator implements AggregationMethod {
         numDataPoints = 0;
         currentBufferElementPointer = 0;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService) {
-        return methodResolutionService.makeNthAggregator(returnType, sizeBuf);
-    }
 }

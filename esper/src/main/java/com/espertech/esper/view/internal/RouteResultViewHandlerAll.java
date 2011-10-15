@@ -12,13 +12,12 @@
 package com.espertech.esper.view.internal;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.core.InternalEventRouter;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.InternalEventRouter;
+import com.espertech.esper.core.service.EPStatementHandle;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**

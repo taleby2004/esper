@@ -12,7 +12,7 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventSender;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.event.bean.BeanEventType;

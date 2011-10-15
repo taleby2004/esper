@@ -8,13 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.OneEventCollection;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.view.*;
@@ -27,10 +26,9 @@ import java.util.LinkedHashSet;
 /**
  *
  */
-public final class FirstTimeView extends ViewSupport implements CloneableView, BatchingDataWindowView, StoppableView
-{
+public final class FirstTimeView extends ViewSupport implements CloneableView, StoppableView, DataWindowView {
     private final FirstTimeViewFactory timeFirstViewFactory;
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final long msecIntervalSize;
     private final ScheduleSlot scheduleSlot;
     private EPStatementHandleCallback handle;
@@ -43,24 +41,23 @@ public final class FirstTimeView extends ViewSupport implements CloneableView, B
      * Constructor.
      * @param msecIntervalSize is the number of milliseconds to batch events for
      * @param timeFirstViewFactory fr copying this view in a group-by
-     * @param statementContext is required view services
      */
     public FirstTimeView(FirstTimeViewFactory timeFirstViewFactory,
-                         StatementContext statementContext,
+                         AgentInstanceViewFactoryChainContext agentInstanceContext,
                          long msecIntervalSize)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.timeFirstViewFactory = timeFirstViewFactory;
         this.msecIntervalSize = msecIntervalSize;
 
-        this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
+        this.scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
 
         scheduleCallback();
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return timeFirstViewFactory.makeView(statementContext);
+        return timeFirstViewFactory.makeView(agentInstanceContext);
     }
 
     /**
@@ -149,13 +146,13 @@ public final class FirstTimeView extends ViewSupport implements CloneableView, B
                 FirstTimeView.this.isClosed = true;
             }
         };
-        handle = new EPStatementHandleCallback(statementContext.getEpStatementHandle(), callback);
-        statementContext.getSchedulingService().add(afterMSec, handle, scheduleSlot);
+        handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
+        agentInstanceContext.getStatementContext().getSchedulingService().add(afterMSec, handle, scheduleSlot);
     }
 
     public void stop() {
     	if (handle != null) {
-        	statementContext.getSchedulingService().remove(handle, scheduleSlot);
+        	agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }
 

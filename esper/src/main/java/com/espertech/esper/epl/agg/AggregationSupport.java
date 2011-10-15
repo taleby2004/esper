@@ -52,9 +52,4 @@ public abstract class AggregationSupport implements AggregationMethod
     {
         return functionName;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makePlugInAggregator(functionName);
-    }
 }

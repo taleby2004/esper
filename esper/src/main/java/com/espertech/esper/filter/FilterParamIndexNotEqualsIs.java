@@ -10,7 +10,6 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,7 +26,7 @@ public final class FilterParamIndexNotEqualsIs extends FilterParamIndexNotEquals
         super(propertyName, FilterOperator.IS_NOT, eventType);
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
         Object attributeValue = this.getGetter().get(eventBean);
 
@@ -39,14 +38,14 @@ public final class FilterParamIndexNotEqualsIs extends FilterParamIndexNotEquals
             if (entry.getKey() == null)
             {
                 if (attributeValue != null) {
-                    entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                    entry.getValue().matchEvent(eventBean, matches);
                 }
                 continue;
             }
 
             if (!entry.getKey().equals(attributeValue))
             {
-                entry.getValue().matchEvent(eventBean, matches, exprEvaluatorContext);
+                entry.getValue().matchEvent(eventBean, matches);
             }
         }
 

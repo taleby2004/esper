@@ -40,8 +40,8 @@ public class TestLengthWindowViewFactory extends TestCase
     {
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {1000}));
         assertFalse(factory.canReuse(new FirstElementView()));
-        assertFalse(factory.canReuse(new LengthWindowView(factory, 1, null)));
-        assertTrue(factory.canReuse(new LengthWindowView(factory, 1000, null)));
+        assertFalse(factory.canReuse(new LengthWindowView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), factory, 1, null)));
+        assertTrue(factory.canReuse(new LengthWindowView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), factory, 1000, null)));
     }
 
     private void tryInvalidParameter(Object param) throws Exception
@@ -62,7 +62,7 @@ public class TestLengthWindowViewFactory extends TestCase
     {
         LengthWindowViewFactory factory = new LengthWindowViewFactory();
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(param));
-        LengthWindowView view = (LengthWindowView) factory.makeView(SupportStatementContextFactory.makeContext());
+        LengthWindowView view = (LengthWindowView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(size, view.getSize());
     }
 }

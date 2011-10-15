@@ -46,24 +46,24 @@ public class SupportAggregationService implements AggregationService
         return enterList;
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
     {
     }
 
-    public Object getValue(int column)
+    public Object getValue(int column, int[] agentInstanceIds)
     {
         return null;
     }
 
-    public Collection<EventBean> getCollection(int column) {
+    public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context) {
         return null;
     }
 
-    public void clearResults()
+    public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
     {
     }
 
-    public EventBean getEventBean(int column) {
+    public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         return null;
     }
 }

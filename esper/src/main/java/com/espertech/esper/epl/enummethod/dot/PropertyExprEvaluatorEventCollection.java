@@ -14,7 +14,7 @@ package com.espertech.esper.epl.enummethod.dot;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.ExpressionResultCacheEntry;
+import com.espertech.esper.core.service.ExpressionResultCacheEntry;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprEvaluatorEnumeration;
 import com.espertech.esper.epl.expression.ExprValidationException;

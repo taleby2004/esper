@@ -11,8 +11,8 @@ package com.espertech.esper.view.std;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.annotation.Hint;
 import com.espertech.esper.client.annotation.HintEnum;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.view.*;
@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * Factory for {@link GroupByView} instances.
  */
-public class GroupByViewFactory implements ViewFactory
+public class GroupByViewFactory implements ViewFactory, GroupByViewFactoryMarker
 {
     private static Log log = LogFactory.getLog(GroupByViewFactory.class);
 
@@ -109,22 +109,12 @@ public class GroupByViewFactory implements ViewFactory
         return criteriaExpressions;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        return false;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-    }
-
-    public View makeView(StatementContext statementContext)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
         if (isReclaimAged) {
-            return new GroupByViewReclaimAged(statementContext, criteriaExpressions, ExprNodeUtility.getEvaluators(criteriaExpressions), reclaimMaxAge, reclaimFrequency);
+            return new GroupByViewReclaimAged(agentInstanceViewFactoryContext, criteriaExpressions, ExprNodeUtility.getEvaluators(criteriaExpressions), reclaimMaxAge, reclaimFrequency);
         }
-        return new GroupByViewImpl(statementContext, criteriaExpressions, ExprNodeUtility.getEvaluators(criteriaExpressions));
+        return new GroupByViewImpl(agentInstanceViewFactoryContext, criteriaExpressions, ExprNodeUtility.getEvaluators(criteriaExpressions));
     }
 
     public EventType getEventType()

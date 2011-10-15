@@ -13,8 +13,6 @@ import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 /**
  * Implements an aggregation service for match recognize.
@@ -25,37 +23,10 @@ public class AggregationServiceMatchRecognizeImpl implements AggregationServiceM
     private AggregationMethod aggregatorsEachStream[][];
     private AggregationMethod aggregatorsAll[];
 
-    /**
-     * Ctor.
-     * @param countStreams number of streams/variables
-     * @param aggregatorsPerStream aggregation methods per stream
-     * @param evaluatorsPerStream evaluation functions per stream
-     */
-    public AggregationServiceMatchRecognizeImpl(int countStreams, LinkedHashMap<Integer, AggregationMethod[]> aggregatorsPerStream, Map<Integer, ExprEvaluator[]> evaluatorsPerStream) {
-        evaluatorsEachStream = new ExprEvaluator[countStreams][];
-        aggregatorsEachStream = new AggregationMethod[countStreams][];
-
-        int count = 0;
-        for (Map.Entry<Integer, AggregationMethod[]> agg : aggregatorsPerStream.entrySet())
-        {
-            aggregatorsEachStream[agg.getKey()] = agg.getValue();
-            count += agg.getValue().length;
-        }
-
-        aggregatorsAll = new AggregationMethod[count];
-        count = 0;
-        for (Map.Entry<Integer, AggregationMethod[]> agg : aggregatorsPerStream.entrySet())
-        {
-            for (AggregationMethod method : agg.getValue())
-            {
-                aggregatorsAll[count++] = method;
-            }
-        }
-
-        for (Map.Entry<Integer, ExprEvaluator[]> eval : evaluatorsPerStream.entrySet())
-        {
-            evaluatorsEachStream[eval.getKey()] = eval.getValue();
-        }
+    public AggregationServiceMatchRecognizeImpl(ExprEvaluator[][] evaluatorsEachStream, AggregationMethod[][] aggregatorsEachStream, AggregationMethod[] aggregatorsAll) {
+        this.evaluatorsEachStream = evaluatorsEachStream;
+        this.aggregatorsEachStream = aggregatorsEachStream;
+        this.aggregatorsAll = aggregatorsAll;
     }
 
     public void applyEnter(EventBean[] eventsPerStream, int streamId, ExprEvaluatorContext exprEvaluatorContext) {
@@ -74,16 +45,16 @@ public class AggregationServiceMatchRecognizeImpl implements AggregationServiceM
         }
     }
 
-    public Object getValue(int column)
+    public Object getValue(int column, int[] agentInstanceIds)
     {
         return aggregatorsAll[column].getValue();
     }
 
-    public Collection<EventBean> getCollection(int column) {
+    public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context) {
         return null;
     }
 
-    public EventBean getEventBean(int column) {
+    public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         return null;
     }
 

@@ -12,8 +12,8 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.*;
-import com.espertech.esper.type.MinMaxTypeEnum;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.type.MinMaxTypeEnum;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -95,7 +95,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return engineImportService.resolveMethod(clazz, methodName, paramTypes);
     }
 
-    public AggregationMethod makeCountAggregator(boolean isIgnoreNull, boolean hasFilter)
+    public AggregationMethod makeCountAggregator(int[] agentInstanceIds, int groupId, int aggregationId, boolean isIgnoreNull, boolean hasFilter)
     {
         if (!hasFilter) {
             if (isIgnoreNull) {
@@ -116,12 +116,12 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return engineImportService.resolveAggregation(functionName);
     }
 
-    public Pair<Class, String> resolveSingleRow(String functionName) throws EngineImportUndefinedException, EngineImportException
+    public Pair<Class, EngineImportSingleRowDesc> resolveSingleRow(String functionName) throws EngineImportUndefinedException, EngineImportException
     {
         return engineImportService.resolveSingleRow(functionName);
     }
 
-    public AggregationMethod makeSumAggregator(Class type, boolean hasFilter)
+    public AggregationMethod makeSumAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class type, boolean hasFilter)
     {
         if (!hasFilter) {
             if (type == BigInteger.class)
@@ -208,7 +208,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return Integer.class;
     }
 
-    public AggregationMethod makeDistinctAggregator(AggregationMethod aggregationMethod, Class childType, boolean hasFilter)
+    public AggregationMethod makeDistinctAggregator(int[] agentInstanceIds, int groupId, int aggregationId, AggregationMethod aggregationMethod, Class childType, boolean hasFilter)
     {
         if (hasFilter) {
             return new DistinctValueFilterAggregator(aggregationMethod, childType);
@@ -216,7 +216,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return new DistinctValueAggregator(aggregationMethod, childType);
     }
 
-    public AggregationMethod makeAvgAggregator(Class type, boolean hasFilter)
+    public AggregationMethod makeAvgAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class type, boolean hasFilter)
     {
         if (hasFilter) {
             if ((type == BigDecimal.class) || (type == BigInteger.class))
@@ -241,7 +241,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return Double.class;
     }
 
-    public AggregationMethod makeAvedevAggregator(boolean hasFilter)
+    public AggregationMethod makeAvedevAggregator(int[] agentInstanceIds, int groupId, int aggregationId, boolean hasFilter)
     {
         if (!hasFilter) {
             return new AvedevAggregator();
@@ -251,7 +251,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         }
     }
 
-    public AggregationMethod makeMedianAggregator(boolean hasFilter)
+    public AggregationMethod makeMedianAggregator(int[] agentInstanceIds, int groupId, int aggregationId, boolean hasFilter)
     {
         if (!hasFilter) {
             return new MedianAggregator();
@@ -259,7 +259,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return new MedianFilterAggregator();
     }
 
-    public AggregationMethod makeMinMaxAggregator(MinMaxTypeEnum minMaxTypeEnum, Class targetType, boolean isHasDataWindows, boolean hasFilter)
+    public AggregationMethod makeMinMaxAggregator(int[] agentInstanceIds, int groupId, int aggregationId, MinMaxTypeEnum minMaxTypeEnum, Class targetType, boolean isHasDataWindows, boolean hasFilter)
     {
         if (!hasFilter) {
             if (!isHasDataWindows) {
@@ -275,7 +275,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         }
     }
 
-    public AggregationMethod makeStddevAggregator(boolean hasFilter)
+    public AggregationMethod makeStddevAggregator(int[] agentInstanceIds, int groupId, int aggregationId, boolean hasFilter)
     {
         if (!hasFilter) {
             return new StddevAggregator();
@@ -283,33 +283,33 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return new StddevFilterAggregator();
     }
 
-    public AggregationMethod makeFirstEverValueAggregator(Class type, boolean hasFilter) {
+    public AggregationMethod makeFirstEverValueAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class type, boolean hasFilter) {
         if (hasFilter) {
             return new FirstEverValueFilterAggregator(type);
         }
         return new FirstEverValueAggregator(type);
     }
 
-    public AggregationMethod makeLastEverValueAggregator(Class type, boolean hasFilter) {
+    public AggregationMethod makeLastEverValueAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class type, boolean hasFilter) {
         if (hasFilter) {
             return new LastEverValueFilterAggregator(type);
         }
         return new LastEverValueAggregator(type);
     }
 
-    public AggregationMethod makeRateAggregator() {
+    public AggregationMethod makeRateAggregator(int[] agentInstanceIds, int groupId, int aggregationId) {
         return new RateAggregator();
     }
 
-    public AggregationMethod makeRateEverAggregator(long interval) {
+    public AggregationMethod makeRateEverAggregator(int[] agentInstanceIds, int groupId, int aggregationId, long interval) {
         return new RateEverAggregator(interval, timeProvider);
     }
 
-    public AggregationMethod makeNthAggregator(Class returnType, int size) {
+    public AggregationMethod makeNthAggregator(int[] agentInstanceIds, int groupId, int aggregationId, Class returnType, int size) {
         return new NthAggregator(returnType, size);
     }
 
-    public AggregationMethod makeLeavingAggregator() {
+    public AggregationMethod makeLeavingAggregator(int[] agentInstanceIds, int groupId, int aggregationId) {
         return new LeavingAggregator();
     }
 
@@ -321,12 +321,19 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         }
     }
 
-    public AggregationMethod[] newAggregators(AggregationMethod[] prototypes, MultiKeyUntyped groupKey)
-    {
+    public AggregationMethod[] newAggregators(AggregationMethodFactory[] prototypes, int[] agentInstanceId) {
+        return newAggregatorsInternal(prototypes, agentInstanceId);
+    }
+
+    public AggregationMethod[] newAggregators(AggregationMethodFactory[] prototypes, int[] agentInstanceId, MultiKeyUntyped groupKey) {
+        return newAggregatorsInternal(prototypes, agentInstanceId);
+    }
+
+    public AggregationMethod[] newAggregatorsInternal(AggregationMethodFactory[] prototypes, int[] agentInstanceId) {
         AggregationMethod row[] = new AggregationMethod[prototypes.length];
         for (int i = 0; i < prototypes.length; i++)
         {
-            row[i] = prototypes[i].newAggregator(this);
+            row[i] = prototypes[i].make(this, agentInstanceId, -1, i);
         }
         return row;
     }
@@ -336,12 +343,12 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return 0;   // since the aggregators are always fresh ones 
     }
 
-    public void removeAggregators(MultiKeyUntyped groupKey)
+    public void removeAggregators(int[] agentInstanceIds, MultiKeyUntyped groupKey)
     {
         // To be overridden by implementations that care when aggregators get removed
     }
 
-    public AggregationAccess makeAccessStreamId(boolean isJoin, int streamId, MultiKeyUntyped groupKey)
+    public AggregationAccess makeAccessStreamId(int[] agentInstanceIds, boolean isJoin, int streamId, MultiKeyUntyped groupKey)
     {
         if (isJoin) {
             return new AggregationAccessJoinImpl(streamId);

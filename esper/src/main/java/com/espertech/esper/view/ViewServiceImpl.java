@@ -8,22 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.view;
 
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.spec.StreamSpecOptions;
 import com.espertech.esper.epl.spec.ViewSpec;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.view.internal.UnionViewFactory;
 import com.espertech.esper.view.internal.IntersectViewFactory;
+import com.espertech.esper.view.internal.UnionViewFactory;
 import com.espertech.esper.view.std.GroupByViewFactory;
+import com.espertech.esper.view.std.GroupByViewFactoryMarker;
 import com.espertech.esper.view.std.MergeViewFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Implementation of the view evaluation service business interface.
@@ -86,7 +85,7 @@ public final class ViewServiceImpl implements ViewService
                 dataWindowCount++;
                 continue;
             }
-            if ((factory instanceof GroupByViewFactory) || (factory instanceof MergeViewFactory))
+            if ((factory instanceof GroupByViewFactoryMarker) || (factory instanceof MergeViewFactory))
             {
                 continue;
             }
@@ -126,7 +125,7 @@ public final class ViewServiceImpl implements ViewService
         for (int i = 0; i < viewFactories.size(); i++)
         {
             ViewFactory factory = viewFactories.get(i);
-            if (factory instanceof GroupByViewFactory)
+            if (factory instanceof GroupByViewFactoryMarker)
             {
                 groupByFactory.add(i);
             }
@@ -146,11 +145,11 @@ public final class ViewServiceImpl implements ViewService
 
         if (groupByFactory.size() > 1)
         {
-            throw new ViewProcessingException("Multiple group-by views are not allowed in conjuntion with multiple data windows");
+            throw new ViewProcessingException("Multiple groupwin views are not allowed in conjuntion with multiple data windows");
         }
         if ((!groupByFactory.isEmpty()) && (groupByFactory.iterator().next() != 0))
         {
-            throw new ViewProcessingException("The group-by view must occur in the first position in conjuntion with multiple data windows");
+            throw new ViewProcessingException("The groupwin view must occur in the first position in conjuntion with multiple data windows");
         }
         if ((!groupByFactory.isEmpty()) && (mergeFactory.iterator().next() != (viewFactories.size() - 1)))
         {
@@ -199,11 +198,18 @@ public final class ViewServiceImpl implements ViewService
 
     public Viewable createViews(Viewable eventStreamViewable,
                                 List<ViewFactory> viewFactories,
-                                StatementContext context)
+                                AgentInstanceViewFactoryChainContext viewFactoryChainContext,
+                                boolean hasPreviousNode)
     {
         // Attempt to find existing views under the stream that match specs.
         // The viewSpecList may have been changed by this method.
-        Pair<Viewable, List<View>> resultPair = ViewServiceHelper.matchExistingViews(eventStreamViewable, viewFactories);
+        Pair<Viewable, List<View>> resultPair;
+        if (hasPreviousNode) {
+            resultPair = new Pair<Viewable, List<View>>(eventStreamViewable, Collections.<View>emptyList());
+        }
+        else {
+            resultPair = ViewServiceHelper.matchExistingViews(eventStreamViewable, viewFactories);
+        }
 
         Viewable parentViewable = resultPair.getFirst();
 
@@ -219,7 +225,7 @@ public final class ViewServiceImpl implements ViewService
         }
 
         // Instantiate remaining chain of views from the remaining factories which didn't match to existing views.
-        List<View> views = ViewServiceHelper.instantiateChain(parentViewable, viewFactories, context);
+        List<View> views = ViewServiceHelper.instantiateChain(parentViewable, viewFactories, viewFactoryChainContext);
 
         // Initialize any views that need initializing after the chain is complete
         for (View view : views)

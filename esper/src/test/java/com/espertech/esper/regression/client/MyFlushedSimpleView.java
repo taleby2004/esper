@@ -11,9 +11,9 @@
 
 package com.espertech.esper.regression.client;
 
-import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.StatementStopCallback;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
@@ -28,9 +28,9 @@ public class MyFlushedSimpleView extends ViewSupport implements StatementStopCal
     private List<EventBean> events;
     private EventType eventType;
 
-    public MyFlushedSimpleView(StatementContext statementContext)
+    public MyFlushedSimpleView(AgentInstanceViewFactoryChainContext agentInstanceContext)
     {
-        statementContext.getStatementStopService().addSubscriber(this);
+        agentInstanceContext.getStatementContext().getStatementStopService().addSubscriber(this);
         events = new ArrayList<EventBean>();
     }
 
@@ -46,9 +46,9 @@ public class MyFlushedSimpleView extends ViewSupport implements StatementStopCal
         eventType = parent.getEventType();
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView(AgentInstanceViewFactoryChainContext agentInstanceContext)
     {
-        return new MyFlushedSimpleView(statementContext);
+        return new MyFlushedSimpleView(agentInstanceContext);
     }
 
     public final void update(EventBean[] newData, EventBean[] oldData)

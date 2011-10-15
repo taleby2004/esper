@@ -34,12 +34,6 @@ public class DoubleSumFilterAggregator extends DoubleSumAggregator
         }
         super.leave(paramArray[0]);
     }
-
-    @Override
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeSumAggregator(Double.class, true);
-    }
 }
 
 

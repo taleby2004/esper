@@ -9,10 +9,10 @@
 package com.espertech.esper.view;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
-import com.espertech.esper.epl.core.ViewResourceCallback;
 import com.espertech.esper.epl.expression.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,16 +27,6 @@ import java.util.List;
 public abstract class ViewFactorySupport implements ViewFactory
 {
     private static Log log = LogFactory.getLog(ViewFactorySupport.class);
-
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        return false;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-    }
 
     public boolean canReuse(View view)
     {
@@ -163,7 +153,7 @@ public abstract class ViewFactorySupport implements ViewFactory
 
         try
         {
-            return validated.getExprEvaluator().evaluate(null, true, statementContext);
+            return validated.getExprEvaluator().evaluate(null, true, new ExprEvaluatorContextStatement(statementContext));
         }
         catch (RuntimeException ex)
         {
@@ -183,8 +173,9 @@ public abstract class ViewFactorySupport implements ViewFactory
         ExprNode validated;
         try
         {
+            ExprEvaluatorContextStatement exprEvaluatorContext = new ExprEvaluatorContextStatement(statementContext);
             ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, statementContext.getMethodResolutionService(),
-                    null, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations());
+                    null, statementContext.getSchedulingService(), statementContext.getVariableService(), exprEvaluatorContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
             validated = ExprNodeUtility.getValidatedSubtree(expression, validationContext);
         }
         catch (ExprValidationException ex)

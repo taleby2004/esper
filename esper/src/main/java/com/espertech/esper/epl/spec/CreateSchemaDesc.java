@@ -28,6 +28,7 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
     private final boolean variant;
     private final String startTimestampProperty;
     private final String endTimestampProperty;
+    private final Set<String> copyFrom;
 
     /**
      * Ctor.
@@ -37,7 +38,7 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
      * @param inherits supertypes
      * @param variant variant streams
      */
-    public CreateSchemaDesc(String schemaName, Set<String> types, List<ColumnDesc> columns, Set<String> inherits, boolean variant, String startTimestampProperty, String endTimestampProperty) {
+    public CreateSchemaDesc(String schemaName, Set<String> types, List<ColumnDesc> columns, Set<String> inherits, boolean variant, String startTimestampProperty, String endTimestampProperty, Set<String> copyFrom) {
         this.schemaName = schemaName;
         this.types = types;
         this.columns = columns;
@@ -45,6 +46,7 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
         this.variant = variant;
         this.startTimestampProperty = startTimestampProperty;
         this.endTimestampProperty = endTimestampProperty;
+        this.copyFrom = copyFrom;
     }
 
     /**
@@ -98,5 +100,9 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
 
     public String getEndTimestampProperty() {
         return endTimestampProperty;
+    }
+
+    public Set<String> getCopyFrom() {
+        return copyFrom;
     }
 }

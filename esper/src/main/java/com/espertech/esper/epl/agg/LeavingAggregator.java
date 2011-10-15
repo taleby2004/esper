@@ -35,8 +35,4 @@ public class LeavingAggregator implements AggregationMethod {
     public void clear() {
         leaving = false;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService) {
-        return methodResolutionService.makeLeavingAggregator();
-    }
 }

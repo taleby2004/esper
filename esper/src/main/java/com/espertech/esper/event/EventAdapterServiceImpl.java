@@ -10,7 +10,7 @@ package com.espertech.esper.event;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.event.bean.BeanEventAdapter;
@@ -337,6 +337,43 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return eventType;
     }
 
+    public synchronized EventType addBeanTypeByName(String eventTypeName, Class clazz, boolean isNamedWindow) throws EventAdapterException
+    {
+        if (log.isDebugEnabled())
+        {
+            log.debug(".addBeanTypeNamedWindow Adding " + eventTypeName + " for type " + clazz.getName());
+        }
+
+        EventType existingType = nameToTypeMap.get(eventTypeName);
+        if (existingType != null)
+        {
+            if (existingType instanceof BeanEventType &&
+                existingType.getUnderlyingType() == clazz &&
+                existingType.getName().equals(eventTypeName))
+            {
+                EventTypeMetadata.TypeClass typeClass = ((BeanEventType) existingType).getMetadata().getTypeClass();
+                if (isNamedWindow) {
+                    if (typeClass == EventTypeMetadata.TypeClass.NAMED_WINDOW) {
+                        return existingType;
+                    }
+                }
+                else {
+                    if (typeClass == EventTypeMetadata.TypeClass.STREAM) {
+                        return existingType;
+                    }
+                }
+            }
+            throw new EventAdapterException("An event type named '" + eventTypeName + "' has already been declared");
+        }
+
+        EventTypeMetadata.TypeClass typeClass = isNamedWindow ? EventTypeMetadata.TypeClass.NAMED_WINDOW : EventTypeMetadata.TypeClass.STREAM;
+        BeanEventType beanEventType = new BeanEventType(EventTypeMetadata.createBeanType(eventTypeName, clazz, false, false, false, typeClass),
+                eventTypeIdGenerator.getTypeId(eventTypeName), clazz, this, beanEventAdapter.getClassToLegacyConfigs(clazz.getName()));
+        nameToTypeMap.put(eventTypeName, beanEventType);
+
+        return beanEventType;
+    }
+
     /**
      * Create an event bean given an event of object id.
      * @param event is the event class
@@ -468,7 +505,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
             throw new EventAdapterException("Event type named '" + eventTypeName + "' has not been defined");
         }
 
-        return adaptorForTypedMap(event, existingType);
+        return adapterForTypedMap(event, existingType);
     }
 
     public EventBean adapterForDOM(Node node)
@@ -581,7 +618,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return EventAdapterServiceHelper.adapterForType(event, eventType, this);
     }
 
-    public final EventBean adaptorForTypedMap(Map<String, Object> properties, EventType eventType)
+    public final EventBean adapterForTypedMap(Map<String, Object> properties, EventType eventType)
     {
         return new MapEventBean(properties, eventType);
     }
@@ -720,7 +757,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
     	return new WrapperEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), underlyingEventType, propertyTypes, this);
     }
 
-	public final EventBean adaptorForTypedWrapper(EventBean event, Map<String, Object> properties, EventType eventType)
+	public final EventBean adapterForTypedWrapper(EventBean event, Map<String, Object> properties, EventType eventType)
 	{
         if (event instanceof DecoratingEventBean)
         {
@@ -804,21 +841,25 @@ public class EventAdapterServiceImpl implements EventAdapterService
                     {
                         props.put(propDesc.getPropertyName(), wrapper.getUnderlyingEvent().get(propDesc.getPropertyName()));
                     }
-                    converted = adaptorForTypedMap(props, targetType);
+                    converted = adapterForTypedMap(props, targetType);
                 }
                 else
                 {
-                    converted = adaptorForTypedWrapper(wrapper.getUnderlyingEvent(), wrapper.getDecoratingProperties(), targetType);
+                    converted = adapterForTypedWrapper(wrapper.getUnderlyingEvent(), wrapper.getDecoratingProperties(), targetType);
                 }
             }
             else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof MapEventType))
             {
                 MappedEventBean mapEvent = (MappedEventBean) event;
-                converted = this.adaptorForTypedMap(mapEvent.getProperties(), targetType);
+                converted = this.adapterForTypedMap(mapEvent.getProperties(), targetType);
             }
             else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof WrapperEventType))
             {
-                converted = this.adaptorForTypedWrapper(event, Collections.EMPTY_MAP, targetType);
+                converted = this.adapterForTypedWrapper(event, Collections.EMPTY_MAP, targetType);
+            }
+            else if ((event.getEventType() instanceof BeanEventType) && (targetType instanceof BeanEventType))
+            {
+                converted = this.adapterForTypedBean(event.getUnderlying(), targetType);
             }
             else
             {

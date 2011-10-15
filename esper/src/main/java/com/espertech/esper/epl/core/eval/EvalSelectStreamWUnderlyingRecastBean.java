@@ -16,6 +16,7 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 import com.espertech.esper.event.EventTypeUtility;
@@ -52,8 +53,8 @@ public class EvalSelectStreamWUnderlyingRecastBean implements SelectExprProcesso
         return targetType;
     }
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize) {
-        Object result = evaluator.evaluate(eventsPerStream, isNewData, selectExprContext.getExprEvaluatorContext());
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
+        Object result = evaluator.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         return selectExprContext.getEventAdapterService().adapterForTypedBean(result, targetType);
     }
 }

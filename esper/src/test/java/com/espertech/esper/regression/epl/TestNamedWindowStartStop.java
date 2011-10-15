@@ -12,9 +12,9 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.core.EPStatementSPI;
-import com.espertech.esper.core.StatementType;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.core.service.StatementType;
 import com.espertech.esper.epl.named.NamedWindowLifecycleEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;

@@ -264,7 +264,7 @@ public class TestBeanEventType extends TestCase
 
         eventTypeSimple = new BeanEventType(null, 1, Object.class, SupportEventAdapterService.getService(), null);
         superTypes = eventTypeSimple.getSuperTypes();
-        assertEquals(0, superTypes.length);
+        assertEquals(null, superTypes);
 
         BeanEventType type = new BeanEventType(null, 1, ISupportD.class, SupportEventAdapterService.getService(), null);
         assertEquals(3, type.getPropertyNames().length);

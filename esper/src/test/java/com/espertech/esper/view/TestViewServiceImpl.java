@@ -11,7 +11,7 @@
 
 package com.espertech.esper.view;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
@@ -39,13 +39,13 @@ public class TestViewServiceImpl extends TestCase
 
         viewService = new ViewServiceImpl();
 
-        StatementContext context = SupportStatementContextFactory.makeContext();
+        AgentInstanceViewFactoryChainContext context = SupportStatementContextFactory.makeAgentInstanceViewFactoryContext();
 
-        viewOne = viewService.createViews(streamOne, SupportViewSpecFactory.makeFactoryListOne(streamOne.getEventType()), context);
-        viewTwo = viewService.createViews(streamOne, SupportViewSpecFactory.makeFactoryListTwo(streamOne.getEventType()), context);
-        viewThree = viewService.createViews(streamOne, SupportViewSpecFactory.makeFactoryListThree(streamOne.getEventType()), context);
-        viewFour = viewService.createViews(streamOne, SupportViewSpecFactory.makeFactoryListFour(streamOne.getEventType()), context);
-        viewFive = viewService.createViews(streamTwo, SupportViewSpecFactory.makeFactoryListFive(streamTwo.getEventType()), context);
+        viewOne = viewService.createViews(streamOne, SupportViewSpecFactory.makeFactoryListOne(streamOne.getEventType()), context, false);
+        viewTwo = viewService.createViews(streamOne, SupportViewSpecFactory.makeFactoryListTwo(streamOne.getEventType()), context, false);
+        viewThree = viewService.createViews(streamOne, SupportViewSpecFactory.makeFactoryListThree(streamOne.getEventType()), context, false);
+        viewFour = viewService.createViews(streamOne, SupportViewSpecFactory.makeFactoryListFour(streamOne.getEventType()), context, false);
+        viewFive = viewService.createViews(streamTwo, SupportViewSpecFactory.makeFactoryListFive(streamTwo.getEventType()), context, false);
     }
 
     public void testCheckChainReuse()

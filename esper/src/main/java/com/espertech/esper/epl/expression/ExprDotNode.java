@@ -40,7 +40,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
     private transient ExprEvaluator exprEvaluator;
     private boolean isReturnsConstantResult;
 
-    private transient ExprDotNodeFilterAnalyzerDTIntervalDesc intervalFilterDesc;
+    private transient ExprDotNodeFilterAnalyzerDesc exprDotNodeFilterAnalyzerDesc;
 
     public ExprDotNode(List<ExprChainedSpec> chainSpec, boolean isDuckTyping, boolean isUDFCache)
     {
@@ -172,7 +172,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                     ExprDotEvalTypeInfo typeInfo = ExprDotEvalTypeInfo.event(eventType);
                     ExprDotNodeRealizedChain chain = ExprDotNodeUtility.getChainEvaluators(typeInfo, remainderChain, validationContext, false, new ExprDotNodeFilterAnalyzerInputStream(prefixedStreamNumber));
                     eventTypeMethodChain = chain.getChainWithUnpack();
-                    intervalFilterDesc = chain.getFilterAnalyzerDesc();
+                    exprDotNodeFilterAnalyzerDesc = chain.getFilterAnalyzerDesc();
                 }
                 catch (ExprValidationException ex) {
                     enumDatetimeEx = ex;
@@ -222,7 +222,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                 ExprEvaluator rootNodeEvaluator = new PropertyExprEvaluatorNonLambda(streamId, getter, propertyInfoPair.getFirst().getPropertyType());
                 ExprDotNodeRealizedChain evals = ExprDotNodeUtility.getChainEvaluators(propertyEval.getSecond(), modifiedChain, validationContext, isDuckTyping, new ExprDotNodeFilterAnalyzerInputProp(propertyInfoPair.getFirst().getStreamNum(), propertyInfoPair.getFirst().getPropertyName()));
                 exprEvaluator = new ExprDotEvalRootChild(rootNodeEvaluator, propertyEval.getFirst(), propertyEval.getSecond(), evals.getChain(), evals.getChainWithUnpack());
-                intervalFilterDesc = evals.getFilterAnalyzerDesc();
+                exprDotNodeFilterAnalyzerDesc = evals.getFilterAnalyzerDesc();
             }
             else {
 
@@ -278,8 +278,8 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
         }
     }
 
-    public ExprDotNodeFilterAnalyzerDTIntervalDesc getIntervalFilterDesc() {
-        return intervalFilterDesc;
+    public ExprDotNodeFilterAnalyzerDesc getExprDotNodeFilterAnalyzerDesc() {
+        return exprDotNodeFilterAnalyzerDesc;
     }
 
     private ExprEvaluator getPropertyPairEvaluator(ExprEvaluator parameterEval, Pair<PropertyResolutionDescriptor, String> propertyInfoPair, ExprValidationContext validationContext)

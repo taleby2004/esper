@@ -8,10 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.expression.ExprTimePeriod;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.util.ExecutionPathDebugLog;
@@ -22,65 +21,27 @@ import org.apache.commons.logging.LogFactory;
  * Output condition that is satisfied at the end
  * of every time interval of a given length.
  */
-public final class OutputConditionTime implements OutputCondition
+public final class OutputConditionTime extends OutputConditionBase implements OutputCondition
 {
     private static final boolean DO_OUTPUT = true;
 	private static final boolean FORCE_UPDATE = true;
 
-    private ExprTimePeriod timePeriod;
-    private long msecIntervalSize;
-    private final OutputCallback outputCallback;
-    private final ScheduleSlot scheduleSlot;
+    private final AgentInstanceContext context;
+    private final OutputConditionTimeFactory parent;
 
+    private final ScheduleSlot scheduleSlot;
+    private long msecIntervalSize;
     private Long currentReferencePoint;
-    private StatementContext context;
     private boolean isCallbackScheduled;
     private EPStatementHandleCallback handle;
 
-    /**
-     * Constructor.
-     * @param timePeriod is the number of minutes or seconds to batch events for, may include variables
-     * @param context is the view context for time scheduling
-     * @param outputCallback is the callback to make once the condition is satisfied
-     */
-    public OutputConditionTime(ExprTimePeriod timePeriod,
-                               StatementContext context,
-    						   OutputCallback outputCallback)
-    {
-		if(outputCallback ==  null)
-		{
-			throw new NullPointerException("Output condition by count requires a non-null callback");
-		}
-        if (context == null)
-        {
-            String message = "OutputConditionTime requires a non-null view context";
-            throw new NullPointerException(message);
-        }
-
+    public OutputConditionTime(OutputCallback outputCallback, AgentInstanceContext context, OutputConditionTimeFactory outputConditionTimeFactory) {
+        super(outputCallback);
         this.context = context;
-        this.outputCallback = outputCallback;
-        this.scheduleSlot = context.getScheduleBucket().allocateSlot();
-        this.timePeriod = timePeriod;
+        this.parent = outputConditionTimeFactory;
 
-        Double numSeconds = (Double) timePeriod.evaluate(null, true, context);
-        if (numSeconds == null)
-        {
-            throw new IllegalArgumentException("Output condition by time returned a null value for the interval size");
-        }
-        if ((numSeconds < 0.001) && (!timePeriod.hasVariable()))
-        {
-            throw new IllegalArgumentException("Output condition by time requires a interval size of at least 1 msec or a variable");
-        }
-        this.msecIntervalSize = Math.round(1000 * numSeconds);
-    }
-
-    /**
-     * Returns the interval size in milliseconds.
-     * @return batch size
-     */
-    public final long getMsecIntervalSize()
-    {
-        return msecIntervalSize;
+        this.scheduleSlot = context.getStatementContext().getScheduleBucket().allocateSlot();
+        msecIntervalSize = parent.getMsecIntervalSize();
     }
 
     public final void updateOutputCondition(int newEventsCount, int oldEventsCount)
@@ -94,13 +55,13 @@ public final class OutputConditionTime implements OutputCondition
 
         if (currentReferencePoint == null)
         {
-        	currentReferencePoint = context.getSchedulingService().getTime();
+        	currentReferencePoint = context.getStatementContext().getSchedulingService().getTime();
         }
 
         // If we pull the interval from a variable, then we may need to reschedule
-        if (timePeriod.hasVariable())
+        if (parent.getTimePeriod().hasVariable())
         {
-            Double numSeconds = (Double) timePeriod.evaluate(null, true, context);
+            Double numSeconds = (Double) parent.getTimePeriod().evaluate(null, true, context);
             if (numSeconds != null)
             {
                 long newMsecIntervalSize = Math.round(1000 * numSeconds);
@@ -111,7 +72,7 @@ public final class OutputConditionTime implements OutputCondition
                     if (isCallbackScheduled)
                     {
                         // reschedule
-                        context.getSchedulingService().remove(handle, scheduleSlot);
+                        context.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
                         scheduleCallback();
                     }
                 }
@@ -134,9 +95,9 @@ public final class OutputConditionTime implements OutputCondition
     private void scheduleCallback()
     {
         // If we pull the interval from a variable, get the current interval length
-        if (timePeriod.hasVariable())
+        if (parent.getTimePeriod().hasVariable())
         {
-            Double param = (Double) timePeriod.evaluate(null, true, context);
+            Double param = (Double) parent.getTimePeriod().evaluate(null, true, context);
             if (param != null)
             {
                 msecIntervalSize = Math.round(1000 * param);
@@ -144,7 +105,7 @@ public final class OutputConditionTime implements OutputCondition
         }
 
     	isCallbackScheduled = true;
-        long current = context.getSchedulingService().getTime();
+        long current = context.getStatementContext().getSchedulingService().getTime();
         long afterMSec = computeWaitMSec(current, this.currentReferencePoint, this.msecIntervalSize);
 
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
@@ -164,8 +125,8 @@ public final class OutputConditionTime implements OutputCondition
                 scheduleCallback();
             }
         };
-        handle = new EPStatementHandleCallback(context.getEpStatementHandle(), callback);
-        context.getSchedulingService().add(afterMSec, handle, scheduleSlot);
+        handle = new EPStatementHandleCallback(context.getEpStatementAgentInstanceHandle(), callback);
+        context.getStatementContext().getSchedulingService().add(afterMSec, handle, scheduleSlot);
     }
 
     /**

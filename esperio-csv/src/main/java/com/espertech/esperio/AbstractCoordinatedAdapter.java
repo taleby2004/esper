@@ -14,7 +14,8 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.core.*;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.service.*;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
@@ -325,7 +326,9 @@ public abstract class AbstractCoordinatedAdapter implements CoordinatedAdapter
 		ScheduleHandleCallback nextScheduleCallback = new ScheduleHandleCallback() { public void scheduledTrigger(ExtensionServicesContext extensionServicesContext) { continueSendingEvents(); } };
         EPServiceProviderSPI spi = (EPServiceProviderSPI)epService;
         StatementMetricHandle metricsHandle = spi.getMetricReportingService().getStatementHandle("AbstractCoordinatedAdapter", "AbstractCoordinatedAdapter");
-        EPStatementHandleCallback scheduleCSVHandle = new EPStatementHandleCallback(new EPStatementHandle("AbstractCoordinatedAdapter", "AbstractCoordinatedAdapter", null, new StatementRWLockImpl("CSV", false), "AbstractCoordinatedAdapter", false, metricsHandle, 0, false, new StatementFilterVersion()), nextScheduleCallback);
+        EPStatementHandle stmtHandle = new EPStatementHandle("AbstractCoordinatedAdapter", "AbstractCoordinatedAdapter", null, "AbstractCoordinatedAdapter", false, metricsHandle, 0, false);
+        EPStatementAgentInstanceHandle agentInstanceHandle = new EPStatementAgentInstanceHandle(stmtHandle, new StatementAgentInstanceRWLockImpl("CSV", false), null, new StatementAgentInstanceFilterVersion());
+        EPStatementHandleCallback scheduleCSVHandle = new EPStatementHandleCallback(agentInstanceHandle, nextScheduleCallback);
         ScheduleSlot nextScheduleSlot;
 
 		if(eventsToSend.isEmpty())

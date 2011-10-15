@@ -11,8 +11,7 @@ package com.espertech.esper.view.window;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ViewUpdatedCollection;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.view.BatchingDataWindowView;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
@@ -37,9 +36,10 @@ import java.util.LinkedList;
  * <p>
  * If there are no events in the current and prior batch, the view will not invoke the update method of child views.
  */
-public final class LengthBatchView extends ViewSupport implements CloneableView, BatchingDataWindowView
+public final class LengthBatchView extends ViewSupport implements CloneableView
 {
     // View parameters
+    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final LengthBatchViewFactory lengthBatchViewFactory;
     private final int size;
     private final ViewUpdatedCollection viewUpdatedCollection;
@@ -54,10 +54,12 @@ public final class LengthBatchView extends ViewSupport implements CloneableView,
      * @param viewUpdatedCollection is a collection that the view must update when receiving events
      * @param lengthBatchViewFactory for copying this view in a group-by
      */
-    public LengthBatchView(LengthBatchViewFactory lengthBatchViewFactory,
+    public LengthBatchView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext,
+                           LengthBatchViewFactory lengthBatchViewFactory,
                          int size,
                          ViewUpdatedCollection viewUpdatedCollection)
     {
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
         this.lengthBatchViewFactory = lengthBatchViewFactory;
         this.size = size;
         this.viewUpdatedCollection = viewUpdatedCollection;
@@ -68,9 +70,9 @@ public final class LengthBatchView extends ViewSupport implements CloneableView,
         }
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return lengthBatchViewFactory.makeView(statementContext);
+        return lengthBatchViewFactory.makeView(agentInstanceViewFactoryContext);
     }
 
     /**

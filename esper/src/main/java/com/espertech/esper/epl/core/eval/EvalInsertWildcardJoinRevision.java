@@ -15,6 +15,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprJoinWildcardProcessor;
 import com.espertech.esper.epl.core.SelectExprProcessor;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,9 +35,9 @@ public class EvalInsertWildcardJoinRevision extends EvalBase implements SelectEx
         this.vaeProcessor = vaeProcessor;
     }
 
-    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
-        EventBean event = joinWildcardProcessor.process(eventsPerStream, isNewData, isSynthesize);
+        EventBean event = joinWildcardProcessor.process(eventsPerStream, isNewData, isSynthesize, exprEvaluatorContext);
         return vaeProcessor.getValueAddEventBean(event);
     }
 }

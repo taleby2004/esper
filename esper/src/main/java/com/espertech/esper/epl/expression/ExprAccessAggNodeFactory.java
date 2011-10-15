@@ -62,17 +62,6 @@ public class ExprAccessAggNodeFactory implements AggregationMethodFactory
         return new AggregationSpec(streamNum);
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
-        if (accessType == AggregationAccessType.FIRST) {
-            return methodResolutionService.makeFirstEverValueAggregator(resultType, false);
-        }
-        else if (accessType == AggregationAccessType.LAST) {
-            return methodResolutionService.makeLastEverValueAggregator(resultType, false);
-        }
-        throw new RuntimeException("Window aggregation function is not available");
-    }
-
     public AggregationAccessor getAccessor()
     {
         if (indexEvalNode != null) {
@@ -95,5 +84,19 @@ public class ExprAccessAggNodeFactory implements AggregationMethodFactory
             }
         }
         throw new IllegalStateException("Access type is undefined or not known as code '" + accessType + "'");
+    }
+
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+        if (accessType == AggregationAccessType.FIRST) {
+            return methodResolutionService.makeFirstEverValueAggregator(agentInstanceIds, groupId, aggregationId, resultType, false);
+        }
+        else if (accessType == AggregationAccessType.LAST) {
+            return methodResolutionService.makeLastEverValueAggregator(agentInstanceIds, groupId, aggregationId, resultType, false);
+        }
+        throw new RuntimeException("Window aggregation function is not available");
+    }
+
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
     }
 }

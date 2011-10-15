@@ -9,8 +9,8 @@
 package com.espertech.esper.view.stream;
 
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.StatementLock;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.filter.FilterSpecCompiled;
@@ -30,19 +30,20 @@ public interface StreamFactoryService
     /**
      * Create or reuse existing EventStream instance representing that event filter.
      * When called for some filters, should return same stream.
+     *
+     * @param statementId the statement id
      * @param filterSpec event filter definition
      * @param filterService filter service to activate filter if not already active
-     * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
+     * @param epStatementAgentInstanceHandle is the statements-own handle for use in registering callbacks with services
      * @param isJoin is indicatng whether the stream will participate in a join statement, information
      * necessary for stream reuse and multithreading concerns
      * @param isSubSelect true for subselects
-     * @param statementId the statement id
      * @param exprEvaluatorContext expression evaluation context
      * @param isNamedWindowTrigger if a named window or trigger querying from named window
      * @return event stream representing active filter
      */
-    public Pair<EventStream, StatementLock> createStream(final String statementId, FilterSpecCompiled filterSpec, FilterService filterService, EPStatementHandle epStatementHandle,
-                                    boolean isJoin, boolean isSubSelect, ExprEvaluatorContext exprEvaluatorContext, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect, Annotation[] annotations);
+    public Pair<EventStream, StatementAgentInstanceLock> createStream(final String statementId, FilterSpecCompiled filterSpec, FilterService filterService, EPStatementAgentInstanceHandle epStatementAgentInstanceHandle,
+                                                         boolean isJoin, boolean isSubSelect, ExprEvaluatorContext exprEvaluatorContext, boolean isNamedWindowTrigger, boolean filterWithSameTypeSubselect, Annotation[] annotations);
 
     /**
      * Drop the event stream associated with the filter passed in.

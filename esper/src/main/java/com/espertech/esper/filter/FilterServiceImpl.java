@@ -10,7 +10,6 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.util.AuditPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,24 +66,24 @@ public final class FilterServiceImpl implements FilterServiceSPI
         filtersVersion++;
     }
 
-    public final long evaluate(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public final long evaluate(EventBean eventBean, Collection<FilterHandle> matches)
     {
         long version = filtersVersion;
         numEventsEvaluated.incrementAndGet();
 
         // Finds all matching filters and return their callbacks
-        eventTypeIndex.matchEvent(eventBean, matches, exprEvaluatorContext);
+        eventTypeIndex.matchEvent(eventBean, matches);
 
         if ((AuditPath.isAuditEnabled) && (!filterServiceListeners.isEmpty())) {
             for (FilterServiceListener listener : filterServiceListeners) {
-                listener.filtering(eventBean, matches, exprEvaluatorContext, null);
+                listener.filtering(eventBean, matches, null);
             }
         }
 
         return version;
     }
 
-    public final long evaluate(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext, String statementId)
+    public final long evaluate(EventBean eventBean, Collection<FilterHandle> matches, String statementId)
     {
         long version = filtersVersion;
         numEventsEvaluated.incrementAndGet();
@@ -92,7 +91,7 @@ public final class FilterServiceImpl implements FilterServiceSPI
         ArrayDeque<FilterHandle> allMatches = new ArrayDeque<FilterHandle>();
 
         // Finds all matching filters
-        eventTypeIndex.matchEvent(eventBean, allMatches, exprEvaluatorContext);
+        eventTypeIndex.matchEvent(eventBean, allMatches);
 
         // Add statement matches to collection passed
         for (FilterHandle match : allMatches) {
@@ -103,7 +102,7 @@ public final class FilterServiceImpl implements FilterServiceSPI
 
         if ((AuditPath.isAuditEnabled) && (!filterServiceListeners.isEmpty())) {
             for (FilterServiceListener listener : filterServiceListeners) {
-                listener.filtering(eventBean, matches, exprEvaluatorContext, statementId);
+                listener.filtering(eventBean, matches, statementId);
             }
         }
 

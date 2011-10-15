@@ -8,39 +8,25 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.OutputLimitLimitType;
 import com.espertech.esper.epl.spec.OutputLimitSpec;
-import com.espertech.esper.epl.expression.ExprValidationException;
 
 /**
  * An output condition that is satisfied at the first event
  * of either a time-based or count-based batch.
  */
-public class OutputConditionFirst implements OutputCondition
+public class OutputConditionFirst extends OutputConditionBase implements OutputCondition
 {
-	private final OutputCallback outputCallback;
 	private final OutputCondition innerCondition;
 	private boolean witnessedFirst;
 
-	/**
-	 * Ctor.
-     * @param outputLimitSpec specifies what kind of condition to create
-     * @param statementContext supplies the services required such as for scheduling callbacks
-     * @param outputCallback is the method to invoke for output
-     * @throws  ExprValidationException if validation of the output expressions fails
-	 */
-	public OutputConditionFirst(OutputLimitSpec outputLimitSpec, StatementContext statementContext, OutputCallback outputCallback, boolean isGrouped, boolean isWithHavingClause)
-            throws ExprValidationException
+	public OutputConditionFirst(OutputCallback outputCallback, AgentInstanceContext agentInstanceContext, OutputConditionFactory innerConditionFactory)
     {
-		if(outputCallback ==  null)
-		{
-			throw new NullPointerException("Output condition by count requires a non-null callback");
-		}
-		this.outputCallback = outputCallback;
-		OutputLimitSpec innerSpec = new OutputLimitSpec(outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), outputLimitSpec.getRateType(), OutputLimitLimitType.DEFAULT, outputLimitSpec.getWhenExpressionNode(), outputLimitSpec.getThenExpressions(), outputLimitSpec.getCrontabAtSchedule(), outputLimitSpec.getTimePeriodExpr(), outputLimitSpec.getAfterTimePeriodExpr(), outputLimitSpec.getAfterNumberOfEvents());
+		super(outputCallback);
 		OutputCallback localCallback = createCallbackToLocal();
-		this.innerCondition = statementContext.getOutputConditionFactory().createCondition(innerSpec, statementContext, localCallback, isGrouped, isWithHavingClause);
+		this.innerCondition = innerConditionFactory.make(agentInstanceContext, localCallback);
 		this.witnessedFirst = false;
 	}
 
@@ -66,6 +52,10 @@ public class OutputConditionFirst implements OutputCondition
 			}
 		};
 	}
+
+    public void terminated() {
+        outputCallback.continueOutputProcessing(true, true);
+    }
 
 	private void continueOutputProcessing(boolean forceUpdate)
 	{

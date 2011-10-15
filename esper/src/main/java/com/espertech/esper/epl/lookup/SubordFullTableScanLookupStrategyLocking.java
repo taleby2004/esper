@@ -9,12 +9,11 @@
 package com.espertech.esper.epl.lookup;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.core.StatementLock;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * Index lookup strategy for subqueries.
@@ -22,9 +21,9 @@ import java.util.Set;
 public class SubordFullTableScanLookupStrategyLocking implements SubordTableLookupStrategy
 {
     private final Iterable<EventBean> contents;
-    private final StatementLock statementLock;
+    private final StatementAgentInstanceLock statementLock;
 
-    public SubordFullTableScanLookupStrategyLocking(Iterable<EventBean> contents, StatementLock statementLock) {
+    public SubordFullTableScanLookupStrategyLocking(Iterable<EventBean> contents, StatementAgentInstanceLock statementLock) {
         this.contents = contents;
         this.statementLock = statementLock;
     }

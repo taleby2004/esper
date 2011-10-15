@@ -18,6 +18,7 @@ import com.espertech.esper.epl.join.exec.base.IndexedTableLookupStrategy;
 import com.espertech.esper.epl.join.exec.base.JoinExecTableLookupStrategy;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.PropertyIndexedEventTable;
+import com.espertech.esper.epl.join.table.PropertyIndexedEventTableFactory;
 import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
@@ -34,7 +35,8 @@ public class TestIndexedTableLookupPlan extends TestCase
     {
         types = new EventType[] { SupportEventTypeFactory.createBeanType(SupportBean.class) };
 
-        propertyMapEventIndex = new PropertyIndexedEventTable(1, types[0], new String[] {"intBoxed"});
+        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(1, types[0], new String[] {"intBoxed"});
+        propertyMapEventIndex = (PropertyIndexedEventTable) factory.makeEventTable();
     }
 
     public void testLookup()
@@ -48,7 +50,7 @@ public class TestIndexedTableLookupPlan extends TestCase
         indexes[1] = new HashMap<String,EventTable>();
         indexes[1].put("idx1", propertyMapEventIndex);
 
-        JoinExecTableLookupStrategy lookupStrategy = spec.makeStrategy(indexes, types, new VirtualDWView[2]);
+        JoinExecTableLookupStrategy lookupStrategy = spec.makeStrategy("ABC", "001", null, indexes, types, new VirtualDWView[2]);
 
         IndexedTableLookupStrategy strategy = (IndexedTableLookupStrategy) lookupStrategy;
         assertEquals(types[0], strategy.getEventType());

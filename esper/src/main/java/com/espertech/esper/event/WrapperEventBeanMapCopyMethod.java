@@ -40,6 +40,6 @@ public class WrapperEventBeanMapCopyMethod implements EventBeanCopyMethod
         DecoratingEventBean decorated = (DecoratingEventBean) event;
         EventBean decoratedUnderlying = decorated.getUnderlyingEvent();
         Map<String, Object> copiedMap = new HashMap<String, Object>(decorated.getDecoratingProperties());
-        return eventAdapterService.adaptorForTypedWrapper(decoratedUnderlying, copiedMap, wrapperEventType);        
+        return eventAdapterService.adapterForTypedWrapper(decoratedUnderlying, copiedMap, wrapperEventType);
     }
 }

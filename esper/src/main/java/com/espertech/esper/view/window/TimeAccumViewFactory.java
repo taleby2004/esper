@@ -8,20 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.view.*;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.view.*;
 
 import java.util.List;
 
 /**
  * Factory for {@link com.espertech.esper.view.window.TimeAccumView}.
  */
-public class TimeAccumViewFactory implements DataWindowViewFactory
+public class TimeAccumViewFactory implements DataWindowViewFactory, DataWindowViewWithPrevious
 {
     private EventType eventType;
 
@@ -29,16 +28,6 @@ public class TimeAccumViewFactory implements DataWindowViewFactory
      * Number of msec of quiet time before results are flushed.
      */
     protected long millisecondsQuietTime;
-
-    /**
-     * Access into the data window.
-     */
-    protected RandomAccessByIndexGetter randomAccessGetterImpl;
-
-    /**
-     * Indicators that we need to handle the remove stream posted by parent views.
-     */
-    protected boolean isRemoveStreamHandling;
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> expressionParameters) throws ViewParameterException
     {
@@ -78,50 +67,20 @@ public class TimeAccumViewFactory implements DataWindowViewFactory
         this.eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
-        }
-        return viewCapability instanceof ViewCapDataWindowAccess;
+    public Object makePreviousGetter() {
+        return new RandomAccessByIndexGetter();
     }
 
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        if (!canProvideCapability(viewCapability))
+        IStreamRandomAccess randomAccess = ViewServiceHelper.getOptPreviousExprRandomAccess(agentInstanceViewFactoryContext);
+        if (agentInstanceViewFactoryContext.isRemoveStream())
         {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            isRemoveStreamHandling = true;
-            return;
-        }
-        if (randomAccessGetterImpl == null)
-        {
-            randomAccessGetterImpl = new RandomAccessByIndexGetter();
-        }
-        resourceCallback.setViewResource(randomAccessGetterImpl);
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        IStreamRandomAccess randomAccess = null;
-
-        if (randomAccessGetterImpl != null)
-        {
-            randomAccess = new IStreamRandomAccess(randomAccessGetterImpl);
-            randomAccessGetterImpl.updated(randomAccess);
-        }
-
-        if (isRemoveStreamHandling)
-        {
-            return new TimeAccumViewRStream(this, statementContext, millisecondsQuietTime);
+            return new TimeAccumViewRStream(this, agentInstanceViewFactoryContext, millisecondsQuietTime);
         }
         else
         {
-            return new TimeAccumView(this, statementContext, millisecondsQuietTime, randomAccess);
+            return new TimeAccumView(this, agentInstanceViewFactoryContext, millisecondsQuietTime, randomAccess);
         }
     }
 
@@ -132,10 +91,6 @@ public class TimeAccumViewFactory implements DataWindowViewFactory
 
     public boolean canReuse(View view)
     {
-        if (randomAccessGetterImpl != null)
-        {
-            return false;
-        }
         if (!(view instanceof TimeAccumView))
         {
             return false;

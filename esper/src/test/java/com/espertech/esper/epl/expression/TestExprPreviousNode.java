@@ -45,19 +45,6 @@ public class TestExprPreviousNode extends TestCase {
         tryInvalidValidate(prevNode);
     }
 
-    public void testEvaluate() throws Exception
-    {
-        RandomAccessByIndexGetter getter = new RandomAccessByIndexGetter();
-        IStreamRandomAccess buffer = new IStreamRandomAccess(getter);
-        getter.updated(buffer);
-
-        prevNode.setViewResource(getter);
-        EventBean[] events = makeEvent(0, 5d);
-        buffer.update(events, null);
-
-        assertEquals(5d, prevNode.evaluate(events, true, null));
-    }
-
     public void testEquals()  throws Exception
     {
         ExprPreviousNode node1 = new ExprPreviousNode(PreviousType.PREV);
@@ -67,14 +54,6 @@ public class TestExprPreviousNode extends TestCase {
     public void testToExpressionString() throws Exception
     {
         assertEquals("prev(s1.intPrimitive, s1.doublePrimitive)", prevNode.toExpressionString());
-    }
-
-    private EventBean[] makeEvent(int intPrimitive, double doublePrimitive)
-    {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        event.setDoublePrimitive(doublePrimitive);
-        return new EventBean[] {null, SupportEventBeanFactory.createObject(event)};
     }
 
     private void tryInvalidValidate(ExprPreviousNode exprPrevNode) throws Exception

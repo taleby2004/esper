@@ -14,11 +14,13 @@ package com.espertech.esper.regression.epl;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.core.EPStatementSPI;
-import com.espertech.esper.core.StatementType;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.core.service.StatementType;
 import com.espertech.esper.event.EventTypeMetadata;
 import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.event.bean.BeanEventBean;
+import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
@@ -136,6 +138,19 @@ public class TestInsertInto extends TestCase
         // assert statement-type reference
         EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
         assertFalse(spi.getStatementEventTypeRef().isInUse("Event_1"));
+
+        // test insert wildcard to wildcard
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        SupportUpdateListener listener = new SupportUpdateListener();
+
+        String stmtSelectText = "insert into ABCStream select * from SupportBean";
+        EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtSelectText, "resilient i0");
+        stmtSelect.addListener(listener);
+        assertTrue(stmtSelect.getEventType() instanceof BeanEventType);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertEquals("E1", listener.assertOneGetNew().get("string"));
+        assertTrue(listener.assertOneGetNew() instanceof BeanEventBean);
     }
 
     public void testVariantOneJoin()

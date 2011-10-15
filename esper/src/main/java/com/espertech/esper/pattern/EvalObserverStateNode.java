@@ -35,7 +35,7 @@ public final class EvalObserverStateNode extends EvalStateNode implements Observ
         super(parentNode, null);
 
         this.evalObserverNode = evalObserverNode;
-        eventObserver = evalObserverNode.getObserverFactory().makeObserver(evalObserverNode.getContext(), beginState, this, null, null);
+        eventObserver = evalObserverNode.getFactoryNode().getObserverFactory().makeObserver(evalObserverNode.getContext(), beginState, this, null, null);
     }
 
     @Override
@@ -44,7 +44,7 @@ public final class EvalObserverStateNode extends EvalStateNode implements Observ
     }
 
     @Override
-    public PatternContext getContext() {
+    public PatternAgentInstanceContext getContext() {
         return evalObserverNode.getContext();
     }
 

@@ -35,6 +35,7 @@ import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
@@ -71,7 +72,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
         return new Pair<IndexMultiKey, EventTable>(imk, eventTable);
     }
 
-    public SubordTableLookupStrategy getSubordinateLookupStrategy(String accessedByStatementName, EventType[] outerStreamTypes, List<SubordPropHashKey> hashKeys, CoercionDesc hashKeyCoercionTypes, List<SubordPropRangeKey> rangeKeys, CoercionDesc rangeKeyCoercionTypes, boolean nwOnTrigger, EventTable eventTable, SubordPropPlan joinDesc, boolean forceTableScan) {
+    public SubordTableLookupStrategy getSubordinateLookupStrategy(String accessedByStatementName, String accessedByStatementId, Annotation[] accessedByStmtAnnotations, EventType[] outerStreamTypes, List<SubordPropHashKey> hashKeys, CoercionDesc hashKeyCoercionTypes, List<SubordPropRangeKey> rangeKeys, CoercionDesc rangeKeyCoercionTypes, boolean nwOnTrigger, EventTable eventTable, SubordPropPlan joinDesc, boolean forceTableScan) {
         VirtualDWEventTable noopTable = (VirtualDWEventTable) eventTable;
         for (int i = 0; i < noopTable.getBtreeAccess().size(); i++) {
             VirtualDataWindowLookupOp op = VirtualDataWindowLookupOp.fromOpString(rangeKeys.get(i).getRangeInfo().getType().getStringOp());
@@ -84,7 +85,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
         }
         lastAccessedByNum++;
 
-        VirtualDataWindowLookupContextSPI context = new VirtualDataWindowLookupContextSPI(namedWindowName, noopTable.getHashAccess(), noopTable.getBtreeAccess(), joinDesc, forceTableScan, outerStreamTypes, accessedByStatementName, lastAccessedByNum);
+        VirtualDataWindowLookupContextSPI context = new VirtualDataWindowLookupContextSPI(accessedByStatementName, accessedByStatementId, accessedByStmtAnnotations, false, namedWindowName, noopTable.getHashAccess(), noopTable.getBtreeAccess(), joinDesc, forceTableScan, outerStreamTypes, accessedByStatementName, lastAccessedByNum);
         VirtualDataWindowLookup index = dataExternal.getLookup(context);
         checkIndex(index);
         return new SubordTableLookupStrategyVirtualDW(namedWindowName, index, hashKeys, hashKeyCoercionTypes, rangeKeys, rangeKeyCoercionTypes, nwOnTrigger, outerStreamTypes.length);
@@ -115,7 +116,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
         return new VirtualDWEventTable(hashFields, btreeFields);
     }
 
-    public JoinExecTableLookupStrategy getJoinLookupStrategy(EventTable eventTable, TableLookupKeyDesc keyDescriptor, int lookupStreamNum) {
+    public JoinExecTableLookupStrategy getJoinLookupStrategy(String accessedByStmtName, String accessedByStmtId, Annotation[] accessedByStmtAnnotations, EventTable eventTable, TableLookupKeyDesc keyDescriptor, int lookupStreamNum) {
         VirtualDWEventTable noopTable = (VirtualDWEventTable) eventTable;
         for (int i = 0; i < noopTable.getHashAccess().size(); i++) {
             QueryGraphValueEntryHashKeyed hashKey = keyDescriptor.getHashes().get(i);
@@ -134,7 +135,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
             }
         }
 
-        VirtualDataWindowLookup index = dataExternal.getLookup(new VirtualDataWindowLookupContext(namedWindowName, noopTable.getHashAccess(), noopTable.getBtreeAccess()));
+        VirtualDataWindowLookup index = dataExternal.getLookup(new VirtualDataWindowLookupContext(accessedByStmtName, accessedByStmtId, accessedByStmtAnnotations, false, namedWindowName, noopTable.getHashAccess(), noopTable.getBtreeAccess()));
         checkIndex(index);
         return new JoinExecTableLookupStrategyVirtualDW(namedWindowName, index, keyDescriptor, lookupStreamNum);
     }
@@ -160,7 +161,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
         return new Pair<IndexMultiKey, EventTable>(imk, noopTable);
     }
 
-    public Collection<EventBean> getFireAndForgetData(EventTable eventTable, Object[] keyValues, RangeIndexLookupValue[] rangeValues) {
+    public Collection<EventBean> getFireAndForgetData(EventTable eventTable, Object[] keyValues, RangeIndexLookupValue[] rangeValues, Annotation[] annotations) {
         VirtualDWEventTable noopTable = (VirtualDWEventTable) eventTable;
         for (int i = 0; i < noopTable.getBtreeAccess().size(); i++) {
             RangeIndexLookupValueRange range = (RangeIndexLookupValueRange) rangeValues[i];
@@ -187,7 +188,7 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
             }
         }
 
-        VirtualDataWindowLookup index = dataExternal.getLookup(new VirtualDataWindowLookupContext(namedWindowName, noopTable.getHashAccess(), noopTable.getBtreeAccess()));
+        VirtualDataWindowLookup index = dataExternal.getLookup(new VirtualDataWindowLookupContext(null, null, annotations, true, namedWindowName, noopTable.getHashAccess(), noopTable.getBtreeAccess()));
         checkIndex(index);
         if (index == null) {
             throw new EPException("Exception obtaining index from virtual data window '" + namedWindowName + "'");

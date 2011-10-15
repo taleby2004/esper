@@ -10,15 +10,8 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Index for filter parameter constants to match using the equals (=) operator.
@@ -30,7 +23,7 @@ public final class FilterParamIndexEqualsIs extends FilterParamIndexEqualsBase
         super(propertyName, FilterOperator.IS, eventType);
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
         Object attributeValue = this.getGetter().get(eventBean);
 
@@ -51,6 +44,6 @@ public final class FilterParamIndexEqualsIs extends FilterParamIndexEqualsBase
             return;
         }
 
-        evaluator.matchEvent(eventBean, matches, exprEvaluatorContext);
+        evaluator.matchEvent(eventBean, matches);
     }
 }

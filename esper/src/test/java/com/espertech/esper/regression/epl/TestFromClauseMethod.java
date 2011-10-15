@@ -19,8 +19,8 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.core.StatementType;
-import com.espertech.esper.core.EPStatementSPI;
+import com.espertech.esper.core.service.StatementType;
+import com.espertech.esper.core.service.EPStatementSPI;
 
 public class TestFromClauseMethod extends TestCase
 {

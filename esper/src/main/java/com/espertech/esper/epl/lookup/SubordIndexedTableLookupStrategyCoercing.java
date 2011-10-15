@@ -8,13 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.epl.lookup;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.join.table.PropertyIndexedEventTable;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.util.JavaClassHelper;
-
-import java.util.List;
 
 /**
  * Index lookup strategy that coerces the key values before performing a lookup.
@@ -23,11 +21,12 @@ public class SubordIndexedTableLookupStrategyCoercing extends SubordIndexedTable
 {
     private Class[] coercionTypes;
 
-    public SubordIndexedTableLookupStrategyCoercing(boolean isNWOnTrigger, int numStreamsOuter, List<SubordPropHashKey> hashKeys, PropertyIndexedEventTable index, Class[] coercionTypes) {
-        super(isNWOnTrigger, numStreamsOuter, hashKeys, index);
+    public SubordIndexedTableLookupStrategyCoercing(int numStreamsOuter, ExprEvaluator[] evaluators, PropertyIndexedEventTable index, Class[] coercionTypes) {
+        super(numStreamsOuter, evaluators, index);
         this.coercionTypes = coercionTypes;
     }
 
+    @Override
     protected Object[] getKeys(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
         Object[] keys = super.getKeys(eventsPerStream, context);
         for (int i = 0; i < keys.length; i++)

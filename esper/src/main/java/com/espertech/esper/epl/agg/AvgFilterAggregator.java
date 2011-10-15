@@ -34,10 +34,4 @@ public class AvgFilterAggregator extends AvgAggregator
         }
         super.leave(paramArray[0]);
     }
-
-    @Override
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeAvgAggregator(Double.class, true);
-    }
 }

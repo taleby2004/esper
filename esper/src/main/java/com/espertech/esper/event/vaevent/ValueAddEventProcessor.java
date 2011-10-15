@@ -8,12 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.epl.named.NamedWindowIndexRepository;
-import com.espertech.esper.epl.named.NamedWindowRootView;
-import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.named.NamedWindowIndexRepository;
+import com.espertech.esper.epl.named.NamedWindowRootViewInstance;
 import com.espertech.esper.view.Viewable;
 
 import java.util.Collection;
@@ -52,7 +52,7 @@ public interface ValueAddEventProcessor
      * @param namedWindowRootView the root view
      * @param indexRepository delete and select indexes
      */
-    public void onUpdate(EventBean[] newData, EventBean[] oldData, NamedWindowRootView namedWindowRootView, NamedWindowIndexRepository indexRepository);
+    public void onUpdate(EventBean[] newData, EventBean[] oldData, NamedWindowRootViewInstance namedWindowRootView, NamedWindowIndexRepository indexRepository);
 
     /**
      * Handle iteration over revision event contents.
@@ -60,7 +60,7 @@ public interface ValueAddEventProcessor
      * @param parent the provider of data
      * @return collection to iterate
      */
-    public Collection<EventBean> getSnapshot(EPStatementHandle createWindowStmtHandle, Viewable parent);
+    public Collection<EventBean> getSnapshot(EPStatementAgentInstanceHandle createWindowStmtHandle, Viewable parent);
 
     /**
      * Called each time a data window posts a remove stream event, to indicate that a data window

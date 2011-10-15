@@ -10,7 +10,7 @@ package com.espertech.esper.plugin;
 
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventSender;
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 
 /**
  * Provided once by an {@link PlugInEventRepresentation} for any event type it creates.

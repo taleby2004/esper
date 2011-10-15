@@ -11,10 +11,7 @@
 
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.util.AuditPath;
-import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,13 +23,13 @@ public class EvalAuditInstanceCount {
 
     private static final Log auditLog = LogFactory.getLog(AuditPath.AUDIT_LOG);
 
-    private final Map<EvalNode, Integer> counts;
+    private final Map<EvalFactoryNode, Integer> counts;
 
     public EvalAuditInstanceCount() {
-        counts = new HashMap<EvalNode, Integer>();
+        counts = new HashMap<EvalFactoryNode, Integer>();
     }
 
-    public void decreaseRefCount(EvalNode evalNode, EvalAuditStateNode current, String patternExpr, String statementName) {
+    public void decreaseRefCount(EvalFactoryNode evalNode, EvalAuditStateNode current, String patternExpr, String statementName) {
         Integer count = counts.get(evalNode);
         if (count == null) {
             return;
@@ -49,7 +46,7 @@ public class EvalAuditInstanceCount {
 
     }
 
-    public void increaseRefCount(EvalNode evalNode, EvalAuditStateNode current, String patternExpr, String statementName) {
+    public void increaseRefCount(EvalFactoryNode evalNode, EvalAuditStateNode current, String patternExpr, String statementName) {
         Integer count = counts.get(evalNode);
         if (count == null) {
             count = 1;

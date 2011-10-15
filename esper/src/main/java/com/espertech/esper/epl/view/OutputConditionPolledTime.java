@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.expression.ExprTimePeriod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,7 +17,7 @@ public final class OutputConditionPolledTime implements OutputConditionPolled
 {
     private ExprTimePeriod timePeriod;
     private long msecIntervalSize;
-    private StatementContext context;
+    private AgentInstanceContext context;
     private long lastUpdate;
 
     /**
@@ -26,7 +26,7 @@ public final class OutputConditionPolledTime implements OutputConditionPolled
      * @param context is the view context for time scheduling
      */
     public OutputConditionPolledTime(ExprTimePeriod timePeriod,
-                               StatementContext context)
+                               AgentInstanceContext context)
     {
         if (context == null)
         {

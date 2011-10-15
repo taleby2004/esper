@@ -326,6 +326,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
     public String toString()
     {
         return "BeanEventType" +
+               " name=" + getName() +
                " clazz=" + clazz.getName();
     }
 
@@ -525,6 +526,9 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
 
         // Determine event type super types
         superTypes = getSuperTypes(clazz, eventAdapterService.getBeanEventTypeFactory());
+        if (superTypes != null && superTypes.length == 0) {
+            superTypes = null;
+        }
 
         // Determine deep supertypes
         // Get Java super types (superclasses and interfaces), deep get of all in the tree

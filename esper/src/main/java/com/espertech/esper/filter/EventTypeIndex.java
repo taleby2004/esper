@@ -10,7 +10,6 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -102,12 +101,12 @@ public class EventTypeIndex implements EventEvaluator
         return result;
     }
 
-    public void matchEvent(EventBean event, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public void matchEvent(EventBean event, Collection<FilterHandle> matches)
     {
         EventType eventType = event.getEventType();
 
         // Attempt to match exact type
-        matchType(eventType, event, matches, exprEvaluatorContext);
+        matchType(eventType, event, matches);
 
         // No supertype means we are done
         if (eventType.getSuperTypes() == null)
@@ -118,7 +117,7 @@ public class EventTypeIndex implements EventEvaluator
         for (Iterator<EventType> it = eventType.getDeepSuperTypes(); it.hasNext();)
         {
             EventType superType = it.next();
-            matchType(superType, event, matches, exprEvaluatorContext);
+            matchType(superType, event, matches);
         }
     }
 
@@ -145,7 +144,7 @@ public class EventTypeIndex implements EventEvaluator
         return count;
     }
 
-    private void matchType(EventType eventType, EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    private void matchType(EventType eventType, EventBean eventBean, Collection<FilterHandle> matches)
     {
         eventTypesRWLock.readLock().lock();
         FilterHandleSetNode rootNode = null;
@@ -165,7 +164,7 @@ public class EventTypeIndex implements EventEvaluator
             return;
         }
 
-        rootNode.matchEvent(eventBean, matches, exprEvaluatorContext);
+        rootNode.matchEvent(eventBean, matches);
     }
 
     private static final Log log = LogFactory.getLog(EventTypeIndex.class);

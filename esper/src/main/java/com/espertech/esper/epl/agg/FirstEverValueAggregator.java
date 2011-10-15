@@ -55,9 +55,4 @@ public class FirstEverValueAggregator implements AggregationMethod
     {
         return type;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeFirstEverValueAggregator(type, false);
-    }
 }

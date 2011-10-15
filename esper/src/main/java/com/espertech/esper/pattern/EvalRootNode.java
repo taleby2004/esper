@@ -17,9 +17,21 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalRootNode extends EvalNodeBase implements PatternStarter
 {
-    private static final long serialVersionUID = 6894059650449481615L;
+    private final EvalRootFactoryNode factoryNode;
+    private final EvalNode childNode;
 
-    public EvalRootNode() {
+    public EvalRootNode(PatternAgentInstanceContext context, EvalRootFactoryNode factoryNode, EvalNode childNode) {
+        super(context);
+        this.factoryNode = factoryNode;
+        this.childNode = childNode;
+    }
+
+    public EvalNodeNumber getNodeNumber() {
+        return factoryNode.getNodeNumber();
+    }
+
+    public EvalNode getChildNode() {
+        return childNode;
     }
 
     public final PatternStopCallback start(PatternMatchCallback callback,
@@ -37,12 +49,7 @@ public class EvalRootNode extends EvalNodeBase implements PatternStarter
                                   MatchedEventMap beginState,
                                   EvalStateNodeNumber stateNodeId)
     {
-        return new EvalRootStateNode(this.getChildNodes().get(0), beginState, getContext());
-    }
-
-    public final String toString()
-    {
-        return ("EvalRootNode children=" + this.getChildNodes().size());
+        return new EvalRootStateNode(childNode, beginState, getContext().getPatternContext());
     }
 
     private static final Log log = LogFactory.getLog(EvalRootNode.class);

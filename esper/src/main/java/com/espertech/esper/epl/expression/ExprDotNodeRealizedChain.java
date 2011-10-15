@@ -9,14 +9,15 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.epl.datetime.eval.ExprDotNodeFilterAnalyzerDTIntervalDesc;
+import com.espertech.esper.epl.datetime.eval.ExprDotNodeFilterAnalyzerDesc;
 
 public class ExprDotNodeRealizedChain
 {
     private final ExprDotEval[] chain;
     private final ExprDotEval[] chainWithUnpack;
-    private final ExprDotNodeFilterAnalyzerDTIntervalDesc filterAnalyzerDesc;
+    private final ExprDotNodeFilterAnalyzerDesc filterAnalyzerDesc;
 
-    public ExprDotNodeRealizedChain(ExprDotEval[] chain, ExprDotEval[] chainWithUnpack, ExprDotNodeFilterAnalyzerDTIntervalDesc filterAnalyzerDesc) {
+    public ExprDotNodeRealizedChain(ExprDotEval[] chain, ExprDotEval[] chainWithUnpack, ExprDotNodeFilterAnalyzerDesc filterAnalyzerDesc) {
         this.chain = chain;
         this.chainWithUnpack = chainWithUnpack;
         this.filterAnalyzerDesc = filterAnalyzerDesc;
@@ -30,7 +31,7 @@ public class ExprDotNodeRealizedChain
         return chainWithUnpack;
     }
 
-    public ExprDotNodeFilterAnalyzerDTIntervalDesc getFilterAnalyzerDesc() {
+    public ExprDotNodeFilterAnalyzerDesc getFilterAnalyzerDesc() {
         return filterAnalyzerDesc;
     }
 }

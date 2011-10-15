@@ -9,11 +9,8 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.epl.core.MethodResolutionService;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 /**
  * Average that generates a BigDecimal numbers.
@@ -36,10 +33,5 @@ public class BigDecimalAvgFilterAggregator extends BigDecimalAvgAggregator
             return;
         }
         super.leave(paramArray[0]);
-    }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeAvgAggregator(BigDecimal.class, true);
     }
 }

@@ -209,10 +209,16 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 
     public void addPlugInSingleRowFunction(String functionName, String className, String methodName) throws ConfigurationException
     {
+        addPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED);
+    }
+
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws ConfigurationException
+    {
         ConfigurationPlugInSingleRowFunction entry = new ConfigurationPlugInSingleRowFunction();
         entry.setFunctionClassName(className);
         entry.setFunctionMethodName(methodName);
         entry.setName(functionName);
+        entry.setValueCache(valueCache);
         plugInSingleRowFunctions.add(entry);
     }
 
@@ -492,6 +498,16 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     }
 
     /**
+     * Add a plugin loader (f.e. an input/output adapter loader) without any additional loader configuration.
+     * @param loaderName is the name of the loader
+     * @param className is the fully-qualified classname of the loader class
+     */
+    public void addPluginLoader(String loaderName, String className)
+    {
+        addPluginLoader(loaderName, className, null, null);
+    }
+
+    /**
      * Add a plugin loader (f.e. an input/output adapter loader).
      * @param loaderName is the name of the loader
      * @param className is the fully-qualified classname of the loader class
@@ -731,6 +747,10 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public void setMetricsReportingDisabled()
     {
         this.getEngineDefaults().getMetricsReporting().setEnableMetricsReporting(false);
+    }
+
+    public void setPatternMaxSubexpressions(Long maxSubexpressions) {
+        this.getEngineDefaults().getPatterns().setMaxSubexpressions(maxSubexpressions);
     }
 
     /**

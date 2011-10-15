@@ -37,17 +37,21 @@ public class ExprPlugInAggFunctionNodeFactory implements AggregationMethodFactor
         return null;  // defaults apply
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
-        AggregationMethod method = aggregationSupport;
-        if (!distinct) {
-            return method;
-        }
-        return methodResolutionService.makeDistinctAggregator(method, aggregatedValueType,false);
-    }
-
     public AggregationAccessor getAccessor()
     {
         return null;  // no accessor
+    }
+
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+
+        AggregationMethod method = methodResolutionService.makePlugInAggregator(aggregationSupport.getFunctionName());
+        if (!distinct) {
+            return method;
+        }
+        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, aggregatedValueType,false);
+    }
+
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
     }
 }

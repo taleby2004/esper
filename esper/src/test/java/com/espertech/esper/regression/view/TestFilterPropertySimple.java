@@ -56,7 +56,8 @@ public class TestFilterPropertySimple extends TestCase
         listener.reset();
 
         // higest price (27 is the last value)
-        assertEquals(35.0, stmtNW.iterator().next().get("price"));
+        EventBean event = stmtNW.iterator().next();
+        assertEquals(35.0, event.get("price"));
     }
 
     public void testUnidirectionalJoin()

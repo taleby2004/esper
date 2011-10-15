@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -18,38 +17,21 @@ import org.apache.commons.logging.LogFactory;
  * the total number of new events arrived or the total number
  * of old events arrived is greater than a preset value.
  */
-public final class OutputConditionCount implements OutputCondition
+public final class OutputConditionCount extends OutputConditionBase implements OutputCondition
 {
     private static final boolean DO_OUTPUT = true;
 	private static final boolean FORCE_UPDATE = false;
 
+    private final OutputConditionCountFactory parent;
+
     private long eventRate;
     private int newEventsCount;
     private int oldEventsCount;
-    private final OutputCallback outputCallback;
-    private final VariableReader variableReader;
 
-
-    /**
-     * Constructor.
-     * @param eventRate is the number of old or new events that
-     * must arrive in order for the condition to be satisfied
-     * @param outputCallback is the callback that is made when the conditoin is satisfied
-     * @param variableReader is for reading the variable value, if a variable was supplied, else null
-     */
-    public OutputConditionCount(int eventRate, VariableReader variableReader, OutputCallback outputCallback)
-    {
-        if ((eventRate < 1) && (variableReader == null))
-        {
-            throw new IllegalArgumentException("Limiting output by event count requires an event count of at least 1 or a variable name");
-        }
-		if(outputCallback ==  null)
-		{
-			throw new NullPointerException("Output condition by count requires a non-null callback");
-		}
-        this.eventRate = eventRate;
-        this.outputCallback = outputCallback;
-        this.variableReader = variableReader;
+    public OutputConditionCount(OutputCallback outputCallback, OutputConditionCountFactory parent) {
+        super(outputCallback);
+        this.parent = parent;
+        this.eventRate = parent.getEventRate();
     }
 
     /**
@@ -68,20 +50,11 @@ public final class OutputConditionCount implements OutputCondition
 		return oldEventsCount;
 	}
 
-    /**
-     * Returns the event rate.
-     * @return event rate
-     */
-    public final long getEventRate()
-    {
-        return eventRate;
-    }
-
     public final void updateOutputCondition(int newDataCount, int oldDataCount)
     {
-        if (variableReader != null)
+        if (parent.getVariableReader() != null)
         {
-            Object value = variableReader.getValue();
+            Object value = parent.getVariableReader().getValue();
             if (value != null)
             {
                 eventRate = ((Number) value).longValue();
@@ -121,9 +94,9 @@ public final class OutputConditionCount implements OutputCondition
     	return (newEventsCount >= eventRate) || (oldEventsCount >= eventRate);
     }
 
+    public void terminated() {
+        outputCallback.continueOutputProcessing(true, true);
+    }
+
     private static final Log log = LogFactory.getLog(OutputConditionCount.class);
-
-
-
-
 }

@@ -10,7 +10,8 @@ package com.espertech.esper.view.stat;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.view.CloneableView;
@@ -32,18 +33,18 @@ public final class CorrelationView extends BaseBivariateStatisticsView implement
      * Constructor.
      * @param xExpression is the expression providing X data points
      * @param yExpression is the expression providing X data points
-     * @param statementContext contains required view services
+     * @param agentInstanceContext contains required view services
      * @param eventType event type
      * @param additionalProps additional properties
      */
-    public CorrelationView(StatementContext statementContext, ExprNode xExpression, ExprNode yExpression, EventType eventType, StatViewAdditionalProps additionalProps)
+    public CorrelationView(AgentInstanceContext agentInstanceContext, ExprNode xExpression, ExprNode yExpression, EventType eventType, StatViewAdditionalProps additionalProps)
     {
-        super(statementContext, xExpression, yExpression, eventType, additionalProps);
+        super(agentInstanceContext, xExpression, yExpression, eventType, additionalProps);
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return new CorrelationView(statementContext, this.getExpressionX(), this.getExpressionY(), eventType, additionalProps);
+        return new CorrelationView(agentInstanceContext, this.getExpressionX(), this.getExpressionY(), eventType, additionalProps);
     }
 
     public EventBean populateMap(BaseStatisticsBean baseStatisticsBean,
@@ -75,7 +76,7 @@ public final class CorrelationView extends BaseBivariateStatisticsView implement
         if (additionalProps != null) {
             additionalProps.addProperties(result, decoration);
         }
-        return eventAdapterService.adaptorForTypedMap(result, eventType);
+        return eventAdapterService.adapterForTypedMap(result, eventType);
     }
 
     public EventType getEventType()

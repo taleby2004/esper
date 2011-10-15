@@ -20,6 +20,7 @@ import com.espertech.esper.util.IndentWriter;
 import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.view.Viewable;
 
+import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class SupportQueryPlanNode extends QueryPlanNode
         this.id = id;
     }
 
-    public ExecNode makeExec(Map<String, EventTable>[] indexPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
+    public ExecNode makeExec(String statementName, String statementId, Annotation[] annotations, Map<String, EventTable>[] indexPerStream, EventType[] streamTypes, Viewable[] streamViews, HistoricalStreamIndexList[] historicalStreamIndexLists, VirtualDWView[] viewExternal)
     {
         return new SupportQueryExecNode(id);
     }

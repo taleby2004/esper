@@ -21,7 +21,6 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
-import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.timer.TimeSourceServiceImpl;
 import com.espertech.esper.type.MathArithTypeEnum;
 import com.espertech.esper.type.RelationalOpEnum;
@@ -366,13 +365,13 @@ public class SupportExprNodeFactory
             factories.add(new LengthWindowViewFactory());
             factoriesPerStream[i] = new ViewFactoryChain(streamTypeService.getEventTypes()[i], factories);
         }
-        ViewResourceDelegateImpl viewResources = new ViewResourceDelegateImpl(factoriesPerStream, SupportStatementContextFactory.makeContext());
+        ViewResourceDelegateUnverified viewResources = new ViewResourceDelegateUnverified();
 
         VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceServiceImpl()), SupportEventAdapterService.getService(), null);
         variableService.createNewVariable("intPrimitive", Integer.class.getName(), 10, null);
         variableService.createNewVariable("var1", String.class.getName(), "my_variable_value", null);
 
-        ExprNodeUtility.getValidatedSubtree(topNode, new ExprValidationContext(streamTypeService, getMethodResService(), viewResources, null, variableService, null, null, null, null, null));
+        ExprNodeUtility.getValidatedSubtree(topNode, new ExprValidationContext(streamTypeService, getMethodResService(), viewResources, null, variableService, null, null, null, null, null, null));
     }
 
     public static void validate1StreamBean(ExprNode topNode) throws Exception

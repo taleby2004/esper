@@ -1,4 +1,4 @@
-<chapter id="configuration" revision="1">
+	<chapter id="configuration" revision="1">
 
     <title>Configuration</title>
     
@@ -1422,6 +1422,35 @@ config.getEngineDefaults().getThreading().setThreadPoolInboundNumThreads(2);]]><
 				</para>
 
 			</sect3>
+
+			<sect3 id="config-engine-execution-enginefairlock" revision="1">
+				<title>Engine Fair Locking</title>
+				<para>
+					By default Esper configures the engine-level lock without fair locking. The engine-level lock coordinates event processing threads (threads that send events) with threads that perform administrative functions (threads that start or destroy statements, for example).
+					A fair lock is generally less performing that an unfair lock thus the default configuration is an unfair lock.
+				</para>
+
+				<para>				
+					If your application is multi-threaded and multiple threads sends events without gaps and if the per-event processing time is significant, then configuring a fair lock can help prioritize administrative functions. Administrative functions exclude event-processing threads until the administrative function completed. You may need to set this flag to prevent lock starvation to perform an administrative function in the face of concurrent event processing. Please consult the Java API documentation under <literal>ReentrantReadWriteLock</literal> and <emphasis>Fair Mode</emphasis> for more information.
+				</para>
+		
+				<para>
+					 The XML configuration to enable fair locking, which is disabled by default, is as follows:
+				</para>
+	
+				<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <threading engine-fairlock="true"/>
+  </defaults>
+</engine-settings>]]></programlisting>
+			
+				<para>
+				 The API to change the setting:
+				</para>
+	
+				<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getThreading().setEngineFairlock(true);]]></programlisting>
+			</sect3>
 		</sect2>
 
 		<sect2 id="config-engine-eventmeta" revision="1">
@@ -1634,6 +1663,46 @@ config.getEngineDefaults().getLogging().setEnableJDBC(true);]]></programlisting>
   </defaults>
 </engine-settings>]]></programlisting>
 
+			</sect3>
+		</sect2>
+
+		<sect2 id="config-engine-patterns" revision="1">
+			<title>Engine Settings related to Patterns</title>
+			
+			<sect3 id="config-engine-patterns-max" revision="1">
+				<title>Followed-By Operator Maximum Subexpression Count</title>
+
+				<para>
+				   You may use this setting to limit the total engine-wide number of pattern sub-expressions that all followed-by operators may manage. When the limit is reached, a condition is raised by the engine through the condition callback API.
+				</para>
+				
+				<para>
+				  By default, when the limit is reached, the engine also prevents the start of new pattern sub-expressions, until pattern sub-expressions end and the limit is no longer reached. By setting the <literal>prevent-start</literal> flag to false you can instruct the engine to only raise a condition and continue to allow the start of new pattern sub-expressions.
+				</para>
+				
+				<para>
+				  The implications of the settings described herein are also detailed in <xref linkend="pattern-temporal-followed-by-engine-max"/>.
+				</para>
+
+				<para>
+					A sample XML configuration for this setting is shown below:
+				</para>
+					<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <patterns>
+      <max-subexpression value="100" prevent-start="false"/>
+    </patterns>
+  </defaults>
+</engine-settings>]]></programlisting>
+
+				<para>
+				  The limit can be changed and disabled or enabled at runtime via the runtime configuration API. Pass a null value as the limit to disable limit checking.
+				</para>
+				
+				<para>
+				  A sample code snippet that sets a new limit is:
+				</para>
+				<programlisting><![CDATA[epService.getEPAdministrator().getConfiguration().setPatternMaxSubexpressions(100L);]]></programlisting>				
 			</sect3>
 		</sect2>
 
@@ -1903,11 +1972,11 @@ config.getEngineDefaults().getExpression().setDivisionByZeroReturnsNull(true);]]
 			<sect3 id="config-engine-expression-udfcache" revision="1">
 				<title>User-Defined Function or Static Method Cache</title>
 				<para>
-					By default Esper caches the result of an user-defined function if the parameter set to that function is empty or all parameters are constant values. Custom plug-in single-row function results are not cached.
+					By default Esper caches the result of an user-defined function if the parameter set to that function is empty or all parameters are constant values. Results of custom plug-in single-row functions are not cached according to the default configuration, unless the single-row function is explicitly configured with value cache enabled.
 				</para>
 	
 				<para>
-					To have Esper evaluate the user-defined function regardless of constant parameters, set the flag as indicated herein.
+					To have Esper evaluate the user-defined function regardless of constant parameters, set the flag to false as indicated herein.
 				</para>
 				
 				<para>
@@ -1993,7 +2062,7 @@ config.getEngineDefaults().getExecution().setPrioritized(true);]]></programlisti
 			</sect3>
 
 			<sect3 id="config-engine-execution-fairlock" revision="1">
-				<title>Fair Locking</title>
+				<title>Statement Fair Locking</title>
 				<para>
 					By default Esper configures statement-level locks without fair locking. If your application is multi-threaded and performs very frequent reads via iterator or fire-and-forget queries, you may need to set this flag to prevent lock starvation in the face of concurrent reads and writes. Please consult the Java API documentation under <literal>ReentrantReadWriteLock</literal> and <emphasis>Fair Mode</emphasis> for more information.
 				</para>
@@ -2014,6 +2083,64 @@ config.getEngineDefaults().getExecution().setPrioritized(true);]]></programlisti
 	
 				<programlisting><![CDATA[Configuration config = new Configuration();
 config.getEngineDefaults().getExecution().setFairlock(true);]]></programlisting>
+			</sect3>
+
+			<sect3 id="config-engine-execution-disablelock" revision="1">
+				<title>Disable Locking</title>
+				<para>
+					By default Esper configures statement-level locks as required after analyzing your EPL statements. You may disable statement-level locks engine-wise using the setting described here. Use the <literal>@NoLock</literal> annotation instead to disable locking for a given statement or named window only.
+				</para>
+		
+				<para>
+					CAUTION: We provide this setting for the purpose of identifying locking overhead, or when your application is single-threaded, or when using an external mechanism for concurrency control.
+					Setting disable-locking to true may have unpredictable results unless your application is taking concurrency under consideration.
+				</para>
+
+				<para>
+					 The XML configuration to disable statement-level locking is as follows:
+				</para>
+	
+				<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <execution disable-locking="false"/>
+  </defaults>
+</engine-settings>]]></programlisting>
+			
+				<para>
+				 The API to change the setting:
+				</para>
+	
+				<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getExecution().setDisableLocking(true);]]></programlisting>
+			</sect3>
+			
+			<sect3 id="config-engine-execution-threadingprofile" revision="1">
+				<title>Threading Profile</title>
+				<para>
+					This setting is for performance tuning when using a large number of threads, such as 100 or more threads.
+				</para> 					
+				
+				<para>
+					The configuration provides a setting that instructs the engine to reduce the use of thread-local variables. As the engine may use thread-local variables to reduce temporary object allocation, it can potentially use too much memory when a large number of threads are used with the engine. By setting the threading profile to large, the engine will allocate temporary objects instead of using thread-local variables for certain logic. Currently this setting applies exclusively to patterns and their filter expressions.
+				</para> 					
+
+				<para>
+					 The XML configuration to set a large threading profile is as follows:
+				</para>
+	
+				<programlisting><![CDATA[<engine-settings>
+  <defaults>
+    <execution threading-profile="large"/>
+  </defaults>
+</engine-settings>]]></programlisting>
+			
+				<para>
+				 The API to change the setting:
+				</para>
+	
+				<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getExecution().setThreadingProfile(
+    ConfigurationEngineDefaults.ThreadingProfile.LARGE);]]></programlisting>
 			</sect3>
 		</sect2>
 

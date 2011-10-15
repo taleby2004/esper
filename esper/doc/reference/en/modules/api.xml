@@ -501,6 +501,28 @@ public void updateEnd() {...}]]></programlisting>
 		
 		   </sect3>
 		   
+		    <sect3 id="api-admin-subscriber-null">		
+				<title>No-Parameter Update Method</title>
+	
+				<indexterm><primary>subscriber object</primary><secondary>no-parameter</secondary></indexterm>
+				<para>
+					In the case that your subscriber object wishes to receive no data from a statement please follow the instructions here. 
+				</para>
+				
+				<para>
+				  You EPL statement must select a single <literal>null</literal> value.
+				</para>
+
+				<para>
+					For example, your statement may be:
+				</para>
+				<programlisting><![CDATA[select null from OrderEvent(price > 100)]]></programlisting>
+
+				<para>
+					Your subscriber class exposes the method:
+				</para>
+				<programlisting><![CDATA[public void update() {...}]]></programlisting>
+			</sect3>
 	  </sect2>
 
 	  <sect2 id="api-admin-listeners">		
@@ -1244,7 +1266,7 @@ In the default configuration, each engine instance maintains a single timer thre
         </para>
         
 		<para>
-Each engine instance performs minimal locking to enable high levels of concurrency. An engine instance locks on a statement level to protect statement resources.
+Each engine instance performs minimal locking to enable high levels of concurrency. An engine instance locks on a statement level to protect statement resources. You may turn off statement-level locking engine-wide (also read the caution notice) as described in <xref linkend="config-engine-execution-disablelock"/>. You may disable statement-level locking for a given statement by providing the <literal>@NoLock</literal> annotation as part of your EPL. Note, we provide the <literal>@NoLock</literal> annotation for the purpose of identifying locking overhead, or when your application is single-threaded, or when using an external mechanism for concurrency control or for example with virtual data windows or plug-in data windows to allow customizing concurrency for a given statement or named window. Using this annotation may have unpredictable results unless your application is taking concurrency under consideration.
         </para>
 
 		<para>
@@ -1913,7 +1935,7 @@ isolatedService.getEPRuntime().send(historyEvent);
         </para>
         
         <para>
-			Currently the only condition indicated by this facility is raised by the pattern followed-by operator when used with the limit expression and when the limit is reached, see <xref linkend="pattern-temporal-followed-by-max"/>.
+			Currently the only conditions indicated by this facility are raised by the pattern followed-by operator, see <xref linkend="pattern-temporal-followed-by-max"/> and see <xref linkend="pattern-temporal-followed-by-engine-max"/>.
         </para>
 
         <para>

@@ -16,8 +16,10 @@ import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.support.epl.SupportAggregator;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.support.epl.SupportAggregatorFactory;
 import com.espertech.esper.support.epl.SupportExprNode;
+import com.espertech.esper.support.view.SupportStatementContextFactory;
 import junit.framework.TestCase;
 
 public class TestAggregationServiceGroupByImpl extends TestCase
@@ -29,10 +31,10 @@ public class TestAggregationServiceGroupByImpl extends TestCase
 
     public void setUp()
     {
-        SupportAggregator aggregators[] = new SupportAggregator[2];
+        SupportAggregatorFactory aggregators[] = new SupportAggregatorFactory[2];
         for (int i = 0; i < aggregators.length; i++)
         {
-            aggregators[i] = new SupportAggregator();
+            aggregators[i] = new SupportAggregatorFactory();
         }
         ExprEvaluator evaluators[] = new ExprEvaluator[] { new SupportExprNode(5).getExprEvaluator(), new SupportExprNode(2).getExprEvaluator() };
         methodResolutionService = new MethodResolutionServiceImpl(null, null);
@@ -45,28 +47,29 @@ public class TestAggregationServiceGroupByImpl extends TestCase
 
     public void testGetValue()
     {
+        ExprEvaluatorContext exprEvaluatorContext = SupportStatementContextFactory.makeEvaluatorContext();
         // apply 3 rows to group key 1, all aggregators evaluated their sub-expressions(constants 5 and 2)
-        service.applyEnter(new EventBean[1], groupOneKey, null);
-        service.applyEnter(new EventBean[1], groupOneKey, null);
-        service.applyEnter(new EventBean[1], groupTwoKey, null);
+        service.applyEnter(new EventBean[1], groupOneKey, exprEvaluatorContext);
+        service.applyEnter(new EventBean[1], groupOneKey, exprEvaluatorContext);
+        service.applyEnter(new EventBean[1], groupTwoKey, exprEvaluatorContext);
 
-        service.setCurrentAccess(groupOneKey);
-        assertEquals(10, service.getValue(0));
-        assertEquals(4, service.getValue(1));
-        service.setCurrentAccess(groupTwoKey);
-        assertEquals(5, service.getValue(0));
-        assertEquals(2, service.getValue(1));
+        service.setCurrentAccess(groupOneKey, null);
+        assertEquals(10, service.getValue(0, null));
+        assertEquals(4, service.getValue(1, null));
+        service.setCurrentAccess(groupTwoKey, null);
+        assertEquals(5, service.getValue(0, null));
+        assertEquals(2, service.getValue(1, null));
 
-        service.applyLeave(new EventBean[1], groupTwoKey, null);
-        service.applyLeave(new EventBean[1], groupTwoKey, null);
-        service.applyLeave(new EventBean[1], groupTwoKey, null);
-        service.applyLeave(new EventBean[1], groupOneKey, null);
+        service.applyLeave(new EventBean[1], groupTwoKey, exprEvaluatorContext);
+        service.applyLeave(new EventBean[1], groupTwoKey, exprEvaluatorContext);
+        service.applyLeave(new EventBean[1], groupTwoKey, exprEvaluatorContext);
+        service.applyLeave(new EventBean[1], groupOneKey, exprEvaluatorContext);
 
-        service.setCurrentAccess(groupOneKey);
-        assertEquals(10 - 5, service.getValue(0));
-        assertEquals(4 - 2, service.getValue(1));
-        service.setCurrentAccess(groupTwoKey);
-        assertEquals(5 - 15, service.getValue(0));
-        assertEquals(2 - 6, service.getValue(1));
+        service.setCurrentAccess(groupOneKey, null);
+        assertEquals(10 - 5, service.getValue(0, null));
+        assertEquals(4 - 2, service.getValue(1, null));
+        service.setCurrentAccess(groupTwoKey, null);
+        assertEquals(5 - 15, service.getValue(0, null));
+        assertEquals(2 - 6, service.getValue(1, null));
     }
 }

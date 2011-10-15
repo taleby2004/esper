@@ -26,7 +26,7 @@ public class TestRangeValueDouble extends TestCase
 
     public void testGetFilterValue()
     {
-        assertEquals(5.5, params[0].getFilterValue(null));
+        assertEquals(5.5, params[0].getFilterValue(null, null));
     }
 
     public void testEquals()

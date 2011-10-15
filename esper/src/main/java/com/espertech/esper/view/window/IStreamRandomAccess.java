@@ -21,7 +21,7 @@ import java.util.Iterator;
  */
 public class IStreamRandomAccess implements RandomAccessByIndex, ViewUpdatedCollection
 {
-    private ArrayList<EventBean> arrayList;
+    private final ArrayList<EventBean> arrayList;
     private final RandomAccessByIndexObserver updateObserver;
 
     /**
@@ -32,14 +32,6 @@ public class IStreamRandomAccess implements RandomAccessByIndex, ViewUpdatedColl
     {
         this.updateObserver = updateObserver;
         this.arrayList = new ArrayList<EventBean>();
-    }
-
-    /**
-     * Sets the array providing previous events.
-     * @param arrayList previous event array
-     */
-    public void setArrayList(ArrayList<EventBean> arrayList) {
-        this.arrayList = arrayList;
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)

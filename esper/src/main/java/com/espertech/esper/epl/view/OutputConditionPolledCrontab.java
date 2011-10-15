@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.schedule.ScheduleComputeHelper;
@@ -27,32 +27,32 @@ import java.util.List;
 public final class OutputConditionPolledCrontab implements OutputConditionPolled
 {
     private Long currentReferencePoint;
-    private StatementContext context;
+    private AgentInstanceContext agentInstanceContext;
     private ScheduleSpec scheduleSpec;
     private long nextScheduledTime;
 
     /**
      * Constructor.
-     * @param context is the view context for time scheduling
+     * @param agentInstanceContext is the view context for time scheduling
      * @param scheduleSpecExpressionList list of schedule parameters
      * @throws com.espertech.esper.epl.expression.ExprValidationException if the crontab expression failed to validate
      */
     public OutputConditionPolledCrontab(List<ExprNode> scheduleSpecExpressionList,
-                                   StatementContext context)
+                                   AgentInstanceContext agentInstanceContext)
             throws ExprValidationException
     {
-        if (context == null)
+        if (agentInstanceContext == null)
         {
             String message = "OutputConditionTime requires a non-null view context";
             throw new NullPointerException(message);
         }
 
-        this.context = context;
+        this.agentInstanceContext = agentInstanceContext;
 
         // Validate the expression
         ExprEvaluator[] expressions = new ExprEvaluator[scheduleSpecExpressionList.size()];
         int count = 0;
-        ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(context.getEngineURI(), false), context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), context, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations());
+        ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(agentInstanceContext.getStatementContext().getEngineURI(), false), agentInstanceContext.getStatementContext().getMethodResolutionService(), null, agentInstanceContext.getStatementContext().getSchedulingService(), agentInstanceContext.getStatementContext().getVariableService(), agentInstanceContext, agentInstanceContext.getStatementContext().getEventAdapterService(), agentInstanceContext.getStatementContext().getStatementName(), agentInstanceContext.getStatementContext().getStatementId(), agentInstanceContext.getStatementContext().getAnnotations(), agentInstanceContext.getStatementContext().getContextDescriptor());
         for (ExprNode parameters : scheduleSpecExpressionList)
         {
             ExprNode node = ExprNodeUtility.getValidatedSubtree(parameters, validationContext);
@@ -61,7 +61,7 @@ public final class OutputConditionPolledCrontab implements OutputConditionPolled
 
         try
         {
-            Object[] scheduleSpecParameterList = evaluate(expressions, context);
+            Object[] scheduleSpecParameterList = evaluate(expressions, agentInstanceContext);
             scheduleSpec = ScheduleSpecUtil.computeValues(scheduleSpecParameterList);
         }
         catch (ScheduleParameterException e)
@@ -80,7 +80,7 @@ public final class OutputConditionPolledCrontab implements OutputConditionPolled
         }
 
         boolean output = false;
-        long currentTime = context.getSchedulingService().getTime();
+        long currentTime = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         if (currentReferencePoint == null)
         {
         	currentReferencePoint = currentTime;

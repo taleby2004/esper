@@ -17,7 +17,6 @@ import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.filter.FilterValueSet;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -28,12 +27,12 @@ public class SupportFilterServiceImpl implements FilterService
     private List<Pair<FilterValueSet, FilterHandle>> added = new LinkedList<Pair<FilterValueSet, FilterHandle>>();
     private List<FilterHandle> removed = new LinkedList<FilterHandle>();
 
-    public long evaluate(EventBean event, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public long evaluate(EventBean event, Collection<FilterHandle> matches)
     {
         throw new UnsupportedOperationException();
     }
 
-    public long evaluate(EventBean event, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext, String statementId)
+    public long evaluate(EventBean event, Collection<FilterHandle> matches, String statementId)
     {
         throw new UnsupportedOperationException();
     }

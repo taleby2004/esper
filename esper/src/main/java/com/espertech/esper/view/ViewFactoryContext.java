@@ -8,9 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.view;
 
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.core.StatementExtensionSvcContext;
+import com.espertech.esper.core.service.EPStatementHandle;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.core.service.StatementExtensionSvcContext;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.schedule.SchedulingService;
@@ -105,6 +105,10 @@ public class ViewFactoryContext
     public String getStatementId()
     {
         return statementContext.getStatementId();
+    }
+
+    public byte[] getStatementIdBytes() {
+        return statementContext.getStatementIdBytes();
     }
 
     /**

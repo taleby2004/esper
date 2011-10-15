@@ -34,10 +34,4 @@ public class IntegerSumFilterAggregator extends IntegerSumAggregator
         }
         super.leave(paramArray[0]);
     }
-
-    @Override
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeSumAggregator(Integer.class, true);
-    }
 }

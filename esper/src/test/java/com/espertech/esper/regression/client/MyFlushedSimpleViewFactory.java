@@ -11,9 +11,10 @@
 
 package com.espertech.esper.regression.client;
 
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.*;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 
 import java.util.List;
@@ -31,9 +32,8 @@ public class MyFlushedSimpleViewFactory extends ViewFactorySupport
         eventType = parentEventType;
     }
 
-    public View makeView(StatementContext statementContext)
-    {
-        return new MyFlushedSimpleView(statementContext);
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext) {
+        return new MyFlushedSimpleView(agentInstanceViewFactoryContext);
     }
 
     public EventType getEventType()

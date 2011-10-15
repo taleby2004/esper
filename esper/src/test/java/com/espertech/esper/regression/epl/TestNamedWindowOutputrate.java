@@ -13,21 +13,11 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerEvent;
-import com.espertech.esper.core.EPServiceProviderSPI;
-import com.espertech.esper.core.EPStatementSPI;
-import com.espertech.esper.core.StatementType;
-import com.espertech.esper.epl.named.NamedWindowProcessor;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public class TestNamedWindowOutputrate extends TestCase
 {

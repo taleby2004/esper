@@ -11,37 +11,41 @@
 
 package com.espertech.esper.view.std;
 
-import java.util.List;
-
+import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
-import junit.framework.TestCase;
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.view.*;
+import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
-import com.espertech.esper.support.epl.SupportExprNodeFactory;
+import com.espertech.esper.support.view.*;
 import com.espertech.esper.view.EventStream;
 import com.espertech.esper.view.View;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.client.EPException;
+import junit.framework.TestCase;
+
+import java.util.List;
 
 public class TestGroupByView extends TestCase
 {
     private GroupByView myGroupByView;
     private SupportBeanClassView ultimateChildView;
     private StatementContext statementContext;
+    private AgentInstanceViewFactoryChainContext agentInstanceContext;
 
     public void setUp() throws Exception
     {
         statementContext = SupportStatementContextFactory.makeContext();
+        agentInstanceContext = SupportStatementContextFactory.makeAgentInstanceViewFactoryContext();
+
         ExprNode[] expressions = SupportExprNodeFactory.makeIdentNodesMD("symbol");
-        myGroupByView = new GroupByViewImpl(statementContext, expressions, ExprNodeUtility.getEvaluators(expressions));
+        myGroupByView = new GroupByViewImpl(agentInstanceContext, expressions, ExprNodeUtility.getEvaluators(expressions));
 
         SupportBeanClassView childView = new SupportBeanClassView(SupportMarketDataBean.class);
 
-        MergeView myMergeView = new MergeView(statementContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class));
+        MergeView myMergeView = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class));
 
         ultimateChildView = new SupportBeanClassView(SupportMarketDataBean.class);
 
@@ -126,7 +130,7 @@ public class TestGroupByView extends TestCase
     {
         EventStream eventStream = new SupportStreamImpl(SupportMarketDataBean.class, 4);
         ExprNode[] expressions = SupportExprNodeFactory.makeIdentNodesMD("symbol");
-        GroupByView groupView = new GroupByViewImpl(statementContext, expressions, ExprNodeUtility.getEvaluators(expressions));
+        GroupByView groupView = new GroupByViewImpl(agentInstanceContext, expressions, ExprNodeUtility.getEvaluators(expressions));
         eventStream.addView(groupView);
 
         Object[] groupByValue = new Object[] {"IBM"};
@@ -134,7 +138,7 @@ public class TestGroupByView extends TestCase
         // Invalid for no child nodes
         try
         {
-            GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, statementContext);
+            GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, agentInstanceContext);
             assertTrue(false);
         }
         catch (EPException ex)
@@ -143,11 +147,11 @@ public class TestGroupByView extends TestCase
         }
 
         // Invalid for child node is a merge node - doesn't make sense to group and merge only
-        MergeView mergeViewOne = new MergeView(statementContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null);
+        MergeView mergeViewOne = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null);
         groupView.addView(mergeViewOne);
         try
         {
-            GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, statementContext);
+            GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, agentInstanceContext);
             assertTrue(false);
         }
         catch (EPException ex)
@@ -156,16 +160,16 @@ public class TestGroupByView extends TestCase
         }
 
         // Add a size view parent of merge view
-        groupView = new GroupByViewImpl(statementContext, expressions, ExprNodeUtility.getEvaluators(expressions));
+        groupView = new GroupByViewImpl(agentInstanceContext, expressions, ExprNodeUtility.getEvaluators(expressions));
 
         FirstElementView firstElementView_1 = new FirstElementView();
 
         groupView.addView(firstElementView_1);
         groupView.setParent(eventStream);
-        mergeViewOne = new MergeView(statementContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null);
+        mergeViewOne = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null);
         firstElementView_1.addView(mergeViewOne);
 
-        List<View> subViews = GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, statementContext);
+        List<View> subViews = GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, agentInstanceContext);
 
         assertTrue(subViews.size() == 1);
         assertTrue(subViews.get(0) instanceof FirstElementView);

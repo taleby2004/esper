@@ -9,6 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.util.JavaClassHelper;
 
@@ -38,7 +39,7 @@ public class InSetOfValuesEventProp implements FilterSpecParamInValue
         this.isMustCoerce = isMustCoerce;
     }
 
-    public final Object getFilterValue(MatchedEventMap matchedEvents)
+    public final Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext)
     {
         EventBean event = matchedEvents.getMatchingEvent(resultEventAsName);
         if (event == null)

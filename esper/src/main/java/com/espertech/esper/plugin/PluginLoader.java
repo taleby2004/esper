@@ -8,10 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.plugin;
 
-import com.espertech.esper.core.EPServiceProviderSPI;
-
-import java.util.Properties;
-
 /**
  * Interface for loaders of input/output adapters or any other adapter that may participate in an engine lifecycle.
  */

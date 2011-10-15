@@ -10,7 +10,7 @@ package com.espertech.esperio.representation.axiom;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esperio.support.util.ArrayAssertionUtil;
 import com.espertech.esperio.support.util.SupportUpdateListener;
 import junit.framework.TestCase;

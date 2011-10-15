@@ -11,6 +11,8 @@
 
 package com.espertech.esper.epl.expression;
 
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.support.view.SupportStatementContextFactory;
 import junit.framework.TestCase;
 import com.espertech.esper.support.epl.SupportAggregationResultFuture;
 
@@ -22,8 +24,9 @@ public abstract class TestExprAggregateNodeAdapter extends TestCase
     {
         SupportAggregationResultFuture future = new SupportAggregationResultFuture(new Object[] {10, 20});
         validatedNodeToTest.setAggregationResultFuture(future, 1);
+        AgentInstanceContext agentInstanceContext = SupportStatementContextFactory.makeAgentInstanceContext();
 
-        assertEquals(20, validatedNodeToTest.evaluate(null, false, null));
+        assertEquals(20, validatedNodeToTest.evaluate(null, false, agentInstanceContext));
     }
 }
 

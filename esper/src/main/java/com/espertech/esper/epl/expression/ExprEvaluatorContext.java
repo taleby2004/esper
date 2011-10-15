@@ -8,7 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.core.ExpressionResultCacheService;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.core.service.ExpressionResultCacheService;
 import com.espertech.esper.schedule.TimeProvider;
 
 /**
@@ -23,4 +24,8 @@ public interface ExprEvaluatorContext
     public TimeProvider getTimeProvider();
 
     public ExpressionResultCacheService getExpressionResultCacheService();
+
+    public int[] getAgentInstanceIds();
+
+    public EventBean getContextProperties();
 }

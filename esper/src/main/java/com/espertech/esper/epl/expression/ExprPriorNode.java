@@ -9,34 +9,20 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.view.ViewCapPriorEventAccess;
-import com.espertech.esper.view.window.RandomAccessByIndex;
-import com.espertech.esper.view.window.RelativeAccessByEventNIndex;
 
 import java.util.Map;
 
 /**
  * Represents the 'prior' prior event function in an expression node tree.
  */
-public class ExprPriorNode extends ExprNodeBase implements ViewResourceCallback, ExprEvaluator
+public class ExprPriorNode extends ExprNodeBase implements ExprEvaluator
 {
     private Class resultType;
     private int streamNumber;
     private int constantIndexNumber;
-    private transient RelativeAccessByEventNIndex relativeAccess;
-    private transient RandomAccessByIndex randomAccess;
-    private transient ExprEvaluator evaluator;
+    private transient ExprPriorEvalStrategy priorStrategy;
+    private transient ExprEvaluator innerEvaluator;
     private static final long serialVersionUID = -2115346817501589366L;
-
-    /**
-     * Returns the index of the prior.
-     * @return index of prior function
-     */
-    public int getConstantIndexNumber()
-    {
-        return constantIndexNumber;
-    }
 
     @Override
     public ExprEvaluator getExprEvaluator() {
@@ -45,6 +31,22 @@ public class ExprPriorNode extends ExprNodeBase implements ViewResourceCallback,
 
     public Map<String, Object> getEventType() {
         return null;
+    }
+
+    public int getStreamNumber() {
+        return streamNumber;
+    }
+
+    public int getConstantIndexNumber() {
+        return constantIndexNumber;
+    }
+
+    public void setPriorStrategy(ExprPriorEvalStrategy priorStrategy) {
+        this.priorStrategy = priorStrategy;
+    }
+
+    public ExprEvaluator getInnerEvaluator() {
+        return innerEvaluator;
     }
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
@@ -65,34 +67,30 @@ public class ExprPriorNode extends ExprNodeBase implements ViewResourceCallback,
 
         Object value = constantNode.getExprEvaluator().evaluate(null, false, validationContext.getExprEvaluatorContext());
         constantIndexNumber = ((Number) value).intValue();
-        evaluator = this.getChildNodes().get(1).getExprEvaluator();
+        innerEvaluator = this.getChildNodes().get(1).getExprEvaluator();
 
         // Determine stream number
         // Determine stream number
         if (this.getChildNodes().get(1) instanceof ExprIdentNode) {
             ExprIdentNode identNode = (ExprIdentNode) this.getChildNodes().get(1);
             streamNumber = identNode.getStreamId();
-            resultType = evaluator.getType();
+            resultType = innerEvaluator.getType();
         }
         else if (this.getChildNodes().get(1) instanceof ExprStreamUnderlyingNode) {
             ExprStreamUnderlyingNode streamNode = (ExprStreamUnderlyingNode) this.getChildNodes().get(1);
             streamNumber = streamNode.getStreamId();
-            resultType = evaluator.getType();
+            resultType = innerEvaluator.getType();
         }
         else
         {
             throw new ExprValidationException("Previous function requires an event property as parameter");
         }
 
-        if (validationContext.getViewResourceDelegate() == null)
-        {
+        // add request
+        if (validationContext.getViewResourceDelegate() == null) {
             throw new ExprValidationException("Prior function cannot be used in this context");
         }
-        // Request a callback that provides the required access
-        if (!validationContext.getViewResourceDelegate().requestCapability(streamNumber, new ViewCapPriorEventAccess(constantIndexNumber), this))
-        {
-            throw new ExprValidationException("Prior function requires the prior event view resource");
-        }
+        validationContext.getViewResourceDelegate().addPriorNodeRequest(this);
     }
 
     public Class getType()
@@ -107,31 +105,7 @@ public class ExprPriorNode extends ExprNodeBase implements ViewResourceCallback,
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        EventBean originalEvent = eventsPerStream[streamNumber];
-        EventBean substituteEvent;
-
-        if (randomAccess != null)
-        {
-            if (isNewData)
-            {
-                substituteEvent = randomAccess.getNewData(constantIndexNumber);
-            }
-            else
-            {
-                substituteEvent = randomAccess.getOldData(constantIndexNumber);
-            }
-        }
-        else
-        {
-            substituteEvent = relativeAccess.getRelativeToEvent(originalEvent, constantIndexNumber);
-        }
-
-        // Substitute original event with prior event, evaluate inner expression
-        eventsPerStream[streamNumber] = substituteEvent;
-        Object evalResult = evaluator.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
-        eventsPerStream[streamNumber] = originalEvent;
-
-        return evalResult;
+        return priorStrategy.evaluate(eventsPerStream, isNewData, exprEvaluatorContext, streamNumber, innerEvaluator, constantIndexNumber);
     }
 
     public String toExpressionString()
@@ -153,21 +127,5 @@ public class ExprPriorNode extends ExprNodeBase implements ViewResourceCallback,
         }
 
         return true;
-    }
-
-    public void setViewResource(Object resource)
-    {
-        if (resource instanceof RelativeAccessByEventNIndex)
-        {
-            relativeAccess = (RelativeAccessByEventNIndex) resource;
-        }
-        else if (resource instanceof RandomAccessByIndex)
-        {
-            randomAccess = (RandomAccessByIndex) resource;
-        }
-        else
-        {
-            throw new IllegalArgumentException("View resource " + resource.getClass() + " not recognized by expression node");
-        }
     }
 }

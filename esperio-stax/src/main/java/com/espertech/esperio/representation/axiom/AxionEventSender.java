@@ -10,7 +10,7 @@ package com.espertech.esperio.representation.axiom;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventSender;
-import com.espertech.esper.core.EPRuntimeEventSender;
+import com.espertech.esper.core.service.EPRuntimeEventSender;
 import org.apache.axiom.om.OMDocument;
 import org.apache.axiom.om.OMElement;
 

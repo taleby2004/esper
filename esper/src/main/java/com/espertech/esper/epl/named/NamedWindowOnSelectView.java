@@ -8,21 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.epl.named;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.InternalEventRouter;
-import com.espertech.esper.core.StatementResultService;
-import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.view.StatementStopService;
-import com.espertech.esper.event.EventTypeSPI;
-import com.espertech.esper.event.EventBeanReaderDefaultImpl;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.event.EventBeanUtility;
-import com.espertech.esper.event.EventBeanReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,60 +31,15 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
 {
     private static final Log log = LogFactory.getLog(NamedWindowOnSelectView.class);
 
-    private final InternalEventRouter internalEventRouter;
-    private final boolean addToFront;
+    private final NamedWindowOnSelectViewFactory parent;
     private final ResultSetProcessor resultSetProcessor;
-    private final EPStatementHandle statementHandle;
-    private final StatementResultService statementResultService;
-    private final StatementContext statementContext;
     private EventBean[] lastResult;
     private Set<MultiKey<EventBean>> oldEvents = new HashSet<MultiKey<EventBean>>();
-    private boolean isDistinct;
-    private EventBeanReader eventBeanReader;
 
-    /**
-     * Ctor.
-     * @param statementStopService for indicating a statement was stopped or destroyed for cleanup
-     * @param lookupStrategy for handling trigger events to determine deleted events
-     * @param rootView the named window root view
-     * @param internalEventRouter for insert-into behavior
-     * @param resultSetProcessor for processing aggregation, having and ordering
-     * @param statementHandle required for routing events
-     * @param statementResultService for coordinating on whether insert and remove stream events should be posted
-     * @param statementContext statement services
-     * @param isDistinct is true for distinct output
-     */
-    public NamedWindowOnSelectView(StatementStopService statementStopService,
-                                   NamedWindowLookupStrategy lookupStrategy,
-                                   NamedWindowRootView rootView,
-                                   InternalEventRouter internalEventRouter,
-                                   boolean addToFront,
-                                   ResultSetProcessor resultSetProcessor,
-                                   EPStatementHandle statementHandle,
-                                   StatementResultService statementResultService,
-                                   StatementContext statementContext,
-                                   boolean isDistinct)
-    {
-        super(statementStopService, lookupStrategy, rootView, statementContext);
-        this.internalEventRouter = internalEventRouter;
-        this.addToFront = addToFront;
+    public NamedWindowOnSelectView(NamedWindowLookupStrategy lookupStrategy, NamedWindowRootViewInstance rootView, ExprEvaluatorContext exprEvaluatorContext, NamedWindowOnSelectViewFactory parent, ResultSetProcessor resultSetProcessor) {
+        super(lookupStrategy, rootView, exprEvaluatorContext);
+        this.parent = parent;
         this.resultSetProcessor = resultSetProcessor;
-        this.statementHandle = statementHandle;
-        this.statementResultService = statementResultService;
-        this.statementContext = statementContext;
-        this.isDistinct = isDistinct;
-
-        if (isDistinct)
-        {
-            if (resultSetProcessor.getResultEventType() instanceof EventTypeSPI)
-            {
-                eventBeanReader = ((EventTypeSPI) resultSetProcessor.getResultEventType()).getReader();
-            }
-            if (eventBeanReader == null)
-            {
-                eventBeanReader = new EventBeanReaderDefaultImpl(resultSetProcessor.getResultEventType());
-            }
-        }
     }
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
@@ -123,18 +71,18 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
         UniformPair<EventBean[]> pair = resultSetProcessor.processJoinResult(newEvents, oldEvents, false);
         newData = (pair != null ? pair.getFirst() : null);
 
-        if (isDistinct)
+        if (parent.isDistinct())
         {
-            newData = EventBeanUtility.getDistinctByProp(newData, eventBeanReader);
+            newData = EventBeanUtility.getDistinctByProp(newData, parent.getEventBeanReader());
         }
 
-        if (internalEventRouter != null)
+        if (parent.getInternalEventRouter() != null)
         {
             if (newData != null)
             {
                 for (int i = 0; i < newData.length; i++)
                 {
-                    internalEventRouter.route(newData[i], statementHandle, statementContext.getInternalEventEngineRouteDest(), statementContext, addToFront);
+                    parent.getInternalEventRouter().route(newData[i], parent.getStatementHandle(), parent.getInternalEventRouteDest(), getExprEvaluatorContext(), parent.isAddToFront());
                 }
             }
         }
@@ -143,7 +91,7 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
         if ((newData != null) && (newData.length > 0))
         {
             // And post only if we have listeners/subscribers that need the data
-            if (statementResultService.isMakeNatural() || statementResultService.isMakeSynthetic())
+            if (parent.getStatementResultService().isMakeNatural() || parent.getStatementResultService().isMakeSynthetic())
             {
                 updateChildren(newData, null);
             }
@@ -162,7 +110,7 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
         }
         else
         {
-            return namedWindowEventType;
+            return rootView.getEventType();
         }
     }
 

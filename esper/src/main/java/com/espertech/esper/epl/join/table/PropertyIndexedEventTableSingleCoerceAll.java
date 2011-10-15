@@ -9,8 +9,9 @@
 package com.espertech.esper.epl.join.table;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.event.EventBeanUtility;
+import com.espertech.esper.util.SimpleNumberCoercer;
 
 import java.util.Set;
 
@@ -18,15 +19,8 @@ public class PropertyIndexedEventTableSingleCoerceAll extends PropertyIndexedEve
 {
     private final Class coercionType;
 
-    /**
-     * Ctor.
-     * @param streamNum is the stream number of the indexed stream
-     * @param eventType is the event type of the indexed stream
-     * @param coercionType are the classes to coerce indexed values to
-     */
-    public PropertyIndexedEventTableSingleCoerceAll(int streamNum, EventType eventType, String propertyName, Class coercionType)
-    {
-        super(streamNum, eventType, propertyName, coercionType);
+    public PropertyIndexedEventTableSingleCoerceAll(int streamNum, EventPropertyGetter propertyGetter, SimpleNumberCoercer coercer, Class coercionType) {
+        super(streamNum, propertyGetter, coercer, coercionType);
         this.coercionType = coercionType;
     }
 

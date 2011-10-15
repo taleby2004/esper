@@ -11,21 +11,75 @@ package com.espertech.esper.view;
 import com.espertech.esper.client.annotation.Audit;
 import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.spec.ViewSpec;
+import com.espertech.esper.view.ext.IStreamSortedRandomAccess;
+import com.espertech.esper.view.ext.IStreamTimeOrderRandomAccess;
+import com.espertech.esper.view.window.IStreamRandomAccess;
+import com.espertech.esper.view.window.IStreamRelativeAccess;
+import com.espertech.esper.view.window.RandomAccessByIndexGetter;
+import com.espertech.esper.view.window.RelativeAccessByEventNIndexMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Utility methods to deal with chains of views, and for merge/group-by views.
  */
 public class ViewServiceHelper
 {
+    public static IStreamRandomAccess getOptPreviousExprRandomAccess(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext) {
+        IStreamRandomAccess randomAccess = null;
+        if (agentInstanceViewFactoryContext.getPreviousNodeGetter() != null)
+        {
+            RandomAccessByIndexGetter getter = (RandomAccessByIndexGetter) agentInstanceViewFactoryContext.getPreviousNodeGetter();
+            randomAccess = new IStreamRandomAccess(getter);
+            getter.updated(randomAccess);
+        }
+        return randomAccess;
+    }
+
+    public static IStreamRelativeAccess getOptPreviousExprRelativeAccess(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext) {
+        IStreamRelativeAccess relativeAccessByEvent = null;
+
+        if (agentInstanceViewFactoryContext.getPreviousNodeGetter() != null)
+        {
+            RelativeAccessByEventNIndexMap getter = (RelativeAccessByEventNIndexMap) agentInstanceViewFactoryContext.getPreviousNodeGetter();
+            relativeAccessByEvent = new IStreamRelativeAccess(getter);
+            getter.updated(relativeAccessByEvent, null);
+        }
+
+        return relativeAccessByEvent;
+    }
+
+    public static IStreamSortedRandomAccess getOptPreviousExprSortedAccess(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext) {
+        IStreamSortedRandomAccess sortedRandomAccess = null;
+
+        if (agentInstanceViewFactoryContext.getPreviousNodeGetter() != null)
+        {
+            RandomAccessByIndexGetter getter = (RandomAccessByIndexGetter) agentInstanceViewFactoryContext.getPreviousNodeGetter();
+            sortedRandomAccess = new IStreamSortedRandomAccess(getter);
+            getter.updated(sortedRandomAccess);
+        }
+
+        return sortedRandomAccess;
+    }
+
+    public static IStreamTimeOrderRandomAccess getOptPreviousExprTimeOrderAccess(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext) {
+        IStreamTimeOrderRandomAccess sortedRandomAccess = null;
+
+        if (agentInstanceViewFactoryContext.getPreviousNodeGetter() != null)
+        {
+            RandomAccessByIndexGetter getter = (RandomAccessByIndexGetter) agentInstanceViewFactoryContext.getPreviousNodeGetter();
+            sortedRandomAccess = new IStreamTimeOrderRandomAccess(getter);
+            getter.updated(sortedRandomAccess);
+        }
+
+        return sortedRandomAccess;
+    }
+
     /**
      * Add merge views for any views in the chain requiring a merge (group view).
      * Appends to the list of view specifications passed in one ore more
@@ -90,20 +144,20 @@ public class ViewServiceHelper
      * Instantiate a chain of views.
      * @param parentViewable - parent view to add the chain to
      * @param viewFactories - is the view factories to use to make each view, or reuse and existing view
-     * @param context - dependent services
      * @return chain of views instantiated
      */
     protected static List<View> instantiateChain(Viewable parentViewable,
                                                  List<ViewFactory> viewFactories,
-                                                 StatementContext context)
+                                                 AgentInstanceViewFactoryChainContext viewFactoryChainContext)
     {
         List<View> newViews = new LinkedList<View>();
         Viewable parent = parentViewable;
 
-        for (ViewFactory viewFactory : viewFactories)
-        {
+        for (int i = 0; i < viewFactories.size(); i++) {
+            ViewFactory viewFactory = viewFactories.get(i);
+
             // Create the new view object
-            View currentView = viewFactory.makeView(context);
+            View currentView = viewFactory.makeView(viewFactoryChainContext);
 
             newViews.add(currentView);
             parent.addView(currentView);
@@ -220,7 +274,7 @@ public class ViewServiceHelper
 
         if (viewFactories.isEmpty())
         {
-            return new Pair<Viewable, List<View>>(rootViewable, new LinkedList<View>());
+            return new Pair<Viewable, List<View>>(rootViewable, Collections.<View>emptyList());
         }
 
         do      // while ((foundMatch) && (specifications.size() > 0));

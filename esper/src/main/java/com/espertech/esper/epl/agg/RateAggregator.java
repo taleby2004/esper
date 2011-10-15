@@ -59,8 +59,4 @@ public class RateAggregator implements AggregationMethod {
     public Class getValueType() {
         return Double.class;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService) {
-        return methodResolutionService.makeRateAggregator();
-    }
 }

@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.named;
 
-import com.espertech.esper.core.EPStatementHandle;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 
 import java.util.List;
 import java.util.Map;
@@ -20,14 +20,14 @@ import java.util.Map;
 public class NamedWindowConsumerDispatchUnit
 {
     private NamedWindowDeltaData deltaData;
-    private Map<EPStatementHandle, List<NamedWindowConsumerView>> dispatchTo;
+    private Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> dispatchTo;
 
     /**
      * Ctor.
      * @param deltaData the insert and remove stream posted by the named window
      * @param dispatchTo the list of consuming statements, and for each the list of consumer views
      */
-    public NamedWindowConsumerDispatchUnit(NamedWindowDeltaData deltaData, Map<EPStatementHandle, List<NamedWindowConsumerView>> dispatchTo)
+    public NamedWindowConsumerDispatchUnit(NamedWindowDeltaData deltaData, Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> dispatchTo)
     {
         this.deltaData = deltaData;
         this.dispatchTo = dispatchTo;
@@ -46,7 +46,7 @@ public class NamedWindowConsumerDispatchUnit
      * Returns the destination of the dispatch: a map of statements and their consuming views (one or multiple)
      * @return map of statement to consumer views
      */
-    public Map<EPStatementHandle, List<NamedWindowConsumerView>> getDispatchTo()
+    public Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> getDispatchTo()
     {
         return dispatchTo;
     }

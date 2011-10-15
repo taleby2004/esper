@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.OutputLimitRateType;
 import com.espertech.esper.epl.spec.OutputLimitSpec;
@@ -27,11 +27,10 @@ public class OutputConditionPolledFactory
     /**
      * Creates an output condition instance.
      * @param outputLimitSpec specifies what kind of condition to create
-     * @param statementContext supplies the services required such as for scheduling callbacks
      * @return instance for handling output condition
      */
 	public static OutputConditionPolled createCondition(OutputLimitSpec outputLimitSpec,
-										 	  	  StatementContext statementContext)
+                                                     AgentInstanceContext agentInstanceContext)
             throws ExprValidationException
     {
 		if(outputLimitSpec == null)
@@ -43,7 +42,7 @@ public class OutputConditionPolledFactory
         VariableReader reader = null;
         if (outputLimitSpec.getVariableName() != null)
         {
-            reader = statementContext.getVariableService().getReader(outputLimitSpec.getVariableName());
+            reader = agentInstanceContext.getStatementContext().getVariableService().getReader(outputLimitSpec.getVariableName());
             if (reader == null)
             {
                 throw new IllegalArgumentException("Variable named '" + outputLimitSpec.getVariableName() + "' has not been declared");
@@ -52,11 +51,11 @@ public class OutputConditionPolledFactory
 
         if(outputLimitSpec.getRateType() == OutputLimitRateType.CRONTAB)
         {
-            return new OutputConditionPolledCrontab(outputLimitSpec.getCrontabAtSchedule(), statementContext);
+            return new OutputConditionPolledCrontab(outputLimitSpec.getCrontabAtSchedule(), agentInstanceContext);
         }
         else if(outputLimitSpec.getRateType() == OutputLimitRateType.WHEN_EXPRESSION)
         {
-            return new OutputConditionPolledExpression(outputLimitSpec.getWhenExpressionNode(), outputLimitSpec.getThenExpressions(), statementContext);
+            return new OutputConditionPolledExpression(outputLimitSpec.getWhenExpressionNode(), outputLimitSpec.getThenExpressions(), agentInstanceContext);
         }
         else if(outputLimitSpec.getRateType() == OutputLimitRateType.EVENTS)
 		{
@@ -84,7 +83,7 @@ public class OutputConditionPolledFactory
                 throw new IllegalArgumentException("Variable named '" + outputLimitSpec.getVariableName() + "' must be of numeric type");
             }
 
-            return new OutputConditionPolledTime(outputLimitSpec.getTimePeriodExpr(), statementContext);
+            return new OutputConditionPolledTime(outputLimitSpec.getTimePeriodExpr(), agentInstanceContext);
 		}
 	}
 }

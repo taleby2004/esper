@@ -1,6 +1,14 @@
 Esper Changelog
 ===================
 
+Changes in version 4.4.0
+------------------------
+  - Support for a new 'between' date-time method
+  - Support for configuring a value cache for plug-in single-row functions
+  - Reduced overhead for named windows based on POJOs
+  - Allow @NoLock annotation and engine-wide disable of statement-level locking
+  - Support for configuring an engine-wide maximum limit of number of sub-expressions for followed-by  
+
 Changes in version 4.3.0
 ------------------------
 Major API or EPL changes

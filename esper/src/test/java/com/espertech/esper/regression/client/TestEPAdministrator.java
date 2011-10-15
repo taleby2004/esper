@@ -13,12 +13,12 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.core.EPAdministratorSPI;
+import com.espertech.esper.core.service.EPAdministratorSPI;
 import com.espertech.esper.epl.expression.ExprDotNode;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
-import com.espertech.esper.pattern.EvalFollowedByNode;
-import com.espertech.esper.pattern.EvalNode;
+import com.espertech.esper.pattern.EvalFactoryNode;
+import com.espertech.esper.pattern.EvalFollowedByFactoryNode;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -278,8 +278,8 @@ public class TestEPAdministrator extends TestCase
         expr.toEPL(buf, ExpressionPrecedenceEnum.MINIMUM);
         assertEquals("5 seconds", buf.toString());
 
-        EvalNode pattern = spi.compilePatternToNode("every A -> B");
-        assertEquals(EvalFollowedByNode.class, pattern.getClass());
+        EvalFactoryNode pattern = spi.compilePatternToNode("every A -> B");
+        assertEquals(EvalFollowedByFactoryNode.class, pattern.getClass());
 
         PatternExpr patternExpr = spi.compilePatternToSODA("every A -> B");
         assertEquals(PatternFollowedByExpr.class, patternExpr.getClass());

@@ -8,11 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.pollindex;
 
-import com.espertech.esper.epl.join.table.EventTable;
-import com.espertech.esper.epl.join.table.UnindexedEventTableList;
-import com.espertech.esper.epl.join.table.PropertyIndexedEventTable;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.join.table.EventTable;
+import com.espertech.esper.epl.join.table.PropertyIndexedEventTableFactory;
+import com.espertech.esper.epl.join.table.UnindexedEventTableList;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +45,8 @@ public class PollResultIndexingStrategyIndex implements PollResultIndexingStrate
         {
             return new UnindexedEventTableList(pollResult);
         }
-        PropertyIndexedEventTable table = new PropertyIndexedEventTable(streamNum, eventType, propertyNames);
+        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(streamNum, eventType, propertyNames);
+        EventTable table = factory.makeEventTable();
         table.add(pollResult.toArray(new EventBean[pollResult.size()]));
         return table;
     }

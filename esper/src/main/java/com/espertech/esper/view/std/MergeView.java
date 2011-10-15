@@ -11,7 +11,7 @@ package com.espertech.esper.view.std;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.IterablesListIterator;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.View;
@@ -34,8 +34,9 @@ import java.util.List;
  * The parent view of this view is generally the AddPropertyValueView that adds the grouped-by information
  * back into the data.
  */
-public final class MergeView extends ViewSupport implements CloneableView
+public final class MergeView extends ViewSupport implements CloneableView, MergeViewMarker
 {
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final LinkedList<View> parentViews = new LinkedList<View>();
     private final ExprNode[] groupFieldNames;
     private final EventType eventType;
@@ -44,17 +45,17 @@ public final class MergeView extends ViewSupport implements CloneableView
      * Constructor.
      * @param groupCriteria is the fields from which to pull the value to group by
      * @param resultEventType is passed by the factory as the factory adds the merged fields to an event type
-     * @param statementContext contains required view services
      */
-    public MergeView(StatementContext statementContext, ExprNode[] groupCriteria, EventType resultEventType)
+    public MergeView(AgentInstanceViewFactoryChainContext agentInstanceContext, ExprNode[] groupCriteria, EventType resultEventType)
     {
+        this.agentInstanceContext = agentInstanceContext;
         this.groupFieldNames = groupCriteria;
         this.eventType = resultEventType;
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return new MergeView(statementContext, groupFieldNames, eventType);
+        return new MergeView(agentInstanceContext, groupFieldNames, eventType);
     }
 
     /**

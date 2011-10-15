@@ -11,19 +11,17 @@
 
 package com.espertech.esper.pattern.observer;
 
-import junit.framework.TestCase;
 import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.pattern.PatternContext;
 import com.espertech.esper.pattern.MatchedEventMapImpl;
+import com.espertech.esper.pattern.PatternAgentInstanceContext;
 import com.espertech.esper.schedule.ScheduleSpec;
-import com.espertech.esper.type.ScheduleUnit;
 import com.espertech.esper.schedule.SchedulingServiceImpl;
 import com.espertech.esper.support.guard.SupportObserverEvaluator;
+import com.espertech.esper.support.pattern.SupportPatternContextFactory;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
-import com.espertech.esper.support.view.SupportStatementContextFactory;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.timer.TimeSourceService;
 import com.espertech.esper.timer.TimeSourceServiceImpl;
+import com.espertech.esper.type.ScheduleUnit;
+import junit.framework.TestCase;
 
 public class TestTimerCronObserver extends TestCase
 {
@@ -37,13 +35,12 @@ public class TestTimerCronObserver extends TestCase
         beginState = new MatchedEventMapImpl();
 
         scheduleService = new SchedulingServiceImpl(new TimeSourceServiceImpl());
-        StatementContext stmtContext = SupportStatementContextFactory.makeContext(scheduleService);
-        PatternContext context = new PatternContext(stmtContext, 1, null);
+        PatternAgentInstanceContext agentContext = SupportPatternContextFactory.makePatternAgentInstanceContext(scheduleService);
 
         ScheduleSpec scheduleSpec = new ScheduleSpec();
         scheduleSpec.addValue(ScheduleUnit.SECONDS, 1);
 
-        evaluator = new SupportObserverEvaluator(context);
+        evaluator = new SupportObserverEvaluator(agentContext);
 
         observer =  new TimerAtObserver(scheduleSpec, beginState, evaluator);
     }

@@ -873,14 +873,14 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 					This view posts the number of events received from a stream or view plus any additional event properties or expression values listed as parameters. The synopsis is:
 				</para>
 
-				<synopsis>std:size([<emphasis>expression</emphasis>, ...])</synopsis>
+				<synopsis>std:size([<emphasis>expression</emphasis>, ...] [ * ])</synopsis>
 
 				<para>					
 					The view posts a single long-typed property named <literal>size</literal>. The view posts the prior size as old data, and the current size as new data to update listeners of the view. Via the <literal>iterator</literal> method of the statement the size value can also be polled (read).
 				</para>
 				
 				<para>
-					As optional parameters the view takes a list of expressions that the view evaluates against the last arriving event and provides along the <literal>size</literal> field.
+					As optional parameters the view takes a list of expressions that the view evaluates against the last arriving event and provides along the <literal>size</literal> field. You may also provide the <literal>*</literal> wildcard selector to have the view output all event properties.
 				</para>
 
 				<para>					
@@ -900,6 +900,11 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 					The next example selects the symbol and feed event properties in addition to the <literal>size</literal> property:
 				</para>
 				<programlisting><![CDATA[select size, symbol, feed from StockTickEvent.win:time(1 min).std:size(symbol, feed)]]></programlisting>
+
+				<para>
+					This example selects all event properties in addition to the <literal>size</literal> property:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent.win:time(1 min).std:size(*)]]></programlisting>
 
 				<para>
 					The size view is also useful in conjunction with a <literal>std:groupwin</literal> grouped-window view to count the number of events per group. The EPL below returns the number of events per symbol.
@@ -1023,10 +1028,10 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 				<para>
 					This view calculates univariate statistics on a numeric expression. The view takes a single value expression as a parameter plus any number of optional additional expressions to return properties of the last event. The value expression must return a numeric value:
 				</para>
-				<synopsis>stat:uni(<emphasis>value_expression</emphasis> [,<emphasis>expression</emphasis>, ...])</synopsis>
+				<synopsis>stat:uni(<emphasis>value_expression</emphasis> [,<emphasis>expression</emphasis>, ...] [ * ])</synopsis>
 				
 				<para>
-					After the value expression you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event.
+					After the value expression you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event. You may also provide the <literal>*</literal> wildcard selector to have the view output all event properties.
 				</para>
 				
 				<table frame="topbot" id="view-stat-uni-table" revision="2">
@@ -1082,6 +1087,11 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 					This example selects all of the derived values, based on the price property, plus the values of the symbol and feed event properties:
 				</para>
 				<programlisting><![CDATA[select * from StockTickEvent.win:length(10).stat:uni(price, symbol, feed)]]></programlisting>
+
+				<para>
+					The following example selects all of the derived values plus all event properties:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent.win:length(10).stat:uni(price, symbol, *)]]></programlisting>
 			</sect2>
 
 			<sect2 id="view-stat-linest" >
@@ -1094,10 +1104,10 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 					This view calculates regression and related intermediate results on the values returned by two expressions. The view takes two value expressions as parameters plus any number of optional additional expressions to return properties of the last event. The value expressions must return a numeric value:
 				</para>
 				
-				<synopsis>stat:linest(<emphasis>value_expression</emphasis>, <emphasis>value_expression</emphasis> [,<emphasis>expression</emphasis>, ...])</synopsis>
+				<synopsis>stat:linest(<emphasis>value_expression</emphasis>, <emphasis>value_expression</emphasis> [,<emphasis>expression</emphasis>, ...] [ * ])</synopsis>
 
 				<para>
-					After the two value expressions you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event.
+					After the two value expressions you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event. You may also provide the <literal>*</literal> wildcard selector to have the view output all event properties.
 				</para>
 
 				<table frame="topbot" id="view-stat-linest-table" revision="2">
@@ -1206,6 +1216,10 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 				</para>
 				<programlisting><![CDATA[select * from StockTickEvent.win:time(10 seconds).stat:linest(price, offer, symbol, feed)]]></programlisting>
 
+				<para>
+					The following example selects all of the derived values plus all event properties:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent.win:time(10 seconds).stat:linest(price, offer, *)]]></programlisting>
 			</sect2>
 				
 			<sect2 id="view-stat-correl" >
@@ -1219,10 +1233,10 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 					This view calculates the correlation value on the value returned by two expressions. The view takes two value expressions as parameters plus any number of optional additional expressions to return properties of the last event. The value expressions must be return a numeric value:
 				</para>
 				
-				<synopsis>stat:correl(<emphasis>value_expression</emphasis>, <emphasis>value_expression</emphasis> [,<emphasis>expression</emphasis>, ...])</synopsis>
+				<synopsis>stat:correl(<emphasis>value_expression</emphasis>, <emphasis>value_expression</emphasis> [,<emphasis>expression</emphasis>, ...] [ * ])</synopsis>
 				
 				<para>
-					After the two value expressions you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event.
+					After the two value expressions you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event. You may also provide the <literal>*</literal> wildcard selector to have the view output all event properties.
 				</para>
 
 				<table frame="topbot" id="view-stat-correl-table" revision="2">
@@ -1259,6 +1273,10 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 				</para>
 				<programlisting><![CDATA[select * from StockTickEvent(symbol='GE').stat:correl(price, offer, feed)]]></programlisting>            
 
+				<para>
+					The next example selects all of the derived values plus all event properties:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent(symbol='GE').stat:correl(price, offer, *)]]></programlisting>            
 			</sect2>
 						
 			<sect2 id="view-stat-weightedavg" >
@@ -1271,10 +1289,10 @@ select * from Market.std:groupwin(ticker).win:length(1000000).std:merge(ticker)
 				<para>
 					This view returns the weighted average given an expression returning values to compute the average for and an expression returning weight. The view takes two value expressions as parameters plus any number of optional additional expressions to return properties of the last event. The value expressions must return numeric values:
 				</para>				
-				<synopsis>stat:weighted_avg(<emphasis>value_expression_field</emphasis>, <emphasis>value_expression_weight</emphasis> [,<emphasis>expression</emphasis>, ...])</synopsis>
+				<synopsis>stat:weighted_avg(<emphasis>value_expression_field</emphasis>, <emphasis>value_expression_weight</emphasis> [,<emphasis>expression</emphasis>, ...] [ * ])</synopsis>
 				
 				<para>
-					After the value expression you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event.
+					After the value expression you may optionally list additional expressions or event properties to evaluate for the stream and return their value based on the last arriving event. You may also provide the <literal>*</literal> wildcard selector to have the view output all event properties.
 				</para>
 
 				<table frame="topbot" id="view-stat-weightedavg-table" revision="2">
@@ -1315,6 +1333,12 @@ from StockTickEvent(symbol='GE').win:time(3 seconds).stat:weighted_avg(price, vo
 from StockTickEvent.win:time(3 seconds).stat:weighted_avg(price, volume, symbol, feed)]]></programlisting>
 
 				<para>
+					The next example selects all of the derived values plus the values of all event properties:
+				</para>
+				<programlisting><![CDATA[select *
+from StockTickEvent.win:time(3 seconds).stat:weighted_avg(price, volume, *)]]></programlisting>
+
+				<para>
 					Aggregation functions could instead be used to compute the weighted average as well. The next example also posts weighted average per symbol considering the last 3 seconds of stock tick data:
 				</para>
 				<programlisting><![CDATA[select symbol, sum(price*volume)/sum(volume)
@@ -1325,8 +1349,7 @@ from StockTickEvent.win:time(3 seconds) group by symbol]]></programlisting>
 				</para>
 				<programlisting><![CDATA[select symbol, average
 from StockTickEvent.std:groupwin(symbol).win:length(5).stat:weighted_avg(price, volume)]]></programlisting>            
-			</sect2> 
-			
+			</sect2> 			
 		</sect1>
 
         <sect1 id="ext-views" >

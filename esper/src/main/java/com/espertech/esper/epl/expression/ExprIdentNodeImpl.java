@@ -79,7 +79,7 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
             throw new IllegalArgumentException("Ident-node constructor could not locate property " + propertyName);
         }
         Class propertyType = eventType.getPropertyType(propertyName);
-        evaluator = new ExprIdentNodeEvaluator(streamNumber, propertyGetter, propertyType);
+        evaluator = new ExprIdentNodeEvaluatorImpl(streamNumber, propertyGetter, propertyType);
     }
 
     public ExprEvaluator getExprEvaluator()
@@ -153,7 +153,17 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
             evaluator = new ExprIdentNodeEvaluatorLogging(streamNum, propertyGetter, propertyType, resolvedPropertyName, validationContext.getStatementName());
         }
         else {
-            evaluator = new ExprIdentNodeEvaluator(streamNum, propertyGetter, propertyType);
+            evaluator = new ExprIdentNodeEvaluatorImpl(streamNum, propertyGetter, propertyType);
+        }
+
+        // if running in a context, take the property value from context
+        if (validationContext.getContextDescriptor() != null) {
+            EventType fromType = validationContext.getStreamTypeService().getEventTypes()[streamNum];
+            String contextPropertyName = validationContext.getContextDescriptor().getContextPropertyRegistry().getPartitionContextPropertyName(fromType, resolvedPropertyName);
+            if (contextPropertyName != null) {
+                EventType contextType = validationContext.getContextDescriptor().getContextPropertyRegistry().getContextEventType();
+                evaluator = new ExprIdentNodeEvaluatorContext(streamNum, contextType.getPropertyType(contextPropertyName), contextType.getGetter(contextPropertyName));
+            }
         }
     }
 
@@ -249,16 +259,16 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
 
     public boolean equalsNode(ExprNode node)
     {
-        if (!(node instanceof ExprIdentNodeImpl))
+        if (!(node instanceof ExprIdentNode))
         {
             return false;
         }
 
-        ExprIdentNodeImpl other = (ExprIdentNodeImpl) node;
+        ExprIdentNode other = (ExprIdentNode) node;
 
-        if (streamOrPropertyName != null ? !streamOrPropertyName.equals(other.streamOrPropertyName) : other.streamOrPropertyName != null)
+        if (streamOrPropertyName != null ? !streamOrPropertyName.equals(other.getStreamOrPropertyName()) : other.getStreamOrPropertyName() != null)
             return false;
-        if (unresolvedPropertyName != null ? !unresolvedPropertyName.equals(other.unresolvedPropertyName) : other.unresolvedPropertyName != null)
+        if (unresolvedPropertyName != null ? !unresolvedPropertyName.equals(other.getUnresolvedPropertyName()) : other.getUnresolvedPropertyName() != null)
             return false;
         return true;
     }

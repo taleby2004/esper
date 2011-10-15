@@ -14,7 +14,7 @@ package com.espertech.esper.epl.core.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
-import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,7 +28,7 @@ public class EvalInsertNoWildcard extends EvalBase implements SelectExprProcesso
         super(selectExprContext, resultEventType);
     }
 
-    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize) {
-        return super.getEventAdapterService().adaptorForTypedMap(props, super.getResultEventType());
+    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
+        return super.getEventAdapterService().adapterForTypedMap(props, super.getResultEventType());
     }
 }

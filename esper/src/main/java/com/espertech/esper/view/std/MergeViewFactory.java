@@ -8,16 +8,16 @@
  **************************************************************************************/
 package com.espertech.esper.view.std;
 
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.view.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Factory for {@link MergeView} instances.
@@ -39,15 +39,15 @@ public class MergeViewFactory implements ViewFactory
     public void attach(EventType parentEventType, StatementContext statementContext, ViewFactory optionalParentFactory, List<ViewFactory> parentViewFactories) throws ViewParameterException
     {
         // Find the group by view matching the merge view
-        GroupByViewFactory groupByViewFactory = null;
+        GroupByViewFactoryMarker groupByViewFactory = null;
         ExprNode[] unvalidated = viewParameters.toArray(new ExprNode[viewParameters.size()]);
         for (ViewFactory parentView : parentViewFactories)
         {
-            if (!(parentView instanceof GroupByViewFactory))
+            if (!(parentView instanceof GroupByViewFactoryMarker))
             {
                 continue;
             }
-            GroupByViewFactory candidateGroupByView = (GroupByViewFactory) parentView;
+            GroupByViewFactoryMarker candidateGroupByView = (GroupByViewFactoryMarker) parentView;
             if (ExprNodeUtility.deepEquals(candidateGroupByView.getCriteriaExpressions(), unvalidated))
             {
                 groupByViewFactory = candidateGroupByView;
@@ -56,7 +56,7 @@ public class MergeViewFactory implements ViewFactory
 
         if (groupByViewFactory == null)
         {
-            throw new ViewParameterException("Group by view for this merge view could not be found among parent views");
+            throw new ViewParameterException("Groupwin view for this merge view could not be found among parent views");
         }
         criteriaExpressions = groupByViewFactory.getCriteriaExpressions();
 
@@ -104,19 +104,9 @@ public class MergeViewFactory implements ViewFactory
         }
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        return false;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        return new MergeView(statementContext, criteriaExpressions, eventType);
+        return new MergeView(agentInstanceViewFactoryContext, criteriaExpressions, eventType);
     }
 
     public EventType getEventType()

@@ -9,7 +9,6 @@
 package com.espertech.esper.view.std;
 
 import com.espertech.esper.collection.SingleEventIterator;
-import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.view.CloneableView;
@@ -31,7 +30,7 @@ public class FirstElementView extends ViewSupport implements CloneableView
      */
     protected EventBean firstEvent;
 
-    public View cloneView(StatementContext context)
+    public View cloneView()
     {
         return new FirstElementView();
     }

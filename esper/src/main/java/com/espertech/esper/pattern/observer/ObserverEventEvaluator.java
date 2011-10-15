@@ -26,5 +26,5 @@ public interface ObserverEventEvaluator
      */
     public void observerEvaluateFalse();
 
-    public PatternContext getContext();
+    public PatternAgentInstanceContext getContext();
 }

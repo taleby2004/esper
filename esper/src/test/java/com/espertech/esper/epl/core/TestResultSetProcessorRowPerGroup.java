@@ -13,9 +13,9 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.UniformPair;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.core.eval.SelectExprStreamDesc;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.epl.SupportAggregationService;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
@@ -23,6 +23,7 @@ import com.espertech.esper.support.epl.SupportSelectExprFactory;
 import com.espertech.esper.support.epl.SupportStreamTypeSvc1Stream;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.view.SupportStatementContextFactory;
 import junit.framework.TestCase;
 
 import java.util.Collections;
@@ -32,9 +33,12 @@ public class TestResultSetProcessorRowPerGroup extends TestCase
 {
     private ResultSetProcessorRowPerGroup processor;
     private SupportAggregationService supportAggregationService;
+    private AgentInstanceContext agentInstanceContext;
 
     public void setUp() throws Exception
     {
+        agentInstanceContext = SupportStatementContextFactory.makeAgentInstanceContext();
+
         SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
         SelectExprProcessorHelper factory = new SelectExprProcessorHelper(Collections.<Integer>emptyList(), SupportSelectExprFactory.makeSelectListFromIdent("string", "s0"),
         		Collections.<SelectExprStreamDesc>emptyList(), null, false, new SupportStreamTypeSvc1Stream(), SupportEventAdapterService.getService(), null, selectExprEventTypeRegistry, null, null, null);
@@ -45,7 +49,8 @@ public class TestResultSetProcessorRowPerGroup extends TestCase
         groupKeyNodes[0] = SupportExprNodeFactory.makeIdentNode("intPrimitive", "s0").getExprEvaluator();
         groupKeyNodes[1] = SupportExprNodeFactory.makeIdentNode("intBoxed", "s0").getExprEvaluator();
 
-        processor = new ResultSetProcessorRowPerGroup(selectProcessor, null, supportAggregationService, groupKeyNodes, null, true, false, null, null);
+        ResultSetProcessorRowPerGroupFactory prototype = new ResultSetProcessorRowPerGroupFactory(selectProcessor, groupKeyNodes, null, true, false, null, false);
+        processor = (ResultSetProcessorRowPerGroup) prototype.instantiate(null, supportAggregationService, agentInstanceContext);
     }
 
     public void testProcess()

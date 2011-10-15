@@ -14,13 +14,13 @@ package com.espertech.esper.regression.epl;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.deploy.DeploymentResult;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
+import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.event.EventTypeSPI;
-import com.espertech.esper.event.EventTypeMetadata;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -39,6 +39,67 @@ public class TestSchema extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    public void testSchemaCopyProperties() {
+        epService.getEPAdministrator().createEPL("create schema BaseOne (prop1 String, prop2 int)");
+        epService.getEPAdministrator().createEPL("create schema BaseTwo (prop3 long)");
+
+        // test define and send
+        epService.getEPAdministrator().createEPL("create schema E1 () copyfrom BaseOne");
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL("select * from E1");
+        stmtOne.addListener(listener);
+        assertEquals(String.class, stmtOne.getEventType().getPropertyType("prop1"));
+        assertEquals(Integer.class, stmtOne.getEventType().getPropertyType("prop2"));
+
+        Map<String, Object> eventE1 = new HashMap<String, Object>();
+        eventE1.put("prop1", "v1");
+        eventE1.put("prop2", 2);
+        epService.getEPRuntime().sendEvent(eventE1, "E1");
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "prop1,prop2".split(","), new Object[] {"v1", 2});
+
+        // test two copy-from types
+        epService.getEPAdministrator().createEPL("create schema E2 () copyfrom BaseOne, BaseTwo");
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL("select * from E2");
+        assertEquals(String.class, stmtTwo.getEventType().getPropertyType("prop1"));
+        assertEquals(Integer.class, stmtTwo.getEventType().getPropertyType("prop2"));
+        assertEquals(Long.class, stmtTwo.getEventType().getPropertyType("prop3"));
+
+        // test API-defined type
+        Map<String, Object> def = new HashMap<String, Object>();
+        def.put("a", "string");
+        def.put("b", String.class);
+        def.put("c", "BaseOne");
+        def.put("d", "BaseTwo[]");
+        epService.getEPAdministrator().getConfiguration().addEventType("MyType", def);
+
+        epService.getEPAdministrator().createEPL("create schema E3(e long, f BaseOne) copyfrom MyType");
+        EPStatement stmtThree = epService.getEPAdministrator().createEPL("select * from E3");
+        assertEquals(String.class, stmtThree.getEventType().getPropertyType("a"));
+        assertEquals(String.class, stmtThree.getEventType().getPropertyType("b"));
+        assertEquals(Map.class, stmtThree.getEventType().getPropertyType("c"));
+        assertEquals(Map[].class, stmtThree.getEventType().getPropertyType("d"));
+        assertEquals(Long.class, stmtThree.getEventType().getPropertyType("e"));
+        assertEquals(Map.class, stmtThree.getEventType().getPropertyType("f"));
+
+        // invalid tests
+        tryInvalid("create schema E4(a long) copyFrom MyType",
+                "Error starting statement: Type by name 'MyType' contributes property 'a' defined as 'java.lang.String' which overides the same property of type 'java.lang.Long' [create schema E4(a long) copyFrom MyType]");
+        tryInvalid("create schema E4(c BaseTwo) copyFrom MyType",
+                "Error starting statement: Property by name 'c' is defined twice by adding type 'MyType' [create schema E4(c BaseTwo) copyFrom MyType]");
+        tryInvalid("create schema E4(c BaseTwo) copyFrom XYZ",
+                "Error starting statement: Type by name 'XYZ' could not be located [create schema E4(c BaseTwo) copyFrom XYZ]");
+        tryInvalid("create schema E4 as " + SupportBean.class.getName() + " copyFrom XYZ",
+                "Error starting statement: Copy-from types are not allowed with class-provided types [create schema E4 as com.espertech.esper.support.bean.SupportBean copyFrom XYZ]");
+        tryInvalid("create variant schema E4(c BaseTwo) copyFrom XYZ",
+                "Error starting statement: Copy-from types are not allowed with variant types [create variant schema E4(c BaseTwo) copyFrom XYZ]");
+
+        // test SODA
+        String createEPL = "create schema EX as () copyFrom BaseOne, BaseTwo";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(createEPL);
+        assertEquals(createEPL, model.toEPL());
+        EPStatement stmt = epService.getEPAdministrator().create(model);
+        assertEquals(createEPL, stmt.getText());
+    }
+    
     public void testConfiguredNotRemoved() throws Exception {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("MapType", new HashMap<String, Object>());
@@ -85,7 +146,7 @@ public class TestSchema extends TestCase
                     "Error starting statement: Event type named 'MyEventType' has already been declared with differing column name or type information: Type by name 'MyEventType' expects 1 properties but receives 2 properties [create schema MyEventType as (col1 string, col2 string)]");
 
         tryInvalid("create schema MyEventType as () inherit ABC",
-                    "Error in expression: Expected 'inherits', 'starttimestamp' or 'endtimestamp' keyword after create-schema clause but encountered 'inherit' [create schema MyEventType as () inherit ABC]");
+                    "Error in expression: Expected 'inherits', 'starttimestamp', 'endtimestamp' or 'copyfrom' keyword after create-schema clause but encountered 'inherit' [create schema MyEventType as () inherit ABC]");
 
         tryInvalid("create schema MyEventType as () inherits ABC",
                     "Error starting statement: Map supertype by name 'ABC' could not be found [create schema MyEventType as () inherits ABC]");

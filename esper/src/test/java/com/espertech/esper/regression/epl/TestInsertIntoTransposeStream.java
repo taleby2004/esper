@@ -108,15 +108,6 @@ public class TestInsertIntoTransposeStream extends TestCase
         assertEquals(11, (int) ((SupportBeanNumeric) resultTwo.getUnderlying()).getIntTwo());
         stmtTwo.destroy();
 
-        // invalid - without transpose_function
-        try {
-            epService.getEPAdministrator().createEPL("insert into SupportBean select customOne('O' || string, 10) from SupportBean(string like 'I%')");
-            fail();
-        }
-        catch (EPStatementException ex) {
-            assertEquals("Error starting statement: Column 'customOne.makeSupportBean((\"O\"||string), 10)' could not be assigned to any of the properties of the underlying type (missing column names, event property, setter method or constructor?) [insert into SupportBean select customOne('O' || string, 10) from SupportBean(string like 'I%')]", ex.getMessage());
-        }
-
         // invalid wrong-bean target
         try {
             epService.getEPAdministrator().createEPL("insert into SupportBeanNumeric select transpose(customOne('O', 10)) from SupportBean");

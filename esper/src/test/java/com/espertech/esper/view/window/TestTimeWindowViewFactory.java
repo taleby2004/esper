@@ -41,8 +41,8 @@ public class TestTimeWindowViewFactory extends TestCase
     {
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {1000}));
         assertFalse(factory.canReuse(new FirstElementView()));
-        assertFalse(factory.canReuse(new TimeBatchView(null, SupportStatementContextFactory.makeContext(), 1000, null, false, false, null)));
-        assertTrue(factory.canReuse(new TimeWindowView(SupportStatementContextFactory.makeContext(), factory, 1000000, null, false)));
+        assertFalse(factory.canReuse(new TimeBatchView(null, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), 1000, null, false, false, null)));
+        assertTrue(factory.canReuse(new TimeWindowView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), factory, 1000000, null)));
     }
 
     private void tryInvalidParameter(Object param) throws Exception
@@ -63,7 +63,7 @@ public class TestTimeWindowViewFactory extends TestCase
     {
         TimeWindowViewFactory factory = new TimeWindowViewFactory();
         factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(new Object[] {param}));
-        TimeWindowView view = (TimeWindowView) factory.makeView(SupportStatementContextFactory.makeContext());
+        TimeWindowView view = (TimeWindowView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(msec, view.getMillisecondsBeforeExpiry());
     }
 }

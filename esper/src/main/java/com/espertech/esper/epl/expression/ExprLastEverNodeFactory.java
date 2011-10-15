@@ -31,13 +31,16 @@ public class ExprLastEverNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod getPrototypeAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeLastEverValueAggregator(childType, hasFilter);
-    }
-
     public AggregationAccessor getAccessor()
     {
         throw new UnsupportedOperationException();
+    }
+
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+        return methodResolutionService.makeLastEverValueAggregator(agentInstanceIds, groupId, aggregationId, childType, hasFilter);
+    }
+
+    public AggregationMethodFactory getPrototypeAggregator() {
+        return this;
     }
 }

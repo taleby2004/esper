@@ -94,7 +94,7 @@ public class MapMaptypedArrayPropertyGetter implements MapEventPropertyGetter
         {
             if (map != null)
             {
-                mapEvents[count++] = eventAdapterService.adaptorForTypedMap(map, fragmentEventType);
+                mapEvents[count++] = eventAdapterService.adapterForTypedMap(map, fragmentEventType);
             }
         }
 

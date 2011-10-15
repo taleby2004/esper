@@ -18,7 +18,6 @@ import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.view.SupportBeanClassView;
 import com.espertech.esper.support.view.SupportStreamImpl;
 import com.espertech.esper.support.view.SupportViewDataChecker;
-import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
 
@@ -86,7 +85,7 @@ public class TestUniqueByPropertyView extends TestCase
         SupportBeanClassView parent = new SupportBeanClassView(SupportMarketDataBean.class);
         myView.setParent(parent);
 
-        UniqueByPropertyView copied = (UniqueByPropertyView) myView.cloneView(SupportStatementContextFactory.makeContext());
+        UniqueByPropertyView copied = (UniqueByPropertyView) myView.cloneView();
         assertEquals(myView.getCriteriaExpressions()[0], copied.getCriteriaExpressions()[0]);
     }
 

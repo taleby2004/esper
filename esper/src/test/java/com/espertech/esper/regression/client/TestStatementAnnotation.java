@@ -19,7 +19,7 @@ import com.espertech.esper.epl.annotation.AnnotationUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportEnum;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.core.EPStatementSPI;
+import com.espertech.esper.core.service.EPStatementSPI;
 import junit.framework.TestCase;
 
 import java.lang.annotation.Annotation;
@@ -169,6 +169,10 @@ public class TestStatementAnnotation extends TestCase
         annos = epService.getEPAdministrator().createEPL("@Hint('reclaim_group_aged=11') select * from Bean").getAnnotations();
         hint = HintEnum.RECLAIM_GROUP_AGED.getHint(annos);
         assertEquals("11", HintEnum.RECLAIM_GROUP_AGED.getHintAssignedValue(hint));
+
+        // NoLock
+        stmt = epService.getEPAdministrator().createEPL("@NoLock select * from Bean");
+        assertNotNull(AnnotationUtil.findAnnotation(stmt.getAnnotations(), NoLock.class));
     }
 
     private void runAssertion(EPStatement stmt)

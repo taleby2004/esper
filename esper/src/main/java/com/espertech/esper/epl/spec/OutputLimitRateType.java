@@ -36,5 +36,11 @@ public enum OutputLimitRateType
     /**
      * Output after a given time period
      */
-    AFTER
+    AFTER,
+
+    /**
+     * Output upon context partition (agent instance) termination
+     */
+    TERM
+
 }

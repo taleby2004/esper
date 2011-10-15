@@ -93,9 +93,4 @@ public class RateEverAggregator implements AggregationMethod {
     {
         return Double.class;
     }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeRateEverAggregator(interval);
-    }
 }

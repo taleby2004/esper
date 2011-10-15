@@ -10,45 +10,23 @@ package com.espertech.esper.epl.view;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.InternalEventRouter;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.core.UpdateDispatchView;
-import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.UpdateDispatchView;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.event.NaturalEventBean;
 
 /**
  * An output strategy that handles routing (insert-into) and stream selection.
  */
-public class OutputStrategyPostProcess implements OutputStrategy
+public class OutputStrategyPostProcess
 {
-    private final boolean isRoute;
-    private final boolean isRouteRStream;
-    private final SelectClauseStreamSelectorEnum selectStreamDirEnum;
-    private final InternalEventRouter internalEventRouter;
-    private final EPStatementHandle epStatementHandle;
-    private final StatementContext statementContext;
-    private final boolean addToFront;
+    private final OutputStrategyPostProcessFactory parent;
+    private final AgentInstanceContext agentInstanceContext;
 
-    /**
-     * Ctor.
-     * @param route true if this is insert-into
-     * @param routeRStream true if routing the remove stream events, false if routing insert stream events
-     * @param selectStreamDirEnum enumerator selecting what stream(s) are selected
-     * @param internalEventRouter for performing the route operation
-     * @param statementContext for statement-level services
-     * @param epStatementHandle for use in routing to determine which statement routed
-     */
-    public OutputStrategyPostProcess(boolean route, boolean routeRStream, SelectClauseStreamSelectorEnum selectStreamDirEnum, InternalEventRouter internalEventRouter, EPStatementHandle epStatementHandle, StatementContext statementContext, boolean addToFront)
-    {
-        isRoute = route;
-        isRouteRStream = routeRStream;
-        this.selectStreamDirEnum = selectStreamDirEnum;
-        this.internalEventRouter = internalEventRouter;
-        this.epStatementHandle = epStatementHandle;
-        this.statementContext = statementContext;
-        this.addToFront = addToFront;
+    public OutputStrategyPostProcess(OutputStrategyPostProcessFactory parent, AgentInstanceContext agentInstanceContext) {
+        this.parent = parent;
+        this.agentInstanceContext = agentInstanceContext;
     }
 
     public void output(boolean forceUpdate, UniformPair<EventBean[]> result, UpdateDispatchView finalView)
@@ -57,26 +35,26 @@ public class OutputStrategyPostProcess implements OutputStrategy
         EventBean[] oldEvents = result != null ? result.getSecond() : null;
 
         // route first
-        if (isRoute)
+        if (parent.isRoute())
         {
-            if ((newEvents != null) && (!isRouteRStream))
+            if ((newEvents != null) && (!parent.isRouteRStream()))
             {
-                route(newEvents, statementContext);
+                route(newEvents, agentInstanceContext);
             }
 
-            if ((oldEvents != null) && (isRouteRStream))
+            if ((oldEvents != null) && (parent.isRouteRStream()))
             {
-                route(oldEvents, statementContext);
+                route(oldEvents, agentInstanceContext);
             }
         }
 
         // discard one side of results
-        if (selectStreamDirEnum == SelectClauseStreamSelectorEnum.RSTREAM_ONLY)
+        if (parent.getSelectStreamDirEnum() == SelectClauseStreamSelectorEnum.RSTREAM_ONLY)
         {
             newEvents = oldEvents;
             oldEvents = null;
         }
-        else if (selectStreamDirEnum == SelectClauseStreamSelectorEnum.ISTREAM_ONLY)
+        else if (parent.getSelectStreamDirEnum() == SelectClauseStreamSelectorEnum.ISTREAM_ONLY)
         {
             oldEvents = null;   // since the insert-into may require rstream
         }
@@ -97,9 +75,9 @@ public class OutputStrategyPostProcess implements OutputStrategy
         for (EventBean routed : events) {
             if (routed instanceof NaturalEventBean) {
                 NaturalEventBean natural = (NaturalEventBean) routed;
-                internalEventRouter.route(natural.getOptionalSynthetic(), epStatementHandle, statementContext.getInternalEventEngineRouteDest(), exprEvaluatorContext, addToFront);
+                parent.getInternalEventRouter().route(natural.getOptionalSynthetic(), parent.getEpStatementHandle(), agentInstanceContext.getStatementContext().getInternalEventEngineRouteDest(), exprEvaluatorContext, parent.isAddToFront());
             } else {
-                internalEventRouter.route(routed, epStatementHandle, statementContext.getInternalEventEngineRouteDest(), exprEvaluatorContext, addToFront);
+                parent.getInternalEventRouter().route(routed, parent.getEpStatementHandle(), agentInstanceContext.getStatementContext().getInternalEventEngineRouteDest(), exprEvaluatorContext, parent.isAddToFront());
             }
         }
     }

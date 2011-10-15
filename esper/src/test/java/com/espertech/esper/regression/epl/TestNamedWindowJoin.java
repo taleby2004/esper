@@ -32,6 +32,7 @@ public class TestNamedWindowJoin extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getLogging().setEnableQueryPlan(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listenerWindow = new SupportUpdateListener();
@@ -506,7 +507,9 @@ public class TestNamedWindowJoin extends TestCase
         stmtOne.addListener(listenerStmtOne);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertFalse(listenerStmtOne.isInvoked());
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
+        assertFalse(listenerStmtOne.isInvoked());
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
         assertFalse(listenerStmtOne.isInvoked());
 

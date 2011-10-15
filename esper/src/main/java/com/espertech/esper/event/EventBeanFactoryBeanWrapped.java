@@ -14,7 +14,6 @@ package com.espertech.esper.event;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventBeanFactory;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.event.EventAdapterService;
 
 import java.util.Collections;
 
@@ -32,6 +31,10 @@ public class EventBeanFactoryBeanWrapped implements EventBeanFactory {
 
     public EventBean wrap(Object underlying) {
         EventBean bean = eventAdapterService.adapterForTypedBean(underlying, beanEventType);
-        return eventAdapterService.adaptorForTypedWrapper(bean, Collections.<String, Object>emptyMap(), wrapperEventType);
+        return eventAdapterService.adapterForTypedWrapper(bean, Collections.<String, Object>emptyMap(), wrapperEventType);
+    }
+
+    public Class getUnderlyingType() {
+        return beanEventType.getUnderlyingType();
     }
 }

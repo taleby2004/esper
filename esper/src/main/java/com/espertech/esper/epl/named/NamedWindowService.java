@@ -9,11 +9,11 @@
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.StatementLock;
-import com.espertech.esper.core.StatementResultService;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
+import com.espertech.esper.core.service.StatementResultService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.metric.StatementMetricHandle;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.view.ViewProcessingException;
 
@@ -52,25 +52,22 @@ public interface NamedWindowService
      * Create a new named window.
      * @param name window name
      * @param eventType the event type of the window
-     * @param createWindowStmtHandle is the handle and lock of the create-named-window statement
      * @param statementResultService for coordinating on whether insert and remove stream events should be posted
      * @param revisionProcessor handles update events
      * @param eplExpression is the expression
      * @param statementName the name of the statement
      * @param isPrioritized if the engine is running with prioritized execution
-     * @param exprEvaluatorContext context for expression evalauation
      * @return processor for the named window
      * @throws ViewProcessingException if the named window already exists
      */
-    public NamedWindowProcessor addProcessor(String name, EventType eventType, EPStatementHandle createWindowStmtHandle, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, ExprEvaluatorContext exprEvaluatorContext, boolean isEnableSubqueryIndexShare) throws ViewProcessingException;
+    public NamedWindowProcessor addProcessor(String name, String contextName, boolean singleInstanceContext, EventType eventType, StatementResultService statementResultService, ValueAddEventProcessor revisionProcessor, String eplExpression, String statementName, boolean isPrioritized, boolean isEnableSubqueryIndexShare, boolean isBatchingDataWindow, boolean isVirtualDataWindow, StatementMetricHandle statementMetricHandle) throws ViewProcessingException;
 
     /**
      * Returns the processing instance for a given named window.
      * @param name window name
      * @return processor for the named window
-     * @throws ExprValidationException invalid processor
      */
-    public NamedWindowProcessor getProcessor(String name) throws ExprValidationException;
+    public NamedWindowProcessor getProcessor(String name);
 
     /**
      * Upon destroy of the named window creation statement, the named window processor must be removed.
@@ -91,14 +88,14 @@ public interface NamedWindowService
      * @param delta is the result to dispatch
      * @param consumers is the destination of the dispatch, a map of statements to one or more consuming views
      */
-    public void addDispatch(NamedWindowDeltaData delta, Map<EPStatementHandle,List<NamedWindowConsumerView>> consumers);
+    public void addDispatch(NamedWindowDeltaData delta, Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> consumers);
 
     /**
      * Returns the statement lock for the named window, to be shared with on-delete statements for the same named window.
      * @param windowName is the window name
      * @return the lock for the named window, or null if the window dos not yet exists
      */
-    public StatementLock getNamedWindowLock(String windowName);
+    public StatementAgentInstanceLock getNamedWindowLock(String windowName);
 
     /**
      * Sets the lock to use for a named window.
@@ -106,7 +103,7 @@ public interface NamedWindowService
      * @param statementResourceLock is the statement lock for the create window statement
      * @param statementName the name of the statement that is the "create window"
      */
-    public void addNamedWindowLock(String windowName, StatementLock statementResourceLock, String statementName);
+    public void addNamedWindowLock(String windowName, StatementAgentInstanceLock statementResourceLock, String statementName);
 
     /**
      * Remove the lock associated to the named window.

@@ -8,14 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
+import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.EPStatementStartMethod;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.*;
+import com.espertech.esper.core.context.util.ContextDescriptor;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.core.start.EPStatementStartMethodHelperValidate;
+import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.epl.core.StreamTypeService;
+import com.espertech.esper.epl.core.StreamTypeServiceImpl;
+import com.espertech.esper.epl.core.ViewResourceDelegateUnverified;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
-import com.espertech.esper.epl.named.NotADataWindowViewCapability;
 import com.espertech.esper.epl.property.PropertyEvaluator;
 import com.espertech.esper.epl.property.PropertyEvaluatorFactory;
 import com.espertech.esper.epl.spec.*;
@@ -89,14 +94,17 @@ public final class FilterSpecCompiler
                                                     String engineURI,
                                                     String optionalStreamName,
                                                     StatementContext statementContext,
-                                                    Collection<Integer> assignedTypeNumberStack)
+                                                    Collection<Integer> assignedTypeNumberStack,
+                                                    ContextDescriptor contextDescriptor,
+                                                    ConfigurationInformation configurationInformation)
             throws ExprValidationException
     {
         // Validate all nodes, make sure each returns a boolean and types are good;
         // Also decompose all AND super nodes into individual expressions
         List<ExprNode> validatedNodes = validateAllowSubquery(filterExpessions, streamTypeService, statementContext, taggedEventTypes, arrayEventTypes);
+        ExprEvaluatorContextStatement evaluatorContextStmt = new ExprEvaluatorContextStatement(statementContext);
         return build(validatedNodes, eventType, eventTypeName, optionalPropertyEvalSpec, taggedEventTypes, arrayEventTypes, streamTypeService, methodResolutionService,
-                timeProvider, variableService, eventAdapterService, engineURI, optionalStreamName, statementContext, statementContext.getStatementId(), statementContext.getStatementName(), statementContext.getAnnotations(), assignedTypeNumberStack);
+                timeProvider, variableService, eventAdapterService, engineURI, optionalStreamName, evaluatorContextStmt, statementContext.getStatementId(), statementContext.getStatementName(), statementContext.getAnnotations(), assignedTypeNumberStack, statementContext.getContextDescriptor(), statementContext.getConfigSnapshot());
     }
 
     public static FilterSpecCompiled build(List<ExprNode> validatedNodes,
@@ -116,7 +124,9 @@ public final class FilterSpecCompiler
                                             String statementId,
                                             String statementName,
                                             Annotation[] annotations,
-                                            Collection<Integer> assignedTypeNumberStack) throws ExprValidationException {
+                                            Collection<Integer> assignedTypeNumberStack,
+                                            ContextDescriptor contextDescriptor,
+                                            ConfigurationInformation configurationInformation) throws ExprValidationException {
 
         List<ExprNode> constituents = decomposeCheckAggregation(validatedNodes);
 
@@ -154,7 +164,7 @@ public final class FilterSpecCompiler
                 {
                     andNode.addChildNode(unoptimized);
                 }
-                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations);
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations, contextDescriptor);
                 andNode.validate(validationContext);
                 exprNode = andNode;
             }
@@ -163,7 +173,7 @@ public final class FilterSpecCompiler
         // if there are boolean expressions, add
         if (exprNode != null)
         {
-            FilterSpecParamExprNode param = new FilterSpecParamExprNode(PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService);
+            FilterSpecParamExprNode param = new FilterSpecParamExprNode(PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService, configurationInformation);
             filterParams.add(param);
         }
 
@@ -220,7 +230,8 @@ public final class FilterSpecCompiler
     {
         List<ExprNode> validatedNodes = new ArrayList<ExprNode>();
 
-        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), statementContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations());
+        ExprEvaluatorContextStatement evaluatorContextStmt = new ExprEvaluatorContextStatement(statementContext);
+        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), evaluatorContextStmt, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
         for (ExprNode node : exprNodes)
         {
             // Determine subselects
@@ -304,8 +315,7 @@ public final class FilterSpecCompiler
         // Named windows don't allow data views
         if (filterStreamSpec instanceof NamedWindowConsumerStreamSpec)
         {
-            ViewResourceDelegate viewResourceDelegate = new ViewResourceDelegateImpl(new ViewFactoryChain[] {viewFactoryChain}, null);
-            viewResourceDelegate.requestCapability(0, new NotADataWindowViewCapability(), null);
+            EPStatementStartMethodHelperValidate.validateNoDataWindowOnNamedWindow(viewFactoryChain.getViewFactoryChain());
         }
 
         // Streams event types are the original stream types with the stream zero the subselect stream
@@ -323,7 +333,7 @@ public final class FilterSpecCompiler
             }
         }
         StreamTypeService subselectTypeService = new StreamTypeServiceImpl(namesAndTypes, statementContext.getEngineURI(), true, true);
-        ViewResourceDelegate viewResourceDelegateSubselect = new ViewResourceDelegateImpl(new ViewFactoryChain[] {viewFactoryChain}, null);
+        ViewResourceDelegateUnverified viewResourceDelegateSubselect = new ViewResourceDelegateUnverified();
         subselect.setFilterSubqueryStreamTypes(subselectTypeService);
 
         // Validate select expression
@@ -340,7 +350,8 @@ public final class FilterSpecCompiler
                 // validate
                 SelectClauseExprCompiledSpec compiled = (SelectClauseExprCompiledSpec) element;
                 ExprNode selectExpression = compiled.getSelectExpression();
-                ExprValidationContext validationContext = new ExprValidationContext(subselectTypeService, statementContext.getMethodResolutionService(), viewResourceDelegateSubselect, statementContext.getSchedulingService(), statementContext.getVariableService(), statementContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations());
+                ExprEvaluatorContextStatement evaluatorContextStmt = new ExprEvaluatorContextStatement(statementContext);
+                ExprValidationContext validationContext = new ExprValidationContext(subselectTypeService, statementContext.getMethodResolutionService(), viewResourceDelegateSubselect, statementContext.getSchedulingService(), statementContext.getVariableService(), evaluatorContextStmt, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
                 selectExpression = ExprNodeUtility.getValidatedSubtree(selectExpression, validationContext);
                 subselect.setSelectClause(new ExprNode[] {selectExpression});
                 subselect.setSelectAsNames(new String[] {compiled.getAssignedName()});
@@ -353,7 +364,7 @@ public final class FilterSpecCompiler
                     // Other stream properties, if there is aggregation, cannot be under aggregation.
                     for (ExprAggregateNode aggNode : aggExprNodes)
                     {
-                        List<Pair<Integer, String>> propertiesNodesAggregated = EPStatementStartMethod.getExpressionProperties(aggNode, true);
+                        List<Pair<Integer, String>> propertiesNodesAggregated = ExprNodeUtility.getExpressionProperties(aggNode, true);
                         for (Pair<Integer, String> pair : propertiesNodesAggregated)
                         {
                             if (pair.getFirst() != 0)
@@ -364,7 +375,7 @@ public final class FilterSpecCompiler
                     }
 
                     // This stream (stream 0) properties must either all be under aggregation, or all not be.
-                    List<Pair<Integer, String>> propertiesNotAggregated = EPStatementStartMethod.getExpressionProperties(selectExpression, false);
+                    List<Pair<Integer, String>> propertiesNotAggregated = ExprNodeUtility.getExpressionProperties(selectExpression, false);
                     for (Pair<Integer, String> pair : propertiesNotAggregated)
                     {
                         if (pair.getFirst() == 0)
@@ -569,6 +580,11 @@ public final class FilterSpecCompiler
             }
         }
 
+        if (endpoint instanceof ExprContextPropertyNode) {
+            ExprContextPropertyNode node = (ExprContextPropertyNode) endpoint;
+            return new RangeValueContextProp(node.getPropertyName(), node.getGetter());
+        }
+
         // or property
         if (endpoint instanceof ExprIdentNode)
         {
@@ -587,7 +603,6 @@ public final class FilterSpecCompiler
             {
                 return new RangeValueEventProp(identNodeInner.getResolvedStreamName(), identNodeInner.getResolvedPropertyName());
             }
-
         }
 
         return null;
@@ -628,6 +643,20 @@ public final class FilterSpecCompiler
                     }
                     constant = handleConstantsCoercion(identNodeInSet, constant);
                     listofValues.add(new InSetOfValuesConstant(constant));
+                }
+                if (subNode instanceof ExprContextPropertyNode)
+                {
+                    ExprContextPropertyNode contextPropertyNode = (ExprContextPropertyNode) subNode;
+                    Class returnType = contextPropertyNode.getType();
+                    if (JavaClassHelper.isImplementsInterface(contextPropertyNode.getType(), Collection.class) ||
+                        JavaClassHelper.isImplementsInterface(contextPropertyNode.getType(), Map.class)) {
+                        return null;
+                    }
+                    if ((returnType != null) && (returnType.getClass().isArray())) {
+                        return null;
+                    }
+                    SimpleNumberCoercer coercer = getNumberCoercer(left.getExprEvaluator().getType(), contextPropertyNode.getType(), propertyName);
+                    listofValues.add(new InSetOfValuesContextProp(contextPropertyNode.getPropertyName(), contextPropertyNode.getGetter(), coercer));
                 }
                 if (subNode instanceof ExprIdentNode)
                 {
@@ -763,30 +792,56 @@ public final class FilterSpecCompiler
             }
             if ((identNodeRight.getStreamId() == 0) && (identNodeLeft.getStreamId() != 0))
             {
-                if (constituent instanceof ExprRelationalOpNode) {
-                    ExprRelationalOpNode relNode = (ExprRelationalOpNode) constituent;
-                    // reverse operators, as the expression is "stream1.prop xyz stream0.prop"
-                    if (relNode.getRelationalOpEnum() == RelationalOpEnum.GT)
-                    {
-                        op = FilterOperator.LESS;
-                    }
-                    else if (relNode.getRelationalOpEnum() == RelationalOpEnum.LT)
-                    {
-                        op = FilterOperator.GREATER;
-                    }
-                    else if (relNode.getRelationalOpEnum() == RelationalOpEnum.LE)
-                    {
-                        op = FilterOperator.GREATER_OR_EQUAL;
-                    }
-                    else if (relNode.getRelationalOpEnum() == RelationalOpEnum.GE)
-                    {
-                        op = FilterOperator.LESS_OR_EQUAL;
-                    }
-                }
+                op = getReversedOperator(constituent, op); // reverse operators, as the expression is "stream1.prop xyz stream0.prop"
                 return handleProperty(op, identNodeRight, identNodeLeft, arrayEventTypes, statementName);
             }
         }
+
+        if ((left instanceof ExprIdentNode) && (right instanceof ExprContextPropertyNode)) {
+            ExprIdentNode identNodeLeft = (ExprIdentNode) left;
+            ExprContextPropertyNode ctxNode = (ExprContextPropertyNode) right;
+            if (identNodeLeft.getStreamId() == 0) {
+                SimpleNumberCoercer numberCoercer = getNumberCoercer(identNodeLeft.getExprEvaluator().getType(), ctxNode.getType(), identNodeLeft.getResolvedPropertyName());
+                return new FilterSpecParamContextProp(identNodeLeft.getResolvedPropertyName(), op, ctxNode.getGetter(), numberCoercer);
+            }
+        }
+        if ((left instanceof ExprContextPropertyNode) && (right instanceof ExprIdentNode)) {
+            ExprIdentNode identNodeRight = (ExprIdentNode) right;
+            ExprContextPropertyNode ctxNode = (ExprContextPropertyNode) left;
+            if (identNodeRight.getStreamId() == 0) {
+                op = getReversedOperator(constituent, op); // reverse operators, as the expression is "stream1.prop xyz stream0.prop"
+                SimpleNumberCoercer numberCoercer = getNumberCoercer(identNodeRight.getExprEvaluator().getType(), ctxNode.getType(), identNodeRight.getResolvedPropertyName());
+                return new FilterSpecParamContextProp(identNodeRight.getResolvedPropertyName(), op, ctxNode.getGetter(), numberCoercer);
+            }
+        }
         return null;
+    }
+
+    private static FilterOperator getReversedOperator(ExprNode constituent, FilterOperator op) {
+        if (!(constituent instanceof ExprRelationalOpNode)) {
+            return op;
+        }
+
+        ExprRelationalOpNode relNode = (ExprRelationalOpNode) constituent;
+        RelationalOpEnum relationalOpEnum = relNode.getRelationalOpEnum();
+
+        if (relationalOpEnum == RelationalOpEnum.GT)
+        {
+            return FilterOperator.LESS;
+        }
+        else if (relationalOpEnum == RelationalOpEnum.LT)
+        {
+            return FilterOperator.GREATER;
+        }
+        else if (relationalOpEnum == RelationalOpEnum.LE)
+        {
+            return FilterOperator.GREATER_OR_EQUAL;
+        }
+        else if (relationalOpEnum == RelationalOpEnum.GE)
+        {
+            return FilterOperator.LESS_OR_EQUAL;
+        }
+        return op;
     }
 
     private static FilterSpecParam handleProperty(FilterOperator op, ExprIdentNode identNodeLeft, ExprIdentNode identNodeRight, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, String statementName)
@@ -794,21 +849,12 @@ public final class FilterSpecCompiler
     {
         String propertyName = identNodeLeft.getResolvedPropertyName();
 
-        boolean isMustCoerce = false;
-        SimpleNumberCoercer numberCoercer = null;
-        Class numericCoercionType = JavaClassHelper.getBoxedType(identNodeLeft.getExprEvaluator().getType());
-        if (identNodeRight.getExprEvaluator().getType() != identNodeLeft.getExprEvaluator().getType())
-        {
-            if (JavaClassHelper.isNumeric(identNodeRight.getExprEvaluator().getType()))
-            {
-                if (!JavaClassHelper.canCoerce(identNodeRight.getExprEvaluator().getType(), identNodeLeft.getExprEvaluator().getType()))
-                {
-                    throwConversionError(identNodeRight.getExprEvaluator().getType(), identNodeLeft.getExprEvaluator().getType(), identNodeLeft.getResolvedPropertyName());
-                }
-                isMustCoerce = true;
-                numberCoercer = SimpleNumberCoercerFactory.getCoercer(identNodeRight.getExprEvaluator().getType(), numericCoercionType);
-            }
-        }
+        Class leftType = identNodeLeft.getExprEvaluator().getType();
+        Class rightType = identNodeRight.getExprEvaluator().getType();
+
+        SimpleNumberCoercer numberCoercer = getNumberCoercer(leftType, rightType, propertyName);
+        boolean isMustCoerce = numberCoercer != null;
+        Class numericCoercionType = JavaClassHelper.getBoxedType(leftType);
 
         String streamName = identNodeRight.getResolvedStreamName();
         if (!arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(streamName))
@@ -819,6 +865,22 @@ public final class FilterSpecCompiler
         }
         return new FilterSpecParamEventProp(propertyName, op, identNodeRight.getResolvedStreamName(), identNodeRight.getResolvedPropertyName(),
                 isMustCoerce, numberCoercer, numericCoercionType, statementName);
+    }
+
+    private static SimpleNumberCoercer getNumberCoercer(Class leftType, Class rightType, String propertyName) throws ExprValidationException {
+        Class numericCoercionType = JavaClassHelper.getBoxedType(leftType);
+        if (rightType != leftType)
+        {
+            if (JavaClassHelper.isNumeric(rightType))
+            {
+                if (!JavaClassHelper.canCoerce(rightType, leftType))
+                {
+                    throwConversionError(rightType, leftType, propertyName);
+                }
+                return SimpleNumberCoercerFactory.getCoercer(rightType, numericCoercionType);
+            }
+        }
+        return null;
     }
 
     private static Pair<Integer, String> getStreamIndex(String resolvedPropertyName)

@@ -8,21 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Result of analysis of pattern expression node tree.
  */
 public class EvalNodeAnalysisResult
 {
-    private List<EvalNode> activeNodes = new ArrayList<EvalNode>();
+    private List<EvalFactoryNode> activeNodes = new ArrayList<EvalFactoryNode>();
 
     /**
      * Add a node found.
      * @param node found
      */
-    public void addNode(EvalNode node)
+    public void addNode(EvalFactoryNode node)
     {
         activeNodes.add(node);
     }
@@ -31,7 +31,7 @@ public class EvalNodeAnalysisResult
      * Returns all nodes found.
      * @return pattern nodes
      */
-    public List<EvalNode> getActiveNodes()
+    public List<EvalFactoryNode> getActiveNodes()
     {
         return activeNodes;
     }
@@ -40,14 +40,14 @@ public class EvalNodeAnalysisResult
      * Returns filter nodes.
      * @return filter nodes
      */
-    public List<EvalFilterNode> getFilterNodes()
+    public List<EvalFilterFactoryNode> getFilterNodes()
     {
-        List<EvalFilterNode> filterNodes = new ArrayList<EvalFilterNode>();
-        for (EvalNode node : activeNodes)
+        List<EvalFilterFactoryNode> filterNodes = new ArrayList<EvalFilterFactoryNode>();
+        for (EvalFactoryNode node : activeNodes)
         {
-            if (node instanceof EvalFilterNode)
+            if (node instanceof EvalFilterFactoryNode)
             {
-                filterNodes.add((EvalFilterNode) node);
+                filterNodes.add((EvalFilterFactoryNode) node);
             }
         }
         return filterNodes;
@@ -57,14 +57,14 @@ public class EvalNodeAnalysisResult
      * Returns the repeat-nodes.
      * @return repeat nodes
      */
-    public List<EvalMatchUntilNode> getRepeatNodes()
+    public List<EvalMatchUntilFactoryNode> getRepeatNodes()
     {
-        List<EvalMatchUntilNode> filterNodes = new ArrayList<EvalMatchUntilNode>();
-        for (EvalNode node : activeNodes)
+        List<EvalMatchUntilFactoryNode> filterNodes = new ArrayList<EvalMatchUntilFactoryNode>();
+        for (EvalFactoryNode node : activeNodes)
         {
-            if (node instanceof EvalMatchUntilNode)
+            if (node instanceof EvalMatchUntilFactoryNode)
             {
-                filterNodes.add((EvalMatchUntilNode) node);
+                filterNodes.add((EvalMatchUntilFactoryNode) node);
             }
         }
         return filterNodes;

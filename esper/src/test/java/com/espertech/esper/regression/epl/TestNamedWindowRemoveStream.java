@@ -13,16 +13,9 @@ package com.espertech.esper.regression.epl;
 
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.core.StatementType;
-import com.espertech.esper.core.EPStatementSPI;
 
 public class TestNamedWindowRemoveStream extends TestCase
 {

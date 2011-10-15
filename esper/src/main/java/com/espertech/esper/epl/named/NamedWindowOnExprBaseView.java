@@ -11,47 +11,43 @@ package com.espertech.esper.epl.named;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.view.StatementStopCallback;
-import com.espertech.esper.view.StatementStopService;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.List;
+
 /**
  * View for the on-delete statement that handles removing events from a named window.
  */
-public abstract class NamedWindowOnExprBaseView extends ViewSupport implements StatementStopCallback
+public abstract class NamedWindowOnExprBaseView extends ViewSupport implements StopCallback
 {
     private static final Log log = LogFactory.getLog(NamedWindowOnExprBaseView.class);
 
     /**
      * The event type of the events hosted in the named window.
      */
-    protected final EventType namedWindowEventType;
     private final NamedWindowLookupStrategy lookupStrategy;
     private final ExprEvaluatorContext exprEvaluatorContext;
 
     /**
      * The root view accepting removals (old data).
      */
-    protected final NamedWindowRootView rootView;
+    protected final NamedWindowRootViewInstance rootView;
 
     /**
      * Ctor.
-     * @param statementStopService for indicating a statement was stopped or destroyed for cleanup
      * @param lookupStrategy for handling trigger events to determine deleted events
      * @param rootView to indicate which events to delete
      * @param exprEvaluatorContext context for expression evalauation
      */
-    public NamedWindowOnExprBaseView(StatementStopService statementStopService,
-                                 NamedWindowLookupStrategy lookupStrategy,
-                                 NamedWindowRootView rootView,
+    public NamedWindowOnExprBaseView(NamedWindowLookupStrategy lookupStrategy,
+                                 NamedWindowRootViewInstance rootView,
                                  ExprEvaluatorContext exprEvaluatorContext)
     {
         this.lookupStrategy = lookupStrategy;
         this.rootView = rootView;
-        statementStopService.addSubscriber(this);
-        namedWindowEventType = rootView.getEventType();
         this.exprEvaluatorContext = exprEvaluatorContext;
     }
 
@@ -62,9 +58,8 @@ public abstract class NamedWindowOnExprBaseView extends ViewSupport implements S
      */
     public abstract void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents);
 
-    public void statementStopped()
-    {
-        log.debug(".statementStopped");
+    public void stop() {
+        log.debug(".stop");
         rootView.removeOnExpr(lookupStrategy);
     }
 

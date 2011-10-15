@@ -14,7 +14,7 @@ import com.espertech.esper.view.ViewSupport;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.FlushedEventBuffer;
-import com.espertech.esper.core.EPStatementDispatch;
+import com.espertech.esper.core.service.EPStatementDispatch;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**

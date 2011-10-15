@@ -9,11 +9,7 @@
 package com.espertech.esper.epl.join.table;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.join.exec.composite.CompositeIndexEnterRemove;
-import com.espertech.esper.epl.join.exec.composite.CompositeIndexEnterRemoveKeyed;
-import com.espertech.esper.epl.join.exec.composite.CompositeIndexEnterRemoveRange;
-import com.espertech.esper.filter.FilterOperator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,9 +27,6 @@ import java.util.*;
  */
 public class PropertyCompositeEventTable implements EventTable
 {
-    private final int streamNum;
-    private final String[] optionalKeyedProps;
-    private final String[] rangeProps;
     private final CompositeIndexEnterRemove chain;
     private final Class[] optKeyCoercedTypes;
     private final Class[] optRangeCoercedTypes;
@@ -43,60 +36,22 @@ public class PropertyCompositeEventTable implements EventTable
      */
     protected final Map<Object, Object> index;
 
-    /**
-     * Ctor.
-     * @param streamNum - the stream number that is indexed
-     * @param eventType - types of events indexed
-     * @param optRangeCoercedTypes - property types
-     */
-    public PropertyCompositeEventTable(int streamNum, EventType eventType, String[] optionalKeyedProps, Class[] optKeyCoercedTypes, String[] rangeProps, Class[] optRangeCoercedTypes)
+    public PropertyCompositeEventTable(boolean isHashKeyed, CompositeIndexEnterRemove chain, Class[] optKeyCoercedTypes, Class[] optRangeCoercedTypes)
     {
-        this.streamNum = streamNum;
-        this.rangeProps = rangeProps;
-        this.optionalKeyedProps = optionalKeyedProps;
+        this.chain = chain;
         this.optKeyCoercedTypes = optKeyCoercedTypes;
         this.optRangeCoercedTypes = optRangeCoercedTypes;
 
-        if (optionalKeyedProps != null && optionalKeyedProps.length > 0) {
+        if (isHashKeyed) {
             index = new HashMap<Object, Object>();
         }
         else {
             index = new TreeMap<Object, Object>();
         }
-
-        // construct chain
-        List<CompositeIndexEnterRemove> enterRemoves = new ArrayList<CompositeIndexEnterRemove>();
-        if (optionalKeyedProps != null && optionalKeyedProps.length > 0) {
-            enterRemoves.add(new CompositeIndexEnterRemoveKeyed(eventType, optionalKeyedProps, optKeyCoercedTypes));
-        }
-        int count = 0;
-        for (String rangeProp : rangeProps) {
-            Class coercionType = optRangeCoercedTypes == null ? null : optRangeCoercedTypes[count];
-            enterRemoves.add(new CompositeIndexEnterRemoveRange(eventType, rangeProp, coercionType));
-            count++;
-        }
-
-        // Hook up as chain for remove
-        CompositeIndexEnterRemove last = null;
-        for (CompositeIndexEnterRemove action : enterRemoves) {
-            if (last != null) {
-                last.setNext(action);
-            }
-            last = action;
-        }
-        chain = enterRemoves.get(0);
     }
 
     public Map<Object, Object> getIndex() {
         return index;
-    }
-
-    public Class[] getOptKeyCoercedTypes() {
-        return optKeyCoercedTypes;
-    }
-
-    public Class[] getOptRangeCoercedTypes() {
-        return optRangeCoercedTypes;
     }
 
     /**
@@ -167,10 +122,15 @@ public class PropertyCompositeEventTable implements EventTable
 
     public String toQueryPlan()
     {
-        return this.getClass().getName() +
-                " streamNum=" + streamNum +
-                " keys=" + Arrays.toString(optionalKeyedProps) +
-                " ranges=" + Arrays.toString(rangeProps);
+        return this.getClass().getName();
+    }
+
+    public Class[] getOptRangeCoercedTypes() {
+        return optRangeCoercedTypes;
+    }
+
+    public Class[] getOptKeyCoercedTypes() {
+        return optKeyCoercedTypes;
     }
 
     private static Log log = LogFactory.getLog(PropertyCompositeEventTable.class);

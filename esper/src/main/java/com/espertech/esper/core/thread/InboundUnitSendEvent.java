@@ -11,7 +11,7 @@
 
 package com.espertech.esper.core.thread;
 
-import com.espertech.esper.core.EPRuntimeImpl;
+import com.espertech.esper.core.service.EPRuntimeImpl;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 

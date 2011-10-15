@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -21,12 +22,14 @@ public interface AggregationResultFuture
 {
     /**
      * Returns current aggregation state, for use by expression node representing an aggregation function.
+     *
      * @param column is assigned to the aggregation expression node and passed as an column (index) into a row
+     * @param agentInstanceIds
      * @return current aggragation state
      */
-    public Object getValue(int column);
+    public Object getValue(int column, int[] agentInstanceIds);
 
-    public Collection<EventBean> getCollection(int column);
+    public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context);
 
-    public EventBean getEventBean(int column);
+    public EventBean getEventBean(int column, ExprEvaluatorContext context);
 }

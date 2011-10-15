@@ -14,6 +14,7 @@ import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.join.assemble.AssemblyStrategyTreeBuilder;
 import com.espertech.esper.epl.join.assemble.BaseAssemblyNode;
+import com.espertech.esper.epl.join.base.HistoricalViewableDesc;
 import com.espertech.esper.epl.join.table.HistoricalStreamIndexList;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.type.OuterJoinType;
@@ -37,8 +38,6 @@ public class NStreamOuterQueryPlanBuilder
      * @param streamNames - stream names
      * @param outerJoinDescList - descriptors for all outer joins
      * @param typesPerStream - event types for each stream
-     * @param hasHistorical - indicator if there is one or more historical streams in the join
-     * @param isHistorical - indicator for each stream if it is a historical streams or not
      * @param dependencyGraph - dependencies between historical streams
      * @param historicalStreamIndexLists - index management, populated for the query plan
      * @param exprEvaluatorContext context for expression evalauation
@@ -49,8 +48,7 @@ public class NStreamOuterQueryPlanBuilder
                                      List<OuterJoinDesc> outerJoinDescList,
                                      String[] streamNames,
                                      EventType[] typesPerStream,
-                                     boolean hasHistorical,
-                                     boolean[] isHistorical,
+                                     HistoricalViewableDesc historicalViewableDesc,
                                      DependencyGraph dependencyGraph,
                                      HistoricalStreamIndexList[] historicalStreamIndexLists,
                                      ExprEvaluatorContext exprEvaluatorContext)
@@ -72,11 +70,11 @@ public class NStreamOuterQueryPlanBuilder
         }
 
         // any historical streams don't get indexes, the lookup strategy accounts for cached indexes
-        if (hasHistorical)
+        if (historicalViewableDesc.isHasHistorical())
         {
-            for (int i = 0; i < isHistorical.length; i++)
+            for (int i = 0; i < historicalViewableDesc.getHistorical().length; i++)
             {
-                if (isHistorical[i])
+                if (historicalViewableDesc.getHistorical()[i])
                 {
                     indexSpecs[i] = null;
                 }
@@ -105,13 +103,13 @@ public class NStreamOuterQueryPlanBuilder
         for (int streamNo = 0; streamNo < numStreams; streamNo++)
         {
             // no plan for historical streams that are dependent upon other streams
-            if ((isHistorical[streamNo]) && (dependencyGraph.hasDependency(streamNo)))
+            if ((historicalViewableDesc.getHistorical()[streamNo]) && (dependencyGraph.hasDependency(streamNo)))
             {
                 planNodeSpecs[streamNo] = new QueryPlanNodeNoOp();
                 continue;
             }
 
-            QueryPlanNode queryPlanNode = buildPlanNode(numStreams, streamNo, streamNames, queryGraph, outerInnerGraph, outerJoinDescList, innerJoinGraph, indexSpecs, typesPerStream, isHistorical, dependencyGraph, historicalStreamIndexLists, exprEvaluatorContext);
+            QueryPlanNode queryPlanNode = buildPlanNode(numStreams, streamNo, streamNames, queryGraph, outerInnerGraph, outerJoinDescList, innerJoinGraph, indexSpecs, typesPerStream, historicalViewableDesc.getHistorical(), dependencyGraph, historicalStreamIndexLists, exprEvaluatorContext);
 
             if (log.isDebugEnabled())
             {

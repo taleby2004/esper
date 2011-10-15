@@ -16,9 +16,25 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalNotNode extends EvalNodeBase
 {
-    private static final long serialVersionUID = -8072564032270892802L;
+    private final EvalNotFactoryNode factoryNode;
+    private final EvalNode childNode;
 
-    protected EvalNotNode() {
+    public EvalNotNode(PatternAgentInstanceContext context, EvalNotFactoryNode factoryNode, EvalNode childNode) {
+        super(context);
+        this.factoryNode = factoryNode;
+        this.childNode = childNode;
+    }
+
+    public EvalNotFactoryNode getFactoryNode() {
+        return factoryNode;
+    }
+
+    public EvalNode getChildNode() {
+        return childNode;
+    }
+
+    public EvalNodeNumber getNodeNumber() {
+        return factoryNode.getNodeNumber();
     }
 
     public EvalStateNode newState(Evaluator parentNode,
@@ -26,11 +42,6 @@ public class EvalNotNode extends EvalNodeBase
                                   EvalStateNodeNumber stateNodeId)
     {
         return new EvalNotStateNode(parentNode, this, beginState);
-    }
-
-    public final String toString()
-    {
-        return "EvalNotNode children=" + this.getChildNodes().size();
     }
 
     private static final Log log = LogFactory.getLog(EvalNotNode.class);

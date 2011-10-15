@@ -138,7 +138,7 @@ public class BeanEventAdapter implements BeanEventTypeFactory
             }
 
             int typeId = eventTypeIdGenerator.getTypeId(name);
-            EventTypeMetadata metadata = EventTypeMetadata.createBeanType(name, clazz, isPreconfiguredStatic, isPreconfigured, isConfigured);
+            EventTypeMetadata metadata = EventTypeMetadata.createBeanType(name, clazz, isPreconfiguredStatic, isPreconfigured, isConfigured, EventTypeMetadata.TypeClass.APPLICATION);
             eventType = new BeanEventType(metadata, typeId, clazz, eventAdapterService, legacyDef);
             typesPerJavaBean.put(clazz, eventType);
         }

@@ -11,18 +11,18 @@ package com.espertech.esper.epl.db;
 import com.espertech.esper.client.ConfigurationCacheReferenceType;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.apachecommons.ReferenceMap;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.schedule.SchedulingService;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.HashMap;
 
 /**
  * Implements an expiry-time cache that evicts data when data becomes stale
@@ -38,7 +38,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
     private final SchedulingService schedulingService;
     private final ScheduleSlot scheduleSlot;
     private final Map<MultiKey<Object>, Item> cache;
-    private final EPStatementHandle epStatementHandle;
+    private final EPStatementAgentInstanceHandle epStatementAgentInstanceHandle;
 
     private boolean isScheduled;
 
@@ -49,14 +49,14 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
      * @param cacheReferenceType indicates whether hard, soft or weak references are used in the cache
      * @param schedulingService is a service for call backs at a scheduled time, for purging
      * @param scheduleSlot slot for scheduling callbacks for this cache
-     * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
+     * @param epStatementAgentInstanceHandle is the statements-own handle for use in registering callbacks with services
      */
     public DataCacheExpiringImpl(double maxAgeSec,
                                  double purgeIntervalSec,
                                  ConfigurationCacheReferenceType cacheReferenceType,
                                  SchedulingService schedulingService,
                                  ScheduleSlot scheduleSlot,
-                                 EPStatementHandle epStatementHandle)
+                                 EPStatementAgentInstanceHandle epStatementAgentInstanceHandle)
     {
         this.maxAgeMSec = (long) maxAgeSec * 1000;
         this.purgeIntervalMSec = (long) purgeIntervalSec * 1000;
@@ -76,7 +76,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
             this.cache = new WeakHashMap<MultiKey<Object>, Item>();
         }
 
-        this.epStatementHandle = epStatementHandle;
+        this.epStatementAgentInstanceHandle = epStatementAgentInstanceHandle;
     }
 
     public EventTable getCached(Object[] lookupKeys)
@@ -107,7 +107,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
 
         if (!isScheduled)
         {
-            EPStatementHandleCallback callback = new EPStatementHandleCallback(epStatementHandle, this);
+            EPStatementHandleCallback callback = new EPStatementHandleCallback(epStatementAgentInstanceHandle, this);
             schedulingService.add(purgeIntervalMSec, callback, scheduleSlot);
             isScheduled = true;
         }

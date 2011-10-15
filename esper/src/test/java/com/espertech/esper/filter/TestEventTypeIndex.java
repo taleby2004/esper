@@ -55,7 +55,7 @@ public class TestEventTypeIndex extends TestCase
         List<FilterHandle> matchesList = new LinkedList<FilterHandle>();
 
         // Invoke match
-        testIndex.matchEvent(testEventBean, matchesList, null);
+        testIndex.matchEvent(testEventBean, matchesList);
 
         assertEquals(1, matchesList.size());
         assertEquals(filterCallback, matchesList.get(0));
@@ -88,7 +88,7 @@ public class TestEventTypeIndex extends TestCase
         testIndex.add(testEventType, handleSetNode);
 
         List<FilterHandle> matchesList = new LinkedList<FilterHandle>();
-        testIndex.matchEvent(testEventBean, matchesList, null);
+        testIndex.matchEvent(testEventBean, matchesList);
 
         assertEquals(1, matchesList.size());
         assertEquals(filterCallback, matchesList.get(0));
@@ -103,7 +103,7 @@ public class TestEventTypeIndex extends TestCase
         testIndex.add(testEventType, handleSetNode);
 
         List<FilterHandle> matchesList = new LinkedList<FilterHandle>();
-        testIndex.matchEvent(testEventBean, matchesList, null);
+        testIndex.matchEvent(testEventBean, matchesList);
 
         assertEquals(1, matchesList.size());
         assertEquals(filterCallback, matchesList.get(0));

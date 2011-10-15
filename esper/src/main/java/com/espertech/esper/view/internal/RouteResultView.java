@@ -14,9 +14,10 @@ package com.espertech.esper.view.internal;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.NullIterator;
-import com.espertech.esper.core.EPStatementHandle;
-import com.espertech.esper.core.InternalEventRouter;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.EPStatementHandle;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
+import com.espertech.esper.core.service.InternalEventRouter;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -52,7 +53,7 @@ public class RouteResultView extends ViewSupport
             throw new IllegalArgumentException("Number of where-clauses and processors does not match");
         }
 
-        this.exprEvaluatorContext = statementContext;
+        this.exprEvaluatorContext = new ExprEvaluatorContextStatement(statementContext);
         this.eventType = eventType;
         if (isFirst)
         {

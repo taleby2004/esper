@@ -18,35 +18,25 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalGuardNode extends EvalNodeBase
 {
-    private PatternGuardSpec patternGuardSpec;
-    private transient GuardFactory guardFactory;
-    private static final long serialVersionUID = -1300326291593373936L;
+    private final EvalGuardFactoryNode factoryNode;
+    private final EvalNode childNode;
 
-    /**
-     * Constructor.
-     * @param patternGuardSpec - factory for guard construction
-     */
-    protected EvalGuardNode(PatternGuardSpec patternGuardSpec)
-    {
-        this.patternGuardSpec = patternGuardSpec;
+    public EvalGuardNode(PatternAgentInstanceContext context, EvalGuardFactoryNode factoryNode, EvalNode childNode) {
+        super(context);
+        this.factoryNode = factoryNode;
+        this.childNode = childNode;
     }
 
-    /**
-     * Returns the guard object specification to use for instantiating the guard factory and guard.
-     * @return guard specification
-     */
-    public PatternGuardSpec getPatternGuardSpec()
-    {
-        return patternGuardSpec;
+    public EvalNodeNumber getNodeNumber() {
+        return factoryNode.getNodeNumber();
     }
 
-    /**
-     * Supplies the guard factory to the node.
-     * @param guardFactory is the guard factory
-     */
-    public void setGuardFactory(GuardFactory guardFactory)
-    {
-        this.guardFactory = guardFactory;
+    public EvalGuardFactoryNode getFactoryNode() {
+        return factoryNode;
+    }
+
+    public EvalNode getChildNode() {
+        return childNode;
     }
 
     public EvalStateNode newState(Evaluator parentNode,
@@ -54,21 +44,6 @@ public class EvalGuardNode extends EvalNodeBase
                                   EvalStateNodeNumber stateNodeId)
     {
         return new EvalGuardStateNode(parentNode, this, beginState, stateNodeId);
-    }
-
-    /**
-     * Returns the guard factory.
-     * @return guard factory
-     */
-    public GuardFactory getGuardFactory()
-    {
-        return guardFactory;
-    }
-
-    public final String toString()
-    {
-        return ("EvalGuardNode guardFactory=" + guardFactory +
-                "  children=" + this.getChildNodes().size());
     }
 
     private static final Log log = LogFactory.getLog(EvalGuardNode.class);

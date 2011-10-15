@@ -8,23 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.core.*;
+import com.espertech.esper.core.service.*;
+import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.schedule.ScheduleBucket;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.TimeProvider;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
  * Contains handles to implementations of services needed by evaluation nodes.
  */
-public class PatternContext implements ExprEvaluatorContext
+public class PatternContext
 {
     private final int streamNumber;
     private final StatementContext statementContext;
-    private final EvalFilterConsumptionHandler consumptionHandler;
 
     /**
      * Constructor.
@@ -32,12 +30,10 @@ public class PatternContext implements ExprEvaluatorContext
      * @param streamNumber is the stream number
      */
     public PatternContext(StatementContext statementContext,
-                          int streamNumber,
-                          EvalFilterConsumptionHandler consumptionHandler)
+                          int streamNumber)
     {
         this.streamNumber = streamNumber;
         this.statementContext = statementContext;
-        this.consumptionHandler = consumptionHandler;
     }
 
     /**
@@ -157,19 +153,11 @@ public class PatternContext implements ExprEvaluatorContext
         return statementContext.getExceptionHandlingService();
     }
 
-    /**
-     * Returns filter version.
-     * @return version
-     */
-    public StatementFilterVersion getStatementFilterVersion() {
-        return statementContext.getStatementFilterVersion();
-    }
-
     public ExpressionResultCacheService getExpressionResultCacheService() {
         return statementContext.getExpressionResultCacheService();
     }
 
-    public EvalFilterConsumptionHandler getConsumptionHandler() {
-        return consumptionHandler;
+    public StatementContext getStatementContext() {
+        return statementContext;
     }
 }

@@ -22,4 +22,6 @@ public interface OutputCondition
      * @param oldEventsCount  - number of old events incoming
      */
 	public void updateOutputCondition(int newEventsCount, int oldEventsCount);
+
+    public void terminated();
 }

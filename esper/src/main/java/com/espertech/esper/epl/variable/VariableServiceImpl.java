@@ -12,7 +12,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.VariableValueException;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.StatementExtensionSvcContext;
+import com.espertech.esper.core.service.StatementExtensionSvcContext;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.JavaClassHelper;

@@ -124,28 +124,28 @@ public class TestFilterParamIndexEquals extends TestCase
     private void verifyShortBoxed(FilterParamIndexBase index, Short testValue, int numExpected)
     {
         testBean.setShortBoxed(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }
 
     private void verifyBooleanPrimitive(FilterParamIndexBase index, boolean testValue, int numExpected)
     {
         testBean.setBoolPrimitive(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }
 
     private void verifyString(FilterParamIndexBase index, String testValue, int numExpected)
     {
         testBean.setString(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }
 
     private void verifyFloatPrimitive(FilterParamIndexBase index, float testValue, int numExpected)
     {
         testBean.setFloatPrimitive(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }
 }

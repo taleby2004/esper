@@ -429,6 +429,10 @@ where w.side='O']]></programlisting>
 			</para>
 			<programlisting><![CDATA[select venue, ccyPair, side, sum(qty) from CumulativePrice(side='O', ccyPair='USD')
 select venue, ccyPair, side, sum(qty) from CumulativePrice(side='O', ccyPair='EURO')]]></programlisting>
+
+			<para>
+			  For testing purposes or if your application controls concurrency, you may disable statement-level locking, see <xref linkend="config-engine-execution-disablelock"/>.
+			</para>
 		</sect2>
 
 		<sect2 id="perf-tips-13a">
@@ -627,6 +631,10 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 			<para>
 				To tune subquery performance when your subquery selects from a named window, consider the hints discussed in <xref linkend="epl-subqueries-hints"/>.
 			</para>
+
+			<para>
+				The <literal>@NoLock</literal> hint to remove statement-level locking (also read caution note) is described at <xref linkend="api-threading"/>.
+			</para>
 		</sect2>
 
 		<sect2 id="perf-tips-16">
@@ -690,6 +698,12 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 			</para>
 		</sect2>
 
+		<sect2 id="perf-tips-19">
+				<title>Large Number of Threads</title>
+				<para>
+					When using a large number of threads with the engine, such as more then 100 threads, we provide a setting in the configuration that instructs the engine to reduce the use of thread-local variables. Please see  <xref linkend="config-engine-execution"/> for more information.
+				</para>
+		</sect2>
     </sect1>
 
     <sect1 id="performance-kit" revision="1">
@@ -767,10 +781,10 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
                         1.7.0)
                         and its dependencies as in the sample below (with Esper 2.1) :
                         <programlisting><![CDATA[# classpath on Unix/Linux (on one single line)
-etc:build:lib/esper-4.3.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
+etc:build:lib/esper-4.4.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
    :lib/antlr-runtime-3.2.jar:lib/log4j-1.2.16.jar
 @rem  classpath on Windows (on one single line)
-etc;build;lib\esper-4.3.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
+etc;build;lib\esper-4.4.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
    ;lib\antlr-runtime-3.2.jar;lib\log4j-1.2.16.jar]]></programlisting>
                         Note that <literal>./etc</literal> and <literal>./build</literal> have to be in the classpath.
                         At that stage you should also start to set min and max JVM heap. A good start is 1GB as in

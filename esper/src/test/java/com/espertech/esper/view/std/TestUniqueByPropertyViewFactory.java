@@ -63,7 +63,7 @@ public class TestUniqueByPropertyViewFactory extends TestCase
         UniqueByPropertyViewFactory factory = new UniqueByPropertyViewFactory();
         factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {param}));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
-        UniqueByPropertyView view = (UniqueByPropertyView) factory.makeView(SupportStatementContextFactory.makeContext());
+        UniqueByPropertyView view = (UniqueByPropertyView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldName, view.getCriteriaExpressions()[0].toExpressionString());
     }
 }

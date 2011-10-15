@@ -10,9 +10,7 @@ package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.view.*;
 import com.espertech.esper.collection.ArrayEventIterator;
-import com.espertech.esper.core.StatementResultService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,25 +23,13 @@ import java.util.Iterator;
 public class NamedWindowOnDeleteView extends NamedWindowOnExprBaseView
 {
     private static final Log log = LogFactory.getLog(NamedWindowOnDeleteView.class);
-    private EventBean[] lastResult;
-    private final StatementResultService statementResultService;
 
-    /**
-     * Ctor.
-     * @param statementStopService for indicating a statement was stopped or destroyed for cleanup
-     * @param lookupStrategy for handling trigger events to determine deleted events
-     * @param removeStreamView to indicate which events to delete
-     * @param statementResultService for coordinating on whether insert and remove stream events should be posted
-     * @param exprEvaluatorContext context for expression evalauation
-     */
-    public NamedWindowOnDeleteView(StatementStopService statementStopService,
-                                 NamedWindowLookupStrategy lookupStrategy,
-                                 NamedWindowRootView removeStreamView,
-                                 StatementResultService statementResultService,
-                                 ExprEvaluatorContext exprEvaluatorContext)
-    {
-        super(statementStopService, lookupStrategy, removeStreamView, exprEvaluatorContext);
-        this.statementResultService = statementResultService;
+    private final NamedWindowOnDeleteViewFactory parent;
+    private EventBean[] lastResult;
+
+    public NamedWindowOnDeleteView(NamedWindowLookupStrategy lookupStrategy, NamedWindowRootViewInstance rootView, ExprEvaluatorContext exprEvaluatorContext, NamedWindowOnDeleteViewFactory parent) {
+        super(lookupStrategy, rootView, exprEvaluatorContext);
+        this.parent = parent;
     }
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
@@ -54,7 +40,7 @@ public class NamedWindowOnDeleteView extends NamedWindowOnExprBaseView
             this.rootView.update(null, matchingEvents);
 
             // The on-delete listeners receive the events deleted, but only if there is interest
-            if (statementResultService.isMakeNatural() || statementResultService.isMakeSynthetic()) {
+            if (parent.getStatementResultService().isMakeNatural() || parent.getStatementResultService().isMakeSynthetic()) {
                 updateChildren(matchingEvents, null);
             }
         }
@@ -65,7 +51,7 @@ public class NamedWindowOnDeleteView extends NamedWindowOnExprBaseView
 
     public EventType getEventType()
     {
-        return namedWindowEventType;
+        return rootView.getEventType();
     }
 
     public Iterator<EventBean> iterator()

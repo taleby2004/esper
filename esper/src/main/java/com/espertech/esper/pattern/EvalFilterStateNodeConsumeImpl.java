@@ -52,7 +52,7 @@ public final class EvalFilterStateNodeConsumeImpl extends EvalFilterStateNode im
                 continue;
             }
             EvalFilterStateNodeConsume node = (EvalFilterStateNodeConsume) callback;
-            Integer consumption = node.getEvalFilterNode().getConsumptionLevel();
+            Integer consumption = node.getEvalFilterNode().getFactoryNode().getConsumptionLevel();
             if (consumption == null) {
                 consumption = 0;
             }

@@ -12,6 +12,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.join.table.EventTable;
 import com.espertech.esper.epl.join.table.PropertyCompositeEventTable;
+import com.espertech.esper.epl.join.table.PropertyCompositeEventTableFactory;
 import com.espertech.esper.epl.join.table.UnindexedEventTableList;
 
 import java.util.Arrays;
@@ -50,7 +51,8 @@ public class PollResultIndexingStrategyComposite implements PollResultIndexingSt
         {
             return new UnindexedEventTableList(pollResult);
         }
-        PropertyCompositeEventTable table = new PropertyCompositeEventTable(streamNum, eventType, indexPropertiesJoin, keyCoercionTypes, rangePropertiesJoin, rangeCoercionTypes);
+        PropertyCompositeEventTableFactory factory = new PropertyCompositeEventTableFactory(streamNum, eventType, indexPropertiesJoin, keyCoercionTypes, rangePropertiesJoin, rangeCoercionTypes);
+        EventTable table = factory.makeEventTable();
         table.add(pollResult.toArray(new EventBean[pollResult.size()]));
         return table;
     }

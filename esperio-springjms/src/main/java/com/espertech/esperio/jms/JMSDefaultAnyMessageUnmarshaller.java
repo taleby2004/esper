@@ -72,7 +72,7 @@ public class JMSDefaultAnyMessageUnmarshaller implements JMSMessageUnmarshaller
                     return null;
                 }
 
-                return eventAdapterService.adaptorForTypedMap(properties, eventType);
+                return eventAdapterService.adapterForTypedMap(properties, eventType);
             }
             else
             {

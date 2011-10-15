@@ -8,6 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.util;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.NullIterator;
+
 import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.*;
@@ -15,8 +19,28 @@ import java.util.*;
 /**
  * Utility for handling collection or array tasks.
  */
-public class CollectionUtil<T>
+public class CollectionUtil
 {
+    public final static Iterator<EventBean> NULL_EVENT_ITERATOR = new NullIterator<EventBean>();
+    public final static SortedMap EMPTY_SORTED_MAP = new TreeMap();
+    public final static Set<MultiKey<EventBean>> EMPTY_ROW_SET = new HashSet<MultiKey<EventBean>>();
+    public final static EventBean[] EVENT_PER_STREAM_EMPTY = new EventBean[0];
+    public final static Set<EventBean> SINGLE_NULL_ROW_EVENT_SET = new HashSet<EventBean>();
+    static
+    {
+        SINGLE_NULL_ROW_EVENT_SET.add(null);
+    }
+
+    public final static StopCallback STOP_CALLBACK_NONE;
+    static {
+        STOP_CALLBACK_NONE = new StopCallback() {
+            public void stop() {
+                // no action
+            }
+        };
+    }
+
+
     public static String toString(Collection<Integer> stack, String delimiterChars) {
         if (stack.isEmpty()) {
             return "";
@@ -141,5 +165,20 @@ public class CollectionUtil<T>
             return Arrays.equals(otherIndexProps, thisIndexProps);
         }
         return otherIndexProps == null && thisIndexProps == null;
+    }
+
+    public static boolean isAllNullArray(Object array) {
+        if (array == null) {
+            throw new NullPointerException();
+        }
+        if (!array.getClass().isArray()) {
+            throw new IllegalArgumentException("Expected array but received " + array.getClass());
+        }
+        for (int i = 0; i < Array.getLength(array); i++) {
+            if (Array.get(array, i) != null) {
+                return false;
+            }
+        }
+        return true;
     }
 }

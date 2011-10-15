@@ -149,7 +149,7 @@ public class WrapperEventType implements EventTypeSPI
                     }
                     DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
                     Map map = wrapperEvent.getDecoratingProperties();
-                    return mapGetter.get(eventAdapterService.adaptorForTypedMap(map, underlyingMapType));
+                    return mapGetter.get(eventAdapterService.adapterForTypedMap(map, underlyingMapType));
                 }
 
                 public boolean isExistsProperty(EventBean eventBean)
@@ -165,7 +165,7 @@ public class WrapperEventType implements EventTypeSPI
                     }
                     DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
                     Map map = wrapperEvent.getDecoratingProperties();
-                    return mapGetter.getFragment(eventAdapterService.adaptorForTypedMap(map, underlyingMapType));
+                    return mapGetter.getFragment(eventAdapterService.adapterForTypedMap(map, underlyingMapType));
                 }
             };
             propertyGetterCache.put(property, getter);
@@ -252,7 +252,7 @@ public class WrapperEventType implements EventTypeSPI
                     }
                     DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
                     Map map = wrapperEvent.getDecoratingProperties();
-                    return decoMapped.get(eventAdapterService.adaptorForTypedMap(map, underlyingMapType), mapKey);
+                    return decoMapped.get(eventAdapterService.adapterForTypedMap(map, underlyingMapType), mapKey);
                 }
             };
         }
@@ -288,7 +288,7 @@ public class WrapperEventType implements EventTypeSPI
                     }
                     DecoratingEventBean wrapperEvent = (DecoratingEventBean) event;
                     Map map = wrapperEvent.getDecoratingProperties();
-                    return decoIndexed.get(eventAdapterService.adaptorForTypedMap(map, underlyingMapType), index);
+                    return decoIndexed.get(eventAdapterService.adapterForTypedMap(map, underlyingMapType), index);
                 }
             };
         }

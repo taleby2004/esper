@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.collection.SortedDoubleVector;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
 /**
@@ -34,10 +33,5 @@ public class MedianFilterAggregator extends MedianAggregator
             return;
         }
         super.leave(paramArray[0]);
-    }
-
-    public AggregationMethod newAggregator(MethodResolutionService methodResolutionService)
-    {
-        return methodResolutionService.makeMedianAggregator(true);
     }
 }

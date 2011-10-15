@@ -14,6 +14,7 @@ package com.espertech.esper.epl.core.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +34,7 @@ public class EvalInsertNoWildcardRevision extends EvalBase implements SelectExpr
         this.vaeInnerEventType = vaeInnerEventType;
     }
 
-    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize) {
-        return vaeProcessor.getValueAddEventBean(super.getEventAdapterService().adaptorForTypedMap(props, vaeInnerEventType));
+    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
+        return vaeProcessor.getValueAddEventBean(super.getEventAdapterService().adapterForTypedMap(props, vaeInnerEventType));
     }
 }

@@ -11,7 +11,6 @@
 
 package com.espertech.esper.event.map;
 
-import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.client.EventType;
@@ -81,6 +80,6 @@ public class MapMaptypedUndPropertyGetter implements MapEventPropertyGetter
             return null;
         }
 
-        return eventAdapterService.adaptorForTypedMap(value, fragmentType);
+        return eventAdapterService.adapterForTypedMap(value, fragmentType);
     }
 }

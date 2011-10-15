@@ -34,6 +34,10 @@ public class EventAdapterServiceHelper
     public static EventBeanFactory getFactoryForType(EventType type, EventAdapterService eventAdapterService) {
         if (type instanceof WrapperEventType) {
             WrapperEventType wrapperType = (WrapperEventType) type;
+
+            if (wrapperType.getUnderlyingEventType() instanceof BeanEventType) {
+
+            }
             return new EventBeanFactoryBeanWrapped(wrapperType.getUnderlyingEventType(), wrapperType, eventAdapterService);
         }
         else if (type instanceof BeanEventType) {
@@ -118,7 +122,7 @@ public class EventAdapterServiceHelper
         }
         else if (eventType instanceof MapEventType)
         {
-            return eventAdapterService.adaptorForTypedMap((Map) event, eventType);
+            return eventAdapterService.adapterForTypedMap((Map) event, eventType);
         }
         else if (eventType instanceof BaseConfigurableEventType)
         {

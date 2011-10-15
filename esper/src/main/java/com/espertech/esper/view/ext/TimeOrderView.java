@@ -10,9 +10,9 @@ package com.espertech.esper.view.ext;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
@@ -39,7 +39,7 @@ import java.util.*;
  */
 public final class TimeOrderView extends ViewSupport implements DataWindowView, CloneableView, StoppableView
 {
-    private final StatementContext statementContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final TimeOrderViewFactory timeOrderViewFactory;
     private final ExprNode timestampExpression;
     private final ExprEvaluator timestampEvaluator;
@@ -59,27 +59,24 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
      * @param optionalSortedRandomAccess is the friend class handling the random access, if required by
      * expressions
      * @param timeOrderViewFactory for copying this view in a group-by
-     * @param statementContext the statement context
      * @param timestampExpr the property name of the event supplying timestamp values
      * @param intervalSize the interval time length
-     * @param isRemoveStreamHandling if the view must handle the remove stream of parent views
      */
-    public TimeOrderView( StatementContext statementContext,
+    public TimeOrderView( AgentInstanceViewFactoryChainContext agentInstanceContext,
                           TimeOrderViewFactory timeOrderViewFactory,
                           ExprNode timestampExpr,
                           ExprEvaluator timestampEvaluator,
                           long intervalSize,
-                          IStreamTimeOrderRandomAccess optionalSortedRandomAccess,
-                          boolean isRemoveStreamHandling)
+                          IStreamTimeOrderRandomAccess optionalSortedRandomAccess)
     {
-        this.statementContext = statementContext;
+        this.agentInstanceContext = agentInstanceContext;
         this.timeOrderViewFactory = timeOrderViewFactory;
         this.timestampExpression = timestampExpr;
         this.timestampEvaluator = timestampEvaluator;
         this.intervalSize = intervalSize;
         this.optionalSortedRandomAccess = optionalSortedRandomAccess;
-        this.scheduleSlot = statementContext.getScheduleBucket().allocateSlot();
-        if (isRemoveStreamHandling)
+        this.scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
+        if (agentInstanceContext.isRemoveStream())
         {
             reverseIndex = new HashMap<EventBean, ArrayList<EventBean>>();
         }
@@ -92,7 +89,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                 TimeOrderView.this.expire();
             }
         };
-        handle = new EPStatementHandleCallback(statementContext.getEpStatementHandle(), callback);
+        handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
     }
 
     /**
@@ -122,9 +119,9 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
         return optionalSortedRandomAccess;
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return timeOrderViewFactory.makeView(statementContext);
+        return timeOrderViewFactory.makeView(agentInstanceContext);
     }
 
     public final EventType getEventType()
@@ -141,7 +138,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
         {
 
             // figure out the current tail time
-            long engineTime = statementContext.getSchedulingService().getTime();
+            long engineTime = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
             long windowTailTime = engineTime - intervalSize + 1;
             long oldestEvent = Long.MAX_VALUE;
             if (!sortedEvents.isEmpty())
@@ -157,7 +154,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                 // get timestamp of event
                 EventBean newEvent = newData[i];
                 eventsPerStream[0] = newEvent;
-                Long timestamp = (Long) timestampEvaluator.evaluate(eventsPerStream, true, statementContext);
+                Long timestamp = (Long) timestampEvaluator.evaluate(eventsPerStream, true, agentInstanceContext);
 
                 // if the event timestamp indicates its older then the tail of the window, release it
                 if (timestamp < windowTailTime)
@@ -204,7 +201,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                 if (!isCallbackScheduled)
                 {
                     long callbackWait = oldestEvent - windowTailTime + 1;
-                    statementContext.getSchedulingService().add(callbackWait, handle, scheduleSlot);
+                    agentInstanceContext.getStatementContext().getSchedulingService().add(callbackWait, handle, scheduleSlot);
                     isCallbackScheduled = true;
                 }
                 else
@@ -214,8 +211,8 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                     {
                         oldestEvent = sortedEvents.firstKey();
                         long callbackWait = oldestEvent - windowTailTime + 1;
-                        statementContext.getSchedulingService().remove(handle, scheduleSlot);
-                        statementContext.getSchedulingService().add(callbackWait, handle, scheduleSlot);
+                        agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
+                        agentInstanceContext.getStatementContext().getSchedulingService().add(callbackWait, handle, scheduleSlot);
                         isCallbackScheduled = true;
                     }
                 }
@@ -290,7 +287,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
      */
     protected final void expire()
     {
-        long expireBeforeTimestamp = statementContext.getSchedulingService().getTime() - intervalSize + 1;
+        long expireBeforeTimestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime() - intervalSize + 1;
         isCallbackScheduled = false;
 
         ArrayList<EventBean> releaseEvents = null;
@@ -353,13 +350,13 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
 
         // Next callback
         long callbackWait = oldestKey - expireBeforeTimestamp + 1;
-        statementContext.getSchedulingService().add(callbackWait, handle, scheduleSlot);
+        agentInstanceContext.getStatementContext().getSchedulingService().add(callbackWait, handle, scheduleSlot);
         isCallbackScheduled = true;
     }
 
     public void stop() {
     	if (handle != null) {
-        	statementContext.getSchedulingService().remove(handle, scheduleSlot);
+        	agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }
 

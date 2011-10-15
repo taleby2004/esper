@@ -11,13 +11,13 @@
 
 package com.espertech.esper.filter;
 
-import junit.framework.TestCase;
-import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.event.SupportEventTypeFactory;
-import com.espertech.esper.support.filter.SupportFilterSpecBuilder;
-import com.espertech.esper.support.filter.SupportFilterHandle;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.event.SupportEventTypeFactory;
+import com.espertech.esper.support.filter.SupportFilterHandle;
+import com.espertech.esper.support.filter.SupportFilterSpecBuilder;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import junit.framework.TestCase;
 
 import java.util.concurrent.*;
 
@@ -37,7 +37,7 @@ public class TestFilterServiceMT extends TestCase
     {
         EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         FilterSpecCompiled spec = SupportFilterSpecBuilder.build(eventType, new Object[] {"string", FilterOperator.EQUAL, "HELLO"});
-        final FilterValueSet filterValues = spec.getValueSet(null);
+        final FilterValueSet filterValues = spec.getValueSet(null, null, null);
 
         Callable callables[] = new Callable[5];
         for (int i = 0; i < callables.length; i++)

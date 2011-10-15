@@ -8,17 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.epl.spec;
 
-import com.espertech.esper.epl.core.MethodResolutionService;
-import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.epl.variable.VariableService;
-import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.vaevent.ValueAddEventService;
-import com.espertech.esper.pattern.PatternObjectResolutionService;
-import com.espertech.esper.schedule.TimeProvider;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.service.StatementContext;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Set;
 

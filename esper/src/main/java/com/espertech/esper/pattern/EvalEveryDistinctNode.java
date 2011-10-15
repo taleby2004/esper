@@ -8,92 +8,44 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNodeUtility;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import java.util.List;
 
 /**
  * This class represents an 'every-distinct' operator in the evaluation tree representing an event expression.
  */
-public class EvalEveryDistinctNode extends EvalNodeBase implements EvalNodeFilterChildNonQuitting
-{
-    private List<ExprNode> expressions;
-    protected transient ExprEvaluator[] expressionsArray;
-    private transient MatchedEventConvertor convertor;
-    private Long msecToExpire;
-    private static final long serialVersionUID = 7455570958072753956L;
+public class EvalEveryDistinctNode extends EvalNodeBase {
+    private final EvalEveryDistinctFactoryNode factoryNode;
+    private final EvalNode childNode;
 
-    /**
-     * Ctor.
-     * @param expressions distinct-value expressions
-     */
-    protected EvalEveryDistinctNode(List<ExprNode> expressions)
-    {
-        this.expressions = expressions;
+    public EvalEveryDistinctNode(EvalEveryDistinctFactoryNode factoryNode, EvalNode childNode, PatternAgentInstanceContext agentInstanceContext) {
+        super(agentInstanceContext);
+        this.factoryNode = factoryNode;
+        this.childNode = childNode;
+    }
+
+    public EvalNodeNumber getNodeNumber() {
+        return factoryNode.getNodeNumber();
+    }
+
+    public EvalEveryDistinctFactoryNode getFactoryNode() {
+        return factoryNode;
+    }
+
+    public EvalNode getChildNode() {
+        return childNode;
     }
 
     public EvalStateNode newState(Evaluator parentNode,
                                   MatchedEventMap beginState,
                                   EvalStateNodeNumber stateNodeId)
     {
-        if (expressionsArray == null) {
-            expressionsArray = ExprNodeUtility.getEvaluators(expressions);
-        }
-        if (msecToExpire == null) {
+        if (factoryNode.getMsecToExpire() == null) {
             return new EvalEveryDistinctStateNode(parentNode, this, beginState);
         }
         else {
             return new EvalEveryDistinctStateExpireKeyNode(parentNode, this, beginState);
         }
-    }
-
-    public ExprEvaluator[] getExpressionsArray() {
-        return expressionsArray;
-    }
-
-    public MatchedEventConvertor getConvertor() {
-        return convertor;
-    }
-
-    public Long getMsecToExpire() {
-        return msecToExpire;
-    }
-
-    public final String toString()
-    {
-        return "EvalEveryNode children=" + this.getChildNodes().size();
-    }
-
-    /**
-     * Returns expressions for distinct-value.
-     * @return expressions
-     */
-    public List<ExprNode> getExpressions()
-    {
-        return expressions;
-    }
-
-    /**
-     * Sets the convertor for matching events to events-per-stream.
-     * @param convertor convertor
-     */
-    public void setConvertor(MatchedEventConvertor convertor)
-    {
-        this.convertor = convertor;
-    }
-
-    /**
-     * Sets expressions for distinct-value.
-     * @param expressions to set
-     */
-    public void setExpressions(List<ExprNode> expressions, Long msecToExpire)
-    {
-        this.expressions = expressions;
-        this.msecToExpire = msecToExpire;
     }
 
     private static final Log log = LogFactory.getLog(EvalEveryNode.class);

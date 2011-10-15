@@ -13,7 +13,7 @@ package com.espertech.esper.view.internal;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.StoppableView;
 import com.espertech.esper.view.View;
@@ -34,6 +34,7 @@ public class IntersectAsymetricView extends ViewSupport implements LastPostObser
 {
     private static final Log log = LogFactory.getLog(IntersectAsymetricView.class);
 
+    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final IntersectViewFactory intersectViewFactory;
     private final EventType eventType;
     private final View[] views;
@@ -53,8 +54,9 @@ public class IntersectAsymetricView extends ViewSupport implements LastPostObser
      * @param eventType the parent event type
      * @param viewList the list of data window views
      */
-    public IntersectAsymetricView(IntersectViewFactory factory, EventType eventType, List<View> viewList)
+    public IntersectAsymetricView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext, IntersectViewFactory factory, EventType eventType, List<View> viewList)
     {
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
         this.intersectViewFactory = factory;
         this.eventType = eventType;
         this.views = viewList.toArray(new View[viewList.size()]);
@@ -69,9 +71,9 @@ public class IntersectAsymetricView extends ViewSupport implements LastPostObser
         }
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return intersectViewFactory.makeView(statementContext);
+        return intersectViewFactory.makeView(agentInstanceViewFactoryContext);
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)

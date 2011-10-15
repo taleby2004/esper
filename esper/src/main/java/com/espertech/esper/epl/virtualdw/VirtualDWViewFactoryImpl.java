@@ -16,10 +16,10 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.hook.VirtualDataWindow;
 import com.espertech.esper.client.hook.VirtualDataWindowContext;
 import com.espertech.esper.client.hook.VirtualDataWindowFactory;
-import com.espertech.esper.core.StatementContext;
-import com.espertech.esper.epl.core.ViewResourceCallback;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
 import com.espertech.esper.event.EventAdapterServiceHelper;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.view.*;
@@ -60,9 +60,10 @@ public class VirtualDWViewFactoryImpl implements ViewFactory, DataWindowViewFact
 
         ExprNode[] validatedNodes = ViewFactorySupport.validate(viewFactoryContext.getViewName(), parentEventType, viewFactoryContext.getStatementContext(), viewParameters, true);
         viewParameterArr = new Object[validatedNodes.length];
+        ExprEvaluatorContextStatement evaluatorContextStmt = new ExprEvaluatorContextStatement(viewFactoryContext.getStatementContext());
         for (int i = 0; i < validatedNodes.length; i++) {
             try {
-                viewParameterArr[i] = ViewFactorySupport.evaluateAssertNoProperties(viewFactoryContext.getViewName(), validatedNodes[i], i, viewFactoryContext.getStatementContext());
+                viewParameterArr[i] = ViewFactorySupport.evaluateAssertNoProperties(viewFactoryContext.getViewName(), validatedNodes[i], i, evaluatorContextStmt);
             }
             catch (Exception ex) {
                 // expected
@@ -72,18 +73,18 @@ public class VirtualDWViewFactoryImpl implements ViewFactory, DataWindowViewFact
         viewParameterExp = ViewFactorySupport.validate(viewFactoryContext.getViewName(), parentEventType, viewFactoryContext.getStatementContext(), viewParameters, true);
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability) {
-        return (viewCapability instanceof ViewCapDataWindowAccess) || (viewCapability instanceof RemoveStreamViewCapability);
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback) {
-    }
-
-    public View makeView(StatementContext statementContext) {
-        EventBeanFactory factory = EventAdapterServiceHelper.getFactoryForType(parentEventType, statementContext.getEventAdapterService());
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
+    {
+        EventBeanFactory factory = EventAdapterServiceHelper.getFactoryForType(parentEventType, agentInstanceViewFactoryContext.getAgentInstanceContext().getStatementContext().getEventAdapterService());
         VirtualDataWindowOutStreamImpl outputStream = new VirtualDataWindowOutStreamImpl();
-        VirtualDataWindowContext context = new VirtualDataWindowContext(statementContext, parentEventType, viewParameterArr, viewParameterExp, factory, outputStream, namedWindowName, viewFactoryContext, customConfiguration);
-        VirtualDataWindow window = virtualDataWindowFactory.create(context);
+        VirtualDataWindowContext context = new VirtualDataWindowContext(agentInstanceViewFactoryContext.getAgentInstanceContext(), parentEventType, viewParameterArr, viewParameterExp, factory, outputStream, namedWindowName, viewFactoryContext, customConfiguration);
+        VirtualDataWindow window;
+        try {
+            window = virtualDataWindowFactory.create(context);
+        }
+        catch (Exception ex) {
+            throw new ViewProcessingException("Exception returned by virtual data window factory upon creation: " + ex.getMessage(), ex);
+        }
         VirtualDWViewImpl view = new VirtualDWViewImpl(window, parentEventType, namedWindowName);
         outputStream.setView(view);
         return view;

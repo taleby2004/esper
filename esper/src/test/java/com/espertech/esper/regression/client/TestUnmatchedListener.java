@@ -72,13 +72,29 @@ public class TestUnmatchedListener extends TestCase
         listener.reset();
     }
 
+    public void testUnmatchedCreateStatement()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        UnmatchListenerCreateStmt listener = new UnmatchListenerCreateStmt(epService);
+        epService.getEPRuntime().setUnmatchedListener(listener);
+
+        // no statement, should be unmatched
+        sendEvent("E1");
+        assertEquals(1, listener.getReceived().size());
+        listener.reset();
+
+        sendEvent("E1");
+        assertEquals(0, listener.getReceived().size());
+    }
+
     public void testUnmatchedInsertInto()
     {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         MyUnmatchedListener listener = new MyUnmatchedListener();
         epService.getEPRuntime().setUnmatchedListener(listener);
 
         // create insert into
-        EPStatement insertInto = epService.getEPAdministrator().createEPL("insert into MyEvent select string from " + SupportBean.class.getName());
+        EPStatement insertInto = epService.getEPAdministrator().createEPL("insert into MyEvent select string from SupportBean");
 
         // no statement, should be unmatched
         sendEvent("E1");
@@ -127,6 +143,32 @@ public class TestUnmatchedListener extends TestCase
         public void update(EventBean event)
         {
             received.add(event);
+        }
+
+        public List<EventBean> getReceived()
+        {
+            return received;
+        }
+
+        public void reset()
+        {
+            received.clear();
+        }
+    }
+
+    public static class UnmatchListenerCreateStmt implements UnmatchedListener {
+
+        private List<EventBean> received;
+        private final EPServiceProvider engine;
+
+        private UnmatchListenerCreateStmt(EPServiceProvider engine) {
+            this.engine = engine;
+            this.received = new ArrayList<EventBean>();
+        }
+
+        public void update(EventBean event) {
+            received.add(event);
+            engine.getEPAdministrator().createEPL("select * from SupportBean");
         }
 
         public List<EventBean> getReceived()

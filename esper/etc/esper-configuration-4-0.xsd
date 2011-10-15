@@ -329,8 +329,16 @@
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="function-class" type="xs:string" use="required"/>
 			<xs:attribute name="function-method" type="xs:string" use="required"/>
+			<xs:attribute name="value-cache" type="esper:valueCacheEnum" use="optional"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:simpleType name="valueCacheEnum">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="enabled"/>
+			<xs:enumeration value="configured"/>
+			<xs:enumeration value="disabled"/>
+		</xs:restriction>
+	</xs:simpleType>
 	<xs:element name="plugin-pattern-guard">
 		<xs:complexType>
 			<xs:attribute name="namespace" type="xs:string" use="required"/>
@@ -379,6 +387,7 @@
 					<xs:element ref="esper:view-resources" minOccurs="0"/>
 					<xs:element ref="esper:logging" minOccurs="0"/>
 					<xs:element ref="esper:variables" minOccurs="0"/>
+					<xs:element ref="esper:patterns" minOccurs="0"/>
 					<xs:element ref="esper:stream-selection" minOccurs="0"/>
 					<xs:element ref="esper:time-source" minOccurs="0"/>
 					<xs:element ref="esper:metrics-reporting" minOccurs="0"/>
@@ -404,6 +413,7 @@
 					<xs:element ref="esper:threadpool-routeexec" minOccurs="0"/>
 				</xs:choice>
 			</xs:sequence>
+			<xs:attribute name="engine-fairlock" type="xs:boolean" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="event-meta">
@@ -510,6 +520,15 @@
 			</xs:choice>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="patterns">
+		<xs:complexType>
+			<xs:choice>
+				<xs:sequence>
+					<xs:element ref="esper:max-subexpression" minOccurs="0"/>
+				</xs:sequence>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="stream-selection">
 		<xs:complexType>
 			<xs:choice>
@@ -588,6 +607,12 @@
 	<xs:element name="msec-version-release">
 		<xs:complexType>
 			<xs:attribute name="value" type="xs:long" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="max-subexpression">
+		<xs:complexType>
+			<xs:attribute name="value" type="xs:long" use="required"/>
+			<xs:attribute name="prevent-start" type="xs:boolean" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:simpleType name="dispatchLockingEnum">
@@ -742,8 +767,16 @@
 		<xs:complexType>
 			<xs:attribute name="prioritized" type="xs:boolean" use="optional"/>
 			<xs:attribute name="fairlock" type="xs:boolean" use="optional"/>
+			<xs:attribute name="disable-locking" type="xs:boolean" use="optional"/>
+			<xs:attribute name="threading-profile" type="esper:threadingProfileEnum" use="optional"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:simpleType name="threadingProfileEnum">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="large"/>
+			<xs:enumeration value="normal"/>
+		</xs:restriction>
+	</xs:simpleType>
 	<xs:element name="stmtgroup">
 		<xs:complexType>
 			<xs:choice minOccurs="0" maxOccurs="unbounded">

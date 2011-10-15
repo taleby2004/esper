@@ -39,7 +39,7 @@ public class TestFullTableScanLookupPlan extends TestCase
         indexes[1] = new HashMap<String,EventTable>();
         indexes[1].put("idx2", unindexedEventIndex);
 
-        JoinExecTableLookupStrategy lookupStrategy = spec.makeStrategy(indexes, null, new VirtualDWView[2]);
+        JoinExecTableLookupStrategy lookupStrategy = spec.makeStrategy("ABC", "001", null, indexes, null, new VirtualDWView[2]);
 
         FullTableScanLookupStrategy strategy = (FullTableScanLookupStrategy) lookupStrategy;
         assertEquals(unindexedEventIndex, strategy.getEventIndex());

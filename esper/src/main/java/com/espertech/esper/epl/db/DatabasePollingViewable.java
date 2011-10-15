@@ -110,7 +110,7 @@ public class DatabasePollingViewable implements HistoricalEventViewable
         this.exprEvaluatorContext = exprEvaluatorContext;
 
         int count = 0;
-        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations);
+        ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, exprEvaluatorContext, eventAdapterService, statementName, statementId, annotations, null);
         for (String inputParam : inputParameters)
         {
             ExprNode raw = findSQLExpressionNode(myStreamNumber, count, sqlParameters);

@@ -8,35 +8,24 @@
  **************************************************************************************/
 package com.espertech.esper.view.window;
 
-import com.espertech.esper.view.*;
-import com.espertech.esper.epl.core.ViewResourceCallback;
-import com.espertech.esper.epl.named.RemoveStreamViewCapability;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.view.*;
 
 import java.util.List;
 
 /**
  * Factory for {@link TimeWindowView}.
  */
-public class TimeWindowViewFactory implements DataWindowViewFactory
+public class TimeWindowViewFactory implements DataWindowViewFactory, DataWindowViewWithPrevious
 {
     /**
      * Number of msec before expiry.
      */
     protected long millisecondsBeforeExpiry;
-
-    /**
-     * Access into the data window.
-     */
-    protected RandomAccessByIndexGetter randomAccessGetterImpl;
-
-    /**
-     * Flag to indicate that the view must handle the removed events from a parent view.
-     */
-    protected boolean isRemoveStreamHandling;
 
     private EventType eventType;
 
@@ -78,60 +67,14 @@ public class TimeWindowViewFactory implements DataWindowViewFactory
         this.eventType = parentEventType;
     }
 
-    public boolean canProvideCapability(ViewCapability viewCapability)
-    {
-        if (viewCapability instanceof ViewCapDataWindowAccess)
-        {
-            return true;
-        }
-        else if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+    public Object makePreviousGetter() {
+        return new RandomAccessByIndexGetter();
     }
 
-    /**
-     * Returns the number of millisecond before window contents expire.
-     * @return num msec
-     */
-    public long getMillisecondsBeforeExpiry()
+    public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        return millisecondsBeforeExpiry;
-    }
-
-    public void setProvideCapability(ViewCapability viewCapability, ViewResourceCallback resourceCallback)
-    {
-        if (!canProvideCapability(viewCapability))
-        {
-            throw new UnsupportedOperationException("View capability " + viewCapability.getClass().getSimpleName() + " not supported");
-        }
-        if (viewCapability instanceof RemoveStreamViewCapability)
-        {
-            isRemoveStreamHandling = true;
-            return;
-        }
-        if (randomAccessGetterImpl == null)
-        {
-            randomAccessGetterImpl = new RandomAccessByIndexGetter();
-        }
-        resourceCallback.setViewResource(randomAccessGetterImpl);
-    }
-
-    public View makeView(StatementContext statementContext)
-    {
-        IStreamRandomAccess randomAccess = null;
-
-        if (randomAccessGetterImpl != null)
-        {
-            randomAccess = new IStreamRandomAccess(randomAccessGetterImpl);
-            randomAccessGetterImpl.updated(randomAccess);
-        }
-
-        return new TimeWindowView(statementContext, this, millisecondsBeforeExpiry, randomAccess, isRemoveStreamHandling);
+        IStreamRandomAccess randomAccess = ViewServiceHelper.getOptPreviousExprRandomAccess(agentInstanceViewFactoryContext);
+        return new TimeWindowView(agentInstanceViewFactoryContext, this, millisecondsBeforeExpiry, randomAccess);
     }
 
     public EventType getEventType()
@@ -141,11 +84,6 @@ public class TimeWindowViewFactory implements DataWindowViewFactory
 
     public boolean canReuse(View view)
     {
-        if (randomAccessGetterImpl != null)
-        {
-            return false;
-        }
-
         if (!(view instanceof TimeWindowView))
         {
             return false;

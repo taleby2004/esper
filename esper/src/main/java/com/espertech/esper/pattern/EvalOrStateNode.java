@@ -40,7 +40,7 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
 
         // In an "or" expression we need to create states for all child expressions/listeners,
         // since all are going to be started
-        for (EvalNode node : getFactoryNode().getChildNodes())
+        for (EvalNode node : evalOrNode.getChildNodes())
         {
             EvalStateNode childState = node.newState(this, beginState, null);
             childNodes.add(childState);
@@ -54,7 +54,7 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
 
     public final void start()
     {
-        if (childNodes.size() != getFactoryNode().getChildNodes().size())
+        if (childNodes.size() != evalOrNode.getChildNodes().length)
         {
             throw new IllegalStateException("OR state node does not have the required child state nodes");
         }

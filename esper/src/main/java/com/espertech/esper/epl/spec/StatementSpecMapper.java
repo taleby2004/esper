@@ -12,10 +12,13 @@ import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.EPAdministratorHelper;
+import com.espertech.esper.core.context.mgr.ContextManagementService;
+import com.espertech.esper.core.context.util.ContextPropertyRegistry;
+import com.espertech.esper.core.service.EPAdministratorHelper;
 import com.espertech.esper.epl.agg.AggregationAccessType;
 import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.epl.core.EngineImportService;
+import com.espertech.esper.epl.core.EngineImportSingleRowDesc;
 import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNodeImpl;
@@ -56,7 +59,7 @@ public class StatementSpecMapper
      * @param node to unmap
      * @return pattern
      */
-    public static PatternExpr unmap(EvalNode node) {
+    public static PatternExpr unmap(EvalFactoryNode node) {
         return unmapPatternEvalDeep(node, new StatementSpecUnMapContext());
     }
 
@@ -87,9 +90,9 @@ public class StatementSpecMapper
      * @param configuration supplies config values
      * @return statement specification, and internal representation of a statement
      */
-    public static StatementSpecRaw map(EPStatementObjectModel sodaStatement, EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI, PatternNodeFactory patternNodeFactory, NamedWindowService namedWindowService)
+    public static StatementSpecRaw map(EPStatementObjectModel sodaStatement, EngineImportService engineImportService, VariableService variableService, ConfigurationInformation configuration, SchedulingService schedulingService, String engineURI, PatternNodeFactory patternNodeFactory, NamedWindowService namedWindowService, ContextManagementService contextManagementService)
     {
-        StatementSpecMapContext mapContext = new StatementSpecMapContext(engineImportService, variableService, configuration, schedulingService, engineURI, patternNodeFactory, namedWindowService);
+        StatementSpecMapContext mapContext = new StatementSpecMapContext(engineImportService, variableService, configuration, schedulingService, engineURI, patternNodeFactory, namedWindowService, contextManagementService);
 
         StatementSpecRaw raw = map(sodaStatement, mapContext);
         if (mapContext.isHasVariables())
@@ -107,8 +110,10 @@ public class StatementSpecMapper
         List<AnnotationDesc> annotations = mapAnnotations(sodaStatement.getAnnotations());
         raw.setAnnotations(annotations);
         mapExpressionDeclaration(sodaStatement.getExpressionDeclarations(), raw, mapContext);
+        mapContextName(sodaStatement.getContextName(), raw, mapContext);
         mapUpdateClause(sodaStatement.getUpdateClause(), raw, mapContext);
-        mapCreateWindow(sodaStatement.getCreateWindow(), raw, mapContext);
+        mapCreateContext(sodaStatement.getCreateContext(), raw, mapContext);
+        mapCreateWindow(sodaStatement.getCreateWindow(), sodaStatement.getFromClause(), raw, mapContext);
         mapCreateIndex(sodaStatement.getCreateIndex(), raw, mapContext);
         mapCreateVariable(sodaStatement.getCreateVariable(), raw, mapContext);
         mapCreateSchema(sodaStatement.getCreateSchema(), raw, mapContext);
@@ -149,6 +154,8 @@ public class StatementSpecMapper
         model.setAnnotations(annotations);
         List<ExpressionDeclaration> expressionDeclarations = unmapExpressionDeclarations(statementSpec.getExpressionDeclDesc(), unmapContext);
         model.setExpressionDeclarations(expressionDeclarations);
+        unmapContextName(statementSpec.getOptionalContextName(), model);
+        unmapCreateContext(statementSpec.getCreateContextDesc(), model, unmapContext);
         unmapCreateWindow(statementSpec.getCreateWindowDesc(), model, unmapContext);
         unmapCreateIndex(statementSpec.getCreateIndexDesc(), model, unmapContext);
         unmapCreateVariable(statementSpec.getCreateVariableDesc(), model, unmapContext);
@@ -312,6 +319,63 @@ public class StatementSpecMapper
         }
     }
 
+    private static void unmapContextName(String contextName, EPStatementObjectModel model) {
+        model.setContextName(contextName);
+    }
+
+    private static void unmapCreateContext(CreateContextDesc createContextDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
+    {
+        if (createContextDesc == null)
+        {
+            return;
+        }
+
+        ContextDescriptor desc;
+        if (createContextDesc.getContextDetail() instanceof ContextDetailTemporalFixed) {
+            ContextDetailTemporalFixed single = (ContextDetailTemporalFixed) createContextDesc.getContextDetail();
+            List<Expression> start = unmapExpressionDeep(single.getCrontabStart(), unmapContext);
+            List<Expression> end = unmapExpressionDeep(single.getCrontabEnd(), unmapContext);
+            ContextDescriptorTemporalCrontabSingle detail = new ContextDescriptorTemporalCrontabSingle();
+            desc = detail;
+            detail.setCrontabEndExpressions(end);
+            detail.setCrontabStartExpressions(start);
+        }
+        else if (createContextDesc.getContextDetail() instanceof ContextDetailPartitioned) {
+            ContextDetailPartitioned seg = (ContextDetailPartitioned) createContextDesc.getContextDetail();
+            List<ContextDescriptorPartitionedItem> segmentedItems = new ArrayList<ContextDescriptorPartitionedItem>();
+            for (ContextDetailPartitionItem item : seg.getItems()) {
+                Filter filter = unmapFilter(item.getFilterSpecRaw(), unmapContext);
+                segmentedItems.add(new ContextDescriptorPartitionedItem(item.getPropertyNames(), filter));
+            }
+            desc = new ContextDescriptorPartitioned(segmentedItems);
+        }
+        else if (createContextDesc.getContextDetail() instanceof ContextDetailCategory) {
+            ContextDetailCategory category = (ContextDetailCategory) createContextDesc.getContextDetail();
+            List<ContextDescriptorCategoryItem> categoryItems = new ArrayList<ContextDescriptorCategoryItem>();
+            Filter filter = unmapFilter(category.getFilterSpecRaw(), unmapContext);
+            for (ContextDetailCategoryItem item : category.getItems()) {
+                Expression expr = unmapExpressionDeep(item.getExpression(), unmapContext);
+                categoryItems.add(new ContextDescriptorCategoryItem(expr, item.getName()));
+            }
+            desc = new ContextDescriptorCategory(categoryItems, filter);
+        }
+        else {
+            ContextDetailInitiatedTerminated init = (ContextDetailInitiatedTerminated) createContextDesc.getContextDetail();
+            TimePeriodExpression expr = (TimePeriodExpression) unmapExpressionDeep(init.getTerminatedTimePeriod(), unmapContext);
+            if (init.getInitiatedFilter() != null) {
+                Filter filter = unmapFilter(init.getInitiatedFilter(), unmapContext);
+                desc = new ContextDescriptorInitiatedTerminated(filter, init.getInitiatedFilterAsName(), expr);
+            }
+            else {
+                PatternExpr pattern = unmapPatternEvalDeep(init.getInitiatedPattern(), unmapContext);
+                desc = new ContextDescriptorInitiatedTerminated(pattern, expr);
+            }
+        }
+
+        CreateContextClause clause = new CreateContextClause(createContextDesc.getContextName(), desc);
+        model.setCreateContext(clause);
+    }
+
     private static void unmapCreateWindow(CreateWindowDesc createWindowDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
     {
         if (createWindowDesc == null)
@@ -368,6 +432,7 @@ public class StatementSpecMapper
         CreateSchemaClause clause = new CreateSchemaClause(desc.getSchemaName(), desc.getTypes(), columns, desc.getInherits(), desc.isVariant());
         clause.setStartTimestampPropertyName(desc.getStartTimestampProperty());
         clause.setEndTimestampPropertyName(desc.getEndTimestampProperty());
+        clause.setCopyFrom(desc.getCopyFrom());
         model.setCreateSchema(clause);
     }
 
@@ -464,6 +529,7 @@ public class StatementSpecMapper
         if (outputLimitSpec.getAfterTimePeriodExpr() != null) {
             clause.setAfterTimePeriodExpression((TimePeriodExpression) unmapExpressionDeep(outputLimitSpec.getAfterTimePeriodExpr(), unmapContext));
         }
+        clause.setAndAfterTerminate(outputLimitSpec.isAndAfterTerminate());
         model.setOutputLimitClause(clause);
     }
 
@@ -612,7 +678,7 @@ public class StatementSpecMapper
             afterTimePeriod = (ExprTimePeriod) mapExpressionDeep(outputLimitClause.getAfterTimePeriodExpression(), mapContext);
         }
 
-        OutputLimitSpec spec = new OutputLimitSpec(frequency, frequencyVariable, rateType, displayLimit, whenExpression, assignments, timerAtExprList, timePeriod, afterTimePeriod, outputLimitClause.getAfterNumberOfEvents());
+        OutputLimitSpec spec = new OutputLimitSpec(frequency, frequencyVariable, rateType, displayLimit, whenExpression, assignments, timerAtExprList, timePeriod, afterTimePeriod, outputLimitClause.getAfterNumberOfEvents(), outputLimitClause.isAndAfterTerminate());
         raw.setOutputLimitSpec(spec);
     }
 
@@ -783,7 +849,7 @@ public class StatementSpecMapper
             ExprTimePeriod timePeriod = (ExprTimePeriod) mapExpressionDeep(clause.getIntervalClause().getExpression(), mapContext);
             try
             {
-                timePeriod.validate(new ExprValidationContext(null, null, null, null, null, null, null, null, null, null));
+                timePeriod.validate(new ExprValidationContext(null, null, null, null, null, null, null, null, null, null, null));
             }
             catch (ExprValidationException e)
             {
@@ -887,7 +953,7 @@ public class StatementSpecMapper
             else if (stream instanceof PatternStreamSpecRaw)
             {
                 PatternStreamSpecRaw pattern = (PatternStreamSpecRaw) stream;
-                PatternExpr patternExpr = unmapPatternEvalDeep(pattern.getEvalNode(), unmapContext);
+                PatternExpr patternExpr = unmapPatternEvalDeep(pattern.getEvalFactoryNode(), unmapContext);
                 PatternStream patternStream = new PatternStream(patternExpr, pattern.getOptionalStreamName());
                 unmapStreamOpts(stream.getOptions(), patternStream);
                 targetStream = patternStream;
@@ -1004,7 +1070,58 @@ public class StatementSpecMapper
                         insertIntoDesc.getColumnNames().toArray(new String[insertIntoDesc.getColumnNames().size()]), s);
     }
 
-    private static void mapCreateWindow(CreateWindowClause createWindow, StatementSpecRaw raw, StatementSpecMapContext mapContext)
+    private static void mapCreateContext(CreateContextClause createContext, StatementSpecRaw raw, StatementSpecMapContext mapContext) {
+        if (createContext == null) {
+            return;
+        }
+
+        ContextDetail detail;
+        if (createContext.getDescriptor() instanceof ContextDescriptorTemporalCrontabSingle) {
+            ContextDescriptorTemporalCrontabSingle single = (ContextDescriptorTemporalCrontabSingle) createContext.getDescriptor();
+            List<ExprNode> start = mapExpressionDeep(single.getCrontabStartExpressions(), mapContext);
+            List<ExprNode> end = mapExpressionDeep(single.getCrontabEndExpressions(), mapContext);
+            detail = new ContextDetailTemporalFixed(start, end);
+        }
+        else if (createContext.getDescriptor() instanceof ContextDescriptorPartitioned) {
+            ContextDescriptorPartitioned seg = (ContextDescriptorPartitioned) createContext.getDescriptor();
+            List<ContextDetailPartitionItem> itemsdesc = new ArrayList<ContextDetailPartitionItem>();
+            for (ContextDescriptorPartitionedItem item : seg.getItems()) {
+                FilterSpecRaw rawSpec = mapFilter(item.getFilter(), mapContext);
+                itemsdesc.add(new ContextDetailPartitionItem(rawSpec, item.getPropertyNames()));
+            }
+            detail = new ContextDetailPartitioned(itemsdesc);
+        }
+        else if (createContext.getDescriptor() instanceof ContextDescriptorCategory) {
+            ContextDescriptorCategory cat = (ContextDescriptorCategory) createContext.getDescriptor();
+            FilterSpecRaw rawSpec = mapFilter(cat.getFilter(), mapContext);
+            List<ContextDetailCategoryItem> itemsdesc = new ArrayList<ContextDetailCategoryItem>();
+            for (ContextDescriptorCategoryItem item : cat.getItems()) {
+                ExprNode expr = mapExpressionDeep(item.getExpression(), mapContext);
+                itemsdesc.add(new ContextDetailCategoryItem(expr, item.getLabel()));
+            }
+            detail = new ContextDetailCategory(itemsdesc, rawSpec);
+        }
+        else {
+            ContextDescriptorInitiatedTerminated term = (ContextDescriptorInitiatedTerminated) createContext.getDescriptor();
+            FilterSpecRaw filter = null;
+            EvalFactoryNode pattern = null;
+            String filterAsName = null;
+            if (term.getInitiatedFilter() != null) {
+                filter = mapFilter(term.getInitiatedFilter(), mapContext);
+                filterAsName = term.getInitiatedFilterAsName();
+            }
+            else {
+                pattern = mapPatternEvalDeep(term.getInitiatedPattern(), mapContext);
+            }
+            ExprTimePeriod after = (ExprTimePeriod) mapExpressionDeep(term.getTerminatedTimePeriod(), mapContext);
+            detail = new ContextDetailInitiatedTerminated(pattern, filter, filterAsName, after);
+        }
+
+        CreateContextDesc desc = new CreateContextDesc(createContext.getContextName(), detail);
+        raw.setCreateContextDesc(desc);
+    }
+
+    private static void mapCreateWindow(CreateWindowClause createWindow, FromClause fromClause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
     {
         if (createWindow == null)
         {
@@ -1017,7 +1134,12 @@ public class StatementSpecMapper
             insertFromWhereExpr = mapExpressionDeep(createWindow.getInsertWhereClause(), mapContext);
         }
         List<ColumnDesc> columns = mapColumns(createWindow.getColumns());
-        raw.setCreateWindowDesc(new CreateWindowDesc(createWindow.getWindowName(), mapViews(createWindow.getViews(), mapContext), new StreamSpecOptions(), createWindow.isInsert(), insertFromWhereExpr,  columns));
+
+        String asEventTypeName = null;
+        if (fromClause != null && !fromClause.getStreams().isEmpty() && fromClause.getStreams().get(0) instanceof FilterStream) {
+            asEventTypeName = ((FilterStream) fromClause.getStreams().get(0)).getFilter().getEventTypeName();
+        }
+        raw.setCreateWindowDesc(new CreateWindowDesc(createWindow.getWindowName(), mapViews(createWindow.getViews(), mapContext), new StreamSpecOptions(), createWindow.isInsert(), insertFromWhereExpr,  columns, asEventTypeName));
     }
 
     private static void mapCreateIndex(CreateIndexClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -1082,7 +1204,7 @@ public class StatementSpecMapper
             return;
         }
         List<ColumnDesc> columns = mapColumns(clause.getColumns());
-        raw.setCreateSchemaDesc(new CreateSchemaDesc(clause.getSchemaName(), clause.getTypes(), columns, clause.getInherits(), clause.isVariant(), clause.getStartTimestampPropertyName(), clause.getEndTimestampPropertyName()));
+        raw.setCreateSchemaDesc(new CreateSchemaDesc(clause.getSchemaName(), clause.getTypes(), columns, clause.getInherits(), clause.isVariant(), clause.getStartTimestampPropertyName(), clause.getEndTimestampPropertyName(), clause.getCopyFrom()));
     }
 
     private static List<ColumnDesc> mapColumns(List<SchemaColumnDesc> columns) {
@@ -1236,6 +1358,20 @@ public class StatementSpecMapper
             {
                 String stream = prop.getPropertyName().substring(0, indexDot);
                 String property = prop.getPropertyName().substring(indexDot + 1, prop.getPropertyName().length());
+
+                if (mapContext.getVariableService().getReader(stream) != null)
+                {
+                    mapContext.setHasVariables(true);
+                    return new ExprVariableNode(prop.getPropertyName());
+                }
+
+                if (mapContext.getContextName() != null) {
+                    com.espertech.esper.core.context.util.ContextDescriptor contextDescriptor = mapContext.getContextManagementService().getContextDescriptor(mapContext.getContextName());
+                    if (contextDescriptor != null && contextDescriptor.getContextPropertyRegistry().isContextPropertyPrefix(stream)) {
+                        return new ExprContextPropertyNode(property);
+                    }
+                }
+
                 return new ExprIdentNodeImpl(property, stream);
             }
 
@@ -1244,6 +1380,7 @@ public class StatementSpecMapper
                 mapContext.setHasVariables(true);
                 return new ExprVariableNode(prop.getPropertyName());
             }
+
             return new ExprIdentNodeImpl(prop.getPropertyName());
         }
         else if (expr instanceof Conjunction)
@@ -1521,7 +1658,7 @@ public class StatementSpecMapper
             }
             List<ExprChainedSpec> chain = mapChains(single.getChain(), mapContext);
             String functionName = chain.get(0).getName();
-            Pair<Class, String> pair;
+            Pair<Class, EngineImportSingleRowDesc> pair;
             try
             {
                 pair = mapContext.getEngineImportService().resolveSingleRow(functionName);
@@ -1530,8 +1667,8 @@ public class StatementSpecMapper
             {
                 throw new IllegalArgumentException("Function name '" + functionName + "' cannot be resolved to a single-row function: " + e.getMessage(), e);
             }
-            chain.get(0).setName(pair.getSecond());
-            return new ExprPlugInSingleRowNode(functionName, pair.getFirst(), chain, false);
+            chain.get(0).setName(pair.getSecond().getMethodName());
+            return new ExprPlugInSingleRowNode(functionName, pair.getFirst(), chain, pair.getSecond().getValueCache());
         }
         else if (expr instanceof PlugInProjectionExpression)
         {
@@ -1704,8 +1841,13 @@ public class StatementSpecMapper
         else if (expr instanceof ExprVariableNode)
         {
             ExprVariableNode prop = (ExprVariableNode) expr;
-            String propertyName = prop.getVariableName();
+            String propertyName = prop.getVariableNameWithSubProp();
             return new PropertyValueExpression(propertyName);
+        }
+        else if (expr instanceof ExprContextPropertyNode)
+        {
+            ExprContextPropertyNode prop = (ExprContextPropertyNode) expr;
+            return new PropertyValueExpression(ContextPropertyRegistry.CONTEXT_PREFIX + "." + prop.getPropertyName());
         }
         else if (expr instanceof ExprEqualsNode)
         {
@@ -2144,9 +2286,9 @@ public class StatementSpecMapper
             else if (stream instanceof PatternStream)
             {
                 PatternStream patternStream = (PatternStream) stream;
-                EvalNode child = mapPatternEvalDeep(patternStream.getExpression(), mapContext);
+                EvalFactoryNode child = mapPatternEvalDeep(patternStream.getExpression(), mapContext);
                 StreamSpecOptions options = mapStreamOpts(patternStream);
-                spec = new PatternStreamSpecRaw(child, Collections.<EvalNode, String>emptyMap(), new ArrayList<ViewSpec>(), patternStream.getStreamName(), options);
+                spec = new PatternStreamSpecRaw(child, Collections.<EvalFactoryNode, String>emptyMap(), new ArrayList<ViewSpec>(), patternStream.getStreamName(), options);
             }
             else if (stream instanceof MethodInvocationStream)
             {
@@ -2220,7 +2362,7 @@ public class StatementSpecMapper
         return views;
     }
 
-    private static EvalNode mapPatternEvalFlat(PatternExpr eval, StatementSpecMapContext mapContext)
+    private static EvalFactoryNode mapPatternEvalFlat(PatternExpr eval, StatementSpecMapContext mapContext)
     {
         if (eval == null)
         {
@@ -2238,7 +2380,7 @@ public class StatementSpecMapper
         {
             PatternFollowedByExpr fb = (PatternFollowedByExpr) eval;
             List<ExprNode> maxExpr = mapExpressionDeep(fb.getOptionalMaxPerSubexpression(), mapContext);
-            return mapContext.getPatternNodeFactory().makeFollowedByNode(maxExpr);
+            return mapContext.getPatternNodeFactory().makeFollowedByNode(maxExpr, mapContext.getConfiguration().getEngineDefaults().getPatterns().getMaxSubexpressions() != null);
         }
         else if (eval instanceof PatternEveryExpr)
         {
@@ -2282,75 +2424,75 @@ public class StatementSpecMapper
         throw new IllegalArgumentException("Could not map pattern expression node of type " + eval.getClass().getSimpleName());
     }
 
-    private static PatternExpr unmapPatternEvalFlat(EvalNode eval, StatementSpecUnMapContext unmapContext)
+    private static PatternExpr unmapPatternEvalFlat(EvalFactoryNode eval, StatementSpecUnMapContext unmapContext)
     {
-        if (eval instanceof EvalAndNode)
+        if (eval instanceof EvalAndFactoryNode)
         {
             return new PatternAndExpr();
         }
-        else if (eval instanceof EvalOrNode)
+        else if (eval instanceof EvalOrFactoryNode)
         {
             return new PatternOrExpr();
         }
-        else if (eval instanceof EvalFollowedByNode)
+        else if (eval instanceof EvalFollowedByFactoryNode)
         {
-            EvalFollowedByNode fb = (EvalFollowedByNode) eval;
+            EvalFollowedByFactoryNode fb = (EvalFollowedByFactoryNode) eval;
             List<Expression> expressions = unmapExpressionDeep(fb.getOptionalMaxExpressions(), unmapContext);
             return new PatternFollowedByExpr(expressions);
         }
-        else if (eval instanceof EvalEveryNode)
+        else if (eval instanceof EvalEveryFactoryNode)
         {
             return new PatternEveryExpr();
         }
-        else if (eval instanceof EvalNotNode)
+        else if (eval instanceof EvalNotFactoryNode)
         {
             return new PatternNotExpr();
         }
-        else if (eval instanceof EvalFilterNode)
+        else if (eval instanceof EvalFilterFactoryNode)
         {
-            EvalFilterNode filterNode = (EvalFilterNode) eval;
+            EvalFilterFactoryNode filterNode = (EvalFilterFactoryNode) eval;
             Filter filter = unmapFilter(filterNode.getRawFilterSpec(), unmapContext);
             PatternFilterExpr expr = new PatternFilterExpr(filter, filterNode.getEventAsName());
             expr.setOptionalConsumptionLevel(filterNode.getConsumptionLevel());
             return expr;
         }
-        else if (eval instanceof EvalObserverNode)
+        else if (eval instanceof EvalObserverFactoryNode)
         {
-            EvalObserverNode observerNode = (EvalObserverNode) eval;
+            EvalObserverFactoryNode observerNode = (EvalObserverFactoryNode) eval;
             List<Expression> expressions = unmapExpressionDeep(observerNode.getPatternObserverSpec().getObjectParameters(), unmapContext);
             return new PatternObserverExpr(observerNode.getPatternObserverSpec().getObjectNamespace(),
                     observerNode.getPatternObserverSpec().getObjectName(), expressions);
         }
-        else if (eval instanceof EvalGuardNode)
+        else if (eval instanceof EvalGuardFactoryNode)
         {
-            EvalGuardNode guardNode = (EvalGuardNode) eval;
+            EvalGuardFactoryNode guardNode = (EvalGuardFactoryNode) eval;
             List<Expression> expressions = unmapExpressionDeep(guardNode.getPatternGuardSpec().getObjectParameters(), unmapContext);
             return new PatternGuardExpr(guardNode.getPatternGuardSpec().getObjectNamespace(),
                     guardNode.getPatternGuardSpec().getObjectName(), expressions);
         }
-        else if (eval instanceof EvalMatchUntilNode)
+        else if (eval instanceof EvalMatchUntilFactoryNode)
         {
-            EvalMatchUntilNode matchUntilNode = (EvalMatchUntilNode) eval;
+            EvalMatchUntilFactoryNode matchUntilNode = (EvalMatchUntilFactoryNode) eval;
             Expression low = matchUntilNode.getLowerBounds() != null ? unmapExpressionDeep(matchUntilNode.getLowerBounds(), unmapContext) : null;
             Expression high = matchUntilNode.getUpperBounds() != null ? unmapExpressionDeep(matchUntilNode.getUpperBounds(), unmapContext) : null;
             return new PatternMatchUntilExpr(low, high);
         }
-        else if (eval instanceof EvalEveryDistinctNode)
+        else if (eval instanceof EvalEveryDistinctFactoryNode)
         {
-            EvalEveryDistinctNode everyDistinctNode = (EvalEveryDistinctNode) eval;
+            EvalEveryDistinctFactoryNode everyDistinctNode = (EvalEveryDistinctFactoryNode) eval;
             List<Expression> expressions = unmapExpressionDeep(everyDistinctNode.getExpressions(), unmapContext);
             return new PatternEveryDistinctExpr(expressions);
         }
-        else if (eval instanceof EvalAuditNode)
+        else if (eval instanceof EvalAuditFactoryNode)
         {
             return null;
         }
         throw new IllegalArgumentException("Could not map pattern expression node of type " + eval.getClass().getSimpleName());
     }
 
-    private static void unmapPatternEvalRecursive(PatternExpr parent, EvalNode eval, StatementSpecUnMapContext unmapContext)
+    private static void unmapPatternEvalRecursive(PatternExpr parent, EvalFactoryNode eval, StatementSpecUnMapContext unmapContext)
     {
-        for (EvalNode child : eval.getChildNodes())
+        for (EvalFactoryNode child : eval.getChildNodes())
         {
             PatternExpr result = unmapPatternEvalFlat(child, unmapContext);
             parent.getChildren().add(result);
@@ -2358,26 +2500,26 @@ public class StatementSpecMapper
         }
     }
 
-    private static void mapPatternEvalRecursive(EvalNode parent, PatternExpr expr, StatementSpecMapContext mapContext)
+    private static void mapPatternEvalRecursive(EvalFactoryNode parent, PatternExpr expr, StatementSpecMapContext mapContext)
     {
         for (PatternExpr child : expr.getChildren())
         {
-            EvalNode result = mapPatternEvalFlat(child, mapContext);
+            EvalFactoryNode result = mapPatternEvalFlat(child, mapContext);
             parent.addChildNode(result);
             mapPatternEvalRecursive(result, child, mapContext);
         }
     }
 
-    private static PatternExpr unmapPatternEvalDeep(EvalNode exprNode, StatementSpecUnMapContext unmapContext)
+    private static PatternExpr unmapPatternEvalDeep(EvalFactoryNode exprNode, StatementSpecUnMapContext unmapContext)
     {
         PatternExpr parent = unmapPatternEvalFlat(exprNode, unmapContext);
         unmapPatternEvalRecursive(parent, exprNode, unmapContext);
         return parent;
     }
 
-    private static EvalNode mapPatternEvalDeep(PatternExpr expr, StatementSpecMapContext mapContext)
+    private static EvalFactoryNode mapPatternEvalDeep(PatternExpr expr, StatementSpecMapContext mapContext)
     {
-        EvalNode parent = mapPatternEvalFlat(expr, mapContext);
+        EvalFactoryNode parent = mapPatternEvalFlat(expr, mapContext);
         mapPatternEvalRecursive(parent, expr, mapContext);
         return parent;
     }
@@ -2515,6 +2657,11 @@ public class StatementSpecMapper
         return result;
     }
 
+    private static void mapContextName(String contextName, StatementSpecRaw raw, StatementSpecMapContext mapContext) {
+        raw.setOptionalContextName(contextName);
+        mapContext.setContextName(contextName);
+    }
+
     private static void mapExpressionDeclaration(List<ExpressionDeclaration> expressionDeclarations, StatementSpecRaw raw, StatementSpecMapContext mapContext) {
         if (expressionDeclarations == null || expressionDeclarations.isEmpty()) {
             return;
@@ -2587,7 +2734,7 @@ public class StatementSpecMapper
                 }
                 String toCompile = "select * from java.lang.Object where " + expression;
                 StatementSpecRaw rawSqlExpr = EPAdministratorHelper.compileEPL(toCompile, expression, false, null, SelectClauseStreamSelectorEnum.ISTREAM_ONLY,
-                        mapContext.getEngineImportService(), mapContext.getVariableService(), mapContext.getSchedulingService(), mapContext.getEngineURI(), mapContext.getConfiguration(), mapContext.getPatternNodeFactory());
+                        mapContext.getEngineImportService(), mapContext.getVariableService(), mapContext.getSchedulingService(), mapContext.getEngineURI(), mapContext.getConfiguration(), mapContext.getPatternNodeFactory(), mapContext.getContextManagementService());
 
                 if ((rawSqlExpr.getSubstitutionParameters() != null) && (rawSqlExpr.getSubstitutionParameters().size() > 0)) {
                     throw new ASTWalkException("EPL substitution parameters are not allowed in SQL ${...} expressions, consider using a variable instead");

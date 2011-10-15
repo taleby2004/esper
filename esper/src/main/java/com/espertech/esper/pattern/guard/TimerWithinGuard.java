@@ -8,12 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.pattern.guard;
 
-import com.espertech.esper.pattern.PatternContext;
+import com.espertech.esper.core.service.EPStatementHandleCallback;
+import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
-import com.espertech.esper.core.EPStatementHandleCallback;
-import com.espertech.esper.core.ExtensionServicesContext;
 
 /**
  * Guard implementation that keeps a timer instance and quits when the timer expired,
@@ -37,7 +36,7 @@ public class TimerWithinGuard implements Guard, ScheduleHandleCallback
     {
         this.msec = msec;
         this.quitable = quitable;
-        this.scheduleSlot = quitable.getContext().getScheduleBucket().allocateSlot();
+        this.scheduleSlot = quitable.getContext().getPatternContext().getScheduleBucket().allocateSlot();
     }
 
     public void startGuard()
@@ -48,8 +47,8 @@ public class TimerWithinGuard implements Guard, ScheduleHandleCallback
         }
 
         // Start the stopwatch timer
-        scheduleHandle = new EPStatementHandleCallback(quitable.getContext().getEpStatementHandle(), this);
-        quitable.getContext().getSchedulingService().add(msec, scheduleHandle, scheduleSlot);
+        scheduleHandle = new EPStatementHandleCallback(quitable.getContext().getAgentInstanceContext().getEpStatementAgentInstanceHandle(), this);
+        quitable.getContext().getPatternContext().getSchedulingService().add(msec, scheduleHandle, scheduleSlot);
         isTimerActive = true;
     }
 
@@ -57,7 +56,7 @@ public class TimerWithinGuard implements Guard, ScheduleHandleCallback
     {
         if (isTimerActive)
         {
-            quitable.getContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
+            quitable.getContext().getPatternContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
             scheduleHandle = null;
             isTimerActive = false;
         }

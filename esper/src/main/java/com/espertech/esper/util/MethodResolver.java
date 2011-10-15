@@ -378,6 +378,7 @@ public class MethodResolver
         else
         {
             StringBuffer params = new StringBuffer();
+            String message = "Constructor not found for " + declaringClass.getSimpleName() + " taking ";
             if(paramTypes != null && paramTypes.length != 0)
             {
                 String appendString = "";
@@ -392,8 +393,12 @@ public class MethodResolver
                     }
                     appendString = ", ";
                 }
+                message += "('" + params + "')'";
             }
-            throw new EngineNoSuchCtorException("Constructor not found for " + declaringClass.getSimpleName() + " taking ('" + params + "')'", conversionFailedCtor);
+            else {
+                message += "no parameters";
+            }
+            throw new EngineNoSuchCtorException(message, conversionFailedCtor);
         }
     }
 }

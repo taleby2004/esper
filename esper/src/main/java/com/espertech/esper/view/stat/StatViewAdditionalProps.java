@@ -11,10 +11,18 @@
 
 package com.espertech.esper.view.stat;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyDescriptor;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNumberSetWildcardMarker;
 import com.espertech.esper.view.ViewFieldEnum;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class StatViewAdditionalProps
@@ -38,18 +46,53 @@ public class StatViewAdditionalProps
         return additionalExpr;
     }
 
-    public static StatViewAdditionalProps make(ExprNode[] validated, int startIndex) {
+    public static StatViewAdditionalProps make(ExprNode[] validated, int startIndex, EventType parentEventType) {
         if (validated.length <= startIndex) {
             return null;
         }
 
-        String[] additionalProps = new String[validated.length - startIndex];
-        ExprEvaluator[] lastValueExpr = new ExprEvaluator[validated.length - startIndex];
+        List<String> additionalProps = new ArrayList<String>();
+        List<ExprEvaluator> lastValueExpr = new ArrayList<ExprEvaluator>();
+        boolean copyAllProperties = false;
+
         for (int i = startIndex; i < validated.length; i++) {
-            additionalProps[i - startIndex] = validated[i].toExpressionString();
-            lastValueExpr[i - startIndex] = validated[i].getExprEvaluator();
+
+            if (validated[i] instanceof ExprNumberSetWildcardMarker) {
+                copyAllProperties = true;
+            }
+
+            additionalProps.add(validated[i].toExpressionString());
+            lastValueExpr.add(validated[i].getExprEvaluator());
         }
-        return new StatViewAdditionalProps(additionalProps, lastValueExpr);
+
+        if (copyAllProperties) {
+            for (EventPropertyDescriptor propertyDescriptor : parentEventType.getPropertyDescriptors()) {
+                if (propertyDescriptor.isFragment()) {
+                    continue;
+                }
+                additionalProps.add(propertyDescriptor.getPropertyName());
+                final EventPropertyGetter getter = parentEventType.getGetter(propertyDescriptor.getPropertyName());
+                final Class type = propertyDescriptor.getPropertyType();
+                ExprEvaluator exprEvaluator = new ExprEvaluator() {
+                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+                        return getter.get(eventsPerStream[0]);
+                    }
+
+                    public Class getType() {
+                        return type;
+                    }
+
+                    public Map<String, Object> getEventType() {
+                        return null;
+                    }
+                };
+                lastValueExpr.add(exprEvaluator);
+            }
+        }
+
+        String[] addPropsArr = additionalProps.toArray(new String[additionalProps.size()]);
+        ExprEvaluator[] valueExprArr = lastValueExpr.toArray(new ExprEvaluator[lastValueExpr.size()]);
+        return new StatViewAdditionalProps(addPropsArr, valueExprArr);
     }
 
     public void addProperties(Map<String, Object> newDataMap, Object[] lastValuesEventNew)

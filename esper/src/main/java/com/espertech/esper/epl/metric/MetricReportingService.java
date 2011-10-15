@@ -9,7 +9,7 @@
 package com.espertech.esper.epl.metric;
 
 import com.espertech.esper.client.EPRuntime;
-import com.espertech.esper.core.EPServicesContext;
+import com.espertech.esper.core.service.EPServicesContext;
 
 /**
  * Metrics reporting service for instrumentation data publishing, if enabled. 

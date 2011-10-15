@@ -8,16 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.event;
 
-import com.espertech.esper.client.EventSender;
-import com.espertech.esper.client.EPException;
 import com.espertech.esper.plugin.PlugInEventBeanFactory;
-import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.EPRuntimeImpl;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.net.URI;
-import java.util.List;
 
 /**
  * Descriptor for URI-based event sender for plug-in event representations.

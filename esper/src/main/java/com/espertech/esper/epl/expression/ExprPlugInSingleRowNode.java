@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
+import com.espertech.esper.client.ConfigurationPlugInSingleRowFunction;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalTypeInfo;
 import com.espertech.esper.epl.enummethod.dot.ExprDotStaticMethodWrap;
 import com.espertech.esper.epl.enummethod.dot.ExprDotStaticMethodWrapFactory;
@@ -20,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an invocation of a plug-in single-row function  in the expression tree.
@@ -32,22 +35,21 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
     private final String functionName;
     private final Class clazz;
     private final List<ExprChainedSpec> chainSpec;
+    private final ConfigurationPlugInSingleRowFunction.ValueCache valueCache;
 
-    private final boolean isUseCache;
     private transient boolean isReturnsConstantResult;
     private transient ExprEvaluator evaluator;
 
     /**
 	 * Ctor.
 	 * @param chainSpec - the class and name of the method that this node will invoke plus parameters
-     * @param isUseCache - configuration whether to use cache
 	 */
-	public ExprPlugInSingleRowNode(String functionName, Class clazz, List<ExprChainedSpec> chainSpec, boolean isUseCache)
+	public ExprPlugInSingleRowNode(String functionName, Class clazz, List<ExprChainedSpec> chainSpec, ConfigurationPlugInSingleRowFunction.ValueCache valueCache)
 	{
         this.functionName = functionName;
         this.clazz = clazz;
 		this.chainSpec = chainSpec;
-        this.isUseCache = isUseCache;
+        this.valueCache = valueCache;
     }
 
     public ExprEvaluator getExprEvaluator() {
@@ -130,11 +132,22 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
                 allConstants = false;
             }
         }
-        boolean isConstantParameters = allConstants && isUseCache;
-        isReturnsConstantResult = isConstantParameters && chainList.isEmpty();
+
+        if (valueCache == ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED) {
+            isReturnsConstantResult = false;
+        }
+        else if (valueCache == ConfigurationPlugInSingleRowFunction.ValueCache.CONFIGURED) {
+            isReturnsConstantResult = validationContext.getMethodResolutionService().isUdfCache() && allConstants && chainList.isEmpty();
+        }
+        else if (valueCache == ConfigurationPlugInSingleRowFunction.ValueCache.ENABLED) {
+            isReturnsConstantResult = allConstants && chainList.isEmpty();
+        }
+        else {
+            throw new IllegalStateException("Invalid value cache code " + valueCache);
+        }
 
         // Try to resolve the method
-        FastMethod staticMethod;
+        final FastMethod staticMethod;
         Method method;
 		try
 		{
@@ -152,7 +165,25 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
         ExprDotEvalTypeInfo typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExprDotEvalTypeInfo.scalarOrUnderlying(method.getReturnType());
 
         ExprDotEval[] eval = ExprDotNodeUtility.getChainEvaluators(typeInfo, chainList, validationContext, false, new ExprDotNodeFilterAnalyzerInputStatic()).getChainWithUnpack();
-        evaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), clazz.getName(), staticMethod, childEvals, isConstantParameters, optionalLambdaWrap, eval);
+        evaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), clazz.getName(), staticMethod, childEvals, allConstants, optionalLambdaWrap, eval);
+
+        // If caching the result, evaluate now and return the result.
+        if (isReturnsConstantResult) {
+            final Object result = evaluator.evaluate(null, true, null);
+            evaluator = new ExprEvaluator() {
+                public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+                    return result;
+                }
+
+                public Class getType() {
+                    return staticMethod.getReturnType();
+                }
+
+                public Map<String, Object> getEventType() throws ExprValidationException {
+                    return null;
+                }
+            };
+        }
 	}
 
     @Override

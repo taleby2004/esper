@@ -44,11 +44,13 @@ public class EPStatementObjectModel implements Serializable
 
     private List<AnnotationPart> annotations;
     private List<ExpressionDeclaration> expressionDeclarations;
+    private String contextName;
     private UpdateClause updateClause;
     private CreateVariableClause createVariable;
     private CreateWindowClause createWindow;
     private CreateIndexClause createIndex;
     private CreateSchemaClause createSchema;
+    private CreateContextClause createContext;
     private OnClause onExpr;
     private InsertIntoClause insertInto;
     private SelectClause selectClause;
@@ -324,6 +326,12 @@ public class EPStatementObjectModel implements Serializable
         AnnotationPart.toEPL(writer, annotations, formatter);
         ExpressionDeclaration.toEPL(writer, expressionDeclarations, formatter);
 
+        if (contextName != null) {
+            writer.append("context ");
+            writer.append(contextName);
+            writer.append(" ");
+        }
+
         if (createIndex != null)
         {
             createIndex.toEPL(writer);
@@ -332,6 +340,11 @@ public class EPStatementObjectModel implements Serializable
         else if (createSchema != null)
         {
             createSchema.toEPL(writer);
+            return writer.toString();
+        }
+        else if (createContext != null)
+        {
+            createContext.toEPL(writer, formatter);
             return writer.toString();
         }
         else if (createWindow != null)
@@ -650,6 +663,22 @@ public class EPStatementObjectModel implements Serializable
     }
 
     /**
+     * Returns the create-context clause.
+     * @return clause
+     */
+    public CreateContextClause getCreateContext() {
+        return createContext;
+    }
+
+    /**
+     * Sets the create-context clause.
+     * @param createContext clause to set
+     */
+    public void setCreateContext(CreateContextClause createContext) {
+        this.createContext = createContext;
+    }
+
+    /**
      * Returns the for-clause.
      * @return for-clause
      */
@@ -679,5 +708,13 @@ public class EPStatementObjectModel implements Serializable
      */
     public void setExpressionDeclarations(List<ExpressionDeclaration> expressionDeclarations) {
         this.expressionDeclarations = expressionDeclarations;
+    }
+
+    public String getContextName() {
+        return contextName;
+    }
+
+    public void setContextName(String contextName) {
+        this.contextName = contextName;
     }
 }

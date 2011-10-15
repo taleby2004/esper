@@ -11,12 +11,10 @@ package com.espertech.esper.epl.view;
 /**
  * An empty output condition that is always satisfied.
  */
-public class OutputConditionNull implements OutputCondition {
+public class OutputConditionNull extends OutputConditionBase implements OutputCondition {
 
 	private static final boolean DO_OUTPUT = true;
 	private static final boolean FORCE_UPDATE = false;
-
-	private final OutputCallback outputCallback;
 
 	/**
 	 * Ctor.
@@ -24,15 +22,14 @@ public class OutputConditionNull implements OutputCondition {
 	 */
 	public OutputConditionNull(OutputCallback outputCallback)
 	{
-        if(outputCallback == null)
-        {
-        	throw new NullPointerException("Output condition requires a non-null callback");
-        }
-		this.outputCallback = outputCallback;
+        super(outputCallback);
 	}
 
 	public void updateOutputCondition(int newEventsCount, int oldEventsCount) {
 		outputCallback.continueOutputProcessing(DO_OUTPUT, FORCE_UPDATE);
 	}
 
+    public void terminated() {
+        outputCallback.continueOutputProcessing(true, true);
+    }
 }

@@ -104,7 +104,7 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
         // Add all the above filter definitions
         for (FilterSpecCompiled filterSpec : testFilterSpecs)
         {
-            FilterValueSet filterValues = filterSpec.getValueSet(null);
+            FilterValueSet filterValues = filterSpec.getValueSet(null, null, null);
             FilterHandle callback = new SupportFilterHandle();
             filterCallbacks.add(callback);
             pathsAddedTo.add(builder.add(filterValues, callback, topNode));
@@ -114,7 +114,7 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
         for (EventBean event : unmatchedEvents)
         {
             List<FilterHandle> matches = new LinkedList<FilterHandle>();
-            topNode.matchEvent(event, matches, null);
+            topNode.matchEvent(event, matches);
             assertTrue(matches.size() == 0);
         }
 
@@ -122,7 +122,7 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
         for (EventBean event : matchedEvents)
         {
             List<FilterHandle> matches = new LinkedList<FilterHandle>();
-            topNode.matchEvent(event, matches, null);
+            topNode.matchEvent(event, matches);
             assertTrue(matches.size() == 1);
         }
 
@@ -138,7 +138,7 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
         for (EventBean event : matchedEvents)
         {
             List<FilterHandle> matches = new LinkedList<FilterHandle>();
-            topNode.matchEvent(event, matches, null);
+            topNode.matchEvent(event, matches);
             assertTrue(matches.size() == 0);
         }
     }

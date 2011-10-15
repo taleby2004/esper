@@ -184,4 +184,11 @@ public class ExprVariableNode extends ExprNodeBase implements ExprEvaluator
         }
         return that.variableName.equals(this.variableName);
     }
+
+    public String getVariableNameWithSubProp() {
+        if (optSubPropName == null) {
+            return variableName;
+        }
+        return variableName + "." + optSubPropName;
+    }
 }

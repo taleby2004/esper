@@ -12,10 +12,11 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.annotation.AuditEnum;
+import com.espertech.esper.core.context.util.ContextDescriptor;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
-import com.espertech.esper.epl.core.ViewResourceDelegate;
+import com.espertech.esper.epl.core.ViewResourceDelegateUnverified;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.TimeProvider;
@@ -25,7 +26,7 @@ import java.lang.annotation.Annotation;
 public class ExprValidationContext {
     private final StreamTypeService streamTypeService;
     private final MethodResolutionService methodResolutionService;
-    private final ViewResourceDelegate viewResourceDelegate;
+    private final ViewResourceDelegateUnverified viewResourceDelegate;
     private final TimeProvider timeProvider;
     private final VariableService variableService;
     private final ExprEvaluatorContext exprEvaluatorContext;
@@ -33,11 +34,22 @@ public class ExprValidationContext {
     private final String statementName;
     private final String statementId;
     private final Annotation[] annotations;
+    private final ContextDescriptor contextDescriptor;
 
     private final boolean isExpressionNestedAudit;
     private final boolean isExpressionAudit;
 
-    public ExprValidationContext(StreamTypeService streamTypeService, MethodResolutionService methodResolutionService, ViewResourceDelegate viewResourceDelegate, TimeProvider timeProvider, VariableService variableService, ExprEvaluatorContext exprEvaluatorContext, EventAdapterService eventAdapterService, String statementName, String statementId, Annotation[] annotations) {
+    public ExprValidationContext(StreamTypeService streamTypeService,
+                                 MethodResolutionService methodResolutionService,
+                                 ViewResourceDelegateUnverified viewResourceDelegate,
+                                 TimeProvider timeProvider,
+                                 VariableService variableService,
+                                 ExprEvaluatorContext exprEvaluatorContext,
+                                 EventAdapterService eventAdapterService,
+                                 String statementName,
+                                 String statementId,
+                                 Annotation[] annotations,
+                                 ContextDescriptor contextDescriptor) {
         this.streamTypeService = streamTypeService;
         this.methodResolutionService = methodResolutionService;
         this.viewResourceDelegate = viewResourceDelegate;
@@ -48,13 +60,14 @@ public class ExprValidationContext {
         this.statementName = statementName;
         this.statementId = statementId;
         this.annotations = annotations;
+        this.contextDescriptor = contextDescriptor;
 
         isExpressionAudit = AuditEnum.EXPRESSION.getAudit(annotations) != null;
         isExpressionNestedAudit = AuditEnum.EXPRESSION_NESTED.getAudit(annotations) != null;
     }
 
     public ExprValidationContext(StreamTypeServiceImpl types, ExprValidationContext ctx) {
-        this(types, ctx.getMethodResolutionService(), ctx.getViewResourceDelegate(), ctx.getTimeProvider(), ctx.getVariableService(), ctx.getExprEvaluatorContext(), ctx.getEventAdapterService(), ctx.getStatementName(), ctx.getStatementId(), ctx.getAnnotations());
+        this(types, ctx.getMethodResolutionService(), ctx.getViewResourceDelegate(), ctx.getTimeProvider(), ctx.getVariableService(), ctx.getExprEvaluatorContext(), ctx.getEventAdapterService(), ctx.getStatementName(), ctx.getStatementId(), ctx.getAnnotations(), ctx.getContextDescriptor());
     }
 
     public StreamTypeService getStreamTypeService() {
@@ -65,7 +78,7 @@ public class ExprValidationContext {
         return methodResolutionService;
     }
 
-    public ViewResourceDelegate getViewResourceDelegate() {
+    public ViewResourceDelegateUnverified getViewResourceDelegate() {
         return viewResourceDelegate;
     }
 
@@ -103,5 +116,9 @@ public class ExprValidationContext {
 
     public String getStatementId() {
         return statementId;
+    }
+
+    public ContextDescriptor getContextDescriptor() {
+        return contextDescriptor;
     }
 }

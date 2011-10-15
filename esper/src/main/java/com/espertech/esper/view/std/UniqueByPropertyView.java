@@ -12,9 +12,8 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.OneEventCollection;
-import com.espertech.esper.core.StatementContext;
+import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.view.CloneableView;
@@ -51,24 +50,24 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
     private final int numKeys;
     private final Map<MultiKey<Object>, EventBean> mostRecentEvents = new LinkedHashMap<MultiKey<Object>, EventBean>();
     private final EventBean[] eventsPerStream = new EventBean[1];
-    private final ExprEvaluatorContext exprEvaluatorContext;
+    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
 
     /**
      * Constructor.
      * @param criteriaExpressions is the expressions from which to pull the unique value
-     * @param exprEvaluatorContext context for expression evaluation
+     * @param agentInstanceViewFactoryContext context for expression evaluation
      */
-    public UniqueByPropertyView(ExprNode[] criteriaExpressions, ExprEvaluatorContext exprEvaluatorContext)
+    public UniqueByPropertyView(ExprNode[] criteriaExpressions, AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
         this.criteriaExpressions = criteriaExpressions;
         this.criteriaExpressionsEvals = ExprNodeUtility.getEvaluators(criteriaExpressions);
-        this.exprEvaluatorContext = exprEvaluatorContext;
+        this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
         numKeys = criteriaExpressions.length;
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
-        return new UniqueByPropertyView(criteriaExpressions,statementContext);
+        return new UniqueByPropertyView(criteriaExpressions, agentInstanceViewFactoryContext);
     }
 
     /**
@@ -180,7 +179,7 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
         Object[] values = new Object[numKeys];
         for (int i = 0; i < numKeys; i++)
         {
-            values[i] = criteriaExpressionsEvals[i].evaluate(eventsPerStream, true, exprEvaluatorContext);
+            values[i] = criteriaExpressionsEvals[i].evaluate(eventsPerStream, true, agentInstanceViewFactoryContext);
         }
         return new MultiKey<Object>(values);
     }

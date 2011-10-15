@@ -10,7 +10,7 @@ package com.espertech.esperio.csv;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.client.EventType;

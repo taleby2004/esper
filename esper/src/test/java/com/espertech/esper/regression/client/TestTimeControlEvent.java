@@ -14,15 +14,14 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.CurrentTimeSpanEvent;
-import com.espertech.esper.core.EPRuntimeIsolatedSPI;
-import com.espertech.esper.core.EPRuntimeSPI;
+import com.espertech.esper.core.service.EPRuntimeIsolatedSPI;
+import com.espertech.esper.core.service.EPRuntimeSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;

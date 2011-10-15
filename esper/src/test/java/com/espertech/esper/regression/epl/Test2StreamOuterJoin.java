@@ -132,7 +132,8 @@ public class Test2StreamOuterJoin extends TestCase
                       "from " + SupportMarketDataBean.class.getName() + ".win:keepall() " +
                       "full outer join " +
                       SupportBean.class.getName() + ".std:groupwin(string, intPrimitive).win:length(2) " +
-                      "on string = symbol group by string, intPrimitive, symbol " +
+                      "on string = symbol " +
+                      "group by string, intPrimitive, symbol " +
                       "order by string, intPrimitive, symbol, volume";
 
         outerJoinView = epService.getEPAdministrator().createEPL(stmt);

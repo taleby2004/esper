@@ -46,4 +46,12 @@ public class FilterValueSetParamImpl implements FilterValueSetParam
     {
         return filterValue;
     }
+
+    public String toString() {
+        return "FilterValueSetParamImpl{" +
+                "propertyName='" + propertyName + '\'' +
+                ", filterOperator=" + filterOperator +
+                ", filterValue=" + filterValue +
+                '}';
+    }
 }

@@ -11,10 +11,8 @@
 
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_S0;
@@ -22,11 +20,13 @@ import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.core.EPRuntimeSPI;
+import junit.framework.TestCase;
+import com.espertech.esper.core.service.EPRuntimeSPI;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.util.*;
 
@@ -428,7 +428,19 @@ public class TestVariables extends TestCase
 
         stmtSet.destroy();
         stmtSelect.destroy();
+
+        // test prepared statement
+        epService.getEPAdministrator().getConfiguration().addVariable("var_a", A.class, new A());
+        epService.getEPAdministrator().getConfiguration().addEventType(B.class);
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL("select var_a.value from B");
+        EPStatement statement = epService.getEPAdministrator().create(prepared);
+        statement.setSubscriber(new Object() {
+            public void update(String value) {
+            }
+        });
+        epService.getEPRuntime().sendEvent(new B());
     }
+
 
     public void testRuntimeConfig()
     {
@@ -816,5 +828,14 @@ public class TestVariables extends TestCase
         {
             assertEquals(values[i], valueSet.get(names[i]));
         }
+    }
+
+    public static class A implements Serializable {
+        public String getValue() {
+            return "";
+        }
+    }
+
+    public static class B {
     }
 }

@@ -15,7 +15,7 @@ import com.espertech.esper.client.hook.SQLColumnTypeContext;
 import com.espertech.esper.client.hook.SQLColumnTypeConversion;
 import com.espertech.esper.client.hook.SQLOutputRowConversion;
 import com.espertech.esper.client.hook.SQLOutputRowTypeContext;
-import com.espertech.esper.core.EPStatementHandle;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarLexer;
 import com.espertech.esper.epl.spec.DBStatementStreamSpec;
@@ -50,22 +50,22 @@ public class DatabasePollingViewableFactory
      * @param databaseStreamSpec provides the SQL statement, database name and additional info
      * @param databaseConfigService for getting database connection and settings
      * @param eventAdapterService for generating event beans from database information
-     * @param epStatementHandle is the statements-own handle for use in registering callbacks with services
+     * @param epStatementAgentInstanceHandle is the statements-own handle for use in registering callbacks with services
      * @param columnTypeConversionHook hook for statement-specific column conversion
      * @param outputRowConversionHook hook for statement-specific row conversion
      * @param enableJDBCLogging indicator to enable JDBC logging
      * @return viewable providing poll functionality
      * @throws ExprValidationException if the validation failed
      */
-    public static HistoricalEventViewable createDBStatementView(String statementId,
-                                                                int streamNumber,
-                                                 DBStatementStreamSpec databaseStreamSpec,
-                                                 DatabaseConfigService databaseConfigService,
-                                                 EventAdapterService eventAdapterService,
-                                                 EPStatementHandle epStatementHandle,
-                                                 SQLColumnTypeConversion columnTypeConversionHook,
-                                                 SQLOutputRowConversion outputRowConversionHook,
-                                                 boolean enableJDBCLogging)
+    public static HistoricalEventViewable createDBStatementView( String statementId,
+                                                                 int streamNumber,
+                                                                 DBStatementStreamSpec databaseStreamSpec,
+                                                                 DatabaseConfigService databaseConfigService,
+                                                                 EventAdapterService eventAdapterService,
+                                                                 EPStatementAgentInstanceHandle epStatementAgentInstanceHandle,
+                                                                 SQLColumnTypeConversion columnTypeConversionHook,
+                                                                 SQLOutputRowConversion outputRowConversionHook,
+                                                                 boolean enableJDBCLogging)
             throws ExprValidationException
     {
         // Parse the SQL for placeholders and text fragments
@@ -251,7 +251,7 @@ public class DatabasePollingViewableFactory
         try
         {
             connectionCache = databaseConfigService.getConnectionCache(databaseName, preparedStatementText);
-            dataCache = databaseConfigService.getDataCache(databaseName, epStatementHandle);
+            dataCache = databaseConfigService.getDataCache(databaseName, epStatementAgentInstanceHandle);
         }
         catch (DatabaseConfigException e)
         {

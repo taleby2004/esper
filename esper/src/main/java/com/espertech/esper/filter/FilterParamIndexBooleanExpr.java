@@ -8,52 +8,48 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Index that simply maintains a list of boolean expressions.
  */
 public final class FilterParamIndexBooleanExpr extends FilterParamIndexBase
 {
-    private final Map<ExprNodeAdapter, EventEvaluator> evaluatorsMap;
+    private final Map<ExprNodeAdapterBase, EventEvaluator> evaluatorsMap;
     private final ReadWriteLock constantsMapRWLock;
 
     /**
      * Constructs the index for multiple-exact matches.
-     * @param eventType describes the event type and is used to obtain a getter instance for the property
      */
-    public FilterParamIndexBooleanExpr(EventType eventType)
+    public FilterParamIndexBooleanExpr()
     {
         super(FilterOperator.BOOLEAN_EXPRESSION);
 
-        evaluatorsMap = new HashMap<ExprNodeAdapter, EventEvaluator>();
+        evaluatorsMap = new HashMap<ExprNodeAdapterBase, EventEvaluator>();
         constantsMapRWLock = new ReentrantReadWriteLock();
     }
 
     public final EventEvaluator get(Object filterConstant)
     {
-        ExprNodeAdapter keyValues = (ExprNodeAdapter) filterConstant;
+        ExprNodeAdapterBase keyValues = (ExprNodeAdapterBase) filterConstant;
         return evaluatorsMap.get(keyValues);
     }
 
     public final void put(Object filterConstant, EventEvaluator evaluator)
     {
-        ExprNodeAdapter keys = (ExprNodeAdapter) filterConstant;
+        ExprNodeAdapterBase keys = (ExprNodeAdapterBase) filterConstant;
         evaluatorsMap.put(keys, evaluator);
     }
 
     public final boolean remove(Object filterConstant)
     {
-        ExprNodeAdapter keys = (ExprNodeAdapter) filterConstant;
+        ExprNodeAdapterBase keys = (ExprNodeAdapterBase) filterConstant;
         return evaluatorsMap.remove(keys) != null;
     }
 
@@ -67,13 +63,13 @@ public final class FilterParamIndexBooleanExpr extends FilterParamIndexBase
         return constantsMapRWLock;
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches, ExprEvaluatorContext exprEvaluatorContext)
+    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
         List<EventEvaluator> evaluators = new ArrayList<EventEvaluator>();
         constantsMapRWLock.readLock().lock();
-        for (ExprNodeAdapter exprNodeAdapter : evaluatorsMap.keySet())
+        for (ExprNodeAdapterBase exprNodeAdapter : evaluatorsMap.keySet())
         {
-            if (exprNodeAdapter.evaluate(eventBean, exprEvaluatorContext))
+            if (exprNodeAdapter.evaluate(eventBean))
             {
                 evaluators.add(evaluatorsMap.get(exprNodeAdapter));
             }
@@ -82,7 +78,7 @@ public final class FilterParamIndexBooleanExpr extends FilterParamIndexBase
 
         for (EventEvaluator evaluator : evaluators)
         {
-            evaluator.matchEvent(eventBean, matches, exprEvaluatorContext);
+            evaluator.matchEvent(eventBean, matches);
         }
     }
 

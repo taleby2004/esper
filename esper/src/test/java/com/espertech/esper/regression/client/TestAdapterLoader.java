@@ -16,7 +16,7 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.support.plugin.SupportPluginLoader;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.core.EPServiceProviderSPI;
+import com.espertech.esper.core.service.EPServiceProviderSPI;
 
 import java.util.Properties;
 

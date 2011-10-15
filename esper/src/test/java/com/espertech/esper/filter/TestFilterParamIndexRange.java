@@ -247,14 +247,14 @@ public class TestFilterParamIndexRange extends TestCase
     private void verifyDoublePrimitive(FilterParamIndexBase index, double testValue, int numExpected)
     {
         testBean.setDoublePrimitive(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }
 
     private void verifyLongPrimitive(FilterParamIndexBase index, long testValue, int numExpected)
     {
         testBean.setLongPrimitive(testValue);
-        index.matchEvent(testEventBean, matchesList, null);
+        index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }
 

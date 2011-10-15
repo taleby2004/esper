@@ -9,6 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.pattern.MatchedEventMap;
 
 /**
@@ -36,8 +37,7 @@ public class RangeValueEventProp implements FilterSpecParamRangeValue
         return resultEventProperty.hashCode();
     }
 
-    public final Double getFilterValue(MatchedEventMap matchedEvents)
-    {
+    public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext) {
         EventBean event = matchedEvents.getMatchingEvent(resultEventAsName);
         if (event == null)
         {

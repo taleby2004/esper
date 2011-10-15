@@ -11,16 +11,16 @@
 
 package com.espertech.esper.support.core;
 
-import com.espertech.esper.core.*;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.spec.UpdateDesc;
-import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.core.service.*;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.spec.UpdateDesc;
 
-import java.util.List;
-import java.util.LinkedList;
 import java.lang.annotation.Annotation;
+import java.util.LinkedList;
+import java.util.List;
 
 public class SupportInternalEventRouter implements InternalEventRouter
 {
@@ -36,11 +36,14 @@ public class SupportInternalEventRouter implements InternalEventRouter
         routed.clear();
     }
 
-    public void addPreprocessing(EventType eventType, UpdateDesc desc, Annotation[] annotations, InternalRoutePreprocessView outputView) throws ExprValidationException {
+    public InternalEventRouterDesc getValidatePreprocessing(EventType eventType, UpdateDesc desc, Annotation[] annotations) throws ExprValidationException {
+        return null;
     }
 
-    public void removePreprocessing(EventType eventType, UpdateDesc desc)
-    {
+    public void addPreprocessing(InternalEventRouterDesc internalEventRouterDesc, InternalRoutePreprocessView outputView) {
+    }
+
+    public void removePreprocessing(EventType eventType, UpdateDesc desc) {
     }
 
     public void route(EventBean event, EPStatementHandle statementHandle, InternalEventRouteDest routeDest, ExprEvaluatorContext exprEvaluatorContext, boolean addToFront) {

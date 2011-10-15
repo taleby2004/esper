@@ -18,6 +18,7 @@ import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.view.SupportBeanClassView;
+import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.support.view.SupportStreamImpl;
 import com.espertech.esper.support.view.SupportViewDataChecker;
 import junit.framework.TestCase;
@@ -31,7 +32,7 @@ public class TestExternallyTimedWindowView extends TestCase
     {
         // Set up timed window view and a test child view, set the time window size to 1 second
         ExprNode node = SupportExprNodeFactory.makeIdentNodeBean("longPrimitive");
-        myView = new ExternallyTimedWindowView(null, node, node.getExprEvaluator(), 1000, null, false, null);
+        myView = new ExternallyTimedWindowView(null, node, node.getExprEvaluator(), 1000, null, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         childView = new SupportBeanClassView(SupportBean.class);
         myView.addView(childView);
     }
@@ -40,7 +41,7 @@ public class TestExternallyTimedWindowView extends TestCase
     {
         try
         {
-            myView = new ExternallyTimedWindowView(null, SupportExprNodeFactory.makeIdentNodeBean("string"), null, 0, null, false, null);
+            myView = new ExternallyTimedWindowView(null, SupportExprNodeFactory.makeIdentNodeBean("string"), null, 0, null, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         }
         catch (IllegalArgumentException ex)
         {

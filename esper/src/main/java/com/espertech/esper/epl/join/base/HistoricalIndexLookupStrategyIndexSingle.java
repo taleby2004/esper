@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.join.base;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.join.plan.QueryGraphValueEntryHashKeyed;

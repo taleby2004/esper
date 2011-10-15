@@ -11,7 +11,6 @@ package com.espertech.esper.view.std;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKey;
-import com.espertech.esper.core.StatementContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -57,7 +56,7 @@ public final class FirstUniqueByPropertyView extends ViewSupport implements Clon
         numKeys = uniqueCriteria.length;
     }
 
-    public View cloneView(StatementContext statementContext)
+    public View cloneView()
     {
         return new FirstUniqueByPropertyView(uniqueCriteria, exprEvaluatorContext);
     }

@@ -15,6 +15,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,16 +40,16 @@ public abstract class EvalSelectStreamBase implements SelectExprProcessor {
         this.isUsingWildcard = usingWildcard;
     }
 
-    public abstract EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream);
+    public abstract EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext);
 
-    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
         // Evaluate all expressions and build a map of name-value pairs
         Map<String, Object> props = new HashMap<String, Object>();
         int count = 0;
         for (ExprEvaluator expressionNode : selectExprContext.getExpressionNodes())
         {
-            Object evalResult = expressionNode.evaluate(eventsPerStream, isNewData, selectExprContext.getExprEvaluatorContext());
+            Object evalResult = expressionNode.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
             props.put(selectExprContext.getColumnNames()[count], evalResult);
             count++;
         }
@@ -67,7 +68,7 @@ public abstract class EvalSelectStreamBase implements SelectExprProcessor {
             }
         }
 
-        return processSpecific(props, eventsPerStream);
+        return processSpecific(props, eventsPerStream, exprEvaluatorContext);
     }
 
     public EventType getResultEventType()

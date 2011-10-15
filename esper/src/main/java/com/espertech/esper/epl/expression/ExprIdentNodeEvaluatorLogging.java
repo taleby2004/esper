@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Map;
 
-public class ExprIdentNodeEvaluatorLogging extends ExprIdentNodeEvaluator
+public class ExprIdentNodeEvaluatorLogging extends ExprIdentNodeEvaluatorImpl
 {
     private static final Log auditLog = LogFactory.getLog(AuditPath.AUDIT_LOG);
 

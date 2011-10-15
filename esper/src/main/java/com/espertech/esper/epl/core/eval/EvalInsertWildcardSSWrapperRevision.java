@@ -14,12 +14,12 @@ package com.espertech.esper.epl.core.eval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
+import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.event.DecoratingEventBean;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class EvalInsertWildcardSSWrapperRevision extends EvalBase implements SelectExprProcessor {
@@ -35,7 +35,7 @@ public class EvalInsertWildcardSSWrapperRevision extends EvalBase implements Sel
 
     // In case of a wildcard and single stream that is itself a
     // wrapper bean, we also need to add the map properties
-    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize)
+    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
         DecoratingEventBean wrapper = (DecoratingEventBean)eventsPerStream[0];
         if(wrapper != null)

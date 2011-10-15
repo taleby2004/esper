@@ -737,6 +737,16 @@ public class TestFirstLastAllAggregation extends TestCase {
         stmt = epService.getEPAdministrator().createEPL(newEPL);
         stmt.addListener(listener);
         runAssertionGrouped();
+
+        // test SODA indexes
+        String eplFirstLast = "select " +
+                "last(intPrimitive), " +
+                "last(intPrimitive, 1), " +
+                "first(intPrimitive), " +
+                "first(intPrimitive, 1) " +
+                "from SupportBean.win:length(3)";
+        EPStatementObjectModel modelFirstLast = epService.getEPAdministrator().compileEPL(epl);
+        assertEquals(epl, modelFirstLast.toEPL());
     }
 
     private void runAssertionGrouped() {
