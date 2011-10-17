@@ -2473,8 +2473,16 @@ public class StatementSpecMapper
         else if (eval instanceof EvalMatchUntilFactoryNode)
         {
             EvalMatchUntilFactoryNode matchUntilNode = (EvalMatchUntilFactoryNode) eval;
-            Expression low = matchUntilNode.getLowerBounds() != null ? unmapExpressionDeep(matchUntilNode.getLowerBounds(), unmapContext) : null;
-            Expression high = matchUntilNode.getUpperBounds() != null ? unmapExpressionDeep(matchUntilNode.getUpperBounds(), unmapContext) : null;
+            Expression low;
+            Expression high;
+
+            if (matchUntilNode.getLowerBounds() == matchUntilNode.getUpperBounds() && matchUntilNode.getLowerBounds() != null) {
+                low = high = unmapExpressionDeep(matchUntilNode.getLowerBounds(), unmapContext);
+            }
+            else {
+                low = matchUntilNode.getLowerBounds() != null ? unmapExpressionDeep(matchUntilNode.getLowerBounds(), unmapContext) : null;
+                high = matchUntilNode.getUpperBounds() != null ? unmapExpressionDeep(matchUntilNode.getUpperBounds(), unmapContext) : null;
+            }
             return new PatternMatchUntilExpr(low, high);
         }
         else if (eval instanceof EvalEveryDistinctFactoryNode)

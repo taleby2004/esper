@@ -541,6 +541,13 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "b[0].string,b[1].string".split(","), new Object[] {"E1", "E2"});
+
+        // test substitution parameter
+        String epl = "select * from pattern[[?] SupportBean]";
+        EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(epl);
+        prepared.setObject(1, 2);
+        EPStatement stmt = epService.getEPAdministrator().create(prepared);
+
     }
 
     private void validateStmt(EPServiceProvider engine, String stmtText, int numEventsA, boolean match, Integer matchCount)
