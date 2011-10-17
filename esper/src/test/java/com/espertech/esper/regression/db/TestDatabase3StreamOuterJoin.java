@@ -44,6 +44,10 @@ public class TestDatabase3StreamOuterJoin extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanTwo", SupportBeanTwo.class);
     }
 
+    protected void tearDown() throws Exception {
+        epService.destroy();
+    }
+
     public void testInnerJoinLeftS0()
     {
         String stmtText = "select * from SupportBean.std:lastevent() sb" +

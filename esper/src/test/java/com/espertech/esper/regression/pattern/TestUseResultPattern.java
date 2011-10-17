@@ -214,6 +214,8 @@ public class TestUseResultPattern extends TestCase implements SupportBeanConstan
         }
 
         assertEquals(0, listener.badMatchCount);
+
+        epService.destroy();
     }
 
     private class MyUpdateListener implements UpdateListener

@@ -273,6 +273,8 @@ public class TestLegacyBeanEvents extends TestCase
         assertEquals(false, stmtType.getMetadata().isApplicationConfigured());        
         assertEquals(false, stmtType.getMetadata().isApplicationPreConfigured());
         assertEquals(false, stmtType.getMetadata().isApplicationPreConfiguredStatic());
+
+        epService.destroy();
     }
 
     private void tryExplicitOnlyAccessors(ConfigurationEventTypeLegacy.CodeGeneration codeGeneration)
@@ -329,6 +331,8 @@ public class TestLegacyBeanEvents extends TestCase
         {
             // expected
         }
+
+        epService.destroy();
     }
 
     public void tryJavaBeanAccessor(ConfigurationEventTypeLegacy.CodeGeneration codeGeneration)
@@ -361,6 +365,8 @@ public class TestLegacyBeanEvents extends TestCase
             assertEquals(int.class, eventType.getPropertyType(name));
             assertEquals(10, listener.getLastNewData()[0].get(name));
         }
+
+        epService.destroy();
     }
 
     private void tryFinalClass(ConfigurationEventTypeLegacy.CodeGeneration codeGeneration)
@@ -384,5 +390,7 @@ public class TestLegacyBeanEvents extends TestCase
         SupportBeanFinal event = new SupportBeanFinal(10);
         epService.getEPRuntime().sendEvent(event);
         assertEquals(10, listener.getLastNewData()[0].get("intPrimitive"));
+
+        epService.destroy();
     }
 }

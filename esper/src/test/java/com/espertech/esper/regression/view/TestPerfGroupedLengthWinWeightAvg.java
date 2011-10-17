@@ -71,6 +71,8 @@ public class TestPerfGroupedLengthWinWeightAvg extends TestCase
         double delta = (endTime - startTime) / 1000d / 1000d / 1000d;
         // System.out.println("delta=" + delta);
         assertTrue(delta < 1);
+
+        epService.destroy();
     }
 
     static public class Sensor {

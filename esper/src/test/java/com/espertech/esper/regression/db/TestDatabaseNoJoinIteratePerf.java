@@ -41,6 +41,10 @@ public class TestDatabaseNoJoinIteratePerf extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        epService.destroy();
+    }
+
     public void testVariablesPollPerformanceCache()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

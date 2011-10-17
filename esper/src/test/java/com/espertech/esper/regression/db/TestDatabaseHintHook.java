@@ -47,7 +47,8 @@ public class TestDatabaseHintHook extends TestCase
         SupportSQLColumnTypeConversion.reset();
     }
 
-    public void tearDown() {
+    protected void tearDown() throws Exception {
+        epService.destroy();
         SupportSQLColumnTypeConversion.reset();
     }
 

@@ -116,6 +116,8 @@ public class TestEveryOperator extends TestCase implements SupportBeanConstants
 
         sendTimer(engine, 19000);
         assertEquals("No event within 6 seconds", listener.assertOneGetNewAndReset().get("alert"));
+
+        engine.destroy();
     }
 
     private void sendTimer(EPServiceProvider engine, long timeInMSec)

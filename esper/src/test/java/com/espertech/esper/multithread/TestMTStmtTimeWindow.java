@@ -38,7 +38,7 @@ public class TestMTStmtTimeWindow extends TestCase
 
     public void tearDown()
     {
-        engine.initialize();
+        engine.destroy();
     }
 
     public void testTimeWin() throws Exception

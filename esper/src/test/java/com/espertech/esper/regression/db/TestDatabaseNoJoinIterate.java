@@ -45,6 +45,10 @@ public class TestDatabaseNoJoinIterate extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        epService.destroy();
+    }
+
     public void testExpressionPoll()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

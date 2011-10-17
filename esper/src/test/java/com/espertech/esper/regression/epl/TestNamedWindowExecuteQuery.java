@@ -105,6 +105,8 @@ public class TestNamedWindowExecuteQuery extends TestCase
                 " having WinCategory.owner=WinProductOwnerDetails.owner"
                 ).getArray();
         ArrayAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][] {{"Product1"}});
+
+        epService.destroy();
     }
 	
     private void sendEvent(EPServiceProvider epService, String eventName, String[] attributes) {

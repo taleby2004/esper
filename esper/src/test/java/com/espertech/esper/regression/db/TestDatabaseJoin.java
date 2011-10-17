@@ -53,6 +53,10 @@ public class TestDatabaseJoin extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        epService.destroy();
+    }
+
     public void test3Stream()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

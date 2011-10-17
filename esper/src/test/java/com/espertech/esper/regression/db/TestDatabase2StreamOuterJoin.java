@@ -43,6 +43,10 @@ public class TestDatabase2StreamOuterJoin extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        epService.destroy();
+    }
+
     public void testOuterJoinLeftS0()
     {
         String stmtText = "select s0.intPrimitive as MyInt, " + TestDatabase2StreamOuterJoin.ALL_FIELDS + " from " +

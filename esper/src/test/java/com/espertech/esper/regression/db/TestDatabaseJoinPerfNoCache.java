@@ -50,6 +50,11 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
         epServicePooled.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        epServicePooled.destroy();
+        epServiceRetained.destroy();
+    }
+
     public void test100EventsRetained()
     {
         long startTime = System.currentTimeMillis();

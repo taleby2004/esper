@@ -213,6 +213,8 @@ public class TestMapEvent extends TestCase
         configuration.addEventType("MyPrimMapEvent", properties);
 
         epService = EPServiceProviderManager.getProvider("testPrimitivesTypes", configuration);
+
+        epService.destroy();
     }
 
     public void testInvalidConfig()

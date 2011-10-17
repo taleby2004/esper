@@ -37,7 +37,6 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
     }
 
     public void testSensorQuery() throws Exception {
-        log.info ("testSensorQuery...........");
         Configuration configuration = setup();
         configuration.getEngineDefaults().getViewResources().setAllowMultipleExpiryPolicies(true);
         EPServiceProvider epService = EPServiceProviderManager.getProvider("testSensorQuery", configuration);
@@ -74,6 +73,8 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
         assertEquals (71.3,lastEvent.get("highMeasurement"));
         assertEquals ("Device2",lastEvent.get("deviceOfHigh"));
         assertEquals (99.3,lastEvent.get("confidenceOfHigh"));
+
+        epService.destroy();
     }
 
     static public class Sensor {

@@ -40,7 +40,7 @@ public class TestMTStmtFilter extends TestCase
 
     public void tearDown()
     {
-        engine.initialize();
+        engine.destroy();
     }
 
     public void testCount() throws Exception

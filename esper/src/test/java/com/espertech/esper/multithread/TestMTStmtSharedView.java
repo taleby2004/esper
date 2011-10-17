@@ -42,7 +42,7 @@ public class TestMTStmtSharedView extends TestCase
 
     public void tearDown()
     {
-        engine.initialize();
+        engine.destroy();
     }
 
     public void testSharedViews() throws Exception

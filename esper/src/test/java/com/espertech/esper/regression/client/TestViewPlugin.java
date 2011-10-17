@@ -36,7 +36,7 @@ public class TestViewPlugin extends TestCase
 
     public void tearDown()
     {
-        epService.initialize();
+        epService.destroy();
     }
 
     public void testPlugInViewFlushed()

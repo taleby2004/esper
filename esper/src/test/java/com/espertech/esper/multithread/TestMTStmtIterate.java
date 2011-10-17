@@ -30,7 +30,7 @@ public class TestMTStmtIterate extends TestCase
 
     public void tearDown()
     {
-        engine.initialize();
+        engine.destroy();
     }
 
     public void testIteratorSingleStmt() throws Exception
@@ -58,7 +58,7 @@ public class TestMTStmtIterate extends TestCase
             stmt[i] = engine.getEPAdministrator().createEPL(stmtText);
         }
 
-        trySend(4, 100, stmt);
+        trySend(4, 10, stmt);
     }
 
     public void testIteratorMultiStmtViewShare() throws Exception
@@ -75,7 +75,7 @@ public class TestMTStmtIterate extends TestCase
             stmt[i] = engine.getEPAdministrator().createEPL(stmtText);
         }
 
-        trySend(4, 100, stmt);
+        trySend(4, 10, stmt);
     }
 
     private void trySend(int numThreads, int numRepeats, EPStatement stmt[]) throws Exception

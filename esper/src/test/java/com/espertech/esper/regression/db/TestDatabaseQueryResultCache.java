@@ -65,6 +65,10 @@ public class TestDatabaseQueryResultCache extends TestCase
         tryCache(configDB, 7000, 25000, true);
     }
 
+    protected void tearDown() throws Exception {
+        epService.destroy();
+    }
+
     private void tryCache(ConfigurationDBRef configDB, long assertMaximumTime, int numEvents, boolean useRandomLookupKey)
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();

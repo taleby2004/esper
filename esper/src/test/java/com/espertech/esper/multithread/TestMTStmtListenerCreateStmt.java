@@ -39,7 +39,7 @@ public class TestMTStmtListenerCreateStmt extends TestCase
 
     public void tearDown()
     {
-        engine.initialize();
+        engine.destroy();
     }
 
     public void testListenerCreateStmt() throws Exception

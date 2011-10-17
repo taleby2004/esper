@@ -39,6 +39,8 @@ public class TestSelectExprSQLCompat extends TestCase
         epService.initialize();
         runAssertionProperty(epService);
         runAssertionPrefixStream(epService);
+
+        epService.destroy();
     }
 
     public void testQualifiedPropertyUnnamed()

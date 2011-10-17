@@ -47,7 +47,7 @@ public class TestMTStmtDatabaseJoin extends TestCase
 
     public void tearDown()
     {
-        engine.initialize();
+        engine.destroy();
     }
 
     public void testJoin() throws Exception

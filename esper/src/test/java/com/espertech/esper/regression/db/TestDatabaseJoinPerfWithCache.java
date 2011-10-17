@@ -48,6 +48,10 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
         epServiceRetained.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        epServiceRetained.destroy();
+    }
+
     public void testConstants() {
         epServiceRetained.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 

@@ -37,6 +37,10 @@ public class TestDeadPattern extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        epService.destroy();
+    }
+
     public void testDeadPattern()
     {
         String pattern = "(A() -> B()) and not C()";

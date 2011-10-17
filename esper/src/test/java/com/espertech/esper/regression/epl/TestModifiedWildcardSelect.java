@@ -202,6 +202,8 @@ public class TestModifiedWildcardSelect extends TestCase
 		properties.put("concat", "xxxx");
 
 		assertProperties(listener);
+
+        epService.destroy();
 	}
 
 	public void testInvalidRepeatedProperties() throws InterruptedException
