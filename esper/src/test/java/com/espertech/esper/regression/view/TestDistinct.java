@@ -19,6 +19,7 @@ import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.soda.SelectClause;
 import com.espertech.esper.client.soda.FromClause;
 import com.espertech.esper.client.soda.FilterStream;
+import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_N;
@@ -273,17 +274,35 @@ public class TestDistinct extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E2", 2}, {"E1", 1}});
+        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E2", 2}, {"E1", 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E2", 3}});
+        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E2", 3}});
+
+        stmt.destroy();
+
+        // test batch window with aggregation
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        String[] fieldsTwo = new String[] {"c1", "c2"};
+        String epl = "insert into ABC select distinct string as c1, first(intPrimitive) as c2 from SupportBean.win:time_batch(1 second)";
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(epl);
+        stmtTwo.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
+        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fieldsTwo, new Object[][] {{"E1", 1}, {"E2", 1}});
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
+        assertFalse(listener.isInvoked());
     }
 
     public void testBatchWindowJoin()

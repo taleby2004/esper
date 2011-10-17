@@ -62,7 +62,7 @@ public class OutputProcessViewDirectDistinctOrAfter extends OutputProcessViewBas
             return;
         }
 
-        if (parent.isDistinct())
+        if (parent.isDistinct() && newOldEvents != null)
         {
             newOldEvents.setFirst(EventBeanUtility.getDistinctByProp(newOldEvents.getFirst(), parent.getEventBeanReader()));
             newOldEvents.setSecond(EventBeanUtility.getDistinctByProp(newOldEvents.getSecond(), parent.getEventBeanReader()));
