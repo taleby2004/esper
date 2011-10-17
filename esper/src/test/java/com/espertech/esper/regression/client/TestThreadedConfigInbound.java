@@ -25,7 +25,7 @@ public class TestThreadedConfigInbound extends TestCase
 {
     public void testOp() throws Exception
     {
-        Configuration config = SupportConfigFactory.getConfiguration();
+        Configuration config = new Configuration();
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
         config.getEngineDefaults().getThreading().setThreadPoolInbound(true);
         config.getEngineDefaults().getThreading().setThreadPoolInboundNumThreads(4);

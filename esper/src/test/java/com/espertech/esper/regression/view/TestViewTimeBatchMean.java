@@ -34,7 +34,7 @@ public class TestViewTimeBatchMean extends TestCase
     public void setUp()
     {
         testListener = new SupportUpdateListener();
-        Configuration config = SupportConfigFactory.getConfiguration();
+        Configuration config = new Configuration();
         config.addEventType("SupportBean", SupportBean.class);
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);

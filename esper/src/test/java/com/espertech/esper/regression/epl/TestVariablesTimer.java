@@ -24,7 +24,7 @@ public class TestVariablesTimer extends TestCase
 
     public void setUp()
     {
-        Configuration config = SupportConfigFactory.getConfiguration();
+        Configuration config = new Configuration();
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(true);
 
         epService = EPServiceProviderManager.getDefaultProvider(config);
