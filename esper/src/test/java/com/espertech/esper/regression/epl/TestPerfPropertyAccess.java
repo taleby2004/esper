@@ -24,7 +24,6 @@ import junit.framework.TestCase;
 public class TestPerfPropertyAccess extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     public void setUp()
@@ -32,6 +31,10 @@ public class TestPerfPropertyAccess extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testPerfPropertyAccess()
@@ -42,7 +45,7 @@ public class TestPerfPropertyAccess extends TestCase
                 SupportBeanCombinedProps.class.getName() + ".win:length(1)" +
             " where indexed[0].mapped('a').value = 'dummy'";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         // Send events for each stream

@@ -46,6 +46,10 @@ public class TestEnumDocSamples extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testHowToUse() {
         String eplFragment = "select items.where(i => i.location.x = 0 and i.location.y = 0) as zeroloc from LocationReport";
         EPStatement stmtFragment = epService.getEPAdministrator().createEPL(eplFragment);

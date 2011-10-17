@@ -34,6 +34,10 @@ public class TestNamedWindowProcessingOrder extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testDispatchBackQueue() {
         epService.getEPAdministrator().createEPL("create schema StartValueEvent as (dummy string)");
         epService.getEPAdministrator().createEPL("create schema TestForwardEvent as (prop1 string)");

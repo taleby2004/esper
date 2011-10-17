@@ -12,15 +12,13 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.plugin.PlugInEventBeanReflectorContext;
+import com.espertech.esper.plugin.PlugInEventRepresentationContext;
+import com.espertech.esper.plugin.PlugInEventTypeHandlerContext;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.plugin.PlugInEventRepresentationContext;
-import com.espertech.esper.plugin.PlugInEventTypeHandlerContext;
-import com.espertech.esper.plugin.PlugInEventBeanReflectorContext;
 import junit.framework.TestCase;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,7 +26,6 @@ import java.util.Properties;
 
 public class TestPlugInEventRepresentation extends TestCase
 {
-    private static Log log = LogFactory.getLog(TestPlugInEventRepresentation.class);
     private EPServiceProvider epService;
     private SupportUpdateListener[] listeners;
 
@@ -39,6 +36,10 @@ public class TestPlugInEventRepresentation extends TestCase
         {
             listeners[i] = new SupportUpdateListener();
         }
+    }
+
+    protected void tearDown() throws Exception {
+        listeners = null;
     }
 
     /*

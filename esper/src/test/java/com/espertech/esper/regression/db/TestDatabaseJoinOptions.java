@@ -54,6 +54,10 @@ public class TestDatabaseJoinOptions extends TestCase
         Assert.assertEquals(80, listener.assertOneGetNewAndReset().get("MYINT"));
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testTypeMapped()
     {
         ConfigurationDBRef dbconfig = getDBConfig();

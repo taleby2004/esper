@@ -37,6 +37,10 @@ public class TestEnumGroupBy extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testKeySelectorOnly() {
 
         // - duplicate key allowed, creates a list of values

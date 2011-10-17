@@ -34,6 +34,10 @@ public class TestSubselectMultirow extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testMultirowSingleColumn()
     {
         // test named window as well as stream

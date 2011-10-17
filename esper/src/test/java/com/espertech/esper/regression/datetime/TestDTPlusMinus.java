@@ -40,6 +40,10 @@ public class TestDTPlusMinus extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testPlusMinus() {
 
         epService.getEPAdministrator().createEPL("create variable long varmsec");

@@ -40,6 +40,10 @@ public class TestIsolationUnit extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testInvalid()
     {
         EPStatement stmt = epService.getEPAdministrator().createEPL("@Name('A') select * from SupportBean");

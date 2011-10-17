@@ -39,6 +39,10 @@ public class TestSubselectUnfiltered extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testSelfSubselect()
     {
         String stmtTextOne = "insert into MyCount select count(*) as cnt from S0";

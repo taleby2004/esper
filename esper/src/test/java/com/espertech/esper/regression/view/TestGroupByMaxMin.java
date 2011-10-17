@@ -11,7 +11,6 @@
 
 package com.espertech.esper.regression.view;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
@@ -22,6 +21,7 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,13 +32,16 @@ public class TestGroupByMaxMin extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    protected void tearDown() throws Exception {
+        testListener = null;
     }
 
     public void testMinMaxView()
@@ -52,10 +55,10 @@ public class TestGroupByMaxMin extends TestCase
                           "where symbol='DELL' or symbol='IBM' or symbol='GE' " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testMinMaxView_OM() throws Exception
@@ -86,10 +89,10 @@ public class TestGroupByMaxMin extends TestCase
                           "group by symbol";
         assertEquals(viewExpr, model.toEPL());
 
-        selectTestView = epService.getEPAdministrator().create(model);
+        EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testMinMaxView_Compile()
@@ -105,10 +108,10 @@ public class TestGroupByMaxMin extends TestCase
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(viewExpr);
         assertEquals(viewExpr, model.toEPL());
 
-        selectTestView = epService.getEPAdministrator().create(model);
+        EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testMinMaxJoin()
@@ -124,13 +127,13 @@ public class TestGroupByMaxMin extends TestCase
                           "  and one.string = two.symbol " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_IBM));
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testMinNoGroupHaving()
@@ -138,7 +141,7 @@ public class TestGroupByMaxMin extends TestCase
         String stmtText = "select symbol from " + SupportMarketDataBean.class.getName() + ".win:time(5 sec) " +
                           "having volume > min(volume) * 1.3";
 
-        selectTestView = epService.getEPAdministrator().createEPL(stmtText);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(stmtText);
         selectTestView.addListener(testListener);
 
         sendEvent("DELL", 100L);
@@ -161,7 +164,7 @@ public class TestGroupByMaxMin extends TestCase
         String stmtText = "select symbol, min(volume) as mymin from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "having volume > min(volume) * 1.3";
 
-        selectTestView = epService.getEPAdministrator().createEPL(stmtText);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(stmtText);
         selectTestView.addListener(testListener);
 
         sendEvent("DELL", 100L);
@@ -190,7 +193,7 @@ public class TestGroupByMaxMin extends TestCase
         assertEquals(125L, event.get("mymin"));
     }
 
-    private void runAssertion()
+    private void runAssertion(EPStatement selectTestView)
     {
         // assert select result type
         assertEquals(String.class, selectTestView.getEventType().getPropertyType("symbol"));

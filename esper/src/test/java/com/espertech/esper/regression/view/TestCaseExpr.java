@@ -41,6 +41,10 @@ public class TestCaseExpr extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testCaseSyntax1Sum()
     {
         // Testing the two forms of the case expression

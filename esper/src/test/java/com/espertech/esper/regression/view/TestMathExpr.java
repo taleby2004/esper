@@ -29,6 +29,10 @@ public class TestMathExpr extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testIntDivisionIntResultZeroDevision()
     {
         Configuration config = SupportConfigFactory.getConfiguration();

@@ -41,6 +41,10 @@ public class TestEnumToMap extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testToMap() {
 
         // - duplicate value allowed, latest value wins

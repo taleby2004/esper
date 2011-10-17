@@ -39,6 +39,10 @@ public class TestMappedIndexedPropertyExpression extends TestCase {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanComplexProps", SupportBeanComplexProps.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testBeanMapWrap()
     {
         // test bean-type

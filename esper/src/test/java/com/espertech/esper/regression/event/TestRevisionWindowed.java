@@ -64,6 +64,10 @@ public class TestRevisionWindowed extends TestCase
         listenerOne = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerOne = null;
+    }
+
     public void testSubclassInterface()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("ISupportRevisionFull", ISupportRevisionFull.class);

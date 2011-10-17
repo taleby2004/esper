@@ -38,6 +38,10 @@ public class TestEventSenderBuiltin extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testSenderPOJO() throws Exception
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();

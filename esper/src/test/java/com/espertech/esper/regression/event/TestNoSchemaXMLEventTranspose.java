@@ -26,7 +26,7 @@ public class TestNoSchemaXMLEventTranspose extends TestCase
 {
     private static String CLASSLOADER_SCHEMA_URI = "regression/simpleSchema.xsd";
 
-    private EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
+    private EPServiceProvider epService;
 
     public void setUp()
     {

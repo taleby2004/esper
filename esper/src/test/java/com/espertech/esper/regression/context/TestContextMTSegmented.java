@@ -39,6 +39,10 @@ public class TestContextMTSegmented extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testSegmentedContext() throws Exception
     {
         String[] choices = "A,B,C,D".split(",");

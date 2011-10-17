@@ -33,6 +33,10 @@ public class TestInvalidEPL extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testInvalidSyntax()
     {
         String exceptionText = getSyntaxExceptionEPL("select * from *");

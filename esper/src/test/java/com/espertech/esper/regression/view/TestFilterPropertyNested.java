@@ -35,6 +35,10 @@ public class TestFilterPropertyNested extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testNamedWindowFilter()
     {
         String[] fields = "reviewId".split(",");

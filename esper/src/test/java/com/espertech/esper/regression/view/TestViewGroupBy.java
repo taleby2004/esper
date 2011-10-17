@@ -36,11 +36,6 @@ public class TestViewGroupBy extends TestCase
     private SupportUpdateListener volumeLast3StatsListener;
     private SupportUpdateListener volumeAllStatsListener;
 
-    private EPStatement priceLast3Stats;
-    private EPStatement priceAllStats;
-    private EPStatement volumeLast3Stats;
-    private EPStatement volumeAllStats;
-
     public void setUp()
     {
         priceLast3StatsListener = new SupportUpdateListener();
@@ -50,6 +45,13 @@ public class TestViewGroupBy extends TestCase
 
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    protected void tearDown() throws Exception {
+        priceLast3StatsListener = null;
+        priceAllStatsListener = null;
+        volumeLast3StatsListener = null;
+        volumeAllStatsListener = null;
     }
 
     public void testSelfJoin() {
@@ -152,16 +154,16 @@ public class TestViewGroupBy extends TestCase
         EPAdministrator epAdmin = epService.getEPAdministrator();
         String filter = "select * from " + SupportMarketDataBean.class.getName();
 
-        priceLast3Stats = epAdmin.createEPL(filter + ".std:groupwin(symbol).win:length(3).stat:uni(price)");
+        EPStatement priceLast3Stats = epAdmin.createEPL(filter + ".std:groupwin(symbol).win:length(3).stat:uni(price)");
         priceLast3Stats.addListener(priceLast3StatsListener);
 
-        volumeLast3Stats = epAdmin.createEPL(filter + ".std:groupwin(symbol).win:length(3).stat:uni(volume)");
+        EPStatement volumeLast3Stats = epAdmin.createEPL(filter + ".std:groupwin(symbol).win:length(3).stat:uni(volume)");
         volumeLast3Stats.addListener(volumeLast3StatsListener);
 
-        priceAllStats = epAdmin.createEPL(filter + ".std:groupwin(symbol).stat:uni(price)");
+        EPStatement priceAllStats = epAdmin.createEPL(filter + ".std:groupwin(symbol).stat:uni(price)");
         priceAllStats.addListener(priceAllStatsListener);
 
-        volumeAllStats = epAdmin.createEPL(filter + ".std:groupwin(symbol).stat:uni(volume)");
+        EPStatement volumeAllStats = epAdmin.createEPL(filter + ".std:groupwin(symbol).stat:uni(volume)");
         volumeAllStats.addListener(volumeAllStatsListener);
 
         Vector<Map<String, Object>> expectedList = new Vector<Map<String, Object>>();

@@ -39,6 +39,10 @@ public class TestEnumTakeAndTakeLast extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testTakeEvents() {
 
         String[] fields = "val0,val1,val2,val3,val4,val5".split(",");

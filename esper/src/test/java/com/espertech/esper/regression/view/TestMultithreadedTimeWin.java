@@ -11,12 +11,11 @@
 
 package com.espertech.esper.regression.view;
 
-import junit.framework.TestCase;
-import junit.framework.Assert;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.client.EventBean;
+import junit.framework.Assert;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -39,6 +38,10 @@ public class TestMultithreadedTimeWin extends TestCase {
 
     private Thread[] threads;
     private ResultUpdateListener[] listeners;
+
+    protected void tearDown() throws Exception {
+        listeners = null;
+    }
 
     public void testMultithreaded() throws Exception
     {

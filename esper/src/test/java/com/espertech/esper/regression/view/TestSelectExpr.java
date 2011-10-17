@@ -12,8 +12,6 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.annotation.Description;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
@@ -31,7 +29,6 @@ public class TestSelectExpr extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
@@ -42,12 +39,16 @@ public class TestSelectExpr extends TestCase
         epService.initialize();
     }
     
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testGraphSelect()
     {
         epService.getEPAdministrator().createEPL("insert into MyStream select nested from " + SupportBeanComplexProps.class.getName());
 
         String viewExpr = "select nested.nestedValue, nested.nestedNested.nestedNestedValue from MyStream";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(SupportBeanComplexProps.makeDefaultBean());
@@ -142,7 +143,7 @@ public class TestSelectExpr extends TestCase
         String viewExpr = "select string, boolBoxed as aBool, 3*intPrimitive, floatBoxed+floatPrimitive as result" +
                           " from " + SupportBean.class.getName() + ".win:length(3) " +
                           " where boolBoxed = true";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -159,7 +160,7 @@ public class TestSelectExpr extends TestCase
         String viewExpr = "select string, boolBoxed as aBool, 3*intPrimitive, floatBoxed+floatPrimitive as result" +
                           " from " + SupportBean.class.getName() + ".win:length(3) " +
                           " where boolBoxed = true";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         testListener.reset();

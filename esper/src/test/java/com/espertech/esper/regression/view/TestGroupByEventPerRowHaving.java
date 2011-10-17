@@ -31,13 +31,16 @@ public class TestGroupByEventPerRowHaving extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    protected void tearDown() throws Exception {
+        testListener = null;
     }
 
     public void testSumOneView()
@@ -49,10 +52,10 @@ public class TestGroupByEventPerRowHaving extends TestCase
                           "group by symbol " +
                           "having sum(price) >= 50";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testSumJoin()
@@ -66,16 +69,16 @@ public class TestGroupByEventPerRowHaving extends TestCase
                           "group by symbol " +
                           "having sum(price) >= 50";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_IBM));
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
-    private void runAssertion()
+    private void runAssertion(EPStatement selectTestView)
     {
         // assert select result type
         assertEquals(String.class, selectTestView.getEventType().getPropertyType("symbol"));

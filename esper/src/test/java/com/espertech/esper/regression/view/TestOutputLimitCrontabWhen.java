@@ -40,6 +40,10 @@ public class TestOutputLimitCrontabWhen extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testOutputCrontabAtVariable() {
 
         // every 15 minutes 8am to 5pm

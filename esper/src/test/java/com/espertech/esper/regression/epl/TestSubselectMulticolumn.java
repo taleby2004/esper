@@ -41,6 +41,10 @@ public class TestSubselectMulticolumn extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testInvalid() {
 
         String epl = "select (select string, sum(intPrimitive) from SupportBean.std:lastevent() as sb) from S0";

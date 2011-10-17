@@ -31,6 +31,10 @@ public class TestJoinInheritAndInterface extends TestCase
         epService.initialize();
     }
     
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testInterfaceJoin()
     {
         String viewExpr = "select a, b from " +

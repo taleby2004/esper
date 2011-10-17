@@ -46,6 +46,10 @@ public class TestDTIntervalOps extends TestCase {
         epService.getEPAdministrator().getConfiguration().addEventType("B", SupportTimeStartEndB.class.getName(), configBean);
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testCreateSchema() {
 
         // test Map type Long-type timestamps

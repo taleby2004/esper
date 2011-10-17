@@ -10,23 +10,20 @@
  */
 
 package com.espertech.esper.regression.epl;
-import java.util.HashMap;
-import java.util.Map;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.support.bean.SupportBeanCombinedProps;
-import com.espertech.esper.support.bean.SupportBeanSimple;
-import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.bean.SupportBean_B;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.support.bean.*;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class TestModifiedWildcardSelect extends TestCase
@@ -34,7 +31,6 @@ public class TestModifiedWildcardSelect extends TestCase
 	private EPServiceProvider epService;
 	private SupportUpdateListener listener;
 	private SupportUpdateListener insertListener;
-	private Map<String, Object> properties;
 
 	protected void setUp()
 	{
@@ -42,8 +38,12 @@ public class TestModifiedWildcardSelect extends TestCase
 		epService.initialize();
 		listener = new SupportUpdateListener();
 		insertListener = new SupportUpdateListener();
-		properties = new HashMap<String, Object>();
 	}
+
+    protected void tearDown() throws Exception {
+        listener = null;
+        insertListener = null;
+    }
 
     public void testSingleOM() throws Exception
     {
@@ -90,7 +90,7 @@ public class TestModifiedWildcardSelect extends TestCase
 		statement = epService.getEPAdministrator().createEPL(textTwo);
 		statement.addListener(insertListener);
 		assertSimple();
-		assertProperties(insertListener);
+		assertProperties(Collections.<String, Object>emptyMap(), insertListener);
 	}
 
 	public void testJoinInsertInto() throws InterruptedException
@@ -109,7 +109,7 @@ public class TestModifiedWildcardSelect extends TestCase
 		statement.addListener(insertListener);
 
 		assertNoCommonProperties();
-		assertProperties(insertListener);
+		assertProperties(Collections.<String, Object>emptyMap(), insertListener);
 	}
 
 	public void testJoinNoCommonProperties() throws Exception
@@ -197,11 +197,12 @@ public class TestModifiedWildcardSelect extends TestCase
 		epService.getEPRuntime().sendEvent(props, "mapEvent");
 
 		// The map of expected results
+        Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("int", 1);
 		properties.put("string", "xx");
 		properties.put("concat", "xxxx");
 
-		assertProperties(listener);
+		assertProperties(properties, listener);
 
         epService.destroy();
 	}
@@ -228,8 +229,9 @@ public class TestModifiedWildcardSelect extends TestCase
 		SupportMarketDataBean eventMarket = sendMarketEvent("string");
 
 		EventBean event = listener.getLastNewData()[0];
+        Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("concat", "stringstring");
-		assertProperties(listener);
+		assertProperties(properties, listener);
 		assertSame(eventSimple, event.get("eventOne"));
 		assertSame(eventMarket, event.get("eventTwo"));
 	}
@@ -239,10 +241,11 @@ public class TestModifiedWildcardSelect extends TestCase
 		SupportBeanSimple event = sendSimpleEvent("string");
 
         assertEquals("stringstring", listener.getLastNewData()[0].get("concat"));
+        Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("concat", "stringstring");
 		properties.put("myString", "string");
 		properties.put("myInt", 0);
-		assertProperties(listener);
+		assertProperties(properties, listener);
 
         assertEquals(Pair.class, listener.getLastNewData()[0].getEventType().getUnderlyingType());
         assertTrue(listener.getLastNewData()[0].getUnderlying() instanceof Pair);
@@ -255,8 +258,9 @@ public class TestModifiedWildcardSelect extends TestCase
 	{
 		sendABEvents("string");
 		EventBean event = listener.getLastNewData()[0];
+        Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("concat", "stringstring");
-		assertProperties(listener);
+		assertProperties(properties, listener);
 		assertNotNull(event.get("eventOne"));
 		assertNotNull(event.get("eventTwo"));
 	}
@@ -277,7 +281,7 @@ public class TestModifiedWildcardSelect extends TestCase
         assertEquals("0ma00ma1", eventBean.get("concat"));
 	}
 
-	private void assertProperties(SupportUpdateListener listener)
+	private void assertProperties(Map<String, Object> properties, SupportUpdateListener listener)
 	{
 		EventBean event = listener.getLastNewData()[0];
 		for(String property : properties.keySet())

@@ -45,6 +45,10 @@ public class TestOutputLimitSimple extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void test1NoneNoHavingNoJoin()
     {
         String stmtText = "select symbol, volume, price " +

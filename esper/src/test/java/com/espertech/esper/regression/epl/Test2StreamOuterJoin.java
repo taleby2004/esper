@@ -11,26 +11,25 @@
 
 package com.espertech.esper.regression.epl;
 
-import com.espertech.esper.support.bean.*;
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.type.OuterJoinType;
 import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
 
 public class Test2StreamOuterJoin extends TestCase
 {
+    private final static String[] fields = new String[] {"s0.id", "s0.p00", "s1.id", "s1.p10"};
+
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private EPStatement outerJoinView;
-    private String[] fields = new String[] {"s0.id", "s0.p00", "s1.id", "s1.p10"};
 
-    private SupportBean_S0 eventsS0[] = new SupportBean_S0[15];
-    private SupportBean_S1 eventsS1[] = new SupportBean_S1[15];
+    private SupportBean_S0[] eventsS0;
+    private SupportBean_S1[] eventsS1;
 
     public void setUp()
     {
@@ -40,6 +39,8 @@ public class Test2StreamOuterJoin extends TestCase
         epService.initialize();
         listener = new SupportUpdateListener();
 
+        eventsS0 = new SupportBean_S0[15];
+        eventsS1 = new SupportBean_S1[15];
         int count = 100;
         for (int i = 0; i < eventsS0.length; i++)
         {
@@ -50,6 +51,12 @@ public class Test2StreamOuterJoin extends TestCase
         {
             eventsS1[i] = new SupportBean_S1(count++, Integer.toString(i));
         }
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
+        eventsS0 = null;
+        eventsS1 = null;
     }
 
     public void testRangeOuterJoin() {
@@ -87,7 +94,7 @@ public class Test2StreamOuterJoin extends TestCase
     private void runAssertion(String epl) {
 
         String fields[] = "sbstr,sbint,sbrk,sbrs,sbre".split(",");
-        outerJoinView = epService.getEPAdministrator().createEPL(epl);
+        EPStatement outerJoinView = epService.getEPAdministrator().createEPL(epl);
         outerJoinView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("K1", 10));
@@ -136,7 +143,7 @@ public class Test2StreamOuterJoin extends TestCase
                       "group by string, intPrimitive, symbol " +
                       "order by string, intPrimitive, symbol, volume";
 
-        outerJoinView = epService.getEPAdministrator().createEPL(stmt);
+        EPStatement outerJoinView = epService.getEPAdministrator().createEPL(stmt);
         outerJoinView.addListener(listener);
 
         sendEventMD("c0", 200L);
@@ -183,7 +190,7 @@ public class Test2StreamOuterJoin extends TestCase
                     });
     }
 
-    public void testFullOuterJoin()
+    public void testFullOuterJoin(EPStatement outerJoinView)
     {
         setupStatement("full");
 
@@ -290,7 +297,7 @@ public class Test2StreamOuterJoin extends TestCase
 
         String stmtText = "select s0.id, s0.p00, s0.p01, s1.id, s1.p10, s1.p11 from com.espertech.esper.support.bean.SupportBean_S0.win:keepall() as s0 left outer join com.espertech.esper.support.bean.SupportBean_S1.win:keepall() as s1 on s0.p00 = s1.p10 and s1.p11 = s0.p01";
         assertEquals(stmtText, model.toEPL());
-        outerJoinView = epService.getEPAdministrator().create(model);
+        EPStatement outerJoinView = epService.getEPAdministrator().create(model);
         outerJoinView.addListener(listener);
 
         assertMultiColumnLeft();
@@ -307,7 +314,7 @@ public class Test2StreamOuterJoin extends TestCase
             SupportBean_S1.class.getName() + ".win:length(5) as s1" +
             " on s0.p00 = s1.p10 and s0.p01 = s1.p11";
 
-        outerJoinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement outerJoinView = epService.getEPAdministrator().createEPL(joinStatement);
         outerJoinView.addListener(listener);
 
         assertMultiColumnLeft();
@@ -338,7 +345,7 @@ public class Test2StreamOuterJoin extends TestCase
             SupportBean_S1.class.getName() + ".win:length(5) as s1" +
             " on s0.p00 = s1.p10 and s1.p11 = s0.p01";
 
-        outerJoinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement outerJoinView = epService.getEPAdministrator().createEPL(joinStatement);
         outerJoinView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "A_1", "B_1"));
@@ -363,7 +370,7 @@ public class Test2StreamOuterJoin extends TestCase
             SupportBean.class.getName() + "(string like 'S1%').win:keepall() as s1" +
             " on s0.intPrimitive = s1.doublePrimitive and s1.intPrimitive = s0.doublePrimitive";
 
-        outerJoinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement outerJoinView = epService.getEPAdministrator().createEPL(joinStatement);
         outerJoinView.addListener(listener);
 
         sendEvent("S1_1", 10, 20d);
@@ -390,7 +397,7 @@ public class Test2StreamOuterJoin extends TestCase
 
     public void testRightOuterJoin()
     {
-        setupStatement("right");
+        EPStatement outerJoinView = setupStatement("right");
 
         // Send S0 events, no events expected
         sendEvent(eventsS0[0]);
@@ -473,7 +480,7 @@ public class Test2StreamOuterJoin extends TestCase
 
     public void testLeftOuterJoin()
     {
-        setupStatement("left");
+        EPStatement outerJoinView = setupStatement("left");
 
         // Send S1 events, no events expected
         sendEvent(eventsS1[0]);
@@ -592,7 +599,7 @@ public class Test2StreamOuterJoin extends TestCase
             SupportBean_S1.class.getName() + ".win:length(5) as s1" +
             " on s0.p00 = s1.p10";
 
-        outerJoinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement outerJoinView = epService.getEPAdministrator().createEPL(joinStatement);
         outerJoinView.addListener(listener);
 
         return outerJoinView;

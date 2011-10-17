@@ -43,6 +43,10 @@ public class TestGroupByCount extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testCountOneViewOM() throws Exception
     {
         EPStatementObjectModel model = new EPStatementObjectModel();

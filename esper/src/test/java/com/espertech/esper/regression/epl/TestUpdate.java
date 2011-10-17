@@ -53,6 +53,10 @@ public class TestUpdate extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testInvalid()
     {
         Map<String, Object> type = new HashMap<String, Object>();

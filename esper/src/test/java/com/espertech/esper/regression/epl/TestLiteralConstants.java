@@ -35,6 +35,10 @@ public class TestLiteralConstants extends TestCase
         updateListener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+    }
+
     public void testLiteral()
     {
         String statement = "select 0x23 as mybyte, " +

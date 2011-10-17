@@ -35,6 +35,10 @@ public class TestFilterInAndBetween extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testInDynamic()
     {
         String expr = "select * from pattern [a=" + SupportBeanNumeric.class.getName() + " -> every b=" + SupportBean.class.getName()

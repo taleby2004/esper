@@ -39,6 +39,10 @@ public class TestEnumChained extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testChained() {
 
         String eplFragment = "select sales.where(x => x.cost > 1000).min(y => y.buyer.age) as val from PersonSales";

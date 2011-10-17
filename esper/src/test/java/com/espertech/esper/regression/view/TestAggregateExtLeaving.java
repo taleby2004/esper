@@ -36,6 +36,10 @@ public class TestAggregateExtLeaving extends TestCase {
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testLeaving()
     {
         String epl = "select leaving() as val from SupportBean.win:length(3)";

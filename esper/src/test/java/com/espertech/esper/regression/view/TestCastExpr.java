@@ -34,6 +34,10 @@ public class TestCastExpr extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testCastSimple()
     {
         String stmtText = "select cast(string as string) as t0, " +

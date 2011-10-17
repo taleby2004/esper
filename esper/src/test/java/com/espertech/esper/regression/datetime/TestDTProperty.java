@@ -36,6 +36,10 @@ public class TestDTProperty extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testProp() {
 
         String startTime = "2002-05-30T9:01:02.003";

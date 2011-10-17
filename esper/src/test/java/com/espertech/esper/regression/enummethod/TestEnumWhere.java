@@ -39,6 +39,10 @@ public class TestEnumWhere extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testWhereEvents() {
 
         String epl = "select " +

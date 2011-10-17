@@ -36,6 +36,10 @@ public class TestNewExpr extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testNewAlone() {
         String epl = "select new { string = 'x' || string || 'x', intPrimitive = intPrimitive + 2} as val0 from SupportBean as sb";
 

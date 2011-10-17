@@ -40,6 +40,11 @@ public class TestViewTimeLengthBatch extends TestCase
         }
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+        events = null;
+    }
+
     public void testTimeLengthBatch()
     {
         final long startTime = 1000;

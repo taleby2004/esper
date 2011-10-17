@@ -49,6 +49,10 @@ public class TestViewUniqueSorted extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testExpressionParameter()
     {
         EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.std:unique(Math.abs(intPrimitive))");

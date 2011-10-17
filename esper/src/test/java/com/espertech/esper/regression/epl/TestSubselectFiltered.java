@@ -43,6 +43,10 @@ public class TestSubselectFiltered extends TestCase
         listener = new SupportUpdateListener();
     }
     
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void test3StreamKeyRangeCoercion() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("ST0", SupportBean_ST0.class);

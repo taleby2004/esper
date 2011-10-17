@@ -41,6 +41,10 @@ public class TestViewTimeAccum extends TestCase
         }
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testTimeAccum()
     {
         final long startTime = 1000;

@@ -11,14 +11,17 @@
 
 package com.espertech.esper.regression.view;
 
-import com.espertech.esper.client.*;
+import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_ST0;
+import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.client.SupportConfigFactory;
-import junit.framework.*;
+import junit.framework.TestCase;
 
 public class TestOutputLimitFirstHaving extends TestCase {
 
@@ -29,11 +32,15 @@ public class TestOutputLimitFirstHaving extends TestCase {
         Configuration config = SupportConfigFactory.getConfiguration();
         config.getEngineDefaults().getLogging().setEnableExecutionDebug(true);
         config.getEngineDefaults().getLogging().setEnableTimerDebug(false);
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_ST0", SupportBean_ST0.class);
         listener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testHavingNoAvgOutputFirstEvents() {

@@ -38,6 +38,10 @@ public class TestFirstEverLastEverAgg extends TestCase {
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testFirstEverLastEver()
     {
         String epl = "select firstever(string) as firsteverstring, lastever(string) as lasteverstring, " +

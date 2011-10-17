@@ -51,6 +51,12 @@ public class TestNamedWindowTypes extends TestCase
         listenerStmtDelete = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerWindow = null;
+        listenerStmtOne = null;
+        listenerStmtDelete = null;
+    }
+
     public void testEventTypeColumnDef() {
         epService.getEPAdministrator().createEPL("create schema SchemaOne(col1 int, col2 int)");
         EPStatement stmt = epService.getEPAdministrator().createEPL("create window SchemaWindow.std:lastevent() as (s1 SchemaOne)");

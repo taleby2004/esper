@@ -25,11 +25,10 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 public class TestJoinNoWhereClause extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
-    private Object[] setOne = new Object[5];
-    private Object[] setTwo = new Object[5];
+    private Object[] setOne;
+    private Object[] setTwo;
 
     public void setUp()
     {
@@ -40,6 +39,8 @@ public class TestJoinNoWhereClause extends TestCase
         epService.initialize();
         updateListener = new SupportUpdateListener();
 
+        setOne = new Object[5];
+        setTwo = new Object[5];
         for (int i = 0; i < setOne.length; i++)
         {
             setOne[i] = new SupportMarketDataBean("IBM", 0, (long) i, "");
@@ -50,6 +51,12 @@ public class TestJoinNoWhereClause extends TestCase
         }
     }
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+        setOne = null;
+        setTwo = null;
+    }
+
     public void testJoinNoWhereClause()
     {
         String[] fields = new String[] {"stream_0.volume", "stream_1.longBoxed"};
@@ -57,7 +64,7 @@ public class TestJoinNoWhereClause extends TestCase
                 SupportMarketDataBean.class.getName() + ".win:length(3)," +
                 SupportBean.class.getName() + "().win:length(3)";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         // Send 2 events, should join on second one

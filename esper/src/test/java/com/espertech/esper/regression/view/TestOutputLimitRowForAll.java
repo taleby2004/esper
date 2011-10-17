@@ -43,6 +43,10 @@ public class TestOutputLimitRowForAll extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void test1NoneNoHavingNoJoin()
     {
         String stmtText = "select sum(price) " +

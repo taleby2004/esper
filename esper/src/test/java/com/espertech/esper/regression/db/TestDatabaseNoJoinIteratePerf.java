@@ -24,7 +24,6 @@ import java.util.Properties;
 public class TestDatabaseNoJoinIteratePerf extends TestCase
 {
     private EPServiceProvider epService;
-    private SupportUpdateListener listener;
 
     public void setUp()
     {

@@ -35,6 +35,10 @@ public class TestGroupByTimeBatch extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testTimeBatchRowForAllNoJoin()
     {
         sendTimer(0);

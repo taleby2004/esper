@@ -38,6 +38,10 @@ public class TestEnumAggregate extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testAggregateEvents() {
 
         String[] fields = new String[] {"val0", "val1", "val2"};

@@ -45,6 +45,11 @@ public class TestVariables extends TestCase
         listenerSet = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+        listenerSet = null;
+    }
+
     public void testVariableEPRuntime() throws Exception
     {
         epService.getEPAdministrator().getConfiguration().addVariable("var1", int.class, -1);

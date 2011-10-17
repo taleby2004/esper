@@ -55,6 +55,10 @@ public class TestDatabaseDataSourceFactory extends TestCase
         runAssertion();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     private void runAssertion()
     {
         String stmtText = "select istream myint from " +

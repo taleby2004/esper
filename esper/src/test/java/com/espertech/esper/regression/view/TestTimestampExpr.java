@@ -33,6 +33,10 @@ public class TestTimestampExpr extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testGetTimestamp()
     {
         sendTimer(0);

@@ -33,6 +33,10 @@ public class TestPerfDTBetween extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testPerf() {
 
         epService.getEPAdministrator().getConfiguration().addEventType("A", SupportTimeStartEndA.class.getName());

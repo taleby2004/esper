@@ -43,6 +43,13 @@ public class TestNamedWindowSubquery extends TestCase
         listenerStmtDelete = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerWindow = null;
+        listenerStmtOne = null;
+        listenerStmtTwo = null;
+        listenerStmtDelete = null;
+    }
+
     public void testSubquerySelfCheck()
     {
         String fields[] = new String[] {"key", "value"};

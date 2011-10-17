@@ -14,7 +14,6 @@ package com.espertech.esper.regression.epl;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.bean.SupportBean_S2;
@@ -26,7 +25,6 @@ import junit.framework.TestCase;
 public class Test3StreamOuterInnerJoin extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     private final static String EVENT_S0 = SupportBean_S0.class.getName();
@@ -38,6 +36,10 @@ public class Test3StreamOuterInnerJoin extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testFullJoinVariantThree()
@@ -104,7 +106,7 @@ public class Test3StreamOuterInnerJoin extends TestCase
     {
         String fields[] = "s0.id, s0.p00, s1.id, s1.p10, s2.id, s2.p20".split(",");
 
-        joinView = epService.getEPAdministrator().createEPL(expression);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(expression);
         joinView.addListener(updateListener);
 
         // s1, s2, s0

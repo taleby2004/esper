@@ -65,6 +65,10 @@ public class TestSchemaXMLEvent extends TestCase
         updateListener.reset();
     }
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+    }
+
     public void testSchemaXMLWSchemaWithAll() throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();        

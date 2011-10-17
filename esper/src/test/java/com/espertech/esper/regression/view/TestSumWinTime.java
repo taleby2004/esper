@@ -29,7 +29,6 @@ public class TestSumWinTime extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
@@ -39,16 +38,20 @@ public class TestSumWinTime extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testWinTimeSum()
     {
         // Every event generates a new row, this time we sum the price by symbol and output volume
         String sumTimeExpr = "select symbol, volume, sum(price) as mySum " +
                              "from " + SupportMarketDataBean.class.getName() + ".win:time(30)";
 
-        selectTestView = epService.getEPAdministrator().createEPL(sumTimeExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(sumTimeExpr);
         selectTestView.addListener(testListener);
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testWinTimeSumGroupBy()
@@ -58,10 +61,10 @@ public class TestSumWinTime extends TestCase
                              "from " + SupportMarketDataBean.class.getName() +
                              ".win:time(30) group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(sumTimeUniExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(sumTimeUniExpr);
         selectTestView.addListener(testListener);
 
-        runGroupByAssertions();
+        runGroupByAssertions(selectTestView);
     }
 
     public void testWinTimeSumSingle()
@@ -71,15 +74,15 @@ public class TestSumWinTime extends TestCase
                              "from " + SupportMarketDataBean.class.getName() +
                              "(symbol = 'IBM').win:time(30)";
 
-        selectTestView = epService.getEPAdministrator().createEPL(sumTimeUniExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(sumTimeUniExpr);
         selectTestView.addListener(testListener);
 
-        runSingleAssertion();
+        runSingleAssertion(selectTestView);
     }
 
-    private void runAssertion()
+    private void runAssertion(EPStatement selectTestView)
     {
-        assertSelectResultType();
+        assertSelectResultType(selectTestView);
 
         CurrentTimeEvent currentTime = new CurrentTimeEvent(0);
         epService.getEPRuntime().sendEvent(currentTime);
@@ -105,9 +108,9 @@ public class TestSumWinTime extends TestCase
 
     }
 
-    private void runGroupByAssertions()
+    private void runGroupByAssertions(EPStatement selectTestView)
     {
-        assertSelectResultType();
+        assertSelectResultType(selectTestView);
 
         CurrentTimeEvent currentTime = new CurrentTimeEvent(0);
         epService.getEPRuntime().sendEvent(currentTime);
@@ -140,9 +143,9 @@ public class TestSumWinTime extends TestCase
         assertEvents(SYMBOL_IBM, 30000, 240,false);
      }
 
-    private void runSingleAssertion()
+    private void runSingleAssertion(EPStatement selectTestView)
     {
-        assertSelectResultType();
+        assertSelectResultType(selectTestView);
 
         CurrentTimeEvent currentTime = new CurrentTimeEvent(0);
         epService.getEPRuntime().sendEvent(currentTime);
@@ -181,7 +184,7 @@ public class TestSumWinTime extends TestCase
         assertFalse(testListener.isInvoked());
     }
 
-    private void assertSelectResultType()
+    private void assertSelectResultType(EPStatement selectTestView)
     {
         assertEquals(String.class, selectTestView.getEventType().getPropertyType("symbol"));
         assertEquals(Long.class, selectTestView.getEventType().getPropertyType("volume"));

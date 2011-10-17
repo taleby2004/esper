@@ -26,12 +26,11 @@ import com.espertech.esper.util.SerializableObjectCopier;
 public class Test3StreamSingleOpJoin extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
-    private SupportBean_A eventsA[] = new SupportBean_A[10];
-    private SupportBean_B eventsB[] = new SupportBean_B[10];
-    private SupportBean_C eventsC[] = new SupportBean_C[10];
+    private SupportBean_A eventsA[];
+    private SupportBean_B eventsB[];
+    private SupportBean_C eventsC[];
 
     private String eventA = SupportBean_A.class.getName();
     private String eventB = SupportBean_B.class.getName();
@@ -43,6 +42,9 @@ public class Test3StreamSingleOpJoin extends TestCase
         epService.initialize();
         updateListener = new SupportUpdateListener();
 
+        eventsA = new SupportBean_A[10];
+        eventsB = new SupportBean_B[10];
+        eventsC = new SupportBean_C[10];
         for (int i = 0; i < eventsA.length; i++)
         {
             eventsA[i] = new SupportBean_A(Integer.toString(i));
@@ -50,7 +52,14 @@ public class Test3StreamSingleOpJoin extends TestCase
             eventsC[i] = new SupportBean_C(Integer.toString(i));
         }
     }
-    
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
+        eventA = null;
+        eventB = null;
+        eventC = null;
+    }
+
     public void testJoinUniquePerId()
     {
         String joinStatement = "select * from " +
@@ -61,7 +70,7 @@ public class Test3StreamSingleOpJoin extends TestCase
             "   and (streamB.id = streamC.id)" +
             "   and (streamA.id = streamC.id)";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runJoinUniquePerId();
@@ -90,7 +99,7 @@ public class Test3StreamSingleOpJoin extends TestCase
             "and streamB.id = streamC.id " +
             "and streamA.id = streamC.id";
 
-        joinView = epService.getEPAdministrator().create(model);
+        EPStatement joinView = epService.getEPAdministrator().create(model);
         joinView.addListener(updateListener);
         assertEquals(joinStatement, model.toEPL());
 
@@ -109,7 +118,7 @@ public class Test3StreamSingleOpJoin extends TestCase
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(joinStatement);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        joinView = epService.getEPAdministrator().create(model);
+        EPStatement joinView = epService.getEPAdministrator().create(model);
         joinView.addListener(updateListener);
         assertEquals(joinStatement, model.toEPL());
 

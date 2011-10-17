@@ -62,6 +62,10 @@ public class TestVariantStreamAny extends TestCase
         assertEquals(0, type.getPropertyDescriptors().length);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testAnyType()
     {
         assertTrue(epService.getEPAdministrator().getConfiguration().isVariantStreamExists("MyVariantStream"));

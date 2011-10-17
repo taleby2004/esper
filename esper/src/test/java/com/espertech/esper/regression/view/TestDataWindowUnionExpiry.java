@@ -27,6 +27,10 @@ public class TestDataWindowUnionExpiry extends TestCase
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testFirstUniqueAndLengthOnDelete()
     {
         init(false);

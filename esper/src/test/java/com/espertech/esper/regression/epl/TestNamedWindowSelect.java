@@ -40,6 +40,12 @@ public class TestNamedWindowSelect extends TestCase
         listenerConsumer = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerSelect = null;
+        listenerSelectTwo = null;
+        listenerConsumer = null;
+    }
+
     public void testSelectAggregationHavingStreamWildcard()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

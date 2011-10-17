@@ -34,6 +34,11 @@ public class TestInBetweenLikeExpr extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+        testListenerTwo = null;
+    }
+
     public void testInObject()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("ArrayBean", SupportBeanArrayCollMap.class);

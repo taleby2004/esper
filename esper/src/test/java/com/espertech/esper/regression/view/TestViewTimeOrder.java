@@ -33,6 +33,10 @@ public class TestViewTimeOrder extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testTimeOrderRemoveStream()
     {
         sendTimer(1000);

@@ -30,6 +30,10 @@ public class TestViewTimeInterval extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testTimeWindowPreparedStmt()
     {
         sendTimer(0);

@@ -35,6 +35,10 @@ public class TestConsumingFilter extends TestCase implements SupportBeanConstant
         engine.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testFollowedBy() {
         String[] fields = "a,b".split(",");
         String pattern = "select a.string as a, b.string as b from pattern[every a=SupportBean -> b=SupportBean@consume]";

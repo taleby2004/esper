@@ -45,6 +45,10 @@ public class TestEnumNested extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testEquivalentToMinByUncorrelated() {
 
         String eplFragment = "select contained.where(x => (x.p00 = contained.min(y => y.p00))) as val from Bean";

@@ -38,6 +38,10 @@ public class TestPerfNamedWindow extends TestCase
         System.gc();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testOnSelectPerformance()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

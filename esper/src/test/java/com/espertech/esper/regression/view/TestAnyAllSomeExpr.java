@@ -40,6 +40,10 @@ public class TestAnyAllSomeExpr extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("ArrayBean", SupportBeanArrayCollMap.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testEqualsAll()
     {
         String[] fields = "eq,neq,sqlneq,nneq".split(",");

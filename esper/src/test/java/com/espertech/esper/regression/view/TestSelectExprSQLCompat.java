@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 public class TestSelectExprSQLCompat extends TestCase
 {
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
     private Configuration config;
 
     public void setUp()
@@ -31,6 +30,11 @@ public class TestSelectExprSQLCompat extends TestCase
         testListener = new SupportUpdateListener();
         config = SupportConfigFactory.getConfiguration();
         config.addEventType("SupportBean", SupportBean.class);
+    }
+
+    protected void tearDown() throws Exception {
+        testListener = null;
+        config = null;
     }
 
     public void testQualifiedPropertyNamed()
@@ -54,7 +58,7 @@ public class TestSelectExprSQLCompat extends TestCase
     private void runAssertionProperty(EPServiceProvider engine)
     {
         String epl = "select default.SupportBean.string as val1, SupportBean.intPrimitive as val2 from SupportBean";
-        selectTestView = engine.getEPAdministrator().createEPL(epl);
+        EPStatement selectTestView = engine.getEPAdministrator().createEPL(epl);
         selectTestView.addListener(testListener);
 
         sendEvent(engine, "E1", 10);
@@ -67,7 +71,7 @@ public class TestSelectExprSQLCompat extends TestCase
     private void runAssertionPrefixStream(EPServiceProvider engine)
     {
         String epl = "select string from default.SupportBean";
-        selectTestView = engine.getEPAdministrator().createEPL(epl);
+        EPStatement selectTestView = engine.getEPAdministrator().createEPL(epl);
         selectTestView.addListener(testListener);
 
         sendEvent(engine, "E1", 10);

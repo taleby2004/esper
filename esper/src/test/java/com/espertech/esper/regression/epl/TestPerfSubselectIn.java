@@ -38,6 +38,10 @@ public class TestPerfSubselectIn extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testPerformanceWhereClauseCoercion()
     {
         String stmtText = "select intPrimitive from MyEvent(string='A') as s0 where intPrimitive in (" +

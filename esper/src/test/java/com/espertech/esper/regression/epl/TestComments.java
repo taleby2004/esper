@@ -32,6 +32,10 @@ public class TestComments extends TestCase
         updateListener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+    }
+
     public void testComment()
     {
         String lineSeparator = System.getProperty("line.separator");

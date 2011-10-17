@@ -11,20 +11,19 @@
 
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 public class TestSingleOpJoin extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     private SupportBean_A eventsA[] = new SupportBean_A[10];
@@ -46,8 +45,12 @@ public class TestSingleOpJoin extends TestCase
             eventB + "().win:length(3) as streamB" +
             " where streamA.id = streamB.id";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
+
+        assertEquals(SupportBean_A.class, joinView.getEventType().getPropertyType("streamA"));
+        assertEquals(SupportBean_B.class, joinView.getEventType().getPropertyType("streamB"));
+        assertEquals(2, joinView.getEventType().getPropertyNames().length);
 
         for (int i = 0; i < eventsA.length; i++)
         {
@@ -130,13 +133,6 @@ public class TestSingleOpJoin extends TestCase
         assertSame(eventsASetTwo[0], updateListener.getLastOldData()[0].get("streamA"));
         assertSame(eventsB[0], updateListener.getLastOldData()[0].get("streamB"));
         assertEquals(1, updateListener.getLastOldData().length);
-    }
-
-    public void testEventType()
-    {
-        assertEquals(SupportBean_A.class, joinView.getEventType().getPropertyType("streamA"));
-        assertEquals(SupportBean_B.class, joinView.getEventType().getPropertyType("streamB"));
-        assertEquals(2, joinView.getEventType().getPropertyNames().length);
     }
 
     private void sendEvent(Object event)

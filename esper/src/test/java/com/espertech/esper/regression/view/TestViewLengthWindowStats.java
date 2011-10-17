@@ -32,7 +32,6 @@ public class TestViewLengthWindowStats extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement statement;
 
     public void setUp()
     {
@@ -41,10 +40,14 @@ public class TestViewLengthWindowStats extends TestCase
         epService.initialize();
     }
     
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testIterator()
     {
         String viewExpr = "select symbol, price from " + SupportMarketDataBean.class.getName() + ".win:length(2)";
-        statement = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement statement = epService.getEPAdministrator().createEPL(viewExpr);
         statement.addListener(testListener);
 
         sendEvent("ABC", 20);
@@ -78,7 +81,7 @@ public class TestViewLengthWindowStats extends TestCase
     {
         String viewExpr = "select irstream * from " + SupportMarketDataBean.class.getName() +
                 "(symbol='" + SYMBOL + "').win:length(3).stat:uni(price, symbol, feed)";
-        statement = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement statement = epService.getEPAdministrator().createEPL(viewExpr);
         statement.addListener(testListener);
         testListener.reset();
 
@@ -91,11 +94,11 @@ public class TestViewLengthWindowStats extends TestCase
 
         sendEvent(SYMBOL, 100);
         checkOld(true, 0, 0, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-        checkNew(1, 100, 100, 0, Double.NaN, Double.NaN);
+        checkNew(statement, 1, 100, 100, 0, Double.NaN, Double.NaN);
 
         sendEvent(SYMBOL, 100.5);
         checkOld(false, 1, 100, 100, 0, Double.NaN, Double.NaN);
-        checkNew(2, 200.5, 100.25, 0.25, 0.353553391, 0.125);
+        checkNew(statement, 2, 200.5, 100.25, 0.25, 0.353553391, 0.125);
 
         sendEvent("DUMMY", 100.5);
         assertTrue(testListener.getLastNewData() == null);
@@ -103,15 +106,15 @@ public class TestViewLengthWindowStats extends TestCase
 
         sendEvent(SYMBOL, 100.7);
         checkOld(false, 2, 200.5, 100.25, 0.25, 0.353553391, 0.125);
-        checkNew(3, 301.2, 100.4, 0.294392029, 0.360555128, 0.13);
+        checkNew(statement, 3, 301.2, 100.4, 0.294392029, 0.360555128, 0.13);
 
         sendEvent(SYMBOL, 100.6);
         checkOld(false, 3, 301.2, 100.4, 0.294392029, 0.360555128, 0.13);
-        checkNew(3, 301.8, 100.6, 0.081649658, 0.1, 0.01);
+        checkNew(statement, 3, 301.8, 100.6, 0.081649658, 0.1, 0.01);
 
         sendEvent(SYMBOL, 100.9);
         checkOld(false, 3, 301.8, 100.6, 0.081649658, 0.1, 0.01);
-        checkNew(3, 302.2, 100.733333333, 0.124721913, 0.152752523, 0.023333333);
+        checkNew(statement, 3, 302.2, 100.733333333, 0.124721913, 0.152752523, 0.023333333);
         statement.destroy();
 
         // Test copying all properties
@@ -133,7 +136,7 @@ public class TestViewLengthWindowStats extends TestCase
         epService.getEPRuntime().sendEvent(event);
     }
 
-    private void checkNew(long countE, double sumE, double avgE, double stdevpaE, double stdevE, double varianceE)
+    private void checkNew(EPStatement statement, long countE, double sumE, double avgE, double stdevpaE, double stdevE, double varianceE)
     {
         Iterator<EventBean> iterator = statement.iterator();
         checkValues(iterator.next(), false, false, countE, sumE, avgE, stdevpaE, stdevE, varianceE);

@@ -34,6 +34,10 @@ public class TestDTGet extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testInput() {
 
         String[] fields = "val0,val1,val2".split(",");

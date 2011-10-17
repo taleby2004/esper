@@ -36,6 +36,10 @@ public class TestAggregateExtRate extends TestCase {
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     // rate implementation does not require a data window (may have one)
     // advantage: not retaining events, only timestamp data points
     // disadvantage: output rate limiting without snapshot may be less accurate rate

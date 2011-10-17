@@ -34,6 +34,10 @@ public class TestPerf3StreamCoercion extends TestCase
         System.gc();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testPerfCoercion3waySceneOne()
     {
         String stmtText = "select s1.intBoxed as value from " +

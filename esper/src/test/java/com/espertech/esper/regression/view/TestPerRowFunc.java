@@ -13,31 +13,31 @@ package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
-
-import java.util.Arrays;
-
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import junit.framework.TestCase;
+
+import java.util.Arrays;
 
 public class TestPerRowFunc extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    protected void tearDown() throws Exception {
+        testListener = null;
     }
 
     public void testCoalesceBeans()
@@ -52,7 +52,7 @@ public class TestPerRowFunc extends TestCase
     private void tryCoalesceBeans(String viewExpr)
     {
         epService.initialize();
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         SupportBean event = sendEvent("s0");
@@ -68,7 +68,7 @@ public class TestPerRowFunc extends TestCase
 
     public void testCoalesceLong()
     {
-        setupCoalesce("coalesce(longBoxed, intBoxed, shortBoxed)");
+        EPStatement selectTestView = setupCoalesce("coalesce(longBoxed, intBoxed, shortBoxed)");
         assertEquals(Long.class, selectTestView.getEventType().getPropertyType("result"));
 
         sendEvent(1L, 2, (short) 3);
@@ -97,7 +97,7 @@ public class TestPerRowFunc extends TestCase
         assertEquals(viewExpr, model.toEPL());
 
         epService.initialize();
-        selectTestView = epService.getEPAdministrator().create(model);
+        EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
         assertEquals(Long.class, selectTestView.getEventType().getPropertyType("result"));
 
@@ -113,7 +113,7 @@ public class TestPerRowFunc extends TestCase
         assertEquals(viewExpr, model.toEPL());
 
         epService.initialize();
-        selectTestView = epService.getEPAdministrator().create(model);
+        EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
         assertEquals(Long.class, selectTestView.getEventType().getPropertyType("result"));
 
@@ -137,7 +137,7 @@ public class TestPerRowFunc extends TestCase
 
     public void testCoalesceDouble()
     {
-        setupCoalesce("coalesce(null, byteBoxed, shortBoxed, intBoxed, longBoxed, floatBoxed, doubleBoxed)");
+        EPStatement selectTestView = setupCoalesce("coalesce(null, byteBoxed, shortBoxed, intBoxed, longBoxed, floatBoxed, doubleBoxed)");
         assertEquals(Double.class, selectTestView.getEventType().getPropertyType("result"));
 
         sendEventWithDouble(null, null, null, null, null, null);
@@ -162,20 +162,21 @@ public class TestPerRowFunc extends TestCase
         assertEquals(5d, testListener.assertOneGetNewAndReset().get("result"));
     }
 
-    private void setupCoalesce(String coalesceExpr)
+    private EPStatement setupCoalesce(String coalesceExpr)
     {
         epService.initialize();
         String viewExpr = "select " + coalesceExpr + " as result" +
                           " from " + SupportBean.class.getName() + ".win:length(1000) ";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
+        return selectTestView;
     }
 
     public void testCoalesceInvalid()
     {
         String viewExpr = "select coalesce(null, null) as result" +
                           " from " + SupportBean.class.getName() + ".win:length(3) ";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         assertEquals(null, selectTestView.getEventType().getPropertyType("result"));
 
         tryCoalesceInvalid("coalesce(intPrimitive)");
@@ -195,7 +196,8 @@ public class TestPerRowFunc extends TestCase
                           " from " + SupportBean.class.getName() + ".win:length(3) ";
 
         try {
-            selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+            epService.getEPAdministrator().createEPL(viewExpr);
+            fail();
         }
         catch (EPStatementException ex)
         {
@@ -205,7 +207,7 @@ public class TestPerRowFunc extends TestCase
 
     public void testMinMaxEventType()
     {
-        setUpMinMax();
+        EPStatement selectTestView = setUpMinMax();
         EventType type = selectTestView.getEventType();
         log.debug(".testGetEventType properties=" + Arrays.toString(type.getPropertyNames()));
         assertEquals(Long.class, type.getPropertyType("myMax"));
@@ -240,7 +242,7 @@ public class TestPerRowFunc extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(viewExpr, model.toEPL());
 
-        selectTestView = epService.getEPAdministrator().create(model);
+        EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
         testListener.reset();
 
@@ -259,7 +261,7 @@ public class TestPerRowFunc extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(viewExpr, model.toEPL());
 
-        selectTestView = epService.getEPAdministrator().create(model);
+        EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
         testListener.reset();
 
@@ -287,7 +289,7 @@ public class TestPerRowFunc extends TestCase
     {
         String viewExpr = "select longBoxed % intBoxed as myMod " +
                           " from " + SupportBean.class.getName() + ".win:length(3) where not(longBoxed > intBoxed)";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         sendEvent(1, 1, (short)0);
@@ -306,7 +308,7 @@ public class TestPerRowFunc extends TestCase
     {
         String viewExpr = "select p00 || p01 as c1, p00 || p01 || p02 as c2, p00 || '|' || p01 as c3" +
                           " from " + SupportBean_S0.class.getName() + ".win:length(10)";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "a", "b", "c"));
@@ -328,15 +330,16 @@ public class TestPerRowFunc extends TestCase
         assertConcat("123456", null, "123|456");
     }
 
-    private void setUpMinMax()
+    private EPStatement setUpMinMax()
     {
         String viewExpr = "select max(longBoxed, intBoxed) as myMax, " +
                                  "max(longBoxed, intBoxed, shortBoxed) as myMaxEx," +
                                  "min(longBoxed, intBoxed) as myMin," +
                                  "min(longBoxed, intBoxed, shortBoxed) as myMinEx" +
                           " from " + SupportBean.class.getName() + ".win:length(3) ";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
+        return selectTestView;
     }
 
     private SupportBean sendEvent(String string)

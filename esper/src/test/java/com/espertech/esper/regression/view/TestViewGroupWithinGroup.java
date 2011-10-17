@@ -33,25 +33,28 @@ public class TestViewGroupWithinGroup extends TestCase
     private String FEED_REU = "REU";
 
     private EPServiceProvider epService;
-    private EPStatement viewGrouped;
     private SupportUpdateListener listener = new SupportUpdateListener();
 
     public void setUp()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
+    public void testPullDateAndPushData()
+    {
         // Listen to all ticks
-        viewGrouped = epService.getEPAdministrator().createEPL(
+        EPStatement viewGrouped = epService.getEPAdministrator().createEPL(
                 "select irstream datapoints as size, symbol, feed, volume from " + SupportMarketDataBean.class.getName() +
                 ".std:groupwin(symbol).std:groupwin(feed).std:groupwin(volume).stat:uni(price)");
 
         // Counts per symbol, feed and volume the events
         viewGrouped.addListener(listener);
-    }
 
-    public void testPullDateAndPushData()
-    {
         ArrayList<Map<String, Object>> mapList = new ArrayList<Map<String, Object>>();
 
         // Set up a map of expected values

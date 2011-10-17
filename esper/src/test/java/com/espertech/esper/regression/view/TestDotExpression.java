@@ -31,6 +31,10 @@ public class TestDotExpression extends TestCase
         listener = new SupportUpdateListener();
 	}
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testInvalid() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportChainTop", SupportChainTop.class);

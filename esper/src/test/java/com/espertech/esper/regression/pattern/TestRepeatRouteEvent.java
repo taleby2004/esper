@@ -11,36 +11,27 @@
 
 package com.espertech.esper.regression.pattern;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-
-import java.io.StringReader;
-import java.util.HashMap;
-
-import org.xml.sax.InputSource;
+import junit.framework.TestCase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.StringReader;
+import java.util.HashMap;
 
 public class TestRepeatRouteEvent extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement patternStmt;
 
     public void setUp()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
-
-        String viewExpr = "every tag=" + SupportBean.class.getName();
-
-        patternStmt = epService.getEPAdministrator().createPattern(viewExpr);
     }
 
     /**
@@ -50,6 +41,9 @@ public class TestRepeatRouteEvent extends TestCase
      */
     public void testRouteSingle() throws Exception
     {
+        String viewExpr = "every tag=" + SupportBean.class.getName();
+        EPStatement patternStmt = epService.getEPAdministrator().createPattern(viewExpr);
+
         SingleRouteUpdateListener listener = new SingleRouteUpdateListener();
         patternStmt.addListener(listener);
 
@@ -78,6 +72,9 @@ public class TestRepeatRouteEvent extends TestCase
      */
     public void testRouteCascade()
     {
+        String viewExpr = "every tag=" + SupportBean.class.getName();
+        EPStatement patternStmt = epService.getEPAdministrator().createPattern(viewExpr);
+
         CascadeRouteUpdateListener listener = new CascadeRouteUpdateListener();
         patternStmt.addListener(listener);
 
@@ -96,10 +93,13 @@ public class TestRepeatRouteEvent extends TestCase
 
     public void testRouteTimer()
     {
+        String viewExpr = "every tag=" + SupportBean.class.getName();
+        EPStatement patternStmt = epService.getEPAdministrator().createPattern(viewExpr);
+
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
         // define time-based pattern and listener
-        String viewExpr = "timer:at(*,*,*,*,*,*)";
+        viewExpr = "timer:at(*,*,*,*,*,*)";
         EPStatement atPatternStmt = epService.getEPAdministrator().createPattern(viewExpr);
         SingleRouteUpdateListener timeListener = new SingleRouteUpdateListener();
         atPatternStmt.addListener(timeListener);

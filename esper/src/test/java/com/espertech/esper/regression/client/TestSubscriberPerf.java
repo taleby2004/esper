@@ -24,7 +24,6 @@ import java.util.ArrayList;
 public class TestSubscriberPerf extends TestCase
 {
     private EPServiceProvider epService;
-    private final String fields[] = "string,intPrimitive".split(",");
 
     public void setUp()
     {

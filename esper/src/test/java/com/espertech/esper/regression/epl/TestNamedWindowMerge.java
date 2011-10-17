@@ -51,6 +51,11 @@ public class TestNamedWindowMerge extends TestCase {
         mergeListener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        nwListener = null;
+        mergeListener = null;
+    }
+
     public void testInsertOtherStream() throws Exception {
         String epl = "create schema MyEvent as (name string, value double);\n" +
                      "create window MyWin.std:unique(name) as MyEvent;\n" +

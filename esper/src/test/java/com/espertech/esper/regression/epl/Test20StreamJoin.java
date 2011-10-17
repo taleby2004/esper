@@ -35,6 +35,10 @@ public class Test20StreamJoin extends TestCase
         listener = new SupportUpdateListener();
     }
     
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void test20StreamJoin()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("S0", SupportBean_S0.class.getName());

@@ -36,6 +36,10 @@ public class TestRowLimit extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testBatchNoOffsetNoOrder()
 	{
         String statementString = "select irstream * from SupportBean.win:length_batch(3) limit 1";

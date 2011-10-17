@@ -26,7 +26,6 @@ import junit.framework.TestCase;
 public class TestOutputLimitAfter extends TestCase
  {
      private EPServiceProvider epService;
-     private long currentTime;
      private SupportUpdateListener listener;
      private String[] fields;
 
@@ -38,6 +37,11 @@ public class TestOutputLimitAfter extends TestCase
          epService = EPServiceProviderManager.getDefaultProvider(config);
          epService.initialize();
          listener = new SupportUpdateListener();
+     }
+
+     protected void tearDown() throws Exception {
+         listener = null;
+         fields = null;
      }
 
      public void testEveryPolicy()

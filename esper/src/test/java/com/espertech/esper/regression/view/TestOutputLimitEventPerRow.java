@@ -36,7 +36,6 @@ public class TestOutputLimitEventPerRow extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private EPStatement selectTestView;
     private final static String CATEGORY = "Aggregated and Grouped";
 
     public void setUp()
@@ -47,6 +46,10 @@ public class TestOutputLimitEventPerRow extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testOutputFirstHavingJoinNoJoin() {
@@ -701,7 +704,7 @@ public class TestOutputLimitEventPerRow extends TestCase
                                   "volume, max(price) as maxVol" +
                           " from " + SupportMarketDataBean.class.getName() + ".win:time(1 sec) " +
                           "group by symbol output every 1 seconds";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         sendEvent("SYM1", 1d);
@@ -728,7 +731,7 @@ public class TestOutputLimitEventPerRow extends TestCase
 	                      "group by symbol " +
 	                      "output last every 2 events";
 
-	    selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+	    EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
 	    selectTestView.addListener(listener);
 
 	    runAssertionLast();
@@ -748,7 +751,7 @@ public class TestOutputLimitEventPerRow extends TestCase
 	    assertFalse(listener.isInvoked());
 	}
 
-	private void runAssertionSingle()
+	private void runAssertionSingle(EPStatement selectTestView)
 	{
 	    // assert select result type
 	    assertEquals(String.class, selectTestView.getEventType().getPropertyType("symbol"));
@@ -770,10 +773,10 @@ public class TestOutputLimitEventPerRow extends TestCase
 	                      "where symbol='DELL' or symbol='IBM' or symbol='GE' " +
 	                      "group by symbol ";
 
-	    selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+	    EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
 	    selectTestView.addListener(listener);
 
-	    runAssertionSingle();
+	    runAssertionSingle(selectTestView);
 	}
 
 	public void testNoJoinDefault()
@@ -785,10 +788,10 @@ public class TestOutputLimitEventPerRow extends TestCase
                           "group by symbol " +
                           "output every 2 events";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
-        runAssertionDefault();
+        runAssertionDefault(selectTestView);
     }
 
     public void testJoinDefault()
@@ -802,13 +805,13 @@ public class TestOutputLimitEventPerRow extends TestCase
 	                      "group by symbol " +
 	                      "output every 2 events";
 
-	    selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+	    EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
 	    selectTestView.addListener(listener);
 
 	    epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
 	    epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_IBM));
 
-	    runAssertionDefault();
+	    runAssertionDefault(selectTestView);
 	}
 
     public void testNoJoinAll()
@@ -820,10 +823,10 @@ public class TestOutputLimitEventPerRow extends TestCase
                           "group by symbol " +
                           "output all every 2 events";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
-        runAssertionAll();
+        runAssertionAll(selectTestView);
     }
 
     public void testJoinAll()
@@ -837,13 +840,13 @@ public class TestOutputLimitEventPerRow extends TestCase
                           "group by symbol " +
                           "output all every 2 events";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_IBM));
 
-        runAssertionAll();
+        runAssertionAll(selectTestView);
     }
 
 	public void testJoinLast()
@@ -857,7 +860,7 @@ public class TestOutputLimitEventPerRow extends TestCase
 	                      "group by symbol " +
 	                      "output last every 2 events";
 
-	    selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+	    EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
 	    selectTestView.addListener(listener);
 
 	    epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
@@ -877,7 +880,7 @@ public class TestOutputLimitEventPerRow extends TestCase
                           "group by symbol " +
                           "output last every 2 events";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
@@ -915,7 +918,7 @@ public class TestOutputLimitEventPerRow extends TestCase
         listener.reset();
     }
 
-    private void runAssertionDefault()
+    private void runAssertionDefault(EPStatement selectTestView)
     {
     	// assert select result type
     	assertEquals(String.class, selectTestView.getEventType().getPropertyType("symbol"));
@@ -952,7 +955,7 @@ public class TestOutputLimitEventPerRow extends TestCase
         assertNull(listener.getLastOldData());
     }
 
-    private void runAssertionAll()
+    private void runAssertionAll(EPStatement selectTestView)
     {
     	// assert select result type
     	assertEquals(String.class, selectTestView.getEventType().getPropertyType("symbol"));

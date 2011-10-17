@@ -21,14 +21,12 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 
 public class TestEventPropertyGetter extends TestCase
 {
-    private SupportUpdateListener listener;
     private EPServiceProvider epService;
 
     public void setUp()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
-        listener = new SupportUpdateListener();
     }
 
     public void testGetter() throws Exception

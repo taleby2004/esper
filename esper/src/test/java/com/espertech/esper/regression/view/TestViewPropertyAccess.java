@@ -31,6 +31,10 @@ public class TestViewPropertyAccess extends TestCase
         epService.initialize();
     }
     
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testWhereAndSelect()
     {
         String viewExpr = "select mapped('keyOne') as a," +

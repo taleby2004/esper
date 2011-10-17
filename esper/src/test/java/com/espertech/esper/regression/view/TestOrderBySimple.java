@@ -34,7 +34,6 @@ public class TestOrderBySimple extends TestCase {
 
 	private static final Log log = LogFactory.getLog(TestOrderBySimple.class);
 	private EPServiceProvider epService;
-    private EPStatement statement;
     private List<Double> prices;
     private List<String> symbols;
     private SupportUpdateListener testListener;
@@ -48,6 +47,13 @@ public class TestOrderBySimple extends TestCase {
         symbols = new LinkedList<String>();
         prices = new LinkedList<Double>();
         volumes = new LinkedList<Long>();
+    }
+
+    protected void tearDown() throws Exception {
+        testListener = null;
+        prices = null;
+        symbols = null;
+        volumes = null;
     }
 
     public void testOrderByMultiDelivery() {
@@ -164,7 +170,7 @@ public class TestOrderBySimple extends TestCase {
     	            SupportBeanString.class.getName() + ".win:length(100) as two " +
                     "where one.symbol = two.string " +
                     "order by price";
-        statement = epService.getEPAdministrator().createEPL(statementString);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         sendJoinEvents();
         sendEvent("CAT", 50);
         sendEvent("IBM", 49);
@@ -1018,7 +1024,7 @@ public class TestOrderBySimple extends TestCase {
 
 	private void createAndSend(String statementString) {
 		testListener = new SupportUpdateListener();
-		statement = epService.getEPAdministrator().createEPL(statementString);
+		EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
     	statement.addListener(testListener);
     	sendEvent("IBM", 2);
     	sendEvent("KGB", 1);

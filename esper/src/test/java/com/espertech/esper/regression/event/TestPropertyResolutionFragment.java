@@ -33,6 +33,10 @@ public class TestPropertyResolutionFragment extends TestCase
         listener = new SupportUpdateListener();        
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testMapSimpleTypes()
     {
         Map<String, Object> mapOuter = new HashMap<String, Object>();

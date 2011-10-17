@@ -38,6 +38,10 @@ public class TestEnumSelectFrom extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testNew() {
 
         String eplFragment = "select " +

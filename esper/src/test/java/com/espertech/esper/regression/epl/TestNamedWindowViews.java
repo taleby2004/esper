@@ -52,6 +52,14 @@ public class TestNamedWindowViews extends TestCase
         listenerStmtDelete = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerWindow = null;
+        listenerStmtOne = null;
+        listenerStmtTwo = null;
+        listenerStmtThree = null;
+        listenerStmtDelete = null;
+    }
+
     public void testBeanBacked()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

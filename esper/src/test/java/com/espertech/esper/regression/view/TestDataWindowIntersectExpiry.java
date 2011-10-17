@@ -27,6 +27,10 @@ public class TestDataWindowIntersectExpiry extends TestCase
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testUniqueAndFirstLength()
     {
         init(false);

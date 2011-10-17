@@ -14,6 +14,7 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.deploy.*;
+import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -32,7 +33,7 @@ public class TestDeployOrder extends TestCase
     private EPDeploymentAdmin deploymentAdmin;
 
     public void setUp() {
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         deploymentAdmin = epService.getEPAdministrator().getDeploymentAdmin();
     }

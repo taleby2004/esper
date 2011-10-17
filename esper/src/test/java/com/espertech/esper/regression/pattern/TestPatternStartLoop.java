@@ -11,22 +11,16 @@
 
 package com.espertech.esper.regression.pattern;
 
-import junit.framework.TestCase;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.UpdateListener;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class TestPatternStartLoop extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement patternStmt;
 
     public void setUp()
     {
@@ -41,7 +35,7 @@ public class TestPatternStartLoop extends TestCase
     public void testStartFireLoop()
     {
         String patternExpr = "not " + SupportBean.class.getName();
-        patternStmt = epService.getEPAdministrator().createPattern(patternExpr);
+        EPStatement patternStmt = epService.getEPAdministrator().createPattern(patternExpr);
         patternStmt.addListener(new PatternUpdateListener());
         patternStmt.stop();
         patternStmt.start();
@@ -59,7 +53,7 @@ public class TestPatternStartLoop extends TestCase
             {
                 count++;
                 String patternExpr = "not " + SupportBean.class.getName();
-                patternStmt = epService.getEPAdministrator().createPattern(patternExpr);
+                EPStatement patternStmt = epService.getEPAdministrator().createPattern(patternExpr);
                 patternStmt.addListener(this);
                 patternStmt.stop();
                 patternStmt.start();

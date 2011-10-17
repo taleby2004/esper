@@ -41,6 +41,12 @@ public class TestNamedWindowOM extends TestCase
         listenerOnSelect = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerWindow = null;
+        listenerStmtOne = null;
+        listenerOnSelect = null;
+    }
+
     public void testCompile()
     {
         String[] fields = new String[] {"key", "value"};

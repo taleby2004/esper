@@ -47,6 +47,8 @@ public class TestPerf2StreamSimpleJoin extends TestCase
 
     public void tearDown()
     {
+        joinView = null;
+        updateListener = null;
         epService.destroy();
     }
 

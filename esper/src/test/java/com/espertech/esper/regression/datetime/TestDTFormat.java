@@ -37,6 +37,10 @@ public class TestDTFormat extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testFormat() {
 
         String startTime = "2002-05-30T9:00:00.000";

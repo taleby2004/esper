@@ -40,6 +40,10 @@ public class TestDTBetween extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testIncludeEndpoints() {
 
         String startTime = "2002-05-30T9:00:00.000";

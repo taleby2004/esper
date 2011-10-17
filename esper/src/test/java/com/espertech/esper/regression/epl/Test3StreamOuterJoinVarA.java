@@ -11,25 +11,26 @@
 
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.support.bean.*;
+import com.espertech.esper.support.bean.SupportBean_S0;
+import com.espertech.esper.support.bean.SupportBean_S1;
+import com.espertech.esper.support.bean.SupportBean_S2;
+import com.espertech.esper.support.bean.SupportBean_S3;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.ArrayHandlingUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.type.OuterJoinType;
 import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Test3StreamOuterJoinVarA extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     private final static String EVENT_S0 = SupportBean_S0.class.getName();
@@ -45,6 +46,10 @@ public class Test3StreamOuterJoinVarA extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testMapLeftJoinUnsortedProps()
@@ -103,7 +108,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             " left outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 and s0.p01 = s1.p11" +
             " left outer join " + EVENT_S2 + ".win:length(1000) as s2 on s0.p00 = s2.p20 and s0.p01 = s2.p21";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(10, "A_1", "B_1"));
@@ -148,7 +153,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         assertEquals("select * from com.espertech.esper.support.bean.SupportBean_S0.win:keepall() as s0 left outer join com.espertech.esper.support.bean.SupportBean_S1.win:keepall() as s1 on s0.p00 = s1.p10 left outer join com.espertech.esper.support.bean.SupportBean_S2.win:keepall() as s2 on s0.p00 = s2.p20", model.toEPL());
-        joinView = epService.getEPAdministrator().create(model);
+        EPStatement joinView = epService.getEPAdministrator().create(model);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -163,7 +168,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(joinStatement);
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
-        joinView = epService.getEPAdministrator().create(model);
+        EPStatement joinView = epService.getEPAdministrator().create(model);
         joinView.addListener(updateListener);
 
         assertEquals(joinStatement, model.toEPL());
@@ -183,7 +188,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             " left outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 " +
             " left outer join " + EVENT_S2 + ".win:length(1000) as s2 on s0.p00 = s2.p20 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -201,7 +206,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             " right outer join " + EVENT_S0 + ".win:length(1000) as s0 on s0.p00 = s2.p20 " +
             " left outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -219,7 +224,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             " right outer join " + EVENT_S0 + ".win:length(1000) as s0 on s0.p00 = s1.p10 " +
             " left outer join " + EVENT_S2 + ".win:length(1000) as s2 on s0.p00 = s2.p20 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();

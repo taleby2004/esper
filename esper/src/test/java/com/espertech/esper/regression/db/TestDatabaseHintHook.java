@@ -48,6 +48,7 @@ public class TestDatabaseHintHook extends TestCase
     }
 
     protected void tearDown() throws Exception {
+        listener = null;
         epService.destroy();
         SupportSQLColumnTypeConversion.reset();
     }

@@ -42,6 +42,10 @@ public class TestJoinMapType extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testJoinMapEvent()
     {
         String joinStatement = "select S0.id, S1.id, S0.p00, S1.p00 from MapS0.win:keepall() as S0, MapS1.win:keepall() as S1" +

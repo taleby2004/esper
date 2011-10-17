@@ -23,7 +23,6 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 public class TestPerfTimeWindowMinFilter extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
 
     public void setUp()
     {

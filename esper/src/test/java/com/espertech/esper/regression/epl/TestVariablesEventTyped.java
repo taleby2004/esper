@@ -28,6 +28,11 @@ public class TestVariablesEventTyped extends TestCase
     private SupportUpdateListener listener;
     private SupportUpdateListener listenerSet;
 
+    protected void tearDown() throws Exception {
+        listener = null;
+        listenerSet = null;
+    }
+
     public void testInvalid() {
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventType("TypeS0", SupportBean_S0.class);

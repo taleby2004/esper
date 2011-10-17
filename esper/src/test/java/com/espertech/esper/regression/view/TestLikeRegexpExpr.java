@@ -35,6 +35,10 @@ public class TestLikeRegexpExpr extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testRegexpFilterWithDanglingMetaCharacter() throws Exception {
 
         Configuration configuration = SupportConfigFactory.getConfiguration();

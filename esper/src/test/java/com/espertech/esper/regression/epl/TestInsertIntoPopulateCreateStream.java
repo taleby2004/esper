@@ -32,6 +32,10 @@ public class TestInsertIntoPopulateCreateStream extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testCreateStream()
     {
         epService.getEPAdministrator().createEPL("create schema MyEvent(myId int)");

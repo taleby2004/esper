@@ -25,6 +25,10 @@ public class TestFromClauseMethodCache extends TestCase
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testLRUCache()
     {
         Configuration config = SupportConfigFactory.getConfiguration();

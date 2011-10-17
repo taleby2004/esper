@@ -36,6 +36,10 @@ public class TestEPStatementObjectModel extends TestCase
         epService.initialize();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     // This is a simple EPL only.
     // Each OM/SODA Api is tested in it's respective unit test (i.e. TestInsertInto), including toEPL()
     // 

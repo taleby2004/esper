@@ -12,21 +12,20 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanString;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
-
+import junit.framework.Assert;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import junit.framework.TestCase;
-import junit.framework.Assert;
 
 public class TestHavingNoGroupBy extends TestCase
 {
@@ -34,13 +33,16 @@ public class TestHavingNoGroupBy extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
         listener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testHavingWildcardSelect() {
@@ -78,10 +80,10 @@ public class TestHavingNoGroupBy extends TestCase
                           "having price < avg(price)";
         assertEquals(viewExpr, model.toEPL());
 
-        selectTestView = epService.getEPAdministrator().create(model);
+        EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(listener);
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testSumOneView()
@@ -90,10 +92,10 @@ public class TestHavingNoGroupBy extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "having price < avg(price)";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testSumJoin()
@@ -104,12 +106,12 @@ public class TestHavingNoGroupBy extends TestCase
                           "where one.string = two.symbol " +
                           "having price < avg(price)";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testSumHavingNoAggregatedProp()
@@ -118,7 +120,7 @@ public class TestHavingNoGroupBy extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
                           "having volume < avg(price)";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
     }
 
@@ -156,7 +158,7 @@ public class TestHavingNoGroupBy extends TestCase
                                     SupportMarketDataBean.class.getName() + "(symbol='SYM2').win:length(1) as b " +
                           filterClause + " Math.max(a.price, b.price) - Math.min(a.price, b.price) >= 1.4";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         sendPriceEvent("SYM1", 20);
@@ -243,7 +245,7 @@ public class TestHavingNoGroupBy extends TestCase
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean(symbol, price, -1L, null));
     }
 
-    private void runAssertion()
+    private void runAssertion(EPStatement selectTestView)
     {
         // assert select result type
         assertEquals(String.class, selectTestView.getEventType().getPropertyType("symbol"));
@@ -277,7 +279,7 @@ public class TestHavingNoGroupBy extends TestCase
     {
         String stmt = "select irstream sum(myEvent.intPrimitive) as mysum from pattern [every myEvent=" + SupportBean.class.getName() +
                 "] having sum(myEvent.intPrimitive) = 2";
-        selectTestView = epService.getEPAdministrator().createEPL(stmt);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(stmt);
         selectTestView.addListener(listener);
 
         sendEvent(1);
@@ -294,7 +296,7 @@ public class TestHavingNoGroupBy extends TestCase
     {
         String stmt = "select istream sum(myEvent.intPrimitive) as mysum from pattern [every myEvent=" + SupportBean.class.getName() +
                 "] having sum(myEvent.intPrimitive) = 2";
-        selectTestView = epService.getEPAdministrator().createEPL(stmt);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(stmt);
         selectTestView.addListener(listener);
 
         sendEvent(1);

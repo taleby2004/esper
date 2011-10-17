@@ -41,6 +41,10 @@ public class TestMinMaxCases extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("S0", SupportBean_S0.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testMinMaxNamedWindow() {
         String[] fields = "lower,upper".split(",");
         epService.getEPAdministrator().createEPL("create window NamedWindow5m.win:length(2) as select * from SupportBean");

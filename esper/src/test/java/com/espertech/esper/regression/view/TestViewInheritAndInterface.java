@@ -31,6 +31,10 @@ public class TestViewInheritAndInterface extends TestCase
         epService.initialize();
     }
     
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testOverridingSubclass()
     {
         String viewExpr = "select val as value from " +

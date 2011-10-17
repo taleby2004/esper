@@ -42,6 +42,10 @@ public class TestEnumNestedPerformance extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testPerfNestedUncorrelated() {
 
         List<SupportBean_ST0> list = new ArrayList<SupportBean_ST0>();

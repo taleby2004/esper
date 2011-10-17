@@ -37,6 +37,10 @@ public class TestDataWindowMultipleExpiry extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testTimeViewUnique()
     {
         // Testing the two forms of the case expression

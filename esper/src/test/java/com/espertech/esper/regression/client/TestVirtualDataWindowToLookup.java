@@ -49,6 +49,12 @@ public class TestVirtualDataWindowToLookup extends TestCase {
         spi = (EPServiceProviderSPI) epService;
     }
 
+    public void tearDown()
+    {
+        spi = null;
+        listener = null;
+    }
+
     public void testLateConsumerNoIterate() throws Exception {
 
         // client-side

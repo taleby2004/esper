@@ -38,8 +38,12 @@ public class TestEPAdministrator extends TestCase
         testListener = new SupportUpdateListener();
         Configuration config = SupportConfigFactory.getConfiguration();
         config.getEngineDefaults().getLogging().setEnableTimerDebug(true);
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+    }
+
+    public void tearDown() {
+        testListener = null;
     }
 
     public void test1kValidStmtsPerformance()

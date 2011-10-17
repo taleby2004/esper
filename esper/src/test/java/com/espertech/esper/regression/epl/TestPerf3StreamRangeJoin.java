@@ -28,7 +28,6 @@ public class TestPerf3StreamRangeJoin extends TestCase
 {
     private static final Log log = LogFactory.getLog(TestPerf3StreamRangeJoin.class);
     private EPServiceProvider epService;
-    private EPStatement stmt;
     private SupportUpdateListener listener;
 
     public void setUp()
@@ -42,6 +41,10 @@ public class TestPerf3StreamRangeJoin extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_ST0", SupportBean_ST0.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_ST1", SupportBean_ST1.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanRange", SupportBeanRange.class);
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     /**
@@ -98,7 +101,7 @@ public class TestPerf3StreamRangeJoin extends TestCase
         //        "where st0.key0 = a.key and st1.key1 = a.key";
         String epl = "select * from SupportBeanRange.std:lastevent() a, ST0 st0, ST1 st1 " +
                 "where st0.p00 between rangeStart and rangeEnd and st1.p10 between rangeStart and rangeEnd";
-        stmt = epService.getEPAdministrator().createEPL(epl);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
         // Repeat
@@ -138,7 +141,7 @@ public class TestPerf3StreamRangeJoin extends TestCase
         String epl = "select * from SupportBean_ST0 st0 unidirectional, SBR a, ST1 st1 " +
                 "where st0.key0 = a.key and st1.key1 = a.key and " +
                 "st1.p10 between rangeStart and rangeEnd";
-        stmt = epService.getEPAdministrator().createEPL(epl);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
         // Repeat
@@ -159,7 +162,7 @@ public class TestPerf3StreamRangeJoin extends TestCase
     }
 
     private void runAssertion(String epl) {
-        stmt = epService.getEPAdministrator().createEPL(epl);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
         // Repeat

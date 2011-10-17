@@ -103,6 +103,12 @@ public class TestRevisionDeclared extends TestCase
            }, type.getPropertyDescriptors());
     }
 
+    protected void tearDown() throws Exception {
+        listenerOne = null;
+        listenerTwo = null;
+        listenerThree = null;
+    }
+
     public void testRevision()
     {
         EPStatement consumerOne = epService.getEPAdministrator().createEPL("select * from RevQuote");

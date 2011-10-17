@@ -35,6 +35,10 @@ public class TestPreviousFunction extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testExprNameAndTypeAndSODA() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         String epl = "select " +

@@ -43,6 +43,10 @@ public class TestEnumExceptIntersectUnion extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testSetLogicWithContained() {
         String epl = "select " +
                 "contained.except(containedTwo) as val0," +

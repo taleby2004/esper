@@ -36,6 +36,10 @@ public class TestEventPropertyDynamicMap extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testMapWithinMap()
     {
         Properties properties = new Properties();

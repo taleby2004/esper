@@ -40,6 +40,10 @@ public class TestSubselectExists extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testExistsInSelect()
     {
         String stmtText = "select exists (select * from S1.win:length(1000)) as value from S0";

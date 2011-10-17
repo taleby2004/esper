@@ -48,6 +48,10 @@ public class TestCronParameter extends TestCase implements SupportBeanConstants
         calendar = Calendar.getInstance();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testOperator() throws Exception
     {
         // Observer for last Sunday of month, 0 = Sunday

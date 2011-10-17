@@ -34,6 +34,10 @@ public class TestExistsExpr extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testExistsSimple()
     {
         String stmtText = "select exists(string) as t0, " +

@@ -54,6 +54,7 @@ public class TestDatabaseJoin extends TestCase
     }
 
     protected void tearDown() throws Exception {
+        listener = null;
         epService.destroy();
     }
 

@@ -33,6 +33,10 @@ public class TestViewTimeBatch extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testStartEagerForceUpdate()
     {
         sendTimer(1000);

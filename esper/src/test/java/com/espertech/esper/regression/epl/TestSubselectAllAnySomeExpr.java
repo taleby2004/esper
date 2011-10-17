@@ -35,6 +35,10 @@ public class TestSubselectAllAnySomeExpr extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("ArrayBean", SupportBeanArrayCollMap.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testRelationalOpAll()
     {
         String[] fields = "g,ge,l,le".split(",");

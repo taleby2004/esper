@@ -12,18 +12,17 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.bean.SupportBeanString;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
-
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanString;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import junit.framework.TestCase;
 
 public class TestGroupByEventPerGroupHaving extends TestCase
 {
@@ -32,7 +31,6 @@ public class TestGroupByEventPerGroupHaving extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
@@ -41,11 +39,15 @@ public class TestGroupByEventPerGroupHaving extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testHavingCount()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         String text = "select * from SupportBean(intPrimitive = 3).win:length(10) as e1 group by string having count(*) > 2";
-        selectTestView = epService.getEPAdministrator().createEPL(text);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(text);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 3));
@@ -65,7 +67,7 @@ public class TestGroupByEventPerGroupHaving extends TestCase
                           "group by symbol " +
                           "having sum(price) >= 100";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
@@ -83,7 +85,7 @@ public class TestGroupByEventPerGroupHaving extends TestCase
                           "group by symbol " +
                           "having sum(price) >= 100";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         runAssertion();

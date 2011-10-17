@@ -30,7 +30,6 @@ public class TestViewTimeBatchMean extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement timeBatchMean;
 
     public void setUp()
     {
@@ -41,24 +40,28 @@ public class TestViewTimeBatchMean extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+    }
 
-        // Set up a 2 second time window
-        timeBatchMean = epService.getEPAdministrator().createEPL(
-                "select * from " + SupportMarketDataBean.class.getName() +
-                "(symbol='" + SYMBOL + "').win:time_batch(2).stat:uni(volume)");
-        timeBatchMean.addListener(testListener);
+    protected void tearDown() throws Exception {
+        testListener = null;
     }
 
     public void testTimeBatchMean()
     {
+        // Set up a 2 second time window
+        EPStatement timeBatchMean = epService.getEPAdministrator().createEPL(
+                "select * from " + SupportMarketDataBean.class.getName() +
+                "(symbol='" + SYMBOL + "').win:time_batch(2).stat:uni(volume)");
+        timeBatchMean.addListener(testListener);
+
         testListener.reset();
-        checkMeanIterator(Double.NaN);
+        checkMeanIterator(timeBatchMean, Double.NaN);
         assertFalse(testListener.isInvoked());
 
         // Send a couple of events, check mean
         sendEvent(SYMBOL, 500);
         sendEvent(SYMBOL, 1000);
-        checkMeanIterator(Double.NaN);              // The iterator is still showing no result yet as no batch was released
+        checkMeanIterator(timeBatchMean, Double.NaN);              // The iterator is still showing no result yet as no batch was released
         assertFalse(testListener.isInvoked());      // No new data posted to the iterator, yet
 
         // Sleep for 1 seconds
@@ -67,12 +70,12 @@ public class TestViewTimeBatchMean extends TestCase
         // Send more events
         sendEvent(SYMBOL, 1000);
         sendEvent(SYMBOL, 1200);
-        checkMeanIterator(Double.NaN);              // The iterator is still showing no result yet as no batch was released
+        checkMeanIterator(timeBatchMean, Double.NaN);              // The iterator is still showing no result yet as no batch was released
         assertFalse(testListener.isInvoked());
 
         // Sleep for 1.5 seconds, thus triggering a new batch
         sleep(1500);
-        checkMeanIterator(925);                 // Now the statistics view received the first batch
+        checkMeanIterator(timeBatchMean, 925);                 // Now the statistics view received the first batch
         assertTrue(testListener.isInvoked());   // Listener has been invoked
         checkMeanListener(925);
 
@@ -80,7 +83,7 @@ public class TestViewTimeBatchMean extends TestCase
         sendEvent(SYMBOL, 500);
         sendEvent(SYMBOL, 600);
         sendEvent(SYMBOL, 1000);
-        checkMeanIterator(925);              // The iterator is still showing the old result as next batch not released
+        checkMeanIterator(timeBatchMean, 925);              // The iterator is still showing the old result as next batch not released
         assertFalse(testListener.isInvoked());
 
         // Sleep for 1 seconds
@@ -88,23 +91,23 @@ public class TestViewTimeBatchMean extends TestCase
 
         // Send more events
         sendEvent(SYMBOL, 200);
-        checkMeanIterator(925);
+        checkMeanIterator(timeBatchMean, 925);
         assertFalse(testListener.isInvoked());
 
         // Sleep for 1.5 seconds, thus triggering a new batch
         sleep(1500);
-        checkMeanIterator(2300d / 4d); // Now the statistics view received the second batch, the mean now is over all events
+        checkMeanIterator(timeBatchMean, 2300d / 4d); // Now the statistics view received the second batch, the mean now is over all events
         assertTrue(testListener.isInvoked());   // Listener has been invoked
         checkMeanListener(2300d / 4d);
 
         // Send more events
         sendEvent(SYMBOL, 1200);
-        checkMeanIterator(2300d / 4d);
+        checkMeanIterator(timeBatchMean, 2300d / 4d);
         assertFalse(testListener.isInvoked());
 
         // Sleep for 2 seconds, no events received anymore
         sleep(2000);
-        checkMeanIterator(1200); // statistics view received the third batch
+        checkMeanIterator(timeBatchMean, 1200); // statistics view received the third batch
         assertTrue(testListener.isInvoked());   // Listener has been invoked
         checkMeanListener(1200);
 
@@ -126,7 +129,7 @@ public class TestViewTimeBatchMean extends TestCase
         testListener.reset();
     }
 
-    private void checkMeanIterator(double meanExpected)
+    private void checkMeanIterator(EPStatement timeBatchMean, double meanExpected)
     {
         Iterator<EventBean> iterator = timeBatchMean.iterator();
         checkValue(iterator.next(), meanExpected);

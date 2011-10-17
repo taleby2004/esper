@@ -43,6 +43,10 @@ public class TestContextPartitioned extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testInvalid() {
         String epl;
 

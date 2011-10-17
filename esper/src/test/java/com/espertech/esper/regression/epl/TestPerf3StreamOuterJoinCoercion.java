@@ -33,6 +33,10 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testPerfCoercion3waySceneOne()
     {
         String stmtText = "select s1.intBoxed as v1, s2.longBoxed as v2, s3.doubleBoxed as v3 from " +

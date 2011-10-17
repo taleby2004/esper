@@ -24,7 +24,6 @@ import junit.framework.TestCase;
 public class TestPerf3StreamAndPropertyJoin extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     public void setUp()
@@ -32,6 +31,10 @@ public class TestPerf3StreamAndPropertyJoin extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testPerfAllProps()
@@ -67,7 +70,7 @@ public class TestPerf3StreamAndPropertyJoin extends TestCase
                 SupportBean_C.class.getName() + "().win:length(1000000) s3" +
             " where s1.id=s2.id";   // ==> stream s3 no properties supplied, full s3 scan
         
-        joinView = epService.getEPAdministrator().createEPL(stmt);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(stmt);
         joinView.addListener(updateListener);
 
         // preload s3 with just 1 event
@@ -94,7 +97,7 @@ public class TestPerf3StreamAndPropertyJoin extends TestCase
     {
         String methodName = ".tryJoinPerf3Streams";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         // Send events for each stream

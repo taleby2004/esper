@@ -40,6 +40,10 @@ public class TestBigNumberSupport extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testEquals()
     {
         // test equals BigDecimal

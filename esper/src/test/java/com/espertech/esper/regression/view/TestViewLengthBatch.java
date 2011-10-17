@@ -43,6 +43,10 @@ public class TestViewLengthBatch extends TestCase
         }
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testLengthBatchSize2()
     {
         EPStatement stmt = epService.getEPAdministrator().createEPL(

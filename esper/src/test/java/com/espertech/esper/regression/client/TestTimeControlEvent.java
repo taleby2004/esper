@@ -43,6 +43,10 @@ public class TestTimeControlEvent extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testSendTimeSpan() throws Exception {
         SimpleDateFormat format = new SimpleDateFormat("yyyy MM dd HH:mm:ss SSS");
         Date d = format.parse("2010 01 01 00:00:00 000");

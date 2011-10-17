@@ -47,6 +47,10 @@ public class TestNamedWindowInsertFrom extends TestCase
         }
     }
 
+    protected void tearDown() throws Exception {
+        listeners = null;
+    }
+
     public void testCreateNamedAfterNamed()
     {
         // create window

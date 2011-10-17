@@ -35,6 +35,10 @@ public class TestEnumSequenceEqual extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testSelectFrom() {
         String[] fields = "val0".split(",");
         String eplFragment = "select contained.selectFrom(x => key0).sequenceEqual(contained.selectFrom(y => id)) as val0 " +

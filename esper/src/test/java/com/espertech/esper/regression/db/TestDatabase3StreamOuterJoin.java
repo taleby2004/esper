@@ -45,6 +45,7 @@ public class TestDatabase3StreamOuterJoin extends TestCase
     }
 
     protected void tearDown() throws Exception {
+        listener = null;
         epService.destroy();
     }
 

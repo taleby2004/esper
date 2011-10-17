@@ -37,6 +37,10 @@ public class TestPriorFunction extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testPriorTimewindowStats() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 

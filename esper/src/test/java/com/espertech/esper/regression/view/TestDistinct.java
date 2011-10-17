@@ -47,6 +47,10 @@ public class TestDistinct extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_N", SupportBean_N.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testWildcardJoinPattern() {
         String epl = "select distinct * from " +
                 "SupportBean(intPrimitive=0) as fooB unidirectional " +

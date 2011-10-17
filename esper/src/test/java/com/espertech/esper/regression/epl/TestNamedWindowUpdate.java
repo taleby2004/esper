@@ -36,6 +36,10 @@ public class TestNamedWindowUpdate extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
     }
 
+    protected void tearDown() throws Exception {
+        listenerWindow = null;
+    }
+
     public void testSubquerySelf() {
         // ESPER-507
 

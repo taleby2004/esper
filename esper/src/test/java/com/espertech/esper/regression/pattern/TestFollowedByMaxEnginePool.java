@@ -40,6 +40,10 @@ public class TestFollowedByMaxEnginePool extends TestCase implements SupportBean
     private EPServiceProvider epService;
     private SupportConditionHandlerFactory.SupportConditionHandler handler;
 
+    protected void tearDown() throws Exception {
+        handler = null;
+    }
+
     public void testFollowedWithMax()
     {
         initService(4L, true);

@@ -80,6 +80,11 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("xmltype", xml);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+        subscriber = null;
+    }
+
     public void testCtor() {
 
         // simple type and null values

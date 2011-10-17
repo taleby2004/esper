@@ -33,6 +33,10 @@ public class TestPatternGuardPlugIn extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testGuard()
     {
         String stmtText = "select * from pattern [(every Bean) where myplugin:count_to(10)]";

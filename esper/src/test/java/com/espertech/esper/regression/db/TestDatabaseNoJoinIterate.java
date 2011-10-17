@@ -46,6 +46,7 @@ public class TestDatabaseNoJoinIterate extends TestCase
     }
 
     protected void tearDown() throws Exception {
+        listener = null;
         epService.destroy();
     }
 

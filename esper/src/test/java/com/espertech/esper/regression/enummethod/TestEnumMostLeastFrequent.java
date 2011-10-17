@@ -36,6 +36,10 @@ public class TestEnumMostLeastFrequent extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testMostLeastEvents() {
 
         String[] fields = "val0,val1".split(",");

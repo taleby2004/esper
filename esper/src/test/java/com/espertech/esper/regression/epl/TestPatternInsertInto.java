@@ -32,6 +32,10 @@ public class TestPatternInsertInto extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+    }
+
     public void testPropsWildcard()
     {
         String stmtText =

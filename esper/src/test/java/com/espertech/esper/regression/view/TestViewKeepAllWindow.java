@@ -11,15 +11,15 @@
 
 package com.espertech.esper.regression.view;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 import java.util.Iterator;
 
@@ -27,7 +27,6 @@ public class TestViewKeepAllWindow extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private EPStatement statement;
 
     public void setUp()
     {
@@ -36,10 +35,14 @@ public class TestViewKeepAllWindow extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testIterator()
     {
         String viewExpr = "select symbol, price from " + SupportMarketDataBean.class.getName() + ".win:keepall()";
-        statement = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement statement = epService.getEPAdministrator().createEPL(viewExpr);
         statement.addListener(listener);
 
         sendEvent("ABC", 20);
@@ -77,7 +80,7 @@ public class TestViewKeepAllWindow extends TestCase
     {
         String viewExpr = "select irstream symbol, count(*) as cnt, sum(price) as mysum from " + SupportMarketDataBean.class.getName() +
                 ".win:keepall() group by symbol";
-        statement = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement statement = epService.getEPAdministrator().createEPL(viewExpr);
         statement.addListener(listener);
         listener.reset();
 

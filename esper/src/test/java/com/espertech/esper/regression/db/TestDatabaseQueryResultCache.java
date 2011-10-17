@@ -30,6 +30,11 @@ public class TestDatabaseQueryResultCache extends TestCase
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
 
+    protected void tearDown() throws Exception {
+        listener = null;
+        epService.destroy();
+    }
+
     public void testExpireCacheNoPurge()
     {
         ConfigurationDBRef configDB = getDefaultConfig();
@@ -63,10 +68,6 @@ public class TestDatabaseQueryResultCache extends TestCase
         ConfigurationDBRef configDB = getDefaultConfig();
         configDB.setExpiryTimeCache(1, 1);
         tryCache(configDB, 7000, 25000, true);
-    }
-
-    protected void tearDown() throws Exception {
-        epService.destroy();
     }
 
     private void tryCache(ConfigurationDBRef configDB, long assertMaximumTime, int numEvents, boolean useRandomLookupKey)

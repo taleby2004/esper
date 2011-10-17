@@ -36,6 +36,10 @@ public class TestFirstLastAllAggregation extends TestCase {
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testNoParamChainedAndProperty() {
         epService.getEPAdministrator().getConfiguration().addEventType("ChainEvent", ChainEvent.class);
         EPStatement stmt = epService.getEPAdministrator().createEPL("select first().property as val0, first().myMethod() as val1, window() as val2 from ChainEvent.std:lastevent()");

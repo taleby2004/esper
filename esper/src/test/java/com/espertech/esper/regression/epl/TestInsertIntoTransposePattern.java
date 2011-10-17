@@ -36,10 +36,15 @@ public class TestInsertIntoTransposePattern extends TestCase
     public void setUp()
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
         listener = new SupportUpdateListener();
         listenerInsertInto = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
+        listenerInsertInto= null;
     }
 
     public void testThisAsColumn()

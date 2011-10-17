@@ -25,8 +25,8 @@ public class TestLeftOuterJoinWhere extends TestCase
     private EPServiceProvider epService;
     private SupportUpdateListener updateListener;
 
-    private SupportBean_S0 eventsS0[] = new SupportBean_S0[15];
-    private SupportBean_S1 eventsS1[] = new SupportBean_S1[15];
+    private SupportBean_S0 eventsS0[];
+    private SupportBean_S1 eventsS1[];
 
     public void setUp()
     {
@@ -35,6 +35,8 @@ public class TestLeftOuterJoinWhere extends TestCase
         updateListener = new SupportUpdateListener();
 
         int count = 100;
+        eventsS0 = new SupportBean_S0[15];
+        eventsS1 = new SupportBean_S1[15];
         for (int i = 0; i < eventsS0.length; i++)
         {
             eventsS0[i] = new SupportBean_S0(count++, Integer.toString(i));
@@ -44,6 +46,12 @@ public class TestLeftOuterJoinWhere extends TestCase
         {
             eventsS1[i] = new SupportBean_S1(count++, Integer.toString(i));
         }
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
+        eventsS0 = null;
+        eventsS1 = null;
     }
 
     public void testWhereNotNullIs()

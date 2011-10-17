@@ -51,6 +51,7 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
     }
 
     protected void tearDown() throws Exception {
+        listener = null;
         epServicePooled.destroy();
         epServiceRetained.destroy();
     }

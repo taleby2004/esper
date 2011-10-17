@@ -32,7 +32,6 @@ public class TestAggregateRowPerEvent extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
     private int eventCount;
 
     public void setUp()
@@ -41,6 +40,10 @@ public class TestAggregateRowPerEvent extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         eventCount = 0;
+    }
+
+    protected void tearDown() throws Exception {
+        testListener = null;
     }
 
     public void testAggregatedSelectUnaggregatedHaving() {
@@ -70,10 +73,10 @@ public class TestAggregateRowPerEvent extends TestCase
     {
         String viewExpr = "select irstream longPrimitive, sum(longBoxed) as mySum " +
                           "from " + SupportBean.class.getName() + ".win:length(3)";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
-        runAssert();
+        runAssert(selectTestView);
     }
 
     public void testSumJoin()
@@ -83,12 +86,12 @@ public class TestAggregateRowPerEvent extends TestCase
                                     SupportBean.class.getName() + ".win:length(3) as two " +
                           "where one.string = two.string";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(JOIN_KEY));
 
-        runAssert();
+        runAssert(selectTestView);
     }
 
     public void testSumAvgWithWhere()
@@ -96,7 +99,7 @@ public class TestAggregateRowPerEvent extends TestCase
         String viewExpr = "select 'IBM stats' as title, volume, avg(volume) as myAvg, sum(volume) as mySum " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3)" +
                           "where symbol='IBM'";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         sendMarketDataEvent("GE", 10L);
@@ -127,7 +130,7 @@ public class TestAggregateRowPerEvent extends TestCase
         testListener.reset();
     }
 
-    private void runAssert()
+    private void runAssert(EPStatement selectTestView)
     {
         String[] fields = new String[] {"longPrimitive", "mySum"};
 

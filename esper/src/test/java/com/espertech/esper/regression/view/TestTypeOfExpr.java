@@ -38,6 +38,10 @@ public class TestTypeOfExpr extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testInvalid() {
         tryInvalid("select typeof(xx) from java.lang.Object", "Error starting statement: Property named 'xx' is not valid in any stream [select typeof(xx) from java.lang.Object]");
     }

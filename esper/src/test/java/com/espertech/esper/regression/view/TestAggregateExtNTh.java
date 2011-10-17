@@ -36,6 +36,10 @@ public class TestAggregateExtNTh extends TestCase {
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testNth()
     {
         String epl = "select " +

@@ -49,6 +49,7 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
     }
 
     protected void tearDown() throws Exception {
+        listener = null;
         epServiceRetained.destroy();
     }
 

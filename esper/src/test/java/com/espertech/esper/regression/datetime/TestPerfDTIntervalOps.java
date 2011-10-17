@@ -32,6 +32,10 @@ public class TestPerfDTIntervalOps extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testPerf() {
 
         ConfigurationEventTypeLegacy config = new ConfigurationEventTypeLegacy();

@@ -33,6 +33,10 @@ public class TestPatternEventProperties extends TestCase
         updateListener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+    }
+
     public void testWildcardSimplePattern()
     {
         setupSimplePattern("*");

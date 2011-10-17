@@ -34,6 +34,10 @@ public class TestInstanceOfExpr extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testInstanceofSimple()
     {
         String stmtText = "select instanceof(string, string) as t0, " +

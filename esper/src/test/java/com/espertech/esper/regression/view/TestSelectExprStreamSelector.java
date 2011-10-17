@@ -33,13 +33,16 @@ public class TestSelectExprStreamSelector extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    protected void tearDown() throws Exception {
+        testListener = null;
     }
 
     public void testInvalidSelectWildcardProperty()
@@ -115,7 +118,7 @@ public class TestSelectExprStreamSelector extends TestCase
                 .add(FilterStream.create(SupportBean.class.getName(), "s0").addView("win", "keepall"))
                 .add(FilterStream.create(SupportMarketDataBean.class.getName(), "s1").addView("win", "keepall")));
 
-        selectTestView = epService.getEPAdministrator().create(model);
+        EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
 
         String viewExpr = "select s0.*, s1.* as s1stream, string as sym from " + SupportBean.class.getName() + ".win:keepall() as s0, " +
@@ -139,7 +142,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testNoJoinWildcardNoAlias()
     {
         String viewExpr = "select *, win.* from " + SupportBean.class.getName() + ".win:length(3) as win";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -154,7 +157,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select *, s1.* from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + ".win:keepall() as s1";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -176,7 +179,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testNoJoinWildcardWithAlias()
     {
         String viewExpr = "select *, win.* as s0 from " + SupportBean.class.getName() + ".win:length(3) as win";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -193,7 +196,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select *, s1.* as s1stream, s0.* as s0stream from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + ".win:keepall() as s1";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -216,7 +219,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testNoJoinWithAliasWithProperties()
     {
         String viewExpr = "select string.* as s0, intPrimitive as a, string.* as s1, intPrimitive as b from " + SupportBean.class.getName() + ".win:length(3) as string";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -236,7 +239,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select intPrimitive, s1.* as s1stream, string, symbol as sym, s0.* as s0stream from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + ".win:keepall() as s1";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -262,7 +265,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testNoJoinNoAliasWithProperties()
     {
         String viewExpr = "select intPrimitive as a, string.*, intPrimitive as b from " + SupportBean.class.getName() + ".win:length(3) as string";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -281,7 +284,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select intPrimitive, s1.*, symbol as sym from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + ".win:keepall() as s1";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -302,7 +305,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testAloneNoJoinNoAlias()
     {
         String viewExpr = "select string.* from " + SupportBean.class.getName() + ".win:length(3) as string";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -316,7 +319,7 @@ public class TestSelectExprStreamSelector extends TestCase
     public void testAloneNoJoinAlias()
     {
         String viewExpr = "select string.* as s0 from " + SupportBean.class.getName() + ".win:length(3) as string";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -332,7 +335,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select s1.* as s1 from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + ".win:keepall() as s1";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();
@@ -368,7 +371,7 @@ public class TestSelectExprStreamSelector extends TestCase
     {
         String viewExpr = "select s1.* from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + ".win:keepall() as s1";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         EventType type = selectTestView.getEventType();

@@ -32,6 +32,10 @@ public class TestSubscriberInvalid extends TestCase
         epAdmin = epService.getEPAdministrator();
     }
 
+    public void tearDown() {
+        epAdmin = null;
+    }
+
     public void testBindWildcardJoin()
     {
         EPStatement stmt = epAdmin.createEPL("select * from SupportBean");

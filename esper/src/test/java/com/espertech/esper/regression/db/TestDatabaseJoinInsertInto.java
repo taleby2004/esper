@@ -44,6 +44,10 @@ public class TestDatabaseJoinInsertInto extends TestCase
         epService.initialize();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testInsertIntoTimeBatch()
     {
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));

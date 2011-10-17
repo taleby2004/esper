@@ -37,6 +37,10 @@ public class TestPatternQueries extends TestCase
         updateListener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+    }
+
     public void testWhere_OM() throws Exception
     {
         EPStatementObjectModel model = new EPStatementObjectModel();

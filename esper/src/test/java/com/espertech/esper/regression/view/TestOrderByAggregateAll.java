@@ -37,6 +37,10 @@ public class TestOrderByAggregateAll extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testIteratorAggregateRowPerEvent()
 	{
         String[] fields = new String[] {"symbol", "sumPrice"};

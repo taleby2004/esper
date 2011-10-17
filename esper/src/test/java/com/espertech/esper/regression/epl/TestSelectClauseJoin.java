@@ -11,19 +11,17 @@
 
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 import java.util.Iterator;
 
 public class TestSelectClauseJoin extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     public void setUp()
@@ -31,7 +29,14 @@ public class TestSelectClauseJoin extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+    }
+
+    public void testJoinSelect()
+    {
         String eventA = SupportBean.class.getName();
         String eventB = SupportBean.class.getName();
 
@@ -40,12 +45,14 @@ public class TestSelectClauseJoin extends TestCase
             eventB + "(string='s1').win:length(3) as s1" +
             " where s0.doubleBoxed = s1.doubleBoxed";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
-    }
 
-    public void testJoinSelect()
-    {
+        EventType result = joinView.getEventType();
+        assertEquals(Double.class, result.getPropertyType("s0.doubleBoxed"));
+        assertEquals(Double.class, result.getPropertyType("div"));
+        assertEquals(2, joinView.getEventType().getPropertyNames().length);
+
         assertNull(updateListener.getLastNewData());
 
         sendEvent("s0", 1, 4, 5);
@@ -59,14 +66,6 @@ public class TestSelectClauseJoin extends TestCase
         EventBean event = iterator.next();
         assertEquals(1d, event.get("s0.doubleBoxed"));
         assertEquals(3d, event.get("div"));
-    }
-
-    public void testEventType()
-    {
-        EventType result = joinView.getEventType();
-        assertEquals(Double.class, result.getPropertyType("s0.doubleBoxed"));
-        assertEquals(Double.class, result.getPropertyType("div"));
-        assertEquals(2, joinView.getEventType().getPropertyNames().length);
     }
 
     private void sendEvent(String s, double doubleBoxed, int intPrimitive, int intBoxed)

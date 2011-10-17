@@ -43,6 +43,10 @@ public class TestPerf2StreamExprJoin extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanRange", SupportBeanRange.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void test2Stream1Hash2HashConstant()
     {
         String epl;

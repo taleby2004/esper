@@ -30,7 +30,6 @@ public class TestStaticFunctions extends TestCase
 	private EPServiceProvider epService;
 	private String stream;
 	private String statementText;
-	private EPStatement statement;
 	private SupportUpdateListener listener;
 
 	protected void setUp()
@@ -40,6 +39,10 @@ public class TestStaticFunctions extends TestCase
 	    stream = " from " + SupportMarketDataBean.class.getName() +".win:length(5) ";
         listener = new SupportUpdateListener();
 	}
+
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
 
     public void testNullPrimitive() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
@@ -154,7 +157,7 @@ public class TestStaticFunctions extends TestCase
 	{
 		String className = SupportStaticMethodLib.class.getName();
 		statementText = "select price, " + className + ".throwException() as value " + stream;
-        statement = epService.getEPAdministrator().createEPL(statementText);
+        EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
         sendEvent("IBM", 10d, 4l);
@@ -273,7 +276,7 @@ public class TestStaticFunctions extends TestCase
         statementText = "select Integer.toBinaryString(7) as value" + stream;
 
         assertEquals(statementText.trim(), model.toEPL());
-        statement = epService.getEPAdministrator().create(model);
+        EPStatement statement = epService.getEPAdministrator().create(model);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -288,7 +291,7 @@ public class TestStaticFunctions extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
         assertEquals(statementText.trim(), model.toEPL());
-        statement = epService.getEPAdministrator().create(model);
+        EPStatement statement = epService.getEPAdministrator().create(model);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -527,7 +530,7 @@ public class TestStaticFunctions extends TestCase
 
     private Object createStatementAndGet(String propertyName)
 	{
-		statement = epService.getEPAdministrator().createEPL(statementText);
+		EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
 		listener = new SupportUpdateListener();
 		statement.addListener(listener);
 		epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 10d, 4l, ""));
@@ -549,7 +552,7 @@ public class TestStaticFunctions extends TestCase
 
 	private Object[] createStatementAndGetProperty(boolean expectResult, String... propertyNames)
 	{
-		statement = epService.getEPAdministrator().createEPL(statementText);
+		EPStatement statement = epService.getEPAdministrator().createEPL(statementText);
 		listener = new SupportUpdateListener();
 		statement.addListener(listener);
 		sendEvent("IBM", 10d, 4l);

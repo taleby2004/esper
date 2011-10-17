@@ -41,6 +41,10 @@ public class TestEnumAverage extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testAverageEvents() {
 
         String[] fields = "val0,val1,val2,val3".split(",");

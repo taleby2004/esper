@@ -40,6 +40,10 @@ public class TestDTWithDate extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testWithDate() {
 
         epService.getEPAdministrator().createEPL("create variable int varyear");

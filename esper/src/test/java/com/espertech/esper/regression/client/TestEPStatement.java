@@ -34,6 +34,10 @@ public class TestEPStatement extends TestCase
         epService.initialize();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testListenerWithReplay()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

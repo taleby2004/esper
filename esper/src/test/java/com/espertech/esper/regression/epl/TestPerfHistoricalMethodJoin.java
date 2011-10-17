@@ -41,6 +41,10 @@ public class TestPerfHistoricalMethodJoin extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void test1Stream2HistInnerJoinPerformance()
     {
         String expression;

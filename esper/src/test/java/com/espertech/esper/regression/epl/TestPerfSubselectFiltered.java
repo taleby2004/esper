@@ -37,6 +37,10 @@ public class TestPerfSubselectFiltered extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testPerformanceOneCriteria()
     {
         String stmtText = "select (select p10 from S1.win:length(100000) where id = s0.id) as value from S0 as s0";

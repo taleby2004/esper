@@ -41,6 +41,11 @@ public class TestEPServiceProvider extends TestCase
         epService.initialize();
     }
 
+    public void tearDown() {
+        listener = null;
+        listenerTwo = null;
+    }
+
     public void testDefaultEngine()
     {
         assertEquals("default", EPServiceProviderManager.getDefaultProvider().getURI());

@@ -11,23 +11,15 @@
 
 package com.espertech.esper.regression.view;
 
-import java.util.Arrays;
-
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.soda.*;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.soda.*;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.util.SerializableObjectCopier;
-
-import junit.framework.TestCase;
 
 
 public class TestBitWiseOperators extends TestCase
@@ -38,20 +30,11 @@ public class TestBitWiseOperators extends TestCase
     private static final long FOURTH_EVENT = 4;
     private static final boolean FITH_EVENT = false;
 
-    private EPServiceProvider _epService;
-    private SupportUpdateListener _testListener;
-    private EPStatement _selectTestView;
+    private EPServiceProvider epService;
+    private SupportUpdateListener listener;
 
-    public void testGetEventType()
-    {
-        setUpBitWiseStmt();
-        EventType type = _selectTestView.getEventType();
-        log.debug(".testGetEventType properties=" + Arrays.toString(type.getPropertyNames()));
-        assertEquals(Byte.class, type.getPropertyType("myFirstProperty"));
-        assertEquals(Short.class, type.getPropertyType("mySecondProperty"));
-        assertEquals(Integer.class, type.getPropertyType("myThirdProperty"));
-        assertEquals(Long.class, type.getPropertyType("myFourthProperty"));
-        assertEquals(Boolean.class, type.getPropertyType("myFifthProperty"));
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testBitWiseOperators_OM() throws Exception
@@ -75,8 +58,8 @@ public class TestBitWiseOperators extends TestCase
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(viewExpr, model.toEPL());
 
-        _selectTestView = _epService.getEPAdministrator().createEPL(viewExpr);
-        _selectTestView.addListener(_testListener);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        selectTestView.addListener(listener);
 
         runBitWiseOperators();
     }
@@ -84,7 +67,7 @@ public class TestBitWiseOperators extends TestCase
     public void testBitWiseOperators()
     {
         setUpBitWiseStmt();
-        _testListener.reset();
+        listener.reset();
 
         runBitWiseOperators();
     }
@@ -95,7 +78,7 @@ public class TestBitWiseOperators extends TestCase
                 FIRST_EVENT, new Integer(THIRD_EVENT), 3L, new Long(FOURTH_EVENT),
                 FITH_EVENT, new Boolean(FITH_EVENT));
 
-        EventBean received = _testListener.getAndResetLastNewData()[0];
+        EventBean received = listener.getAndResetLastNewData()[0];
         assertEquals((byte) 1, (received.get("myFirstProperty")));
         assertTrue(((Short) (received.get("mySecondProperty")) & SECOND_EVENT) == SECOND_EVENT);
         assertTrue(((Integer) (received.get("myThirdProperty")) & FIRST_EVENT) == FIRST_EVENT);
@@ -105,12 +88,12 @@ public class TestBitWiseOperators extends TestCase
 
     public void setUp()
     {
-        _testListener = new SupportUpdateListener();
-        _epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
-        _epService.initialize();
+        listener = new SupportUpdateListener();
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
+        epService.initialize();
     }
 
-    private void setUpBitWiseStmt()
+    private EPStatement setUpBitWiseStmt()
     {
         String viewExpr = "select (bytePrimitive & byteBoxed) as myFirstProperty, " +
                 "(shortPrimitive | shortBoxed) as mySecondProperty, " +
@@ -118,8 +101,17 @@ public class TestBitWiseOperators extends TestCase
                 "(longPrimitive ^ longBoxed) as myFourthProperty, " +
                 "(boolPrimitive & boolBoxed) as myFifthProperty " +
                 " from " + SupportBean.class.getName() + ".win:length(3) ";
-        _selectTestView = _epService.getEPAdministrator().createEPL(viewExpr);
-        _selectTestView.addListener(_testListener);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        selectTestView.addListener(listener);
+
+        EventType type = selectTestView.getEventType();
+        assertEquals(Byte.class, type.getPropertyType("myFirstProperty"));
+        assertEquals(Short.class, type.getPropertyType("mySecondProperty"));
+        assertEquals(Integer.class, type.getPropertyType("myThirdProperty"));
+        assertEquals(Long.class, type.getPropertyType("myFourthProperty"));
+        assertEquals(Boolean.class, type.getPropertyType("myFifthProperty"));
+
+        return selectTestView;
     }
 
     protected void sendEvent
@@ -138,7 +130,7 @@ public class TestBitWiseOperators extends TestCase
         bean.setLongBoxed(longBoxed_);
         bean.setBoolPrimitive(boolPrimitive_);
         bean.setBoolBoxed(boolBoxed_);
-        _epService.getEPRuntime().sendEvent(bean);
+        epService.getEPRuntime().sendEvent(bean);
     }
 
     private static final Log log = LogFactory.getLog(TestBitWiseOperators.class);

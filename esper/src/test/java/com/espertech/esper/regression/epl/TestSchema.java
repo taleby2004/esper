@@ -39,6 +39,10 @@ public class TestSchema extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testSchemaCopyProperties() {
         epService.getEPAdministrator().createEPL("create schema BaseOne (prop1 String, prop2 int)");
         epService.getEPAdministrator().createEPL("create schema BaseTwo (prop3 long)");

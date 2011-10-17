@@ -40,6 +40,12 @@ public class TestNamedWindowJoin extends TestCase
         listenerStmtOne = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerWindow = null;
+        listenerStmtOne = null;
+        listenerWindowTwo = null;
+    }
+
     public void testInnerJoinLateStart() {
 
         // ESPER-526

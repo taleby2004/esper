@@ -23,7 +23,6 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 public class TestJoinNoTableName extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     private Object[] setOne = new Object[5];
@@ -40,7 +39,7 @@ public class TestJoinNoTableName extends TestCase
                 SupportBean.class.getName() + ".win:length(3)" +
             " where symbol=string and volume=longBoxed";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         for (int i = 0; i < setOne.length; i++)
@@ -52,6 +51,10 @@ public class TestJoinNoTableName extends TestCase
             event.setLongBoxed((long)i);
             setTwo[i] = event;
         }
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testJoinUniquePerId()

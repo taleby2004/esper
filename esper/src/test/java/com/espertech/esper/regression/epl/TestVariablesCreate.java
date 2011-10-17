@@ -45,6 +45,12 @@ public class TestVariablesCreate extends TestCase
         listenerCreateTwo = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+        listenerCreateOne = null;
+        listenerCreateTwo = null;
+    }
+
     public void testOM()
     {
         EPStatementObjectModel model = new EPStatementObjectModel();

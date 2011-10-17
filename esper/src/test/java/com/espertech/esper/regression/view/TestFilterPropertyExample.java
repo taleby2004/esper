@@ -48,6 +48,11 @@ public class TestFilterPropertyExample extends TestCase
         eventDocTwo = SupportXML.getDocument(xmlStreamTwo);
     }
 
+    protected void tearDown() throws Exception {
+        eventDocOne = null;
+        eventDocTwo = null;
+    }
+
     public void testExample() throws Exception
     {
         String stmtTextOne = "select orderId, items.item[0].itemId from MediaOrder";

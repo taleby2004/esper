@@ -18,6 +18,7 @@ import com.espertech.esper.client.deploy.EPDeploymentAdmin;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.filter.FilterServiceSPI;
+import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
 public class TestDeployRedefinition extends TestCase
@@ -26,7 +27,7 @@ public class TestDeployRedefinition extends TestCase
     private EPDeploymentAdmin deploySvc;
 
     public void setUp() {
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         deploySvc = epService.getEPAdministrator().getDeploymentAdmin();
     }

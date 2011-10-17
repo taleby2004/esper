@@ -38,6 +38,10 @@ public class TestForGroupDelivery extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testInvalid() {
         tryInvalid("select * from SupportBean for ",
                 "Incorrect syntax near ' ' ('for' is a reserved keyword) expecting an identifier but found end of input at line 1 column 29 [select * from SupportBean for ]");

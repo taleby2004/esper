@@ -42,6 +42,11 @@ public class TestSplitStream extends TestCase
         }
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+        listeners = null;
+    }
+
     public void testInvalid()
     {
         tryInvalid("on SupportBean select * where intPrimitive=1 insert into BStream select * where 1=2",

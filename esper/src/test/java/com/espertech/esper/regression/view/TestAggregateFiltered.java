@@ -42,6 +42,10 @@ public class TestAggregateFiltered extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBeanNumeric.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testBlackWhitePercent()
     {
         String[] fields = "cb,cnb,c,pct".split(",");

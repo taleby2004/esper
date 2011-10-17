@@ -47,6 +47,10 @@ public class TestNoSchemaXMLEvent extends TestCase
         "  <element4><element41>VAL4-1</element41></element4>\n" +
         "</myevent>";
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+    }
+
     public void testVariableResolution() throws Exception
     {
         // test for ESPER-341 

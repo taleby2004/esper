@@ -33,6 +33,10 @@ public class TestViewTimeWindowUnique extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     // Make sure the timer and dispatch works for externally timed events and views
     public void testWindowUnique()
     {

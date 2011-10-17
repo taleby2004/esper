@@ -29,13 +29,18 @@ public class TestDistinctWildcardJoinPattern extends TestCase
 	private static Log log = LogFactory.getLog(TestDistinctWildcardJoinPattern.class);
 	
     private EPServiceProvider epService;
-    private SupportSubscriberMRD subscriber = new SupportSubscriberMRD();
+    private SupportSubscriberMRD subscriber;
 
     public void setUp()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        subscriber = new SupportSubscriberMRD();
+    }
+
+    protected void tearDown() throws Exception {
+        subscriber = null;
     }
 
     public void testWildcardJoinPattern() {

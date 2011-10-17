@@ -20,7 +20,6 @@ import com.espertech.esper.support.util.SupportUpdateListener;
 public class TestVariablesTimer extends TestCase
 {
     private EPServiceProvider epService;
-    private SupportUpdateListener listener;
     private SupportUpdateListener listenerSet;
 
     public void setUp()
@@ -30,8 +29,11 @@ public class TestVariablesTimer extends TestCase
 
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
-        listener = new SupportUpdateListener();
         listenerSet = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        listenerSet = null;
     }
 
     public void testTimestamp() throws Exception

@@ -32,7 +32,6 @@ public class TestAggregateRowForAllHaving extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
@@ -41,15 +40,19 @@ public class TestAggregateRowForAllHaving extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testSumOneView()
     {
         String viewExpr = "select irstream sum(longBoxed) as mySum " +
                           "from " + SupportBean.class.getName() + ".win:time(10 seconds) " +
                           "having sum(longBoxed) > 10";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
-        runAssert();
+        runAssert(selectTestView);
     }
 
     public void testSumJoin()
@@ -60,15 +63,15 @@ public class TestAggregateRowForAllHaving extends TestCase
                           "where one.string = two.string " +
                           "having sum(longBoxed) > 10";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(JOIN_KEY));
 
-        runAssert();
+        runAssert(selectTestView);
     }
 
-    private void runAssert()
+    private void runAssert(EPStatement selectTestView)
     {
         // assert select result type
         assertEquals(Long.class, selectTestView.getEventType().getPropertyType("mySum"));

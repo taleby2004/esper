@@ -23,6 +23,10 @@ public class TestDotExpressionDuckTyping extends TestCase
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
 	public void testDuckTyping()
 	{
         Configuration config = SupportConfigFactory.getConfiguration();

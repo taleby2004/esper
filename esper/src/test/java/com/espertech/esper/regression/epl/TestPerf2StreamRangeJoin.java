@@ -27,7 +27,6 @@ import org.apache.commons.logging.LogFactory;
 public class TestPerf2StreamRangeJoin extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement stmt;
     private SupportUpdateListener listener;
 
     public void setUp()
@@ -40,6 +39,10 @@ public class TestPerf2StreamRangeJoin extends TestCase
 
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanRange", SupportBeanRange.class);
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testPerfKeyAndRangeOuterJoin() {
@@ -67,7 +70,7 @@ public class TestPerf2StreamRangeJoin extends TestCase
                       "SBR sbr " +
                       "on string = key " +
                       "where intPrimitive between rangeStart and rangeEnd";
-        stmt = epService.getEPAdministrator().createEPL(epl);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
         
         // Repeat
@@ -106,7 +109,7 @@ public class TestPerf2StreamRangeJoin extends TestCase
 
         // start query
         String epl = "select * from SBR a, SB b where a.rangeStart < b.intPrimitive";
-        stmt = epService.getEPAdministrator().createEPL(epl);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
         // Repeat
@@ -147,7 +150,7 @@ public class TestPerf2StreamRangeJoin extends TestCase
 
         // start query
         String epl = "select * from SBR sbr, SB sb where sbr.key = sb.string and sb.intPrimitive between sbr.rangeStart and sbr.rangeEnd";
-        stmt = epService.getEPAdministrator().createEPL(epl);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
         // repeat
@@ -193,7 +196,7 @@ public class TestPerf2StreamRangeJoin extends TestCase
 
         // start query
         String epl = "select * from SupportBeanRange.std:lastevent() sbr, SB sb where sbr.key = sb.string and sb.intPrimitive not in [sbr.rangeStart:sbr.rangeEnd]";
-        stmt = epService.getEPAdministrator().createEPL(epl);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
         // repeat
@@ -397,7 +400,7 @@ public class TestPerf2StreamRangeJoin extends TestCase
     {
         String[] fields = "mini,maxi".split(",");
         
-        stmt = epService.getEPAdministrator().createEPL(epl);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
         // Send range query events

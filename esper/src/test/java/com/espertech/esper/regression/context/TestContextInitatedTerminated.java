@@ -51,6 +51,10 @@ public class TestContextInitatedTerminated extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testPatternInitiatedStraightSelect() {
         sendTimeEvent("2002-05-1T8:00:00.000");
         String eplCtx = "create context EverySupportBean as " +

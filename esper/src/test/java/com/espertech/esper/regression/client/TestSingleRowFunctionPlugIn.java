@@ -36,6 +36,10 @@ public class TestSingleRowFunctionPlugIn extends TestCase
         epService.initialize();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testPropertyOrSingleRowMethod() throws Exception
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

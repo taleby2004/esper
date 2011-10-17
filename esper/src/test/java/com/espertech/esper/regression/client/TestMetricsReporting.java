@@ -52,6 +52,11 @@ public class TestMetricsReporting extends TestCase
 
     public void tearDown()
     {
+        listener = null;
+        listenerTwo = null;
+        listenerEngineMetric = null;
+        listenerStmtMetric = null;
+
         try
         {
             if (epService != null)

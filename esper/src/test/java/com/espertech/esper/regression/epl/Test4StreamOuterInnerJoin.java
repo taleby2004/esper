@@ -26,9 +26,9 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 
 public class Test4StreamOuterInnerJoin extends TestCase
 {
-    private String fields[] = "s0.id, s0.p00, s1.id, s1.p10, s2.id, s2.p20, s3.id, s3.p30".split(",");
+    private final static String fields[] = "s0.id, s0.p00, s1.id, s1.p10, s2.id, s2.p20, s3.id, s3.p30".split(",");
+    
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener listener;
 
     public void setUp()
@@ -42,6 +42,10 @@ public class Test4StreamOuterInnerJoin extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testFullMiddleJoinVariantTwo()
@@ -108,7 +112,7 @@ public class Test4StreamOuterInnerJoin extends TestCase
     {
         String fields[] = "s0.id, s0.p00, s1.id, s1.p10, s2.id, s2.p20, s3.id, s3.p30".split(",");
 
-        joinView = epService.getEPAdministrator().createEPL(expression);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(expression);
         joinView.addListener(listener);
 
         // s0, s1, s2, s3
@@ -166,7 +170,7 @@ public class Test4StreamOuterInnerJoin extends TestCase
 
     public void runAssertionSided(String expression)
     {
-        joinView = epService.getEPAdministrator().createEPL(expression);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(expression);
         joinView.addListener(listener);
 
         // s0, s1, s2, s3
@@ -224,7 +228,7 @@ public class Test4StreamOuterInnerJoin extends TestCase
 
     public void runAssertionStar(String expression)
     {
-        joinView = epService.getEPAdministrator().createEPL(expression);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(expression);
         joinView.addListener(listener);
 
         // s0, s1, s2, s3

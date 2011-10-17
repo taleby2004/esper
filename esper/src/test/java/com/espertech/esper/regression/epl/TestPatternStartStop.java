@@ -25,22 +25,25 @@ public class TestPatternStartStop extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener updateListener;
-    private EPStatement statement;
 
     public void setUp()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
 
-        String stmtText = "select * from pattern [every(a=" + SupportBean.class.getName() +
-                " or b=" + SupportBeanComplexProps.class.getName() + ")]";
-        statement = epService.getEPAdministrator().createEPL(stmtText);
-        statement.addListener(updateListener);
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testStartStop()
     {
+        String stmtText = "select * from pattern [every(a=" + SupportBean.class.getName() +
+                " or b=" + SupportBeanComplexProps.class.getName() + ")]";
+        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
+        statement.addListener(updateListener);
+
         for (int i = 0; i < 100; i++)
         {
             sendAndAssert();

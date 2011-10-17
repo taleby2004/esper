@@ -36,6 +36,10 @@ public class TestEnumMinMaxBy extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testMinMaxBy() {
 
         String[] fields = "val0,val1,val2,val3".split(",");

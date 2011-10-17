@@ -25,7 +25,6 @@ import junit.framework.TestCase;
 public class TestPerf5StreamJoin extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     public void setUp()
@@ -33,6 +32,10 @@ public class TestPerf5StreamJoin extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testPerfAllProps()
@@ -48,7 +51,7 @@ public class TestPerf5StreamJoin extends TestCase
                "and s2.p20 = s3.p30 " +
                "and s3.p30 = s4.p40 ";
 
-        joinView = epService.getEPAdministrator().createEPL(statement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(statement);
         joinView.addListener(updateListener);
 
         log.info(".testPerfAllProps Preloading events");

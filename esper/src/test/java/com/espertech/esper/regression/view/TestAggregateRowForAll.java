@@ -41,6 +41,10 @@ public class TestAggregateRowForAll extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testSumOneView()
     {
         String viewExpr = "select irstream sum(longBoxed) as mySum " +

@@ -35,6 +35,7 @@ public class TestPerf2StreamSimpleJoinCoercion extends TestCase
 
     public void tearDown()
     {
+        listener = null;
         epService.initialize();
     }
 

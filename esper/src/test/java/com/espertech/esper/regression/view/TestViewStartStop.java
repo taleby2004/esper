@@ -12,28 +12,27 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestViewStartStop extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement sizeView;
 
     public void setUp()
     {
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
 
-        String viewExpr = "select count(*) as size from " + SupportBean.class.getName();
-
-        sizeView = epService.getEPAdministrator().createEPL(viewExpr);
+    protected void tearDown() throws Exception {
+        testListener = null;
     }
 
     public void testSameWindowReuse()
@@ -60,6 +59,9 @@ public class TestViewStartStop extends TestCase
 
     public void testStartStop()
     {
+        String viewExpr = "select count(*) as size from " + SupportBean.class.getName();
+        EPStatement sizeView = epService.getEPAdministrator().createEPL(viewExpr);
+
         // View created is automatically started
         assertEquals(0l, sizeView.iterator().next().get("size"));
         sizeView.stop();
@@ -87,6 +89,9 @@ public class TestViewStartStop extends TestCase
 
     public void testAddRemoveListener()
     {
+        String viewExpr = "select count(*) as size from " + SupportBean.class.getName();
+        EPStatement sizeView = epService.getEPAdministrator().createEPL(viewExpr);
+
         // View is started when created
 
         // Add listener send event

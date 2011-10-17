@@ -40,6 +40,10 @@ public class TestStreamExpr extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testChainedParameterized() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportChainTop", SupportChainTop.class);
 

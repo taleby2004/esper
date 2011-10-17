@@ -38,6 +38,10 @@ public class TestEnumCountOf extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testCountOfEvents() {
 
         String[] fields = new String[] {"val0", "val1"};

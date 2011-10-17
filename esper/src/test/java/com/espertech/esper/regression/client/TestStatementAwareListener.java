@@ -39,6 +39,10 @@ public class TestStatementAwareListener extends TestCase
         listener = new SupportStmtAwareUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testStmtAware()
     {
         String stmtText = "select * from Bean";

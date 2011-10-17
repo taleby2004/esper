@@ -39,6 +39,10 @@ public class TestEnumFirstLastOf extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testFirstLastScalar() {
 
         String[] fields = "val0,val1,val2,val3".split(",");

@@ -40,6 +40,10 @@ public class TestDTWithTime extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testWithTime() {
 
         epService.getEPAdministrator().createEPL("create variable int varhour");

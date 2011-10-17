@@ -11,34 +11,38 @@
 
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
- import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.support.bean.SupportBean_S0;
+import com.espertech.esper.support.bean.SupportBean_S1;
+import com.espertech.esper.support.bean.SupportBean_S2;
+import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.ArrayHandlingUtil;
-import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 public class Test3StreamOuterFullJoin extends TestCase
 {
-    private EPServiceProvider epService;
-    private EPStatement joinView;
-    private SupportUpdateListener updateListener;
-    private String[] fields = new String[] {"s0.p00", "s0.p01", "s1.p10", "s1.p11", "s2.p20", "s2.p21", };
-
+    private final static String[] fields = new String[] {"s0.p00", "s0.p01", "s1.p10", "s1.p11", "s2.p20", "s2.p21", };
     private final static String EVENT_S0 = SupportBean_S0.class.getName();
     private final static String EVENT_S1 = SupportBean_S1.class.getName();
     private final static String EVENT_S2 = SupportBean_S2.class.getName();
+
+    private EPServiceProvider epService;
+    private SupportUpdateListener updateListener;
 
     public void setUp()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testFullJoin_2sides_multicolumn()
@@ -50,7 +54,7 @@ public class Test3StreamOuterFullJoin extends TestCase
             " full outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 and s0.p01 = s1.p11" +
             " full outer join " + EVENT_S2 + ".win:length(1000) as s2 on s0.p00 = s2.p20 and s0.p01 = s2.p21";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(10, "A_1", "B_1"));
@@ -117,13 +121,13 @@ public class Test3StreamOuterFullJoin extends TestCase
             " full outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 " +
             " full outer join " + EVENT_S2 + ".win:length(1000) as s2 on s0.p00 = s2.p20 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
-        runAssertsFullJoin_2sides();
+        runAssertsFullJoin_2sides(joinView);
     }
 
-    private void runAssertsFullJoin_2sides()
+    private void runAssertsFullJoin_2sides(EPStatement joinView)
     {
         // Test s0 outer join to 2 streams, 2 results for each (cartesian product)
         //

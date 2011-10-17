@@ -29,7 +29,6 @@ public class TestGroupByEventPerGroup extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
@@ -38,6 +37,10 @@ public class TestGroupByEventPerGroup extends TestCase
         config.getEngineDefaults().getViewResources().setAllowMultipleExpiryPolicies(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testNamedWindowDelete()
@@ -52,10 +55,10 @@ public class TestGroupByEventPerGroup extends TestCase
 
         String fields[] = "string,mysum".split(",");
         String viewExpr = "@Hint('DISABLE_RECLAIM_GROUP') select string, sum(intPrimitive) as mysum from MyWindow group by string order by string";
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
-        runAssertion(fields);
+        runAssertion(selectTestView, fields);
 
         selectTestView.destroy();
         epService.getEPRuntime().sendEvent(new SupportBean_B("delete"));
@@ -64,7 +67,7 @@ public class TestGroupByEventPerGroup extends TestCase
         selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
-        runAssertion(fields);
+        runAssertion(selectTestView, fields);
     }
 
     public void testUnboundStreamIterate()
@@ -216,7 +219,7 @@ public class TestGroupByEventPerGroup extends TestCase
         */
     }
 
-    private void runAssertion(String[] fields)
+    private void runAssertion(EPStatement selectTestView, String[] fields)
     {
         epService.getEPRuntime().sendEvent(new SupportBean("A", 100));
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A", 100});
@@ -256,7 +259,7 @@ public class TestGroupByEventPerGroup extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "group by price";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         sendEvent(SYMBOL_DELL, 10);
@@ -286,7 +289,7 @@ public class TestGroupByEventPerGroup extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "group by symbol, price";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         sendEvent(SYMBOL_DELL, 10);
@@ -322,7 +325,7 @@ public class TestGroupByEventPerGroup extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "group by symbol, price order by symbol asc";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         sendEvent(SYMBOL_DELL, 10);
@@ -385,10 +388,10 @@ public class TestGroupByEventPerGroup extends TestCase
                           "where symbol='DELL' or symbol='IBM' or symbol='GE' " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testSumJoin()
@@ -402,14 +405,14 @@ public class TestGroupByEventPerGroup extends TestCase
                           "       and one.string = two.symbol " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_IBM));
         epService.getEPRuntime().sendEvent(new SupportBeanString("AAA"));
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testUniqueInBatch()
@@ -423,7 +426,7 @@ public class TestGroupByEventPerGroup extends TestCase
                           "from MyStream.win:time_batch(1 sec).std:unique(symbol) " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         sendEvent("IBM", 100);
@@ -437,7 +440,7 @@ public class TestGroupByEventPerGroup extends TestCase
         assertEquals("IBM", received.getFirst()[0].get("symbol"));
     }
 
-    private void runAssertion()
+    private void runAssertion(EPStatement selectTestView)
     {
         String[] fields = new String[] {"symbol", "mySum", "myAvg"};
         ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, null);

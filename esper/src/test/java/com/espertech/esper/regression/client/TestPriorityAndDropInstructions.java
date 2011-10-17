@@ -46,6 +46,12 @@ public class TestPriorityAndDropInstructions extends TestCase
         }
     }
 
+    public void tearDown() {
+        listener = null;
+        listenerTwo = null;
+        listeners = null;
+    }
+
     @Priority(10)
     @Drop
     public void testSchedulingPriority()

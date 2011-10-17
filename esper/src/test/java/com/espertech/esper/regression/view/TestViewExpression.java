@@ -35,6 +35,10 @@ public class TestViewExpression extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testLengthWindow()
     {
         String[] fields = new String[] {"string"};

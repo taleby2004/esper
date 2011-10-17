@@ -40,6 +40,10 @@ public class TestNamedWindowSubqCorrelCoerce extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testNoShare() {
         runAssertion(false, false, false);
     }

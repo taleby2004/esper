@@ -38,6 +38,10 @@ public class TestFilterExpressionsLargeThreading extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testNullBooleanExpr()
     {
         String stmtOneText = "every event1=SupportEvent(userId like '123%')";

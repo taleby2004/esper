@@ -49,6 +49,11 @@ public class TestVirtualDataWindowLateConsume extends TestCase {
         epService.initialize();
     }
 
+    public void tearDown()
+    {
+        listener = null;
+    }
+
     public void testInsertConsume() {
 
         epService.getEPAdministrator().createEPL("create window MyVDW.test:vdw() as SupportBean");

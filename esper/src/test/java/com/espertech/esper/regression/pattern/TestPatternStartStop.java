@@ -27,23 +27,25 @@ import java.util.Set;
 public class TestPatternStartStop extends TestCase
 {
     private EPServiceProvider epService;
-    private SupportUpdateListener testListener;
-    private EPStatement patternStmt;
+    private SupportUpdateListener listener;
 
     public void setUp()
     {
-        testListener = new SupportUpdateListener();
+        listener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
 
-        String viewExpr = "every tag=" + SupportBean.class.getName();
-
-        patternStmt = epService.getEPAdministrator().createPattern(viewExpr, "MyPattern");
-        assertEquals(StatementType.PATTERN, ((EPStatementSPI) patternStmt).getStatementMetadata().getStatementType());
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testStartStop()
     {
+        String viewExpr = "every tag=" + SupportBean.class.getName();
+        EPStatement patternStmt = epService.getEPAdministrator().createPattern(viewExpr, "MyPattern");
+        assertEquals(StatementType.PATTERN, ((EPStatementSPI) patternStmt).getStatementMetadata().getStatementType());
+
         // Pattern started when created
         assertFalse(patternStmt.iterator().hasNext());
 
@@ -83,29 +85,33 @@ public class TestPatternStartStop extends TestCase
 
     public void testAddRemoveListener()
     {
+        String viewExpr = "every tag=" + SupportBean.class.getName();
+        EPStatement patternStmt = epService.getEPAdministrator().createPattern(viewExpr, "MyPattern");
+        assertEquals(StatementType.PATTERN, ((EPStatementSPI) patternStmt).getStatementMetadata().getStatementType());
+
         // Pattern started when created
 
         // Add listener
-        patternStmt.addListener(testListener);
-        assertNull(testListener.getLastNewData());
+        patternStmt.addListener(listener);
+        assertNull(listener.getLastNewData());
         assertFalse(patternStmt.iterator().hasNext());
 
         // Send event
         SupportBean event = sendEvent();
-        assertEquals(event, testListener.getAndResetLastNewData()[0].get("tag"));
+        assertEquals(event, listener.getAndResetLastNewData()[0].get("tag"));
         assertSame(event, patternStmt.iterator().next().get("tag"));
 
         // Remove listener
-        patternStmt.removeListener(testListener);
+        patternStmt.removeListener(listener);
         event = sendEvent();
         assertSame(event, patternStmt.iterator().next().get("tag"));
-        assertNull(testListener.getLastNewData());
+        assertNull(listener.getLastNewData());
 
         // Add listener back
-        patternStmt.addListener(testListener);
+        patternStmt.addListener(listener);
         event = sendEvent();
         assertSame(event, patternStmt.iterator().next().get("tag"));
-        assertEquals(event, testListener.getAndResetLastNewData()[0].get("tag"));
+        assertEquals(event, listener.getAndResetLastNewData()[0].get("tag"));
     }
 
     private SupportBean sendEvent()

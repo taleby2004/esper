@@ -46,6 +46,10 @@ public class TestEnumDataSources extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testPrevWindowSorted() {
         EPStatement stmt = epService.getEPAdministrator().createEPL("select prevwindow(st0) as val0, prevwindow(st0).esperInternalNoop() as val1 " +
                 "from SupportBean_ST0.ext:sort(3, p00 asc) as st0");

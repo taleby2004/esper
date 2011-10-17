@@ -34,6 +34,10 @@ public class TestVariablesOutputRate extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testOutputRateEventsAll() throws Exception
     {
         epService.getEPAdministrator().getConfiguration().addVariable("var_output_limit", long.class, "3");

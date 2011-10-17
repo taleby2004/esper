@@ -36,6 +36,10 @@ public class TestVariantStreamDefault extends TestCase
         listenerOne = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerOne = null;
+    }
+
     public void testCoercionBoxedTypeMatch()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);

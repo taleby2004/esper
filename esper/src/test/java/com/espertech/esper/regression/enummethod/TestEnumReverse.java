@@ -39,6 +39,10 @@ public class TestEnumReverse extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testReverseEvents() {
 
         String epl = "select contained.reverse() as val from Bean";

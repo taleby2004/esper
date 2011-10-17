@@ -36,6 +36,10 @@ public class TestFromClauseMethod extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void test2StreamMaxAggregation() {
         String className = SupportStaticMethodLib.class.getName();
         String stmtText;

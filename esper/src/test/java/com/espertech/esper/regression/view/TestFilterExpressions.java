@@ -38,6 +38,10 @@ public class TestFilterExpressions extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testShortCircuitEvalAndOverspecified() {
         epService.getEPAdministrator().getConfiguration().addEventType(MyEvent.class);
         

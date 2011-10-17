@@ -39,6 +39,10 @@ public class TestOrderByEventPerRow extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testAliasesAggregationCompile() throws Exception
     {
         String statementString = "select symbol, volume, sum(price) as mySum from " +

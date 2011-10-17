@@ -32,7 +32,6 @@ public class TestGroupByEventPerRow extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
@@ -40,6 +39,10 @@ public class TestGroupByEventPerRow extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testUnaggregatedHaving() {
@@ -62,7 +65,7 @@ public class TestGroupByEventPerRow extends TestCase
         // test no output limit
         String fields[] = "string, intPrimitive, minval".split(",");
         String epl = "select *, min(intPrimitive) as minval from SupportBean.win:length(2) group by string";
-        selectTestView = epService.getEPAdministrator().createEPL(epl);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(epl);
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
@@ -83,7 +86,7 @@ public class TestGroupByEventPerRow extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(5) " +
                           "group by symbol, price";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         sendEvent(SYMBOL_DELL, 1000, 10);
@@ -133,10 +136,10 @@ public class TestGroupByEventPerRow extends TestCase
                           "where symbol='DELL' or symbol='IBM' or symbol='GE' " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testSumJoin()
@@ -149,13 +152,13 @@ public class TestGroupByEventPerRow extends TestCase
                           "  and one.string = two.symbol " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_IBM));
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testInsertInto()
@@ -199,7 +202,7 @@ public class TestGroupByEventPerRow extends TestCase
         assertEquals(40000L, eventBean.get("sumation"));
     }
 
-    private void runAssertion()
+    private void runAssertion(EPStatement selectTestView)
     {
         String[] fields = new String[] {"symbol", "volume", "mySum"};
         ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, null);

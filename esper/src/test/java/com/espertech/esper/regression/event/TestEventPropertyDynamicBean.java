@@ -33,6 +33,10 @@ public class TestEventPropertyDynamicBean extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testGetValue() throws Exception
     {
         String stmtText = "select item.id? as myid from " + SupportBeanDynRoot.class.getName();

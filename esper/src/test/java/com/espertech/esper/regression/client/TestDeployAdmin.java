@@ -15,6 +15,7 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.deploy.*;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportUpdateListener;
@@ -32,7 +33,7 @@ public class TestDeployAdmin extends TestCase
     private SupportUpdateListener listener;
 
     public void setUp() {
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         deploymentAdmin = epService.getEPAdministrator().getDeploymentAdmin();
         listener = new SupportUpdateListener();

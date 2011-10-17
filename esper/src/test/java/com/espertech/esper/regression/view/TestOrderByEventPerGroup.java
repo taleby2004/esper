@@ -37,6 +37,10 @@ public class TestOrderByEventPerGroup extends TestCase {
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testNoHavingNoJoin()
 	{
 		String statementString = "select irstream symbol, sum(price) as mysum from " +

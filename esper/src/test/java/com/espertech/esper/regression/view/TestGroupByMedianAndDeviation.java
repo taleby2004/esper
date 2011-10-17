@@ -33,13 +33,16 @@ public class TestGroupByMedianAndDeviation extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
         testListener = new SupportUpdateListener();
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
+    }
+
+    protected void tearDown() throws Exception {
+        testListener = null;
     }
 
     public void testSumOneView()
@@ -53,10 +56,10 @@ public class TestGroupByMedianAndDeviation extends TestCase
                           "where symbol='DELL' or symbol='IBM' or symbol='GE' " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
-        runAssertion();
+        runAssertion(selectTestView);
 
         // Test NaN sensitivity
         selectTestView.destroy();
@@ -110,14 +113,14 @@ public class TestGroupByMedianAndDeviation extends TestCase
                           "group by symbol";
         assertEquals(viewExpr, model.toEPL());
 
-        selectTestView = epService.getEPAdministrator().create(model);
+        EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_IBM));
         epService.getEPRuntime().sendEvent(new SupportBeanString("AAA"));
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
     public void testSumJoin()
@@ -133,17 +136,17 @@ public class TestGroupByMedianAndDeviation extends TestCase
                           "       and one.string = two.symbol " +
                           "group by symbol";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_DELL));
         epService.getEPRuntime().sendEvent(new SupportBeanString(SYMBOL_IBM));
         epService.getEPRuntime().sendEvent(new SupportBeanString("AAA"));
 
-        runAssertion();
+        runAssertion(selectTestView);
     }
 
-    private void runAssertion()
+    private void runAssertion(EPStatement selectTestView)
     {
         // assert select result type
         assertEquals(String.class, selectTestView.getEventType().getPropertyType("symbol"));

@@ -31,7 +31,7 @@ public class TestSchemaXMLEventTranspose extends TestCase
 {
     private static String CLASSLOADER_SCHEMA_URI = "regression/simpleSchema.xsd";
 
-    private EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider();
+    private EPServiceProvider epService;
     private String schemaURI;
     private SupportUpdateListener listener;
 
@@ -43,6 +43,10 @@ public class TestSchemaXMLEventTranspose extends TestCase
         Configuration config = SupportConfigFactory.getConfiguration();
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+    }
+
+    protected void tearDown() throws Exception {
+        listener = null;
     }
 
     public void testXPathConfigured() throws Exception

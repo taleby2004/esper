@@ -32,6 +32,10 @@ public class TestNamedWindowOutputrate extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testOutputSnapshot() {
         epService.getEPAdministrator().createEPL("create schema SupportBean as " + SupportBean.class.getName());
 

@@ -34,6 +34,10 @@ public class TestSubselectWithinPattern extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testInvalid() {
 
         tryInvalid("select * from S0(exists (select * from S1))",

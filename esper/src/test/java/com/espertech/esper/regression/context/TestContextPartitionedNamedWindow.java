@@ -40,6 +40,11 @@ public class TestContextPartitionedNamedWindow extends TestCase {
         listenerNamedWindow = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listenerSelect = null;
+        listenerNamedWindow = null;
+    }
+
     public void testNWFireAndForgetInvalid() {
         epService.getEPAdministrator().createEPL("create context SegmentedByString partition by string from SupportBean");
 

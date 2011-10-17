@@ -38,6 +38,10 @@ public class TestNamedWindowSubqCorrelIndex extends TestCase
         listenerStmtOne = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerStmtOne = null;
+    }
+
     public void testNoShare() {
         runAssertion(false, false, false, false);
     }

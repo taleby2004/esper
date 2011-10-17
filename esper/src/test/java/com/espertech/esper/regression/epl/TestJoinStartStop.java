@@ -32,7 +32,6 @@ import java.util.Set;
 public class TestJoinStartStop extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     private Object[] setOne = new Object[5];
@@ -44,15 +43,6 @@ public class TestJoinStartStop extends TestCase
         epService.initialize();
         updateListener = new SupportUpdateListener();
 
-        String joinStatement = "select * from " +
-                SupportMarketDataBean.class.getName() + "(symbol='IBM').win:length(3) s0, " +
-                SupportMarketDataBean.class.getName() + "(symbol='CSCO').win:length(3) s1" +
-            " where s0.volume=s1.volume";
-        log.info(".setUp statement=" + joinStatement);
-
-        joinView = epService.getEPAdministrator().createEPL(joinStatement, "MyJoin");
-        joinView.addListener(updateListener);
-
         long[] volumesOne = new long[] { 10, 20, 20, 40, 50 };
         long[] volumesTwo = new long[] { 10, 20, 30, 40, 50 };
 
@@ -63,8 +53,20 @@ public class TestJoinStartStop extends TestCase
         }
     }
 
+    protected void tearDown() throws Exception {
+        updateListener = null;
+    }
+
     public void testJoinUniquePerId()
     {
+        String joinStatement = "select * from " +
+                SupportMarketDataBean.class.getName() + "(symbol='IBM').win:length(3) s0, " +
+                SupportMarketDataBean.class.getName() + "(symbol='CSCO').win:length(3) s1" +
+            " where s0.volume=s1.volume";
+
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement, "MyJoin");
+        joinView.addListener(updateListener);
+
         sendEvent(setOne[0]);
         sendEvent(setTwo[0]);
         assertNotNull(updateListener.getLastNewData());

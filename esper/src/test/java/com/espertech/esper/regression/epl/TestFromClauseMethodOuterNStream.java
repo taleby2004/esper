@@ -42,6 +42,10 @@ public class TestFromClauseMethodOuterNStream extends TestCase
         epService.getEPAdministrator().createEPL("on SupportBeanInt(id like 'V%') set var1=p00, var2=p01");
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void test1Stream2HistStarSubordinateLeftRight()
     {
         String expression;

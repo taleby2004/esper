@@ -31,6 +31,10 @@ public class TestViewSimpleFilter extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testNotEqualsOp()
     {
         EPStatement statement = epService.getEPAdministrator().createEPL(

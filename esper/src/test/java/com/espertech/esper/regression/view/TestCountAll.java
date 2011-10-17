@@ -34,6 +34,10 @@ public class TestCountAll extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testSize()
     {
         String statementText = "select irstream size from " + SupportMarketDataBean.class.getName() + ".std:size()";

@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
-import junit.framework.TestCase;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,21 +26,24 @@ public class TestViewWhereClause extends TestCase
 {
     private EPServiceProvider epService;
     private SupportUpdateListener listener;
-    private EPStatement stmt;
 
     public void setUp()
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
-
-        String viewExpr = "select * from " + SupportMarketDataBean.class.getName() + ".win:length(3) where symbol='CSCO'";
-        stmt = epService.getEPAdministrator().createEPL(viewExpr);
-        listener = new SupportUpdateListener();
-        stmt.addListener(listener);
     }
     
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testWhere()
     {
+        String viewExpr = "select * from " + SupportMarketDataBean.class.getName() + ".win:length(3) where symbol='CSCO'";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
+        listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
         sendMarketDataEvent("IBM");
         assertFalse(listener.getAndClearIsInvoked());
 
@@ -67,7 +70,7 @@ public class TestViewWhereClause extends TestCase
         Map<String, Object> dict = new HashMap<String, Object>();
         dict.put("criteria", Boolean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("MapEvent", dict);
-        EPStatement stmt = epService.getEPAdministrator().createEPL("Select * From MapEvent.win:time(30 seconds) where criteria");
+        stmt = epService.getEPAdministrator().createEPL("Select * From MapEvent.win:time(30 seconds) where criteria");
 
         try {
             epService.getEPRuntime().sendEvent(Collections.singletonMap("criteria", 15), "MapEvent");
@@ -89,7 +92,7 @@ public class TestViewWhereClause extends TestCase
                 " from " + SupportBean.class.getName() + ".win:length(3) where " +
                 "intPrimitive=longPrimitive and intPrimitive=doublePrimitive and floatPrimitive=doublePrimitive";
 
-        stmt = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         listener = new SupportUpdateListener();
         stmt.addListener(listener);
 

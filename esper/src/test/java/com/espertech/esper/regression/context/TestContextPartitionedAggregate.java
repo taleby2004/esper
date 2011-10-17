@@ -44,6 +44,10 @@ public class TestContextPartitionedAggregate extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testAccessOnly() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 

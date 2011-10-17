@@ -16,6 +16,7 @@ import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
 import com.espertech.esper.client.deploy.Module;
 import com.espertech.esper.client.deploy.ParseException;
+import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
@@ -29,7 +30,7 @@ public class TestDeployParse extends TestCase
     private EPDeploymentAdmin deploySvc;
 
     public void setUp() {
-        epService = EPServiceProviderManager.getDefaultProvider();
+        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         deploySvc = epService.getEPAdministrator().getDeploymentAdmin();
     }

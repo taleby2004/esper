@@ -47,6 +47,12 @@ public class TestInsertInto extends TestCase
         resultListenerProduct = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        resultListenerDelta = null;
+        feedListener = null;
+        resultListenerProduct = null;
+    }
+
     public void testVariantRStreamOMToStmt() throws Exception
     {
         EPStatementObjectModel model = new EPStatementObjectModel();

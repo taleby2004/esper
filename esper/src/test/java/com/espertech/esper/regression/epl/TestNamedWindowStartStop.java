@@ -41,6 +41,11 @@ public class TestNamedWindowStartStop extends TestCase
         listenerSelect = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerWindow = null;
+        listenerSelect = null;
+    }
+
     public void testStartStopDeleter()
     {
         SupportNamedWindowObserver observer = new SupportNamedWindowObserver();

@@ -38,6 +38,10 @@ public class TestRevisionMerge extends TestCase
         listenerOne = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerOne = null;
+    }
+
     public void testMergeDeclared()
     {
         Map<String, Object> fullType = makeMap(new Object[][] {{"p1", String.class}, {"p2", String.class}, {"p3", String.class}, {"pf", String.class}});

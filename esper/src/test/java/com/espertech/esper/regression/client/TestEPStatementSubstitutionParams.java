@@ -32,6 +32,11 @@ public class TestEPStatementSubstitutionParams extends TestCase
         epService.initialize();
     }
 
+    public void tearDown() {
+        listenerOne = null;
+        listenerTwo = null;
+    }
+
     public void testPattern()
     {
         String stmt = SupportBean.class.getName() + "(string=?)";

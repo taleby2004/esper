@@ -43,6 +43,10 @@ public class TestExpressionDef extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testSequenceAndNested() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_S0", SupportBean_S0.class);
         epService.getEPAdministrator().createEPL("create window WindowOne.win:keepall() as (col1 string, col2 string)");

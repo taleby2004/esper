@@ -34,6 +34,11 @@ public class TestIStreamRStreamKeywords extends TestCase
         testListenerInsertInto = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+        testListenerInsertInto = null;
+    }
+
     public void testChangeEngineDefaultRStream()
     {
         Configuration config = SupportConfigFactory.getConfiguration();

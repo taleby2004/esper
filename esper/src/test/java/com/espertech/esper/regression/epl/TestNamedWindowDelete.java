@@ -47,6 +47,13 @@ public class TestNamedWindowDelete extends TestCase
         listenerDelete = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listenerDelete = null;
+        listenerSelect = null;
+        listenerWindow = null;
+        listenerDelete = null;
+    }
+    
     public void testFirstUnique() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);

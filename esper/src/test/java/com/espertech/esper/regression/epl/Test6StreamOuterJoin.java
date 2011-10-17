@@ -26,7 +26,6 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 public class Test6StreamOuterJoin extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     private final static String EVENT_S0 = SupportBean_S0.class.getName();
@@ -41,6 +40,10 @@ public class Test6StreamOuterJoin extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testRoot_s0()
@@ -61,7 +64,7 @@ public class Test6StreamOuterJoin extends TestCase
             " right outer join " + EVENT_S4 + ".win:length(1000) as s4 on s2.p20 = s4.p40 " +
             " right outer join " + EVENT_S5 + ".win:length(1000) as s5 on s2.p20 = s5.p50 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -85,7 +88,7 @@ public class Test6StreamOuterJoin extends TestCase
             " right outer join " + EVENT_S5 + ".win:length(1000) as s5 on s2.p20 = s5.p50 " +
             " right outer join " + EVENT_S4 + ".win:length(1000) as s4 on s2.p20 = s4.p40 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -109,7 +112,7 @@ public class Test6StreamOuterJoin extends TestCase
             " right outer join " + EVENT_S4 + ".win:length(1000) as s4 on s2.p20 = s4.p40 " +
             " right outer join " + EVENT_S5 + ".win:length(1000) as s5 on s2.p20 = s5.p50 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -133,7 +136,7 @@ public class Test6StreamOuterJoin extends TestCase
             " right outer join " + EVENT_S5 + ".win:length(1000) as s5 on s2.p20 = s5.p50 " +
             " right outer join " + EVENT_S4 + ".win:length(1000) as s4 on s2.p20 = s4.p40 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -157,7 +160,7 @@ public class Test6StreamOuterJoin extends TestCase
             " right outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 " +
             " right outer join " + EVENT_S3 + ".win:length(1000) as s3 on s1.p10 = s3.p30 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -181,7 +184,7 @@ public class Test6StreamOuterJoin extends TestCase
             " right outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 " +
             " right outer join " + EVENT_S3 + ".win:length(1000) as s3 on s1.p10 = s3.p30 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();

@@ -39,6 +39,10 @@ public class TestDTNested extends TestCase {
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+    }
+
     public void testCalOps() {
 
         String[] fields = "val0,val1,val2".split(",");

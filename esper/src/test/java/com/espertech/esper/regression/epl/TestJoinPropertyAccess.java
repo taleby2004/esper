@@ -31,7 +31,11 @@ public class TestJoinPropertyAccess extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
     }
-    
+
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testRegularJoin()
     {
         SupportBeanCombinedProps combined = SupportBeanCombinedProps.makeDefaultBean();

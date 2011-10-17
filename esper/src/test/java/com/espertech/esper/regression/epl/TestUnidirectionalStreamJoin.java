@@ -34,6 +34,10 @@ public class TestUnidirectionalStreamJoin extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void test2TableJoinGrouped()
     {
         String stmtText = "select irstream symbol, count(*) as cnt " +

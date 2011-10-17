@@ -30,7 +30,6 @@ public class TestAggregateRowPerEventDistinct extends TestCase
 
     private EPServiceProvider epService;
     private SupportUpdateListener testListener;
-    private EPStatement selectTestView;
 
     public void setUp()
     {
@@ -39,13 +38,17 @@ public class TestAggregateRowPerEventDistinct extends TestCase
         epService.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        testListener = null;
+    }
+
     public void testSumOneView()
     {
         // Every event generates a new row, this time we sum the price by symbol and output volume
         String viewExpr = "select irstream symbol, sum(distinct volume) as volSum " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) ";
 
-        selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
         // assert select result type

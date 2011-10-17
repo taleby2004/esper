@@ -26,7 +26,6 @@ import com.espertech.esper.client.EventBean;
 public class Test3StreamOuterJoinVarC extends TestCase
 {
     private EPServiceProvider epService;
-    private EPStatement joinView;
     private SupportUpdateListener updateListener;
 
     private final static String EVENT_S0 = SupportBean_S0.class.getName();
@@ -38,6 +37,10 @@ public class Test3StreamOuterJoinVarC extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
         updateListener = new SupportUpdateListener();
+    }
+
+    protected void tearDown() throws Exception {
+        updateListener = null;
     }
 
     public void testOuterInnerJoin_root_s0()
@@ -52,7 +55,7 @@ public class Test3StreamOuterJoinVarC extends TestCase
             " right outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 " +
             " right outer join " + EVENT_S2 + ".win:length(1000) as s2 on s0.p00 = s2.p20 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -70,7 +73,7 @@ public class Test3StreamOuterJoinVarC extends TestCase
             " left outer join " + EVENT_S0 + ".win:length(1000) as s0 on s0.p00 = s1.p10 " +
             " right outer join " + EVENT_S2 + ".win:length(1000) as s2 on s0.p00 = s2.p20 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
@@ -88,7 +91,7 @@ public class Test3StreamOuterJoinVarC extends TestCase
             " left outer join " + EVENT_S0 + ".win:length(1000) as s0 on s0.p00 = s2.p20 " +
             " right outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 ";
 
-        joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
 
         runAsserts();
