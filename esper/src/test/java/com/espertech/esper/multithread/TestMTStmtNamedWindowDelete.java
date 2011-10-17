@@ -42,6 +42,11 @@ public class TestMTStmtNamedWindowDelete extends TestCase
         engine.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listenerWindow = null;
+        listenerConsumer = null;
+    }
+
     public void testNamedWindow() throws Exception
     {
         EPStatement stmtWindow = engine.getEPAdministrator().createEPL(

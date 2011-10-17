@@ -28,7 +28,6 @@ import java.util.concurrent.*;
 public class TestMTStmtListenerCreateStmt extends TestCase
 {
     private EPServiceProvider engine;
-    private SupportMTUpdateListener listener;
 
     public void setUp()
     {

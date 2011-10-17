@@ -411,6 +411,8 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
                 Thread.currentThread().interrupt();
             }
 
+            engine.getRuntime().initialize();
+
             engine.getServices().destroy();
         }
 

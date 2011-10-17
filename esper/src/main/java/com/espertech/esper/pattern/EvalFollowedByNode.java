@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalFollowedByNode extends EvalNodeBase
 {
-    private final EvalFollowedByFactoryNode factoryNode;
+    protected final EvalFollowedByFactoryNode factoryNode;
     private final EvalNode[] childNodes;
 
     public EvalFollowedByNode(PatternAgentInstanceContext context, EvalFollowedByFactoryNode factoryNode, EvalNode[] childNodes) {

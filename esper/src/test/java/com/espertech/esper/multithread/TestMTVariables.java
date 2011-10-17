@@ -64,6 +64,11 @@ public class TestMTVariables extends TestCase
         epService.getEPAdministrator().createEPL(stmtSetTwoText).addListener(listenerSetTwo);
     }
 
+    protected void tearDown() throws Exception {
+        listenerSetOne = null;
+        listenerSetTwo = null;
+    }
+
     public void testMTSetAtomicity() throws Exception
     {
         trySetAndReadAtomic(4, 2000);

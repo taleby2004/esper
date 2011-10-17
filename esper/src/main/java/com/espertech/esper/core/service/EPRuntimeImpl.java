@@ -1244,6 +1244,26 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         schedulePerStmtThreadLocal = null;
     }
 
+    public void initialize() {
+        matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
+        {
+            protected synchronized ArrayBackedCollection<FilterHandle> initialValue()
+            {
+                return new ArrayBackedCollection<FilterHandle>(100);
+            }
+        };
+
+        scheduleArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<ScheduleHandle>>()
+        {
+            protected synchronized ArrayBackedCollection<ScheduleHandle> initialValue()
+            {
+                return new ArrayBackedCollection<ScheduleHandle>(100);
+            }
+        };
+
+        threadWorkQueue = new ThreadWorkQueue();
+    }
+
     public void setUnmatchedListener(UnmatchedListener listener)
     {
         this.unmatchedListener = listener;

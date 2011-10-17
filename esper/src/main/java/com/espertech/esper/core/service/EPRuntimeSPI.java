@@ -8,7 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.core.service;
 
-import com.espertech.esper.client.*;
+import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.EPRuntime;
+import com.espertech.esper.client.EventBean;
 
 import java.util.Map;
 
@@ -83,4 +85,6 @@ public interface EPRuntimeSPI extends EPRuntime
 
     public void processThreadWorkQueue();
     public void dispatch();
+    public void initialize();
+
 }

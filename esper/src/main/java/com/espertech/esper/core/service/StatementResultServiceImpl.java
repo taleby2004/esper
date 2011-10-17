@@ -400,5 +400,11 @@ public class StatementResultServiceImpl implements StatementResultService
             return;
         }
         execute();
+
+        lastResults = new ThreadLocal<ArrayDeque<UniformPair<EventBean[]>>>() {
+            protected synchronized ArrayDeque<UniformPair<EventBean[]>> initialValue() {
+                return new ArrayDeque<UniformPair<EventBean[]>>();
+            }
+        };
     }
 }

@@ -40,6 +40,7 @@ public class TestMTStmtSubquery extends TestCase
 
     public void tearDown()
     {
+        listener = null;
         engine.destroy();
     }
 

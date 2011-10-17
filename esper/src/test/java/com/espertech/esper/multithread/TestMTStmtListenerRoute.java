@@ -33,7 +33,6 @@ import java.util.Collections;
 public class TestMTStmtListenerRoute extends TestCase
 {
     private EPServiceProvider engine;
-    private SupportMTUpdateListener listener;
 
     public void setUp()
     {

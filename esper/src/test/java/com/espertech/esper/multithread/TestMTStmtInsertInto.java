@@ -43,6 +43,10 @@ public class TestMTStmtInsertInto extends TestCase
         engine.initialize();
     }
 
+    protected void tearDown() throws Exception {
+        listener = null;
+    }
+
     public void testInsertInto() throws Exception
     {
         engine.getEPAdministrator().createEPL(

@@ -84,6 +84,10 @@ public class EvalFollowedByFactoryNode extends EvalNodeFactoryBase
         opType = hasEngineWidePatternCount ? EvalFollowedByNodeOpType.MAX_POOL : EvalFollowedByNodeOpType.MAX_PLAIN;
     }
 
+    public EvalFollowedByNodeOpType getOpType() {
+        return opType;
+    }
+
     public int getMax(int position) {
         Integer cached = cachedMaxPerChild[position];
         if (cached != null) {
