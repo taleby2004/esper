@@ -21,6 +21,7 @@
     <!ENTITY appendix_outputspec SYSTEM "modules/appendix_outputspec.xml">
     <!ENTITY appendix_keywords SYSTEM "modules/appendix_keywords.xml">
 	<!ENTITY devlifecycle SYSTEM "modules/devlifecycle.xml">
+	<!ENTITY context SYSTEM "modules/context.xml">
 ]>
 <book lang="en">
 	<bookinfo>
@@ -114,6 +115,8 @@
     &event_representation;
 
     &processingmodel;
+
+    &context;
 
     &epl;
 

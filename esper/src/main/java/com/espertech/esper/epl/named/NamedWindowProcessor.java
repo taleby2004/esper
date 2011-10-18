@@ -91,6 +91,13 @@ public class NamedWindowProcessor
         instances.remove(instance.getAgentInstanceId());
     }
 
+    public long getProcessorRowCountDefaultInstance() {
+        if (instanceNoContext != null) {
+            return instanceNoContext.getCountDataWindow();
+        }
+        return -1;
+    }
+
     public NamedWindowProcessorInstance getProcessorInstance(AgentInstanceContext agentInstanceContext) {
         if (contextName == null) {
             return instanceNoContext;

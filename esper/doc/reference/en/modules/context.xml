@@ -1,0 +1,401 @@
+<chapter id="context">
+
+    <title>Context and Context Partitions</title>
+
+    <sect1 id="context_intro" revision="1">
+        <title>Introduction</title>
+        
+        <para>
+			This section discusses the notion of context and its role in the Esper event processing language (EPL).
+        </para>
+        
+        <para>
+           When you look up the word <emphasis>context</emphasis> in a dictionary, you may find: Context is the set of circumstances or facts that surround a particular event, situation, etc.. 
+        </para>
+        
+        <para>
+          Context-dependent event processing occurs frequently: For example, consider a requirement that monitors banking transactions. For different customers your analysis considers customer-specific aggregrations, patterns or data windows. In this example the context of detection is the customer. For a given customer you may want to analyze the banking transactions of that customer by using aggregations, data windows, patterns including other EPL constructs.
+        </para>
+        
+        <para>
+          In a second example, consider traffic monitoring to detect speed violations. Assume the speed limit must be enforced only between 9 am and 5 pm. The context of detection is of temporal nature.
+        </para>
+        
+        <para>
+           A context takes a cloud of events and classifies them into one or more sets. These sets are called <emphasis>context partitions</emphasis>. An event processing operation that is associated with a context operates on each of these context partitions independently. (Credit: Taken from the book "Event Processing in Action" by Opher Etzion and Peter Niblett.)
+        </para>
+
+        <para>
+          A context may result in one or more context partitions. In the banking transaction example there is a context partition per customer. In the traffic monitoring example there is a single context partition that exists only between 9 am and 5 pm and does not exist outside of that daily time period.
+        </para>
+        
+        <para>
+          In an event processing glossary you may find the term <emphasis>event processing agent</emphasis>. An EPL statement is an <emphasis>event processing agent</emphasis>.  An alternative term for context partition is <emphasis>event processing agent instance</emphasis>. 
+        </para>
+
+		<para>
+          Esper EPL allows you to declare a context explicitly via the <literal>create context</literal> syntax introduced below.
+		</para>
+		
+		<para>
+		  After you have declared a context, one or more EPL statements can refer to that context by prepending the EPL with the optional <literal>context <emphasis>name</emphasis></literal> syntax.
+		  When an EPL statement refers to a context, all EPL-statement related state such as aggregations, patterns or data windows etc. exists once per context partition.
+		</para>
+		
+		<para>
+		  If an EPL statement does not declare a context, it implicitly has a single context partition. The single context partition lives as long as the EPL statement is started and ends when the EPL statement is stopped.
+		</para>
+		
+		<para>
+		  Variables are global state and are visible across context partitions. The same is true for event types and external data.
+		</para>
+		
+		<para>
+		   For locking and threading related information please see <xref linkend="api-threading"/>. For performance related tuning please refer to <xref linkend="performance"/>.
+		</para>		
+	</sect1>
+	
+    <sect1 id="context_decl" revision="1">
+        <title>Context Declaration</title>
+                
+		<para>
+			The <literal>create context</literal> statement declares a context by specifying a context name and context dimension information.
+		</para>
+
+		<para>
+			A context declaration by itself does not consume any resources or perform any logic until your application starts at least one statement that refers to that context. Until then the context is inactive and not in use.
+		</para>
+
+		<para>
+			When your application creates or starts the first statement that refers to the context, the engine activates the context.
+		</para>
+
+		<para>
+			As soon as your application stop or destroys all statements that refer to the context, the context becomes inactive again.
+		</para>
+
+		<para>
+		   When your application stops or destroys a statement that refers to a context, the context partitions associated to that statement also end (context partitions associated to other started statements live on).
+		</para>
+
+		<para>
+		   When your application stops or destroys the statement that declared the context and does not also stop or destroy any statements that refer to the context, the context partitions associated to each such statement do not end.
+		</para>
+
+		<para>
+			When your application destroys the statement that declared the context and destroys all statements that refer to that context then the engine removes the context declaration entirely.
+		</para>
+		
+		<para>
+			The <literal>create context</literal> statement posts no output events to listeners or subscribers and does not return any rows when iterated.
+		</para>
+		
+		<para>
+		   Each of the context declarations makes available a set of built-in context properties. You may select these context properties for output or use them in any of the statement expressions. Refer to the context property as <literal>context.<emphasis>property_name</emphasis></literal>, 
+		   wherein <emphasis>property_name</emphasis> refers to the name of the built-in context property.
+		</para>
+
+		<sect2 id="context_def_keyed" revision="1">
+			<title>Keyed Segmented Context</title>
+			
+			<para>
+				  This context assigns events to context partitions based on the values of one or more event properties, using the value of these property(s) as a key that picks a unique context partition directly. Each event thus belongs to exactly one context partition, or zero context partitions if the event does not match the optional filter predicate expression(s).
+			</para>
+
+			<para>
+				The syntax for creating a keyed segmented context is as follows: 
+			</para>
+				<synopsis>create context <emphasis>context_name</emphasis> partition by 
+  <emphasis>event_property</emphasis> [and <emphasis>event_property</emphasis> [and ...]] from <emphasis>stream_def</emphasis>
+  [, <emphasis>event_property</emphasis> [...] from <emphasis>stream_def</emphasis>]
+  [, ...]</synopsis>
+						
+			<para>
+				The <emphasis>context_name</emphasis> you assign to the context can be any identifier.
+			</para>
+				
+			<para>
+				The <emphasis>event_property</emphasis> is the name(s) of the event properties that provide the value(s) to pick a unique partition. Multiple event property names are separated by the <literal>and</literal> keyword.
+			</para>
+				
+			<para>
+				The <emphasis>stream_def</emphasis> is a stream definition which consists of an event type name optionally followed by parenthesis that contain filter expressions. If providing filter expressions, only events matching the provided filter expressions for that event type are considered by context partitions.
+			</para>
+
+			<para>				
+				You may list multiple event properties for each stream definition. You may list multiple stream definitions. Please refer to usage guidelines below when specifying multiple event properties and/or multiple stream definitions.
+			</para>
+			
+			<para>
+				The next statement creates a context <literal>SegmentedByCustomer</literal> that consider the value of the <literal>custId</literal> property of the <literal>BankTxn</literal> event type to pick the context partition to assign events to:
+			</para>
+			<programlisting><![CDATA[create context SegmentedByCustomer partition by custId from BankTxn]]></programlisting>
+			
+			<para>
+			    The following statement refers to the context created as above to compute a total withdrawal amount per account for each customer:
+			</para>
+			<programlisting><![CDATA[context SegmentedByCustomer
+select custId, account, sum(amount) from BankTxn group by account]]></programlisting>
+			
+			<para>
+			    The following statement refers to the context created as above and detects a withdrawal of more then 400 followed by a second withdrawal of more then 400 that occurs within 10 minutes of the first withdrawal, all for the same customer:
+			</para>
+			<programlisting><![CDATA[context SegmentedByCustomer
+select * from pattern [
+  every a=BankTxn(amount > 400) -> b=BankTxn(amount > 400) where timer:within(10 minutes)
+]]]></programlisting>
+
+			<para>
+				The EPL statement that refers to a keyed segmented context must have at least one filter expression, at any place within the EPL statement, that looks for events of any of the event types listed in the context declaration.
+			</para>
+
+			<para>
+			    For example, the following is not valid:
+			</para>
+			<programlisting><![CDATA[// Neither LoginEvent nor LogoutEvent are listed in the context declaration
+context SegmentedByCustomer
+select * from pattern [every a=LoginEvent -> b=LogoutEvent where timer:within(10 minutes)]]]></programlisting>
+			
+			<sect3 id="context_def_keyed_multitype" revision="1">
+				<title>Multiple Stream Definitions</title>
+				<para>				
+					If the context declaration lists multiple streams, each event type must be unrelated: You may not list the same event type twice and you may not list a sub- or supertype of any event type already listed.
+				</para>
+				
+				<para>
+					The following is not a valid declaration since the <literal>BankTxn</literal> event type is listed twice:
+				</para>
+				<programlisting><![CDATA[// Not valid
+create context SegmentedByCustomer partition by custId from BankTxn, account from BankTxn]]></programlisting>
+
+				<para>
+					If the context declaration lists multiple streams, the number of event properties provided for each event type must also be the same. The value type returned by event properties of each event type must match within the respective position it is listed in, i.e. the first property listed for each event type must have the same type, the second property listed for each event type must have the same type, and so on.
+				</para>
+	
+				<para>
+					The following is not a valid declaration since the customer id of <literal>BankTxn</literal> and login time of <literal>LoginEvent</literal> are not the same type:
+				</para>
+				<programlisting><![CDATA[// Invalid: Type mismatch between properties
+create context SegmentedByCustomer partition by custId from BankTxn, loginTime from LoginEvent]]></programlisting>
+
+				<para>
+					The next statement creates a context <literal>SegmentedByCustomer</literal> that also considers <literal>LoginEvent</literal> and <literal>LogoutEvent</literal>:
+				</para>
+				<programlisting><![CDATA[create context SegmentedByCustomer partition by 
+  custId from BankTxn, loginId from LoginEvent, loginId from LogoutEvent]]></programlisting>
+
+				<para>
+				  As you may have noticed, the above example refers to <literal>loginId</literal> as the event property name for <literal>LoginEvent</literal> and <literal>LogoutEvent</literal> events. The assumption is that the <literal>loginId</literal> event property of the login and logout events has the same type and carries the same exact value as the <literal>custId</literal> of bank transaction events, thereby allowing all events of the three event types to apply to the same customer-specific context partition.
+				</para>
+			</sect3>
+				
+			<sect3 id="context_def_keyed_filter" revision="1">
+				<title>Filters</title>
+				
+				<para>
+				  You may add a filter expression to each of the event types listed. The engine applies the filter expression to the EPL statement that refers to the context and to the same event type.
+				</para>
+				
+				<para>
+					The next statement creates a context <literal>SegmentedByCustomer</literal> that does not consider login events that indicate that the login failed.
+				</para>
+				<programlisting><![CDATA[create context SegmentedByCustomer partition by 
+  custId from BankTxn, loginId from LoginEvent(failed=false)]]></programlisting>
+			</sect3>
+			
+			<sect3 id="context_def_keyed_multiprop" revision="1">
+				<title>Multiple Properties Per Event Type</title>
+
+				<para>
+					You may assign events to context partitions based on the values of two or more event properties. The engine thus uses the combination of values of these properties to pick a context partition.
+				</para>
+
+				<para>
+					An example context declaration follows:
+				</para>
+				<programlisting><![CDATA[create context ByCustomerAndAccount partitioned by custId, account from BankTxn]]></programlisting>
+
+				<para>
+					The next statement refers to the context and and computes a total withdrawal amount, per account and customer:
+				</para>
+				<programlisting><![CDATA[context ByCustomerAndAccount select custId, account, sum(amount) from BankTxn]]></programlisting>
+
+				<para>
+				  As you can see, the above statement does not need to specify <literal>group by</literal> clause to aggregate per customer and account, since events of each unique combination of customer id and account are assigned to separate context partitions.
+				</para>
+			</sect3>
+
+			<sect3 id="context_def_keyed_builtin" revision="1">
+				<title>Built-In Context Properties</title>
+				  
+				<para>
+				  The following context properties are available in your EPL statement when it refers to a keyed segmented context:
+				</para>
+
+				<table frame="topbot">
+					<title>Keyed Segmented Context Properties</title>
+					<tgroup cols="2">
+						<colspec colwidth="0.20*"/>
+						<colspec colwidth="1*"/>
+						<thead>
+							<row>
+								<entry>Name</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+								<entry><literal>name</literal></entry>
+								<entry>The string-type context name.</entry>
+							</row>
+							<row>
+								<entry><literal>id</literal></entry>
+								<entry>The integer-type internal context id that the engine assigns to the context partition.</entry>
+							</row>
+							<row>
+								<entry><literal>key1</literal></entry>
+								<entry>The event property value for the first key.</entry>
+							</row>
+							<row>
+								<entry><literal>key<emphasis>N</emphasis></literal></entry>
+								<entry>The event property value for the Nth key.</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+		
+				<para>
+					Assume the keyed segmented context is declared as follows:
+				</para>
+				<programlisting><![CDATA[create context ByCustomerAndAccount partitioned by custId, account from BankTxn]]></programlisting>
+
+				<para>
+					You may, for example, select the context properties as follows:
+				</para>
+				<programlisting><![CDATA[context ByCustomerAndAccount
+  select context.name, context.id, context.key1, context.key2 from BankTxn]]></programlisting>
+			</sect3>
+
+			<sect3 id="context_def_keyed_additional" revision="1">
+				<title>Additional Considerations</title>
+				
+				<para>
+				  This section discuss the impact of contexts on joins to provide further samples of use and deepen the understanding of context partitions.
+				</para>
+
+				<para>
+				    Consider a context declared as follows:
+				</para>
+				<programlisting><![CDATA[create context ByCust partitioned by custId from BankTxn]]></programlisting>
+								
+				<para>
+				  The following statement matches, within the same customer id, the current event with the last 30 minutes of events to determine those events that match amounts:
+				</para>
+				<programlisting><![CDATA[context ByCust 
+  select * from BankTxn.std:lastevent() unidirectional t1, BankTxn.win:time(30) t2 
+  where t1.amount = t2.amount]]]></programlisting>
+
+				<para>
+				  Note that the <literal>where</literal>-clause in the join above does not mention customer id. Since each <literal>BankTxn</literal> applies to a specific context partition the join evaluates within that single context partition.
+				</para>
+				
+				<para>
+				  Consider the next statement that matches a security event with the last 30 minutes of transaction events for each customer:
+				</para>
+				<programlisting><![CDATA[context ByCust
+  select * from SecurityEvent.std:lastevent() unidirectional, BankTxn.win:time(30) t2 
+  where t1.customerName = t2.customerName]]]></programlisting>  
+  
+				  <para>
+				    When a security event comes in, it applies to all context partitions and not any specific context partition, since the <literal>SecurityEvent</literal> event type is not part of the context declaration.
+				  </para>
+			</sect3>
+			
+		</sect2>
+
+		<sect2 id="context_def_category" revision="1">
+			<title>Category Segmented Context</title>
+			
+			<para>
+				  This context assigns events to context partitions based on the values of one or more event properties, using a predicate expression(s) to define context partition membership. Each event can thus belong to zero, one or many context partitions depending on the outcome of the predicate expression(s).
+			</para>
+		</sect2>
+
+		<sect2 id="context_def_tempfixed" revision="1">
+			<title>Fixed Temporal Context</title>
+			
+			<para>
+				  The fixed temporal interval context is used to represent either a single fixed-length time period or a fixed-length time period that repeats in a regular fashion. These time periods do not overlap therefore the engine maintains a single context partition that exists for the time period of the context only.
+			</para>
+		</sect2>
+
+		<sect2 id="context_def_initiated" revision="1">
+			<title>Initiated Temporal Context</title>
+			
+			<para>
+				  This context initates a new context partition when an event arrives or a pattern occurs, and terminates the context partition when a given time interval ended. The engine maintains as many context partitions as the event filter or pattern expression matched, and discards context partitions that expire.
+			</para>
+		</sect2>
+     </sect1>
+
+    <sect1 id="context_other" revision="1">
+        <title>Partitioning Without Context Declaration</title>
+        
+		<para>
+		  You do not need to declare a context to partition data windows, aggregation values or patterns themselves individually. You may mix-and-match partitioning as needed.
+		</para>
+		
+		<para>
+		  The table below outlines relevant partitioning syntax supported by EPL:
+		</para>
+
+		<table frame="topbot">
+			<title>Partition in EPL without the use of Context Declaration</title>
+			<tgroup cols="3">
+				<colspec colwidth="0.30*"/>
+				<colspec colwidth="0.8*"/>
+				<colspec colwidth="1*"/>
+				<thead>
+					<row>
+						<entry>Partition Type</entry>
+						<entry>Description</entry>
+						<entry>Example</entry>
+					</row>
+				</thead>
+				<tbody>
+					<row>
+						<entry>Grouped Data Window</entry>
+						<entry><para>Partitions at the level of data window, only applies to appended data window(s).</para><para>Syntax: <literal>std:groupby(...)</literal></para></entry>
+						<entry><programlisting><![CDATA[// Length window of 2 events per customer
+select * from
+  BankTxn.std:groupwin(custId).win:length(2)]]></programlisting></entry>
+					</row>
+					<row>
+						<entry>Grouped Aggregation</entry>
+						<entry><para>Partitions at the level of aggregation, only applies to any aggregations.</para><para>Syntax: <literal>group by ....</literal></para></entry>
+						<entry><programlisting><![CDATA[select avg(price), window(*)
+  from BankTxn group by custId]]></programlisting></entry>
+					</row>
+					<row>
+						<entry>Pattern</entry>
+						<entry><para>Partitions pattern subexpressions.</para><para>Syntax: <literal>every</literal> or <literal>every-distinct</literal></para></entry>
+						<entry><programlisting><![CDATA[select * from pattern [
+  every a=BankTxn -> BankTxn(custId = a.custId)...]]]></programlisting></entry>
+					</row>
+					<row>
+						<entry>Match-Recognize</entry>
+						<entry><para>Partitions match-recognize patterns.</para><para>Syntax: <literal>partition by</literal></para></entry>
+						<entry><programlisting><![CDATA[select * from match_recognize 
+  ... partition by custId]]></programlisting></entry>
+					</row>
+					<row>
+						<entry>Join and Subquery</entry>
+						<entry><para>Partitions join and subqueries.</para><para>Syntax: <literal>where ...</literal></para></entry>
+						<entry><programlisting><![CDATA[select * from ... where a.custId = b.custId]]></programlisting></entry>
+					</row>
+				</tbody>
+			</tgroup>				
+		</table>
+	</sect1>
+     
+</chapter>
