@@ -2062,9 +2062,9 @@ config.getEngineDefaults().getExecution().setPrioritized(true);]]></programlisti
 			</sect3>
 
 			<sect3 id="config-engine-execution-fairlock" revision="1">
-				<title>Statement Fair Locking</title>
+				<title>Context Partition Fair Locking</title>
 				<para>
-					By default Esper configures statement-level locks without fair locking. If your application is multi-threaded and performs very frequent reads via iterator or fire-and-forget queries, you may need to set this flag to prevent lock starvation in the face of concurrent reads and writes. Please consult the Java API documentation under <literal>ReentrantReadWriteLock</literal> and <emphasis>Fair Mode</emphasis> for more information.
+					By default Esper configures context partition locks without fair locking. If your application is multi-threaded and performs very frequent reads via iterator or fire-and-forget queries, you may need to set this flag to prevent lock starvation in the face of concurrent reads and writes. Please consult the Java API documentation under <literal>ReentrantReadWriteLock</literal> and <emphasis>Fair Mode</emphasis> for more information.
 				</para>
 		
 				<para>
@@ -2088,7 +2088,7 @@ config.getEngineDefaults().getExecution().setFairlock(true);]]></programlisting>
 			<sect3 id="config-engine-execution-disablelock" revision="1">
 				<title>Disable Locking</title>
 				<para>
-					By default Esper configures statement-level locks as required after analyzing your EPL statements. You may disable statement-level locks engine-wise using the setting described here. Use the <literal>@NoLock</literal> annotation instead to disable locking for a given statement or named window only.
+					By default Esper configures context partition locks as required after analyzing your EPL statements. You may disable context partition locks engine-wide using the setting described here. Use the <literal>@NoLock</literal> annotation instead to disable locking for a given statement or named window only.
 				</para>
 		
 				<para>
@@ -2097,7 +2097,7 @@ config.getEngineDefaults().getExecution().setFairlock(true);]]></programlisting>
 				</para>
 
 				<para>
-					 The XML configuration to disable statement-level locking is as follows:
+					 The XML configuration to disable context level locking is as follows:
 				</para>
 	
 				<programlisting><![CDATA[<engine-settings>

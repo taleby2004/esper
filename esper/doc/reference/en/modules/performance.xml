@@ -405,11 +405,19 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 			<title>High-Arrival-Rate Streams and Single Statements</title>
 
 			<para>
-				A statement is associated with certain statement state that consists of current aggregation values, partial pattern matches, data windows or other view state depending on whether your statement uses such constructs. When an engine receives events it updates statement state under locking such that statement state remains consistent under concurrent multi-threaded access.
+				A context partition is associated with certain context partition state that consists of current aggregation values, partial pattern matches, data windows or other view state depending on whether your statement uses such constructs. When an engine receives events it updates context partition state under locking such that context partition state remains consistent under concurrent multi-threaded access.
 			</para>
 			
 			<para>
-				For high-volume streams, the locking required to protected statement state may slow down or introduce blocking for very high arrival rates of events that apply to the very same statement and its state. You may want to consider splitting a single statement into multiple statements that each look for a certain subset of the high-arrival-rate stream. There is very little cost in terms of memory or CPU resources per statement, the engine can handle larger number of statements usually as efficiently as single statements.
+				For high-volume streams, the locking required to protected context partition state may slow down or introduce blocking for very high arrival rates of events that apply to the very same context partition and its state.
+			</para>
+
+			<para>
+				Your first choice should be to utilize a context that allows for multiple context partitions, such as the keyed segmented context or the category segmented context.
+			</para>
+
+			<para>
+				Your second choice is to split the statement into multiple statements that each perform part of the intended function or that each look for a certain subset of the high-arrival-rate stream. There is very little cost in terms of memory or CPU resources per statement, the engine can handle larger number of statements usually as efficiently as single statements.
 			</para>
 
 			<para>
@@ -417,21 +425,30 @@ config.getEngineDefaults().getThreading().setInsertIntoDispatchPreserveOrder(fal
 			</para>
 			<programlisting><![CDATA[// less effective in a highly threaded environment 
 select venue, ccyPair, side, sum(qty)
-from CumulativePrice.std:groupwin(ccyPair,side) as w
-where w.side='O']]></programlisting>
+from CumulativePrice
+where side='O'
+group by venue, ccyPair, side]]></programlisting>
 
 			<para>
-				The engine will protect state of a statements by a lock on the statement level, as discussed in the API section. In highly threaded applications threads may block on the single statement.
+				The engine protects state of each context partition by a separate lock for each context partition, as discussed in the API section. In highly threaded applications threads may block on a specific context partition. You would therefore want to use multiple context partitions.
 			</para>
 
 			<para>
-				Consider creating a statement per currency instead, for example:			
+				Consider creating a keyed segmented context, for example:
 			</para>
-			<programlisting><![CDATA[select venue, ccyPair, side, sum(qty) from CumulativePrice(side='O', ccyPair='USD')
-select venue, ccyPair, side, sum(qty) from CumulativePrice(side='O', ccyPair='EURO')]]></programlisting>
+			<programlisting><![CDATA[create context MyContext partition by venue, ccyPair, side from CumulativePrice(side='O')]]></programlisting>
 
 			<para>
-			  For testing purposes or if your application controls concurrency, you may disable statement-level locking, see <xref linkend="config-engine-execution-disablelock"/>.
+				The keyed segmented context instructs the engine to employ a context partition per <literal>venue, ccyPair, side</literal> key combination. As locking is on the level of context partition, the locks taken by the engine are very fine grained allowing for highly concurrent processing.
+			</para>
+			
+			<para>
+				The new statement that refers to the context as created above is:
+			</para>
+			<programlisting><![CDATA[context MyContext select venue, ccyPair, side, sum(qty) from CumulativePrice]]></programlisting>
+
+			<para>
+			  For testing purposes or if your application controls concurrency, you may disable context partition locking, see <xref linkend="config-engine-execution-disablelock"/>.
 			</para>
 		</sect2>
 
@@ -633,7 +650,7 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 			</para>
 
 			<para>
-				The <literal>@NoLock</literal> hint to remove statement-level locking (also read caution note) is described at <xref linkend="api-threading"/>.
+				The <literal>@NoLock</literal> hint to remove context partition locking (also read caution note) is described at <xref linkend="api-threading"/>.
 			</para>
 		</sect2>
 

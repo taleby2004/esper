@@ -1929,20 +1929,29 @@ select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10
 					Here is the syntax for the <literal>output</literal> clause that specifies a rate in time interval or number of events:
 				</para>
 				<synopsis>output [after <emphasis>suppression_def</emphasis>] 
-  [[all | first | last | snapshot] every <emphasis>output_rate</emphasis> [seconds | events]]</synopsis>
+  [[all | first | last | snapshot] every <emphasis>output_rate</emphasis> [seconds | events]]
+[and when terminated]</synopsis>
 
 				<para>
 					An alternate syntax specifies the time period between output as outlined in <xref linkend="epl-syntax-time-periods"/> :
 				</para>
 				<synopsis>output [after <emphasis>suppression_def</emphasis>] 
-  [[all | first | last | snapshot] every <emphasis>time_period</emphasis>]</synopsis>
+  [[all | first | last | snapshot] every <emphasis>time_period</emphasis>]
+[and when terminated]</synopsis>
 
 				<para>
 					A crontab-like schedule can also be specified. The schedule parameters follow the pattern observer parameters and are further described in <xref linkend="pattern-timer-at"/> :
 				</para>
 				<synopsis>output [after <emphasis>suppression_def</emphasis>] 
   [[all | first | last | snapshot] at 
-   (<emphasis>minutes, hours, days of month, months, days of week [, seconds]</emphasis>)]</synopsis>
+   (<emphasis>minutes, hours, days of month, months, days of week [, seconds]</emphasis>)]
+[and when terminated]</synopsis>
+
+				<para>
+					For use with contexts, in order to trigger output only when a context partition terminates, specify <literal>when terminated</literal> as further described in <xref linkend="context_outputterminated"/>:
+				</para>
+				<synopsis>output [after <emphasis>suppression_def</emphasis>] 
+  [[all | first | last | snapshot] when terminated]</synopsis>
 
 				<para>
 					Last, output can be controlled by an expression that may contain variables, user-defined functions and information about the number of collected events. Output that is controlled by an expression is discussed in detail below.
@@ -1984,6 +1993,10 @@ select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10
 
 				<para>
 					Please consult the <xref linkend="appendix_outputspec"/> for detailed information on insert and remove stream output for the various <literal>output</literal> clause keywords.
+				</para>
+				
+				<para>
+				  For use with contexts you may append the keywords <literal>and when terminated</literal> to trigger output at the rate defined and in addition trigger output when the context partition terminates. Please see <xref linkend="context_outputterminated"/> for details.
 				</para>
 				
 				<para>
@@ -5361,7 +5374,7 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 		</para>
 
 		<para>
-			 The engine guarantees consistency and atomicity of variable reads and writes on a statement-level (this is a soft guarantee, see below). Variables are optimized for fast read access and are also multithread-safe.
+			 The engine guarantees consistency and atomicity of variable reads and writes on the level of context partition (this is a soft guarantee, see below). Variables are optimized for fast read access and are also multithread-safe.
 		</para>		
 		
 		<para>
