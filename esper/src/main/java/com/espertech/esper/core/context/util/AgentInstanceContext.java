@@ -18,6 +18,12 @@ import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.StopCallback;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class AgentInstanceContext implements ExprEvaluatorContext {
 
@@ -26,6 +32,7 @@ public class AgentInstanceContext implements ExprEvaluatorContext {
     private final int[] agentInstanceIds;
     private final AgentInstanceFilterProxy agentInstanceFilterProxy;
     private final EventBean agentInstanceProperties;
+    private final Set<StopCallback> terminationCallbacks = new HashSet<StopCallback>();
 
     public AgentInstanceContext(StatementContext statementContext, EPStatementAgentInstanceHandle epStatementAgentInstanceHandle, int[] agentInstanceIds, AgentInstanceFilterProxy agentInstanceFilterProxy, EventBean agentInstanceProperties) {
         this.statementContext = statementContext;
@@ -65,5 +72,9 @@ public class AgentInstanceContext implements ExprEvaluatorContext {
 
     public EventBean getContextProperties() {
         return agentInstanceProperties;
+    }
+
+    public Set<StopCallback> getTerminationCallbacks() {
+        return terminationCallbacks;
     }
 }

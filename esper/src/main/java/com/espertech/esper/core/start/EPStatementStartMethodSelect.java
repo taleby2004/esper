@@ -24,10 +24,7 @@ import com.espertech.esper.core.context.subselect.SubSelectActivationCollection;
 import com.espertech.esper.core.context.subselect.SubSelectStrategyCollection;
 import com.espertech.esper.core.context.subselect.SubSelectStrategyFactoryDesc;
 import com.espertech.esper.core.context.subselect.SubSelectStrategyHolder;
-import com.espertech.esper.core.context.util.AgentInstanceContext;
-import com.espertech.esper.core.context.util.ContextMergeView;
-import com.espertech.esper.core.context.util.ContextPropertyRegistry;
-import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.context.util.*;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.StatementContext;
@@ -376,7 +373,7 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
             finalViewable = resultOfStart.getFinalView();
             stopStatementMethod = new EPStatementStopMethod() {
                 public void stop() {
-                    resultOfStart.getStopCallback().stop();
+                    StatementAgentInstanceUtil.stopSafe(resultOfStart.getStopCallback(), statementContext);
                     stopMethod.stop();
                 }
             };

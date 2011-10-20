@@ -29,11 +29,27 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayDeque;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class StatementAgentInstanceUtil {
 
     private static final Log log = LogFactory.getLog(EPStatementStopMethodImpl.class);
+
+    public static void stopSafe(Set<StopCallback> terminationCallbacks, List<StopCallback> stopCallbacks, StatementContext statementContext) {
+        StopCallback[] terminationArr = terminationCallbacks.toArray(new StopCallback[terminationCallbacks.size()]);
+        stopSafe(terminationArr, statementContext);
+
+        StopCallback[] stopArr = stopCallbacks.toArray(new StopCallback[stopCallbacks.size()]);
+        stopSafe(stopArr, statementContext);
+    }
+
+    public static void stopSafe(StopCallback[] stopMethods, StatementContext statementContext) {
+        for (StopCallback stopCallback : stopMethods) {
+            stopSafe(stopCallback, statementContext);
+        }
+    }
 
     public static void stopSafe(StopCallback stopMethod, StatementContext statementContext) {
         try {
@@ -173,5 +189,4 @@ public class StatementAgentInstanceUtil {
             servicesContext.getExceptionHandlingService().handleException(ex, agentInstanceContext.getEpStatementAgentInstanceHandle());
         }
     }
-
 }

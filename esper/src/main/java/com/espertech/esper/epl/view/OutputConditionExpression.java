@@ -17,7 +17,7 @@ import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.util.ExecutionPathDebugLog;
-import com.espertech.esper.view.StatementStopCallback;
+import com.espertech.esper.util.StopCallback;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * Output condition for output rate limiting that handles when-then expressions for controlling output.
  */
-public class OutputConditionExpression extends OutputConditionBase implements OutputCondition, VariableChangeCallback
+public class OutputConditionExpression extends OutputConditionBase implements OutputCondition, VariableChangeCallback, StopCallback
 {
     private static final Log log = LogFactory.getLog(OutputConditionExpression.class);
     private final AgentInstanceContext agentInstanceContext;
@@ -43,6 +43,7 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
     private int totalNewEventsCount;
     private int totalOldEventsCount;
     private Long lastOutputTimestamp;
+    private EPStatementHandleCallback scheduleHandle;
 
     public OutputConditionExpression(OutputCallback outputCallback, final AgentInstanceContext agentInstanceContext, OutputConditionExpressionFactory parent) {
         super(outputCallback);
@@ -65,9 +66,8 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
             {
                 final VariableReader reader = agentInstanceContext.getStatementContext().getVariableService().getReader(variableName);
                 agentInstanceContext.getStatementContext().getVariableService().registerCallback(reader.getVariableNumber(), this);
-                agentInstanceContext.getStatementContext().getStatementStopService().addSubscriber(new StatementStopCallback() {
-                    public void statementStopped()
-                    {
+                agentInstanceContext.getTerminationCallbacks().add(new StopCallback() {
+                    public void stop() {
                         agentInstanceContext.getStatementContext().getVariableService().unregisterCallback(reader.getVariableNumber(), OutputConditionExpression.this);
                     }
                 });
@@ -101,6 +101,13 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
         if ((isOutput) && (!isCallbackScheduled))
         {
             scheduleCallback();
+        }
+    }
+
+    public void stop() {
+        if (scheduleHandle != null) {
+            agentInstanceContext.getStatementContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
+            scheduleHandle = null;
         }
     }
 
@@ -144,8 +151,9 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
                 resetBuiltinProperties();
             }
         };
-        EPStatementHandleCallback handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
-        agentInstanceContext.getStatementContext().getSchedulingService().add(0, handle, scheduleSlot);
+        scheduleHandle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
+        agentInstanceContext.getStatementContext().getSchedulingService().add(0, scheduleHandle, scheduleSlot);
+        agentInstanceContext.getTerminationCallbacks().add(this);
 
         // execute assignments
         if (parent.getVariableReadWritePackage() != null)

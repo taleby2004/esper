@@ -913,7 +913,7 @@ createContextDetail
 	;
 	
 createContextFilter
-	:	eventFilterExpression AS i=IDENT
+	:	eventFilterExpression AS? i=IDENT
 		-> ^(STREAM_EXPR eventFilterExpression $i)
 	;
 

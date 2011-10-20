@@ -22,6 +22,7 @@ import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.map.MapEventBean;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 
 import java.util.ArrayDeque;
@@ -31,7 +32,7 @@ import java.util.Set;
 /**
  * This view is a moving window extending the into the past until the expression passed to it returns false.
  */
-public final class ExpressionWindowView extends ViewSupport implements DataWindowView, CloneableView, StoppableView, VariableChangeCallback {
+public final class ExpressionWindowView extends ViewSupport implements DataWindowView, CloneableView, StoppableView, VariableChangeCallback, StopCallback {
     public final static String CURRENT_COUNT = "current_count";
     public final static String OLDEST_TIMESTAMP = "oldest_timestamp";
     public final static String NEWEST_TIMESTAMP = "newest_timestamp";
@@ -75,9 +76,8 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
                 final VariableService variableService = agentInstanceContext.getStatementContext().getVariableService();
                 final VariableReader reader = variableService.getReader(variable);
                 agentInstanceContext.getStatementContext().getVariableService().registerCallback(reader.getVariableNumber(), this);
-                agentInstanceContext.getStatementContext().getStatementStopService().addSubscriber(new StatementStopCallback() {
-                    public void statementStopped()
-                    {
+                agentInstanceContext.getTerminationCallbacks().add(new StopCallback() {
+                    public void stop() {
                         variableService.unregisterCallback(reader.getVariableNumber(), ExpressionWindowView.this);
                     }
                 });
@@ -91,6 +91,7 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
             };
             scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
             scheduleHandle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
+            agentInstanceContext.getTerminationCallbacks().add(this);
         }
         else {
             scheduleSlot = null;
@@ -234,7 +235,16 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
         return this.getClass().getName();
     }
 
+    public void stopView() {
+        stopScheduleAndVar();
+        agentInstanceContext.getTerminationCallbacks().remove(this);
+    }
+
     public void stop() {
+        stopScheduleAndVar();
+    }
+
+    public void stopScheduleAndVar() {
         if (variableNames != null && !variableNames.isEmpty()) {
             for (String variable : variableNames) {
                 VariableReader reader = agentInstanceContext.getStatementContext().getVariableService().getReader(variable);
@@ -242,12 +252,13 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
                     agentInstanceContext.getStatementContext().getVariableService().unregisterCallback(reader.getVariableNumber(), this);
                 }
             }
-            
+
             if (agentInstanceContext.getStatementContext().getSchedulingService().isScheduled(scheduleHandle)) {
                 agentInstanceContext.getStatementContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
             }
         }
     }
+
 
     // Handle variable updates by scheduling a re-evaluation with timers
     public void update(Object newValue, Object oldValue) {

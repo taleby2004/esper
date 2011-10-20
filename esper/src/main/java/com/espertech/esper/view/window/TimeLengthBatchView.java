@@ -16,6 +16,7 @@ import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +36,7 @@ import java.util.Iterator;
  * <p>
  * The view starts the first interval when the view is created.
  */
-public final class TimeLengthBatchView extends ViewSupport implements CloneableView, StoppableView, DataWindowView {
+public final class TimeLengthBatchView extends ViewSupport implements CloneableView, StoppableView, StopCallback, DataWindowView {
     private static final Log log = LogFactory.getLog(TimeLengthBatchView.class);
 
     // View parameters
@@ -87,6 +88,8 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
             scheduleCallback();
             isCallbackScheduled = true;
         }
+
+        agentInstanceContext.getTerminationCallbacks().add(this);
     }
 
     public View cloneView()
@@ -274,7 +277,16 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
         agentInstanceContext.getStatementContext().getSchedulingService().add(msecIntervalSize, handle, scheduleSlot);
     }
 
+    public void stopView() {
+        stopSchedule();
+        agentInstanceContext.getTerminationCallbacks().remove(this);
+    }
+
     public void stop() {
+        stopSchedule();
+    }
+
+    public void stopSchedule() {
         if (handle != null) {
             agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }

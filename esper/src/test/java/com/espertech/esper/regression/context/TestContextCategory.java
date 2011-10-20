@@ -128,7 +128,7 @@ public class TestContextCategory extends TestCase {
 
     public void testSingleCategorySODAPrior() {
         String ctx = "CategorizedContext";
-        String eplCtx = "@Name('context')create context " + ctx + " as " +
+        String eplCtx = "@Name('context') create context " + ctx + " as " +
                 "group intPrimitive < 10 as cat1 " +
                 "from SupportBean";
         epService.getEPAdministrator().createEPL(eplCtx);

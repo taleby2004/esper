@@ -15,6 +15,7 @@ import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +27,7 @@ import java.util.LinkedHashSet;
 /**
  * Same as the {@link TimeBatchView}, this view also supports fast-remove from the batch for remove stream events.
  */
-public final class TimeBatchViewRStream extends ViewSupport implements CloneableView, StoppableView, DataWindowView {
+public final class TimeBatchViewRStream extends ViewSupport implements CloneableView, StoppableView, StopCallback, DataWindowView {
     // View parameters
     private final TimeBatchViewFactory timeBatchViewFactory;
     private final AgentInstanceViewFactoryChainContext agentInstanceContext;
@@ -75,6 +76,7 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
             scheduleCallback();
             isCallbackScheduled = true;
         }
+        agentInstanceContext.getTerminationCallbacks().add(this);
     }
 
     public View cloneView()
@@ -252,7 +254,16 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
         agentInstanceContext.getStatementContext().getSchedulingService().add(afterMSec, handle, scheduleSlot);
     }
 
+    public void stopView() {
+        stopSchedule();
+        agentInstanceContext.getTerminationCallbacks().remove(this);
+    }
+
     public void stop() {
+        stopSchedule();
+    }
+
+    public void stopSchedule() {
         if (handle != null) {
             agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }

@@ -734,10 +734,10 @@ public EventType getEventType() {
 			</itemizedlist>
 
 			<para>
-				The engine can provide a callback to the view indicating when a statement using the view is stopped. The callback is available to the view via the <literal>com.espertech.esper.view.StatementStopCallback</literal> interface. Your
-				view code must subscribe to the stop callback in order for the engine to invoke the callback:
+				Your view implementation can register a callback indicating when a statement using the view, or a context partition using the view, is stopped or terminated. Your
+				view code must implement, or provide an implementation, of the <literal>com.espertech.esper.util.StopCallback</literal> interface. Register the stop callback in order for the engine to invoke the callback:
 			</para>			
-			<programlisting><![CDATA[statementContext.getStatementStopService().addSubscriber(this);]]></programlisting>
+			<programlisting><![CDATA[agentInstanceContext.getTerminationCallbacks().add(this);]]></programlisting>
 
 			<para>
 				Please refer to the sample views for a code sample on how to implement <literal>iterator</literal> and <literal>cloneView</literal> methods.
@@ -803,8 +803,8 @@ public EventType getEventType() {
 				Your view must implement the <literal>com.espertech.esper.view.CloneableView</literal> interface to indicate your view may create new views. This code snippet shows a sample implementation of the <literal>cloneView</literal> method required by the interface:
 			</para>		
 			
-			<programlisting><![CDATA[public View cloneView(StatementContext statementContext) {
-  return new MyPlugInView(statementContext);	// pass any parameters along where
+			<programlisting><![CDATA[public View cloneView() {
+  return new MyPlugInView(...);	// pass any parameters along
 }]]></programlisting>
 
 		</sect2>
@@ -1100,7 +1100,7 @@ public EventType getEventType() {
 			<para>
 				The <literal>makeGuard</literal> method is called by the engine to create a new guard instance. The example <literal>makeGuard</literal> method shown below passes the maximum count of events to the guard instance. It also passes a <literal>Quitable</literal> implementation to the guard instance. The guard uses <literal>Quitable</literal> to indicate that the sub-expression contained within must stop (quit) listening for events.
 			</para>
-			<programlisting><![CDATA[public Guard makeGuard(PatternContext context, 
+			<programlisting><![CDATA[public Guard makeGuard(PatternAgentInstanceContext context,
       MatchedEventMap beginState, 
       Quitable quitable, 
       Object stateNodeId, 
@@ -1296,7 +1296,7 @@ public EventType getEventType() {
 			<para>
 				The pattern engine calls the <literal>makeObserver</literal> method to create a new observer instance. The example <literal>makeObserver</literal> method shown below passes parameters to the observer instance:
 			</para>
-			<programlisting><![CDATA[public EventObserver makeObserver(PatternContext context, 
+			<programlisting><![CDATA[public EventObserver makeObserver(PatternAgentInstanceContext context,
 			MatchedEventMap beginState, 
 			ObserverEventEvaluator observerEventEvaluator, 
 			Object stateNodeId, 

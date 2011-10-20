@@ -55,6 +55,46 @@ public class TestContextInitatedTerminated extends TestCase {
         listener = null;
     }
 
+    public void testScheduleFilterResources() {
+        // test no-context statement
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.win:time(30)");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertEquals(1, spi.getSchedulingService().getScheduleHandleCount());
+
+        stmt.destroy();
+        assertEquals(0, spi.getSchedulingService().getScheduleHandleCount());
+
+        // test initiated
+        FilterServiceSPI filterServiceSPI = (FilterServiceSPI) spi.getFilterService();
+
+        sendTimeEvent("2002-05-1T8:00:00.000");
+        String eplCtx = "create context EverySupportBean as " +
+                "initiated by SupportBean as sb " +
+                "terminated after 1 minutes";
+        epService.getEPAdministrator().createEPL(eplCtx);
+
+        epService.getEPAdministrator().createEPL("context EverySupportBean select * from SupportBean_S0.win:time(2 min) sb0");
+        assertEquals(0, spi.getSchedulingService().getScheduleHandleCount());
+        assertEquals(1, filterServiceSPI.getFilterCountApprox());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
+        assertEquals(1, spi.getSchedulingService().getScheduleHandleCount());
+        assertEquals(2, filterServiceSPI.getFilterCountApprox());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "S0_1"));
+        assertEquals(2, spi.getSchedulingService().getScheduleHandleCount());
+        assertEquals(2, filterServiceSPI.getFilterCountApprox());
+
+        sendTimeEvent("2002-05-1T8:01:00.000");
+        assertEquals(0, spi.getSchedulingService().getScheduleHandleCount());
+        assertEquals(1, filterServiceSPI.getFilterCountApprox());
+
+        epService.getEPAdministrator().destroyAllStatements();
+        assertEquals(0, spi.getSchedulingService().getScheduleHandleCount());
+        assertEquals(0, filterServiceSPI.getFilterCountApprox());
+    }
+
     public void testPatternInitiatedStraightSelect() {
         sendTimeEvent("2002-05-1T8:00:00.000");
         String eplCtx = "create context EverySupportBean as " +

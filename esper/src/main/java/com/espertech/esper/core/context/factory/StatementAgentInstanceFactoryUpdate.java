@@ -58,9 +58,7 @@ public class StatementAgentInstanceFactoryUpdate implements StatementAgentInstan
         final List<StopCallback> stopCallbacks = new ArrayList<StopCallback>();
         StopCallback stopCallback = new StopCallback() {
             public void stop() {
-                for (StopCallback stopCallback : stopCallbacks) {
-                    StatementAgentInstanceUtil.stopSafe(stopCallback, statementContext);
-                }
+                StatementAgentInstanceUtil.stopSafe(agentInstanceContext.getTerminationCallbacks(), stopCallbacks, statementContext);
             }
         };
 

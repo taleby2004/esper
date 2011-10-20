@@ -16,6 +16,7 @@ import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,7 +35,7 @@ import java.util.Iterator;
  * The view is continuous, the insert stream consists of arriving events. The remove stream
  * only posts current window contents when no more events arrive for a given timer interval.
  */
-public final class TimeAccumView extends ViewSupport implements CloneableView, DataWindowView, StoppableView
+public final class TimeAccumView extends ViewSupport implements CloneableView, DataWindowView, StoppableView, StopCallback
 {
     // View parameters
     private final TimeAccumViewFactory factory;
@@ -74,6 +75,7 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
             }
         };
         handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
+        agentInstanceContext.getTerminationCallbacks().add(this);
     }
 
     public View cloneView()
@@ -200,9 +202,18 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
         return this.getClass().getName() + " msecIntervalSize=" + msecIntervalSize;
     }
 
+    public void stopView() {
+        stopSchedule();
+        agentInstanceContext.getTerminationCallbacks().remove(this);
+    }
+
     public void stop() {
-    	if (handle != null) {
-        	agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
+        stopSchedule();
+    }
+
+    public void stopSchedule() {
+        if (handle != null) {
+            agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }
 

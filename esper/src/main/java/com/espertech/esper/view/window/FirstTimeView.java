@@ -16,6 +16,7 @@ import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,7 +27,7 @@ import java.util.LinkedHashSet;
 /**
  *
  */
-public final class FirstTimeView extends ViewSupport implements CloneableView, StoppableView, DataWindowView {
+public final class FirstTimeView extends ViewSupport implements CloneableView, StoppableView, DataWindowView, StopCallback {
     private final FirstTimeViewFactory timeFirstViewFactory;
     private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final long msecIntervalSize;
@@ -53,6 +54,8 @@ public final class FirstTimeView extends ViewSupport implements CloneableView, S
         this.scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
 
         scheduleCallback();
+
+        agentInstanceContext.getTerminationCallbacks().add(this);
     }
 
     public View cloneView()
@@ -150,9 +153,18 @@ public final class FirstTimeView extends ViewSupport implements CloneableView, S
         agentInstanceContext.getStatementContext().getSchedulingService().add(afterMSec, handle, scheduleSlot);
     }
 
+    public void stopView() {
+        stopSchedule();
+        agentInstanceContext.getTerminationCallbacks().remove(this);
+    }
+
     public void stop() {
-    	if (handle != null) {
-        	agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
+        stopSchedule();
+    }
+
+    public void stopSchedule() {
+        if (handle != null) {
+            agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }
 

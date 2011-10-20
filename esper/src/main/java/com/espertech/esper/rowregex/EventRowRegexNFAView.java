@@ -31,6 +31,7 @@ import com.espertech.esper.epl.spec.MatchRecognizeSpec;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.util.ExecutionPathDebugLog;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +43,7 @@ import java.util.*;
 /**
  * View for match recognize support.
  */
-public class EventRowRegexNFAView extends ViewSupport
+public class EventRowRegexNFAView extends ViewSupport implements StopCallback
 {
     private static final Log log = LogFactory.getLog(EventRowRegexNFAView.class);
     private static final boolean IS_DEBUG = false;
@@ -130,6 +131,8 @@ public class EventRowRegexNFAView extends ViewSupport
             };
             handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
             schedule = new TreeMap<Long, Object>();
+
+            agentInstanceContext.getTerminationCallbacks().add(this);
         }
         else
         {
@@ -207,6 +210,12 @@ public class EventRowRegexNFAView extends ViewSupport
         else
         {
             regexPartitionStateRepo = new RegexPartitionStateRepoGroup(randomAccessByIndexGetter, ExprNodeUtility.getEvaluators(matchRecognizeSpec.getPartitionByExpressions()), matchRecognizeSpec.getInterval() != null, agentInstanceContext);
+        }
+    }
+
+    public void stop() {
+        if (handle != null) {
+            agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }
 

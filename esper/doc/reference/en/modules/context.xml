@@ -536,7 +536,7 @@ create context SegmentedByCustomer partition by custId from BankTxn, loginTime f
 				The syntax for creating an initiated temporal context is as follows: 
 			</para>
 			<synopsis>create context <emphasis>context_name</emphasis>
-  initiated [by] [<emphasis>stream_def</emphasis> as <emphasis>stream_name</emphasis> | pattern [<emphasis>pattern_def</emphasis>]]
+  initiated [by] [<emphasis>stream_def</emphasis> [as] <emphasis>stream_name</emphasis> | pattern [<emphasis>pattern_def</emphasis>]]
   terminated after <emphasis>time_period_expression</emphasis></synopsis>
 						
 			<para>

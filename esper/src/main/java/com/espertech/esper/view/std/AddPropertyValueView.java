@@ -180,7 +180,7 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
     }
 
     @Override
-    public void stop() {
+    public void stopView() {
         OneEventCollection oldEvents = new OneEventCollection();
         for (Map.Entry<EventBean, EventBean> oldEvent : newToOldEventMap.entrySet()) {
             oldEvents.add(oldEvent.getValue());

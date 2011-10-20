@@ -42,6 +42,7 @@ import com.espertech.esper.view.internal.RouteResultView;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -83,14 +84,12 @@ public class StatementAgentInstanceFactoryOnTrigger implements StatementAgentIns
 
     public StatementAgentInstanceFactoryOnTriggerResult newContext(final AgentInstanceContext agentInstanceContext)
     {
-        final List<StopCallback> stopCallbacks = new LinkedList<StopCallback>();
+        final List<StopCallback> stopCallbacks = new ArrayList<StopCallback>();
         StopCallback stopCallback = new StopCallback() {
-                public void stop() {
-                    for (StopCallback stopCallback : stopCallbacks) {
-                        StatementAgentInstanceUtil.stopSafe(stopCallback, statementContext);
-                    }
-                }
-            };
+            public void stop() {
+                StatementAgentInstanceUtil.stopSafe(agentInstanceContext.getTerminationCallbacks(), stopCallbacks, statementContext);
+            }
+        };
 
         View onExprView;
         Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies;

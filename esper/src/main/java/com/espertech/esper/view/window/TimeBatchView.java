@@ -16,6 +16,7 @@ import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +40,7 @@ import java.util.LinkedList;
  * If there are no events in the current and prior batch, the view will not invoke the update method of child views.
  * In that case also, no next callback is scheduled with the scheduling service until the next event arrives.
  */
-public final class TimeBatchView extends ViewSupport implements CloneableView, StoppableView, DataWindowView {
+public final class TimeBatchView extends ViewSupport implements CloneableView, StoppableView, StopCallback, DataWindowView {
     // View parameters
     private final TimeBatchViewFactory timeBatchViewFactory;
     private final AgentInstanceViewFactoryChainContext agentInstanceContext;
@@ -95,6 +96,8 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, S
             scheduleCallback();
             isCallbackScheduled = true;
         }
+
+        agentInstanceContext.getTerminationCallbacks().add(this);
     }
 
     public View cloneView()
@@ -302,11 +305,20 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, S
         return solution;
     }
 
+    public void stopView() {
+        stopSchedule();
+        agentInstanceContext.getTerminationCallbacks().remove(this);
+    }
+
     public void stop() {
+        stopSchedule();
+    }
+
+    public void stopSchedule() {
         if (handle != null) {
             agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
-    }    
+    }
 
     private static final Log log = LogFactory.getLog(TimeBatchView.class);
 }

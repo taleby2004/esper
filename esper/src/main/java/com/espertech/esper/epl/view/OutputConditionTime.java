@@ -14,6 +14,7 @@ import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.util.ExecutionPathDebugLog;
+import com.espertech.esper.util.StopCallback;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -21,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
  * Output condition that is satisfied at the end
  * of every time interval of a given length.
  */
-public final class OutputConditionTime extends OutputConditionBase implements OutputCondition
+public final class OutputConditionTime extends OutputConditionBase implements OutputCondition, StopCallback
 {
     private static final boolean DO_OUTPUT = true;
 	private static final boolean FORCE_UPDATE = true;
@@ -127,6 +128,13 @@ public final class OutputConditionTime extends OutputConditionBase implements Ou
         };
         handle = new EPStatementHandleCallback(context.getEpStatementAgentInstanceHandle(), callback);
         context.getStatementContext().getSchedulingService().add(afterMSec, handle, scheduleSlot);
+        context.getTerminationCallbacks().add(this);
+    }
+
+    public void stop() {
+        if (handle != null) {
+            context.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
+        }
     }
 
     /**

@@ -18,12 +18,14 @@ import com.espertech.esper.epl.core.ViewResourceDelegateVerifiedStream;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprPriorNode;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.DataWindowViewFactory;
 import com.espertech.esper.view.DataWindowViewWithPrevious;
 import com.espertech.esper.view.ViewFactory;
 import com.espertech.esper.view.internal.PriorEventViewFactory;
 
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 
 public class AgentInstanceViewFactoryChainContext implements ExprEvaluatorContext
@@ -82,6 +84,10 @@ public class AgentInstanceViewFactoryChainContext implements ExprEvaluatorContex
 
     public EPStatementAgentInstanceHandle getEpStatementAgentInstanceHandle() {
         return agentInstanceContext.getEpStatementAgentInstanceHandle();
+    }
+
+    public Set<StopCallback> getTerminationCallbacks() {
+        return agentInstanceContext.getTerminationCallbacks();
     }
 
     public static AgentInstanceViewFactoryChainContext create(List<ViewFactory> viewFactoryChain, AgentInstanceContext agentInstanceContext, ViewResourceDelegateVerifiedStream viewResourceDelegate) {

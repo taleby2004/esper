@@ -14,7 +14,7 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
-import com.espertech.esper.view.StatementStopCallback;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
 import com.espertech.esper.view.Viewable;
@@ -23,18 +23,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MyFlushedSimpleView extends ViewSupport implements StatementStopCallback
+public class MyFlushedSimpleView extends ViewSupport implements StopCallback
 {
     private List<EventBean> events;
     private EventType eventType;
 
     public MyFlushedSimpleView(AgentInstanceViewFactoryChainContext agentInstanceContext)
     {
-        agentInstanceContext.getStatementContext().getStatementStopService().addSubscriber(this);
+        agentInstanceContext.getTerminationCallbacks().add(this);
         events = new ArrayList<EventBean>();
     }
 
-    public void statementStopped()
+    public void stop()
     {
         this.updateChildren(events.toArray(new EventBean[0]), null);
         events = new ArrayList<EventBean>();

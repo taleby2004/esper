@@ -397,7 +397,7 @@ public class TestContextTemporalFixed extends TestCase {
 
     public void testStartTurnedOff() {
         sendTimeEvent("2002-05-1T8:00:00.000");
-        String contextEPL = "@Name('context')create context NineToFive as start (0, 9, *, *, *) end (0, 17, *, *, *)";
+        String contextEPL = "@Name('context') create context NineToFive as start (0, 9, *, *, *) end (0, 17, *, *, *)";
         EPStatement stmtContext = epService.getEPAdministrator().createEPL("@Name('context') create context NineToFive as start (0, 9, *, *, *) end (0, 17, *, *, *)");
         assertContextEventType(stmtContext.getEventType());
         SupportUpdateListener contextListener = new SupportUpdateListener();

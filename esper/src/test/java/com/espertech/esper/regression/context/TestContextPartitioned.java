@@ -504,7 +504,7 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testSegmentedViews() {
-        String contextEPL = "@Name('context')create context SegmentedByString as partition by string from SupportBean";
+        String contextEPL = "@Name('context') create context SegmentedByString as partition by string from SupportBean";
         epService.getEPAdministrator().createEPL(contextEPL);
 
         String[] fieldsIterate = "intPrimitive".split(",");

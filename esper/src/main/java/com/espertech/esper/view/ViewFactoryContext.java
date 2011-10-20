@@ -90,15 +90,6 @@ public class ViewFactoryContext
     }
 
     /**
-     * Returns statement stop svc.
-     * @return snc
-     */
-    public StatementStopService getStatementStopService()
-    {
-        return statementContext.getStatementStopService();
-    }
-
-    /**
      * Returns the statement id.
      * @return statement id
      */

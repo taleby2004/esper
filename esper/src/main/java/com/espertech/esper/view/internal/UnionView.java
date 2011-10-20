@@ -240,10 +240,10 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
     }
 
     @Override
-    public void stop() {
+    public void stopView() {
         for (View view : views) {
             if (view instanceof StoppableView) {
-                ((StoppableView) view).stop();
+                ((StoppableView) view).stopView();
             }
         }
     }    

@@ -32,14 +32,6 @@ public class EPStatementStopMethodImpl implements EPStatementStopMethod
     }
 
     public void stop() {
-        try {
-            statementContext.getStatementStopService().fireStatementStopped();
-        }
-        catch (RuntimeException e) {
-            log.warn("Failed to perform statement stop for statement '" + statementContext.getStatementName() +
-                    "' expression '" + statementContext.getExpression() + "' : " + e.getMessage(), e);
-        }
-
         for (StopCallback stopCallback : stopCallbacks){
             StatementAgentInstanceUtil.stopSafe(stopCallback, statementContext);
         }

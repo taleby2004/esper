@@ -237,7 +237,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
                 view.setParent(null);
                 recursiveMergeViewRemove(view);
                 if (view instanceof StoppableView) {
-                    ((StoppableView) view).stop();
+                    ((StoppableView) view).stopView();
                 }
             }
         }
@@ -247,7 +247,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
     {
         for (View child : view.getViews()) {
             if (child instanceof StoppableView) {
-                ((StoppableView) child).stop();
+                ((StoppableView) child).stopView();
             }
             if (child instanceof MergeView) {
                 MergeView mergeView = (MergeView) child;

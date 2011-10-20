@@ -202,10 +202,10 @@ public class IntersectView extends ViewSupport implements LastPostObserver, Clon
     }
 
     @Override
-    public void stop() {
+    public void stopView() {
         for (View view : views) {
             if (view instanceof StoppableView) {
-                ((StoppableView) view).stop();
+                ((StoppableView) view).stopView();
             }
         }
     }

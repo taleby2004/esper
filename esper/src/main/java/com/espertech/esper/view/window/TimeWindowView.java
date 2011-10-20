@@ -18,6 +18,7 @@ import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.schedule.ScheduleAdjustmentCallback;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +37,7 @@ import java.util.Iterator;
  * as the system-time-based timeWindow moves on. However child views receive updates containing new data
  * as soon as the new data arrives.
  */
-public final class TimeWindowView extends ViewSupport implements CloneableView, DataWindowView, ScheduleAdjustmentCallback, StoppableView
+public final class TimeWindowView extends ViewSupport implements CloneableView, DataWindowView, ScheduleAdjustmentCallback, StoppableView, StopCallback
 {
     private final TimeWindowViewFactory timeWindowViewFactory;
     private final long millisecondsBeforeExpiry;
@@ -71,6 +72,7 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
         this.handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
 
         agentInstanceContext.getStatementContext().getScheduleAdjustmentService().addCallback(this);
+        agentInstanceContext.getTerminationCallbacks().add(this);
     }
 
     public void adjust(long delta)
@@ -209,7 +211,16 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
         return timeWindow.isEmpty();
     }
 
+    public void stopView() {
+        stopSchedule();
+        agentInstanceContext.getTerminationCallbacks().remove(this);
+    }
+
     public void stop() {
+        stopSchedule();
+    }
+
+    public void stopSchedule() {
         if (handle != null) {
             agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }

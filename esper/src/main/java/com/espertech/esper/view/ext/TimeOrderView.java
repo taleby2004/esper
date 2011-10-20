@@ -17,6 +17,7 @@ import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +38,7 @@ import java.util.*;
  * The view accepts 2 parameters. The first parameter is the field name to get the event timestamp value from,
  * the second parameter defines the interval size.
  */
-public final class TimeOrderView extends ViewSupport implements DataWindowView, CloneableView, StoppableView
+public final class TimeOrderView extends ViewSupport implements DataWindowView, CloneableView, StoppableView, StopCallback
 {
     private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final TimeOrderViewFactory timeOrderViewFactory;
@@ -90,6 +91,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
             }
         };
         handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
+        agentInstanceContext.getTerminationCallbacks().add(this);
     }
 
     /**
@@ -354,9 +356,18 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
         isCallbackScheduled = true;
     }
 
+    public void stopView() {
+        stopSchedule();
+        agentInstanceContext.getTerminationCallbacks().remove(this);
+    }
+
     public void stop() {
-    	if (handle != null) {
-        	agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
+        stopSchedule();
+    }
+
+    public void stopSchedule() {
+        if (handle != null) {
+            agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }
 
