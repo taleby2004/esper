@@ -342,12 +342,12 @@ public class StatementSpecMapper
         }
         else if (createContextDesc.getContextDetail() instanceof ContextDetailPartitioned) {
             ContextDetailPartitioned seg = (ContextDetailPartitioned) createContextDesc.getContextDetail();
-            List<ContextDescriptorPartitionedItem> segmentedItems = new ArrayList<ContextDescriptorPartitionedItem>();
+            List<ContextDescriptorKeyedSegmentedItem> segmentedItems = new ArrayList<ContextDescriptorKeyedSegmentedItem>();
             for (ContextDetailPartitionItem item : seg.getItems()) {
                 Filter filter = unmapFilter(item.getFilterSpecRaw(), unmapContext);
-                segmentedItems.add(new ContextDescriptorPartitionedItem(item.getPropertyNames(), filter));
+                segmentedItems.add(new ContextDescriptorKeyedSegmentedItem(item.getPropertyNames(), filter));
             }
-            desc = new ContextDescriptorPartitioned(segmentedItems);
+            desc = new ContextDescriptorKeyedSegmented(segmentedItems);
         }
         else if (createContextDesc.getContextDetail() instanceof ContextDetailCategory) {
             ContextDetailCategory category = (ContextDetailCategory) createContextDesc.getContextDetail();
@@ -1082,10 +1082,10 @@ public class StatementSpecMapper
             List<ExprNode> end = mapExpressionDeep(single.getCrontabEndExpressions(), mapContext);
             detail = new ContextDetailTemporalFixed(start, end);
         }
-        else if (createContext.getDescriptor() instanceof ContextDescriptorPartitioned) {
-            ContextDescriptorPartitioned seg = (ContextDescriptorPartitioned) createContext.getDescriptor();
+        else if (createContext.getDescriptor() instanceof ContextDescriptorKeyedSegmented) {
+            ContextDescriptorKeyedSegmented seg = (ContextDescriptorKeyedSegmented) createContext.getDescriptor();
             List<ContextDetailPartitionItem> itemsdesc = new ArrayList<ContextDetailPartitionItem>();
-            for (ContextDescriptorPartitionedItem item : seg.getItems()) {
+            for (ContextDescriptorKeyedSegmentedItem item : seg.getItems()) {
                 FilterSpecRaw rawSpec = mapFilter(item.getFilter(), mapContext);
                 itemsdesc.add(new ContextDetailPartitionItem(rawSpec, item.getPropertyNames()));
             }

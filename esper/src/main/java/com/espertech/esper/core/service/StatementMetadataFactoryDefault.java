@@ -70,6 +70,9 @@ public class StatementMetadataFactoryDefault implements StatementMetadataFactory
         else if (statementSpec.getCreateIndexDesc() != null) {
             statementType = StatementType.CREATE_INDEX;
         }
+        else if (statementSpec.getCreateContextDesc() != null) {
+            statementType = StatementType.CREATE_CONTEXT;
+        }
         else if (statementSpec.getCreateSchemaDesc() != null) {
             statementType = StatementType.CREATE_SCHEMA;
         }

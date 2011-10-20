@@ -36,6 +36,10 @@ public class EPStatementFormatter
         this.newlineString = newlineString;
     }
 
+    public void beginContext(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
     public void beginAnnotation(StringWriter writer) {
         writeDelimiter(writer);
     }
@@ -149,5 +153,29 @@ public class EPStatementFormatter
             }
         }
         setDelimiter();
+    }
+
+    public void beginCreateVariable(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void beginUpdate(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void beginCreateWindow(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void beginCreateContext(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void beginCreateSchema(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void beginCreateIndex(StringWriter writer) {
+        writeDelimiter(writer);
     }
 }

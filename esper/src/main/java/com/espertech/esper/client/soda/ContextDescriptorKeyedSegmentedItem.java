@@ -11,37 +11,49 @@
 
 package com.espertech.esper.client.soda;
 
+import com.espertech.esper.epl.spec.FilterSpecRaw;
+import com.espertech.esper.filter.FilterSpecCompiled;
+
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 
-public class ContextDescriptorPartitioned implements ContextDescriptor {
+public class ContextDescriptorKeyedSegmentedItem implements ContextDescriptor {
 
-    private List<ContextDescriptorPartitionedItem> items;
+    private List<String> propertyNames;
+    private Filter filter;
 
-    public ContextDescriptorPartitioned() {
-        items = new ArrayList<ContextDescriptorPartitionedItem>();
+    public ContextDescriptorKeyedSegmentedItem() {
     }
 
-    public ContextDescriptorPartitioned(List<ContextDescriptorPartitionedItem> items) {
-        this.items = items;
+    public ContextDescriptorKeyedSegmentedItem(List<String> propertyNames, Filter filter) {
+        this.propertyNames = propertyNames;
+        this.filter = filter;
     }
 
-    public List<ContextDescriptorPartitionedItem> getItems() {
-        return items;
+    public Filter getFilter() {
+        return filter;
     }
 
-    public void setItems(List<ContextDescriptorPartitionedItem> items) {
-        this.items = items;
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
+
+    public List<String> getPropertyNames() {
+        return propertyNames;
+    }
+
+    public void setPropertyNames(List<String> propertyNames) {
+        this.propertyNames = propertyNames;
     }
 
     public void toEPL(StringWriter writer, EPStatementFormatter formatter) {
-        writer.append("partition by ");
         String delimiter = "";
-        for (ContextDescriptorPartitionedItem item : items) {
+        for (String prop : propertyNames) {
             writer.append(delimiter);
-            item.toEPL(writer, formatter);
-            delimiter = ", ";
+            writer.append(prop);
+            delimiter = "and ";
         }
+        writer.append(" from ");
+        filter.toEPL(writer, formatter);
     }
 }

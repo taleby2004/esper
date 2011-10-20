@@ -327,28 +327,32 @@ public class EPStatementObjectModel implements Serializable
         ExpressionDeclaration.toEPL(writer, expressionDeclarations, formatter);
 
         if (contextName != null) {
+            formatter.beginContext(writer);
             writer.append("context ");
             writer.append(contextName);
-            writer.append(" ");
         }
 
         if (createIndex != null)
         {
+            formatter.beginCreateIndex(writer);
             createIndex.toEPL(writer);
             return writer.toString();
         }
         else if (createSchema != null)
         {
+            formatter.beginCreateSchema(writer);
             createSchema.toEPL(writer);
             return writer.toString();
         }
         else if (createContext != null)
         {
+            formatter.beginCreateContext(writer);
             createContext.toEPL(writer, formatter);
             return writer.toString();
         }
         else if (createWindow != null)
         {
+            formatter.beginCreateWindow(writer);
             createWindow.toEPL(writer);
 
             if (fromClause != null)
@@ -373,6 +377,7 @@ public class EPStatementObjectModel implements Serializable
         }
         else if (createVariable != null)
         {
+            formatter.beginCreateVariable(writer);
             createVariable.toEPL(writer);
             return writer.toString();
         }
@@ -380,6 +385,7 @@ public class EPStatementObjectModel implements Serializable
         boolean displayWhereClause = true;
         if (updateClause != null)
         {
+            formatter.beginUpdate(writer);
             updateClause.toEPL(writer);
         }
         else if (onExpr != null)

@@ -52,6 +52,11 @@ public enum StatementType
     CREATE_INDEX,
 
     /**
+     * Create-context statement.
+     */
+    CREATE_CONTEXT,
+
+    /**
      * On-merge statement.
      */
     ON_MERGE,

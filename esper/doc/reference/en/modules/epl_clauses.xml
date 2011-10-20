@@ -84,6 +84,7 @@
 
 <synopsis>[<emphasis>annotations</emphasis>]
 [<emphasis>expression_declarations</emphasis>]
+[context <emphasis>context_name</emphasis>]
 [insert into <emphasis>insert_into_def</emphasis>]
 select <emphasis>select_list</emphasis>
 from <emphasis>stream_def</emphasis> [as name] [, <emphasis>stream_def</emphasis> [as name]] [,...]
@@ -798,6 +799,50 @@ from MarketDataEvent mdstream]]></programlisting>
 				<listitem>
 					<para>
 						The scope of the expression body of a declared expression only includes the parameters explicitly listed.
+					</para>
+				</listitem>
+			</orderedlist>
+		</sect2>
+
+		<sect2 id="epl-syntax-context-decl">
+			<title>Referring to a Context</title>
+			
+			<para>
+			   You may refer to a context in the EPL text by specifying the <literal>context</literal> keyword followed by a context name. Context are described in more detail at <xref linkend="context"/>
+			</para>
+			
+			<para>
+				The effect of referring to a context is that your statement operates according to the context dimensional information as declared for the context.
+			</para>
+
+			<para>
+			  The synopsis is:
+			</para>
+			<synopsis>... context <emphasis>context_name</emphasis> ...</synopsis>
+
+			<para>
+			  You may refer to a context in all statements except for the following types of statements:
+			</para>
+			
+			<orderedlist>
+				<listitem>
+					<para>
+						<literal>create schema</literal> for declaring event types.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>create variable</literal> for declaring a variable.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>create index</literal> for creating an index on a named window.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						<literal>update istream</literal> for updating insert stream events.
 					</para>
 				</listitem>
 			</orderedlist>
@@ -4059,7 +4104,8 @@ where asset.assetid = desc.assetid]]></programlisting>
 				<para>
 					The syntax for creating a named window by modelling the named window after an existing event type, is as follows: 
 				</para>
-				<synopsis>create window <emphasis>window_name</emphasis>.<emphasis>view_specifications</emphasis> 
+				<synopsis>[context <emphasis>context_name</emphasis>] 
+create window <emphasis>window_name</emphasis>.<emphasis>view_specifications</emphasis> 
     [as] [select <emphasis>list_of_properties</emphasis> from] <emphasis>event_type_or_windowname</emphasis>
     [insert [where <emphasis>filter_expression</emphasis>]]</synopsis>
 						
@@ -4083,6 +4129,10 @@ where asset.assetid = desc.assetid]]></programlisting>
 					Finally, the <literal>insert</literal> clause and optional <emphasis>filter_expression</emphasis> are used if the new named windows is modelled after an existing named window, and the data of the new named window is to be populated from the existing named window upon creation. The optional <emphasis>filter_expression</emphasis> can be used to exclude events.
 				</para>
 
+				<para>
+				   You may refer to a context by specifying the <literal>context</literal> keyword followed by a context name. Context are described in more detail at <xref linkend="context"/>. The effect of referring to a context is that your named window operates according to the context dimensional information as declared for the context. For usage and limitations please see the respective chapter.
+				</para>
+	
 				<para>
 					The next statement creates a named window 'AllOrdersNamedWindow' for which the expiry policy is simply to keep all events. Assume that the event type 'OrderMapEventType' has been configured. The named window is to hold events of type 'OrderMapEventType':
 				</para>
@@ -4108,7 +4158,8 @@ where asset.assetid = desc.assetid]]></programlisting>
 				<para>
 					The second syntax for creating a named window is by supplying column names and types: 
 				</para>
-				<synopsis>create window <emphasis>window_name</emphasis>.<emphasis>view_specifications</emphasis> [as] (<emphasis>column_name</emphasis> <emphasis>column_type</emphasis> 
+				<synopsis>[context <emphasis>context_name</emphasis>] 
+create window <emphasis>window_name</emphasis>.<emphasis>view_specifications</emphasis> [as] (<emphasis>column_name</emphasis> <emphasis>column_type</emphasis> 
   [,<emphasis>column_name</emphasis> <emphasis>column_type</emphasis> [,...])</synopsis>
 
 				<para>				
@@ -5280,7 +5331,8 @@ create variant schema AnyEvent as *]]></programlisting>
 			The synopsis is:
 		</para>
 
-<synopsis>on <emphasis>event_type</emphasis>[(<emphasis>filter_criteria</emphasis>)] [as <emphasis>stream_name</emphasis>]
+<synopsis>[context <emphasis>context_name</emphasis>]
+on <emphasis>event_type</emphasis>[(<emphasis>filter_criteria</emphasis>)] [as <emphasis>stream_name</emphasis>]
 insert into <emphasis>insert_into_def</emphasis> select <emphasis>select_list</emphasis> [where <emphasis>condition</emphasis>]
 [insert into <emphasis>insert_into_def</emphasis> select <emphasis>select_list</emphasis> [where <emphasis>condition</emphasis>]]
 [insert into...]
@@ -5306,6 +5358,10 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 
 		<para>
 			If, for a given event, none of the <literal>where</literal> clause conditions match, the statement listener receives the unmatched event. The statement listener only receives unmatched events and does not receive any transformed or inserted events. The <literal>iterator</literal> method to the statement returns no events.
+		</para>
+		
+		<para>
+			You may specify an optional context name to the effect that the split-stream operates according to the context dimensional information as declared for the context. See <xref linkend="context"/> for more information.
 		</para>
 
 		<para>

@@ -19,6 +19,14 @@ public class ContextDescriptorTemporalCrontabSingle implements ContextDescriptor
     private List<Expression> crontabStartExpressions;
     private List<Expression> crontabEndExpressions;
 
+    public ContextDescriptorTemporalCrontabSingle() {
+    }
+
+    public ContextDescriptorTemporalCrontabSingle(List<Expression> crontabStartExpressions, List<Expression> crontabEndExpressions) {
+        this.crontabStartExpressions = crontabStartExpressions;
+        this.crontabEndExpressions = crontabEndExpressions;
+    }
+
     public List<Expression> getCrontabStartExpressions() {
         return crontabStartExpressions;
     }

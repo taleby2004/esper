@@ -328,6 +328,8 @@ Version 3.4.0
   * New HTTP input and output adapter
   
   * New database output adapter for insert, update, delete (DML) and upsert (keyed-insert/update)
+  
+  * The EsperIO jar file "esperio-x.y.z.jar" is no longer needed. The few classes that EsperIO adapters share are now part of Esper core.
 
   []
     
