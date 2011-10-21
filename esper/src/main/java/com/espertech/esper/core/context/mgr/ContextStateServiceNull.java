@@ -26,7 +26,7 @@ public class ContextStateServiceNull implements ContextStateService {
     }
 
     public List<ContextState> getContexts(String contextName, ContextStateServiceBinding binding, EventAdapterService eventAdapterService) {
-        return null;
+        return Collections.emptyList();
     }
 
     public void removeContext(String contextName) {

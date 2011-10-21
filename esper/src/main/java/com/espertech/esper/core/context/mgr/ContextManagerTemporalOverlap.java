@@ -33,8 +33,6 @@ import com.espertech.esper.pattern.*;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.util.CollectionUtil;
-import com.espertech.esper.util.StopCallback;
-import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,12 +51,12 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     private final ScheduleSlot scheduleSlot;
     private final ContextDescriptor contextDescriptor;
 
-    private final Map<String, Set<AgentInstanceWithSchedule>> instances = new HashMap<String, Set<AgentInstanceWithSchedule>>();
+    private final Map<String, Set<AgentInstance>> statementInstances = new HashMap<String, Set<AgentInstance>>();
     private final Map<String, ContextManagedStatementBase> statements = new LinkedHashMap<String, ContextManagedStatementBase>(); // retain order of statement creation
+    private final TreeMap<Integer, ContextPlusSchedule> agentInstances = new TreeMap<Integer, ContextPlusSchedule>();
 
     private PatternStopCallback patternStopCallback;
     private EPStatementHandleCallback filterHandle;
-    private final TreeSet<Integer> instanceIds = new TreeSet<Integer>();
 
     public ContextManagerTemporalOverlap(String contextName, EPServicesContext servicesContext, AgentInstanceContext createContextContext, ContextDetailInitiatedTerminated overlapSpec, ContextStateService contextStateService) {
         this.contextName = contextName;
@@ -84,11 +82,8 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
         for (ContextState contextState : contextStates) {
             int instanceId = contextState.getAgentInstanceId();
 
-            EventBean context = (EventBean) contextState.getAdditionalInfo();
-            for (Map.Entry<String, ContextManagedStatementBase> stmtEntry : statements.entrySet()) {
-                startAgentInstance(stmtEntry.getValue(), instanceId, context);
-            }
-            instanceIds.add(instanceId);
+            ContextPlusSchedule context = new ContextPlusSchedule((EventBean)contextState.getAdditionalInfo(), null);
+            agentInstances.put(instanceId, context);
         }
     }
 
@@ -97,7 +92,7 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     }
 
     public synchronized Iterator<EventBean> iterator(String statementId) {
-        Set<AgentInstanceWithSchedule> list = instances.get(statementId);
+        Set<AgentInstance> list = statementInstances.get(statementId);
         if (list == null) {
             return CollectionUtil.NULL_EVENT_ITERATOR;
         }
@@ -106,7 +101,7 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     }
 
     public synchronized SafeIterator<EventBean> safeIterator(String statementId) {
-        Set<AgentInstanceWithSchedule> list = instances.get(statementId);
+        Set<AgentInstance> list = statementInstances.get(statementId);
         if (list == null) {
             return SafeIteratorNull.NULL_EVENT_ITER;
         }
@@ -119,6 +114,24 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
             activate();
         }
         statements.put(statement.getStatementContext().getStatementId(), statement);
+
+        Set<AgentInstance> instanceList = new LinkedHashSet<AgentInstance>();
+        statementInstances.put(statement.getStatementContext().getStatementId(), instanceList);
+
+        // retro-actively create contexts for that statement
+        for (Map.Entry<Integer, ContextPlusSchedule> entry : agentInstances.entrySet()) {
+            Integer agentInstanceId = entry.getKey();
+            ContextPlusSchedule scheduleAndContext = entry.getValue();
+
+            AgentInstance result = startAgentInstance(statement, agentInstanceId, scheduleAndContext.getContextEvent());
+            instanceList.add(result);
+
+            // schedule a termination callback unless it is already scheduled
+            if (scheduleAndContext.getContextScheduleCallbackHandle() == null) {
+                EPStatementHandleCallback callback = scheduleCallback(agentInstanceId);
+                scheduleAndContext.setContextScheduleCallbackHandle(callback);
+            }
+        }
     }
 
     public synchronized void stopStatement(String statementName, String statementId) {
@@ -138,28 +151,6 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
 
     public synchronized void matchFound(Map<String, Object> matchEvent) {
         processMatchFound(matchEvent, null);
-    }
-
-    private void stopAgentInstance(AgentInstanceContext agentInstanceContext) {
-        Set<AgentInstanceWithSchedule> instanceList = instances.get(agentInstanceContext.getStatementContext().getStatementId());
-        if (instanceList == null) {
-            return;
-        }
-
-        for (AgentInstanceWithSchedule entry : instanceList) {
-            if (entry.getAgentInstanceContext() != agentInstanceContext) {
-                continue;
-            }
-
-            contextStateService.removeContextAgentInstance(contextName, agentInstanceContext.getAgentInstanceIds()[0]);
-
-            StatementAgentInstanceUtil.stop(entry.getStopCallback(), entry.getAgentInstanceContext(), entry.getFinalView());
-            servicesContext.getSchedulingService().remove(entry.getContextScheduleCallbackHandle(), scheduleSlot);
-            instanceList.remove(entry);
-            break;
-        }
-
-        instanceIds.remove(agentInstanceContext.getAgentInstanceIds()[0]);
     }
 
     private void activate() {
@@ -203,26 +194,39 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     }
 
     private void processMatchFound(Map<String, Object> patternData, EventBean filterEvent) {
-        int agentInstanceId = nextId(instanceIds);
-        instanceIds.add(agentInstanceId);
+
+        if (statements.isEmpty()) {
+            return;
+        }
+
+        int agentInstanceId = nextId(agentInstances);
 
         // determine context properties
         EventBean context = ContextPropertyEventType.getTempOverlapBean(servicesContext.getEventAdapterService(), contextDescriptor.getContextPropertyRegistry().getContextEventType(), contextName, agentInstanceId, patternData, filterEvent, overlapSpec.getInitiatedFilterAsName());
 
+        // save id - for statements to be added
+        ContextPlusSchedule scheduleAndContext = new ContextPlusSchedule(context, null);
+        agentInstances.put(agentInstanceId, scheduleAndContext);
+
+        // save state if required
         contextStateService.addContext(contextName, agentInstanceId, context, contextStateServiceBinding);
+
+        // schedule callback, save for removal
+        EPStatementHandleCallback scheduleHandle = scheduleCallback(agentInstanceId);
+        scheduleAndContext.setContextScheduleCallbackHandle(scheduleHandle);
 
         // for all current statements, start an instance
         for (ContextManagedStatementBase statement : statements.values()) {
 
             // obtain existing instances
-            Set<AgentInstanceWithSchedule> instanceList = instances.get(statement.getStatementContext().getStatementId());
+            Set<AgentInstance> instanceList = statementInstances.get(statement.getStatementContext().getStatementId());
             if (instanceList == null) {
-                instanceList = new LinkedHashSet<AgentInstanceWithSchedule>();
-                instances.put(statement.getStatementContext().getStatementId(), instanceList);
+                instanceList = new LinkedHashSet<AgentInstance>();
+                statementInstances.put(statement.getStatementContext().getStatementId(), instanceList);
             }
 
             // start
-            AgentInstanceWithSchedule ai = startAgentInstance(statement, agentInstanceId, context);
+            AgentInstance ai = startAgentInstance(statement, agentInstanceId, context);
 
             // evaluate this event specifically for this statement
             // evaluate that event for that new agent instance
@@ -234,15 +238,65 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
         }
     }
 
-    private AgentInstanceWithSchedule startAgentInstance(ContextManagedStatementBase statement, int agentInstanceId, EventBean contextBean) {
-
-        // instantiate context
+    private AgentInstance startAgentInstance(ContextManagedStatementBase statement, int agentInstanceId, EventBean contextBean) {
         StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statement, false, agentInstanceId, contextBean, AgentInstanceFilterProxyNull.AGENT_INSTANCE_FILTER_PROXY_NULL);
-        final AgentInstanceContext agentInstanceContext= result.getAgentInstanceContext();
+        return new AgentInstance(result.getStopCallback(), result.getAgentInstanceContext(), result.getFinalView());
+    }
+
+    private void deactivate() {
+        if (patternStopCallback != null) {
+            patternStopCallback.stop();
+            patternStopCallback = null;
+        }
+        if (filterHandle != null) {
+            servicesContext.getFilterService().remove(filterHandle);
+            filterHandle = null;
+        }
+
+        for (Map.Entry<Integer, ContextPlusSchedule> entry : agentInstances.entrySet()) {
+            if (entry.getValue().getContextScheduleCallbackHandle() != null) {
+                servicesContext.getSchedulingService().remove(entry.getValue().getContextScheduleCallbackHandle(), scheduleSlot);
+            }
+        }
+        agentInstances.clear();
+    }
+
+    private void removeStatement(String statementId) {
+        Set<AgentInstance> instanceList = statementInstances.get(statementId);
+        if (instanceList != null) {
+            for (AgentInstance entry : instanceList) {
+                StatementAgentInstanceUtil.stop(entry.getStopCallback(), entry.getAgentInstanceContext(), entry.getFinalView());
+            }
+        }
+
+        statementInstances.remove(statementId);
+        statements.remove(statementId);
+        if (statements.isEmpty()) {
+            agentInstances.clear();
+        }
+    }
+
+    private static int nextId(TreeMap<Integer, ContextPlusSchedule> instanceIds) {
+        if (instanceIds.isEmpty()) {
+            return 0;
+        }
+        if (instanceIds.lastKey() == (instanceIds.size() - 1)) {
+            return instanceIds.lastKey() + 1;
+        }
+        for (int i = 0; i < instanceIds.size(); i++) {
+            if (instanceIds.containsKey(i)) {
+                continue;
+            }
+            return i;
+        }
+        return instanceIds.lastKey() + 1;
+    }
+
+    private EPStatementHandleCallback scheduleCallback(final int agentInstanceId) {
 
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext) {
-                stopAgentInstance(agentInstanceContext);
+                stopAgentInstanceCallback(agentInstanceId);
             }
         };
 
@@ -258,63 +312,48 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
             servicesContext.getSchedulingService().add(msec, contextScheduleCallbackHandle, scheduleSlot);
         }
 
-        // save
-        return new AgentInstanceWithSchedule(result.getStopCallback(), result.getAgentInstanceContext(), result.getFinalView(), contextScheduleCallbackHandle);
+        return contextScheduleCallbackHandle;
     }
 
-    private void deactivate() {
-        if (patternStopCallback != null) {
-            patternStopCallback.stop();
-            patternStopCallback = null;
-        }
-        if (filterHandle != null) {
-            servicesContext.getFilterService().remove(filterHandle);
-            filterHandle = null;
-        }
-    }
+    private void stopAgentInstanceCallback(int agentInstanceId) {
+        for (Map.Entry<String, Set<AgentInstance>> entry : statementInstances.entrySet()) {
+            Iterator<AgentInstance> agentInstanceIterator = entry.getValue().iterator();
+            for (;agentInstanceIterator.hasNext();) {
+                AgentInstance agentInstance = agentInstanceIterator.next();
+                if (agentInstance.getAgentInstanceContext().getAgentInstanceIds()[0] != agentInstanceId) {
+                    continue;
+                }
 
-    private void removeStatement(String statementId) {
-        Set<AgentInstanceWithSchedule> instanceList = instances.get(statementId);
-        if (instanceList != null) {
-            for (AgentInstanceWithSchedule entry : instanceList) {
-                StatementAgentInstanceUtil.stop(entry.getStopCallback(), entry.getAgentInstanceContext(), entry.getFinalView());
-                servicesContext.getSchedulingService().remove(entry.getContextScheduleCallbackHandle(), scheduleSlot);
+                agentInstanceIterator.remove();
+
+                StatementAgentInstanceUtil.stop(agentInstance.getStopCallback(), agentInstance.getAgentInstanceContext(), agentInstance.getFinalView());
             }
         }
 
-        instances.remove(statementId);
-        statements.remove(statementId);
-        if (statements.isEmpty()) {
-            instanceIds.clear();
-        }
+        agentInstances.remove(agentInstanceId);
+        contextStateService.removeContextAgentInstance(contextName, agentInstanceId);
     }
 
-    private static int nextId(TreeSet<Integer> instanceIds) {
-        if (instanceIds.isEmpty()) {
-            return 0;
-        }
-        if (instanceIds.last() == (instanceIds.size() - 1)) {
-            return instanceIds.last() + 1;
-        }
-        for (int i = 0; i < instanceIds.size(); i++) {
-            if (instanceIds.contains(i)) {
-                continue;
-            }
-            return i;
-        }
-        return instanceIds.last() + 1;
-    }
 
-    public static class AgentInstanceWithSchedule extends AgentInstance {
-        private final EPStatementHandleCallback contextScheduleCallbackHandle;
+    public static class ContextPlusSchedule {
+        private final EventBean contextEvent;
+        private EPStatementHandleCallback contextScheduleCallbackHandle;
 
-        public AgentInstanceWithSchedule(StopCallback stopCallback, AgentInstanceContext agentInstanceContext, Viewable finalView, EPStatementHandleCallback contextScheduleCallbackHandle) {
-            super(stopCallback, agentInstanceContext, finalView);
+        public ContextPlusSchedule(EventBean contextEvent, EPStatementHandleCallback contextScheduleCallbackHandle) {
+            this.contextEvent = contextEvent;
             this.contextScheduleCallbackHandle = contextScheduleCallbackHandle;
+        }
+
+        public EventBean getContextEvent() {
+            return contextEvent;
         }
 
         public EPStatementHandleCallback getContextScheduleCallbackHandle() {
             return contextScheduleCallbackHandle;
+        }
+
+        public void setContextScheduleCallbackHandle(EPStatementHandleCallback contextScheduleCallbackHandle) {
+            this.contextScheduleCallbackHandle = contextScheduleCallbackHandle;
         }
     }
 }
