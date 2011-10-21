@@ -12,6 +12,7 @@
 package com.espertech.esper.core.context.mgr;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.SafeIterator;
 import com.espertech.esper.collection.SafeIteratorImpl;
 import com.espertech.esper.collection.SafeIteratorNull;
@@ -25,21 +26,17 @@ import com.espertech.esper.core.context.util.ContextIteratorHandler;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
 import com.espertech.esper.core.service.*;
-import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
 import com.espertech.esper.schedule.ScheduleComputeHelper;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.schedule.ScheduleSpec;
 import com.espertech.esper.util.CollectionUtil;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ContextManagerTemporalSingle implements ContextManager, ContextIteratorHandler {
-
-    private final static ContextPropertyRegistryImpl CONTEXT_PROPERTY_REGISTRY = new ContextPropertyRegistryImpl(Collections.<ContextDetailPartitionItem>emptyList(), ContextPropertyEventType.TYPE_TEMPORAL_FIXED_PROPS);
 
     private final String contextName;
     private final EPServicesContext servicesContext;
@@ -73,7 +70,9 @@ public class ContextManagerTemporalSingle implements ContextManager, ContextIter
             }
         };
 
-        this.contextDescriptor = new ContextDescriptor(contextName, true, CONTEXT_PROPERTY_REGISTRY, resourceRegistryFactory, this);
+        EventType contextEventType = ContextPropertyEventType.getTemporalFixedType(contextName, servicesContext.getEventAdapterService());
+        ContextPropertyRegistryImpl contextPropertyRegistry = new ContextPropertyRegistryImpl(contextEventType);
+        this.contextDescriptor = new ContextDescriptor(contextName, true, contextPropertyRegistry, resourceRegistryFactory, this);
     }
 
     public void safeDestroy() {
@@ -149,7 +148,7 @@ public class ContextManagerTemporalSingle implements ContextManager, ContextIter
 
     protected void startStatement(ContextManagedStatementBase statement) {
 
-        EventBean contextProperties = ContextPropertyEventType.getTemporalFixedBean(contextName, startTime, endTime);
+        EventBean contextProperties = ContextPropertyEventType.getTemporalFixedBean(servicesContext.getEventAdapterService(), contextDescriptor.getContextPropertyRegistry().getContextEventType(), contextName, startTime, endTime);
         StatementAgentInstanceFactoryResult startResult = StatementAgentInstanceUtil.start(servicesContext, statement, true, 0, contextProperties, AgentInstanceFilterProxyNull.AGENT_INSTANCE_FILTER_PROXY_NULL);
         instances.put(statement.getStatementContext().getStatementId(), new AgentInstance(startResult.getStopCallback(), startResult.getAgentInstanceContext(), startResult.getFinalView()));
     }

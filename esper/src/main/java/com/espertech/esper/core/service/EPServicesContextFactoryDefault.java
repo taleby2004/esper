@@ -13,7 +13,7 @@ import com.espertech.esper.client.hook.*;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.core.context.mgr.ContextManagementServiceImpl;
 import com.espertech.esper.core.context.mgr.ContextStateService;
-import com.espertech.esper.core.context.mgr.ContextStateServiceImpl;
+import com.espertech.esper.core.context.mgr.ContextStateServiceNull;
 import com.espertech.esper.core.context.schedule.SchedulableAgentInstanceDirectory;
 import com.espertech.esper.core.deploy.DeploymentStateService;
 import com.espertech.esper.core.deploy.DeploymentStateServiceImpl;
@@ -158,7 +158,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
             stmtMetadataFactory = (StatementMetadataFactory) JavaClassHelper.instantiate(StatementMetadataFactory.class, configSnapshot.getEngineDefaults().getAlternativeContext().getStatementMetadataFactory());
         }
 
-        ContextStateService contextStateService = new ContextStateServiceImpl();
+        ContextStateService contextStateService = new ContextStateServiceNull();
         ContextManagementService contextManagementService = new ContextManagementServiceImpl(contextStateService);
 
         SchedulableAgentInstanceDirectory schedulableAgentInstanceDirectory = null;     // not required for Non-HA.

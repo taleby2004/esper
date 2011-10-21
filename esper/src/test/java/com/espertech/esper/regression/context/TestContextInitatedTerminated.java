@@ -318,6 +318,7 @@ public class TestContextInitatedTerminated extends TestCase {
         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{0, 4+5+6});
 
         stmt.destroy();
+        stmtModel.destroy();
 
         // test late-coming statement without "terminated"
         EPStatementSPI stmtTwo = (EPStatementSPI) epService.getEPAdministrator().createEPL("context EveryMinute " +

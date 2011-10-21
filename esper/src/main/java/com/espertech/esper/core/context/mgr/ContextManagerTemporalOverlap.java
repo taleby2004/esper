@@ -48,16 +48,17 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     private final AgentInstanceContext createContextContext;
     private final ContextDetailInitiatedTerminated overlapSpec;
     private final ContextStateService contextStateService;
+    private final ContextStateServiceBinding contextStateServiceBinding;
 
     private final ScheduleSlot scheduleSlot;
     private final ContextDescriptor contextDescriptor;
 
-    private final Map<String, InstanceList> instances = new HashMap<String, InstanceList>();
+    private final Map<String, Set<AgentInstanceWithSchedule>> instances = new HashMap<String, Set<AgentInstanceWithSchedule>>();
     private final Map<String, ContextManagedStatementBase> statements = new LinkedHashMap<String, ContextManagedStatementBase>(); // retain order of statement creation
 
     private PatternStopCallback patternStopCallback;
     private EPStatementHandleCallback filterHandle;
-    private EventType eventTypeContextProps;
+    private final TreeSet<Integer> instanceIds = new TreeSet<Integer>();
 
     public ContextManagerTemporalOverlap(String contextName, EPServicesContext servicesContext, AgentInstanceContext createContextContext, ContextDetailInitiatedTerminated overlapSpec, ContextStateService contextStateService) {
         this.contextName = contextName;
@@ -73,23 +74,21 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
                 return new StatementAIResourceRegistry(new AIRegistryAggregationMultiPerm(), new AIRegistryExprMultiPerm());
             }
         };
-        eventTypeContextProps = ContextPropertyEventType.getTemporalOverlapType(contextName, overlapSpec, servicesContext.getEventAdapterService());
+        EventType eventTypeContextProps = ContextPropertyEventType.getTemporalOverlapType(contextName, overlapSpec, servicesContext.getEventAdapterService());
         ContextPropertyRegistry contextProperties = new ContextPropertyRegistryImpl(eventTypeContextProps);
         contextDescriptor = new ContextDescriptor(contextName, false, contextProperties, resourceRegistryFactory, this);
+        contextStateServiceBinding = contextStateService.getBinding(eventTypeContextProps);
 
         // restart
-        int lastInstanceId = -1;
-        List<ContextState> contextStates = contextStateService.getContexts(contextName);
+        List<ContextState> contextStates = contextStateService.getContexts(contextName, contextStateServiceBinding);
         for (ContextState contextState : contextStates) {
             int instanceId = contextState.getAgentInstanceId();
-            if (lastInstanceId < instanceId) {
-                lastInstanceId = instanceId;
-            }
 
-            ContextManagerTemporalOverlapInstance initiationState = (ContextManagerTemporalOverlapInstance) contextState.getAdditionalInfo();
+            EventBean context = (EventBean) contextState.getAdditionalInfo();
             for (Map.Entry<String, ContextManagedStatementBase> stmtEntry : statements.entrySet()) {
-                startAgentInstance(stmtEntry.getValue(), instanceId, initiationState.getPatternData(), initiationState.getFilterEvent());
+                startAgentInstance(stmtEntry.getValue(), instanceId, context);
             }
+            instanceIds.add(instanceId);
         }
     }
 
@@ -98,20 +97,20 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     }
 
     public synchronized Iterator<EventBean> iterator(String statementId) {
-        InstanceList list = instances.get(statementId);
+        Set<AgentInstanceWithSchedule> list = instances.get(statementId);
         if (list == null) {
             return CollectionUtil.NULL_EVENT_ITERATOR;
         }
-        AgentInstance[] instances = list.getInstances().toArray(new AgentInstance[list.getInstances().size()]);
+        AgentInstance[] instances = list.toArray(new AgentInstance[list.size()]);
         return new AgentInstanceArrayIterator(instances);
     }
 
     public synchronized SafeIterator<EventBean> safeIterator(String statementId) {
-        InstanceList list = instances.get(statementId);
+        Set<AgentInstanceWithSchedule> list = instances.get(statementId);
         if (list == null) {
             return SafeIteratorNull.NULL_EVENT_ITER;
         }
-        AgentInstance[] instances = list.getInstances().toArray(new AgentInstance[list.getInstances().size()]);
+        AgentInstance[] instances = list.toArray(new AgentInstance[list.size()]);
         return new AgentInstanceArraySafeIterator(instances);
     }
 
@@ -142,21 +141,25 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     }
 
     private void stopAgentInstance(AgentInstanceContext agentInstanceContext) {
-        InstanceList instanceList = instances.get(agentInstanceContext.getStatementContext().getStatementId());
+        Set<AgentInstanceWithSchedule> instanceList = instances.get(agentInstanceContext.getStatementContext().getStatementId());
         if (instanceList == null) {
             return;
         }
 
-        for (AgentInstanceWithSchedule entry : instanceList.getInstances()) {
+        for (AgentInstanceWithSchedule entry : instanceList) {
             if (entry.getAgentInstanceContext() != agentInstanceContext) {
                 continue;
             }
+
+            contextStateService.removeContextAgentInstance(contextName, agentInstanceContext.getAgentInstanceIds()[0]);
 
             StatementAgentInstanceUtil.stop(entry.getStopCallback(), entry.getAgentInstanceContext(), entry.getFinalView());
             servicesContext.getSchedulingService().remove(entry.getContextScheduleCallbackHandle(), scheduleSlot);
             instanceList.remove(entry);
             break;
         }
+
+        instanceIds.remove(agentInstanceContext.getAgentInstanceIds()[0]);
     }
 
     private void activate() {
@@ -200,20 +203,26 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     }
 
     private void processMatchFound(Map<String, Object> patternData, EventBean filterEvent) {
+        int agentInstanceId = nextId(instanceIds);
+        instanceIds.add(agentInstanceId);
+
+        // determine context properties
+        EventBean context = ContextPropertyEventType.getTempOverlapBean(servicesContext.getEventAdapterService(), contextDescriptor.getContextPropertyRegistry().getContextEventType(), contextName, agentInstanceId, patternData, filterEvent, overlapSpec.getInitiatedFilterAsName());
+
+        contextStateService.addContext(contextName, agentInstanceId, context, contextStateServiceBinding);
+
         // for all current statements, start an instance
         for (ContextManagedStatementBase statement : statements.values()) {
 
             // obtain existing instances
-            InstanceList instanceList = instances.get(statement.getStatementContext().getStatementId());
+            Set<AgentInstanceWithSchedule> instanceList = instances.get(statement.getStatementContext().getStatementId());
             if (instanceList == null) {
-                instanceList = new InstanceList();
+                instanceList = new LinkedHashSet<AgentInstanceWithSchedule>();
                 instances.put(statement.getStatementContext().getStatementId(), instanceList);
             }
 
-            int agentInstanceId = instanceList.nextId();
-
             // start
-            AgentInstanceWithSchedule ai = startAgentInstance(statement, agentInstanceId, patternData, filterEvent);
+            AgentInstanceWithSchedule ai = startAgentInstance(statement, agentInstanceId, context);
 
             // evaluate this event specifically for this statement
             // evaluate that event for that new agent instance
@@ -225,12 +234,10 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
         }
     }
 
-    private AgentInstanceWithSchedule startAgentInstance(ContextManagedStatementBase statement, int agentInstanceId, Map<String, Object> patternData, EventBean filterEvent) {
-        // determine context properties
-        EventBean context = ContextPropertyEventType.getTempOverlapBean(eventTypeContextProps, contextName, agentInstanceId, patternData, filterEvent, overlapSpec.getInitiatedFilterAsName());
+    private AgentInstanceWithSchedule startAgentInstance(ContextManagedStatementBase statement, int agentInstanceId, EventBean contextBean) {
 
         // instantiate context
-        StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statement, false, agentInstanceId, context, AgentInstanceFilterProxyNull.AGENT_INSTANCE_FILTER_PROXY_NULL);
+        StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statement, false, agentInstanceId, contextBean, AgentInstanceFilterProxyNull.AGENT_INSTANCE_FILTER_PROXY_NULL);
         final AgentInstanceContext agentInstanceContext= result.getAgentInstanceContext();
 
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
@@ -267,9 +274,9 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     }
 
     private void removeStatement(String statementId) {
-        InstanceList instanceList = instances.get(statementId);
+        Set<AgentInstanceWithSchedule> instanceList = instances.get(statementId);
         if (instanceList != null) {
-            for (AgentInstanceWithSchedule entry : instanceList.getInstances()) {
+            for (AgentInstanceWithSchedule entry : instanceList) {
                 StatementAgentInstanceUtil.stop(entry.getStopCallback(), entry.getAgentInstanceContext(), entry.getFinalView());
                 servicesContext.getSchedulingService().remove(entry.getContextScheduleCallbackHandle(), scheduleSlot);
             }
@@ -277,41 +284,25 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
 
         instances.remove(statementId);
         statements.remove(statementId);
+        if (statements.isEmpty()) {
+            instanceIds.clear();
+        }
     }
 
-    public static class InstanceList {
-        private final Set<AgentInstanceWithSchedule> instances = new LinkedHashSet<AgentInstanceWithSchedule>();
-        private final TreeSet<Integer> instanceIds = new TreeSet<Integer>();
-
-        public void add(AgentInstanceWithSchedule instance) {
-            instanceIds.add(instance.getAgentInstanceContext().getAgentInstanceIds()[0]);
-            instances.add(instance);
+    private static int nextId(TreeSet<Integer> instanceIds) {
+        if (instanceIds.isEmpty()) {
+            return 0;
         }
-
-        public void remove(AgentInstanceWithSchedule instance) {
-            instances.remove(instance);
-            instanceIds.remove(instance.getAgentInstanceContext().getAgentInstanceIds()[0]);
-        }
-
-        public Set<AgentInstanceWithSchedule> getInstances() {
-            return instances;
-        }
-
-        public int nextId() {
-            if (instanceIds.isEmpty()) {
-                return 0;
-            }
-            if (instanceIds.last() == (instanceIds.size() - 1)) {
-                return instanceIds.last() + 1;
-            }
-            for (int i = 0; i < instanceIds.size(); i++) {
-                if (instanceIds.contains(i)) {
-                    continue;
-                }
-                return i;
-            }
+        if (instanceIds.last() == (instanceIds.size() - 1)) {
             return instanceIds.last() + 1;
         }
+        for (int i = 0; i < instanceIds.size(); i++) {
+            if (instanceIds.contains(i)) {
+                continue;
+            }
+            return i;
+        }
+        return instanceIds.last() + 1;
     }
 
     public static class AgentInstanceWithSchedule extends AgentInstance {

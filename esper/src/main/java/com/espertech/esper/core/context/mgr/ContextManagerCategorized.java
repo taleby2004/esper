@@ -27,7 +27,6 @@ import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.ContextDetailCategory;
 import com.espertech.esper.epl.spec.ContextDetailCategoryItem;
-import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
 import com.espertech.esper.epl.spec.util.StatementSpecCompiledAnalyzer;
 import com.espertech.esper.epl.spec.util.StatementSpecCompiledAnalyzerResult;
 import com.espertech.esper.event.EventTypeUtility;
@@ -38,8 +37,6 @@ import com.espertech.esper.util.CollectionUtil;
 import java.util.*;
 
 public class ContextManagerCategorized implements ContextManager, ContextIteratorHandler {
-
-    private final static ContextPropertyRegistryImpl CONTEXT_PROPERTY_REGISTRY = new ContextPropertyRegistryImpl(Collections.<ContextDetailPartitionItem>emptyList(), ContextPropertyEventType.TYPE_CATEGORY_PROPS);
 
     private final String contextName;
     private final EPServicesContext servicesContext;
@@ -62,7 +59,10 @@ public class ContextManagerCategorized implements ContextManager, ContextIterato
                 return new StatementAIResourceRegistry(new AIRegistryAggregationMultiPerm(), new AIRegistryExprMultiPerm());
             }
         };
-        contextDescriptor = new ContextDescriptor(contextName, false, CONTEXT_PROPERTY_REGISTRY, resourceRegistryFactory, this);
+
+        EventType contextEventType = ContextPropertyEventType.getCategorizedType(contextName, servicesContext.getEventAdapterService());
+        ContextPropertyRegistryImpl contextPropertyRegistry = new ContextPropertyRegistryImpl(contextEventType);
+        contextDescriptor = new ContextDescriptor(contextName, false, contextPropertyRegistry, resourceRegistryFactory, this);
 
         // create empty categories
         int agentInstanceId = 0;
@@ -93,7 +93,7 @@ public class ContextManagerCategorized implements ContextManager, ContextIterato
             ContextDetailCategoryItem category = entry.getKey();
             Integer agentInstanceId = entry.getValue();
 
-            StatementAgentInstanceFactoryResult result = startContextStatement(contextName, servicesContext, category, desc, agentInstanceId, categorySpec);
+            StatementAgentInstanceFactoryResult result = startContextStatement(contextDescriptor, contextName, servicesContext, category, desc, agentInstanceId, categorySpec);
             AgentInstance agentInstance = new AgentInstance(result.getStopCallback(), result.getAgentInstanceContext(), result.getFinalView());
             desc.getInstances().add(agentInstance);
         }
@@ -177,12 +177,12 @@ public class ContextManagerCategorized implements ContextManager, ContextIterato
         }
     }
 
-    private static StatementAgentInstanceFactoryResult startContextStatement(String contextName, EPServicesContext servicesContext, ContextDetailCategoryItem category, ContextManagerPartitionedStatementDesc statementDesc, int agentInstanceId, ContextDetailCategory categorySpec) {
+    private static StatementAgentInstanceFactoryResult startContextStatement(ContextDescriptor contextDescriptor, String contextName, EPServicesContext servicesContext, ContextDetailCategoryItem category, ContextManagerPartitionedStatementDesc statementDesc, int agentInstanceId, ContextDetailCategory categorySpec) {
 
         // determine filter addendum
         AgentInstanceFilterProxyImpl filterProxy = getAddendumFilters(category, categorySpec, statementDesc);
 
-        EventBean context = ContextPropertyEventType.getCategorizedBean(contextName, agentInstanceId, category.getName());
+        EventBean context = ContextPropertyEventType.getCategorizedBean(servicesContext.getEventAdapterService(), contextDescriptor.getContextPropertyRegistry().getContextEventType(), contextName, agentInstanceId, category.getName());
 
         // instantiate context
         return StatementAgentInstanceUtil.start(servicesContext, statementDesc.getStatement(), false, agentInstanceId, context, filterProxy);

@@ -17,9 +17,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.spec.ContextDetailInitiatedTerminated;
 import com.espertech.esper.epl.spec.ContextDetailPartitioned;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventTypeMetadata;
 import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.event.map.MapEventType;
 
 import java.util.*;
 
@@ -31,25 +29,21 @@ public class ContextPropertyEventType {
     public static final String PROP_CTX_ENDTIME = "endTime";
     public static final String PROP_CTX_KEY_PREFIX = "key";
 
-    public final static EventType TYPE_TEMPORAL_FIXED_PROPS;
-    public final static EventType TYPE_CATEGORY_PROPS;
-
-    public final static List<ContextProperty> LIST_PARTITION_PROPS;
-    public final static List<ContextProperty> LIST_TEMPORAL_OVERLAP_PROPS;
+    private final static List<ContextProperty> LIST_TEMPORAL_FIXED_PROPS;
+    private final static List<ContextProperty> LIST_CATEGORY_PROPS;
+    private final static List<ContextProperty> LIST_PARTITION_PROPS;
+    private final static List<ContextProperty> LIST_TEMPORAL_OVERLAP_PROPS;
 
     static {
-        List<ContextProperty> props = new ArrayList<ContextProperty>();
+        LIST_TEMPORAL_FIXED_PROPS = new ArrayList<ContextProperty>();
+        LIST_TEMPORAL_FIXED_PROPS.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_NAME, String.class));
+        LIST_TEMPORAL_FIXED_PROPS.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_STARTTIME, long.class));
+        LIST_TEMPORAL_FIXED_PROPS.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_ENDTIME, long.class));
 
-        props.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_NAME, String.class));
-        props.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_STARTTIME, long.class));
-        props.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_ENDTIME, long.class));
-        TYPE_TEMPORAL_FIXED_PROPS = createFixedType("TEMPORAL", props);
-
-        props.clear();
-        props.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_NAME, String.class));
-        props.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_ID, int.class));
-        props.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_LABEL, String.class));
-        TYPE_CATEGORY_PROPS = createFixedType("CATEGORY", props);
+        LIST_CATEGORY_PROPS = new ArrayList<ContextProperty>();
+        LIST_CATEGORY_PROPS.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_NAME, String.class));
+        LIST_CATEGORY_PROPS.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_ID, int.class));
+        LIST_CATEGORY_PROPS.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_LABEL, String.class));
 
         LIST_PARTITION_PROPS = new ArrayList<ContextProperty>();
         LIST_PARTITION_PROPS.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_NAME, String.class));
@@ -60,20 +54,28 @@ public class ContextPropertyEventType {
         LIST_TEMPORAL_OVERLAP_PROPS.add(new ContextProperty(ContextPropertyEventType.PROP_CTX_ID, int.class));
     }
 
-    public static EventBean getCategorizedBean(String contextName, int agentInstanceId, String label) {
+    public static EventType getCategorizedType(String contextName, EventAdapterService eventAdapterService) {
+        return createFixedType(contextName, LIST_CATEGORY_PROPS, eventAdapterService);
+    }
+
+    public static EventBean getCategorizedBean(EventAdapterService eventAdapterService, EventType eventType, String contextName, int agentInstanceId, String label) {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(PROP_CTX_NAME, contextName);
         props.put(PROP_CTX_ID, agentInstanceId);
         props.put(PROP_CTX_LABEL, label);
-        return new MapEventBean(props, TYPE_CATEGORY_PROPS);
+        return eventAdapterService.adapterForTypedMap(props, eventType);
     }
 
-    public static EventBean getTemporalFixedBean(String contextName, long startTime, long endTime) {
+    public static EventType getTemporalFixedType(String contextName, EventAdapterService eventAdapterService) {
+        return createFixedType(contextName, LIST_TEMPORAL_FIXED_PROPS, eventAdapterService);
+    }
+
+    public static EventBean getTemporalFixedBean(EventAdapterService eventAdapterService, EventType eventType, String contextName, long startTime, long endTime) {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(PROP_CTX_NAME, contextName);
         props.put(PROP_CTX_STARTTIME, startTime);
         props.put(PROP_CTX_ENDTIME, endTime);
-        return new MapEventBean(props, TYPE_TEMPORAL_FIXED_PROPS);
+        return eventAdapterService.adapterForTypedMap(props, eventType);
     }
 
     public static EventType getTemporalOverlapType(String contextName, ContextDetailInitiatedTerminated overlapSpec, EventAdapterService eventAdapterService) {
@@ -89,7 +91,7 @@ public class ContextPropertyEventType {
         return ContextPropertyEventType.makeEventType("context_" + contextName, ContextPropertyEventType.LIST_TEMPORAL_OVERLAP_PROPS, additionalProperties, eventAdapterService);
     }
 
-    public static EventBean getTempOverlapBean(EventType eventType, String contextName, int agentInstanceId, Map<String, Object> matchEvent, EventBean event, String filterAsName) {
+    public static EventBean getTempOverlapBean(EventAdapterService eventAdapterService, EventType eventType, String contextName, int agentInstanceId, Map<String, Object> matchEvent, EventBean event, String filterAsName) {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(PROP_CTX_NAME, contextName);
         props.put(PROP_CTX_ID, agentInstanceId);
@@ -99,7 +101,7 @@ public class ContextPropertyEventType {
         else {
             props.put(filterAsName, event);
         }
-        return new MapEventBean(props, eventType);
+        return eventAdapterService.adapterForTypedMap(props, eventType);
     }
 
     public static EventType getPartitionType(String contextName, ContextDetailPartitioned segmentedSpec, Class[] propertyTypes, EventAdapterService eventAdapterService) {
@@ -111,7 +113,7 @@ public class ContextPropertyEventType {
         return makeEventType(contextName, ContextPropertyEventType.LIST_PARTITION_PROPS, props, eventAdapterService);
     }
 
-    public static EventBean getPartitionBean(EventType eventType, String contextName, int agentInstanceId, Object[] keys) {
+    public static EventBean getPartitionBean(EventAdapterService eventAdapterService, EventType eventType, String contextName, int agentInstanceId, Object[] keys) {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(PROP_CTX_NAME, contextName);
         props.put(PROP_CTX_ID, agentInstanceId);
@@ -119,11 +121,11 @@ public class ContextPropertyEventType {
             String propertyName = ContextPropertyEventType.PROP_CTX_KEY_PREFIX + (i + 1);
             props.put(propertyName, keys[i]);
         }
-        return new MapEventBean(props, eventType);
+        return eventAdapterService.adapterForTypedMap(props, eventType);
     }
 
-    private static EventType createFixedType(String name, List<ContextProperty> props) {
-        return makeEventType(name, props, Collections.EMPTY_MAP, null);
+    private static EventType createFixedType(String name, List<ContextProperty> props, EventAdapterService eventAdapterService) {
+        return makeEventType(name, props, Collections.EMPTY_MAP, eventAdapterService);
     }
 
     private static EventType makeEventType(String name, List<ContextProperty> builtin, Map<String, Object> additionalProperties, EventAdapterService eventAdapterService) {
@@ -131,7 +133,7 @@ public class ContextPropertyEventType {
         for (ContextProperty prop : builtin) {
             properties.put(prop.getPropertyName(), prop.getPropertyType());
         }
-        return new MapEventType(EventTypeMetadata.createAnonymous(name), name, 0, eventAdapterService, properties, null, null, null);
+        return eventAdapterService.createAnonymousMapType(name, properties);
     }
 
     public static class ContextProperty {

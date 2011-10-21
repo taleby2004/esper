@@ -49,12 +49,12 @@ public class ContextManagerPartitioned implements ContextManager, ContextManager
     private final ContextDetailPartitioned segmentedSpec;
     private final AgentInstanceContext agentInstanceContextCreateContext;
     private final ContextStateService stateService;
+    private final ContextStateServiceBinding stateServiceBinding;
 
     private final ContextDescriptor contextDescriptor;
     private final Map<Object, Integer> partitionKeys = new LinkedHashMap<Object, Integer>();
     private final Map<String, ContextManagerPartitionedStatementDesc> statements = new LinkedHashMap<String, ContextManagerPartitionedStatementDesc>(); // retain order of statement creation
     private final List<ContextManagerPartitionedFilterCallback> filterCallbacks = new ArrayList<ContextManagerPartitionedFilterCallback>();
-    private final EventType contextPropsType;
 
     private int numInstances;
 
@@ -75,13 +75,14 @@ public class ContextManagerPartitioned implements ContextManager, ContextManager
             }
         };
 
-        contextPropsType = ContextPropertyEventType.getPartitionType(contextName, segmentedSpec, propertyTypes, servicesContext.getEventAdapterService());
+        EventType contextPropsType = ContextPropertyEventType.getPartitionType(contextName, segmentedSpec, propertyTypes, servicesContext.getEventAdapterService());
         ContextPropertyRegistryImpl registry = new ContextPropertyRegistryImpl(segmentedSpec.getItems(), contextPropsType);
         contextDescriptor = new ContextDescriptor(contextName, false, registry, resourceRegistryFactory, this);
+        stateServiceBinding = stateService.getBinding(propertyTypes);
 
         // restart
         int lastInstanceId = -1;
-        List<ContextState> contextStates = stateService.getContexts(contextName);
+        List<ContextState> contextStates = stateService.getContexts(contextName, stateServiceBinding);
         for (ContextState state : contextStates) {
             int instanceId = state.getAgentInstanceId();
             if (lastInstanceId < instanceId) {
@@ -118,7 +119,7 @@ public class ContextManagerPartitioned implements ContextManager, ContextManager
             Object key = entry.getKey();
             Integer agentInstanceId = entry.getValue();
 
-            StatementAgentInstanceFactoryResult result = startContextStatement(contextPropsType, contextName, servicesContext, key, desc, agentInstanceId, segmentedSpec);
+            StatementAgentInstanceFactoryResult result = startContextStatement(contextDescriptor.getContextPropertyRegistry().getContextEventType(), contextName, servicesContext, key, desc, agentInstanceId, segmentedSpec);
 
             AgentInstance instance = new AgentInstance(result.getStopCallback(), result.getAgentInstanceContext(), result.getFinalView());
             desc.getInstances().add(instance);
@@ -172,7 +173,7 @@ public class ContextManagerPartitioned implements ContextManager, ContextManager
         for (Map.Entry<String, ContextManagerPartitionedStatementDesc> entry : statements.entrySet()) {
             ContextManagerPartitionedStatementDesc statementDesc = entry.getValue();
 
-            StatementAgentInstanceFactoryResult startResult = startContextStatement(contextPropsType, contextName, servicesContext, keyValue, statementDesc, agentInstanceId, segmentedSpec);
+            StatementAgentInstanceFactoryResult startResult = startContextStatement(contextDescriptor.getContextPropertyRegistry().getContextEventType(), contextName, servicesContext, keyValue, statementDesc, agentInstanceId, segmentedSpec);
 
             AgentInstance instance = new AgentInstance(startResult.getStopCallback(), startResult.getAgentInstanceContext(), startResult.getFinalView());
             statementDesc.getInstances().add(instance);
@@ -180,7 +181,7 @@ public class ContextManagerPartitioned implements ContextManager, ContextManager
         }
 
         // save new context state
-        stateService.addContext(contextName, agentInstanceId, keyValue);
+        stateService.addContext(contextName, agentInstanceId, keyValue, stateServiceBinding);
 
         // for all new contexts: evaluate this event for this statement
         for (AgentInstance context : newInstances) {
@@ -206,7 +207,7 @@ public class ContextManagerPartitioned implements ContextManager, ContextManager
         }
 
         // Build built-in properties for access
-        EventBean builtin = ContextPropertyEventType.getPartitionBean(contextPropsType, contextName, agentInstanceId, agentInstanceProperties);
+        EventBean builtin = ContextPropertyEventType.getPartitionBean(servicesContext.getEventAdapterService(), contextPropsType, contextName, agentInstanceId, agentInstanceProperties);
 
         // instantiate context
         return StatementAgentInstanceUtil.start(servicesContext, statementDesc.getStatement(), false, agentInstanceId, builtin, filterProxy);

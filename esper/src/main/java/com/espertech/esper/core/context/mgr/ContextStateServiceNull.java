@@ -14,17 +14,22 @@ package com.espertech.esper.core.context.mgr;
 import java.util.Collections;
 import java.util.List;
 
-public class ContextStateServiceImpl implements ContextStateService {
+public class ContextStateServiceNull implements ContextStateService {
 
-    public void addContext(String contextName, int agentInstanceId, Object additionalInfo) {
-        // no action
+    public ContextStateServiceBinding getBinding(Object bindingInfo) {
+        return null;
     }
 
-    public List<ContextState> getContexts(String contextName) {
+    public void addContext(String contextName, int agentInstanceId, Object additionalInfo, ContextStateServiceBinding binding) {
+    }
+
+    public List<ContextState> getContexts(String contextName, ContextStateServiceBinding binding) {
         return Collections.emptyList();
     }
 
     public void removeContext(String contextName) {
+    }
 
+    public void removeContextAgentInstance(String contextName, int agentInstanceId) {
     }
 }
