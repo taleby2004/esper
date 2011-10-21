@@ -80,7 +80,7 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
         contextStateServiceBinding = contextStateService.getBinding(eventTypeContextProps);
 
         // restart
-        List<ContextState> contextStates = contextStateService.getContexts(contextName, contextStateServiceBinding);
+        List<ContextState> contextStates = contextStateService.getContexts(contextName, contextStateServiceBinding, servicesContext.getEventAdapterService());
         for (ContextState contextState : contextStates) {
             int instanceId = contextState.getAgentInstanceId();
 

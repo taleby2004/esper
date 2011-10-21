@@ -82,7 +82,7 @@ public class ContextManagerPartitioned implements ContextManager, ContextManager
 
         // restart
         int lastInstanceId = -1;
-        List<ContextState> contextStates = stateService.getContexts(contextName, stateServiceBinding);
+        List<ContextState> contextStates = stateService.getContexts(contextName, stateServiceBinding, servicesContext.getEventAdapterService());
         for (ContextState state : contextStates) {
             int instanceId = state.getAgentInstanceId();
             if (lastInstanceId < instanceId) {

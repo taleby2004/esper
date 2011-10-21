@@ -11,6 +11,8 @@
 
 package com.espertech.esper.core.context.mgr;
 
+import com.espertech.esper.event.EventAdapterService;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -23,8 +25,8 @@ public class ContextStateServiceNull implements ContextStateService {
     public void addContext(String contextName, int agentInstanceId, Object additionalInfo, ContextStateServiceBinding binding) {
     }
 
-    public List<ContextState> getContexts(String contextName, ContextStateServiceBinding binding) {
-        return Collections.emptyList();
+    public List<ContextState> getContexts(String contextName, ContextStateServiceBinding binding, EventAdapterService eventAdapterService) {
+        return null;
     }
 
     public void removeContext(String contextName) {

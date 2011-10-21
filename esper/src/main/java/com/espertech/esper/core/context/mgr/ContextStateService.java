@@ -11,13 +11,15 @@
 
 package com.espertech.esper.core.context.mgr;
 
+import com.espertech.esper.event.EventAdapterService;
+
 import java.util.List;
 
 public interface ContextStateService {
 
     public ContextStateServiceBinding getBinding(Object bindingInfo);
     public void addContext(String contextName, int agentInstanceId, Object additionalInfo, ContextStateServiceBinding binding);
-    public List<ContextState> getContexts(String contextName, ContextStateServiceBinding binding);
+    public List<ContextState> getContexts(String contextName, ContextStateServiceBinding binding, EventAdapterService eventAdapterService);
     public void removeContext(String contextName);
     public void removeContextAgentInstance(String contextName, int agentInstanceId);
 }
