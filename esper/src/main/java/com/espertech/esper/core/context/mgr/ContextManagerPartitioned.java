@@ -27,14 +27,16 @@ import com.espertech.esper.core.context.util.ContextDescriptor;
 import com.espertech.esper.core.context.util.ContextIteratorHandler;
 import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
 import com.espertech.esper.core.service.EPServicesContext;
-import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
 import com.espertech.esper.epl.spec.ContextDetailPartitioned;
 import com.espertech.esper.epl.spec.util.StatementSpecCompiledAnalyzer;
 import com.espertech.esper.epl.spec.util.StatementSpecCompiledAnalyzerResult;
 import com.espertech.esper.event.EventTypeUtility;
-import com.espertech.esper.filter.*;
+import com.espertech.esper.filter.FilterOperator;
+import com.espertech.esper.filter.FilterSpecCompiled;
+import com.espertech.esper.filter.FilterValueSetParam;
+import com.espertech.esper.filter.FilterValueSetParamImpl;
 import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.util.JavaClassHelper;
 

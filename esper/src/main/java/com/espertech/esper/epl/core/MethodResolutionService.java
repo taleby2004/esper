@@ -277,4 +277,6 @@ public interface MethodResolutionService
     public long getCurrentRowCount(AggregationMethod[] aggregators, AggregationAccess[] accesses);
 
     public AggregationAccess makeAccessStreamId(int[] agentInstanceIds, boolean isJoin, int streamId, MultiKeyUntyped mk);
+
+    public void destroyedAgentInstance(int[] agentInstanceIds);
 }

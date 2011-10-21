@@ -174,4 +174,6 @@ public interface EPServiceProviderSPI extends EPServiceProvider
     public void setConfiguration(Configuration configuration);
 
     public void postInitialize();
+
+    public void initialize(Long currentTime);
 }

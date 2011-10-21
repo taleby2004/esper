@@ -49,7 +49,7 @@ public class ContextManagerCategorized implements ContextManager, ContextIterato
     private final Map<ContextDetailCategoryItem, Integer> instances = new LinkedHashMap<ContextDetailCategoryItem, Integer>();
     private final Map<String, ContextManagerPartitionedStatementDesc> statements = new LinkedHashMap<String, ContextManagerPartitionedStatementDesc>(); // retain order of statement creation
 
-    public ContextManagerCategorized(String contextName, EPServicesContext servicesContext, ContextDetailCategory categorySpec, ContextStateService stateService)
+    public ContextManagerCategorized(String contextName, EPServicesContext servicesContext, ContextDetailCategory categorySpec)
         throws ExprValidationException {
         this.contextName = contextName;
         this.servicesContext = servicesContext;

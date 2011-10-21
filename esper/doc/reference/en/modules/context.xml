@@ -369,8 +369,8 @@ create context SegmentedByCustomer partition by custId from BankTxn, loginTime f
 				The syntax for creating a category segmented context is as follows: 
 			</para>
 			<synopsis>create context <emphasis>context_name</emphasis>
-  group <emphasis>group_expression</emphasis> as <emphasis>category_label</emphasis>
-  [, group <emphasis>group_expression</emphasis> as <emphasis>category_label</emphasis>]
+  group [by] <emphasis>group_expression</emphasis> as <emphasis>category_label</emphasis>
+  [, group [by] <emphasis>group_expression</emphasis> as <emphasis>category_label</emphasis>]
   [, ...]
   from <emphasis>stream_def</emphasis></synopsis>
 						

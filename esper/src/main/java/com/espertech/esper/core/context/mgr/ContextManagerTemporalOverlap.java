@@ -47,6 +47,7 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     private final EPServicesContext servicesContext;
     private final AgentInstanceContext createContextContext;
     private final ContextDetailInitiatedTerminated overlapSpec;
+    private final ContextStateService contextStateService;
 
     private final ScheduleSlot scheduleSlot;
     private final ContextDescriptor contextDescriptor;
@@ -58,11 +59,12 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
     private EPStatementHandleCallback filterHandle;
     private EventType eventTypeContextProps;
 
-    public ContextManagerTemporalOverlap(String contextName, EPServicesContext servicesContext, AgentInstanceContext createContextContext, ContextDetailInitiatedTerminated overlapSpec) {
+    public ContextManagerTemporalOverlap(String contextName, EPServicesContext servicesContext, AgentInstanceContext createContextContext, ContextDetailInitiatedTerminated overlapSpec, ContextStateService contextStateService) {
         this.contextName = contextName;
         this.servicesContext = servicesContext;
         this.createContextContext = createContextContext;
         this.overlapSpec = overlapSpec;
+        this.contextStateService = contextStateService;
 
         this.scheduleSlot = createContextContext.getStatementContext().getScheduleBucket().allocateSlot();
 
@@ -74,6 +76,21 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
         eventTypeContextProps = ContextPropertyEventType.getTemporalOverlapType(contextName, overlapSpec, servicesContext.getEventAdapterService());
         ContextPropertyRegistry contextProperties = new ContextPropertyRegistryImpl(eventTypeContextProps);
         contextDescriptor = new ContextDescriptor(contextName, false, contextProperties, resourceRegistryFactory, this);
+
+        // restart
+        int lastInstanceId = -1;
+        List<ContextState> contextStates = contextStateService.getContexts(contextName);
+        for (ContextState contextState : contextStates) {
+            int instanceId = contextState.getAgentInstanceId();
+            if (lastInstanceId < instanceId) {
+                lastInstanceId = instanceId;
+            }
+
+            ContextManagerTemporalOverlapInstance initiationState = (ContextManagerTemporalOverlapInstance) contextState.getAdditionalInfo();
+            for (Map.Entry<String, ContextManagedStatementBase> stmtEntry : statements.entrySet()) {
+                startAgentInstance(stmtEntry.getValue(), instanceId, initiationState.getPatternData(), initiationState.getFilterEvent());
+            }
+        }
     }
 
     public ContextDescriptor getContextDescriptor() {
@@ -195,40 +212,47 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
 
             int agentInstanceId = instanceList.nextId();
 
-            // determine context properties
-            EventBean context = ContextPropertyEventType.getTempOverlapBean(eventTypeContextProps, contextName, agentInstanceId, patternData, filterEvent, overlapSpec.getInitiatedFilterAsName());
+            // start
+            AgentInstanceWithSchedule ai = startAgentInstance(statement, agentInstanceId, patternData, filterEvent);
 
-            // instantiate context
-            StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statement, false, agentInstanceId, context, AgentInstanceFilterProxyNull.AGENT_INSTANCE_FILTER_PROXY_NULL);
-            final AgentInstanceContext agentInstanceContext= result.getAgentInstanceContext();
-
-            ScheduleHandleCallback callback = new ScheduleHandleCallback() {
-                public void scheduledTrigger(ExtensionServicesContext extensionServicesContext) {
-                    stopAgentInstance(agentInstanceContext);
-                }
-            };
-
-            // callback for expiry
-            EPStatementAgentInstanceHandle agentHandle = new EPStatementAgentInstanceHandle(createContextContext.getStatementContext().getEpStatementHandle(), createContextContext.getStatementContext().getDefaultAgentInstanceLock(), null, new StatementAgentInstanceFilterVersion());
-            EPStatementHandleCallback contextScheduleCallbackHandle = new EPStatementHandleCallback(agentHandle, callback);
-            Double interval = (Double) overlapSpec.getTerminatedTimePeriod().evaluate(null, true, createContextContext);
-            if (interval == null) {
-                log.warn("Time period expression in context '" + contextName + "' returned a null value, not scheduling time period");
-            }
-            else {
-                long msec = (long) (interval * 1000L);
-                servicesContext.getSchedulingService().add(msec, contextScheduleCallbackHandle, scheduleSlot);
-            }
-
-            // save
-            AgentInstanceWithSchedule instance = new AgentInstanceWithSchedule(result.getStopCallback(), result.getAgentInstanceContext(), result.getFinalView(), contextScheduleCallbackHandle);
-            instanceList.add(instance);
-
+            // evaluate this event specifically for this statement
             // evaluate that event for that new agent instance
             if (filterEvent != null) {
-                StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, createContextContext, filterEvent, result.getAgentInstanceContext());
+                StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, createContextContext, filterEvent, ai.getAgentInstanceContext());
             }
+
+            instanceList.add(ai);
         }
+    }
+
+    private AgentInstanceWithSchedule startAgentInstance(ContextManagedStatementBase statement, int agentInstanceId, Map<String, Object> patternData, EventBean filterEvent) {
+        // determine context properties
+        EventBean context = ContextPropertyEventType.getTempOverlapBean(eventTypeContextProps, contextName, agentInstanceId, patternData, filterEvent, overlapSpec.getInitiatedFilterAsName());
+
+        // instantiate context
+        StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statement, false, agentInstanceId, context, AgentInstanceFilterProxyNull.AGENT_INSTANCE_FILTER_PROXY_NULL);
+        final AgentInstanceContext agentInstanceContext= result.getAgentInstanceContext();
+
+        ScheduleHandleCallback callback = new ScheduleHandleCallback() {
+            public void scheduledTrigger(ExtensionServicesContext extensionServicesContext) {
+                stopAgentInstance(agentInstanceContext);
+            }
+        };
+
+        // callback for expiry
+        EPStatementAgentInstanceHandle agentHandle = new EPStatementAgentInstanceHandle(createContextContext.getStatementContext().getEpStatementHandle(), createContextContext.getStatementContext().getDefaultAgentInstanceLock(), null, new StatementAgentInstanceFilterVersion());
+        EPStatementHandleCallback contextScheduleCallbackHandle = new EPStatementHandleCallback(agentHandle, callback);
+        Double interval = (Double) overlapSpec.getTerminatedTimePeriod().evaluate(null, true, createContextContext);
+        if (interval == null) {
+            log.warn("Time period expression in context '" + contextName + "' returned a null value, not scheduling time period");
+        }
+        else {
+            long msec = (long) (interval * 1000L);
+            servicesContext.getSchedulingService().add(msec, contextScheduleCallbackHandle, scheduleSlot);
+        }
+
+        // save
+        return new AgentInstanceWithSchedule(result.getStopCallback(), result.getAgentInstanceContext(), result.getFinalView(), contextScheduleCallbackHandle);
     }
 
     private void deactivate() {

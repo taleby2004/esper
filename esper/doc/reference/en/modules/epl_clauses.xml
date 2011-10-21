@@ -1919,22 +1919,83 @@ having stddev(price) &gt; 0.8</programlisting>
 		</sect2>
 
         <sect2 id="epl-group-by-versus-view" >
-			 <title>Comparing the <emphasis>Group By</emphasis> clause and the <emphasis>std:groupwin</emphasis> view</title>
+			 <title>Comparing Keyed Segmented Context, the <emphasis>Group By</emphasis> clause and the <emphasis>std:groupwin</emphasis> view</title>
 
 			<para>
-				The <emphasis>group by</emphasis> clause as well as the built-in <emphasis>std:groupwin</emphasis> view are similar in their ability to group events. This section explains the key differences in their behavior and use.
+				The keyed segmented context <emphasis>create context ... partition by</emphasis> and the <emphasis>group by</emphasis> clause as well as the built-in <emphasis>std:groupwin</emphasis> view are similar in their ability to group events but very different in their semantics. This section explains the key differences in their behavior and use.
 			</para>
 				
+			<para>
+				The keyed segmented context as declared with <emphasis>create context ... partition by</emphasis> and <emphasis>context .... select ...</emphasis> creates a new context partition per key value(s). The engine maintains separate data window views as well as separate aggregations per context partition; thereby the keyed segmented context applies to both. See <xref linkend="context_def_keyed"/> for additional examples.
+			</para>
+
 			<para>
 				The <emphasis>group by</emphasis> clause works together with aggregation functions in your statement to produce an aggregation result per group. In greater detail, this means that when a new event arrives, the engine applies the expressions in the <emphasis>group by</emphasis> clause to determine a grouping key. If the engine has not encountered that grouping key before (a new group), the engine creates a set of new aggregation results for that grouping key and performs the aggregation changing that new set of aggregation results. If the grouping key points to an existing set of prior aggregation results (an existing group), the engine performs the aggregation changing the prior set of aggregation results for that group.
 			</para>
 
 			<para>
-				The <emphasis>std:groupwin</emphasis> view is a built-in view that also groups events. The view is described in greater detail in <xref linkend="view-std-groupwin"/>. Its primary use is to create a separate data window per group, or more generally to create separate instances of all its sub-views for each grouping key encountered.
+				The <emphasis>std:groupwin</emphasis> view is a built-in view that groups events into data windows. The view is described in greater detail in <xref linkend="view-std-groupwin"/>. Its primary use is to create a separate data window per group, or more generally to create separate instances of all its sub-views for each grouping key encountered.
+			</para>
+			
+			<para>
+				The table below summarizes the point:
+			</para>
+			
+			<table frame="topbot">
+				<title>Grouping Options</title>
+				<tgroup cols="2">
+					<colspec colwidth="0.50*"/>
+					<colspec colwidth="1*"/>
+					<thead>
+						<row>
+							<entry>Option</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry>Keyed Segmented Context</entry>
+							<entry>
+							  <para>
+							    Separate context partition per key value.
+							  </para>
+							  <para>
+							    Affects all of data windows, aggregations, patterns, etc. (except variables which are global).
+							  </para>
+							</entry>
+						</row>
+						<row>
+							<entry>Grouped Data Window (<emphasis>std:groupwin</emphasis>)</entry>
+							<entry>
+							  <para>
+							    Separate data window per key value.
+							  </para>
+							  <para>
+							    Affects only the data window that is declared next to it.
+							  </para>
+							</entry>
+						</row>
+						<row>
+							<entry>Group By Clause (<emphasis>group by</emphasis>)</entry>
+							<entry>
+							  <para>
+							    Separate aggregation values per key value.
+							  </para>
+							  <para>
+							    Affects only aggregation values.
+							  </para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>				
+			</table>
+			
+			<para>
+			  Please review the performance section for advice related to performance or memory-use.
 			</para>
 
 			<para>
-				The next example shows two queries that produce equivalent results. The query using the <emphasis>group by</emphasis> clause is generally preferable as is easier to read. The second form introduces the <literal>stat:uni</literal> view which computes univariate statistics for a given property:
+				The next example shows queries that produce equivalent results. The query using the <emphasis>group by</emphasis> clause is generally preferable as is easier to read. The second form introduces the <literal>stat:uni</literal> view which computes univariate statistics for a given property:
 			</para>
 
 			<programlisting>select symbol, avg(price) from StockTickEvent group by symbol

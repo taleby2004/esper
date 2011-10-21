@@ -926,7 +926,7 @@ createContextPartitionItem
 	;
 	
 createContextGroupItem
-	:	GROUP expression AS i=IDENT
+	:	GROUP BY? expression AS i=IDENT
 		-> ^(CREATE_CTX_CATITEM expression $i?)		
 	;	
 

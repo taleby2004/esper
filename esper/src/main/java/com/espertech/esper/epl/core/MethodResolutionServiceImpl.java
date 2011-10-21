@@ -356,5 +356,9 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         else {
             return new AggregationAccessImpl(streamId);
         }
-    }    
+    }
+
+    public void destroyedAgentInstance(int[] agentInstanceIds) {
+        // no action require
+    }
 }

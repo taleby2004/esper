@@ -721,6 +721,16 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 					When using a large number of threads with the engine, such as more then 100 threads, we provide a setting in the configuration that instructs the engine to reduce the use of thread-local variables. Please see  <xref linkend="config-engine-execution"/> for more information.
 				</para>
 		</sect2>
+		
+		<sect2 id="perf-tips-20">
+				<title>Context Partition Related Information</title>
+				<para>
+					As the engine locks on the level of context partition, high concurrency under threading can be achieved by using context partitions.
+				</para>
+				<para>
+					Generally context partitions require more memory then the more fine-grained grouping that can be achieved by <literal>group by</literal> or <literal>std:groupwin</literal>.
+				</para>
+		</sect2>
     </sect1>
 
     <sect1 id="performance-kit" revision="1">

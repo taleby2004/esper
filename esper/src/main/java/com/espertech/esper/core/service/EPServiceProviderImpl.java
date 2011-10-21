@@ -82,7 +82,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
         configSnapshot = takeSnapshot(configuration);
         statementListeners = new CopyOnWriteArraySet<EPStatementStateListener>();
-        doInitialize();
+        doInitialize(null);
     }
 
     public synchronized EPServiceProviderIsolated getEPServiceIsolated(String name) {
@@ -371,16 +371,23 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         return engine == null;
     }
 
-    public void initialize()
-    {
-        doInitialize();
+    public void initialize() {
+        initializeInternal(null);
+    }
+
+    public void initialize(Long currentTime) {
+        initializeInternal(currentTime);
+    }
+
+    private void initializeInternal(Long currentTime) {
+        doInitialize(currentTime);
         postInitialize();
     }
 
     /**
      * Performs the initialization.
      */
-    protected void doInitialize()
+    protected void doInitialize(Long startTime)
     {
         log.info("Initializing engine URI '" + engineURI + "' version " + Version.VERSION);
 
@@ -520,6 +527,11 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
 
         routeDest.setInternalEventRouter(services.getInternalEventRouter());
         services.setInternalEventEngineRouteDest(routeDest);
+
+        // set current time, if applicable
+        if (startTime != null) {
+            services.getSchedulingService().setTime(startTime);
+        }
 
         // Configure services to use the new runtime
         services.getTimerService().setCallback(timerCallback);

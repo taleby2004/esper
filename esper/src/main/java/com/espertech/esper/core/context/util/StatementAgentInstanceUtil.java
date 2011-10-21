@@ -74,6 +74,9 @@ public class StatementAgentInstanceUtil {
 
             stopSafe(stopCallback, agentInstanceContext.getStatementContext());
 
+            // indicate method resolution
+            agentInstanceContext.getStatementContext().getMethodResolutionService().destroyedAgentInstance(agentInstanceContext.getAgentInstanceIds());
+
             // release resource
             agentInstanceContext.getStatementContext().getStatementAgentInstanceRegistry().deassign(agentInstanceContext.getAgentInstanceIds());
 

@@ -61,11 +61,11 @@ public class ContextManagementServiceImpl implements ContextManagementService {
         }
         else if (contextDesc.getContextDetail() instanceof ContextDetailCategory) {
             ContextDetailCategory category = (ContextDetailCategory) contextDesc.getContextDetail();
-            contextManager = new ContextManagerCategorized(contextDesc.getContextName(), servicesContext, category, stateService);
+            contextManager = new ContextManagerCategorized(contextDesc.getContextName(), servicesContext, category);
         }
         else if (contextDesc.getContextDetail() instanceof ContextDetailInitiatedTerminated) {
             ContextDetailInitiatedTerminated overlaps = (ContextDetailInitiatedTerminated) contextDesc.getContextDetail();
-            contextManager = new ContextManagerTemporalOverlap(contextDesc.getContextName(), servicesContext, agentInstanceContext, overlaps);
+            contextManager = new ContextManagerTemporalOverlap(contextDesc.getContextName(), servicesContext, agentInstanceContext, overlaps, stateService);
         }
         else {
             throw new RuntimeException("Unrecognized context detail " + contextDesc.getContextDetail());
