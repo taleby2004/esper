@@ -284,8 +284,8 @@ public class TestContextInitatedTerminated extends TestCase {
 
         // test when-terminated and snapshot
         String[] fields = "c0,c1".split(",");
-        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("context EveryMinute " +
-                "select context.id as c0, sum(intPrimitive) as c1 from SupportBean output snapshot when terminated");
+        String epl = "context EveryMinute select context.id as c0, sum(intPrimitive) as c1 from SupportBean output snapshot when terminated";
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
         sendTimeEvent("2002-05-1T8:01:00.000");
@@ -307,6 +307,11 @@ public class TestContextInitatedTerminated extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 5));
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
         assertFalse(listener.getAndClearIsInvoked());
+
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
+        assertEquals(epl, model.toEPL());
+        EPStatement stmtModel = epService.getEPAdministrator().create(model);
+        assertEquals(epl, stmtModel.getText());
 
         // terminate
         sendTimeEvent("2002-05-1T8:03:00.000");

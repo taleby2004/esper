@@ -1,4 +1,4 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 EsperEPL2Grammar.g 2011-10-20 09:10:46
+// $ANTLR 3.2 Sep 23, 2009 12:02:23 EsperEPL2Grammar.g 2011-10-20 18:15:21
 
   package com.espertech.esper.epl.generated;
 
@@ -3029,8 +3029,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = FOLLOWMAX_BEGIN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:1991:17: ( '-[' )
-            // EsperEPL2Grammar.g:1991:19: '-['
+            // EsperEPL2Grammar.g:1994:17: ( '-[' )
+            // EsperEPL2Grammar.g:1994:19: '-['
             {
             match("-["); if (state.failed) return ;
 
@@ -3050,8 +3050,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = FOLLOWMAX_END;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:1992:17: ( ']>' )
-            // EsperEPL2Grammar.g:1992:19: ']>'
+            // EsperEPL2Grammar.g:1995:17: ( ']>' )
+            // EsperEPL2Grammar.g:1995:19: ']>'
             {
             match("]>"); if (state.failed) return ;
 
@@ -3071,8 +3071,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = FOLLOWED_BY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:1993:14: ( '->' )
-            // EsperEPL2Grammar.g:1993:16: '->'
+            // EsperEPL2Grammar.g:1996:14: ( '->' )
+            // EsperEPL2Grammar.g:1996:16: '->'
             {
             match("->"); if (state.failed) return ;
 
@@ -3092,8 +3092,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = GOES;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:1994:8: ( '=>' )
-            // EsperEPL2Grammar.g:1994:10: '=>'
+            // EsperEPL2Grammar.g:1997:8: ( '=>' )
+            // EsperEPL2Grammar.g:1997:10: '=>'
             {
             match("=>"); if (state.failed) return ;
 
@@ -3113,8 +3113,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = EQUALS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:1995:10: ( '=' )
-            // EsperEPL2Grammar.g:1995:12: '='
+            // EsperEPL2Grammar.g:1998:10: ( '=' )
+            // EsperEPL2Grammar.g:1998:12: '='
             {
             match('='); if (state.failed) return ;
 
@@ -3133,8 +3133,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = SQL_NE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:1996:10: ( '<>' )
-            // EsperEPL2Grammar.g:1996:12: '<>'
+            // EsperEPL2Grammar.g:1999:10: ( '<>' )
+            // EsperEPL2Grammar.g:1999:12: '<>'
             {
             match("<>"); if (state.failed) return ;
 
@@ -3154,8 +3154,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = QUESTION;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:1997:11: ( '?' )
-            // EsperEPL2Grammar.g:1997:13: '?'
+            // EsperEPL2Grammar.g:2000:11: ( '?' )
+            // EsperEPL2Grammar.g:2000:13: '?'
             {
             match('?'); if (state.failed) return ;
 
@@ -3174,8 +3174,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = LPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:1998:10: ( '(' )
-            // EsperEPL2Grammar.g:1998:12: '('
+            // EsperEPL2Grammar.g:2001:10: ( '(' )
+            // EsperEPL2Grammar.g:2001:12: '('
             {
             match('('); if (state.failed) return ;
 
@@ -3194,8 +3194,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = RPAREN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:1999:10: ( ')' )
-            // EsperEPL2Grammar.g:1999:12: ')'
+            // EsperEPL2Grammar.g:2002:10: ( ')' )
+            // EsperEPL2Grammar.g:2002:12: ')'
             {
             match(')'); if (state.failed) return ;
 
@@ -3214,8 +3214,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = LBRACK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2000:10: ( '[' )
-            // EsperEPL2Grammar.g:2000:12: '['
+            // EsperEPL2Grammar.g:2003:10: ( '[' )
+            // EsperEPL2Grammar.g:2003:12: '['
             {
             match('['); if (state.failed) return ;
 
@@ -3234,8 +3234,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = RBRACK;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2001:10: ( ']' )
-            // EsperEPL2Grammar.g:2001:12: ']'
+            // EsperEPL2Grammar.g:2004:10: ( ']' )
+            // EsperEPL2Grammar.g:2004:12: ']'
             {
             match(']'); if (state.failed) return ;
 
@@ -3254,8 +3254,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = LCURLY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2002:10: ( '{' )
-            // EsperEPL2Grammar.g:2002:12: '{'
+            // EsperEPL2Grammar.g:2005:10: ( '{' )
+            // EsperEPL2Grammar.g:2005:12: '{'
             {
             match('{'); if (state.failed) return ;
 
@@ -3274,8 +3274,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = RCURLY;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2003:10: ( '}' )
-            // EsperEPL2Grammar.g:2003:12: '}'
+            // EsperEPL2Grammar.g:2006:10: ( '}' )
+            // EsperEPL2Grammar.g:2006:12: '}'
             {
             match('}'); if (state.failed) return ;
 
@@ -3294,8 +3294,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = COLON;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2004:9: ( ':' )
-            // EsperEPL2Grammar.g:2004:11: ':'
+            // EsperEPL2Grammar.g:2007:9: ( ':' )
+            // EsperEPL2Grammar.g:2007:11: ':'
             {
             match(':'); if (state.failed) return ;
 
@@ -3314,8 +3314,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = COMMA;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2005:9: ( ',' )
-            // EsperEPL2Grammar.g:2005:11: ','
+            // EsperEPL2Grammar.g:2008:9: ( ',' )
+            // EsperEPL2Grammar.g:2008:11: ','
             {
             match(','); if (state.failed) return ;
 
@@ -3334,8 +3334,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = EQUAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2006:9: ( '==' )
-            // EsperEPL2Grammar.g:2006:11: '=='
+            // EsperEPL2Grammar.g:2009:9: ( '==' )
+            // EsperEPL2Grammar.g:2009:11: '=='
             {
             match("=="); if (state.failed) return ;
 
@@ -3355,8 +3355,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = LNOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2007:8: ( '!' )
-            // EsperEPL2Grammar.g:2007:10: '!'
+            // EsperEPL2Grammar.g:2010:8: ( '!' )
+            // EsperEPL2Grammar.g:2010:10: '!'
             {
             match('!'); if (state.failed) return ;
 
@@ -3375,8 +3375,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = BNOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2008:8: ( '~' )
-            // EsperEPL2Grammar.g:2008:10: '~'
+            // EsperEPL2Grammar.g:2011:8: ( '~' )
+            // EsperEPL2Grammar.g:2011:10: '~'
             {
             match('~'); if (state.failed) return ;
 
@@ -3395,8 +3395,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = NOT_EQUAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2009:12: ( '!=' )
-            // EsperEPL2Grammar.g:2009:14: '!='
+            // EsperEPL2Grammar.g:2012:12: ( '!=' )
+            // EsperEPL2Grammar.g:2012:14: '!='
             {
             match("!="); if (state.failed) return ;
 
@@ -3416,8 +3416,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = DIV;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2010:7: ( '/' )
-            // EsperEPL2Grammar.g:2010:9: '/'
+            // EsperEPL2Grammar.g:2013:7: ( '/' )
+            // EsperEPL2Grammar.g:2013:9: '/'
             {
             match('/'); if (state.failed) return ;
 
@@ -3436,8 +3436,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = DIV_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2011:13: ( '/=' )
-            // EsperEPL2Grammar.g:2011:15: '/='
+            // EsperEPL2Grammar.g:2014:13: ( '/=' )
+            // EsperEPL2Grammar.g:2014:15: '/='
             {
             match("/="); if (state.failed) return ;
 
@@ -3457,8 +3457,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = PLUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2012:8: ( '+' )
-            // EsperEPL2Grammar.g:2012:10: '+'
+            // EsperEPL2Grammar.g:2015:8: ( '+' )
+            // EsperEPL2Grammar.g:2015:10: '+'
             {
             match('+'); if (state.failed) return ;
 
@@ -3477,8 +3477,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = PLUS_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2013:13: ( '+=' )
-            // EsperEPL2Grammar.g:2013:15: '+='
+            // EsperEPL2Grammar.g:2016:13: ( '+=' )
+            // EsperEPL2Grammar.g:2016:15: '+='
             {
             match("+="); if (state.failed) return ;
 
@@ -3498,8 +3498,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = INC;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2014:7: ( '++' )
-            // EsperEPL2Grammar.g:2014:9: '++'
+            // EsperEPL2Grammar.g:2017:7: ( '++' )
+            // EsperEPL2Grammar.g:2017:9: '++'
             {
             match("++"); if (state.failed) return ;
 
@@ -3519,8 +3519,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = MINUS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2015:9: ( '-' )
-            // EsperEPL2Grammar.g:2015:11: '-'
+            // EsperEPL2Grammar.g:2018:9: ( '-' )
+            // EsperEPL2Grammar.g:2018:11: '-'
             {
             match('-'); if (state.failed) return ;
 
@@ -3539,8 +3539,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = MINUS_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2016:15: ( '-=' )
-            // EsperEPL2Grammar.g:2016:17: '-='
+            // EsperEPL2Grammar.g:2019:15: ( '-=' )
+            // EsperEPL2Grammar.g:2019:17: '-='
             {
             match("-="); if (state.failed) return ;
 
@@ -3560,8 +3560,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = DEC;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2017:7: ( '--' )
-            // EsperEPL2Grammar.g:2017:9: '--'
+            // EsperEPL2Grammar.g:2020:7: ( '--' )
+            // EsperEPL2Grammar.g:2020:9: '--'
             {
             match("--"); if (state.failed) return ;
 
@@ -3581,8 +3581,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = STAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2018:8: ( '*' )
-            // EsperEPL2Grammar.g:2018:10: '*'
+            // EsperEPL2Grammar.g:2021:8: ( '*' )
+            // EsperEPL2Grammar.g:2021:10: '*'
             {
             match('*'); if (state.failed) return ;
 
@@ -3601,8 +3601,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = STAR_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2019:14: ( '*=' )
-            // EsperEPL2Grammar.g:2019:16: '*='
+            // EsperEPL2Grammar.g:2022:14: ( '*=' )
+            // EsperEPL2Grammar.g:2022:16: '*='
             {
             match("*="); if (state.failed) return ;
 
@@ -3622,8 +3622,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = MOD;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2020:7: ( '%' )
-            // EsperEPL2Grammar.g:2020:9: '%'
+            // EsperEPL2Grammar.g:2023:7: ( '%' )
+            // EsperEPL2Grammar.g:2023:9: '%'
             {
             match('%'); if (state.failed) return ;
 
@@ -3642,8 +3642,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = MOD_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2021:13: ( '%=' )
-            // EsperEPL2Grammar.g:2021:15: '%='
+            // EsperEPL2Grammar.g:2024:13: ( '%=' )
+            // EsperEPL2Grammar.g:2024:15: '%='
             {
             match("%="); if (state.failed) return ;
 
@@ -3663,8 +3663,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = SR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2022:6: ( '>>' )
-            // EsperEPL2Grammar.g:2022:8: '>>'
+            // EsperEPL2Grammar.g:2025:6: ( '>>' )
+            // EsperEPL2Grammar.g:2025:8: '>>'
             {
             match(">>"); if (state.failed) return ;
 
@@ -3684,8 +3684,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = SR_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2023:12: ( '>>=' )
-            // EsperEPL2Grammar.g:2023:14: '>>='
+            // EsperEPL2Grammar.g:2026:12: ( '>>=' )
+            // EsperEPL2Grammar.g:2026:14: '>>='
             {
             match(">>="); if (state.failed) return ;
 
@@ -3705,8 +3705,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = BSR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2024:7: ( '>>>' )
-            // EsperEPL2Grammar.g:2024:9: '>>>'
+            // EsperEPL2Grammar.g:2027:7: ( '>>>' )
+            // EsperEPL2Grammar.g:2027:9: '>>>'
             {
             match(">>>"); if (state.failed) return ;
 
@@ -3726,8 +3726,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = BSR_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2025:13: ( '>>>=' )
-            // EsperEPL2Grammar.g:2025:15: '>>>='
+            // EsperEPL2Grammar.g:2028:13: ( '>>>=' )
+            // EsperEPL2Grammar.g:2028:15: '>>>='
             {
             match(">>>="); if (state.failed) return ;
 
@@ -3747,8 +3747,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = GE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2026:6: ( '>=' )
-            // EsperEPL2Grammar.g:2026:8: '>='
+            // EsperEPL2Grammar.g:2029:6: ( '>=' )
+            // EsperEPL2Grammar.g:2029:8: '>='
             {
             match(">="); if (state.failed) return ;
 
@@ -3768,8 +3768,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = GT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2027:6: ( '>' )
-            // EsperEPL2Grammar.g:2027:8: '>'
+            // EsperEPL2Grammar.g:2030:6: ( '>' )
+            // EsperEPL2Grammar.g:2030:8: '>'
             {
             match('>'); if (state.failed) return ;
 
@@ -3788,8 +3788,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = SL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2028:6: ( '<<' )
-            // EsperEPL2Grammar.g:2028:8: '<<'
+            // EsperEPL2Grammar.g:2031:6: ( '<<' )
+            // EsperEPL2Grammar.g:2031:8: '<<'
             {
             match("<<"); if (state.failed) return ;
 
@@ -3809,8 +3809,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = SL_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2029:12: ( '<<=' )
-            // EsperEPL2Grammar.g:2029:14: '<<='
+            // EsperEPL2Grammar.g:2032:12: ( '<<=' )
+            // EsperEPL2Grammar.g:2032:14: '<<='
             {
             match("<<="); if (state.failed) return ;
 
@@ -3830,8 +3830,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = LE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2030:6: ( '<=' )
-            // EsperEPL2Grammar.g:2030:8: '<='
+            // EsperEPL2Grammar.g:2033:6: ( '<=' )
+            // EsperEPL2Grammar.g:2033:8: '<='
             {
             match("<="); if (state.failed) return ;
 
@@ -3851,8 +3851,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = LT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2031:6: ( '<' )
-            // EsperEPL2Grammar.g:2031:8: '<'
+            // EsperEPL2Grammar.g:2034:6: ( '<' )
+            // EsperEPL2Grammar.g:2034:8: '<'
             {
             match('<'); if (state.failed) return ;
 
@@ -3871,8 +3871,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = BXOR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2032:8: ( '^' )
-            // EsperEPL2Grammar.g:2032:10: '^'
+            // EsperEPL2Grammar.g:2035:8: ( '^' )
+            // EsperEPL2Grammar.g:2035:10: '^'
             {
             match('^'); if (state.failed) return ;
 
@@ -3891,8 +3891,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = BXOR_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2033:14: ( '^=' )
-            // EsperEPL2Grammar.g:2033:16: '^='
+            // EsperEPL2Grammar.g:2036:14: ( '^=' )
+            // EsperEPL2Grammar.g:2036:16: '^='
             {
             match("^="); if (state.failed) return ;
 
@@ -3912,8 +3912,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = BOR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2034:6: ( '|' )
-            // EsperEPL2Grammar.g:2034:8: '|'
+            // EsperEPL2Grammar.g:2037:6: ( '|' )
+            // EsperEPL2Grammar.g:2037:8: '|'
             {
             match('|'); if (state.failed) return ;
 
@@ -3932,8 +3932,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = BOR_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2035:13: ( '|=' )
-            // EsperEPL2Grammar.g:2035:15: '|='
+            // EsperEPL2Grammar.g:2038:13: ( '|=' )
+            // EsperEPL2Grammar.g:2038:15: '|='
             {
             match("|="); if (state.failed) return ;
 
@@ -3953,8 +3953,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = LOR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2036:6: ( '||' )
-            // EsperEPL2Grammar.g:2036:8: '||'
+            // EsperEPL2Grammar.g:2039:6: ( '||' )
+            // EsperEPL2Grammar.g:2039:8: '||'
             {
             match("||"); if (state.failed) return ;
 
@@ -3974,8 +3974,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = BAND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2037:8: ( '&' )
-            // EsperEPL2Grammar.g:2037:10: '&'
+            // EsperEPL2Grammar.g:2040:8: ( '&' )
+            // EsperEPL2Grammar.g:2040:10: '&'
             {
             match('&'); if (state.failed) return ;
 
@@ -3994,8 +3994,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = BAND_ASSIGN;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2038:14: ( '&=' )
-            // EsperEPL2Grammar.g:2038:16: '&='
+            // EsperEPL2Grammar.g:2041:14: ( '&=' )
+            // EsperEPL2Grammar.g:2041:16: '&='
             {
             match("&="); if (state.failed) return ;
 
@@ -4015,8 +4015,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = LAND;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2039:8: ( '&&' )
-            // EsperEPL2Grammar.g:2039:10: '&&'
+            // EsperEPL2Grammar.g:2042:8: ( '&&' )
+            // EsperEPL2Grammar.g:2042:10: '&&'
             {
             match("&&"); if (state.failed) return ;
 
@@ -4036,8 +4036,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = SEMI;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2040:8: ( ';' )
-            // EsperEPL2Grammar.g:2040:10: ';'
+            // EsperEPL2Grammar.g:2043:8: ( ';' )
+            // EsperEPL2Grammar.g:2043:10: ';'
             {
             match(';'); if (state.failed) return ;
 
@@ -4056,8 +4056,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = DOT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2041:7: ( '.' )
-            // EsperEPL2Grammar.g:2041:9: '.'
+            // EsperEPL2Grammar.g:2044:7: ( '.' )
+            // EsperEPL2Grammar.g:2044:9: '.'
             {
             match('.'); if (state.failed) return ;
 
@@ -4076,8 +4076,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = NUM_LONG;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2042:10: ( '\\u18FF' )
-            // EsperEPL2Grammar.g:2042:12: '\\u18FF'
+            // EsperEPL2Grammar.g:2045:10: ( '\\u18FF' )
+            // EsperEPL2Grammar.g:2045:12: '\\u18FF'
             {
             match('\u18FF'); if (state.failed) return ;
 
@@ -4096,8 +4096,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = NUM_DOUBLE;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2043:12: ( '\\u18FE' )
-            // EsperEPL2Grammar.g:2043:14: '\\u18FE'
+            // EsperEPL2Grammar.g:2046:12: ( '\\u18FE' )
+            // EsperEPL2Grammar.g:2046:14: '\\u18FE'
             {
             match('\u18FE'); if (state.failed) return ;
 
@@ -4116,8 +4116,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = NUM_FLOAT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2044:11: ( '\\u18FD' )
-            // EsperEPL2Grammar.g:2044:13: '\\u18FD'
+            // EsperEPL2Grammar.g:2047:11: ( '\\u18FD' )
+            // EsperEPL2Grammar.g:2047:13: '\\u18FD'
             {
             match('\u18FD'); if (state.failed) return ;
 
@@ -4136,8 +4136,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = ESCAPECHAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2045:12: ( '\\\\' )
-            // EsperEPL2Grammar.g:2045:14: '\\\\'
+            // EsperEPL2Grammar.g:2048:12: ( '\\\\' )
+            // EsperEPL2Grammar.g:2048:14: '\\\\'
             {
             match('\\'); if (state.failed) return ;
 
@@ -4156,8 +4156,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = ATCHAR;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2046:9: ( '@' )
-            // EsperEPL2Grammar.g:2046:11: '@'
+            // EsperEPL2Grammar.g:2049:9: ( '@' )
+            // EsperEPL2Grammar.g:2049:11: '@'
             {
             match('@'); if (state.failed) return ;
 
@@ -4176,10 +4176,10 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = WS;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2049:4: ( ( ' ' | '\\t' | '\\f' | ( '\\r' | '\\n' ) )+ )
-            // EsperEPL2Grammar.g:2049:6: ( ' ' | '\\t' | '\\f' | ( '\\r' | '\\n' ) )+
+            // EsperEPL2Grammar.g:2052:4: ( ( ' ' | '\\t' | '\\f' | ( '\\r' | '\\n' ) )+ )
+            // EsperEPL2Grammar.g:2052:6: ( ' ' | '\\t' | '\\f' | ( '\\r' | '\\n' ) )+
             {
-            // EsperEPL2Grammar.g:2049:6: ( ' ' | '\\t' | '\\f' | ( '\\r' | '\\n' ) )+
+            // EsperEPL2Grammar.g:2052:6: ( ' ' | '\\t' | '\\f' | ( '\\r' | '\\n' ) )+
             int cnt1=0;
             loop1:
             do {
@@ -4238,12 +4238,12 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = SL_COMMENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2063:2: ( '//' (~ ( '\\n' | '\\r' ) )* ( '\\n' | '\\r' ( '\\n' )? )? )
-            // EsperEPL2Grammar.g:2063:4: '//' (~ ( '\\n' | '\\r' ) )* ( '\\n' | '\\r' ( '\\n' )? )?
+            // EsperEPL2Grammar.g:2066:2: ( '//' (~ ( '\\n' | '\\r' ) )* ( '\\n' | '\\r' ( '\\n' )? )? )
+            // EsperEPL2Grammar.g:2066:4: '//' (~ ( '\\n' | '\\r' ) )* ( '\\n' | '\\r' ( '\\n' )? )?
             {
             match("//"); if (state.failed) return ;
 
-            // EsperEPL2Grammar.g:2064:3: (~ ( '\\n' | '\\r' ) )*
+            // EsperEPL2Grammar.g:2067:3: (~ ( '\\n' | '\\r' ) )*
             loop2:
             do {
                 int alt2=2;
@@ -4256,7 +4256,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                 switch (alt2) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:2064:4: ~ ( '\\n' | '\\r' )
+            	    // EsperEPL2Grammar.g:2067:4: ~ ( '\\n' | '\\r' )
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='\t')||(input.LA(1)>='\u000B' && input.LA(1)<='\f')||(input.LA(1)>='\u000E' && input.LA(1)<='\uFFFF') ) {
             	        input.consume();
@@ -4277,7 +4277,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                 }
             } while (true);
 
-            // EsperEPL2Grammar.g:2064:19: ( '\\n' | '\\r' ( '\\n' )? )?
+            // EsperEPL2Grammar.g:2067:19: ( '\\n' | '\\r' ( '\\n' )? )?
             int alt4=3;
             int LA4_0 = input.LA(1);
 
@@ -4289,17 +4289,17 @@ public class EsperEPL2GrammarLexer extends Lexer {
             }
             switch (alt4) {
                 case 1 :
-                    // EsperEPL2Grammar.g:2064:20: '\\n'
+                    // EsperEPL2Grammar.g:2067:20: '\\n'
                     {
                     match('\n'); if (state.failed) return ;
 
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:2064:25: '\\r' ( '\\n' )?
+                    // EsperEPL2Grammar.g:2067:25: '\\r' ( '\\n' )?
                     {
                     match('\r'); if (state.failed) return ;
-                    // EsperEPL2Grammar.g:2064:29: ( '\\n' )?
+                    // EsperEPL2Grammar.g:2067:29: ( '\\n' )?
                     int alt3=2;
                     int LA3_0 = input.LA(1);
 
@@ -4308,7 +4308,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                     }
                     switch (alt3) {
                         case 1 :
-                            // EsperEPL2Grammar.g:2064:30: '\\n'
+                            // EsperEPL2Grammar.g:2067:30: '\\n'
                             {
                             match('\n'); if (state.failed) return ;
 
@@ -4342,12 +4342,12 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = ML_COMMENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2070:5: ( '/*' ( options {greedy=false; } : . )* '*/' )
-            // EsperEPL2Grammar.g:2070:9: '/*' ( options {greedy=false; } : . )* '*/'
+            // EsperEPL2Grammar.g:2073:5: ( '/*' ( options {greedy=false; } : . )* '*/' )
+            // EsperEPL2Grammar.g:2073:9: '/*' ( options {greedy=false; } : . )* '*/'
             {
             match("/*"); if (state.failed) return ;
 
-            // EsperEPL2Grammar.g:2070:14: ( options {greedy=false; } : . )*
+            // EsperEPL2Grammar.g:2073:14: ( options {greedy=false; } : . )*
             loop5:
             do {
                 int alt5=2;
@@ -4372,7 +4372,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                 switch (alt5) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:2070:42: .
+            	    // EsperEPL2Grammar.g:2073:42: .
             	    {
             	    matchAny(); if (state.failed) return ;
 
@@ -4405,11 +4405,11 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = TICKED_STRING_LITERAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2074:5: ( '`' ( EscapeSequence | ~ ( '\\`' | '\\\\' ) )* '`' )
-            // EsperEPL2Grammar.g:2074:9: '`' ( EscapeSequence | ~ ( '\\`' | '\\\\' ) )* '`'
+            // EsperEPL2Grammar.g:2077:5: ( '`' ( EscapeSequence | ~ ( '\\`' | '\\\\' ) )* '`' )
+            // EsperEPL2Grammar.g:2077:9: '`' ( EscapeSequence | ~ ( '\\`' | '\\\\' ) )* '`'
             {
             match('`'); if (state.failed) return ;
-            // EsperEPL2Grammar.g:2074:13: ( EscapeSequence | ~ ( '\\`' | '\\\\' ) )*
+            // EsperEPL2Grammar.g:2077:13: ( EscapeSequence | ~ ( '\\`' | '\\\\' ) )*
             loop6:
             do {
                 int alt6=3;
@@ -4425,14 +4425,14 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                 switch (alt6) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:2074:15: EscapeSequence
+            	    // EsperEPL2Grammar.g:2077:15: EscapeSequence
             	    {
             	    mEscapeSequence(); if (state.failed) return ;
 
             	    }
             	    break;
             	case 2 :
-            	    // EsperEPL2Grammar.g:2074:32: ~ ( '\\`' | '\\\\' )
+            	    // EsperEPL2Grammar.g:2077:32: ~ ( '\\`' | '\\\\' )
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='[')||(input.LA(1)>=']' && input.LA(1)<='_')||(input.LA(1)>='a' && input.LA(1)<='\uFFFF') ) {
             	        input.consume();
@@ -4470,11 +4470,11 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = QUOTED_STRING_LITERAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2078:5: ( '\\'' ( EscapeSequence | ~ ( '\\'' | '\\\\' ) )* '\\'' )
-            // EsperEPL2Grammar.g:2078:9: '\\'' ( EscapeSequence | ~ ( '\\'' | '\\\\' ) )* '\\''
+            // EsperEPL2Grammar.g:2081:5: ( '\\'' ( EscapeSequence | ~ ( '\\'' | '\\\\' ) )* '\\'' )
+            // EsperEPL2Grammar.g:2081:9: '\\'' ( EscapeSequence | ~ ( '\\'' | '\\\\' ) )* '\\''
             {
             match('\''); if (state.failed) return ;
-            // EsperEPL2Grammar.g:2078:14: ( EscapeSequence | ~ ( '\\'' | '\\\\' ) )*
+            // EsperEPL2Grammar.g:2081:14: ( EscapeSequence | ~ ( '\\'' | '\\\\' ) )*
             loop7:
             do {
                 int alt7=3;
@@ -4490,14 +4490,14 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                 switch (alt7) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:2078:16: EscapeSequence
+            	    // EsperEPL2Grammar.g:2081:16: EscapeSequence
             	    {
             	    mEscapeSequence(); if (state.failed) return ;
 
             	    }
             	    break;
             	case 2 :
-            	    // EsperEPL2Grammar.g:2078:33: ~ ( '\\'' | '\\\\' )
+            	    // EsperEPL2Grammar.g:2081:33: ~ ( '\\'' | '\\\\' )
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='&')||(input.LA(1)>='(' && input.LA(1)<='[')||(input.LA(1)>=']' && input.LA(1)<='\uFFFF') ) {
             	        input.consume();
@@ -4535,11 +4535,11 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = STRING_LITERAL;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2082:5: ( '\"' ( EscapeSequence | ~ ( '\\\\' | '\"' ) )* '\"' )
-            // EsperEPL2Grammar.g:2082:8: '\"' ( EscapeSequence | ~ ( '\\\\' | '\"' ) )* '\"'
+            // EsperEPL2Grammar.g:2085:5: ( '\"' ( EscapeSequence | ~ ( '\\\\' | '\"' ) )* '\"' )
+            // EsperEPL2Grammar.g:2085:8: '\"' ( EscapeSequence | ~ ( '\\\\' | '\"' ) )* '\"'
             {
             match('\"'); if (state.failed) return ;
-            // EsperEPL2Grammar.g:2082:12: ( EscapeSequence | ~ ( '\\\\' | '\"' ) )*
+            // EsperEPL2Grammar.g:2085:12: ( EscapeSequence | ~ ( '\\\\' | '\"' ) )*
             loop8:
             do {
                 int alt8=3;
@@ -4555,14 +4555,14 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                 switch (alt8) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:2082:14: EscapeSequence
+            	    // EsperEPL2Grammar.g:2085:14: EscapeSequence
             	    {
             	    mEscapeSequence(); if (state.failed) return ;
 
             	    }
             	    break;
             	case 2 :
-            	    // EsperEPL2Grammar.g:2082:31: ~ ( '\\\\' | '\"' )
+            	    // EsperEPL2Grammar.g:2085:31: ~ ( '\\\\' | '\"' )
             	    {
             	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='!')||(input.LA(1)>='#' && input.LA(1)<='[')||(input.LA(1)>=']' && input.LA(1)<='\uFFFF') ) {
             	        input.consume();
@@ -4598,11 +4598,11 @@ public class EsperEPL2GrammarLexer extends Lexer {
     // $ANTLR start "EscapeSequence"
     public final void mEscapeSequence() throws RecognitionException {
         try {
-            // EsperEPL2Grammar.g:2086:16: ( '\\\\' ( 'n' | 'r' | 't' | 'b' | 'f' | '\"' | '\\'' | '\\\\' | UnicodeEscape | OctalEscape | . ) )
-            // EsperEPL2Grammar.g:2086:18: '\\\\' ( 'n' | 'r' | 't' | 'b' | 'f' | '\"' | '\\'' | '\\\\' | UnicodeEscape | OctalEscape | . )
+            // EsperEPL2Grammar.g:2089:16: ( '\\\\' ( 'n' | 'r' | 't' | 'b' | 'f' | '\"' | '\\'' | '\\\\' | UnicodeEscape | OctalEscape | . ) )
+            // EsperEPL2Grammar.g:2089:18: '\\\\' ( 'n' | 'r' | 't' | 'b' | 'f' | '\"' | '\\'' | '\\\\' | UnicodeEscape | OctalEscape | . )
             {
             match('\\'); if (state.failed) return ;
-            // EsperEPL2Grammar.g:2087:3: ( 'n' | 'r' | 't' | 'b' | 'f' | '\"' | '\\'' | '\\\\' | UnicodeEscape | OctalEscape | . )
+            // EsperEPL2Grammar.g:2090:3: ( 'n' | 'r' | 't' | 'b' | 'f' | '\"' | '\\'' | '\\\\' | UnicodeEscape | OctalEscape | . )
             int alt9=11;
             int LA9_0 = input.LA(1);
 
@@ -4662,77 +4662,77 @@ public class EsperEPL2GrammarLexer extends Lexer {
             }
             switch (alt9) {
                 case 1 :
-                    // EsperEPL2Grammar.g:2087:5: 'n'
+                    // EsperEPL2Grammar.g:2090:5: 'n'
                     {
                     match('n'); if (state.failed) return ;
 
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:2088:5: 'r'
+                    // EsperEPL2Grammar.g:2091:5: 'r'
                     {
                     match('r'); if (state.failed) return ;
 
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:2089:5: 't'
+                    // EsperEPL2Grammar.g:2092:5: 't'
                     {
                     match('t'); if (state.failed) return ;
 
                     }
                     break;
                 case 4 :
-                    // EsperEPL2Grammar.g:2090:5: 'b'
+                    // EsperEPL2Grammar.g:2093:5: 'b'
                     {
                     match('b'); if (state.failed) return ;
 
                     }
                     break;
                 case 5 :
-                    // EsperEPL2Grammar.g:2091:5: 'f'
+                    // EsperEPL2Grammar.g:2094:5: 'f'
                     {
                     match('f'); if (state.failed) return ;
 
                     }
                     break;
                 case 6 :
-                    // EsperEPL2Grammar.g:2092:5: '\"'
+                    // EsperEPL2Grammar.g:2095:5: '\"'
                     {
                     match('\"'); if (state.failed) return ;
 
                     }
                     break;
                 case 7 :
-                    // EsperEPL2Grammar.g:2093:5: '\\''
+                    // EsperEPL2Grammar.g:2096:5: '\\''
                     {
                     match('\''); if (state.failed) return ;
 
                     }
                     break;
                 case 8 :
-                    // EsperEPL2Grammar.g:2094:5: '\\\\'
+                    // EsperEPL2Grammar.g:2097:5: '\\\\'
                     {
                     match('\\'); if (state.failed) return ;
 
                     }
                     break;
                 case 9 :
-                    // EsperEPL2Grammar.g:2095:5: UnicodeEscape
+                    // EsperEPL2Grammar.g:2098:5: UnicodeEscape
                     {
                     mUnicodeEscape(); if (state.failed) return ;
 
                     }
                     break;
                 case 10 :
-                    // EsperEPL2Grammar.g:2096:5: OctalEscape
+                    // EsperEPL2Grammar.g:2099:5: OctalEscape
                     {
                     mOctalEscape(); if (state.failed) return ;
 
                     }
                     break;
                 case 11 :
-                    // EsperEPL2Grammar.g:2097:5: .
+                    // EsperEPL2Grammar.g:2100:5: .
                     {
                     matchAny(); if (state.failed) return ;
 
@@ -4753,7 +4753,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
     // $ANTLR start "OctalEscape"
     public final void mOctalEscape() throws RecognitionException {
         try {
-            // EsperEPL2Grammar.g:2103:5: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
+            // EsperEPL2Grammar.g:2106:5: ( '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) ( '0' .. '7' ) | '\\\\' ( '0' .. '7' ) )
             int alt10=3;
             int LA10_0 = input.LA(1);
 
@@ -4801,25 +4801,25 @@ public class EsperEPL2GrammarLexer extends Lexer {
             }
             switch (alt10) {
                 case 1 :
-                    // EsperEPL2Grammar.g:2103:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
+                    // EsperEPL2Grammar.g:2106:9: '\\\\' ( '0' .. '3' ) ( '0' .. '7' ) ( '0' .. '7' )
                     {
                     match('\\'); if (state.failed) return ;
-                    // EsperEPL2Grammar.g:2103:14: ( '0' .. '3' )
-                    // EsperEPL2Grammar.g:2103:15: '0' .. '3'
+                    // EsperEPL2Grammar.g:2106:14: ( '0' .. '3' )
+                    // EsperEPL2Grammar.g:2106:15: '0' .. '3'
                     {
                     matchRange('0','3'); if (state.failed) return ;
 
                     }
 
-                    // EsperEPL2Grammar.g:2103:25: ( '0' .. '7' )
-                    // EsperEPL2Grammar.g:2103:26: '0' .. '7'
+                    // EsperEPL2Grammar.g:2106:25: ( '0' .. '7' )
+                    // EsperEPL2Grammar.g:2106:26: '0' .. '7'
                     {
                     matchRange('0','7'); if (state.failed) return ;
 
                     }
 
-                    // EsperEPL2Grammar.g:2103:36: ( '0' .. '7' )
-                    // EsperEPL2Grammar.g:2103:37: '0' .. '7'
+                    // EsperEPL2Grammar.g:2106:36: ( '0' .. '7' )
+                    // EsperEPL2Grammar.g:2106:37: '0' .. '7'
                     {
                     matchRange('0','7'); if (state.failed) return ;
 
@@ -4829,18 +4829,18 @@ public class EsperEPL2GrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:2104:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
+                    // EsperEPL2Grammar.g:2107:9: '\\\\' ( '0' .. '7' ) ( '0' .. '7' )
                     {
                     match('\\'); if (state.failed) return ;
-                    // EsperEPL2Grammar.g:2104:14: ( '0' .. '7' )
-                    // EsperEPL2Grammar.g:2104:15: '0' .. '7'
+                    // EsperEPL2Grammar.g:2107:14: ( '0' .. '7' )
+                    // EsperEPL2Grammar.g:2107:15: '0' .. '7'
                     {
                     matchRange('0','7'); if (state.failed) return ;
 
                     }
 
-                    // EsperEPL2Grammar.g:2104:25: ( '0' .. '7' )
-                    // EsperEPL2Grammar.g:2104:26: '0' .. '7'
+                    // EsperEPL2Grammar.g:2107:25: ( '0' .. '7' )
+                    // EsperEPL2Grammar.g:2107:26: '0' .. '7'
                     {
                     matchRange('0','7'); if (state.failed) return ;
 
@@ -4850,11 +4850,11 @@ public class EsperEPL2GrammarLexer extends Lexer {
                     }
                     break;
                 case 3 :
-                    // EsperEPL2Grammar.g:2105:9: '\\\\' ( '0' .. '7' )
+                    // EsperEPL2Grammar.g:2108:9: '\\\\' ( '0' .. '7' )
                     {
                     match('\\'); if (state.failed) return ;
-                    // EsperEPL2Grammar.g:2105:14: ( '0' .. '7' )
-                    // EsperEPL2Grammar.g:2105:15: '0' .. '7'
+                    // EsperEPL2Grammar.g:2108:14: ( '0' .. '7' )
+                    // EsperEPL2Grammar.g:2108:15: '0' .. '7'
                     {
                     matchRange('0','7'); if (state.failed) return ;
 
@@ -4874,8 +4874,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
     // $ANTLR start "HexDigit"
     public final void mHexDigit() throws RecognitionException {
         try {
-            // EsperEPL2Grammar.g:2109:10: ( ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) )
-            // EsperEPL2Grammar.g:2109:12: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
+            // EsperEPL2Grammar.g:2112:10: ( ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' ) )
+            // EsperEPL2Grammar.g:2112:12: ( '0' .. '9' | 'a' .. 'f' | 'A' .. 'F' )
             {
             if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='F')||(input.LA(1)>='a' && input.LA(1)<='f') ) {
                 input.consume();
@@ -4899,8 +4899,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
     // $ANTLR start "UnicodeEscape"
     public final void mUnicodeEscape() throws RecognitionException {
         try {
-            // EsperEPL2Grammar.g:2113:5: ( '\\\\' 'u' HexDigit HexDigit HexDigit HexDigit )
-            // EsperEPL2Grammar.g:2113:9: '\\\\' 'u' HexDigit HexDigit HexDigit HexDigit
+            // EsperEPL2Grammar.g:2116:5: ( '\\\\' 'u' HexDigit HexDigit HexDigit HexDigit )
+            // EsperEPL2Grammar.g:2116:9: '\\\\' 'u' HexDigit HexDigit HexDigit HexDigit
             {
             match('\\'); if (state.failed) return ;
             match('u'); if (state.failed) return ;
@@ -4922,8 +4922,8 @@ public class EsperEPL2GrammarLexer extends Lexer {
         try {
             int _type = IDENT;
             int _channel = DEFAULT_TOKEN_CHANNEL;
-            // EsperEPL2Grammar.g:2120:2: ( ( 'a' .. 'z' | '_' | '$' ) ( 'a' .. 'z' | '_' | '0' .. '9' | '$' )* )
-            // EsperEPL2Grammar.g:2120:4: ( 'a' .. 'z' | '_' | '$' ) ( 'a' .. 'z' | '_' | '0' .. '9' | '$' )*
+            // EsperEPL2Grammar.g:2123:2: ( ( 'a' .. 'z' | '_' | '$' ) ( 'a' .. 'z' | '_' | '0' .. '9' | '$' )* )
+            // EsperEPL2Grammar.g:2123:4: ( 'a' .. 'z' | '_' | '$' ) ( 'a' .. 'z' | '_' | '0' .. '9' | '$' )*
             {
             if ( input.LA(1)=='$'||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z') ) {
                 input.consume();
@@ -4935,7 +4935,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                 recover(mse);
                 throw mse;}
 
-            // EsperEPL2Grammar.g:2120:23: ( 'a' .. 'z' | '_' | '0' .. '9' | '$' )*
+            // EsperEPL2Grammar.g:2123:23: ( 'a' .. 'z' | '_' | '0' .. '9' | '$' )*
             loop11:
             do {
                 int alt11=2;
@@ -4991,7 +4991,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
             CommonToken f4=null;
 
             boolean isDecimal=false; Token t=null;
-            // EsperEPL2Grammar.g:2127:5: ( '.' ( ( '0' .. '9' )+ ( EXPONENT )? (f1= FLOAT_SUFFIX )? )? | ( '0' ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )? | ( '1' .. '9' ) ( '0' .. '9' )* ) ( ( 'l' ) | {...}? ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX ) )? )
+            // EsperEPL2Grammar.g:2130:5: ( '.' ( ( '0' .. '9' )+ ( EXPONENT )? (f1= FLOAT_SUFFIX )? )? | ( '0' ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )? | ( '1' .. '9' ) ( '0' .. '9' )* ) ( ( 'l' ) | {...}? ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX ) )? )
             int alt28=2;
             int LA28_0 = input.LA(1);
 
@@ -5010,13 +5010,13 @@ public class EsperEPL2GrammarLexer extends Lexer {
             }
             switch (alt28) {
                 case 1 :
-                    // EsperEPL2Grammar.g:2127:9: '.' ( ( '0' .. '9' )+ ( EXPONENT )? (f1= FLOAT_SUFFIX )? )?
+                    // EsperEPL2Grammar.g:2130:9: '.' ( ( '0' .. '9' )+ ( EXPONENT )? (f1= FLOAT_SUFFIX )? )?
                     {
                     match('.'); if (state.failed) return ;
                     if ( state.backtracking==0 ) {
                       _type = DOT;
                     }
-                    // EsperEPL2Grammar.g:2128:13: ( ( '0' .. '9' )+ ( EXPONENT )? (f1= FLOAT_SUFFIX )? )?
+                    // EsperEPL2Grammar.g:2131:13: ( ( '0' .. '9' )+ ( EXPONENT )? (f1= FLOAT_SUFFIX )? )?
                     int alt15=2;
                     int LA15_0 = input.LA(1);
 
@@ -5025,9 +5025,9 @@ public class EsperEPL2GrammarLexer extends Lexer {
                     }
                     switch (alt15) {
                         case 1 :
-                            // EsperEPL2Grammar.g:2128:15: ( '0' .. '9' )+ ( EXPONENT )? (f1= FLOAT_SUFFIX )?
+                            // EsperEPL2Grammar.g:2131:15: ( '0' .. '9' )+ ( EXPONENT )? (f1= FLOAT_SUFFIX )?
                             {
-                            // EsperEPL2Grammar.g:2128:15: ( '0' .. '9' )+
+                            // EsperEPL2Grammar.g:2131:15: ( '0' .. '9' )+
                             int cnt12=0;
                             loop12:
                             do {
@@ -5041,7 +5041,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                                 switch (alt12) {
                             	case 1 :
-                            	    // EsperEPL2Grammar.g:2128:16: '0' .. '9'
+                            	    // EsperEPL2Grammar.g:2131:16: '0' .. '9'
                             	    {
                             	    matchRange('0','9'); if (state.failed) return ;
 
@@ -5058,7 +5058,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                                 cnt12++;
                             } while (true);
 
-                            // EsperEPL2Grammar.g:2128:27: ( EXPONENT )?
+                            // EsperEPL2Grammar.g:2131:27: ( EXPONENT )?
                             int alt13=2;
                             int LA13_0 = input.LA(1);
 
@@ -5067,7 +5067,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                             }
                             switch (alt13) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:2128:28: EXPONENT
+                                    // EsperEPL2Grammar.g:2131:28: EXPONENT
                                     {
                                     mEXPONENT(); if (state.failed) return ;
 
@@ -5076,7 +5076,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                             }
 
-                            // EsperEPL2Grammar.g:2128:39: (f1= FLOAT_SUFFIX )?
+                            // EsperEPL2Grammar.g:2131:39: (f1= FLOAT_SUFFIX )?
                             int alt14=2;
                             int LA14_0 = input.LA(1);
 
@@ -5085,7 +5085,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                             }
                             switch (alt14) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:2128:40: f1= FLOAT_SUFFIX
+                                    // EsperEPL2Grammar.g:2131:40: f1= FLOAT_SUFFIX
                                     {
                                     int f1Start2129 = getCharIndex();
                                     mFLOAT_SUFFIX(); if (state.failed) return ;
@@ -5119,9 +5119,9 @@ public class EsperEPL2GrammarLexer extends Lexer {
                     }
                     break;
                 case 2 :
-                    // EsperEPL2Grammar.g:2139:4: ( '0' ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )? | ( '1' .. '9' ) ( '0' .. '9' )* ) ( ( 'l' ) | {...}? ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX ) )?
+                    // EsperEPL2Grammar.g:2142:4: ( '0' ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )? | ( '1' .. '9' ) ( '0' .. '9' )* ) ( ( 'l' ) | {...}? ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX ) )?
                     {
-                    // EsperEPL2Grammar.g:2139:4: ( '0' ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )? | ( '1' .. '9' ) ( '0' .. '9' )* )
+                    // EsperEPL2Grammar.g:2142:4: ( '0' ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )? | ( '1' .. '9' ) ( '0' .. '9' )* )
                     int alt21=2;
                     int LA21_0 = input.LA(1);
 
@@ -5140,13 +5140,13 @@ public class EsperEPL2GrammarLexer extends Lexer {
                     }
                     switch (alt21) {
                         case 1 :
-                            // EsperEPL2Grammar.g:2139:6: '0' ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )?
+                            // EsperEPL2Grammar.g:2142:6: '0' ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )?
                             {
                             match('0'); if (state.failed) return ;
                             if ( state.backtracking==0 ) {
                               isDecimal = true;
                             }
-                            // EsperEPL2Grammar.g:2140:4: ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )?
+                            // EsperEPL2Grammar.g:2143:4: ( ( 'x' ) ( HexDigit )+ | ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+ | ( '0' .. '7' )+ )?
                             int alt19=4;
                             int LA19_0 = input.LA(1);
 
@@ -5168,16 +5168,16 @@ public class EsperEPL2GrammarLexer extends Lexer {
                             }
                             switch (alt19) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:2140:6: ( 'x' ) ( HexDigit )+
+                                    // EsperEPL2Grammar.g:2143:6: ( 'x' ) ( HexDigit )+
                                     {
-                                    // EsperEPL2Grammar.g:2140:6: ( 'x' )
-                                    // EsperEPL2Grammar.g:2140:7: 'x'
+                                    // EsperEPL2Grammar.g:2143:6: ( 'x' )
+                                    // EsperEPL2Grammar.g:2143:7: 'x'
                                     {
                                     match('x'); if (state.failed) return ;
 
                                     }
 
-                                    // EsperEPL2Grammar.g:2141:5: ( HexDigit )+
+                                    // EsperEPL2Grammar.g:2144:5: ( HexDigit )+
                                     int cnt16=0;
                                     loop16:
                                     do {
@@ -5243,7 +5243,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                                         switch (alt16) {
                                     	case 1 :
-                                    	    // EsperEPL2Grammar.g:2147:6: HexDigit
+                                    	    // EsperEPL2Grammar.g:2150:6: HexDigit
                                     	    {
                                     	    mHexDigit(); if (state.failed) return ;
 
@@ -5264,9 +5264,9 @@ public class EsperEPL2GrammarLexer extends Lexer {
                                     }
                                     break;
                                 case 2 :
-                                    // EsperEPL2Grammar.g:2151:5: ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+
+                                    // EsperEPL2Grammar.g:2154:5: ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )=> ( '0' .. '9' )+
                                     {
-                                    // EsperEPL2Grammar.g:2151:50: ( '0' .. '9' )+
+                                    // EsperEPL2Grammar.g:2154:50: ( '0' .. '9' )+
                                     int cnt17=0;
                                     loop17:
                                     do {
@@ -5280,7 +5280,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                                         switch (alt17) {
                                     	case 1 :
-                                    	    // EsperEPL2Grammar.g:2151:51: '0' .. '9'
+                                    	    // EsperEPL2Grammar.g:2154:51: '0' .. '9'
                                     	    {
                                     	    matchRange('0','9'); if (state.failed) return ;
 
@@ -5301,9 +5301,9 @@ public class EsperEPL2GrammarLexer extends Lexer {
                                     }
                                     break;
                                 case 3 :
-                                    // EsperEPL2Grammar.g:2153:6: ( '0' .. '7' )+
+                                    // EsperEPL2Grammar.g:2156:6: ( '0' .. '7' )+
                                     {
-                                    // EsperEPL2Grammar.g:2153:6: ( '0' .. '7' )+
+                                    // EsperEPL2Grammar.g:2156:6: ( '0' .. '7' )+
                                     int cnt18=0;
                                     loop18:
                                     do {
@@ -5317,7 +5317,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                                         switch (alt18) {
                                     	case 1 :
-                                    	    // EsperEPL2Grammar.g:2153:7: '0' .. '7'
+                                    	    // EsperEPL2Grammar.g:2156:7: '0' .. '7'
                                     	    {
                                     	    matchRange('0','7'); if (state.failed) return ;
 
@@ -5344,16 +5344,16 @@ public class EsperEPL2GrammarLexer extends Lexer {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:2155:5: ( '1' .. '9' ) ( '0' .. '9' )*
+                            // EsperEPL2Grammar.g:2158:5: ( '1' .. '9' ) ( '0' .. '9' )*
                             {
-                            // EsperEPL2Grammar.g:2155:5: ( '1' .. '9' )
-                            // EsperEPL2Grammar.g:2155:6: '1' .. '9'
+                            // EsperEPL2Grammar.g:2158:5: ( '1' .. '9' )
+                            // EsperEPL2Grammar.g:2158:6: '1' .. '9'
                             {
                             matchRange('1','9'); if (state.failed) return ;
 
                             }
 
-                            // EsperEPL2Grammar.g:2155:16: ( '0' .. '9' )*
+                            // EsperEPL2Grammar.g:2158:16: ( '0' .. '9' )*
                             loop20:
                             do {
                                 int alt20=2;
@@ -5366,7 +5366,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                                 switch (alt20) {
                             	case 1 :
-                            	    // EsperEPL2Grammar.g:2155:17: '0' .. '9'
+                            	    // EsperEPL2Grammar.g:2158:17: '0' .. '9'
                             	    {
                             	    matchRange('0','9'); if (state.failed) return ;
 
@@ -5387,7 +5387,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                     }
 
-                    // EsperEPL2Grammar.g:2157:3: ( ( 'l' ) | {...}? ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX ) )?
+                    // EsperEPL2Grammar.g:2160:3: ( ( 'l' ) | {...}? ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX ) )?
                     int alt27=3;
                     int LA27_0 = input.LA(1);
 
@@ -5399,10 +5399,10 @@ public class EsperEPL2GrammarLexer extends Lexer {
                     }
                     switch (alt27) {
                         case 1 :
-                            // EsperEPL2Grammar.g:2157:5: ( 'l' )
+                            // EsperEPL2Grammar.g:2160:5: ( 'l' )
                             {
-                            // EsperEPL2Grammar.g:2157:5: ( 'l' )
-                            // EsperEPL2Grammar.g:2157:6: 'l'
+                            // EsperEPL2Grammar.g:2160:5: ( 'l' )
+                            // EsperEPL2Grammar.g:2160:6: 'l'
                             {
                             match('l'); if (state.failed) return ;
 
@@ -5415,13 +5415,13 @@ public class EsperEPL2GrammarLexer extends Lexer {
                             }
                             break;
                         case 2 :
-                            // EsperEPL2Grammar.g:2160:5: {...}? ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX )
+                            // EsperEPL2Grammar.g:2163:5: {...}? ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX )
                             {
                             if ( !((isDecimal)) ) {
                                 if (state.backtracking>0) {state.failed=true; return ;}
                                 throw new FailedPredicateException(input, "NUM_INT", "isDecimal");
                             }
-                            // EsperEPL2Grammar.g:2161:13: ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX )
+                            // EsperEPL2Grammar.g:2164:13: ( '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )? | EXPONENT (f3= FLOAT_SUFFIX )? | f4= FLOAT_SUFFIX )
                             int alt26=3;
                             switch ( input.LA(1) ) {
                             case '.':
@@ -5450,10 +5450,10 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                             switch (alt26) {
                                 case 1 :
-                                    // EsperEPL2Grammar.g:2161:17: '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )?
+                                    // EsperEPL2Grammar.g:2164:17: '.' ( '0' .. '9' )* ( EXPONENT )? (f2= FLOAT_SUFFIX )?
                                     {
                                     match('.'); if (state.failed) return ;
-                                    // EsperEPL2Grammar.g:2161:21: ( '0' .. '9' )*
+                                    // EsperEPL2Grammar.g:2164:21: ( '0' .. '9' )*
                                     loop22:
                                     do {
                                         int alt22=2;
@@ -5466,7 +5466,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                                         switch (alt22) {
                                     	case 1 :
-                                    	    // EsperEPL2Grammar.g:2161:22: '0' .. '9'
+                                    	    // EsperEPL2Grammar.g:2164:22: '0' .. '9'
                                     	    {
                                     	    matchRange('0','9'); if (state.failed) return ;
 
@@ -5478,7 +5478,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                                         }
                                     } while (true);
 
-                                    // EsperEPL2Grammar.g:2161:33: ( EXPONENT )?
+                                    // EsperEPL2Grammar.g:2164:33: ( EXPONENT )?
                                     int alt23=2;
                                     int LA23_0 = input.LA(1);
 
@@ -5487,7 +5487,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                                     }
                                     switch (alt23) {
                                         case 1 :
-                                            // EsperEPL2Grammar.g:2161:34: EXPONENT
+                                            // EsperEPL2Grammar.g:2164:34: EXPONENT
                                             {
                                             mEXPONENT(); if (state.failed) return ;
 
@@ -5496,7 +5496,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                                     }
 
-                                    // EsperEPL2Grammar.g:2161:45: (f2= FLOAT_SUFFIX )?
+                                    // EsperEPL2Grammar.g:2164:45: (f2= FLOAT_SUFFIX )?
                                     int alt24=2;
                                     int LA24_0 = input.LA(1);
 
@@ -5505,7 +5505,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                                     }
                                     switch (alt24) {
                                         case 1 :
-                                            // EsperEPL2Grammar.g:2161:46: f2= FLOAT_SUFFIX
+                                            // EsperEPL2Grammar.g:2164:46: f2= FLOAT_SUFFIX
                                             {
                                             int f2Start2393 = getCharIndex();
                                             mFLOAT_SUFFIX(); if (state.failed) return ;
@@ -5523,10 +5523,10 @@ public class EsperEPL2GrammarLexer extends Lexer {
                                     }
                                     break;
                                 case 2 :
-                                    // EsperEPL2Grammar.g:2162:17: EXPONENT (f3= FLOAT_SUFFIX )?
+                                    // EsperEPL2Grammar.g:2165:17: EXPONENT (f3= FLOAT_SUFFIX )?
                                     {
                                     mEXPONENT(); if (state.failed) return ;
-                                    // EsperEPL2Grammar.g:2162:26: (f3= FLOAT_SUFFIX )?
+                                    // EsperEPL2Grammar.g:2165:26: (f3= FLOAT_SUFFIX )?
                                     int alt25=2;
                                     int LA25_0 = input.LA(1);
 
@@ -5535,7 +5535,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                                     }
                                     switch (alt25) {
                                         case 1 :
-                                            // EsperEPL2Grammar.g:2162:27: f3= FLOAT_SUFFIX
+                                            // EsperEPL2Grammar.g:2165:27: f3= FLOAT_SUFFIX
                                             {
                                             int f3Start2420 = getCharIndex();
                                             mFLOAT_SUFFIX(); if (state.failed) return ;
@@ -5553,7 +5553,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
                                     }
                                     break;
                                 case 3 :
-                                    // EsperEPL2Grammar.g:2163:17: f4= FLOAT_SUFFIX
+                                    // EsperEPL2Grammar.g:2166:17: f4= FLOAT_SUFFIX
                                     {
                                     int f4Start2444 = getCharIndex();
                                     mFLOAT_SUFFIX(); if (state.failed) return ;
@@ -5599,17 +5599,17 @@ public class EsperEPL2GrammarLexer extends Lexer {
     // $ANTLR start "EXPONENT"
     public final void mEXPONENT() throws RecognitionException {
         try {
-            // EsperEPL2Grammar.g:2180:2: ( ( 'e' ) ( '+' | '-' )? ( '0' .. '9' )+ )
-            // EsperEPL2Grammar.g:2180:4: ( 'e' ) ( '+' | '-' )? ( '0' .. '9' )+
+            // EsperEPL2Grammar.g:2183:2: ( ( 'e' ) ( '+' | '-' )? ( '0' .. '9' )+ )
+            // EsperEPL2Grammar.g:2183:4: ( 'e' ) ( '+' | '-' )? ( '0' .. '9' )+
             {
-            // EsperEPL2Grammar.g:2180:4: ( 'e' )
-            // EsperEPL2Grammar.g:2180:5: 'e'
+            // EsperEPL2Grammar.g:2183:4: ( 'e' )
+            // EsperEPL2Grammar.g:2183:5: 'e'
             {
             match('e'); if (state.failed) return ;
 
             }
 
-            // EsperEPL2Grammar.g:2180:10: ( '+' | '-' )?
+            // EsperEPL2Grammar.g:2183:10: ( '+' | '-' )?
             int alt29=2;
             int LA29_0 = input.LA(1);
 
@@ -5636,7 +5636,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
             }
 
-            // EsperEPL2Grammar.g:2180:21: ( '0' .. '9' )+
+            // EsperEPL2Grammar.g:2183:21: ( '0' .. '9' )+
             int cnt30=0;
             loop30:
             do {
@@ -5650,7 +5650,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
                 switch (alt30) {
             	case 1 :
-            	    // EsperEPL2Grammar.g:2180:22: '0' .. '9'
+            	    // EsperEPL2Grammar.g:2183:22: '0' .. '9'
             	    {
             	    matchRange('0','9'); if (state.failed) return ;
 
@@ -5679,7 +5679,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
     // $ANTLR start "FLOAT_SUFFIX"
     public final void mFLOAT_SUFFIX() throws RecognitionException {
         try {
-            // EsperEPL2Grammar.g:2186:2: ( 'f' | 'd' )
+            // EsperEPL2Grammar.g:2189:2: ( 'f' | 'd' )
             // EsperEPL2Grammar.g:
             {
             if ( input.LA(1)=='d'||input.LA(1)=='f' ) {
@@ -11676,10 +11676,10 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
     // $ANTLR start synpred1_EsperEPL2Grammar
     public final void synpred1_EsperEPL2Grammar_fragment() throws RecognitionException {   
-        // EsperEPL2Grammar.g:2151:5: ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )
-        // EsperEPL2Grammar.g:2151:6: ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX )
+        // EsperEPL2Grammar.g:2154:5: ( ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX ) )
+        // EsperEPL2Grammar.g:2154:6: ( '0' .. '9' )+ ( '.' | EXPONENT | FLOAT_SUFFIX )
         {
-        // EsperEPL2Grammar.g:2151:6: ( '0' .. '9' )+
+        // EsperEPL2Grammar.g:2154:6: ( '0' .. '9' )+
         int cnt32=0;
         loop32:
         do {
@@ -11693,7 +11693,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
             switch (alt32) {
         	case 1 :
-        	    // EsperEPL2Grammar.g:2151:7: '0' .. '9'
+        	    // EsperEPL2Grammar.g:2154:7: '0' .. '9'
         	    {
         	    matchRange('0','9'); if (state.failed) return ;
 
@@ -11710,7 +11710,7 @@ public class EsperEPL2GrammarLexer extends Lexer {
             cnt32++;
         } while (true);
 
-        // EsperEPL2Grammar.g:2151:18: ( '.' | EXPONENT | FLOAT_SUFFIX )
+        // EsperEPL2Grammar.g:2154:18: ( '.' | EXPONENT | FLOAT_SUFFIX )
         int alt33=3;
         switch ( input.LA(1) ) {
         case '.':
@@ -11739,21 +11739,21 @@ public class EsperEPL2GrammarLexer extends Lexer {
 
         switch (alt33) {
             case 1 :
-                // EsperEPL2Grammar.g:2151:19: '.'
+                // EsperEPL2Grammar.g:2154:19: '.'
                 {
                 match('.'); if (state.failed) return ;
 
                 }
                 break;
             case 2 :
-                // EsperEPL2Grammar.g:2151:23: EXPONENT
+                // EsperEPL2Grammar.g:2154:23: EXPONENT
                 {
                 mEXPONENT(); if (state.failed) return ;
 
                 }
                 break;
             case 3 :
-                // EsperEPL2Grammar.g:2151:32: FLOAT_SUFFIX
+                // EsperEPL2Grammar.g:2154:32: FLOAT_SUFFIX
                 {
                 mFLOAT_SUFFIX(); if (state.failed) return ;
 

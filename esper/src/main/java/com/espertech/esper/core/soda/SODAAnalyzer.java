@@ -28,6 +28,52 @@ public class SODAAnalyzer
             }
         }
 
+        if (model.getCreateContext() != null) {
+            ContextDescriptor desc = model.getCreateContext().getDescriptor();
+            if (desc instanceof ContextDescriptorKeyedSegmented) {
+                ContextDescriptorKeyedSegmented ks = (ContextDescriptorKeyedSegmented) desc;
+                for (ContextDescriptorKeyedSegmentedItem item : ks.getItems()) {
+                    if (item.getFilter().getFilter() != null) {
+                        expressions.add(item.getFilter().getFilter());
+                    }
+                }
+            }
+            if (desc instanceof ContextDescriptorCategory) {
+                ContextDescriptorCategory cat = (ContextDescriptorCategory) desc;
+                for (ContextDescriptorCategoryItem item : cat.getItems()) {
+                    if (item.getExpression() != null) {
+                        expressions.add(item.getExpression());
+                    }
+                }
+                if (cat.getFilter().getFilter() != null) {
+                    expressions.add(cat.getFilter().getFilter());
+                }
+            }
+            if (desc instanceof ContextDescriptorInitiatedTerminated) {
+                ContextDescriptorInitiatedTerminated init = (ContextDescriptorInitiatedTerminated) desc;
+                if (init.getInitiatedFilter() != null) {
+                    if (init.getInitiatedFilter().getFilter() != null) {
+                        expressions.add(init.getInitiatedFilter().getFilter());
+                    }
+                }
+                else {
+                    collectPatternExpressions(expressions, init.getInitiatedPattern());
+                }
+                if (init.getTerminatedTimePeriod() != null) {
+                    expressions.add(init.getTerminatedTimePeriod());
+                }
+            }
+            if (desc instanceof ContextDescriptorTemporalCrontabSingle) {
+                ContextDescriptorTemporalCrontabSingle ts = (ContextDescriptorTemporalCrontabSingle) desc;
+                for (Expression expression : ts.getCrontabStartExpressions()) {
+                    expressions.add(expression);
+                }
+                for (Expression expression : ts.getCrontabEndExpressions()) {
+                    expressions.add(expression);
+                }
+            }
+        }
+
         if (model.getCreateVariable() != null) {
             Expression expr = model.getCreateVariable().getOptionalAssignment();
             if (expr != null) {
@@ -171,18 +217,7 @@ public class SODAAnalyzer
                 // pattern stream
                 if (stream instanceof PatternStream) {
                     PatternStream patternStream = (PatternStream) stream;
-                    SODAAnalyzerPatternCollector collector = new SODAAnalyzerPatternCollector() {
-                        public void visit(PatternExpr patternExpr)
-                        {
-                            if (patternExpr instanceof PatternFilterExpr) {
-                                PatternFilterExpr filter = (PatternFilterExpr) patternExpr;
-                                if (filter.getFilter().getFilter() != null) {
-                                    expressions.add(filter.getFilter().getFilter());
-                                }
-                            }
-                        }
-                    };
-                    traversePatternRecursive(patternStream.getExpression(), collector);
+                    collectPatternExpressions(expressions, patternStream.getExpression());
                 }
                 // method stream
                 if (stream instanceof MethodInvocationStream) {
@@ -289,6 +324,21 @@ public class SODAAnalyzer
         return expressions;
     }
 
+    private static void collectPatternExpressions(final List<Expression> expressions, PatternExpr expression) {
+        SODAAnalyzerPatternCollector collector = new SODAAnalyzerPatternCollector() {
+            public void visit(PatternExpr patternExpr)
+            {
+                if (patternExpr instanceof PatternFilterExpr) {
+                    PatternFilterExpr filter = (PatternFilterExpr) patternExpr;
+                    if (filter.getFilter().getFilter() != null) {
+                        expressions.add(filter.getFilter().getFilter());
+                    }
+                }
+            }
+        };
+        traversePatternRecursive(expression, collector);
+    }
+
     private static void traversePatternRecursive(PatternExpr patternExpr, SODAAnalyzerPatternCollector collectorFunction) {
         collectorFunction.visit(patternExpr);
         if (patternExpr == null){
@@ -324,6 +374,17 @@ public class SODAAnalyzer
                 }
             }
         }
+
+        if (model.getCreateContext() != null) {
+            ContextDescriptor desc = model.getCreateContext().getDescriptor();
+            if (desc instanceof ContextDescriptorInitiatedTerminated) {
+                ContextDescriptorInitiatedTerminated cat = (ContextDescriptorInitiatedTerminated) desc;
+                if (cat.getInitiatedPattern() != null) {
+                    result.add(cat.getInitiatedPattern());
+                }
+            }
+        }
+
         return result;
     }
 }

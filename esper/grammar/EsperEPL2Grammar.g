@@ -548,6 +548,9 @@ tokens
 	parserTokenParaphases.put(MATCHED, "'matched'");
 	parserTokenParaphases.put(CONTEXT, "'context'");
 	parserTokenParaphases.put(START, "'start'");
+	parserTokenParaphases.put(END, "'end'");
+	parserTokenParaphases.put(INITIATED, "'initiated'");
+	parserTokenParaphases.put(TERMINATED, "'terminated'");
 
 	parserKeywordSet = new java.util.TreeSet<String>(parserTokenParaphases.values());
     }

@@ -51,7 +51,7 @@ public class ContextDescriptorKeyedSegmentedItem implements ContextDescriptor {
         for (String prop : propertyNames) {
             writer.append(delimiter);
             writer.append(prop);
-            delimiter = "and ";
+            delimiter = " and ";
         }
         writer.append(" from ");
         filter.toEPL(writer, formatter);

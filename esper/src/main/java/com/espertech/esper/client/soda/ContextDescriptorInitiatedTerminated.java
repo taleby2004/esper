@@ -20,7 +20,7 @@ public class ContextDescriptorInitiatedTerminated implements ContextDescriptor {
     private String initiatedFilterAsName;
     private PatternExpr initiatedPattern;
 
-    private TimePeriodExpression terminatedTimePeriod;
+    private Expression terminatedTimePeriod;
 
     public ContextDescriptorInitiatedTerminated() {
     }
@@ -60,11 +60,11 @@ public class ContextDescriptorInitiatedTerminated implements ContextDescriptor {
         this.initiatedPattern = initiatedPattern;
     }
 
-    public TimePeriodExpression getTerminatedTimePeriod() {
+    public Expression getTerminatedTimePeriod() {
         return terminatedTimePeriod;
     }
 
-    public void setTerminatedTimePeriod(TimePeriodExpression terminatedTimePeriod) {
+    public void setTerminatedTimePeriod(Expression terminatedTimePeriod) {
         this.terminatedTimePeriod = terminatedTimePeriod;
     }
 
@@ -72,7 +72,7 @@ public class ContextDescriptorInitiatedTerminated implements ContextDescriptor {
         writer.append("initiated by ");
         if (initiatedFilter != null) {
             initiatedFilter.toEPL(writer, formatter);
-            writer.append(" ");
+            writer.append(" as ");
             writer.append(initiatedFilterAsName);
         }
         else {

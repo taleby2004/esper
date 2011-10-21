@@ -21,6 +21,9 @@ public class CreateContextClause implements Serializable
     private String contextName;
     private ContextDescriptor descriptor;
 
+    public CreateContextClause() {
+    }
+
     public CreateContextClause(String contextName, ContextDescriptor descriptor) {
         this.contextName = contextName;
         this.descriptor = descriptor;

@@ -39,6 +39,11 @@ public class OutputLimitClause implements Serializable
     public OutputLimitClause() {
     }
 
+    public OutputLimitClause(OutputLimitSelector selector, OutputLimitUnit unit) {
+        this.selector = selector;
+        this.unit = unit;
+    }
+
     /**
      * Creates an output limit clause.
      * @param timePeriodExpression a frequency to output at
@@ -436,6 +441,10 @@ public class OutputLimitClause implements Serializable
         else if (unit == OutputLimitUnit.AFTER)
         {
             // no action required
+        }
+        else if (unit == OutputLimitUnit.CONTEXT_PARTITION_TERM)
+        {
+            writer.write("when terminated");
         }
         else
         {

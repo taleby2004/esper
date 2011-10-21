@@ -36,7 +36,12 @@ public enum OutputLimitUnit
     /**
      * The unit representing just after a time period or after a number of events.
      */
-    AFTER("after");
+    AFTER("after"),
+
+    /**
+     * The unit representing that output occurs when the context partition terminates.
+     */
+    CONTEXT_PARTITION_TERM("when terminated");
 
     private String text;
 

@@ -520,6 +520,10 @@ public class StatementSpecMapper
             List<Expression> mappedExpr = unmapExpressionDeep(timerAtExpressions, unmapContext);
             clause = new OutputLimitClause(selector, mappedExpr.toArray(new Expression[mappedExpr.size()]));
         }
+        else if (outputLimitSpec.getRateType() == OutputLimitRateType.TERM)
+        {
+            clause = new OutputLimitClause(selector, OutputLimitUnit.CONTEXT_PARTITION_TERM);
+        }
         else
         {
             clause = new OutputLimitClause(selector, outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), unit);
@@ -632,6 +636,10 @@ public class StatementSpecMapper
         else if (outputLimitClause.getUnit() == OutputLimitUnit.AFTER)
         {
             rateType = OutputLimitRateType.AFTER;
+        }
+        else if (outputLimitClause.getUnit() == OutputLimitUnit.CONTEXT_PARTITION_TERM)
+        {
+            rateType = OutputLimitRateType.TERM;
         }
         else
         {

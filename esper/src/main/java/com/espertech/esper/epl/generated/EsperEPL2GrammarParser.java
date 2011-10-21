@@ -587,6 +587,9 @@ public class EsperEPL2GrammarParser extends Parser {
     	parserTokenParaphases.put(MATCHED, "'matched'");
     	parserTokenParaphases.put(CONTEXT, "'context'");
     	parserTokenParaphases.put(START, "'start'");
+    	parserTokenParaphases.put(END, "'end'");
+    	parserTokenParaphases.put(INITIATED, "'initiated'");
+    	parserTokenParaphases.put(TERMINATED, "'terminated'");
     	parserKeywordSet = new java.util.TreeSet<String>(parserTokenParaphases.values());
         }
         return parserTokenParaphases;
@@ -5862,8 +5865,8 @@ public class EsperEPL2GrammarParser extends Parser {
             } while (true);
             if ( state.backtracking==0 ) {
             retval.tree = root_0;
-            RewriteRuleTokenStream stream_name=new RewriteRuleTokenStream(adaptor,"token name",name);
             RewriteRuleTokenStream stream_keyword=new RewriteRuleTokenStream(adaptor,"token keyword",keyword);
+            RewriteRuleTokenStream stream_name=new RewriteRuleTokenStream(adaptor,"token name",name);
             RewriteRuleSubtreeStream stream_retval=new RewriteRuleSubtreeStream(adaptor,"rule retval",retval!=null?retval.tree:null);
             root_0 = (CommonTree)adaptor.nil();
             if (keyword != null) {
@@ -36210,7 +36213,7 @@ public class EsperEPL2GrammarParser extends Parser {
             this.transition = DFA208_transition;
         }
         public String getDescription() {
-            return "1362:1: unaryExpression : ( MINUS eventProperty -> ^( UNARY_MINUS eventProperty ) | constant | substitution | LPAREN expression RPAREN (d= DOT libFunctionNoClass (d= DOT libFunctionNoClass )* )? -> {$d != null}? ^( DOT_EXPR expression ( libFunctionNoClass )+ ) -> expression | eventPropertyOrLibFunction | ( builtinFunc )=> ( builtinFunc ) | arrayExpression | subSelectExpression (d= DOT libFunctionNoClass (d= DOT libFunctionNoClass )* )? -> {$d != null}? ^( DOT_EXPR subSelectExpression ( libFunctionNoClass )+ ) -> subSelectExpression | existsSubSelectExpression | NEWKW LCURLY newAssign ( COMMA newAssign )* RCURLY -> ^( NEWKW ( newAssign )* ) );";
+            return "1365:1: unaryExpression : ( MINUS eventProperty -> ^( UNARY_MINUS eventProperty ) | constant | substitution | LPAREN expression RPAREN (d= DOT libFunctionNoClass (d= DOT libFunctionNoClass )* )? -> {$d != null}? ^( DOT_EXPR expression ( libFunctionNoClass )+ ) -> expression | eventPropertyOrLibFunction | ( builtinFunc )=> ( builtinFunc ) | arrayExpression | subSelectExpression (d= DOT libFunctionNoClass (d= DOT libFunctionNoClass )* )? -> {$d != null}? ^( DOT_EXPR subSelectExpression ( libFunctionNoClass )+ ) -> subSelectExpression | existsSubSelectExpression | NEWKW LCURLY newAssign ( COMMA newAssign )* RCURLY -> ^( NEWKW ( newAssign )* ) );";
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             TokenStream input = (TokenStream)_input;
