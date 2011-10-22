@@ -227,10 +227,18 @@ public class ConfigurationEngineDefaults implements Serializable
         this.cluster = cluster;
     }
 
+    /**
+     * Return pattern settings.
+     * @return pattern settings
+     */
     public Patterns getPatterns() {
         return patterns;
     }
 
+    /**
+     * Sets pattern settings.
+     * @param patterns settings to set
+     */
     public void setPatterns(Patterns patterns) {
         this.patterns = patterns;
     }
@@ -684,7 +692,7 @@ public class ConfigurationEngineDefaults implements Serializable
          * This lock coordinates
          * event processing threads (threads that send events) with threads that
          * perform administrative functions (threads that start or destroy statements, for example).
-         * @return
+         * @return true for fair lock
          */
         public boolean isEngineFairlock() {
             return engineFairlock;
@@ -998,18 +1006,36 @@ public class ConfigurationEngineDefaults implements Serializable
         private Long maxSubexpressions;
         private boolean maxSubexpressionPreventStart = true;
 
+        /**
+         * Returns the maximum number of subexpressions
+         * @return subexpression count
+         */
         public Long getMaxSubexpressions() {
             return maxSubexpressions;
         }
 
+        /**
+         * Sets the maximum number of subexpressions
+         * @param maxSubexpressions subexpression count
+         */
         public void setMaxSubexpressions(Long maxSubexpressions) {
             this.maxSubexpressions = maxSubexpressions;
         }
 
+        /**
+         * Returns true, the default, to indicate that if there is a maximum defined
+         * it is being enforced and new subexpressions are not allowed.
+         * @return indicate whether enforced or not
+         */
         public boolean isMaxSubexpressionPreventStart() {
             return maxSubexpressionPreventStart;
         }
 
+        /**
+         * Set to true, the default, to indicate that if there is a maximum defined
+         * it is being enforced and new subexpressions are not allowed.
+         * @param maxSubexpressionPreventStart indicate whether enforced or not
+         */
         public void setMaxSubexpressionPreventStart(boolean maxSubexpressionPreventStart) {
             this.maxSubexpressionPreventStart = maxSubexpressionPreventStart;
         }
@@ -1370,10 +1396,18 @@ public class ConfigurationEngineDefaults implements Serializable
             this.disableLocking = disableLocking;
         }
 
+        /**
+         * Returns the threading profile
+         * @return profile
+         */
         public ThreadingProfile getThreadingProfile() {
             return threadingProfile;
         }
 
+        /**
+         * Sets the threading profile
+         * @param threadingProfile profile to set
+         */
         public void setThreadingProfile(ThreadingProfile threadingProfile) {
             this.threadingProfile = threadingProfile;
         }

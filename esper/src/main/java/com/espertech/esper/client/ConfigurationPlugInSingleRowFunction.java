@@ -98,6 +98,9 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
         this.valueCache = valueCache;
     }
 
+    /**
+     * Enum for single-row function value cache setting.
+     */
     public enum ValueCache {
         /**
          * The default, the result of a single-row function is always computed anew.

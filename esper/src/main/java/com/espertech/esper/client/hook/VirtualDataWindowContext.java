@@ -135,6 +135,10 @@ public class VirtualDataWindowContext {
         return customConfiguration;
     }
 
+    /**
+     * Returns the agent instance (context partition) context.
+     * @return context
+     */
     public AgentInstanceContext getAgentInstanceContext() {
         return agentInstanceContext;
     }

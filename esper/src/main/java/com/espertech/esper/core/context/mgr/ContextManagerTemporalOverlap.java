@@ -79,7 +79,7 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
         for (ContextState contextState : contextStates) {
             int instanceId = contextState.getAgentInstanceId();
 
-            ContextPlusSchedule context = new ContextPlusSchedule((EventBean)contextState.getAdditionalInfo(), null, null);
+            ContextPlusSchedule context = (ContextPlusSchedule) contextState.getAdditionalInfo();
             agentInstances.put(instanceId, context);
         }
     }
@@ -126,7 +126,8 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
             // schedule a termination callback unless it is already scheduled
             if (scheduleAndContext.getContextScheduleCallbackHandle() == null) {
                 ScheduleSlot scheduleSlot = createContextContext.getStatementContext().getScheduleBucket().allocateSlot();
-                EPStatementHandleCallback callback = scheduleCallback(agentInstanceId, scheduleSlot);
+                long timeOffset = servicesContext.getSchedulingService().getTime() - scheduleAndContext.getStartTime();
+                EPStatementHandleCallback callback = scheduleCallback(agentInstanceId, scheduleSlot, timeOffset);
                 scheduleAndContext.setContextScheduleCallbackHandle(callback, scheduleSlot);
             }
         }
@@ -203,15 +204,15 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
         EventBean context = ContextPropertyEventType.getTempOverlapBean(servicesContext.getEventAdapterService(), contextDescriptor.getContextPropertyRegistry().getContextEventType(), contextName, agentInstanceId, patternData, filterEvent, overlapSpec.getInitiatedFilterAsName());
 
         // save id - for statements to be added
-        ContextPlusSchedule scheduleAndContext = new ContextPlusSchedule(context, null, null);
+        ContextPlusSchedule scheduleAndContext = new ContextPlusSchedule(context, servicesContext.getSchedulingService().getTime());
         agentInstances.put(agentInstanceId, scheduleAndContext);
 
         // save state if required
-        contextStateService.addContext(contextName, agentInstanceId, context, contextStateServiceBinding);
+        contextStateService.addContext(contextName, agentInstanceId, scheduleAndContext, contextStateServiceBinding);
 
         // schedule callback, save for removal
         ScheduleSlot scheduleSlot = createContextContext.getStatementContext().getScheduleBucket().allocateSlot();
-        EPStatementHandleCallback scheduleHandle = scheduleCallback(agentInstanceId, scheduleSlot);
+        EPStatementHandleCallback scheduleHandle = scheduleCallback(agentInstanceId, scheduleSlot, 0);
         scheduleAndContext.setContextScheduleCallbackHandle(scheduleHandle, scheduleSlot);
 
         // for all current statements, start an instance
@@ -291,7 +292,7 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
         return instanceIds.lastKey() + 1;
     }
 
-    private EPStatementHandleCallback scheduleCallback(final int agentInstanceId, ScheduleSlot scheduleSlot) {
+    private EPStatementHandleCallback scheduleCallback(final int agentInstanceId, ScheduleSlot scheduleSlot, long timeOffset) {
 
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext) {
@@ -307,7 +308,7 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
             log.warn("Time period expression in context '" + contextName + "' returned a null value, not scheduling time period");
         }
         else {
-            long msec = (long) (interval * 1000L);
+            long msec = (long) (interval * 1000L) - timeOffset;
             servicesContext.getSchedulingService().add(msec, contextScheduleCallbackHandle, scheduleSlot);
         }
 
@@ -336,13 +337,13 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
 
     public static class ContextPlusSchedule {
         private final EventBean contextEvent;
+        private final long startTime;
         private EPStatementHandleCallback contextScheduleCallbackHandle;
         private ScheduleSlot scheduleSlot;
 
-        public ContextPlusSchedule(EventBean contextEvent, EPStatementHandleCallback contextScheduleCallbackHandle, ScheduleSlot scheduleSlot) {
+        public ContextPlusSchedule(EventBean contextEvent, long startTime) {
             this.contextEvent = contextEvent;
-            this.contextScheduleCallbackHandle = contextScheduleCallbackHandle;
-            this.scheduleSlot = scheduleSlot;
+            this.startTime = startTime;
         }
 
         public EventBean getContextEvent() {
@@ -360,6 +361,10 @@ public class ContextManagerTemporalOverlap implements ContextManager, PatternMat
 
         public ScheduleSlot getScheduleSlot() {
             return scheduleSlot;
+        }
+
+        public long getStartTime() {
+            return startTime;
         }
     }
 }

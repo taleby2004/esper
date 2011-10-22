@@ -716,10 +716,18 @@ public class EPStatementObjectModel implements Serializable
         this.expressionDeclarations = expressionDeclarations;
     }
 
+    /**
+     * Returns the context name if context dimensions apply to statement.
+     * @return context name
+     */
     public String getContextName() {
         return contextName;
     }
 
+    /**
+     * Sets the context name if context dimensions apply to statement.
+     * @param contextName context name
+     */
     public void setContextName(String contextName) {
         this.contextName = contextName;
     }

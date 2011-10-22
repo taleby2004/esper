@@ -14,31 +14,58 @@ package com.espertech.esper.client.soda;
 import java.io.StringWriter;
 import java.util.List;
 
+/**
+ * Context dimension descriptor for a start-and-end temporal single-fire or repeating context
+ */
 public class ContextDescriptorTemporalCrontabSingle implements ContextDescriptor {
 
     private List<Expression> crontabStartExpressions;
     private List<Expression> crontabEndExpressions;
 
+    /**
+     * Ctor.
+     */
     public ContextDescriptorTemporalCrontabSingle() {
     }
 
+    /**
+     * Ctor.
+     * @param crontabStartExpressions start-crontab
+     * @param crontabEndExpressions end-crontab
+     */
     public ContextDescriptorTemporalCrontabSingle(List<Expression> crontabStartExpressions, List<Expression> crontabEndExpressions) {
         this.crontabStartExpressions = crontabStartExpressions;
         this.crontabEndExpressions = crontabEndExpressions;
     }
 
+    /**
+     * Returns the start crontab expressions.
+     * @return start
+     */
     public List<Expression> getCrontabStartExpressions() {
         return crontabStartExpressions;
     }
 
+    /**
+     * Sets the start crontab expressions.
+     * @param crontabStartExpressions start
+     */
     public void setCrontabStartExpressions(List<Expression> crontabStartExpressions) {
         this.crontabStartExpressions = crontabStartExpressions;
     }
 
+    /**
+     * Returns the end crontab expressions.
+     * @return end
+     */
     public List<Expression> getCrontabEndExpressions() {
         return crontabEndExpressions;
     }
 
+    /**
+     * Sets the end crontab expressions.
+     * @param crontabEndExpressions end
+     */
     public void setCrontabEndExpressions(List<Expression> crontabEndExpressions) {
         this.crontabEndExpressions = crontabEndExpressions;
     }

@@ -192,10 +192,18 @@ public class CreateSchemaClause implements Serializable
         return endTimestampPropertyName;
     }
 
+    /**
+     * Returns the optional set of event type names that properties are copied from.
+     * @return copy-from event types
+     */
     public Set<String> getCopyFrom() {
         return copyFrom;
     }
 
+    /**
+     * Sets the optional set of event type names that properties are copied from.
+     * @param copyFrom event types
+     */
     public void setCopyFrom(Set<String> copyFrom) {
         this.copyFrom = copyFrom;
     }

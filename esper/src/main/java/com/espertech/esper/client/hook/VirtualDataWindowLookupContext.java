@@ -11,10 +11,7 @@
 
 package com.espertech.esper.client.hook;
 
-import com.espertech.esper.epl.lookup.SubordPropPlan;
-
 import java.lang.annotation.Annotation;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -45,6 +42,7 @@ public class VirtualDataWindowLookupContext {
      * @param statementName the statement name of the statement performing the lookup; Null for fire-and-forget queries
      * @param statementAnnotations the statement annotations of the statement performing the lookup; Null for fire-and-forget queries
      * @param fireAndForget true for fire-and-forget queries
+     * @param statementId statement id
      */
     public VirtualDataWindowLookupContext(String statementName, String statementId, Annotation[] statementAnnotations, boolean fireAndForget, String namedWindowName, List<VirtualDataWindowLookupFieldDesc> hashFields, List<VirtualDataWindowLookupFieldDesc> btreeFields) {
         this.statementName = statementName;

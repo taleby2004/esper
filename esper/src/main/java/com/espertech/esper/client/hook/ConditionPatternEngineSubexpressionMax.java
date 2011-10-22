@@ -25,6 +25,7 @@ public class ConditionPatternEngineSubexpressionMax implements BaseCondition
     /**
      * Ctor.
      * @param max limit reached
+     * @param counts the number of subexpression counts per statement
      */
     public ConditionPatternEngineSubexpressionMax(long max, Map<String, Long> counts) {
         this.max = max;
@@ -39,6 +40,10 @@ public class ConditionPatternEngineSubexpressionMax implements BaseCondition
         return max;
     }
 
+    /**
+     * Returns the per-statement count.
+     * @return count
+     */
     public Map<String, Long> getCounts() {
         return counts;
     }

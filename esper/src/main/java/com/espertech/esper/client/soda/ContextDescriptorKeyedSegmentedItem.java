@@ -11,37 +11,61 @@
 
 package com.espertech.esper.client.soda;
 
-import com.espertech.esper.epl.spec.FilterSpecRaw;
-import com.espertech.esper.filter.FilterSpecCompiled;
-
 import java.io.StringWriter;
 import java.util.List;
 
+/**
+ * Context detail for a key-filter pair for the keyed segmented context.
+ */
 public class ContextDescriptorKeyedSegmentedItem implements ContextDescriptor {
 
     private List<String> propertyNames;
     private Filter filter;
 
+    /**
+     * Ctor.
+     */
     public ContextDescriptorKeyedSegmentedItem() {
     }
 
+    /**
+     * Ctor.
+     * @param propertyNames list of property names
+     * @param filter event type name and optional filter predicates
+     */
     public ContextDescriptorKeyedSegmentedItem(List<String> propertyNames, Filter filter) {
         this.propertyNames = propertyNames;
         this.filter = filter;
     }
 
+    /**
+     * Returns the filter.
+     * @return filter
+     */
     public Filter getFilter() {
         return filter;
     }
 
+    /**
+     * Sets the filter.
+     * @param filter filter
+     */
     public void setFilter(Filter filter) {
         this.filter = filter;
     }
 
+    /**
+     * Returns the property names.
+     * @return list
+     */
     public List<String> getPropertyNames() {
         return propertyNames;
     }
 
+    /**
+     * Sets the property names.
+     * @param propertyNames list
+     */
     public void setPropertyNames(List<String> propertyNames) {
         this.propertyNames = propertyNames;
     }

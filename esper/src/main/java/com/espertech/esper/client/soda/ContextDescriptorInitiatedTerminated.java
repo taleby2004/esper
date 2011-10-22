@@ -14,6 +14,9 @@ package com.espertech.esper.client.soda;
 import java.io.StringWriter;
 import java.util.List;
 
+/**
+ * Context dimension descriptor for initiated and terminated context partitions.
+ */
 public class ContextDescriptorInitiatedTerminated implements ContextDescriptor {
 
     private Filter initiatedFilter;
@@ -22,48 +25,94 @@ public class ContextDescriptorInitiatedTerminated implements ContextDescriptor {
 
     private Expression terminatedTimePeriod;
 
+    /**
+     * Ctor.
+     */
     public ContextDescriptorInitiatedTerminated() {
     }
 
+    /**
+     * Ctor.
+     * @param initiatedPattern pattern to initiate
+     * @param terminatedTimePeriod expires time period
+     */
     public ContextDescriptorInitiatedTerminated(PatternExpr initiatedPattern, TimePeriodExpression terminatedTimePeriod) {
         this.initiatedPattern = initiatedPattern;
         this.terminatedTimePeriod = terminatedTimePeriod;
     }
 
+    /**
+     * Ctor.
+     * @param initiatedFilter filter that initiates
+     * @param initiatedFilterAsName name for events
+     * @param terminatedTimePeriod expires time period
+     */
     public ContextDescriptorInitiatedTerminated(Filter initiatedFilter, String initiatedFilterAsName, TimePeriodExpression terminatedTimePeriod) {
         this.initiatedFilter = initiatedFilter;
         this.initiatedFilterAsName = initiatedFilterAsName;
         this.terminatedTimePeriod = terminatedTimePeriod;
     }
 
+    /**
+     * Returns initiating filter, of null if using patterns.
+     * @return filter
+     */
     public Filter getInitiatedFilter() {
         return initiatedFilter;
     }
 
+    /**
+     * Sets initiating filter, of null if using patterns.
+     * @param initiatedFilter filter
+     */
     public void setInitiatedFilter(Filter initiatedFilter) {
         this.initiatedFilter = initiatedFilter;
     }
 
+    /**
+     * Returns event-as-name for initiating filter
+     * @return name
+     */
     public String getInitiatedFilterAsName() {
         return initiatedFilterAsName;
     }
 
+    /**
+     * Sets event-as-name for initiating filter
+     * @param initiatedFilterAsName name
+     */
     public void setInitiatedFilterAsName(String initiatedFilterAsName) {
         this.initiatedFilterAsName = initiatedFilterAsName;
     }
 
+    /**
+     * Returns the initiating pattern, or null if using filter instead
+     * @return pattern
+     */
     public PatternExpr getInitiatedPattern() {
         return initiatedPattern;
     }
 
+    /**
+     * Sets the initiating pattern, or null if using filter instead
+     * @param initiatedPattern pattern
+     */
     public void setInitiatedPattern(PatternExpr initiatedPattern) {
         this.initiatedPattern = initiatedPattern;
     }
 
+    /**
+     * Returns the expires-time-period.
+     * @return expires expression
+     */
     public Expression getTerminatedTimePeriod() {
         return terminatedTimePeriod;
     }
 
+    /**
+     * Sets the expires-time-period.
+     * @param terminatedTimePeriod expires expression
+     */
     public void setTerminatedTimePeriod(Expression terminatedTimePeriod) {
         this.terminatedTimePeriod = terminatedTimePeriod;
     }

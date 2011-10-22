@@ -39,6 +39,11 @@ public class OutputLimitClause implements Serializable
     public OutputLimitClause() {
     }
 
+    /**
+     * Ctor.
+     * @param selector selector
+     * @param unit unit
+     */
     public OutputLimitClause(OutputLimitSelector selector, OutputLimitUnit unit) {
         this.selector = selector;
         this.unit = unit;
@@ -369,10 +374,18 @@ public class OutputLimitClause implements Serializable
         return crontabAtParameters;
     }
 
+    /**
+     * Returns true for output upon termination of a context partition
+     * @return indicator
+     */
     public boolean isAndAfterTerminate() {
         return andAfterTerminate;
     }
 
+    /**
+     * Set true for output upon termination of a context partition
+     * @param andAfterTerminate indicator
+     */
     public void setAndAfterTerminate(boolean andAfterTerminate) {
         this.andAfterTerminate = andAfterTerminate;
     }
