@@ -61,7 +61,7 @@ public class StatementAgentInstanceUtil {
         }
     }
 
-    public static void stop(StopCallback stopCallback, AgentInstanceContext agentInstanceContext, Viewable finalView) {
+    public static void stop(StopCallback stopCallback, AgentInstanceContext agentInstanceContext, Viewable finalView, EPServicesContext servicesContext) {
 
         // obtain statement lock
         StatementAgentInstanceLock lock = agentInstanceContext.getEpStatementAgentInstanceHandle().getStatementAgentInstanceLock();
@@ -73,6 +73,10 @@ public class StatementAgentInstanceUtil {
             }
 
             stopSafe(stopCallback, agentInstanceContext.getStatementContext());
+
+            if (servicesContext.getSchedulableAgentInstanceDirectory() != null) {
+                servicesContext.getSchedulableAgentInstanceDirectory().remove(agentInstanceContext.getStatementContext().getStatementId(), agentInstanceContext.getAgentInstanceIds());
+            }
 
             // indicate method resolution
             agentInstanceContext.getStatementContext().getMethodResolutionService().destroyedAgentInstance(agentInstanceContext.getAgentInstanceIds());

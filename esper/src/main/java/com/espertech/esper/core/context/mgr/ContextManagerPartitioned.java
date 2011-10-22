@@ -442,7 +442,7 @@ public class ContextManagerPartitioned implements ContextManager, ContextManager
         }
 
         for (AgentInstance instance : statementDesc.getInstances()) {
-            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView());
+            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext);
         }
         statements.remove(statementId);
     }

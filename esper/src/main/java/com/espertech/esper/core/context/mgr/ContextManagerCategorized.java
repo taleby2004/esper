@@ -135,7 +135,7 @@ public class ContextManagerCategorized implements ContextManager, ContextIterato
         }
 
         for (AgentInstance instance : statementDesc.getInstances()) {
-            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView());
+            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext);
         }
         statements.remove(statementId);
     }

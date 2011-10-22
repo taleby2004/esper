@@ -667,7 +667,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
 
             // finally remove reference to schedulable agent-instance resources (an HA requirements)
             if (services.getSchedulableAgentInstanceDirectory() != null) {
-                services.getSchedulableAgentInstanceDirectory().remove(desc.getStatementHandle().getStatementId());
+                services.getSchedulableAgentInstanceDirectory().removeStatement(desc.getStatementHandle().getStatementId());
             }
 
             long timeLastStateChange = services.getSchedulingService().getTime();

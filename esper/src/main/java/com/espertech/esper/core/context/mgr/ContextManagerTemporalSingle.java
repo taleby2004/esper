@@ -140,7 +140,7 @@ public class ContextManagerTemporalSingle implements ContextManager, ContextIter
     private void removeStatement(String statementId) {
         AgentInstance instance = instances.get(statementId);
         if (instance != null) {
-            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView());
+            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext);
         }
         instances.remove(statementId);
         statements.remove(statementId);
@@ -162,7 +162,7 @@ public class ContextManagerTemporalSingle implements ContextManager, ContextIter
     protected void deactivateStatements() {
         for (Map.Entry<String, AgentInstance> stmtEntry : instances.entrySet()) {
             AgentInstance instance = stmtEntry.getValue();
-            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView());
+            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext);
         }
         instances.clear();
     }

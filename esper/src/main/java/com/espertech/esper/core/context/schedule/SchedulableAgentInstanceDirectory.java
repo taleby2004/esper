@@ -15,6 +15,7 @@ import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 
 public interface SchedulableAgentInstanceDirectory {
     public void add(EPStatementAgentInstanceHandle handle);
-    public void remove(String statementId);
-    public EPStatementAgentInstanceHandle lookup(String statementId);
+    public void remove(String statementId, int[] agentInstanceIds);
+    public void removeStatement(String statementId);
+    public EPStatementAgentInstanceHandle lookup(String statementId, int[] agentInstanceIds);
 }
