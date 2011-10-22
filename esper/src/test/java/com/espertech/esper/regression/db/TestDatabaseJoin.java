@@ -410,6 +410,7 @@ public class TestDatabaseJoin extends TestCase
                 " sql:MyDB ['select mychar from mytesttable where mytesttable.mybigint = 2'] as s0," +
                 " pattern [every timer:interval(5 sec) ]";
 
+        /* TODO
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -424,6 +425,15 @@ public class TestDatabaseJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
         assertEquals("Y", listener.assertOneGetNewAndReset().get("mychar"));
+        */
+        
+        // with variable
+        epService.getEPAdministrator().createEPL("create variable long VarLastTimestamp = 0");
+        String epl = "@Name('Poll every 5 seconds') insert into PollStream" +
+            " select * from pattern[every timer:interval(5 sec)]," +
+            " sql:MyDB ['select mychar from mytesttable where mytesttable.mybigint > ${VarLastTimestamp}'] as s0";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
+        epService.getEPAdministrator().create(model);
     }
 
     public void testPropertyResolution()

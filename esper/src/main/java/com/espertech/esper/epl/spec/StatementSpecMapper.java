@@ -2717,10 +2717,10 @@ public class StatementSpecMapper
         }
         int streamNum = -1;
         for (Stream stream : fromClause.getStreams()) {
+            streamNum++;
             if (!(stream instanceof SQLStream)) {
                 continue;
             }
-            streamNum++;
             SQLStream sqlStream = (SQLStream) stream;
 
             List<PlaceholderParser.Fragment> sqlFragments = null;
