@@ -143,6 +143,10 @@ ObjectOutputStream out = new ObjectOutputStream(requestSocket.getOutputStream())
 out.writeObject(new MyEvent("Hello World"));
 out.flush();
 
+// Consider resetting the output stream from time-to-time, after sending a number of objects.
+// This is because the stream may cache strings etc. . The reset is:
+// out.reset();
+
 // close when done
 out.close();
 requestSocket.close();]]></programlisting>
