@@ -274,7 +274,8 @@ select id, count(*) from MyOffOnStream.win:time(1 hour) group by id;]]></program
 		
 		<para>
 		  After your application obtains a <literal>Module</literal> instance it may either use <literal>deploy</literal> to deploy the module directly, starting all statements of the module. Alternatively your application
-		  may add a module, making it known without starting statements for later deployment. In each case the module is assigned a deployment id, which acts as a unique primary key for all known modules. 
+		  may add a module, making it known without starting statements for later deployment. In each case the module is assigned a deployment id, which acts as a unique primary key for all known modules. Your application may assign its own deployment id
+		  or may have the engine generate a deployment id (two footprints for <literal>add</literal> and <literal>deploy</literal> methods).
 		</para>
 
 		<para>
@@ -326,7 +327,8 @@ DeploymentOrder order = deployAdmin.getDeploymentOrder(mymodules, new Deployment
 		<sect2 id="devlifecycle-admin-devlifecycle-undeploy">
         <title>Deploying and Undeploying</title>
 			<para>
-				The deployment interface returns a deployment id for each module made known by adding a module or by deploying a module. To undeploy the module your application must provide the deployment id.
+				The deployment interface returns a deployment id for each module made known by adding a module or by deploying a module. To undeploy the module your application must provide the deployment id. Your application can assign its own deployment id or obtain the module name
+				from the <literal>Module</literal> and use that as the deployment id.
 			</para>
 			
 			<para>

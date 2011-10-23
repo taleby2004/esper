@@ -91,6 +91,14 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
         return EPLModuleUtil.readResource(resource);
     }
 
+    public synchronized DeploymentResult deploy(Module module, DeploymentOptions options, String assignedDeploymentId) throws DeploymentActionException
+    {
+        if (deploymentStateService.getDeployment(assignedDeploymentId) != null) {
+            throw new IllegalArgumentException("Assigned deployment id '" + assignedDeploymentId + "' is already in use");
+        }
+        return deployInternal(module, options, assignedDeploymentId, Calendar.getInstance());
+    }
+
     public synchronized DeploymentResult deploy(Module module, DeploymentOptions options) throws DeploymentActionException
     {
         String deploymentId = deploymentStateService.nextDeploymentId();
@@ -526,12 +534,25 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
         return deployQuick(module, moduleURI, moduleArchive, userObject);
     }
 
+    public synchronized void add(Module module, String assignedDeploymentId)
+    {
+        if (deploymentStateService.getDeployment(assignedDeploymentId) != null) {
+            throw new IllegalArgumentException("Assigned deployment id '" + assignedDeploymentId + "' is already in use");
+        }
+        addInternal(module, assignedDeploymentId);
+    }
+
     public synchronized String add(Module module)
     {
         String deploymentId = deploymentStateService.nextDeploymentId();
+        addInternal(module, deploymentId);
+        return deploymentId;
+    }
+
+    private void addInternal(Module module, String deploymentId) {
+
         DeploymentInformation desc = new DeploymentInformation(deploymentId, module, Calendar.getInstance(), Calendar.getInstance(), new DeploymentInformationItem[0], DeploymentState.UNDEPLOYED);
         deploymentStateService.addUpdateDeployment(desc);
-        return deploymentId;
     }
 
     public synchronized DeploymentResult deploy(String deploymentId, DeploymentOptions options) throws DeploymentNotFoundException, DeploymentStateException, DeploymentOrderException, DeploymentActionException

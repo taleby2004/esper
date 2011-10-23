@@ -11,8 +11,8 @@
 
 package com.espertech.esper.client.deploy;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
@@ -84,7 +84,7 @@ public interface EPDeploymentAdmin
     public DeploymentOrder getDeploymentOrder(Collection<Module> modules, DeploymentOrderOptions options) throws DeploymentException;
 
     /**
-     * Deploy a single module returning a deployment id to use when undeploying statements as well as
+     * Deploy a single module returning a generated deployment id to use when undeploying statements as well as
      * additional statement-level information.
      * <p>
      * Pass in @{link DeploymentOptions} to customize the behavior. When passing no options or passing default options,
@@ -95,10 +95,27 @@ public interface EPDeploymentAdmin
      * on success.
      * @param module to deploy
      * @param options operation options or null for default options
-     * @return deployment id in a result object with statement detail, or null for pass on validate-only
+     * @return result object with statement detail, or null for pass on validate-only
      * @throws DeploymentActionException when the deployment fails, contains a list of deployment failures
      */
     public DeploymentResult deploy(Module module, DeploymentOptions options) throws DeploymentException;
+
+    /**
+     * Deploy a single module using the deployment id provided as a parameter.
+     * <p>
+     * Pass in @{link DeploymentOptions} to customize the behavior. When passing no options or passing default options,
+     * the operation first compiles all EPL statements before starting each statement, fails-fast on the first statement that fails to start
+     * and rolls back (destroys) any started statement on a failure.
+     * <p>
+     * When setting validate-only in the deployment options, the method returns a null-value
+     * on success.
+     * @param module to deploy
+     * @param options operation options or null for default options
+     * @param assignedDeploymentId the deployment id to assign
+     * @return result object with statement detail, or null for pass on validate-only
+     * @throws DeploymentActionException when the deployment fails, contains a list of deployment failures
+     */
+    public DeploymentResult deploy(Module module, DeploymentOptions options, String assignedDeploymentId) throws DeploymentActionException;
 
     /**
      * Undeploy a single module, if its in deployed state, and removes it from the known modules.
@@ -207,11 +224,18 @@ public interface EPDeploymentAdmin
         throws IOException, ParseException, DeploymentException;
 
     /**
-     * Adds a module in undeployed state, returning the deployment id of the module.
+     * Adds a module in undeployed state, generating a deployment id and returning the generated deployment id of the module.
      * @param module to add
      * @return The deployment id assigned to the module
      */
     public String add(Module module);
+
+    /**
+     * Adds a module in undeployed state, using the provided deployment id as a unique identifier for the module.
+     * @param module to add
+     * @param assignedDeploymentId deployment id to assign
+     */
+    public void add(Module module, String assignedDeploymentId);
 
     /**
      * Remove a module that is currently in undeployed state.

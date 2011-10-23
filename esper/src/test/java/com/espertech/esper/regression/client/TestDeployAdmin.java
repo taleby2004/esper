@@ -39,6 +39,43 @@ public class TestDeployAdmin extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    public void testExplicitDeploymentId() throws Exception {
+        // try module-add
+        Module module = deploymentAdmin.parse("select * from java.lang.Object");
+        deploymentAdmin.add(module, "ABC01");
+        assertEquals(DeploymentState.UNDEPLOYED, deploymentAdmin.getDeployment("ABC01").getState());
+        assertEquals(1, deploymentAdmin.getDeployments().length);
+
+        deploymentAdmin.deploy("ABC01", null);
+        assertEquals(DeploymentState.DEPLOYED, deploymentAdmin.getDeployment("ABC01").getState());
+
+        try {
+            deploymentAdmin.add(module, "ABC01");
+            fail();
+        }
+        catch (IllegalArgumentException ex) {
+            assertEquals("Assigned deployment id 'ABC01' is already in use", ex.getMessage());
+        }
+        deploymentAdmin.undeployRemove("ABC01");
+        assertEquals(0, deploymentAdmin.getDeployments().length);
+
+        // try module-deploy
+        Module moduleTwo = deploymentAdmin.parse("select * from java.lang.Object");
+        deploymentAdmin.deploy(moduleTwo, null, "ABC02");
+        assertEquals(DeploymentState.DEPLOYED, deploymentAdmin.getDeployment("ABC02").getState());
+        assertEquals(1, deploymentAdmin.getDeployments().length);
+
+        try {
+            deploymentAdmin.add(module, "ABC02");
+            fail();
+        }
+        catch (IllegalArgumentException ex) {
+            assertEquals("Assigned deployment id 'ABC02' is already in use", ex.getMessage());
+        }
+        deploymentAdmin.undeployRemove("ABC02");
+        assertEquals(0, deploymentAdmin.getDeployments().length);
+    }
+
     public void testTransition() throws Exception {
 
         // add module
