@@ -17,13 +17,14 @@ import com.espertech.esper.pattern.EvalFactoryNode;
 
 public class ContextDetailInitiatedTerminated implements ContextDetail {
 
+    private static final long serialVersionUID = -57813075143127850L;
     private final EvalFactoryNode initiatedPattern;
     private final FilterSpecRaw initiatedFilter;
     private final String initiatedFilterAsName;
     private final ExprTimePeriod terminatedTimePeriod;
 
-    private PatternStreamSpecCompiled initiatedPatternCompiled;
-    private FilterSpecCompiled initiatedFilterCompiled;
+    private transient PatternStreamSpecCompiled initiatedPatternCompiled;
+    private transient FilterSpecCompiled initiatedFilterCompiled;
 
     public ContextDetailInitiatedTerminated(EvalFactoryNode initiatedPattern, FilterSpecRaw initiatedFilter, String initiatedFilterAsName, ExprTimePeriod terminatedTimePeriod) {
         this.initiatedPattern = initiatedPattern;

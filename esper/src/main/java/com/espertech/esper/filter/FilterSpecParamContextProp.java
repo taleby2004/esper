@@ -18,6 +18,7 @@ import com.espertech.esper.util.SimpleNumberCoercer;
  */
 public final class FilterSpecParamContextProp extends FilterSpecParam
 {
+    private static final long serialVersionUID = -1651262234386299344L;
     private final EventPropertyGetter getter;
     private transient final SimpleNumberCoercer numberCoercer;
 

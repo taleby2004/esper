@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalObserverFactoryNode extends EvalNodeFactoryBase
 {
+    private static final long serialVersionUID = 7130273585111632791L;
     private final PatternObserverSpec patternObserverSpec;
     private transient ObserverFactory observerFactory;
 

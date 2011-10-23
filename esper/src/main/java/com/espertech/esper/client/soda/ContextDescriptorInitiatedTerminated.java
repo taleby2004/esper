@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class ContextDescriptorInitiatedTerminated implements ContextDescriptor {
 
+    private static final long serialVersionUID = 8998560999403352926L;
     private Filter initiatedFilter;
     private String initiatedFilterAsName;
     private PatternExpr initiatedPattern;

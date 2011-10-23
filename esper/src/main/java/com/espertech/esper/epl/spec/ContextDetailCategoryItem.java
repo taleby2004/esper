@@ -20,6 +20,7 @@ import java.util.ArrayDeque;
 
 public class ContextDetailCategoryItem implements Serializable {
 
+    private static final long serialVersionUID = -2022340210686656104L;
     private final ExprNode expression;
     private final String name;
     private ArrayDeque<FilterValueSetParam> compiledFilterParam;

@@ -16,6 +16,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalEveryFactoryNode extends EvalNodeFactoryBase
 {
+    private static final long serialVersionUID = 2307264285954941167L;
+
     /**
      * Ctor.
      */

@@ -18,6 +18,7 @@ import java.util.List;
  */
 public class EvalFollowedByFactoryNode extends EvalNodeFactoryBase
 {
+    private static final long serialVersionUID = 6255755581326049894L;
     private List<ExprNode> optionalMaxExpressions;
     private boolean hasEngineWidePatternCount;
 

@@ -17,6 +17,7 @@ import java.util.List;
 
 public class ContextDetailTemporalFixed implements ContextDetail {
 
+    private static final long serialVersionUID = -8082004791526916308L;
     private List<ExprNode> crontabStart;
     private List<ExprNode> crontabEnd;
 

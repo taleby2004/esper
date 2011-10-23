@@ -17,6 +17,7 @@ import java.util.List;
 
 public class ContextDetailPartitioned implements ContextDetail {
 
+    private static final long serialVersionUID = -7754347180148095977L;
     private final List<ContextDetailPartitionItem> items;
 
     public ContextDetailPartitioned(List<ContextDetailPartitionItem> items) {

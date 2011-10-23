@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class ContextDescriptorTemporalCrontabSingle implements ContextDescriptor {
 
+    private static final long serialVersionUID = 8185386941253467559L;
     private List<Expression> crontabStartExpressions;
     private List<Expression> crontabEndExpressions;
 

@@ -18,6 +18,7 @@ import java.io.StringWriter;
  */
 public class ContextDescriptorCategoryItem implements ContextDescriptor {
 
+    private static final long serialVersionUID = -6914400028529675775L;
     private Expression expression;
     private String label;
 

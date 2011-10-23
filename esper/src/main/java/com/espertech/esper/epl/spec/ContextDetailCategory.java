@@ -19,11 +19,12 @@ import java.util.List;
 
 public class ContextDetailCategory implements ContextDetail {
 
+    private static final long serialVersionUID = 8141827106254268831L;
     private final List<ContextDetailCategoryItem> items;
     private final FilterSpecRaw filterSpecRaw;
 
-    private FilterSpecCompiled filterSpecCompiled;
-    private ArrayDeque<FilterValueSetParam> filterParamsCompiled;
+    private transient FilterSpecCompiled filterSpecCompiled;
+    private transient ArrayDeque<FilterValueSetParam> filterParamsCompiled;
 
     public ContextDetailCategory(List<ContextDetailCategoryItem> items, FilterSpecRaw filterSpecRaw) {
         this.items = items;

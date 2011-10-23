@@ -20,6 +20,7 @@ import java.util.Map;
  */
 public class ExprContextPropertyNode extends ExprNodeBase implements ExprEvaluator
 {
+    private static final long serialVersionUID = 2816977190089087618L;
     private final String propertyName;
     private Class returnType;
     private EventPropertyGetter getter;

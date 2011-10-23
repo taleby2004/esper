@@ -20,11 +20,12 @@ import java.util.List;
 
 public class ContextDetailPartitionItem implements Serializable {
 
+    private static final long serialVersionUID = -4009763999241702138L;
     private final FilterSpecRaw filterSpecRaw;
     private final List<String> propertyNames;
 
-    private FilterSpecCompiled filterSpecCompiled;
-    private ArrayDeque<FilterValueSetParam> parametersCompiled;
+    private transient FilterSpecCompiled filterSpecCompiled;
+    private transient ArrayDeque<FilterValueSetParam> parametersCompiled;
 
     public ContextDetailPartitionItem(FilterSpecRaw filterSpecRaw, List<String> propertyNames) {
         this.filterSpecRaw = filterSpecRaw;

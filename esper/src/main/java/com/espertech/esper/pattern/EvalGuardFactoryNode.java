@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalGuardFactoryNode extends EvalNodeFactoryBase
 {
+    private static final long serialVersionUID = -6426206281275755119L;
     private PatternGuardSpec patternGuardSpec;
     private transient GuardFactory guardFactory;
 

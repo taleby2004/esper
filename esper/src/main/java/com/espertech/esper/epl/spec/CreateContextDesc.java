@@ -18,6 +18,7 @@ import java.util.List;
 
 public class CreateContextDesc implements Serializable {
 
+    private static final long serialVersionUID = -5318225626899036861L;
     private final String contextName;
     private final ContextDetail contextDetail;
 

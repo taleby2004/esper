@@ -1003,6 +1003,7 @@ public class ConfigurationEngineDefaults implements Serializable
      */
     public static class Patterns implements Serializable
     {
+        private static final long serialVersionUID = -7596853289989573800L;
         private Long maxSubexpressions;
         private boolean maxSubexpressionPreventStart = true;
 

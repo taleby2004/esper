@@ -20,6 +20,7 @@ import java.util.List;
  */
 public class ContextDescriptorCategory implements ContextDescriptor {
 
+    private static final long serialVersionUID = 4054195679515606559L;
     private List<ContextDescriptorCategoryItem> items;
     private Filter filter;
 

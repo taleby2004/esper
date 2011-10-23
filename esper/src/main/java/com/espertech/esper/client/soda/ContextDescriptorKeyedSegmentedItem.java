@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class ContextDescriptorKeyedSegmentedItem implements ContextDescriptor {
 
+    private static final long serialVersionUID = -5135918405149193009L;
     private List<String> propertyNames;
     private Filter filter;
 

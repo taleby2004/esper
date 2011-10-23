@@ -15,6 +15,7 @@ import java.io.Serializable;
 
 public class ContextState implements Serializable {
 
+    private static final long serialVersionUID = 5990634397144550807L;
     private final int agentInstanceId;
     private final Object additionalInfo;
 

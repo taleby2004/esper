@@ -16,6 +16,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalOrFactoryNode extends EvalNodeFactoryBase
 {
+    private static final long serialVersionUID = -771361274781500482L;
+
     protected EvalOrFactoryNode() {
     }
 

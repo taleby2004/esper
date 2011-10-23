@@ -19,6 +19,7 @@ import java.util.Set;
  */
 public class EvalMatchUntilFactoryNode extends EvalNodeFactoryBase
 {
+    private static final long serialVersionUID = 5697835058233579562L;
     private ExprNode lowerBounds;
     private ExprNode upperBounds;
     private transient MatchedEventConvertor convertor;
