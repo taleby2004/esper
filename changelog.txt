@@ -4,7 +4,7 @@ Esper Changelog
 Changes in version 4.4.0
 ------------------------
 Major API or EPL changes
-  - Support for context declaration: Temporal context for interval-based context partitions; Keyed and category segmented contexts; Initiated contexts
+  - Support for context declarations: Temporal context for interval-based context partitions; Keyed and category segmented contexts; Initiated contexts
   - Support for fine-grained locking per context partition for high concurrency
   - Support for a new 'between' date-time method
   - Support for a new @NoLock annotation that disables context-partition-level locking
@@ -16,24 +16,25 @@ Major API or EPL changes
   - Reduced overhead for named windows based on POJOs
 
 Minor changes
-  - Fixed issue ESPER-599 Aggregation functions 'first' and 'last' with index are represented incorrectly when converted back to EPL
-  - Fixed issue ESPER-609 Distinct causing null pointer exception on time batch query
+  - Fixed issue ESPER-587 groupwin EPStatementException text
   - Fixed issue ESPER-590 Allow configuration of fair locking for administrative functions excluding event processing
-  - Fixed issue ESPER-608 Prepared statement referring to variable that is a class (nested property syntax) not working
-  - Fixed issue ESPER-604 epl_clauses.xml documentation patch
-  - Fixed issue ESPER-601 Deadlock when an UnmatchedListener creates a new statement
   - Fixed issue ESPER-591 Exception "Attempting to remove key from map that wasn't added" in RefCountedSet.
   - Fixed issue ESPER-592 Statements are not able to get GCed when using Force Update
   - Fixed issue ESPER-594 Exception starting statement with @Audit and groupwin
   - Fixed issue ESPER-595 Two statements with identical stream and "prev" function not delivering expected events
-  - Fixed issue ESPER-603 NPE in match-recognize when reg-ex pattern event is optional and doesn't have a definition
-  - Fixed issue ESPER-606 Memory leak if creating a large numbers of different event types and using "remove" operation in runtime configuration operations
+  - Fixed issue ESPER-597 example code error in documentation
+  - Fixed issue ESPER-599 Aggregation functions 'first' and 'last' with index are represented incorrectly when converted back to EPL
   - Fixed issue ESPER-600 Memory leak with "group by", "order by" and a lot of different group by keys
+  - Fixed issue ESPER-601 Deadlock when an UnmatchedListener creates a new statement
   - Fixed issue ESPER-602 Reduce memory use when large number of threads send events - ThreadLocal use
+  - Fixed issue ESPER-603 NPE in match-recognize when reg-ex pattern event is optional and doesn't have a definition
+  - Fixed issue ESPER-604 epl_clauses.xml documentation patch
+  - Fixed issue ESPER-606 Memory leak if creating a large numbers of different event types and using "remove" operation in runtime configuration operations
+  - Fixed issue ESPER-608 Prepared statement referring to variable that is a class (nested property syntax) not working
+  - Fixed issue ESPER-609 Distinct causing null pointer exception on time batch query
   - Fixed issue ESPER-610 IllegalStateException for prepared statement with "select * from pattern[[?] Event]"
   - Fixed issue ESPER-611 ExprValidationException when create from statement object model with SQL join using variable
-  - Fixed issue ESPER-587 groupwin EPStatementException text
-  - Fixed issue ESPER-597 example code error in documentation
+  - Fixed issue ESPER-612 support for providing a deployment id to the deployment admin rather then using a system-generated deployment id
 
 
 Changes in version 4.3.0

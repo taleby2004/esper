@@ -37,8 +37,4 @@ public class ViewableActivatorNamedWindow implements ViewableActivator {
         NamedWindowConsumerView consumerView = processor.addConsumer(consumerDesc);
         return new ViewableActivationResult(consumerView, consumerView, null);
     }
-
-    public void deactivate(AgentInstanceContext agentInstanceContext) {
-        System.out.println("deactivate");
-    }
 }
