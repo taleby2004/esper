@@ -610,6 +610,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 return;
             }
 
+            // fire the statement stop
+            desc.getStatementContext().getStatementStopService().fireStatementStopped();
+
+            // invoke start-provided stop method
             stopMethod.stop();
             statement.setParentView(null);
             desc.setStopMethod(null);
@@ -656,6 +660,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             EPStatementSPI statement = desc.getEpStatement();
             if (statement.getState() == EPStatementState.STARTED)
             {
+                // fire the statement stop
+                desc.getStatementContext().getStatementStopService().fireStatementStopped();
+
+                // invoke start-provided stop method
                 EPStatementStopMethod stopMethod = desc.getStopMethod();
                 statement.setParentView(null);
                 stopMethod.stop();

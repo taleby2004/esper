@@ -1,7 +1,7 @@
 Esper Changelog
 ===================
 
-Changes in version 4.4.0
+Changes in version 4.4.1
 ------------------------
 Major API or EPL changes
   - Support for context declarations: Temporal context for interval-based context partitions; Keyed and category segmented contexts; Initiated contexts

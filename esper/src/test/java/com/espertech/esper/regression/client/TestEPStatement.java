@@ -11,6 +11,9 @@
 
 package com.espertech.esper.regression.client;
 
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.util.StopCallback;
+import com.espertech.esper.view.StatementStopCallback;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
@@ -184,6 +187,19 @@ public class TestEPStatement extends TestCase
         assertFalse(listener.isInvoked());
 
         assertStmtDestroyed(stmt, text);
+
+        // test fire-stop service
+        EPStatementSPI spiOne = (EPStatementSPI) epService.getEPAdministrator().createEPL("select * from java.lang.Object");
+        StopCallbackImpl callbackOne = new StopCallbackImpl();
+        spiOne.getStatementContext().getStatementStopService().addSubscriber(callbackOne);
+        spiOne.destroy();
+        assertTrue(callbackOne.isStopped());
+
+        EPStatementSPI spiTwo = (EPStatementSPI) epService.getEPAdministrator().createEPL("select * from java.lang.Object");
+        StopCallbackImpl callbackTwo = new StopCallbackImpl();
+        spiTwo.getStatementContext().getStatementStopService().addSubscriber(callbackTwo);
+        spiTwo.stop();
+        assertTrue(callbackTwo.isStopped());
     }
 
     private void assertStmtDestroyed(EPStatement stmt, String text)
@@ -239,5 +255,21 @@ public class TestEPStatement extends TestCase
         CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
         runtime.sendEvent(event);
-    }    
+    }
+
+    private class StopCallbackImpl implements StatementStopCallback {
+        private boolean stopped = false;
+
+        public void statementStopped() {
+            stopped = true;
+        }
+
+        public boolean isStopped() {
+            return stopped;
+        }
+
+        public void setStopped(boolean stopped) {
+            this.stopped = stopped;
+        }
+    }
 }
