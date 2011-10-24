@@ -16,6 +16,7 @@ Major API or EPL changes
   - Reduced overhead for named windows based on POJOs
 
 Minor changes
+  - Few minor changes to extension APIs to support context partitions.
   - Fixed issue ESPER-587 groupwin EPStatementException text
   - Fixed issue ESPER-590 Allow configuration of fair locking for administrative functions excluding event processing
   - Fixed issue ESPER-591 Exception "Attempting to remove key from map that wasn't added" in RefCountedSet.

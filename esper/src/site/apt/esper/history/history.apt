@@ -12,6 +12,43 @@ Change History
 	[]
 
 
+Version 4.4.0
+
+	Released October 24, 2011
+	
+	Built and tested with JDK 6.0 Update 26
+
+* API changes
+
+  * None.
+    
+* Major changes
+
+  * Support for context declarations: Temporal context for interval-based context partitions; Keyed and category segmented contexts; Initiated contexts
+  
+  * Support for fine-grained locking per context partition for high concurrency
+  
+  * Support for a new 'between' date-time method
+  
+  * Support for a new @NoLock annotation that disables context-partition-level locking
+  
+  * Support for configuring an engine-wide maximum limit of number of sub-expressions for followed-by and for monitoring the number of sub-expressions
+  
+  * Support for the "create schema" syntax to copy type information from one or more types
+  
+  * Support for wildcard (*) parameter to derived-value views (stat:uni etc.) to indicate all properties of input type are available in output
+  
+  * Support for subscribers with a no-parameter "update" method 
+  
+  * Support for configuring the behavior of the value cache for plug-in single-row functions
+  
+  * Reduced overhead for named windows based on POJOs
+  
+  * Many bug fixes and improvements to documentation, code and performance; Please see history or changelog.txt for additional information.
+
+  []
+
+
 Version 4.3.0
 
 	Released July 18, 2011

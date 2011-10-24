@@ -45,6 +45,8 @@ Esper Enterprise Edition Feature Summary
 	
 	* Hot deployment of EPL modules and event-driven applications
 	
+	* Integration with distributed caches: Oracle Coherence, VMware GemFire, GigaSpaces XAP, Hazelcast, Infinispan, Terracotta, IBM WebSphere eXtreme Scale
+	
 	* {{{http://www.espertech.com/products/esperee.php}Info and Download}} and {{{http://www.espertech.com/resources/sd_esperhqscreenshots.html}Screenshots}}
 
 	[]
@@ -92,6 +94,8 @@ Core Esper Features
 		[]
 		
 	* Enumeration methods, date-time methods, Allan's interval algebra, lambda-expressions, expression definition and reuse, 'new' operator for returning multiple results from an expression
+	
+	* Declarative context dimensions
 	
 	[]
 		

@@ -1,5 +1,32 @@
 News
 
+* October 24, 2011  -  Esper 4.4.0 - Update release
+
+  * Support for context declarations: Temporal context for interval-based context partitions; Keyed and category segmented contexts; Initiated contexts
+  
+  * Support for fine-grained locking per context partition for high concurrency
+  
+  * Support for a new 'between' date-time method
+  
+  * Support for a new @NoLock annotation that disables context-partition-level locking
+  
+  * Support for configuring an engine-wide maximum limit of number of sub-expressions for followed-by and for monitoring the number of sub-expressions
+  
+  * Support for the "create schema" syntax to copy type information from one or more types
+  
+  * Support for wildcard (*) parameter to derived-value views (stat:uni etc.) to indicate all properties of input type are available in output
+  
+  * Support for subscribers with a no-parameter "update" method 
+  
+  * Support for configuring the behavior of the value cache for plug-in single-row functions
+  
+  * Reduced overhead for named windows based on POJOs
+  
+  * Many other bug fixes, improvements to code, performance-related changes; Please see history or changelog.txt for additional information.
+
+  []
+
+
 * July 19, 2011  -  Esper 4.3.0 - Update release
 
   * We have made a change to NULL-value comparison, to closely follow SQL standards, as follows: In version 4.3, the expression "property = NULL" always returns null, use "property is NULL" instead. Version 4.2 and earlier returned true/false.
