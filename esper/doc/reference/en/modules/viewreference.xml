@@ -360,6 +360,10 @@ win:time(MYINTERVAL)  // MYINTERVAL defined as a variable</programlisting>
 				</para>
 
 				<para>
+					Note that using this view means that the engine keeps events in the memory until the time is up: Consider your event arrival rate and determine if this is the behavior you want. Use <literal>output snapshot</literal> as described in output rate limiting as an alternative.
+				</para>	
+
+				<para>
 					The below example batches events into a 5 second window releasing new batches every 5 seconds. Listeners to updates
 					posted by this view receive updated information only every 5 seconds.
 				</para>	
