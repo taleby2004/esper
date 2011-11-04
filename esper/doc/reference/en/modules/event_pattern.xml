@@ -323,10 +323,6 @@ timer:interval(5 min) and not MyEvent]]></programlisting></entry>
 		</para>
 		
 		<para>
-			Note that we are also providing the EPL grammar as a HTML file as part of the documentation set on the project website.
-		</para>
-
-		<para>
 			The following table outlines sample equivalent expressions, with and without the use of parenthesis for subexpressions.
 		</para>
 
