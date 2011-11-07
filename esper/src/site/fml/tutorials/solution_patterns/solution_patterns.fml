@@ -769,12 +769,13 @@ select a.qty - b.qty from MyStream</pre></div>
 <div class="source"><pre>select * from pattern [
   every down=MyEvent(text='down') ->
   (
-    (timer:interval(1 min) and not up=MyEvent(text='Up', equipmentId=a.equipmentId))
+    (timer:interval(1 min) and not up=MyEvent(text='Up', equipmentId=down.equipmentId))
       or
-    ( (timer:interval(30 sec) and not MyEvent(text='Up', equipmentId=a.equipmentId))
+    ( (timer:interval(30 sec) and not MyEvent(text='Up', equipmentId=down.equipmentId))
         -> 
-      up=MyEvent(text='Up', equipmentId=a.equipmentId) where timer:within(30 seconds)
-    )]
+      up=MyEvent(text='Up', equipmentId=down.equipmentId) where timer:within(30 seconds)
+    )
+  )]
 </pre></div>    
       </answer>
     </faq>    
