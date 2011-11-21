@@ -27,7 +27,7 @@ Getting Help
 	
 	* A snippet of Java code or a unit test to reproduce the issue or question.
 	  Keep this code very simple and minimal without any additional classes, in the style of our regression test suite.
-	  Remove all random-ness from this test class.
+	  Remove all random-ness from this test class. We have an example of a test case below.
 	  	
 	
 * Please consider obtaining support from EsperTech.
@@ -35,3 +35,71 @@ Getting Help
 	When we get questions on the mailing lists that ask for a complete solution, we can often only provide short summarized answers as
 	we don't usually have the time to look into each inquiry in the detail required. EsperTech support will spend the time
 	needed to get you to a desired solution.
+	
+	
+* Sample code snippet for providing a test
+
+	* Simple event class "Event" with a single field is part of the test class.
+	
+	* Time controlled via external timer events and not Thread.sleep
+	
+	* Exception handling not cluttering the test code
+	
+
+----------------------------------------
+public class TestExample extends TestCase {
+
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+
+    public void testExample() throws Exception {
+        Configuration config = new Configuration();
+        config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        config.addEventType(Event.class);
+        EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider(config);
+
+        // set the current time
+        engine.getEPRuntime().sendEvent(new CurrentTimeEvent(parse("2001-05-1T08:20:00.000")));
+
+        // put your EPL statements here
+        String epl = "create variable boolean IsOutputTriggered_1 = false;" +
+                "\n" +
+                "select * from EventsWindow output snapshot when count_insert > 1;";
+        engine.getEPAdministrator().getDeploymentAdmin().parseDeploy(epl);
+
+        engine.getEPAdministrator().getStatement("out").addListener(new PrintUpdateListener());
+
+        // send sample events
+        System.out.println("Sending P1");
+        engine.getEPRuntime().sendEvent(new Event("P1"));
+
+        // advance time
+        engine.getEPRuntime().sendEvent(new CurrentTimeEvent(parse("2001-05-1T08:20:01.000")));
+
+        // send sample events
+        System.out.println("Sending P2");
+        engine.getEPRuntime().sendEvent(new Event("P2"));
+    }
+
+    public static long parse(String datestr) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+            return sdf.parse(datestr).getTime();
+
+        }
+        catch (Exception ex) {
+            throw new RuntimeException("Error parsing date '" + datestr + "' as format '" + DATE_FORMAT + "' : " + ex.getMessage(), ex);
+        }
+    }
+
+    public static class Event {
+        private String productId;
+
+        public Event(String productId) {
+            this.productId = productId;
+        }
+
+        public String getProductId() {
+            return productId;
+        }
+    }
+----------------------------------------
