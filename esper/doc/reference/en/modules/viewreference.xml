@@ -769,6 +769,13 @@ following conditions occurs, whichever occurs first: the data window has collect
 				</para>
 
 				<para>
+					A grouped data window with a length window of 1 is equivalent to the unique data window <literal>std:unique</literal>. The <literal>std:unique</literal> data window is the preferred notation:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent.std:unique(symbol)	// Prefer this
+// ... equivalent to ...
+select * from StockTickEvent.std:groupwin(symbol).win:length(1)]]></programlisting>
+
+				<para>
 					This example computes the total price for the last 5 events considering the last 5 events per each symbol, aggregating the price across all symbols (since no <literal>group by</literal> clause is specified the aggregation is across all symbols):
 				</para>
 	
