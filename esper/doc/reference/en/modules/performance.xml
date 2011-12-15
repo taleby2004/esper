@@ -549,6 +549,37 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 
 		</sect2>
 
+		<sect2 id="perf-tips-13b2">
+			<title>Pattern Sub-Expression Instance Versus Data Window Use</title>
+
+			<para>
+			  For some use cases you can either specify one or more data windows as the solution, or you can specify a pattern that also solves your use case.
+			</para>
+			
+			<para>
+			  For patterns, you should understand that the engine employs a dynamic state machine. For data windows, the engine employs a delta network and collections. Generally you may find patterns that require a large number of sub-expression instances to consume more memory and more CPU then data windows.
+			</para>
+			
+			<para>
+			  For example, consider the following EPL statement that filters out duplicate transaction ids that occur within 20 seconds of each other:
+			</para>
+			<programlisting><![CDATA[select * from TxnEvent.std:firstunique(transactionId).win:time(20 sec)]]></programlisting>
+			
+			<para>
+			  You could also address this solution using a pattern:
+			</para>
+			<programlisting><![CDATA[select * from pattern [every-distinct(a.transactionId) a=TxnEvent where timer:within(20 sec)]]]></programlisting>
+
+			<para>
+			  If you have a fairly large number of different transaction ids to track, you may find the pattern to perform less well then the data window solution as the pattern asks the engine to manage a pattern sub-expression per transaction id. The data window solution
+			  asks the engine to manage expiry, which can give better performance in many cases.
+			</para>
+
+			<para>
+			  Similar to this, it is generally preferable to use EPL join syntax over a pattern that cardinally detects relationships i.e. <literal>pattern [every-distinct(...) ... -> every-distinct(...) ...]</literal>. Join query planning is a powerful Esper feature that implements fast relational joins.
+			</para>
+		</sect2>
+
 		<sect2 id="perf-tips-13c">
 			<title>The Keep-All Data Window</title>
 
