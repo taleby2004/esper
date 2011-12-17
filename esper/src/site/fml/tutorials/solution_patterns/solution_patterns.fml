@@ -167,6 +167,10 @@ where sensor.sensorId = loc.sensorId</pre></div>
           Consider adding expressions to the select-clause so that you can inspect what the expression result is.
         </p>
         <p>
+          If you have listeners that send events into the engine upon receipt of events from the engine, those listeners must use the "route"
+          method to send events.
+        </p>
+        <p>
           Turn on logging as described in the documentation to see warning message that the engine may log, or exceptions raised by the engine or your code, or to trace event processing. 
           Ensure to turn off logging when deploying to production.
         </p>
