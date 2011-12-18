@@ -363,11 +363,6 @@ timer:interval(5 min) and not MyEvent]]></programlisting></entry>
 						<entry>The <literal>and</literal> operator has higher precedence then the <literal>or</literal> operator.</entry>
 					</row>
 					<row>
-						<entry>every A where timer:within(5)</entry>
-						<entry>every (A where timer:within(5))</entry>
-						<entry>The <literal>every</literal> operator has higher precedence then the <literal>timer:within</literal> guard postfix.</entry>
-					</row>
-					<row>
 						<entry>A -> B until C -> D</entry>
 						<entry>A -> (B until C) -> D</entry>
 						<entry>The <literal>until</literal> operator has higher precedence then the <literal>followed-by</literal> operator.</entry>
