@@ -285,7 +285,7 @@ where sensor.sensorId = loc.sensorId</pre></div>
   <part id="epl">
   	<title>EPL Questions</title>
   	
-    <faq id="throughput-1">
+    <faq id="aggregate-0">
       <question>How do I measure the rate of arrival of events in a given time period? Per category?</question>
       <answer>
         <p>
@@ -322,7 +322,7 @@ where sensor.sensorId = loc.sensorId</pre></div>
       </answer>
     </faq>    
     
-    <faq id="Event Aggregation-2">
+    <faq id="aggregate-1">
       <question>How to I compute a percentage or ratio?</question>
       <answer>
         <p>
@@ -342,25 +342,44 @@ where sensor.sensorId = loc.sensorId</pre></div>
       </answer>
     </faq>   
 
-    <faq id="correlate">
-      <question>How do I correlate events arriving in 2 or more streams?</question>
+    <faq id="aggregate-2">
+      <question>I want to get average, count, min and max for a 60-second time window?</question>
       <answer>
         <p>
-          The join of event streams looks very similar to joins in SQL. To bind data in the streams together, across streams, 
-          we identify keys to join on. 
+          There are a few solutions to consider, mostly depending on how often you want to compute aggregations (continuously or once on output) and output a result (continuously or once after 60 sec).
         </p>
+
         <p>
-          The below example specifies the 'accountNumber' field as the only join key. In this example we hold the last
-          30 seconds of events for each stream.
+          Lets assume we want to output only once after 60 seconds, start fresh every 60 seconds, compute aggregations continuously and don't retain any events for those 60 seconds (only retain aggregated values in memory).
+          This is the two statements that accomplish this:
         </p>
-	<div class="source"><pre>select fraud.accountNumber as accntNum, withdraw.amount as amount         
-from FraudWarningEvent.win:time(30 sec) as fraud,
-     WithdrawalEvent.win:time(30 sec) as withdraw
-where fraud.accountNumber = withdraw.accountNumber</pre></div>      
+	<div class="source"><pre>create context CtxEachMinute initiated by pattern [every timer:interval(1 min)] terminated after 1 minute</pre></div>      
+	<div class="source"><pre>context CtxEachMinute select avg(value) as avgValue, count(value) as countValue, 
+min(value) as minValue, max(value) as maxValue from MyEvent
+output snapshot when terminated</pre></div>      
+	
+        <p>
+          Another possible solution is to use a batch window like the following EPL shows. This EPL asks the engine to keep 60 seconds of
+          events in memory, perform the aggregation computation once (not continuously) for all events at the end of 60 seconds, and then output the result.
+        </p>
+	<div class="source"><pre>select avg(value) as avgValue, count(value) as countValue, 
+min(value) as minValue, max(value) as maxValue from MyEvent.win:time_batch(60 sec)</pre></div>
+
+        <p>
+          A third possible solution uses a rolling time window as shown below. The engine always retains 60 seconds of events and outputs every time the aggregations change either when
+          new events arrive or when events leave the time window. This output is continuous and aggregation computation is continuous as well.
+        </p>
+	<div class="source"><pre>select avg(value) as avgValue, count(value) as countValue, 
+min(value) as minValue, max(value) as maxValue from MyEvent.win:time(60 sec)</pre></div>      
+
+        <p>
+          The first solution (the one with CtxEachMinute) may be preferable for many cases, however solutions two and three can have an advantage depending on
+          what output you are looking for and when you want to compute aggregated values. 
+        </p>
       </answer>
     </faq>    
 
-    <faq id="correlate-1">
+    <faq id="aggregate-3">
       <question>I want to compute and compare the maximum of all events since start and the maximum for the last 10 seconds?</question>
       <answer>
         <p>
@@ -386,7 +405,25 @@ where fraud.accountNumber = withdraw.accountNumber</pre></div>
       </answer>
     </faq>    
 
-    <faq id="correlate-2">
+    <faq id="correlate-0">
+      <question>How do I correlate events arriving in 2 or more streams?</question>
+      <answer>
+        <p>
+          The join of event streams looks very similar to joins in SQL. To bind data in the streams together, across streams, 
+          we identify keys to join on. 
+        </p>
+        <p>
+          The below example specifies the 'accountNumber' field as the only join key. In this example we hold the last
+          30 seconds of events for each stream.
+        </p>
+	<div class="source"><pre>select fraud.accountNumber as accntNum, withdraw.amount as amount         
+from FraudWarningEvent.win:time(30 sec) as fraud,
+     WithdrawalEvent.win:time(30 sec) as withdraw
+where fraud.accountNumber = withdraw.accountNumber</pre></div>      
+      </answer>
+    </faq>    
+
+    <faq id="correlate-1">
       <question>How do I correlate events arriving out-of-order?</question>
       <answer>
 		<p>
@@ -423,7 +460,7 @@ where fraud.accountNumber = withdraw.accountNumber</pre></div>
       </answer>
     </faq>    
 
-    <faq id="correlate-3">
+    <faq id="correlate-2">
       <question>How do I use patterns to correlate events arriving in-order or out-of-order?</question>
       <answer>
         <p>
@@ -458,7 +495,7 @@ where fraud.accountNumber = withdraw.accountNumber</pre></div>
       </answer>
     </faq>    
 
-    <faq id="correlate-4">
+    <faq id="correlate-3">
       <question>How to implement an On-Off window? How to detect events between other events?</question>
       <answer>
         <p>
@@ -493,7 +530,7 @@ select * from pattern [
       </answer>
     </faq>    
 
-    <faq id="correlate-5">
+    <faq id="correlate-4">
       <question>How do I look for pairs of immediately-followed events?</question>
       <answer>
       
@@ -521,7 +558,7 @@ select * from AlertEventStream
       </answer>
     </faq>    
 
-    <faq id="correlate_pattern_similar_properties">
+    <faq id="correlate-5">
       <question>How do I correlate 3 events in a time window in which events have similar properties?</question>
       <answer>
 		<p>
@@ -547,7 +584,7 @@ The pattern is to match only if all 3 events have a different user. The time win
       </answer>
     </faq>    
 
-    <faq id="window-policy-removeall">
+    <faq id="expiry-0">
       <question>How do I remove all events from a window and start over?</question>
       <answer>
         <p>
@@ -576,7 +613,7 @@ having avg(waitTime) > 60</pre></div>
       </answer>
     </faq>    
 
-    <faq id="window-expiry-multiple-or-custom">
+    <faq id="expiry-1">
       <question>How do I combine data windows and their expiry polices? Or define custom logic for removing events?</question>
       <answer>
         <p>
@@ -612,7 +649,7 @@ delete from MyWindow where threshold > CURRENT_THRESHOLD</pre></div>
       </answer>
     </faq>    
 
-    <faq id="window-seeding">
+    <faq id="expiry-2">
       <question>How do I seed an empty data window from a filled data window?</question>
       <answer>
         <p>
@@ -624,11 +661,27 @@ delete from MyWindow where threshold > CURRENT_THRESHOLD</pre></div>
       </answer>
     </faq>    
 
-    <faq id="window-per-category">
+    <faq id="expiry-3">
       <question>How do I keep a separate window of events per category and compute aggregates for each category's window?</question>
       <answer>
         <p>
           I have one or more categories and for each of these categories I need to keep a separate window of events.
+        </p>
+        <p>
+          We present two approaches here: The first approach shown here uses a partitioned context, and the second approach is based on the grouped data windows.
+        </p>
+        <p>
+          The <b>First Approach</b> uses a partitioned context.
+          The first statement declares a partitioned context wherein each context partition carries events for a different symbol value.
+          The second statement outputs the average price for the last 10 events, separately for each symbol.
+        </p>        
+<div class="source"><pre>create context PerSymbolContext partition by symbol on StockTick</pre></div>      
+<div class="source"><pre>context PerSymbolContext select symbol, avg(price) as avgPrice from StockTick.win:length(10)</pre></div>      
+        <p>
+          You could also use a category context to categorize events based on some expression, or a hash context to assign events based on consistent hash code.
+        </p>        
+        <p>
+          The <b>Second Approach</b> uses grouped data windows.
         </p>
         <p>
           In the statement below we have stock tick events for which we want to compute the average price of the last 10 
@@ -646,7 +699,7 @@ group by symbol, location</pre></div>
 
         <p>
           Let's consider another possible way of using a separate window of events per category.
-          In some use cases we may need to compute not an average per group, but an average over all groups that considers only the last N events per group.
+          In some use cases we may need to compute not an average per group, but an average over all groups that consider only the last N events per group.
           This can be accomplished by leaving the group-by clause off. Now the engine computes the average price over all symbols, considering only the last 10 events per symbol:
         </p>
 <div class="source"><pre>select symbol, location, avg(price) as avgPrice 
