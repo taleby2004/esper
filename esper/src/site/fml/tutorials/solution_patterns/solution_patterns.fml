@@ -1085,15 +1085,25 @@ from pattern[every myevent=TrackingEvent where timer:within(10 min)]
       <question>How can I remove duplicates?</question>
       <answer>
 		<p>
-			One construct EPL exposes to remove duplicates in a stream of events is the pattern "every-distinct". 
+			One construct EPL exposes to remove duplicates in a stream of events is the first-unique data window. Another is the pattern "every-distinct". 
 		</p>
 		<p>
+			The next example statement reports only the first sensor event per device:
+		</p>		
+<div class="source"><pre>select * from Sensor.std:firstunique(device)</pre></div>
+		<p>
+			The next example statement reports only the first sensor event per device and suppresses subsequent sensor events from the same device for 30 seconds:
+		</p>		
+<div class="source"><pre>// Retain only the intersection of unique-by-device and 30 seconds
+// Does not retain 30 seconds of events, only 30-seconds of events unique by device
+select * from Sensor.std:firstunique(device).win:time(30)</pre></div>
+		<p>
 			Other related constructs are the "prior" and "prev" functions, the "unique" data windows, the group-by and output-rate-limiting clauses
-			as well as the "distinct" keyword within the select clause. We only discuss the pattern "every-distinct" here,
+			as well as the "distinct" keyword within the select clause and also subqueries. We only discuss the pattern "every-distinct" here,
 			please see the documentation for additional examples.			
 		</p>
 		<p>
-			The next example statement reports only the first sensor event per device and suppresses subsequent sensor events from the same device:
+			The next example utilizes a pattern which could be extended looking for additional events, and reports only the first sensor event per device and suppresses subsequent sensor events from the same device:
 		</p>		
 <div class="source"><pre>select * from pattern[every-distinct(s.device) s=Sensor]</pre></div>
 		<p>
@@ -1101,7 +1111,7 @@ from pattern[every myevent=TrackingEvent where timer:within(10 min)]
 			you should specify a time period indicating how long the key is valid and after which a duplicate can be reported again.
 		</p>
 		<p>
-			The next example statement reports only the first sensor event per device and for 10 seconds suppresses subsequent sensor events from the same device:
+			The next example utilizes a pattern that reports only the first sensor event per device and for 10 seconds suppresses subsequent sensor events from the same device:
 		</p>		
 <div class="source"><pre>select * from pattern[every-distinct(s.device, 10 sec) s=Sensor]</pre></div>    
       </answer>
