@@ -225,10 +225,18 @@ public class SODAAnalyzer
             if (model.getOutputLimitClause().getWhenExpression() != null) {
                 expressions.add(model.getOutputLimitClause().getWhenExpression());
             }
+            if (model.getOutputLimitClause().getAndAfterTerminateAndExpr() != null) {
+                expressions.add(model.getOutputLimitClause().getAndAfterTerminateAndExpr());
+            }
             if (model.getOutputLimitClause().getThenAssignments() != null) {
                 for (AssignmentPair thenAssign : model.getOutputLimitClause().getThenAssignments()) {
                     expressions.add(thenAssign.getValue());
                 }					
+            }
+            if (model.getOutputLimitClause().getAndAfterTerminateThenAssignments() != null) {
+                for (AssignmentPair thenAssign : model.getOutputLimitClause().getAndAfterTerminateThenAssignments()) {
+                    expressions.add(thenAssign.getValue());
+                }
             }
             if (model.getOutputLimitClause().getCrontabAtParameters() != null) {
                 for (Expression expr : model.getOutputLimitClause().getCrontabAtParameters()) {
