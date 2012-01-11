@@ -632,7 +632,7 @@ public final class FilterSpecCompiler
                 return null;
             }
 
-            if (!arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(identNodeInner.getResolvedStreamName()))
+            if (arrayEventTypes != null && !arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(identNodeInner.getResolvedStreamName()))
             {
                 Pair<Integer, String> indexAndProp = getStreamIndex(identNodeInner.getResolvedPropertyName());
                 return new RangeValueEventPropIndexed(identNodeInner.getResolvedStreamName(), indexAndProp.getFirst(), indexAndProp.getSecond(), statementName);
@@ -725,7 +725,7 @@ public final class FilterSpecCompiler
 
                 FilterSpecParamInValue inValue;
                 String streamName = identNodeInner.getResolvedStreamName();
-                if (!arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(streamName))
+                if (arrayEventTypes != null && !arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(streamName))
                 {
                     Pair<Integer, String> indexAndProp = getStreamIndex(identNodeInner.getResolvedPropertyName());
                     inValue = new InSetOfValuesEventPropIndexed(identNodeInner.getResolvedStreamName(), indexAndProp.getFirst(),
@@ -901,7 +901,7 @@ public final class FilterSpecCompiler
         Class numericCoercionType = JavaClassHelper.getBoxedType(leftType);
 
         String streamName = identNodeRight.getResolvedStreamName();
-        if (!arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(streamName))
+        if (arrayEventTypes != null && !arrayEventTypes.isEmpty() && arrayEventTypes.containsKey(streamName))
         {
             Pair<Integer, String> indexAndProp = getStreamIndex(identNodeRight.getResolvedPropertyName());
             return new FilterSpecParamEventPropIndexed(identNodeLeft.getFilterLookupable(), op, identNodeRight.getResolvedStreamName(), indexAndProp.getFirst(),

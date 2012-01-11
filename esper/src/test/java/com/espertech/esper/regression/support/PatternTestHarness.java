@@ -19,6 +19,7 @@ import com.espertech.esper.client.time.TimerEvent;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -274,17 +275,23 @@ public class PatternTestHarness implements SupportBeanConstants
             LinkedList<EventDescriptor> expectedResults = allExpectedResults.get(eventId);
 
             // Compare the result lists, not caring about the order of the elements
-            if (!(compareLists(receivedResults, expectedResults)))
-            {
-                log.debug(".checkResults Incorrect result for style " + testStyle + " expression : " + expressionText);
-                log.debug(".checkResults Expected size=" + expectedResults.size() + " received size=" + (receivedResults == null ? 0 : receivedResults.length));
+            try {
+                if (!(compareLists(receivedResults, expectedResults)))
+                {
+                    log.debug(".checkResults Incorrect result for style " + testStyle + " expression : " + expressionText);
+                    log.debug(".checkResults Expected size=" + expectedResults.size() + " received size=" + (receivedResults == null ? 0 : receivedResults.length));
 
-                log.debug(".checkResults Expected, have " + expectedResults.size() + " entries");
-                printList(expectedResults);
-                log.debug(".checkResults Received, have " + (receivedResults == null ? 0 : receivedResults.length) + " entries");
-                printList(receivedResults);
+                    log.debug(".checkResults Expected, have " + expectedResults.size() + " entries");
+                    printList(expectedResults);
+                    log.debug(".checkResults Received, have " + (receivedResults == null ? 0 : receivedResults.length) + " entries");
+                    printList(receivedResults);
 
-                TestCase.assertFalse(true);
+                    TestCase.assertFalse(true);
+                }
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                Assert.fail("For statement '" + expressionText + "' failed to assert: " + ex.getMessage());
             }
         }
     }

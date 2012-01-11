@@ -62,7 +62,6 @@ public class TimerIntervalObserverFactory implements ObserverFactory, MetaDefIte
 
     public EventObserver makeObserver(PatternAgentInstanceContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator, EvalStateNodeNumber stateNodeId, Object observerState)
     {
-
         Object result = parameter.getExprEvaluator().evaluate(convertor.convert(beginState), true, context.getAgentInstanceContext());
         if (result == null)
         {

@@ -2925,6 +2925,10 @@ epService.getEPRuntime().executeQuery(
 							<entry><para>Returns the last events received by the listener.</para></entry>
 						</row>
 						<row>
+							<entry><literal>getAndResetDataListsFlattened</literal></entry>
+							<entry><para>Returns all events received by the listener as a pair.</para></entry>
+						</row>
+						<row>
 							<entry><literal>assertOneGetNewAndReset</literal></entry>
 							<entry><para>Asserts that exactly one new event was received and no removed events, returns the event and resets the listener.</para></entry>
 						</row>
@@ -2950,7 +2954,21 @@ SupportUpdateListener listener = new SupportUpdateListener();
 stmt.addListener(listener);
 
 epService.getEPRuntime().sendEvent(new PersonEvent("Joe"));
-EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "personName,cnt".split(","), new Object[]{"Joe", 1L});]]></programlisting>
+EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "personName,cnt".split(","),
+    new Object[]{"Joe", 1L});]]></programlisting>
+
+			<para>
+			  A few additional examples are shown below:
+			</para>
+			
+			<programlisting><![CDATA[String[] fields = new String[] {"property"};			
+EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields, 
+    new Object[][]{{"E2"}}, new Object[][]{{"E1"}});]]></programlisting>
+
+			<programlisting><![CDATA[EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, 
+    new Object[][]{{"E1"}, {"E2"}, {"E3"}});]]></programlisting>
+
+			<programlisting><![CDATA[assertTrue(listener.getAndClearIsInvoked());]]></programlisting>
 
 			<para>
 			  Please refer to the Esper codebase test sources for more examples using the assertion class and the listener class. 

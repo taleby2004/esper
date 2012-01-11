@@ -14,6 +14,7 @@ package com.espertech.esper.regression.pattern;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -467,6 +468,29 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         epService.getEPRuntime().sendEvent(new SupportBean_A("A2"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("A2"));
         assertTrue(listener.isInvoked());
+
+        statement.destroy();
+
+        // test with timer:interval
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        String query="select * from pattern [every ([2:]e1=SupportBean(string='2') until timer:interval(5))->([2:]e2=SupportBean(string='3') until timer:interval(2))]";
+
+        statement = epService.getEPAdministrator().createEPL(query);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("2", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean("2", 0));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(5000));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("3", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean("3", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean("3", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean("3", 0));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("2", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean("2", 0));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(15000));
     }
 
     public void testArrayFunctionRepeat()
@@ -581,7 +605,6 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
 
         tryInvalid(epService, "[:0] A until B", "Incorrect range specification, a bounds value of zero or negative value is not allowed [[:0] A until B]");
         tryInvalid(epService, "[10:4] A", "Incorrect range specification, lower bounds value '10' is higher then higher bounds '4' [[10:4] A]");
-        tryInvalid(epService, "every [2] (a=A() -> b=B(id=a[0].id))", "Property named 'a[0].id' is not valid in any stream [every [2] (a=A() -> b=B(id=a[0].id))]");
         tryInvalid(epService, "[-1] A", "Incorrect range specification, a bounds value of zero or negative value is not allowed [[-1] A]");
         tryInvalid(epService, "[4:6] A", "Variable bounds repeat operator requires an until-expression [[4:6] A]");
         tryInvalid(epService, "[0:0] A", "Incorrect range specification, a bounds value of zero or negative value is not allowed [[0:0] A]");

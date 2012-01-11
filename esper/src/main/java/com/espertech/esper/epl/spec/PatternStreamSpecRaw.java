@@ -101,7 +101,8 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         }
         Deque<Integer> subexpressionIdStack = new ArrayDeque<Integer>(assignedTypeNumberStack);
         ExprEvaluatorContext evaluatorContextStmt = new ExprEvaluatorContextStatement(context);
-        recursiveCompile(evalFactoryNode, context, evaluatorContextStmt, eventTypeReferences, isInsertInto, tags, subexpressionIdStack);
+        Stack<EvalFactoryNode> nodeStack = new Stack<EvalFactoryNode>();
+        recursiveCompile(evalFactoryNode, context, evaluatorContextStmt, eventTypeReferences, isInsertInto, tags, subexpressionIdStack, nodeStack);
 
         Audit auditPattern = AuditEnum.PATTERN.getAudit(context.getAnnotations());
         Audit auditPatternInstance = AuditEnum.PATTERNINSTANCES.getAudit(context.getAnnotations());
@@ -114,15 +115,17 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         return new PatternStreamSpecCompiled(compiledEvalFactoryNode, tags.getTaggedEventTypes(), tags.getArrayEventTypes(), this.getViewSpecs(), this.getOptionalStreamName(), this.getOptions());
     }
 
-    private static void recursiveCompile(EvalFactoryNode evalNode, StatementContext context, ExprEvaluatorContext evaluatorContext, Set<String> eventTypeReferences, boolean isInsertInto, MatchEventSpec tags, Deque<Integer> subexpressionIdStack) throws ExprValidationException
+    private static void recursiveCompile(EvalFactoryNode evalNode, StatementContext context, ExprEvaluatorContext evaluatorContext, Set<String> eventTypeReferences, boolean isInsertInto, MatchEventSpec tags, Deque<Integer> subexpressionIdStack, Stack<EvalFactoryNode> parentNodeStack) throws ExprValidationException
     {
         int counter = 0;
+        parentNodeStack.push(evalNode);
         for (EvalFactoryNode child : evalNode.getChildNodes())
         {
             subexpressionIdStack.addLast(counter++);
-            recursiveCompile(child, context, evaluatorContext, eventTypeReferences, isInsertInto, tags, subexpressionIdStack);
+            recursiveCompile(child, context, evaluatorContext, eventTypeReferences, isInsertInto, tags, subexpressionIdStack, parentNodeStack);
             subexpressionIdStack.removeLast();
         }
+        parentNodeStack.pop();
 
         LinkedHashMap<String, Pair<EventType, String>> newTaggedEventTypes = null;
         LinkedHashMap<String, Pair<EventType, String>> newArrayEventTypes = null;
@@ -135,6 +138,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             EventType finalEventType = resolvedEventType;
             String optionalTag = filterNode.getEventAsName();
             boolean isPropertyEvaluation = false;
+            boolean isParentMatchUntil = isParentMatchUntil(evalNode, parentNodeStack);
 
             // obtain property event type, if final event type is properties
             if (filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec() != null)
@@ -175,7 +179,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
                 pair = new Pair<EventType, String>(finalEventType, eventName);
 
                 // add tagged type
-                if (isPropertyEvaluation)
+                if (isPropertyEvaluation || isParentMatchUntil)
                 {
                     newArrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
                     newArrayEventTypes.put(optionalTag, pair);
@@ -208,7 +212,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
 
             // handle array tags (match-until clause)
             LinkedHashMap<String, Pair<EventType, String>> arrayCompositeEventTypes = null;
-            if (tags.getArrayEventTypes() != null)
+            if (tags.getArrayEventTypes() != null && !tags.getArrayEventTypes().isEmpty())
             {
                 arrayCompositeEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
                 String patternSubexEventType = getPatternSubexEventType(context.getStatementId(), "pattern", subexpressionIdStack);
@@ -426,6 +430,24 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         {
             tags.getArrayEventTypes().putAll(newArrayEventTypes);
         }
+    }
+
+    private static boolean isParentMatchUntil(EvalFactoryNode currentNode, Stack<EvalFactoryNode> parentNodeStack) {
+        if (parentNodeStack.isEmpty()) {
+            return false;
+        }
+
+        EvalFactoryNode lastParent = currentNode;
+        for (EvalFactoryNode deepParent : parentNodeStack) {
+            if (deepParent instanceof EvalMatchUntilFactoryNode) {
+                EvalMatchUntilFactoryNode matchUntilFactoryNode = (EvalMatchUntilFactoryNode) deepParent;
+                if (matchUntilFactoryNode.getChildNodes().get(0) == currentNode) {
+                    return true;
+                }
+                lastParent = deepParent;
+            }
+        }
+        return false;
     }
 
     private static List<ExprNode> validateExpressions(List<ExprNode> objectParameters, ExprValidationContext validationContext)
