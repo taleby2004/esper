@@ -11,13 +11,13 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import org.apache.commons.logging.Log;
@@ -52,7 +52,7 @@ public class TestDataWindowMultipleExpiry extends TestCase
         stmt.addListener(listener);
         sendMarketDataEvent("DELL", 1, 50);
         sendMarketDataEvent("DELL", 2, 50);
-        Object[] values = ArrayAssertionUtil.iteratorToArray(stmt.iterator());
+        Object[] values = EPAssertionUtil.iteratorToArray(stmt.iterator());
         assertEquals(1, values.length);
     }
 

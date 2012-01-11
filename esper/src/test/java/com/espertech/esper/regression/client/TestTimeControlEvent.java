@@ -12,19 +12,22 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.ScopeTestHelper;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.CurrentTimeSpanEvent;
 import com.espertech.esper.core.service.EPRuntimeIsolatedSPI;
 import com.espertech.esper.core.service.EPRuntimeSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class TestTimeControlEvent extends TestCase
 {
@@ -194,6 +197,30 @@ public class TestTimeControlEvent extends TestCase
     }
 
     private void assertSchedules(Map<String, Long> schedules, Object[][] expected) {
-        ArrayAssertionUtil.assertUnorderedMap(schedules, expected);
+        ScopeTestHelper.assertEquals(expected.length, schedules.size());
+
+        Set<Integer> matchNumber = new HashSet<Integer>();
+        for (Object entryObj : schedules.entrySet()) {
+            Map.Entry<Object, Object> entry = (Map.Entry<Object, Object>) entryObj;
+            boolean matchFound = false;
+            for (int i = 0; i < expected.length; i++) {
+                if (matchNumber.contains(i)) {
+                    continue;
+                }
+                if (expected[i][0].equals(entry.getKey())) {
+                    matchFound = true;
+                    matchNumber.add(i);
+                    if (expected[i][1] == null && entry.getValue() == null) {
+                        continue;
+                    }
+                    if (!expected[i][1].equals(entry.getValue())) {
+                        ScopeTestHelper.fail("Failed to match value for key '" + entry.getKey() + "' expected '" + expected[i][i] + "' received '" + entry.getValue() + "'");
+                    }
+                }
+            }
+            if (!matchFound) {
+                ScopeTestHelper.fail("Failed to find key '" + entry.getKey() + "'");
+            }
+        }
     }
 }

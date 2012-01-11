@@ -32,11 +32,6 @@ public class RangeValueEventProp implements FilterSpecParamRangeValue
         this.resultEventProperty = resultEventProperty;
     }
 
-    public int getFilterHash()
-    {
-        return resultEventProperty.hashCode();
-    }
-
     public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext) {
         EventBean event = matchedEvents.getMatchingEvent(resultEventAsName);
         if (event == null)

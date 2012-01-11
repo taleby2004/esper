@@ -9,7 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
 
 import java.util.Collection;
 
@@ -19,13 +19,13 @@ import java.util.Collection;
  */
 public final class FilterParamIndexEquals extends FilterParamIndexEqualsBase
 {
-    public FilterParamIndexEquals(String propertyName, EventType eventType) {
-        super(propertyName, FilterOperator.EQUAL, eventType);
+    public FilterParamIndexEquals(FilterSpecLookupable lookupable) {
+        super(lookupable, FilterOperator.EQUAL);
     }
 
     public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
-        Object attributeValue = this.getGetter().get(eventBean);
+        Object attributeValue = lookupable.getGetter().get(eventBean);
         if (attributeValue == null) {   //  null cannot match, not even null: requires use of "is"
             return;
         }

@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.collection.UniformPair;
@@ -20,8 +22,6 @@ import com.espertech.esper.regression.support.ResultAssertTestResult;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -382,8 +382,8 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.isInvoked());
 
         sendMDEvent(0);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{20L}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{20L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{20L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{20L}});
         listener.reset();
     }
 
@@ -408,8 +408,8 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.isInvoked());
 
         sendMDEvent(0);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{20L}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{20L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{20L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{20L}});
         listener.reset();
     }
 
@@ -554,7 +554,7 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(1000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{2L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{2L}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -564,7 +564,7 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(2000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{4L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{4L}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -572,12 +572,12 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(9000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{5L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{5L}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendTimer(10000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{4L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{4L}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -585,7 +585,7 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{3L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{3L}});
         assertNull(listener.getLastOldData());
         listener.reset();
     }
@@ -616,7 +616,7 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(1000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{2L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{2L}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -626,7 +626,7 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(2000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{4L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{4L}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -634,13 +634,13 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(9000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{5L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{5L}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         // The execution of the join is after the snapshot, as joins are internal dispatch
         sendTimer(10000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{5L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{5L}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -648,7 +648,7 @@ public class TestOutputLimitRowForAll extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"cnt"}, new Object[][] {{3L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"cnt"}, new Object[][]{{3L}});
         assertNull(listener.getLastOldData());
         listener.reset();
     }

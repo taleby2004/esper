@@ -36,7 +36,7 @@ public class UpdateDispatchViewNonBlocking extends UpdateDispatchViewBase
 
     public void newResult(UniformPair<EventBean[]> results)
     {
-        statementResultServiceImpl.indicate(results);
+        statementResultService.indicate(results);
         if (!isDispatchWaiting.get())
         {
             dispatchService.addExternal(this);

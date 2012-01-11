@@ -11,12 +11,11 @@
 
 package com.espertech.esper.epl.metric;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.List;
 import java.util.ArrayList;
-
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestMetricScheduleService extends TestCase
 {
@@ -61,7 +60,7 @@ public class TestMetricScheduleService extends TestCase
 
         svc.setTime(1200);
         svc.evaluate(executions);
-        ArrayAssertionUtil.assertEqualsExactOrder(executions.iterator(), new Object[] {execs[3]});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{execs[3]}, executions.iterator());
         assertEquals(3000, (long) svc.getNearestTime());
 
         executions.clear();
@@ -71,7 +70,7 @@ public class TestMetricScheduleService extends TestCase
         
         svc.setTime(3000);
         svc.evaluate(executions);
-        ArrayAssertionUtil.assertEqualsExactOrder(executions.iterator(), new Object[] {execs[0], execs[2]});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{execs[0], execs[2]}, executions.iterator());
         assertEquals(3100, (long) svc.getNearestTime());
 
         svc.clear();

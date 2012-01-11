@@ -11,8 +11,8 @@
 
 package com.espertech.esper.epl.join.plan;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestOuterInnerDirectionalGraph extends TestCase
 {
@@ -93,14 +93,14 @@ public class TestOuterInnerDirectionalGraph extends TestCase
 
         graph.add(0, 1);
         assertNull(graph.getInner(1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {1}, graph.getInner(0));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{1}, graph.getInner(0));
         graph.add(0, 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {1, 3}, graph.getInner(0));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{1, 3}, graph.getInner(0));
         graph.add(1, 0);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {0}, graph.getInner(1));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{0}, graph.getInner(1));
         graph.add(1, 2);
         graph.add(1, 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {0, 2, 3}, graph.getInner(1));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{0, 2, 3}, graph.getInner(1));
     }
 
     public void testGetOuter()
@@ -112,15 +112,15 @@ public class TestOuterInnerDirectionalGraph extends TestCase
 
         graph.add(0, 1);
         assertNull(graph.getOuter(0));
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {0}, graph.getOuter(1));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{0}, graph.getOuter(1));
         graph.add(0, 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {0}, graph.getOuter(3));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{0}, graph.getOuter(3));
         graph.add(1, 0);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {0}, graph.getOuter(1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {1}, graph.getOuter(0));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{0}, graph.getOuter(1));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{1}, graph.getOuter(0));
         graph.add(1, 3);
         graph.add(2, 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {0, 1, 2}, graph.getOuter(3));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{0, 1, 2}, graph.getOuter(3));
     }
 
     private void tryInvalidGetOuter(int stream)

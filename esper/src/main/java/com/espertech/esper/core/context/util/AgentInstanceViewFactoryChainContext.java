@@ -11,12 +11,14 @@ package com.espertech.esper.core.context.util;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.ViewUpdatedCollection;
 import com.espertech.esper.core.service.ExpressionResultCacheService;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperPrevious;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperPrior;
 import com.espertech.esper.epl.core.ViewResourceDelegateVerifiedStream;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprPriorNode;
+import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.DataWindowViewFactory;
@@ -42,8 +44,16 @@ public class AgentInstanceViewFactoryChainContext implements ExprEvaluatorContex
         this.priorViewUpdatedCollection = priorViewUpdatedCollection;
     }
 
+    public StatementAgentInstanceLock getAgentInstanceLock() {
+        return agentInstanceContext.getAgentInstanceLock();
+    }
+
     public AgentInstanceContext getAgentInstanceContext() {
         return agentInstanceContext;
+    }
+
+    public AgentInstanceScriptContext getAgentInstanceScriptContext() {
+        return agentInstanceContext.getAgentInstanceScriptContext();
     }
 
     public boolean isRemoveStream() {
@@ -74,8 +84,8 @@ public class AgentInstanceViewFactoryChainContext implements ExprEvaluatorContex
         return agentInstanceContext.getExpressionResultCacheService();
     }
 
-    public int[] getAgentInstanceIds() {
-        return agentInstanceContext.getAgentInstanceIds();
+    public int getAgentInstanceId() {
+        return agentInstanceContext.getAgentInstanceId();
     }
 
     public EventBean getContextProperties() {
@@ -102,7 +112,7 @@ public class AgentInstanceViewFactoryChainContext implements ExprEvaluatorContex
         if (viewResourceDelegate.getPriorRequests() != null && !viewResourceDelegate.getPriorRequests().isEmpty()) {
             PriorEventViewFactory priorEventViewFactory = EPStatementStartMethodHelperPrior.findPriorViewFactory(viewFactoryChain);
             SortedMap<Integer, List<ExprPriorNode>> callbacksPerIndex = viewResourceDelegate.getPriorRequests();
-            priorViewUpdatedCollection = priorEventViewFactory.makeViewUpdatedCollection(callbacksPerIndex, agentInstanceContext.getAgentInstanceIds());
+            priorViewUpdatedCollection = priorEventViewFactory.makeViewUpdatedCollection(callbacksPerIndex, agentInstanceContext.getAgentInstanceId());
         }
 
         boolean removedStream = false;
@@ -119,4 +129,15 @@ public class AgentInstanceViewFactoryChainContext implements ExprEvaluatorContex
         return new AgentInstanceViewFactoryChainContext(agentInstanceContext, removedStream, previousNodeGetter, priorViewUpdatedCollection);
     }
 
+    public String getStatementName() {
+        return agentInstanceContext.getStatementName();
+    }
+
+    public String getEngineURI() {
+        return agentInstanceContext.getEngineURI();
+    }
+
+    public String getStatementId() {
+        return agentInstanceContext.getStatementId();
+    }
 }

@@ -12,10 +12,10 @@
 package com.espertech.esper.regression.rowrecog;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,8 +54,8 @@ public class TestRowPatternRecognitionDataWin extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("s1", 7));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"s1", 7}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"s1", 7}});
         assertFalse(stmt.iterator().hasNext());
 
         /*
@@ -113,10 +113,10 @@ public class TestRowPatternRecognitionDataWin extends TestCase
 
         sendTimer(11500, epService);
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E6", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E4", "E5", "E6"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E4", "E5", "E6"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E4", "E5", "E6"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E4", "E5", "E6"}});
 
         sendTimer(11999, epService);
         assertTrue(stmt.iterator().hasNext());
@@ -162,12 +162,12 @@ public class TestRowPatternRecognitionDataWin extends TestCase
         epService.getEPRuntime().sendEvent(new SupportRecogBean("C2", "002", 5));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("B3", "003", -1));
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{null, "B2", "C1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{null, "B2", "C1"}});
 
         sendTimer(5050, epService);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{null, "B2", "C1"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{null, "B2", "C1"}});
         assertFalse(stmt.iterator().hasNext());
 
         sendTimer(6000, epService);
@@ -186,12 +186,12 @@ public class TestRowPatternRecognitionDataWin extends TestCase
         epService.getEPRuntime().sendEvent(new SupportRecogBean("C5", "002", 0));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("C6", "003", 10));
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{null, "B4", "C6"}, {"A2", null, "C5"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{null, "B4", "C6"}, {"A2", null, "C5"}});
 
         sendTimer(15050, epService);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{null, "B4", "C6"}, {"A2", null, "C5"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{null, "B4", "C6"}, {"A2", null, "C5"}});
         assertFalse(stmt.iterator().hasNext());
     }
 

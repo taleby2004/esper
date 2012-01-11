@@ -19,14 +19,14 @@ import com.espertech.esper.client.hook.ConditionHandlerContext;
 import com.espertech.esper.client.hook.ConditionHandlerFactoryContext;
 import com.espertech.esper.client.hook.ConditionPatternEngineSubexpressionMax;
 import com.espertech.esper.client.hook.ConditionPatternSubexpressionMax;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConditionHandlerFactory;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -141,11 +141,11 @@ public class TestFollowedByMaxEnginePool extends TestCase implements SupportBean
 
         String fields[] = new String[] {"a", "b"};
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A1", "B1"}, {"A2", "B1"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A1", "B1"}, {"A2", "B1"}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A4"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("B2"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A4", "B2"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A4", "B2"}});
         assertTrue(handler.getContexts().isEmpty());
 
         for (int i = 5; i < 9; i++) {
@@ -156,7 +156,7 @@ public class TestFollowedByMaxEnginePool extends TestCase implements SupportBean
         }
 
         epService.getEPRuntime().sendEvent(new SupportBean_B("B3"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A5", "B3"}, {"A6", "B3"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A5", "B3"}, {"A6", "B3"}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_B("B4"));
         assertFalse(listener.isInvoked());
@@ -164,7 +164,7 @@ public class TestFollowedByMaxEnginePool extends TestCase implements SupportBean
         epService.getEPRuntime().sendEvent(new SupportBean_A("A20"));
         epService.getEPRuntime().sendEvent(new SupportBean_A("A21"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("B5"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"A20","B5"}, {"A21","B5"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A20", "B5"}, {"A21", "B5"}});
         assertTrue(handler.getContexts().isEmpty());
 
         stmt.destroy();
@@ -193,7 +193,7 @@ public class TestFollowedByMaxEnginePool extends TestCase implements SupportBean
 
         String fields[] = new String[] {"a", "b"};
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A1", "B1"}, {"A2", "B1"}, {"A3", "B1"}, {"A4", "B1"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A1", "B1"}, {"A2", "B1"}, {"A3", "B1"}, {"A4", "B1"}});
 
         // set new max
         epService.getEPAdministrator().getConfiguration().setPatternMaxSubexpressions(1L);

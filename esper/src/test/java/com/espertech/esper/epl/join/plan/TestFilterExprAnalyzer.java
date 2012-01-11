@@ -11,9 +11,9 @@
 
 package com.espertech.esper.epl.join.plan;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.epl.expression.ExprEqualsNode;
 import com.espertech.esper.epl.expression.ExprAndNode;
 
@@ -28,10 +28,10 @@ public class TestFilterExprAnalyzer extends TestCase
         FilterExprAnalyzer.analyzeEqualsNode(equalsNode, graph, false);
 
         assertTrue(graph.isNavigableAtAll(0, 1));
-        ArrayAssertionUtil.assertEqualsExactOrder(QueryGraphTestUtil.getStrictKeyProperties(graph, 0, 1), new String[] {"intPrimitive"});
-        ArrayAssertionUtil.assertEqualsExactOrder(QueryGraphTestUtil.getIndexProperties(graph, 1, 0), new String[] {"intPrimitive"});
-        ArrayAssertionUtil.assertEqualsExactOrder(QueryGraphTestUtil.getStrictKeyProperties(graph, 1, 0), new String[] {"intBoxed"});
-        ArrayAssertionUtil.assertEqualsExactOrder(QueryGraphTestUtil.getIndexProperties(graph, 0, 1), new String[] {"intBoxed"});
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intPrimitive"}, QueryGraphTestUtil.getStrictKeyProperties(graph, 0, 1));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intPrimitive"}, QueryGraphTestUtil.getIndexProperties(graph, 1, 0));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intBoxed"}, QueryGraphTestUtil.getStrictKeyProperties(graph, 1, 0));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intBoxed"}, QueryGraphTestUtil.getIndexProperties(graph, 0, 1));
     }
 
     public void testAnalyzeAnd() throws Exception
@@ -42,9 +42,9 @@ public class TestFilterExprAnalyzer extends TestCase
         FilterExprAnalyzer.analyzeAndNode(andNode, graph, false);
 
         assertTrue(graph.isNavigableAtAll(0, 1));
-        ArrayAssertionUtil.assertEqualsExactOrder(QueryGraphTestUtil.getStrictKeyProperties(graph, 0, 1), new String[] {"intPrimitive","string"});
-        ArrayAssertionUtil.assertEqualsExactOrder(QueryGraphTestUtil.getIndexProperties(graph, 1, 0), new String[] {"intPrimitive","string"});
-        ArrayAssertionUtil.assertEqualsExactOrder(QueryGraphTestUtil.getStrictKeyProperties(graph, 1, 0), new String[] {"intBoxed","string"});
-        ArrayAssertionUtil.assertEqualsExactOrder(QueryGraphTestUtil.getIndexProperties(graph, 0, 1), new String[] {"intBoxed","string"});
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intPrimitive", "string"}, QueryGraphTestUtil.getStrictKeyProperties(graph, 0, 1));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intPrimitive", "string"}, QueryGraphTestUtil.getIndexProperties(graph, 1, 0));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intBoxed", "string"}, QueryGraphTestUtil.getStrictKeyProperties(graph, 1, 0));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intBoxed", "string"}, QueryGraphTestUtil.getIndexProperties(graph, 0, 1));
     }
 }

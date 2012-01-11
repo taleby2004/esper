@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.client.EventType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -22,7 +21,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * The implementation is based on the SortedMap implementation of TreeMap and stores only expression
  * parameter values of type DoubleRange.
  */
-public abstract class FilterParamIndexDoubleRangeBase extends FilterParamIndexPropBase
+public abstract class FilterParamIndexDoubleRangeBase extends FilterParamIndexLookupableBase
 {
     protected final TreeMap<DoubleRange, EventEvaluator> ranges;
     private final IdentityHashMap<DoubleRange, EventEvaluator> rangesNullEndpoints;
@@ -30,15 +29,8 @@ public abstract class FilterParamIndexDoubleRangeBase extends FilterParamIndexPr
 
     protected double largestRangeValueDouble = Double.MIN_VALUE;
 
-   /**
-     * Constructs the index for matching ranges.
-     * @param attributeName is the name of the event attribute field
-    * @param filterOperator is the type of range
-    * @param eventType is type of events handled
-    */
-    public FilterParamIndexDoubleRangeBase(String attributeName, FilterOperator filterOperator, EventType eventType)
-    {
-        super(attributeName, filterOperator, eventType);
+    protected FilterParamIndexDoubleRangeBase(FilterSpecLookupable lookupable, FilterOperator filterOperator) {
+        super(filterOperator, lookupable);
 
         ranges = new TreeMap<DoubleRange, EventEvaluator>(new DoubleRangeComparator());
         rangesNullEndpoints = new IdentityHashMap<DoubleRange, EventEvaluator>();

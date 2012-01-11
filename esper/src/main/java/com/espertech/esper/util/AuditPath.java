@@ -11,6 +11,8 @@
 
 package com.espertech.esper.util;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.event.EventBeanUtility;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -41,20 +43,27 @@ public class AuditPath {
      */
     public static boolean isAuditEnabled = false;
 
-    /**
-     * Sets execution path debug logging.
-     * @param auditEnabled true if metric reporting should be enabled
-     */
-    public static void setAuditEnabled(boolean auditEnabled)
-    {
-        if (auditEnabled)
-        {
-            log.debug("Audit reporting has been enabled.");
+    private static String auditPattern;
+
+    public static void setAuditPattern(String auditPattern) {
+        AuditPath.auditPattern = auditPattern;
+    }
+
+    public static void auditInsertInto(String engineURI, String statementName, EventBean event) {
+        auditLog(engineURI, statementName, "insert-into " + EventBeanUtility.summarize(event));
+    }
+
+    public static void auditLog(String engineURI, String statementName, String message) {
+        if (auditPattern == null) {
+            log.info("Statement " + statementName + " " + message);
         }
-        else
-        {
-            log.debug("Audit reporting has been disabled.");
+        else {
+            String result = auditPattern.replace("%s", statementName).replace("%u", engineURI).replace("%m", message);
+            log.info(result);
         }
-        isAuditEnabled = auditEnabled;
+    }
+
+    public static boolean isInfoEnabled() {
+        return log.isInfoEnabled();
     }
 }

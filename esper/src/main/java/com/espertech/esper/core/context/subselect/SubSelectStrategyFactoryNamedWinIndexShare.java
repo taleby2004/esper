@@ -41,7 +41,7 @@ public class SubSelectStrategyFactoryNamedWinIndexShare implements SubSelectStra
 
         AggregationService aggregationService = null;
         if (aggregationServiceFactory != null) {
-            aggregationService = aggregationServiceFactory.getAggregationServiceFactory().makeService(agentInstanceContext);
+            aggregationService = aggregationServiceFactory.getAggregationServiceFactory().makeService(agentInstanceContext, agentInstanceContext.getStatementContext().getMethodResolutionService());
             subselectAggregationPreprocessor = new SubselectAggregationPreprocessor(aggregationService, filterExprEval);
         }
 

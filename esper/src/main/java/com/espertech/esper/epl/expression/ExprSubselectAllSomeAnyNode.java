@@ -83,7 +83,7 @@ public class ExprSubselectAllSomeAnyNode extends ExprSubselectNode
         return Boolean.class;
     }
 
-    public void validate(ExprValidationContext validationContext) throws ExprValidationException
+    public void validateSubquery(ExprValidationContext validationContext) throws ExprValidationException
     {
         evalStrategy = SubselectEvalStrategyFactory.createStrategy(this, isNot, isAll, !isAll, relationalOp);
     }

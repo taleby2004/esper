@@ -12,15 +12,14 @@
 package com.espertech.esper.regression.db;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportDatabaseService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
@@ -67,7 +66,8 @@ public class TestDatabaseJoin extends TestCase
                 "sql:MyDB ['select myint from mytesttable'] as s1 " +
                 "  where sb.string = sbt.stringTwo and s1.myint = sbt.intPrimitiveTwo";
 
-        EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
+        EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL(stmtText);
+        assertFalse(statement.getStatementContext().isStatelessSelect());
         listener = new SupportUpdateListener();
         statement.addListener(listener);
 
@@ -76,11 +76,11 @@ public class TestDatabaseJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T2", 30));
         epService.getEPRuntime().sendEvent(new SupportBean("T2", -1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T2", "T2", 30});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T2", "T2", 30});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T3", -1));
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T3", 40));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T3", "T3", 40});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", "T3", 40});
     }
 
     public void testTimeBatchEPL()
@@ -102,19 +102,19 @@ public class TestDatabaseJoin extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendSupportBeanEvent(6);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {6, 60, "F"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{6, 60, "F"}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{6, 60, "F"});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{6, 60, "F"}});
 
         sendSupportBeanEvent(9);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {9, 90, "I"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{6, 60, "F"}, {9, 90, "I"}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{9, 90, "I"});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{6, 60, "F"}, {9, 90, "I"}});
 
         sendSupportBeanEvent(20);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{6, 60, "F"}, {9, 90, "I"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{6, 60, "F"}, {9, 90, "I"}});
 
         stmt.destroy();
     }
@@ -133,7 +133,7 @@ public class TestDatabaseJoin extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("A", 1));
@@ -141,7 +141,7 @@ public class TestDatabaseJoin extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("B", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"B", 3, "B", "B"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"B", 3, "B", "B"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("D", 4));
         assertFalse(listener.isInvoked());
@@ -228,16 +228,16 @@ public class TestDatabaseJoin extends TestCase
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, null);
 
         sendSupportBeanEvent(10);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{100}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{100}});
 
         sendSupportBeanEvent(5);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{100}, {50}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{100}, {50}});
 
         sendSupportBeanEvent(2);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{100}, {50}, {20}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{100}, {50}, {20}});
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
         EventBean[] received = listener.getLastNewData();
@@ -246,13 +246,13 @@ public class TestDatabaseJoin extends TestCase
         assertEquals(50, received[1].get("myint"));
         assertEquals(20, received[2].get("myint"));
 
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, null);
 
         sendSupportBeanEvent(9);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{90}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{90}});
 
         sendSupportBeanEvent(8);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{90}, {80}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{90}, {80}});
     }
 
     public void testInvalidSQL()
@@ -410,7 +410,6 @@ public class TestDatabaseJoin extends TestCase
                 " sql:MyDB ['select mychar from mytesttable where mytesttable.mybigint = 2'] as s0," +
                 " pattern [every timer:interval(5 sec) ]";
 
-        /* TODO
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -425,8 +424,7 @@ public class TestDatabaseJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
         assertEquals("Y", listener.assertOneGetNewAndReset().get("mychar"));
-        */
-        
+
         // with variable
         epService.getEPAdministrator().createEPL("create variable long VarLastTimestamp = 0");
         String epl = "@Name('Poll every 5 seconds') insert into PollStream" +

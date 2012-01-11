@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.util.JSONEventRenderer;
 import com.espertech.esper.regression.event.SupportXML;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.w3c.dom.Document;
 
@@ -121,18 +121,18 @@ public class TestFilterPropertyExample extends TestCase
         epService.getEPRuntime().sendEvent(eventDocOne);
         //System.out.println(SupportXML.serialize(eventDoc));
 
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), "orderId,items.item[0].itemId".split(","), new Object[] {"PO200901", "100001"});
-        ArrayAssertionUtil.assertPropsPerRow(listenerTwo.getLastNewData(), "bookId".split(","), new Object[][] {{"B001"}, {"B002"}});
-        ArrayAssertionUtil.assertPropsPerRow(listenerThree.getLastNewData(), "bookId".split(","), new Object[][] {{"B001"}, {"B002"}});
-        ArrayAssertionUtil.assertPropsPerRow(listenerFour.getLastNewData(), "count(*)".split(","), new Object[][] {{2L}});
-        ArrayAssertionUtil.assertPropsPerRow(listenerFive.getLastNewData(), "reviewId".split(","), new Object[][] {{"1"}});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), "orderId,items.item[0].itemId".split(","), new Object[]{"PO200901", "100001"});
+        EPAssertionUtil.assertPropsPerRow(listenerTwo.getLastNewData(), "bookId".split(","), new Object[][]{{"B001"}, {"B002"}});
+        EPAssertionUtil.assertPropsPerRow(listenerThree.getLastNewData(), "bookId".split(","), new Object[][]{{"B001"}, {"B002"}});
+        EPAssertionUtil.assertPropsPerRow(listenerFour.getLastNewData(), "count(*)".split(","), new Object[][]{{2L}});
+        EPAssertionUtil.assertPropsPerRow(listenerFive.getLastNewData(), "reviewId".split(","), new Object[][]{{"1"}});
         assertFalse(listenerSix.isInvoked());
-        ArrayAssertionUtil.assertPropsPerRow(listenerSeven.getLastNewData(), "orderId,bookId,reviewId".split(","), new Object[][] {{"PO200901", "B001", "1"}});
-        ArrayAssertionUtil.assertPropsPerRow(listenerEight.getLastNewData(), "reviewId,bookId".split(","), new Object[][] {{"1", "B001"}});
-        ArrayAssertionUtil.assertPropsPerRow(listenerNine.getLastNewData(), "reviewId,bookId".split(","), new Object[][] {{"1", "B001"}});
-        ArrayAssertionUtil.assertPropsPerRow(listenerTen.getLastNewData(), "reviewId,bookId".split(","), new Object[][] {{"1", "B001"}});
-        ArrayAssertionUtil.assertPropsPerRow(listenerEleven.getLastNewData(), "mediaOrder.orderId,book.bookId,review.reviewId".split(","), new Object[][] {{"PO200901", "B001", "1"}});
-        ArrayAssertionUtil.assertPropsPerRow(listenerTwelve.getLastNewData(), "reviewId".split(","), new Object[][] {{"1"}});
+        EPAssertionUtil.assertPropsPerRow(listenerSeven.getLastNewData(), "orderId,bookId,reviewId".split(","), new Object[][]{{"PO200901", "B001", "1"}});
+        EPAssertionUtil.assertPropsPerRow(listenerEight.getLastNewData(), "reviewId,bookId".split(","), new Object[][]{{"1", "B001"}});
+        EPAssertionUtil.assertPropsPerRow(listenerNine.getLastNewData(), "reviewId,bookId".split(","), new Object[][]{{"1", "B001"}});
+        EPAssertionUtil.assertPropsPerRow(listenerTen.getLastNewData(), "reviewId,bookId".split(","), new Object[][]{{"1", "B001"}});
+        EPAssertionUtil.assertPropsPerRow(listenerEleven.getLastNewData(), "mediaOrder.orderId,book.bookId,review.reviewId".split(","), new Object[][]{{"PO200901", "B001", "1"}});
+        EPAssertionUtil.assertPropsPerRow(listenerTwelve.getLastNewData(), "reviewId".split(","), new Object[][]{{"1"}});
     }
 
     public void testJoinSelfJoin()
@@ -145,13 +145,13 @@ public class TestFilterPropertyExample extends TestCase
         String[] fields = "book.bookId,item.itemId".split(",");
         epService.getEPRuntime().sendEvent(eventDocOne);
         printRows(listener.getLastNewData());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"B001", "100001"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"B001", "100001"}});
 
         epService.getEPRuntime().sendEvent(eventDocOne);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"B001", "100001"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"B001", "100001"}});
 
         epService.getEPRuntime().sendEvent(eventDocTwo);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"B005", "200002"}, {"B005", "200004"}, {"B006", "200001"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"B005", "200002"}, {"B005", "200004"}, {"B006", "200001"}});
 
         // count
         stmt.destroy();
@@ -161,10 +161,10 @@ public class TestFilterPropertyExample extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(eventDocTwo);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{3L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{3L}});
 
         epService.getEPRuntime().sendEvent(eventDocOne);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{4L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{4L}});
 
         // unidirectional count
         stmt.destroy();
@@ -173,10 +173,10 @@ public class TestFilterPropertyExample extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(eventDocTwo);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{3L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{3L}});
 
         epService.getEPRuntime().sendEvent(eventDocOne);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{1L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{1L}});
     }
 
     public void testJoinSelfLeftOuterJoin()
@@ -188,11 +188,11 @@ public class TestFilterPropertyExample extends TestCase
 
         String[] fields = "book.bookId,item.itemId".split(",");
         epService.getEPRuntime().sendEvent(eventDocTwo);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"B005", "200002"}, {"B005", "200004"}, {"B006", "200001"}, {"B008", null}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"B005", "200002"}, {"B005", "200004"}, {"B006", "200001"}, {"B008", null}});
 
         epService.getEPRuntime().sendEvent(eventDocOne);
         printRows(listener.getLastNewData());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"B001", "100001"}, {"B002", null}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"B001", "100001"}, {"B002", null}});
 
         // count
         stmt.destroy();
@@ -202,10 +202,10 @@ public class TestFilterPropertyExample extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(eventDocTwo);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{4L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{4L}});
 
         epService.getEPRuntime().sendEvent(eventDocOne);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{6L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{6L}});
 
         // unidirectional count
         stmt.destroy();
@@ -214,10 +214,10 @@ public class TestFilterPropertyExample extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(eventDocTwo);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{4L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{4L}});
 
         epService.getEPRuntime().sendEvent(eventDocOne);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{2L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{2L}});
     }
 
     public void testJoinSelfFullOuterJoin()
@@ -229,11 +229,11 @@ public class TestFilterPropertyExample extends TestCase
 
         String[] fields = "book.bookId,item.itemId".split(",");
         epService.getEPRuntime().sendEvent(eventDocTwo);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{null, "200003"}, {"B005", "200002"}, {"B005", "200004"}, {"B006", "200001"}, {"B008", null}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{null, "200003"}, {"B005", "200002"}, {"B005", "200004"}, {"B006", "200001"}, {"B008", null}});
 
         epService.getEPRuntime().sendEvent(eventDocOne);
         printRows(listener.getLastNewData());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"B001", "100001"}, {"B002", null}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"B001", "100001"}, {"B002", null}});
 
         // count
         stmt.destroy();
@@ -243,10 +243,10 @@ public class TestFilterPropertyExample extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(eventDocTwo);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{5L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{5L}});
 
         epService.getEPRuntime().sendEvent(eventDocOne);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{7L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{7L}});
 
         // unidirectional count
         stmt.destroy();
@@ -255,10 +255,10 @@ public class TestFilterPropertyExample extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(eventDocTwo);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{4L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{4L}});
 
         epService.getEPRuntime().sendEvent(eventDocOne);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{2L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{2L}});
     }
 
     private void printRows(EventBean[] rows)
@@ -282,10 +282,10 @@ public class TestFilterPropertyExample extends TestCase
         stmt.addListener(listener);
         
         epService.getEPRuntime().sendEvent(new ResponseEvent("svcOne", new SubEvent[] {new SubEvent(1000, "typeA"), new SubEvent(800, "typeB")}));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"svcOne", "typeA", 1000.0}, {"svcOne", "typeB", 800.0}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"svcOne", "typeA", 1000.0}, {"svcOne", "typeB", 800.0}});
 
         epService.getEPRuntime().sendEvent(new ResponseEvent("svcOne", new SubEvent[] {new SubEvent(400, "typeB"), new SubEvent(500, "typeA")}));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"svcOne", "typeA", 750.0}, {"svcOne", "typeB", 600.0}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"svcOne", "typeA", 750.0}, {"svcOne", "typeB", 600.0}});
     }
 
     public class ResponseEvent

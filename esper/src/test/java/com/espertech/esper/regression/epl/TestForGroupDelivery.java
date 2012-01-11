@@ -12,14 +12,13 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportEnum;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportSubscriber;
 import com.espertech.esper.support.util.SupportSubscriberMRD;
 import junit.framework.TestCase;
 
@@ -87,9 +86,9 @@ public class TestForGroupDelivery extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 1));
         sendTimer(1000);
         assertEquals(3, subscriber.getInsertStreamList().size());
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getInsertStreamList().get(0)[0], new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getInsertStreamList().get(1)[0], new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getInsertStreamList().get(2)[0], new Object[] {"E3", 1});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E1", 1}, subscriber.getInsertStreamList().get(0)[0]);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E2", 2}, subscriber.getInsertStreamList().get(1)[0]);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E3", 1}, subscriber.getInsertStreamList().get(2)[0]);
 
         stmt.destroy();
         subscriber.reset();
@@ -102,12 +101,12 @@ public class TestForGroupDelivery extends TestCase
         sendTimer(2000);
         assertEquals(2, subscriber.getInsertStreamList().size());
         assertEquals(2, subscriber.getRemoveStreamList().size());
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getInsertStreamList().get(0)[0], new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getInsertStreamList().get(0)[1], new Object[] {"E3", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getInsertStreamList().get(1)[0], new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getRemoveStreamList().get(0)[0], new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getRemoveStreamList().get(0)[1], new Object[] {"E3", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getRemoveStreamList().get(1)[0], new Object[] {"E2", 2});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E1", 1}, subscriber.getInsertStreamList().get(0)[0]);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E3", 1}, subscriber.getInsertStreamList().get(0)[1]);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E2", 2}, subscriber.getInsertStreamList().get(1)[0]);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E1", 1}, subscriber.getRemoveStreamList().get(0)[0]);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E3", 1}, subscriber.getRemoveStreamList().get(0)[1]);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E2", 2}, subscriber.getRemoveStreamList().get(1)[0]);
     }
 
     public void testDiscreteDelivery()
@@ -121,9 +120,9 @@ public class TestForGroupDelivery extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 1));
         sendTimer(1000);
         assertEquals(3, listener.getNewDataList().size());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "string,intPrimitive".split(","), new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "string,intPrimitive".split(","), new Object[][] {{"E2", 2}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(2), "string,intPrimitive".split(","), new Object[][] {{"E3", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "string,intPrimitive".split(","), new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "string,intPrimitive".split(","), new Object[][]{{"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(2), "string,intPrimitive".split(","), new Object[][]{{"E3", 1}});
     }
 
     public void testGroupDelivery()
@@ -138,9 +137,9 @@ public class TestForGroupDelivery extends TestCase
         sendTimer(1000);
         assertEquals(2, listener.getNewDataList().size());
         assertEquals(2, listener.getNewDataList().get(0).length);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "string,intPrimitive".split(","), new Object[][] {{"E1", 1}, {"E3", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "string,intPrimitive".split(","), new Object[][]{{"E1", 1}, {"E3", 1}});
         assertEquals(1, listener.getNewDataList().get(1).length);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "string,intPrimitive".split(","), new Object[][] {{"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "string,intPrimitive".split(","), new Object[][]{{"E2", 2}});
 
         // test sorted
         stmt.destroy();
@@ -154,9 +153,9 @@ public class TestForGroupDelivery extends TestCase
         sendTimer(2000);
         assertEquals(2, listener.getNewDataList().size());
         assertEquals(1, listener.getNewDataList().get(0).length);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "string,intPrimitive".split(","), new Object[][] {{"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "string,intPrimitive".split(","), new Object[][]{{"E2", 2}});
         assertEquals(2, listener.getNewDataList().get(1).length);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "string,intPrimitive".split(","), new Object[][] {{"E1", 1}, {"E3", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "string,intPrimitive".split(","), new Object[][]{{"E1", 1}, {"E3", 1}});
 
         // test multiple criteria
         stmt.destroy();
@@ -176,14 +175,14 @@ public class TestForGroupDelivery extends TestCase
         sendTimer(3000);
         assertEquals(4, listener.getNewDataList().size());
         String[] fields = "string,doubleBoxed,enumValue".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), fields,
-                new Object[][] {{"E1", 10d, SupportEnum.ENUM_VALUE_2}, {"E4", 10d, SupportEnum.ENUM_VALUE_2}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), fields,
-                new Object[][] {{"E2", 11d, SupportEnum.ENUM_VALUE_1}, {"E7", 11d, SupportEnum.ENUM_VALUE_1}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(2), fields,
-                new Object[][] {{"E3", 9d, SupportEnum.ENUM_VALUE_2}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(3), fields,
-                new Object[][] {{"E5", 10d, SupportEnum.ENUM_VALUE_1}, {"E6", 10d, SupportEnum.ENUM_VALUE_1}, {"E8", 10d, SupportEnum.ENUM_VALUE_1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), fields,
+                new Object[][]{{"E1", 10d, SupportEnum.ENUM_VALUE_2}, {"E4", 10d, SupportEnum.ENUM_VALUE_2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), fields,
+                new Object[][]{{"E2", 11d, SupportEnum.ENUM_VALUE_1}, {"E7", 11d, SupportEnum.ENUM_VALUE_1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(2), fields,
+                new Object[][]{{"E3", 9d, SupportEnum.ENUM_VALUE_2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(3), fields,
+                new Object[][]{{"E5", 10d, SupportEnum.ENUM_VALUE_1}, {"E6", 10d, SupportEnum.ENUM_VALUE_1}, {"E8", 10d, SupportEnum.ENUM_VALUE_1}});
         
         // test SODA
         stmt.destroy();
@@ -198,10 +197,10 @@ public class TestForGroupDelivery extends TestCase
         sendEvent("E3", 11d, SupportEnum.ENUM_VALUE_1); // B (2)
         sendTimer(4000);
         assertEquals(2, listener.getNewDataList().size());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), fields,
-                new Object[][] {{"E1", 10d, SupportEnum.ENUM_VALUE_2}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), fields,
-                new Object[][] {{"E2", 11d, SupportEnum.ENUM_VALUE_1}, {"E3", 11d, SupportEnum.ENUM_VALUE_1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), fields,
+                new Object[][]{{"E1", 10d, SupportEnum.ENUM_VALUE_2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), fields,
+                new Object[][]{{"E2", 11d, SupportEnum.ENUM_VALUE_1}, {"E3", 11d, SupportEnum.ENUM_VALUE_1}});
     }
 
     private void sendTimer(long timeInMSec)

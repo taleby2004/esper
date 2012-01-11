@@ -50,11 +50,11 @@ public class SupportStatementContextFactory
     }
 
     public static AgentInstanceContext makeAgentInstanceContext(SchedulingService stub) {
-        return new AgentInstanceContext(makeContext(stub), null, null, null, null);
+        return new AgentInstanceContext(makeContext(stub), null, -1, null, null, null);
     }
 
     public static AgentInstanceContext makeAgentInstanceContext() {
-        return new AgentInstanceContext(makeContext(), null, null, null, null);
+        return new AgentInstanceContext(makeContext(), null, -1, null, null, null);
     }
 
     public static AgentInstanceViewFactoryChainContext makeAgentInstanceViewFactoryContext(SchedulingService stub) {
@@ -113,6 +113,6 @@ public class SupportStatementContextFactory
                 null,
                 null,
                 null,
-                null, new EventTypeIdGeneratorImpl(), null, null, null, null);
+                null, new EventTypeIdGeneratorImpl(), null, null, null, null, false, null, null);
     }
 }

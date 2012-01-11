@@ -11,10 +11,10 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportBean;
 
@@ -55,11 +55,11 @@ public class TestNamedWindowProcessingOrder extends TestCase
         epService.getEPAdministrator().createEPL(eplSelect).addListener(listener);
         
         epService.getEPRuntime().sendEvent(new HashMap<String, String>(), "StartValueEvent");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"V1", "O1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"V1", "O1"});
 
         epService.getEPRuntime().sendEvent(new HashMap<String, String>(), "TestInputEvent");
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"V1", "O1"});
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fields, new Object[] {"V1", "U1"});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"V1", "O1"});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fields, new Object[]{"V1", "U1"});
     }
 
     public void testOrderedDeleteAndSelect()

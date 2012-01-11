@@ -11,7 +11,6 @@
 
 package com.espertech.esper.client.util;
 
-import com.espertech.esper.epl.datetime.reformatop.ReformatOpToCalendar;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,6 +23,9 @@ import java.util.Date;
  * Utility class for date-time functions.
  */
 public class DateTime {
+
+    public static final String DEFAULT_XMLLIKE_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+
     private static final Log log = LogFactory.getLog(DateTime.class);
 
     /**
@@ -92,6 +94,54 @@ public class DateTime {
             return null;
         }
         return date.getTime();
+    }
+
+    /**
+     * Print the provided date object using the default date format {@link #DEFAULT_XMLLIKE_DATE_FORMAT}
+     * @param date should be long, Date or Calendar
+     * @return date string
+     */
+    public static String print(Object date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(DEFAULT_XMLLIKE_DATE_FORMAT);
+        if (date instanceof Long) {
+            return sdf.format(new Date((Long) date));
+        }
+        if (date instanceof Date) {
+            return sdf.format((Date) date);
+        }
+        if (date instanceof Calendar) {
+            return sdf.format(((Calendar) date).getTime());
+        }
+        throw new IllegalArgumentException("Date format for type '" + date.getClass() + "' not possible");
+    }
+
+    /**
+     * Parse the date-time string using {@link #DEFAULT_XMLLIKE_DATE_FORMAT}.
+     * @param dateTime date-time string
+     * @return milliseconds
+     */
+    public static long parseDefaultMSec(String dateTime) {
+        return parse(dateTime, new SimpleDateFormat(DEFAULT_XMLLIKE_DATE_FORMAT)).getTime();
+    }
+
+    /**
+     * Parse the date-time string using {@link #DEFAULT_XMLLIKE_DATE_FORMAT}.
+     * @param dateTime date-time string
+     * @return date
+     */
+    public static Date parseDefaultDate(String dateTime) {
+        return parse(dateTime, new SimpleDateFormat(DEFAULT_XMLLIKE_DATE_FORMAT));
+    }
+
+    /**
+     * Parse the date-time string using {@link #DEFAULT_XMLLIKE_DATE_FORMAT}.
+     * @param dateTime date-time string
+     * @return calendar
+     */
+    public static Calendar parseDefaultCal(String dateTime) {
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(parseDefaultMSec(dateTime));
+        return cal;
     }
 
     private static Date parse(String str) {

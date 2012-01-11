@@ -11,12 +11,12 @@
 
 package com.espertech.esper.view.window;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.event.EventFactoryHelper;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.view.SupportBeanClassView;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.support.view.SupportViewDataChecker;
@@ -48,7 +48,7 @@ public class TestTimeBatchView extends TestCase
         schedulingServiceStub.setTime(startTime);
 
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
 
@@ -60,13 +60,13 @@ public class TestTimeBatchView extends TestCase
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
         assertTrue(schedulingServiceStub.getAdded().get(TEST_INTERVAL_MSEC) != null);
         schedulingServiceStub.getAdded().clear();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[] {events.get("a1")});
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a1")}, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);  // Data got batched, no data release till later
 
         schedulingServiceStub.setTime(startTime + 5000);
         myView.update(new EventBean[] {events.get("b1"), events.get("b2")}, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[] {events.get("a1"), events.get("b1"), events.get("b2")});
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a1"), events.get("b1"), events.get("b2")}, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
@@ -74,7 +74,7 @@ public class TestTimeBatchView extends TestCase
         // Pretend we have a callback, check data, check scheduled new callback
         schedulingServiceStub.setTime(startTime + TEST_INTERVAL_MSEC);
         myView.sendBatch();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[] {events.get("a1"), events.get("b1"), events.get("b2")});
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
@@ -84,7 +84,7 @@ public class TestTimeBatchView extends TestCase
         // Pretend callback received again, should schedule a callback since the last interval showed data
         schedulingServiceStub.setTime(startTime + TEST_INTERVAL_MSEC * 2);
         myView.sendBatch();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, new EventBean[]{events.get("a1"), events.get("b1"), events.get("b2")});   // Old data is published
         SupportViewDataChecker.checkNewData(childView, null);
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
@@ -94,7 +94,7 @@ public class TestTimeBatchView extends TestCase
         // Pretend callback received again, not schedule a callback since the this and last interval showed no data
         schedulingServiceStub.setTime(startTime + TEST_INTERVAL_MSEC * 3);
         myView.sendBatch();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
@@ -105,14 +105,14 @@ public class TestTimeBatchView extends TestCase
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
         assertTrue(schedulingServiceStub.getAdded().get(TEST_INTERVAL_MSEC - 500) != null);
         schedulingServiceStub.getAdded().clear();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{events.get("c1")});
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("c1")}, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);  // Data got batched, no data release till later
 
         // Pretend callback received again
         schedulingServiceStub.setTime(startTime + TEST_INTERVAL_MSEC * 4);
         myView.sendBatch();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[]{events.get("c1")});
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
@@ -123,14 +123,14 @@ public class TestTimeBatchView extends TestCase
         schedulingServiceStub.setTime(startTime + TEST_INTERVAL_MSEC * 4 + 500);
         myView.update(new EventBean[]{ events.get("d1") }, null);
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{events.get("d1")});
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("d1")}, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
 
         // Pretend callback again
         schedulingServiceStub.setTime(startTime + TEST_INTERVAL_MSEC * 5);
         myView.sendBatch();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, new EventBean[]{events.get("c1")});
         SupportViewDataChecker.checkNewData(childView, new EventBean[]{events.get("d1")});
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
@@ -140,14 +140,14 @@ public class TestTimeBatchView extends TestCase
         // Pretend callback again
         schedulingServiceStub.setTime(startTime + TEST_INTERVAL_MSEC * 6);
         myView.sendBatch();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, new EventBean[]{events.get("d1")});
         SupportViewDataChecker.checkNewData(childView, null);
 
         // Pretend callback again
         schedulingServiceStub.setTime(startTime + TEST_INTERVAL_MSEC * 7);
         myView.sendBatch();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
     }
@@ -169,14 +169,14 @@ public class TestTimeBatchView extends TestCase
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
         assertTrue(schedulingServiceStub.getAdded().get(1505L) != null);
         schedulingServiceStub.getAdded().clear();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{events.get("A1"), events.get("A2"), events.get("A3")});
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("A1"), events.get("A2"), events.get("A3")}, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);  // Data got batched, no data release till later
 
         // Pretend we have a callback, check data, check scheduled new callback
         schedulingServiceStub.setTime(startTime + 1505);
         myView.sendBatch();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[]{events.get("A1"), events.get("A2"), events.get("A3")});
         assertTrue(schedulingServiceStub.getAdded().size() == 1);

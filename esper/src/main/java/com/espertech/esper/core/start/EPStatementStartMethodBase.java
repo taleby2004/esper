@@ -60,11 +60,11 @@ public abstract class EPStatementStartMethodBase implements EPStatementStartMeth
     }
 
     protected EPStatementAgentInstanceHandle getDefaultAgentInstanceHandle() {
-        return new EPStatementAgentInstanceHandle(statementContext.getEpStatementHandle(), statementContext.getDefaultAgentInstanceLock(), null, new StatementAgentInstanceFilterVersion());
+        return new EPStatementAgentInstanceHandle(statementContext.getEpStatementHandle(), statementContext.getDefaultAgentInstanceLock(), -1, new StatementAgentInstanceFilterVersion());
     }
 
     protected AgentInstanceContext getDefaultAgentInstanceContext() {
         EPStatementAgentInstanceHandle handle = getDefaultAgentInstanceHandle();
-        return new AgentInstanceContext(statementContext, handle, null, null, null);
+        return new AgentInstanceContext(statementContext, handle, -1, null, null, statementContext.getDefaultAgentInstanceScriptContext());
     }
 }

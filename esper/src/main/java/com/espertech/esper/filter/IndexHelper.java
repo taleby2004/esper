@@ -36,16 +36,16 @@ public class IndexHelper
     {
         for (FilterValueSetParam parameter : parameters)
         {
-            String property = parameter.getPropertyName();
+            FilterSpecLookupable lookupable = parameter.getLookupable();
             FilterOperator operator = parameter.getFilterOperator();
 
             for (FilterParamIndexBase index : indizes)
             {
                 // if property-based index, we prefer this in matching
-                if (index instanceof FilterParamIndexPropBase)
+                if (index instanceof FilterParamIndexLookupableBase)
                 {
-                    FilterParamIndexPropBase propBasedIndex = (FilterParamIndexPropBase) index;
-                    if ( (property.equals(propBasedIndex.getPropertyName())) &&
+                    FilterParamIndexLookupableBase propBasedIndex = (FilterParamIndexLookupableBase) index;
+                    if ( (lookupable.equals(propBasedIndex.getLookupable())) &&
                          (operator.equals(propBasedIndex.getFilterOperator())) )
                     {
                         return new Pair<FilterValueSetParam, FilterParamIndexBase>(parameter, index);
@@ -67,18 +67,18 @@ public class IndexHelper
     public static FilterValueSetParam findParameter(ArrayDeque<FilterValueSetParam> parameters,
                                                 FilterParamIndexBase index)
     {
-        if (index instanceof FilterParamIndexPropBase)
+        if (index instanceof FilterParamIndexLookupableBase)
         {
-            FilterParamIndexPropBase propBasedIndex = (FilterParamIndexPropBase) index;
-            String indexProperty = propBasedIndex.getPropertyName();
+            FilterParamIndexLookupableBase propBasedIndex = (FilterParamIndexLookupableBase) index;
+            FilterSpecLookupable indexLookupable = propBasedIndex.getLookupable();
             FilterOperator indexOperator = propBasedIndex.getFilterOperator();
 
             for (FilterValueSetParam parameter : parameters)
             {
-                String paramProperty = parameter.getPropertyName();
+                FilterSpecLookupable lookupable = parameter.getLookupable();
                 FilterOperator paramOperator = parameter.getFilterOperator();
 
-                if ( (paramProperty.equals(indexProperty)) &&
+                if ( (lookupable.equals(indexLookupable)) &&
                      (paramOperator.equals(indexOperator)) )
                 {
                     return parameter;

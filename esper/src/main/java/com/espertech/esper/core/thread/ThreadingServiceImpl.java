@@ -254,6 +254,17 @@ public class ThreadingServiceImpl implements ThreadingService
         return pool;
     }
 
+    public Thread makeEventSourceThread(String engineURI, String sourceName, Runnable runnable) {
+        if (engineURI == null)
+        {
+            engineURI = "default";
+        }
+
+        String threadGroupName = "com.espertech.esper." + engineURI + "-source-" + sourceName;
+        ThreadGroup threadGroup = new ThreadGroup(threadGroupName);
+        return new Thread(threadGroup, runnable);
+    }
+
     private void stopPool(ThreadPoolExecutor threadPool, BlockingQueue<Runnable> queue, String name)
     {
         if (log.isInfoEnabled())

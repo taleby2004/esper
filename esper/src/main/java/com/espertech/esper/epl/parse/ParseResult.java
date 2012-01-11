@@ -14,6 +14,8 @@ package com.espertech.esper.epl.parse;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
 
+import java.util.List;
+
 /**
  * Result of a parse action.
  */
@@ -22,17 +24,19 @@ public class ParseResult
     private Tree tree;
     private String expressionWithoutAnnotations;
     private CommonTokenStream tokenStream;
+    private List<String> scripts;
 
     /**
      * Ctor.
      * @param tree parse tree
      * @param expressionWithoutAnnotations expression text no annotations, or null if same
      */
-    public ParseResult(Tree tree, String expressionWithoutAnnotations, CommonTokenStream tokenStream)
+    public ParseResult(Tree tree, String expressionWithoutAnnotations, CommonTokenStream tokenStream, List<String> scripts)
     {
         this.tree = tree;
         this.expressionWithoutAnnotations = expressionWithoutAnnotations;
         this.tokenStream = tokenStream;
+        this.scripts = scripts;
     }
 
     /**
@@ -55,5 +59,9 @@ public class ParseResult
 
     public CommonTokenStream getTokenStream() {
         return tokenStream;
+    }
+
+    public List<String> getScripts() {
+        return scripts;
     }
 }

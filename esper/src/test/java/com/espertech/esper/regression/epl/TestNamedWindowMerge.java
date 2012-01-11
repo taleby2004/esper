@@ -12,8 +12,11 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementFormatter;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.regression.view.TestFilterPropertySimple;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
@@ -21,9 +24,7 @@ import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.bookexample.OrderBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportSubscriberMRD;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -76,13 +77,13 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPAdministrator().createEPL("select * from OtherStreamOne").addListener(mergeListener);
 
         epService.getEPRuntime().sendEvent(makeMyEvent("name1", 10d), "MyEvent");
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), "event_name,status".split(","), new Object[] {"name1", 0d});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), "event_name,status".split(","), new Object[]{"name1", 0d});
 
         epService.getEPRuntime().sendEvent(makeMyEvent("name1", 11d), "MyEvent");
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), "event_name,status".split(","), new Object[] {"name1", 10d});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), "event_name,status".split(","), new Object[]{"name1", 10d});
 
         epService.getEPRuntime().sendEvent(makeMyEvent("name1", 12d), "MyEvent");
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), "event_name,status".split(","), new Object[] {"name1", 11d});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), "event_name,status".split(","), new Object[]{"name1", 11d});
     }
 
     public void testMergeTriggeredByAnotherWindow() {
@@ -100,7 +101,8 @@ public class TestNamedWindowMerge extends TestCase {
     }
 
 	public void testSubqueryNotMatched() {
-        EPStatement stmt = epService.getEPAdministrator().createEPL("create window WindowOne.std:unique(string) (string string, intPrimitive int)");
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("create window WindowOne.std:unique(string) (string string, intPrimitive int)");
+        assertFalse(stmt.getStatementContext().isStatelessSelect());
         epService.getEPAdministrator().createEPL("create window WindowTwo.std:unique(val0) (val0 string, val1 int)");
         epService.getEPAdministrator().createEPL("insert into WindowTwo select 'W2' as val0, id as val1 from SupportBean_S0");
 
@@ -111,11 +113,11 @@ public class TestNamedWindowMerge extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(50));  // WindowTwo now has a row {W2, 1}
         epService.getEPRuntime().sendEvent(new SupportBean("W2", 1));
-        ArrayAssertionUtil.assertPropsPerRow(stmt.iterator(), "string,intPrimitive".split(","), new Object[][] {{"Y", 50}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "string,intPrimitive".split(","), new Object[][]{{"Y", 50}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(51));  // WindowTwo now has a row {W2, 1}
         epService.getEPRuntime().sendEvent(new SupportBean("W2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(stmt.iterator(), "string,intPrimitive".split(","), new Object[][] {{"Y", 51}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "string,intPrimitive".split(","), new Object[][]{{"Y", 51}});
     }
 
     public void testMultiactionDeleteUpdate() {
@@ -146,27 +148,27 @@ public class TestNamedWindowMerge extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", "E1", 0));
-        ArrayAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][]{{"E1", 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", -1));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", "E2", 0));
-        ArrayAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][]{{"E1", 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3000));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", "E3", 3));
-        ArrayAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 3}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", "E4", 3000));
-        ArrayAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}, {"E4", 3000}});
+        EPAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 3}, {"E4", 3000}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 1000));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", "E5", 0));
-        ArrayAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}, {"E4", 3000}, {"E5", 999}});
+        EPAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 3}, {"E4", 3000}, {"E5", 999}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 2000));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", "E6", 0));
-        ArrayAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}, {"E4", 3000}, {"E5", 999}, {"E6", 1999}});
+        EPAssertionUtil.assertPropsPerRow(nmStmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 3}, {"E4", 3000}, {"E5", 999}, {"E6", 1999}});
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
         assertEquals(epl.trim(), model.toEPL().trim());
@@ -200,15 +202,15 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPAdministrator().createEPL("select * from StreamFour").addListener(listenerFour);
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID1", "K1", 1));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), "id,key0".split(","), new Object[] {"ID1", "K1"});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), "id,key0".split(","), new Object[] {"ID1", "K1"});
-        ArrayAssertionUtil.assertProps(listenerThree.assertOneGetNewAndReset(), "id,key0".split(","), new Object[] {"ID1", "K1"});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), "id,key0".split(","), new Object[]{"ID1", "K1"});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), "id,key0".split(","), new Object[]{"ID1", "K1"});
+        EPAssertionUtil.assertProps(listenerThree.assertOneGetNewAndReset(), "id,key0".split(","), new Object[]{"ID1", "K1"});
         assertFalse(listenerFour.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID1", "K2", 2));
-        ArrayAssertionUtil.assertProps(listenerFour.assertOneGetNewAndReset(), "id,key0".split(","), new Object[] {"ID1", "K2"});
+        EPAssertionUtil.assertProps(listenerFour.assertOneGetNewAndReset(), "id,key0".split(","), new Object[]{"ID1", "K2"});
 
-        ArrayAssertionUtil.assertPropsPerRow(nmStmt.iterator(), "v1,v2".split(","), new Object[][] {{"K1", 1}, {"K2", 2}});
+        EPAssertionUtil.assertPropsPerRow(nmStmt.iterator(), "v1,v2".split(","), new Object[][]{{"K1", 1}, {"K2", 2}});
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
         assertEquals(epl.trim(), model.toEPL().trim());
@@ -251,16 +253,16 @@ public class TestNamedWindowMerge extends TestCase {
         sendOrderEvent("O1", "P1", 10, 100, false);
         sendOrderEvent("O1", "P1", 11, 200, false);
         sendOrderEvent("O2", "P2", 3, 300, false);
-        ArrayAssertionUtil.assertEqualsAnyOrder(epService.getEPAdministrator().getStatement("nwProd").iterator(), "productId,totalPrice".split(","), new Object[][] {{"P1", 21d}, {"P2", 3d}});
-        ArrayAssertionUtil.assertEqualsAnyOrder(epService.getEPAdministrator().getStatement("nwOrd").iterator(), "orderId,quantity".split(","), new Object[][] {{"O1", 200}, {"O2", 300}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(epService.getEPAdministrator().getStatement("nwProd").iterator(), "productId,totalPrice".split(","), new Object[][]{{"P1", 21d}, {"P2", 3d}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(epService.getEPAdministrator().getStatement("nwOrd").iterator(), "orderId,quantity".split(","), new Object[][]{{"O1", 200}, {"O2", 300}});
 
         String module = "create schema StreetCarCountSchema (streetid string, carcount int);" +
                 "    create schema StreetChangeEvent (streetid string, action string);" +
                 "    create window StreetCarCountWindow.std:unique(streetid) as StreetCarCountSchema;" +
                 "    on StreetChangeEvent ce merge StreetCarCountWindow w where ce.streetid = w.streetid\n" +
                 "    when not matched and ce.action = 'ENTER' then insert select streetid, 1 as carcount\n" +
-                "    when matched and ce.action = 'ENTER' then update set carcount = carcount + 1\n" +
-                "    when matched and ce.action = 'LEAVE' then update set carcount = carcount - 1;" +
+                "    when matched and ce.action = 'ENTER' then update set StreetCarCountWindow.carcount = carcount + 1\n" +
+                "    when matched and ce.action = 'LEAVE' then update set StreetCarCountWindow.carcount = carcount - 1;" +
                 "    select * from StreetCarCountWindow;";
         epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(module, null, null, null);
     }
@@ -281,17 +283,17 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPAdministrator().createEPL("@Name('ces') create schema EventSchema(in1 string, in2 int)");
         epService.getEPAdministrator().createEPL("@Name('cnws') create schema WindowSchema(in1 string, in2 int)");
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"ces"}, configOps.getEventTypeNameUsedBy("EventSchema").toArray());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"cnws"}, configOps.getEventTypeNameUsedBy("WindowSchema").toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"ces"}, configOps.getEventTypeNameUsedBy("EventSchema").toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"cnws"}, configOps.getEventTypeNameUsedBy("WindowSchema").toArray());
 
         epService.getEPAdministrator().createEPL("@Name('cnw') create window MyWindow.win:keepall() as WindowSchema");
-        ArrayAssertionUtil.assertEqualsAnyOrder("cnws,cnw".split(","), configOps.getEventTypeNameUsedBy("WindowSchema").toArray());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"cnw"}, configOps.getEventTypeNameUsedBy("MyWindow").toArray());
+        EPAssertionUtil.assertEqualsAnyOrder("cnws,cnw".split(","), configOps.getEventTypeNameUsedBy("WindowSchema").toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"cnw"}, configOps.getEventTypeNameUsedBy("MyWindow").toArray());
 
         epService.getEPAdministrator().createEPL("@Name('om') on EventSchema merge into MyWindow " +
                 "when not matched then insert select in1, in2");
-        ArrayAssertionUtil.assertEqualsAnyOrder("ces,om".split(","), configOps.getEventTypeNameUsedBy("EventSchema").toArray());
-        ArrayAssertionUtil.assertEqualsAnyOrder("cnws,cnw".split(","), configOps.getEventTypeNameUsedBy("WindowSchema").toArray());
+        EPAssertionUtil.assertEqualsAnyOrder("ces,om".split(","), configOps.getEventTypeNameUsedBy("EventSchema").toArray());
+        EPAssertionUtil.assertEqualsAnyOrder("cnws,cnw".split(","), configOps.getEventTypeNameUsedBy("WindowSchema").toArray());
     }
 
     public void testPerformance() {
@@ -352,7 +354,7 @@ public class TestNamedWindowMerge extends TestCase {
         stmt.addListener(mergeListener);
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(mergeListener.getLastNewData(), fields, new Object[][] {{"10020", "Enders Game"},
+        EPAssertionUtil.assertPropsPerRow(mergeListener.getLastNewData(), fields, new Object[][]{{"10020", "Enders Game"},
                 {"10021", "Foundation 1"}, {"10022", "Stranger in a Strange Land"}});
     }
 
@@ -371,12 +373,12 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("B1", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"A1", "B1"}, {"A2", "B1"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A1", "B1"}, {"A2", "B1"}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A3", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("A4", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("B2", 2));
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"A1", "B1"}, {"A2", "B1"}, {"A3", "B2"}, {"A4", "B2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A1", "B1"}, {"A2", "B1"}, {"A3", "B2"}, {"A4", "B2"}});
     }
 
     public void testInnerTypeAndVariable() {
@@ -401,18 +403,18 @@ public class TestNamedWindowMerge extends TestCase {
         String[] fields = "c1,c2.in1,c2.in2".split(",");
 
         sendMyInnerSchemaEvent("X1", "Y1", 10);
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[] {"B", "Y1", 10});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"B", "Y1", 10});
 
         sendMyInnerSchemaEvent("B", "0", 0);    // delete
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetOldAndReset(), fields, new Object[] {"B", "Y1", 10});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetOldAndReset(), fields, new Object[]{"B", "Y1", 10});
 
         epService.getEPRuntime().setVariableValue("myvar", true);
         sendMyInnerSchemaEvent("X2", "Y2", 11);
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[] {"X2", "Y2", 11});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"X2", "Y2", 11});
 
         epService.getEPRuntime().setVariableValue("myvar", false);
         sendMyInnerSchemaEvent("X3", "Y3", 12);
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[] {"A", null, null});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"A", null, null});
 
         stmt.destroy();
         stmt = epService.getEPAdministrator().createEPL(epl);
@@ -436,14 +438,14 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
 
         EventBean event = stmtWindow.iterator().next();
-        ArrayAssertionUtil.assertProps(event, "string,intPrimitive".split(","), new Object[] {null, 10});
+        EPAssertionUtil.assertProps(event, "string,intPrimitive".split(","), new Object[]{null, 10});
         stmtMerge.destroy();
 
         epl = "on SupportBean as up merge MergeWindow as mv where mv.string=up.string when not matched then insert select string, intPrimitive";
         epService.getEPAdministrator().createEPL(epl);
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
 
-        ArrayAssertionUtil.assertPropsPerRow(stmtWindow.iterator(), "string,intPrimitive".split(","), new Object[][] {{null, 10}, {"E2", 20}});
+        EPAssertionUtil.assertPropsPerRow(stmtWindow.iterator(), "string,intPrimitive".split(","), new Object[][]{{null, 10}, {"E2", 20}});
     }
 
     public void testInvalid() {
@@ -515,39 +517,39 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 0));   // ignored
         sendMyEvent("X2", 2);
         epService.getEPRuntime().sendEvent(new SupportBean("A2", 20));
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
         sendMyEvent("X3", 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"A2", 20}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A2", 20}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("Y1"));
         epService.getEPRuntime().sendEvent(new SupportBean("A3", 30));
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
         sendMyEvent("X4", 4);
         epService.getEPRuntime().sendEvent(new SupportBean("A4", 40));
         sendMyEvent("X5", 5);   // ignored as matched (no where clause, no B event)
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"A3", 30}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A3", 30}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B1", 50));
         sendMyEvent("X6", 6);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"B1", 50}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"B1", 50}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B2", 60));
         sendMyEvent("X7", 7);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"B2", 60}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"B2", 60}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B2", 0));
         sendMyEvent("X8", 8);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"B2", 60}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"B2", 60}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("C1", 1));
         sendMyEvent("X9", 9);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
         epService.getEPRuntime().sendEvent(new SupportBean("C1", 0));
         sendMyEvent("X10", 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"A4", 40}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A4", 40}});
     }
 
     public void testNoWhereClause() {
@@ -570,28 +572,28 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPAdministrator().createEPL(epl);
 
         sendMyEvent("E1", 2);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"xE1x", -2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"xE1x", -2}});
 
         sendMyEvent("A1", 3);   // matched : no where clause
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"xE1x", -2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"xE1x", -2}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("Ax1"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
         sendMyEvent("A1", 4);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"A1", 4}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A1", 4}});
 
         sendMyEvent("B1", 5);   // matched : no where clause
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"A1", 4}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A1", 4}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("Ax1"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
         sendMyEvent("B1", 5);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"B1", 5}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"B1", 5}});
 
         sendMyEvent("C", 6);
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"Z", -1}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"Z", -1}});
     }
 
     public void testMultipleInsert() {
@@ -619,16 +621,16 @@ public class TestNamedWindowMerge extends TestCase {
         assertFalse(mergeListener.isInvoked());
 
         sendMyEvent("A1", 1);
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[] {"A1", 1});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"A1", 1});
 
         sendMyEvent("B1", 2);
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[] {"B1", 2});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"B1", 2});
 
         sendMyEvent("C1", 3);
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[] {"Z", -1});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"Z", -1});
 
         sendMyEvent("D1", 4);
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[] {"xD1x", -4});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"xD1x", -4});
 
         sendMyEvent("B1", 2);
         assertFalse(mergeListener.isInvoked());
@@ -706,7 +708,7 @@ public class TestNamedWindowMerge extends TestCase {
         merged.addListener(mergeListener);
 
         sendSupportBeanEvent(false, "E99", 2, 3); // insert via merge
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E99", 2, 3}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E99", 2, 3}});
 
         // Test ambiguous columns.
         epService.getEPAdministrator().createEPL("create schema TypeOne (id long, mylong long, mystring long)");
@@ -724,65 +726,65 @@ public class TestNamedWindowMerge extends TestCase {
     private void runAssertion(EPStatement namedWindowStmt, String[] fields) {
 
         sendSupportBeanEvent(true, "E1", 10, 200); // insert via insert-into
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 10, 200});
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E1", 10, 200}});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 10, 200});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E1", 10, 200}});
         assertFalse(mergeListener.isInvoked());
 
         sendSupportBeanEvent(false, "E1", 11, 201);    // update via merge
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetNew(), fields, new Object[] {"E1", 11, 401});
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetOld(), fields, new Object[] {"E1", 10, 200});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetNew(), fields, new Object[]{"E1", 11, 401});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetOld(), fields, new Object[]{"E1", 10, 200});
         nwListener.reset();
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E1", 11, 401}});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNew(), fields, new Object[] {"E1", 11, 401});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetOld(), fields, new Object[] {"E1", 10, 200});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E1", 11, 401}});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNew(), fields, new Object[]{"E1", 11, 401});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetOld(), fields, new Object[]{"E1", 10, 200});
         mergeListener.reset();
 
         sendSupportBeanEvent(false, "E2", 13, 300); // insert via merge
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 13, 300});
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E1", 11, 401}, {"E2", 13, 300}});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 13, 300});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 13, 300});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E1", 11, 401}, {"E2", 13, 300}});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 13, 300});
 
         sendSupportBeanEvent(false, "E2", 14, 301); // update via merge
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetNew(), fields, new Object[] {"E2", 14, 601});
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetOld(), fields, new Object[] {"E2", 13, 300});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetNew(), fields, new Object[]{"E2", 14, 601});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetOld(), fields, new Object[]{"E2", 13, 300});
         nwListener.reset();
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E1", 11, 401}, {"E2", 14, 601}});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNew(), fields, new Object[] {"E2", 14, 601});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetOld(), fields, new Object[] {"E2", 13, 300});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E1", 11, 401}, {"E2", 14, 601}});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNew(), fields, new Object[]{"E2", 14, 601});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetOld(), fields, new Object[]{"E2", 13, 300});
         mergeListener.reset();
 
         sendSupportBeanEvent(false, "E2", 15, 302); // update via merge
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetNew(), fields, new Object[] {"E2", 15, 903});
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetOld(), fields, new Object[] {"E2", 14, 601});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetNew(), fields, new Object[]{"E2", 15, 903});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetOld(), fields, new Object[]{"E2", 14, 601});
         nwListener.reset();
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E1", 11, 401}, {"E2", 15, 903}});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNew(), fields, new Object[] {"E2", 15, 903});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetOld(), fields, new Object[] {"E2", 14, 601});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E1", 11, 401}, {"E2", 15, 903}});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNew(), fields, new Object[]{"E2", 15, 903});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetOld(), fields, new Object[]{"E2", 14, 601});
         mergeListener.reset();
 
         sendSupportBeanEvent(false, "E3", 40, 400); // insert via merge
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetNewAndReset(), fields, new Object[] {"E3", 40, 400});
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E1", 11, 401}, {"E2", 15, 903}, {"E3", 40, 400}});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[] {"E3", 40, 400});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetNewAndReset(), fields, new Object[]{"E3", 40, 400});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E1", 11, 401}, {"E2", 15, 903}, {"E3", 40, 400}});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"E3", 40, 400});
 
         sendSupportBeanEvent(false, "E3", 0, 1000); // reset E3 via merge
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetNew(), fields, new Object[] {"E3", 0, 0});
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetOld(), fields, new Object[] {"E3", 40, 400});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetNew(), fields, new Object[]{"E3", 0, 0});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetOld(), fields, new Object[]{"E3", 40, 400});
         nwListener.reset();
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E1", 11, 401}, {"E2", 15, 903}, {"E3", 0, 0}});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetNew(), fields, new Object[] {"E3", 0, 0});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetOld(), fields, new Object[] {"E3", 40, 400});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E1", 11, 401}, {"E2", 15, 903}, {"E3", 0, 0}});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetNew(), fields, new Object[]{"E3", 0, 0});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetOld(), fields, new Object[]{"E3", 40, 400});
         mergeListener.reset();
 
         sendSupportBeanEvent(false, "E2", -1, 1000); // delete E2 via merge
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetOldAndReset(), fields, new Object[] {"E2", 15, 903});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetOldAndReset(), fields, new Object[] {"E2", 15, 903});
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E1", 11, 401}, {"E3", 0, 0}});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetOldAndReset(), fields, new Object[]{"E2", 15, 903});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetOldAndReset(), fields, new Object[]{"E2", 15, 903});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E1", 11, 401}, {"E3", 0, 0}});
 
         sendSupportBeanEvent(false, "E1", -1, 1000); // delete E1 via merge
-        ArrayAssertionUtil.assertProps(nwListener.assertOneGetOldAndReset(), fields, new Object[] {"E1", 11, 401});
-        ArrayAssertionUtil.assertProps(mergeListener.assertOneGetOldAndReset(), fields, new Object[] {"E1", 11, 401});
-        ArrayAssertionUtil.assertEqualsAnyOrder(namedWindowStmt.iterator(), fields, new Object[][] {{"E3", 0, 0}});
+        EPAssertionUtil.assertProps(nwListener.assertOneGetOldAndReset(), fields, new Object[]{"E1", 11, 401});
+        EPAssertionUtil.assertProps(mergeListener.assertOneGetOldAndReset(), fields, new Object[]{"E1", 11, 401});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E3", 0, 0}});
     }
 
     private void sendSupportBeanEvent(boolean boolPrimitive, String string, int intPrimitive, Integer intBoxed) {

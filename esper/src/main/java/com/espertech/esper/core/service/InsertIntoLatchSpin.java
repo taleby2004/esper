@@ -11,7 +11,6 @@ package com.espertech.esper.core.service;
 import com.espertech.esper.client.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.timer.TimeSourceService;
 
 /**
  * A spin-locking implementation of a latch for use in guaranteeing delivery between
@@ -22,10 +21,10 @@ public class InsertIntoLatchSpin
     private static final Log log = LogFactory.getLog(InsertIntoLatchSpin.class);
 
     // The earlier latch is the latch generated before this latch
+    private InsertIntoLatchFactory factory;
     private InsertIntoLatchSpin earlier;
     private long msecTimeout;
     private EventBean payload;
-    private TimeSourceService timeSourceService;
 
     private volatile boolean isCompleted;
 
@@ -34,22 +33,21 @@ public class InsertIntoLatchSpin
      * @param earlier the latch before this latch that this latch should be waiting for
      * @param msecTimeout the timeout after which delivery occurs
      * @param payload the payload is an event to deliver
-     * @param timeSourceService time source provider
      */
-    public InsertIntoLatchSpin(InsertIntoLatchSpin earlier, long msecTimeout, EventBean payload, TimeSourceService timeSourceService)
+    public InsertIntoLatchSpin(InsertIntoLatchFactory factory, InsertIntoLatchSpin earlier, long msecTimeout, EventBean payload)
     {
+        this.factory = factory;
         this.earlier = earlier;
         this.msecTimeout = msecTimeout;
         this.payload = payload;
-        this.timeSourceService = timeSourceService;
     }
 
     /**
      * Ctor - use for the first and unused latch to indicate completion.
-     * @param timeSourceService time source provider
      */
-    public InsertIntoLatchSpin(TimeSourceService timeSourceService)
+    public InsertIntoLatchSpin(InsertIntoLatchFactory factory)
     {
+        this.factory = factory;
         isCompleted = true;
         earlier = null;
         msecTimeout = 0;
@@ -72,16 +70,16 @@ public class InsertIntoLatchSpin
     {
         if (!earlier.isCompleted)
         {
-            long spinStartTime = timeSourceService.getTimeMillis();
+            long spinStartTime = factory.getTimeSourceService().getTimeMillis();
 
             while(!earlier.isCompleted)
             {
                 Thread.yield();
 
-                long spinDelta = timeSourceService.getTimeMillis() - spinStartTime;
+                long spinDelta = factory.getTimeSourceService().getTimeMillis() - spinStartTime;
                 if (spinDelta > msecTimeout)
                 {
-                    log.info("Spin wait timeout exceeded in insert-into dispatch at " + msecTimeout + "ms, consider disabling insert-into between-statement latching for better performance");
+                    log.info("Spin wait timeout exceeded in insert-into dispatch at " + msecTimeout + "ms for " + factory.getName() + ", consider disabling insert-into between-statement latching for better performance");
                     break;
                 }
             }

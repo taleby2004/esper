@@ -11,18 +11,21 @@
 
 package com.espertech.esper.event;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventPropertyGetter;
 import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TestEventBeanUtility extends TestCase
 {
@@ -30,28 +33,30 @@ public class TestEventBeanUtility extends TestCase
     {
         EventBean[] testEvent = makeEventArray(new String[] {"a1", "a2", "a3"});
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {testEvent[0]},
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{testEvent[0]},
                 EventBeanUtility.addToArray(new EventBean[0], testEvent[0]));
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {testEvent[0], testEvent[1]},
-                EventBeanUtility.addToArray(new EventBean[] {testEvent[0]}, testEvent[1]));
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{testEvent[0], testEvent[1]},
+                EventBeanUtility.addToArray(new EventBean[]{testEvent[0]}, testEvent[1]));
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {testEvent[0], testEvent[1], testEvent[2]},
-                EventBeanUtility.addToArray(new EventBean[] {testEvent[0], testEvent[1]}, testEvent[2]));
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{testEvent[0], testEvent[1], testEvent[2]},
+                EventBeanUtility.addToArray(new EventBean[]{testEvent[0], testEvent[1]}, testEvent[2]));
+
+        System.out.println(EventBeanUtility.printEvents(testEvent));
     }
 
     public void testArrayOpAdd()
     {
         EventBean[] testEvent = makeEventArray(new String[] {"a1", "a2", "a3"});
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {testEvent[0], testEvent[1], testEvent[2]},
-                EventBeanUtility.addToArray(new EventBean[] {testEvent[0]}, Arrays.asList(new EventBean[] {testEvent[1], testEvent[2]})));
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{testEvent[0], testEvent[1], testEvent[2]},
+                EventBeanUtility.addToArray(new EventBean[]{testEvent[0]}, Arrays.asList(new EventBean[]{testEvent[1], testEvent[2]})));
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {testEvent[1], testEvent[2]},
-                EventBeanUtility.addToArray(new EventBean[] {}, Arrays.asList(new EventBean[] {testEvent[1], testEvent[2]})));
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{testEvent[1], testEvent[2]},
+                EventBeanUtility.addToArray(new EventBean[]{}, Arrays.asList(new EventBean[]{testEvent[1], testEvent[2]})));
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {testEvent[0]},
-                EventBeanUtility.addToArray(new EventBean[] {testEvent[0]}, Arrays.asList(new EventBean[0])));
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{testEvent[0]},
+                EventBeanUtility.addToArray(new EventBean[]{testEvent[0]}, Arrays.asList(new EventBean[0])));
     }
 
     public void testFlattenList()
@@ -66,15 +71,15 @@ public class TestEventBeanUtility extends TestCase
         eventVector.add(new UniformPair<EventBean[]>(new EventBean[] {testEvents[6]}, null));
 
         UniformPair<EventBean[]> events = EventBeanUtility.flattenList(eventVector);
-        ArrayAssertionUtil.assertEqualsExactOrder(events.getFirst(), new EventBean[] {testEvents[2], testEvents[6]});
-        ArrayAssertionUtil.assertEqualsExactOrder(events.getSecond(), new EventBean[] {testEvents[0], testEvents[1], testEvents[3], testEvents[4], testEvents[5]});
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{testEvents[2], testEvents[6]}, events.getFirst());
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{testEvents[0], testEvents[1], testEvents[3], testEvents[4], testEvents[5]}, events.getSecond());
 
         // test just one array
         eventVector.clear();
         eventVector.add(new UniformPair<EventBean[]>(new EventBean[] {testEvents[2]}, null));
         events = EventBeanUtility.flattenList(eventVector);
-        ArrayAssertionUtil.assertEqualsExactOrder(events.getFirst(), new EventBean[] {testEvents[2]});
-        ArrayAssertionUtil.assertEqualsExactOrder(events.getSecond(), null);
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{testEvents[2]}, events.getFirst());
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) null, events.getSecond());
 
         // test empty vector
         eventVector.clear();

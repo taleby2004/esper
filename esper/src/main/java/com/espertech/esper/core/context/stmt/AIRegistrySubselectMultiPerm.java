@@ -28,9 +28,7 @@ public class AIRegistrySubselectMultiPerm implements AIRegistrySubselect, ExprSu
     }
 
     public void assignService(int num, ExprSubselectStrategy subselectStrategy) {
-        if (num > strategies.getArray().length - 1) {
-            strategies.expand(100);
-        }
+        AIRegistryUtil.checkExpand(num, strategies);
         strategies.getArray()[num] = subselectStrategy;
         count++;
     }
@@ -41,7 +39,7 @@ public class AIRegistrySubselectMultiPerm implements AIRegistrySubselect, ExprSu
     }
 
     public Collection<EventBean> evaluateMatching(EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext) {
-        int agentInstanceId = exprEvaluatorContext.getAgentInstanceIds()[0];
+        int agentInstanceId = exprEvaluatorContext.getAgentInstanceId();
         ExprSubselectStrategy strategy = strategies.getArray()[agentInstanceId];
         return strategy.evaluateMatching(eventsPerStream, exprEvaluatorContext);
     }

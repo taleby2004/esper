@@ -8,8 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.core.service;
 
-import com.espertech.esper.epl.spec.CreateWindowDesc;
-import com.espertech.esper.epl.spec.OnTriggerDesc;
+import com.espertech.esper.epl.spec.StatementSpecRaw;
 
 import java.lang.annotation.Annotation;
 import java.util.Map;
@@ -26,9 +25,6 @@ public interface StatementContextFactory
      * @param expression is the statement expression
      * @param engineServices is engine services
      * @param optAdditionalContext addtional context to pass to the statement
-     * @param optOnTriggerDesc the on-delete statement descriptor for named window context creation
-     * @param optCreateWindowDesc the create-window statement descriptor for named window context creation
-     * @param hasVariables indicator whether the statement uses variables anywhere in the statement
      * @param isFireAndForget if the statement context is for a fire-and-forget statement
      * @param annotations statement annotations
      * @param isolationUnitServices for isolation units
@@ -37,14 +33,11 @@ public interface StatementContextFactory
     public StatementContext makeContext(String statementId,
                                         String statementName,
                                         String expression,
-                                        boolean hasVariables,
                                         EPServicesContext engineServices,
                                         Map<String, Object> optAdditionalContext,
-                                        OnTriggerDesc optOnTriggerDesc,
-                                        CreateWindowDesc optCreateWindowDesc,
                                         boolean isFireAndForget,
                                         Annotation[] annotations,
                                         EPIsolationUnitServices isolationUnitServices,
-                                        String optionalCreateNamedWindowName,
-                                        String optionalContextName);
+                                        boolean stateless,
+                                        StatementSpecRaw statementSpecRaw);
 }

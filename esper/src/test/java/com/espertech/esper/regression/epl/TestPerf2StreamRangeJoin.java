@@ -15,11 +15,11 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanRange;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -412,7 +412,7 @@ public class TestPerf2StreamRangeJoin extends TestCase
             //    log.info("At loop #" + i);
             //}
             epService.getEPRuntime().sendEvent(assertionCallback.getEvent(i));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, assertionCallback.getExpectedValue(i));
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, assertionCallback.getExpectedValue(i));
         }
         log.info("Done Querying");
         long endTime = System.currentTimeMillis();

@@ -21,10 +21,10 @@ public class SupportFilterSpecBuilder
 {
     public static FilterSpecCompiled build(EventType eventType, Object[] objects)
     {
-        return new FilterSpecCompiled(eventType, "SomeAliasNameForType", buildList(objects), null);
+        return new FilterSpecCompiled(eventType, "SomeAliasNameForType", buildList(eventType, objects), null);
     }
 
-    public static List<FilterSpecParam> buildList(Object[] objects)
+    public static List<FilterSpecParam> buildList(EventType eventType, Object[] objects)
     {
         List<FilterSpecParam> filterParams = new LinkedList<FilterSpecParam>();
 
@@ -37,19 +37,23 @@ public class SupportFilterSpecBuilder
             if (!(filterOperator.isRangeOperator()))
             {
                 Object filterForConstant = objects[index++];
-                filterParams.add(new FilterSpecParamConstant(propertyName, filterOperator, filterForConstant));
+                filterParams.add(new FilterSpecParamConstant(makeLookupable(eventType, propertyName), filterOperator, filterForConstant));
             }
             else
             {
                 double min = ((Number) objects[index++]).doubleValue();
                 double max = ((Number) objects[index++]).doubleValue();
-                filterParams.add(new FilterSpecParamRange(propertyName, filterOperator,
+                filterParams.add(new FilterSpecParamRange(makeLookupable(eventType, propertyName), filterOperator,
                         new RangeValueDouble(min),
-                        new RangeValueDouble(max), Double.class));
+                        new RangeValueDouble(max)));
             }
         }
 
         return filterParams;
+    }
+
+    private static FilterSpecLookupable makeLookupable(EventType eventType, String fieldName) {
+        return new FilterSpecLookupable(fieldName, eventType.getGetter(fieldName), eventType.getPropertyType(fieldName));
     }
 }
 

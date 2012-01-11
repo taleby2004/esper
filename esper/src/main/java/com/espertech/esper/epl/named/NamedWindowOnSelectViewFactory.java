@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPStatementHandle;
 import com.espertech.esper.core.service.InternalEventRouteDest;
@@ -48,7 +49,8 @@ public class NamedWindowOnSelectViewFactory extends NamedWindowOnExprBaseViewFac
     }
 
     public NamedWindowOnExprBaseView make(NamedWindowLookupStrategy lookupStrategy, NamedWindowRootViewInstance namedWindowRootViewInstance, AgentInstanceContext agentInstanceContext, ResultSetProcessor resultSetProcessor) {
-        return new NamedWindowOnSelectView(lookupStrategy, namedWindowRootViewInstance, agentInstanceContext, this, resultSetProcessor);
+        boolean audit = AuditEnum.INSERT.getAudit(agentInstanceContext.getStatementContext().getAnnotations()) != null;
+        return new NamedWindowOnSelectView(lookupStrategy, namedWindowRootViewInstance, agentInstanceContext, this, resultSetProcessor, audit);
     }
 
     public InternalEventRouter getInternalEventRouter() {

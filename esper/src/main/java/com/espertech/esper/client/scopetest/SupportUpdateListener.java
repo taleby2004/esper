@@ -1,0 +1,329 @@
+/*
+ * *************************************************************************************
+ *  Copyright (C) 2008 EsperTech, Inc. All rights reserved.                            *
+ *  http://esper.codehaus.org                                                          *
+ *  http://www.espertech.com                                                           *
+ *  ---------------------------------------------------------------------------------- *
+ *  The software in this package is published under the terms of the GPL license       *
+ *  a copy of which has been included with this distribution in the license.txt file.  *
+ * *************************************************************************************
+ */
+
+package com.espertech.esper.client.scopetest;
+
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.UpdateListener;
+import com.espertech.esper.collection.UniformPair;
+
+import java.util.LinkedList;
+import java.util.List;
+
+/**
+ * Update listener that retains the events it receives for use in assertions.
+ */
+public class SupportUpdateListener implements UpdateListener
+{
+    private final List<EventBean[]> newDataList;
+    private final List<EventBean[]> oldDataList;
+    private EventBean[] lastNewData;
+    private EventBean[] lastOldData;
+    private boolean isInvoked;
+
+    /**
+     * Ctor.
+     */
+    public SupportUpdateListener()
+    {
+        newDataList = new LinkedList<EventBean[]>();
+        oldDataList = new LinkedList<EventBean[]>();
+    }
+
+    /**
+     * Wait for the listener invocation for up to the given number of milliseconds.
+     * @param msecWait to wait
+     * @throws RuntimeException when no results were received
+     */
+    public void waitForInvocation(long msecWait) {
+        long startTime = System.currentTimeMillis();
+        while(true) {
+            if ((System.currentTimeMillis() - startTime) > msecWait) {
+                throw new RuntimeException("No result received");
+            }
+            if (isInvoked()) {
+                return;
+            }
+            try {
+                Thread.sleep(50);
+            }
+            catch (InterruptedException e) {
+                return;
+            }
+        }
+    }
+
+    public void update(EventBean[] newData, EventBean[] oldData)
+    {
+        this.oldDataList.add(oldData);
+        this.newDataList.add(newData);
+
+        this.lastNewData = newData;
+        this.lastOldData = oldData;
+
+        isInvoked = true;
+    }
+
+    /**
+     * Reset listener, clearing all associated state.
+     */
+    public void reset()
+    {
+        this.oldDataList.clear();
+        this.newDataList.clear();
+        this.lastNewData = null;
+        this.lastOldData = null;
+        isInvoked = false;
+    }
+
+    /**
+     * Returns the last array of events (insert stream) that were received.
+     * @return insert stream events or null if either a null value was received or when no events have been received since the last reset
+     */
+    public EventBean[] getLastNewData()
+    {
+        return lastNewData;
+    }
+
+    /**
+     * Returns the last array of remove-stream events that were received.
+     * @return remove stream events or null if either a null value was received or when no events have been received since the last reset
+     */
+    public EventBean[] getLastOldData()
+    {
+        return lastOldData;
+    }
+
+    /**
+     * Returns the last array of events (insert stream) that were received and resets the listener.
+     * @return insert stream events or null if either a null value was received or when no events have been received since the last reset
+     */
+    public EventBean[] getAndResetLastNewData()
+    {
+        EventBean[] lastNew = lastNewData;
+        reset();
+        return lastNew;
+    }
+
+    /**
+     * Returns the last array of events (insert stream) that were received and resets the listener.
+     * @return insert stream events or null if either a null value was received or when no events have been received since the last reset
+     */
+    public EventBean[] getAndResetLastOldData()
+    {
+        EventBean[] lastOld = lastOldData;
+        reset();
+        return lastOld;
+    }
+
+    /**
+     * Asserts that exactly one insert stream event was received and no remove stream events, resets the listener clearing all state and returns the received event.
+     * @return single insert-stream event
+     */
+    public EventBean assertOneGetNewAndReset()
+    {
+        ScopeTestHelper.assertTrue(isInvoked);
+        
+        ScopeTestHelper.assertEquals(1, newDataList.size());
+        ScopeTestHelper.assertEquals(1, oldDataList.size());
+
+        ScopeTestHelper.assertEquals(1, lastNewData.length);
+        ScopeTestHelper.assertNull(lastOldData);
+
+        EventBean lastNew = lastNewData[0];
+        reset();
+        return lastNew;
+    }
+
+    /**
+     * Asserts that exactly one remove stream event was received and no insert stream events, resets the listener clearing all state and returns the received event.
+     * @return single remove-stream event
+     */
+    public EventBean assertOneGetOldAndReset()
+    {
+        ScopeTestHelper.assertTrue(isInvoked);
+
+        ScopeTestHelper.assertEquals(1, newDataList.size());
+        ScopeTestHelper.assertEquals(1, oldDataList.size());
+
+        ScopeTestHelper.assertEquals(1, lastOldData.length);
+        ScopeTestHelper.assertNull(lastNewData);
+
+        EventBean lastNew = lastOldData[0];
+        reset();
+        return lastNew;
+    }
+
+    /**
+     * Asserts that exactly one insert stream event was received not checking remove stream data, and returns the received event.
+     * @return single insert-stream event
+     */
+    public EventBean assertOneGetNew()
+    {
+        ScopeTestHelper.assertTrue(isInvoked);
+
+        ScopeTestHelper.assertEquals(1, newDataList.size());
+        ScopeTestHelper.assertEquals(1, oldDataList.size());
+
+        ScopeTestHelper.assertEquals(1, lastNewData.length);
+        return lastNewData[0];
+    }
+
+    /**
+     * Asserts that exactly one remove stream event was received not checking insert stream data, and returns the received event.
+     * @return single remove-stream event
+     */
+    public EventBean assertOneGetOld()
+    {
+        ScopeTestHelper.assertTrue(isInvoked);
+
+        ScopeTestHelper.assertEquals(1, newDataList.size());
+        ScopeTestHelper.assertEquals(1, oldDataList.size());
+
+        ScopeTestHelper.assertEquals(1, lastOldData.length);
+        return lastOldData[0];
+    }
+
+    /**
+     * Get a list of all insert-stream event arrays received.
+     * @return list of event arrays
+     */
+    public List<EventBean[]> getNewDataList()
+    {
+        return newDataList;
+    }
+
+    /**
+     * Get a list of all remove-stream event arrays received.
+     * @return list of event arrays
+     */
+    public List<EventBean[]> getOldDataList()
+    {
+        return oldDataList;
+    }
+
+    /**
+     * Returns true if the listener was invoked at least once.
+     * @return invoked flag
+     */
+    public boolean isInvoked()
+    {
+        return isInvoked;
+    }
+
+    /**
+     * Returns true if the listener was invoked at least once and clears the invocation flag.
+     * @return invoked flag
+     */
+    public boolean getAndClearIsInvoked()
+    {
+        boolean invoked = isInvoked;
+        isInvoked = false;
+        return invoked;
+    }
+
+    /**
+     * Set an array of events as the last insert-stream events received.
+     * @param lastNewData to store
+     */
+    public void setLastNewData(EventBean[] lastNewData)
+    {
+        this.lastNewData = lastNewData;
+    }
+
+    /**
+     * Set an array of events as the last remove-stream events received.
+     * @param lastOldData to store
+     */
+    public void setLastOldData(EventBean[] lastOldData)
+    {
+        this.lastOldData = lastOldData;
+    }
+
+    /**
+     * Returns an event array that represents all insert-stream events received so far.
+     * @return event array
+     */
+    public EventBean[] getNewDataListFlattened()
+    {
+        return flatten(newDataList);
+    }
+
+    /**
+     * Returns an event array that represents all remove-stream events received so far.
+     * @return event array
+     */
+    public EventBean[] getOldDataListFlattened()
+    {
+        return flatten(oldDataList);
+    }
+
+    private EventBean[] flatten(List<EventBean[]> list)
+    {
+        int count = 0;
+        for (EventBean[] events : list)
+        {
+            if (events != null)
+            {
+                count += events.length;
+            }
+        }
+
+        EventBean[] array = new EventBean[count];
+        count = 0;
+        for (EventBean[] events : list)
+        {
+            if (events != null)
+            {
+                for (int i = 0; i < events.length; i++)
+                {
+                    array[count++] = events[i];
+                }
+            }
+        }
+        return array;
+    }
+
+    /**
+     * Returns a pair of insert and remove stream event arrays considering the last invocation only,
+     * asserting that only a single invocation occured, and resetting the listener.
+     * @return pair of event arrays, the first in the pair is the insert stream data, the second in the pair is the remove stream data
+     */
+    public UniformPair<EventBean[]> assertInvokedAndReset() {
+        ScopeTestHelper.assertTrue(isInvoked);
+        ScopeTestHelper.assertEquals(1, getNewDataList().size());
+        ScopeTestHelper.assertEquals(1, getOldDataList().size());
+        EventBean[] newEvents = getLastNewData();
+        EventBean[] oldEvents = getLastOldData();
+        reset();
+        return new UniformPair<EventBean[]>(newEvents, oldEvents);
+    }
+
+    /**
+     * Returns a pair of insert and remove stream event arrays considering the all invocations.
+     * @return pair of event arrays, the first in the pair is the insert stream data, the second in the pair is the remove stream data
+     */
+    public UniformPair<EventBean[]> getDataListsFlattened()
+    {
+        return new UniformPair<EventBean[]>(flatten(newDataList), flatten(oldDataList));
+    }    
+
+    /**
+     * Returns a pair of insert and remove stream event arrays considering the all invocations, and resets the listener.
+     * @return pair of event arrays, the first in the pair is the insert stream data, the second in the pair is the remove stream data
+     */
+    public UniformPair<EventBean[]> getAndResetDataListsFlattened()
+    {
+        UniformPair pair = getDataListsFlattened();
+        reset();
+        return pair;
+    }
+}

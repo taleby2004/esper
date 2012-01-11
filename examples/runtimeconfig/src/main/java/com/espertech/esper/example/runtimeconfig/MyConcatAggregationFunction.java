@@ -1,9 +1,8 @@
 package com.espertech.esper.example.runtimeconfig;
 
-import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.epl.agg.AggregationValidationContext;
+import com.espertech.esper.epl.agg.AggregationMethod;
 
-public class MyConcatAggregationFunction extends AggregationSupport {
+public class MyConcatAggregationFunction implements AggregationMethod {
     private final static char DELIMITER = ' ';
     private StringBuilder builder;
     private String delimiter;
@@ -12,13 +11,6 @@ public class MyConcatAggregationFunction extends AggregationSupport {
         super();
         builder = new StringBuilder();
         delimiter = "";
-    }
-
-    public void validate(AggregationValidationContext validationContext) {
-        if ((validationContext.getParameterTypes().length != 1) ||
-            (validationContext.getParameterTypes()[0] != String.class)) {
-            throw new IllegalArgumentException("Concat aggregation requires a single parameter of type String");
-        }
     }
 
     public void enter(Object value) {

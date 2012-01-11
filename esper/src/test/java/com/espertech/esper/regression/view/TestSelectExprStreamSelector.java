@@ -11,6 +11,8 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
@@ -24,8 +26,6 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 
 import java.util.Map;
 
@@ -173,7 +173,7 @@ public class TestSelectExprStreamSelector extends TestCase
         Object eventTwo = sendMarketEvent("E2");
         String[] fields = new String[] {"s0", "s1", "symbol", "volume"};
         EventBean received = testListener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields, new Object[] {eventOne, eventTwo, "E2", 0L});
+        EPAssertionUtil.assertProps(received, fields, new Object[]{eventOne, eventTwo, "E2", 0L});
     }
 
     public void testNoJoinWildcardWithAlias()
@@ -189,7 +189,7 @@ public class TestSelectExprStreamSelector extends TestCase
 
         Object event = sendBeanEvent("E1", 15);
         String[] fields = new String[] {"string", "intPrimitive", "s0"};
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 15, event});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 15, event});
     }
 
     public void testJoinWildcardWithAlias()
@@ -213,7 +213,7 @@ public class TestSelectExprStreamSelector extends TestCase
         Object eventTwo = sendMarketEvent("E2");
         String[] fields = new String[] {"s0", "s1", "s0stream", "s1stream"};
         EventBean received = testListener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields, new Object[] {eventOne, eventTwo, eventOne, eventTwo});
+        EPAssertionUtil.assertProps(received, fields, new Object[]{eventOne, eventTwo, eventOne, eventTwo});
     }
 
     public void testNoJoinWithAliasWithProperties()
@@ -232,7 +232,7 @@ public class TestSelectExprStreamSelector extends TestCase
 
         Object event = sendBeanEvent("E1", 12);
         String[] fields = new String[] {"s0", "s1", "a", "b"};
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[] {event, event, 12, 12});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[]{event, event, 12, 12});
     }
 
     public void testJoinWithAliasWithProperties()
@@ -257,7 +257,7 @@ public class TestSelectExprStreamSelector extends TestCase
         Object eventTwo = sendMarketEvent("E2");
         String[] fields = new String[] {"intPrimitive", "sym", "string", "s0stream", "s1stream"};
         EventBean received = testListener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields, new Object[] {13, "E2", "E1", eventOne, eventTwo});
+        EPAssertionUtil.assertProps(received, fields, new Object[]{13, "E2", "E1", eventOne, eventTwo});
         EventBean event = (EventBean) ((Map)received.getUnderlying()).get("s0stream");
         assertSame(eventOne, event.getUnderlying());
     }
@@ -277,7 +277,7 @@ public class TestSelectExprStreamSelector extends TestCase
 
         sendBeanEvent("E1", 10);
         String[] fields = new String[] {"a", "string", "intPrimitive", "b"};
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[] {10, "E1", 10, 10});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[]{10, "E1", 10, 10});
     }
 
     public void testJoinNoAliasWithProperties()
@@ -298,7 +298,7 @@ public class TestSelectExprStreamSelector extends TestCase
         Object event = sendMarketEvent("E1");
         String[] fields = new String[] {"intPrimitive", "sym", "symbol"};
         EventBean received = testListener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields, new Object[] {11, "E1", "E1"});
+        EPAssertionUtil.assertProps(received, fields, new Object[]{11, "E1", "E1"});
         assertSame(event, ((Pair)received.getUnderlying()).getFirst());
     }
 

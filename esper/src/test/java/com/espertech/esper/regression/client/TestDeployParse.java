@@ -16,8 +16,8 @@ import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
 import com.espertech.esper.client.deploy.Module;
 import com.espertech.esper.client.deploy.ParseException;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 import java.io.IOException;
@@ -163,10 +163,10 @@ public class TestDeployParse extends TestCase
         assertEquals(name, module.getName());
 
         String[] expectedUses = usesCSV == null ? new String[0] : usesCSV.split(",");
-        ArrayAssertionUtil.assertEqualsExactOrder(module.getUses().toArray(), expectedUses);
+        EPAssertionUtil.assertEqualsExactOrder(expectedUses, module.getUses().toArray());
 
         String[] expectedImports = importsCSV == null ? new String[0] : importsCSV.split(",");
-        ArrayAssertionUtil.assertEqualsExactOrder(module.getImports().toArray(), expectedImports);
+        EPAssertionUtil.assertEqualsExactOrder(expectedImports, module.getImports().toArray());
 
         String[] stmtsFound = new String[module.getItems().size()];
         boolean[] comments = new boolean[module.getItems().size()];
@@ -182,8 +182,8 @@ public class TestDeployParse extends TestCase
             charEndsFound[i] = module.getItems().get(i).getCharPosEnd();
         }
                 
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtsFound, statementsExpected);
-        ArrayAssertionUtil.assertEqualsExactOrder(comments, commentsExpected);
+        EPAssertionUtil.assertEqualsExactOrder(statementsExpected, stmtsFound);
+        EPAssertionUtil.assertEqualsExactOrder(commentsExpected, comments);
 
         boolean isCompareLineNums = false;
         for (int l : lineNumsExpected) {
@@ -192,9 +192,9 @@ public class TestDeployParse extends TestCase
             }
         }
         if (isCompareLineNums) {
-            ArrayAssertionUtil.assertEqualsExactOrder(lineNumsFound, lineNumsExpected);
-            ArrayAssertionUtil.assertEqualsExactOrder(charStartsFound, charStartsExpected);
-            ArrayAssertionUtil.assertEqualsExactOrder(charEndsFound, charEndsExpected);
+            EPAssertionUtil.assertEqualsExactOrder(lineNumsExpected, lineNumsFound);
+            EPAssertionUtil.assertEqualsExactOrder(charStartsExpected, charStartsFound);
+            EPAssertionUtil.assertEqualsExactOrder(charEndsExpected, charEndsFound);
         }
     }
 }

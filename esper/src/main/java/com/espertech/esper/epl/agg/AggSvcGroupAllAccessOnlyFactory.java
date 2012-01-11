@@ -19,20 +19,18 @@ import com.espertech.esper.epl.core.MethodResolutionService;
  */
 public class AggSvcGroupAllAccessOnlyFactory implements AggregationServiceFactory
 {
-    private final MethodResolutionService methodResolutionService;
     private final AggregationAccessorSlotPair[] accessors;
     private final int[] streams;
     private final boolean isJoin;
 
-    public AggSvcGroupAllAccessOnlyFactory(MethodResolutionService methodResolutionService, AggregationAccessorSlotPair[] accessors, int[] streams, boolean join) {
-        this.methodResolutionService = methodResolutionService;
+    public AggSvcGroupAllAccessOnlyFactory(AggregationAccessorSlotPair[] accessors, int[] streams, boolean join) {
         this.accessors = accessors;
         this.streams = streams;
         isJoin = join;
     }
 
-    public AggregationService makeService(AgentInstanceContext agentInstanceContext) {
-        AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(agentInstanceContext.getAgentInstanceIds(), isJoin, streams, methodResolutionService, null);
+    public AggregationService makeService(AgentInstanceContext agentInstanceContext, MethodResolutionService methodResolutionService) {
+        AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(agentInstanceContext.getAgentInstanceId(), isJoin, streams, methodResolutionService, null);
         return new AggSvcGroupAllAccessOnlyImpl(accessors, accesses);
     }
 }

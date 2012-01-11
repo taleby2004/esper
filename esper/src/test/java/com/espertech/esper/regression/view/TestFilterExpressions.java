@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -338,22 +338,22 @@ public class TestFilterExpressions extends TestCase
                 "string = 'A' and intPrimitive != 0 as val5 from SupportBean").addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, false, null, null, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, false, null, null, false});
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, true, null, null, true, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, true, null, null, true, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false, false, true, true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false, false, true, true, false});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true, false, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true, false, true, true, true});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true, false, false, false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true, false, false, false, false});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true, true, false, true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true, true, false, true, false});
 
         epService.getEPAdministrator().destroyAllStatements();
 
@@ -388,16 +388,16 @@ public class TestFilterExpressions extends TestCase
                 "from SupportBean").addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true, false, false, false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true, false, false, false, false});
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true, true, false, true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true, true, false, true, false});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false, false, true, true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false, false, true, true, false});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true, false, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true, false, true, true, true});
 
         epService.getEPAdministrator().destroyAllStatements();
 
@@ -427,7 +427,7 @@ public class TestFilterExpressions extends TestCase
                 "from SupportBean").addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null});
     }
 
     private void assertListeners(SupportUpdateListener[] listeners, boolean[] invoked) {

@@ -26,10 +26,10 @@ public class StatementLockFactoryImpl implements StatementLockFactory
         this.disableLocking = disableLocking;
     }
 
-    public StatementAgentInstanceLock getStatementLock(String statementName, String expressionText, Annotation[] annotations)
+    public StatementAgentInstanceLock getStatementLock(String statementName, String expressionText, Annotation[] annotations, boolean stateless)
     {
         boolean foundNoLock = AnnotationUtil.findAnnotation(annotations, NoLock.class) != null;
-        if (disableLocking || foundNoLock) {
+        if (disableLocking || foundNoLock || stateless) {
            return new StatementNoLockImpl(statementName);
         }
         return new StatementAgentInstanceRWLockImpl(statementName, fairlocks);

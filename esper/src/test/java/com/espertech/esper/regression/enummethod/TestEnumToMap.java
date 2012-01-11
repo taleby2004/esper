@@ -15,15 +15,14 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST0_Container;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
@@ -56,12 +55,12 @@ public class TestEnumToMap extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), "val".split(","), new Class[]{Map.class});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value("E1,1", "E3,12", "E2,5"));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val"), "E1,E2,E3".split(","), new Object[] {1,5,12});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val"), "E1,E2,E3".split(","), new Object[]{1, 5, 12});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value("E1,1", "E3,12", "E2,12", "E1,2"));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val"), "E1,E2,E3".split(","), new Object[]{2, 12, 12});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val"), "E1,E2,E3".split(","), new Object[]{2, 12, 12});
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0_Container(Collections.singletonList(new SupportBean_ST0(null, null))));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val"), "E1,E2,E3".split(","), new Object[]{null, null, null});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val"), "E1,E2,E3".split(","), new Object[]{null, null, null});
     }
 }

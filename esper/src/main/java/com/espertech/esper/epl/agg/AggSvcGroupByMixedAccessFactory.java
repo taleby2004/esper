@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 
 /**
@@ -41,7 +42,7 @@ public class AggSvcGroupByMixedAccessFactory extends AggregationServiceFactoryBa
         this.isJoin = isJoin;
     }
 
-    public AggregationService makeService(AgentInstanceContext agentInstanceContext) {
-        return new AggSvcGroupByMixedAccessImpl(evaluators, aggregators, agentInstanceContext.getMethodResolutionService(), accessors, streams, isJoin);
+    public AggregationService makeService(AgentInstanceContext agentInstanceContext, MethodResolutionService methodResolutionService) {
+        return new AggSvcGroupByMixedAccessImpl(evaluators, aggregators, methodResolutionService, accessors, streams, isJoin);
     }
 }

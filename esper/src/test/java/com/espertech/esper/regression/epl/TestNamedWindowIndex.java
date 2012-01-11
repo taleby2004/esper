@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.support.bean.SupportBean;
@@ -19,8 +21,6 @@ import com.espertech.esper.support.bean.SupportBeanRange;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestNamedWindowIndex extends TestCase
@@ -68,7 +68,7 @@ public class TestNamedWindowIndex extends TestCase
 
     private void runQueryAssertion(String epl, String[] fields, Object[][] expected) {
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(epl);
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, expected);
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, expected);
     }
 
     public void testHashBTreeWidening() {
@@ -84,7 +84,7 @@ public class TestNamedWindowIndex extends TestCase
 
         sendEventLong("E1", 10L);
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f1>9");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{10L, "E1"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{10L, "E1"}});
 
         // SODA
         String epl = "create index IX1 on MyWindowOne(f1, f2 btree)";
@@ -102,7 +102,7 @@ public class TestNamedWindowIndex extends TestCase
         sendEventShort("E1", (short) 2);
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowTwo where f1>=2");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{(short)2, "E1"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{(short) 2, "E1"}});
     }
 
     public void testWidening()
@@ -120,7 +120,7 @@ public class TestNamedWindowIndex extends TestCase
         sendEventLong("E1", 10L);
 
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f1=10");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{10L, "E1"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{10L, "E1"}});
 
         // coerce to short
         stmtTextCreate = "create window MyWindowTwo.win:keepall() as (f1 short, f2 string)";
@@ -131,7 +131,7 @@ public class TestNamedWindowIndex extends TestCase
         sendEventShort("E1", (short) 2);
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowTwo where f1=2");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{(short)2, "E1"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{(short) 2, "E1"}});
     }
 
     public void testCompositeIndex()
@@ -148,13 +148,13 @@ public class TestNamedWindowIndex extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", -2));
 
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f3='>E1<'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2, ">E1<", "?E1?"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2, ">E1<", "?E1?"}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f3='>E1<' and f2=-2");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2, ">E1<", "?E1?"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2, ">E1<", "?E1?"}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f3='>E1<' and f2=-2 and f1='E1'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2, ">E1<", "?E1?"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2, ">E1<", "?E1?"}});
 
         indexOne.destroy();
 
@@ -184,7 +184,7 @@ public class TestNamedWindowIndex extends TestCase
         String fields[] = "f1,f2,f3,f4".split(",");
 
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f3='>E1<' order by f2 asc");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{
                 {"E1", -4, ">E1<", "?E1?"}, {"E1", -3, ">E1<", "?E1?"}, {"E1", -2, ">E1<", "?E1?"}});
     }
 
@@ -206,22 +206,22 @@ public class TestNamedWindowIndex extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E3", -3));
 
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f3='>E1<'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2, ">E1<", "?E1?"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2, ">E1<", "?E1?"}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f3='>E1<' and f2=-2");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2, ">E1<", "?E1?"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2, ">E1<", "?E1?"}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f3='>E1<' and f2=-2 and f1='E1'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2, ">E1<", "?E1?"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2, ">E1<", "?E1?"}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f2=-2");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2, ">E1<", "?E1?"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2, ">E1<", "?E1?"}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f1='E1'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2, ">E1<", "?E1?"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2, ">E1<", "?E1?"}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f3='>E1<' and f2=-2 and f1='E1' and f4='?E1?'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2, ">E1<", "?E1?"}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2, ">E1<", "?E1?"}});
     }
 
     public void testDropCreate()
@@ -241,26 +241,26 @@ public class TestNamedWindowIndex extends TestCase
         indexOne.destroy();
 
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f1='E1'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f4='?E1?'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2}});
 
         indexTwo.destroy();
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f1='E1'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f4='?E1?'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2}});
 
         indexTwo = epService.getEPAdministrator().createEPL("create index MyWindowOneIndex2 on MyWindowOne(f4)");
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f1='E1'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2}});
 
         result = epService.getEPRuntime().executeQuery("select * from MyWindowOne where f4='?E1?'");
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", -2}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", -2}});
 
         indexTwo.destroy();
         assertEquals(0, epService.getNamedWindowService().getNamedWindowIndexes("MyWindowOne").length);
@@ -285,12 +285,12 @@ public class TestNamedWindowIndex extends TestCase
         assertEquals(1, epService.getNamedWindowService().getNamedWindowIndexes("MyWindowOne").length);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
 
         indexOne.destroy();
         
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
 
         // create second identical statement
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL("on SupportBean_S0 s0 select nw.f1 as f1, nw.f2 as f2 from MyWindowOne nw where nw.f2 = s0.id");

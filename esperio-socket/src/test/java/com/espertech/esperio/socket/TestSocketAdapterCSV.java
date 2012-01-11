@@ -12,14 +12,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esperio.socket.config.ConfigurationSocketAdapter;
-import com.espertech.esperio.socket.config.SocketConfig;
 import com.espertech.esperio.socket.config.DataType;
+import com.espertech.esperio.socket.config.SocketConfig;
 import junit.framework.TestCase;
-
-import java.util.Properties;
-import java.util.Map;
-import java.util.HashMap;
 
 public class TestSocketAdapterCSV extends TestCase
 {
@@ -58,11 +56,11 @@ public class TestSocketAdapterCSV extends TestCase
 
         client.send("stream=SupportBean,stringProp=E1,intProp=20" + newline);
         Thread.sleep(200);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 20});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 20});
 
         client.send("stream=SupportBean,stringProp=E2,intProp=20,xxxx,x=msdjdjdj,intProp=21" + newline);
         Thread.sleep(200);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 21});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 21});
 
         client.close();
         adapter.destroy();

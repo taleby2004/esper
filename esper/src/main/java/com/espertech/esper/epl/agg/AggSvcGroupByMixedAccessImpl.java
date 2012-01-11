@@ -73,8 +73,8 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
         // The aggregators for this group do not exist, need to create them from the prototypes
         if (groupAggregators == null)
         {
-            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
-            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceIds(), isJoin, streams, methodResolutionService, groupByKey);
+            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceId(), groupByKey);
+            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceId(), isJoin, streams, methodResolutionService, groupByKey);
             groupAggregators = new AggregationRowPair(methods, accesses);
             aggregatorsPerGroup.put(groupByKey, groupAggregators);
         }
@@ -99,8 +99,8 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
         // The aggregators for this group do not exist, need to create them from the prototypes
         if (groupAggregators == null)
         {
-            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
-            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceIds(), isJoin, streams, methodResolutionService, groupByKey);
+            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceId(), groupByKey);
+            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceId(), isJoin, streams, methodResolutionService, groupByKey);
             groupAggregators = new AggregationRowPair(methods, accesses);
             aggregatorsPerGroup.put(groupByKey, groupAggregators);
         }
@@ -118,20 +118,20 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey, int[] agentInstanceIds)
+    public void setCurrentAccess(MultiKeyUntyped groupByKey, int agentInstanceId)
     {
         currentAggregatorRow = aggregatorsPerGroup.get(groupByKey);
 
         if (currentAggregatorRow == null)
         {
-            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, agentInstanceIds, groupByKey);
-            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(agentInstanceIds, isJoin, streams, methodResolutionService, groupByKey);
+            AggregationMethod[] methods = methodResolutionService.newAggregators(aggregators, agentInstanceId, groupByKey);
+            AggregationAccess[] accesses = AggregationAccessUtil.getNewAccesses(agentInstanceId, isJoin, streams, methodResolutionService, groupByKey);
             currentAggregatorRow = new AggregationRowPair(methods, accesses);
             aggregatorsPerGroup.put(groupByKey, currentAggregatorRow);
         }
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         if (column < aggregators.length) {
             return currentAggregatorRow.getMethods()[column].getValue();
@@ -160,5 +160,9 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
             AggregationAccessorSlotPair pair = accessorsFactory[column - aggregators.length];
             return pair.getAccessor().getEventBean(currentAggregatorRow.getAccesses()[pair.getSlot()]);
         }
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

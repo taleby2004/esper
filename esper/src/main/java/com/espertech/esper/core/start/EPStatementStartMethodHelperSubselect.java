@@ -175,7 +175,7 @@ public class EPStatementStartMethodHelperSubselect
             // Should only be invoked if the subselect belongs to that instance.
             if (!declaredExpressions.isEmpty()) {
                 // Find that subselect within that declaration
-                ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+                ExprNodeSubselectDeclaredDotVisitor visitor = new ExprNodeSubselectDeclaredDotVisitor();
                 for (ExprDeclaredNode declaration : declaredExpressions) {
                     visitor.reset();
                     declaration.accept(visitor);
@@ -279,7 +279,7 @@ public class EPStatementStartMethodHelperSubselect
                 {
                     List<ExprAggregateNode> havingAgg = Collections.emptyList();
                     List<ExprAggregateNode> orderByAgg = Collections.emptyList();
-                    aggregationServiceFactoryDesc = AggregationServiceFactoryFactory.getService(aggExprNodes, havingAgg, orderByAgg, false, statementContext.getMethodResolutionService(), evaluatorContextStmt, annotations, statementContext.getVariableService(), false, statementSpec.getFilterRootNode(), statementSpec.getHavingExprRootNode());
+                    aggregationServiceFactoryDesc = AggregationServiceFactoryFactory.getService(aggExprNodes, havingAgg, orderByAgg, false, evaluatorContextStmt, annotations, statementContext.getVariableService(), false, statementSpec.getFilterRootNode(), statementSpec.getHavingExprRootNode());
 
                     // Other stream properties, if there is aggregation, cannot be under aggregation.
                     for (ExprAggregateNode aggNode : aggExprNodes)
@@ -404,7 +404,7 @@ public class EPStatementStartMethodHelperSubselect
             SubSelectActivationHolder holder = factoryDesc.getSubSelectActivationHolder();
 
             // activate view
-            ViewableActivationResult subselectActivationResult = holder.getActivator().activate(agentInstanceContext);
+            ViewableActivationResult subselectActivationResult = holder.getActivator().activate(agentInstanceContext, true);
             stopCallbackList.add(subselectActivationResult.getStopCallback());
 
             // apply returning the strategy instance

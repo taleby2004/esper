@@ -14,8 +14,6 @@ package com.espertech.esper.core.service;
 import com.espertech.esper.schedule.*;
 import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.JavaClassHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.StringWriter;
 import java.util.Collection;
@@ -24,12 +22,12 @@ import java.util.Set;
 
 public class SchedulingServiceAudit implements SchedulingServiceSPI {
 
-    private static final Log auditLog = LogFactory.getLog(AuditPath.AUDIT_LOG);
-
+    private final String engineUri;
     private final String statementName;
     private final SchedulingServiceSPI spi;
 
-    public SchedulingServiceAudit(String statementName, SchedulingServiceSPI spi) {
+    public SchedulingServiceAudit(String engineUri, String statementName, SchedulingServiceSPI spi) {
+        this.engineUri = engineUri;
         this.statementName = statementName;
         this.spi = spi;
     }
@@ -55,15 +53,14 @@ public class SchedulingServiceAudit implements SchedulingServiceSPI {
     }
 
     public void add(long afterMSec, ScheduleHandle handle, ScheduleSlot slot) throws ScheduleServiceException {
-        if (auditLog.isInfoEnabled()) {
+        if (AuditPath.isInfoEnabled()) {
             StringWriter message = new StringWriter();
-            message.write("Statement ");
-            message.write(statementName);
-            message.write(" schedule after ");
+            message.write("schedule after ");
             message.write(Long.toString(afterMSec));
             message.write(" handle ");
             printHandle(message, handle);
-            auditLog.info(message);
+
+            AuditPath.auditLog(engineUri, statementName, message.toString());
 
             modifyCreateProxy(handle);
         }
@@ -71,15 +68,14 @@ public class SchedulingServiceAudit implements SchedulingServiceSPI {
     }
 
     public void add(ScheduleSpec scheduleSpec, ScheduleHandle handle, ScheduleSlot slot) throws ScheduleServiceException {
-        if (auditLog.isInfoEnabled()) {
+        if (AuditPath.isInfoEnabled()) {
             StringWriter message = new StringWriter();
-            message.write("Statement ");
-            message.write(statementName);
-            message.write(" schedule add ");
+            message.write("schedule add ");
             message.write(scheduleSpec.toString());
             message.write(" handle ");
             printHandle(message, handle);
-            auditLog.info(message);
+
+            AuditPath.auditLog(engineUri, statementName, message.toString());
 
             modifyCreateProxy(handle);
         }
@@ -87,13 +83,12 @@ public class SchedulingServiceAudit implements SchedulingServiceSPI {
     }
 
     public void remove(ScheduleHandle handle, ScheduleSlot slot) throws ScheduleServiceException {
-        if (auditLog.isInfoEnabled()) {
+        if (AuditPath.isInfoEnabled()) {
             StringWriter message = new StringWriter();
-            message.write("Statement ");
-            message.write(statementName);
-            message.write(" schedule remove handle ");
+            message.write("schedule remove handle ");
             printHandle(message, handle);
-            auditLog.info(message);
+
+            AuditPath.auditLog(engineUri, statementName, message.toString());
         }
         spi.remove(handle, slot);
     }
@@ -141,7 +136,7 @@ public class SchedulingServiceAudit implements SchedulingServiceSPI {
             return;
         }
         EPStatementHandleCallback callback = (EPStatementHandleCallback) handle;
-        ScheduleHandleCallback sc = (ScheduleHandleCallback) ScheduleHandleCallbackProxy.newInstance(statementName, callback.getScheduleCallback());
+        ScheduleHandleCallback sc = (ScheduleHandleCallback) ScheduleHandleCallbackProxy.newInstance(engineUri, statementName, callback.getScheduleCallback());
         callback.setScheduleCallback(sc);
     }
 }

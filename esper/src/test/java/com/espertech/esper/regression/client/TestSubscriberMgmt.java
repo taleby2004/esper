@@ -11,12 +11,12 @@
 
 package com.espertech.esper.regression.client;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.SupportStmtAwareUpdateListener;
 
 import java.util.ArrayList;
@@ -45,11 +45,11 @@ public class TestSubscriberMgmt extends TestCase
 
         SupportBean_A a1 = new SupportBean_A("A1");
         epService.getEPRuntime().sendEvent(a1);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetIndicate().toArray(), new Object[] {a1});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{a1}, subscriber.getAndResetIndicate().toArray());
 
         SupportBean_B b1 = new SupportBean_B("B1");
         epService.getEPRuntime().sendEvent(b1);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetIndicate().toArray(), new Object[] {b1});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{b1}, subscriber.getAndResetIndicate().toArray());
         
         stmt.stop();
 
@@ -61,7 +61,7 @@ public class TestSubscriberMgmt extends TestCase
 
         SupportBean_D d1 = new SupportBean_D("D1");
         epService.getEPRuntime().sendEvent(d1);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetIndicate().toArray(), new Object[] {d1});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{d1}, subscriber.getAndResetIndicate().toArray());
     }
 
     public void testVariables()
@@ -78,8 +78,8 @@ public class TestSubscriberMgmt extends TestCase
         stmt.setSubscriber(subscriberSetVariable);
 
         epService.getEPRuntime().sendEvent(new SupportBean("def", 1));
-        ArrayAssertionUtil.assertPropsMap(subscriberCreateVariable.getAndResetIndicate().get(0), fields, new Object[]{"def"});
-        ArrayAssertionUtil.assertPropsMap(subscriberSetVariable.getAndResetIndicate().get(0), fields, new Object[]{"def"});
+        EPAssertionUtil.assertPropsMap(subscriberCreateVariable.getAndResetIndicate().get(0), fields, new Object[]{"def"});
+        EPAssertionUtil.assertPropsMap(subscriberSetVariable.getAndResetIndicate().get(0), fields, new Object[]{"def"});
     }
 
     public void testNamedWindow()
@@ -96,8 +96,8 @@ public class TestSubscriberMgmt extends TestCase
         stmt.setSubscriber(subscriberInsertInto);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertPropsMap(subscriberNamedWindow.getAndResetIndicate().get(0), fields, new Object[]{"E1", 1});
-        ArrayAssertionUtil.assertPropsPerRow(subscriberInsertInto.getAndResetIndicate(), new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsMap(subscriberNamedWindow.getAndResetIndicate().get(0), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[][]{{"E1", 1}}, subscriberInsertInto.getAndResetIndicate());
 
         // test on-delete
         SubscriberMap subscriberDelete = new SubscriberMap();
@@ -106,7 +106,7 @@ public class TestSubscriberMgmt extends TestCase
         stmt.setSubscriber(subscriberDelete);
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("E1", 0, 1L, ""));
-        ArrayAssertionUtil.assertPropsMap(subscriberDelete.getAndResetIndicate().get(0), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsMap(subscriberDelete.getAndResetIndicate().get(0), fields, new Object[]{"E1", 1});
 
         // test on-select
         SubscriberMap subscriberSelect = new SubscriberMap();
@@ -116,7 +116,7 @@ public class TestSubscriberMgmt extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("M1", 0, 1L, ""));
-        ArrayAssertionUtil.assertPropsMap(subscriberSelect.getAndResetIndicate().get(0), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsMap(subscriberSelect.getAndResetIndicate().get(0), fields, new Object[]{"E2", 2});
     }
 
     public void testSimpleSelectUpdateOnly()
@@ -131,17 +131,17 @@ public class TestSubscriberMgmt extends TestCase
 
         // send event
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 100));
-        ArrayAssertionUtil.assertPropsPerRow(subscriber.getAndResetIndicate(), new Object[][] {{"E1", 100}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E1", 100}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 100});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[][]{{"E1", 100}}, subscriber.getAndResetIndicate());
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1", 100}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 100});
 
         // remove listener
         stmt.removeAllListeners();
 
         // send event
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 200));
-        ArrayAssertionUtil.assertPropsPerRow(subscriber.getAndResetIndicate(), new Object[][] {{"E2", 200}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E2", 200}});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[][]{{"E2", 200}}, subscriber.getAndResetIndicate());
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E2", 200}});
         assertFalse(listener.isInvoked());
 
         // add listener
@@ -150,9 +150,9 @@ public class TestSubscriberMgmt extends TestCase
 
         // send event
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 300));
-        ArrayAssertionUtil.assertPropsPerRow(subscriber.getAndResetIndicate(), new Object[][] {{"E3", 300}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E3", 300}});
-        ArrayAssertionUtil.assertProps(stmtAwareListener.assertOneGetNewAndReset(), fields, new Object[] {"E3", 300});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[][]{{"E3", 300}}, subscriber.getAndResetIndicate());
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E3", 300}});
+        EPAssertionUtil.assertProps(stmtAwareListener.assertOneGetNewAndReset(), fields, new Object[]{"E3", 300});
     }
 
     public class SubscriberFields

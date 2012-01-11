@@ -248,9 +248,9 @@ public class IndexedProperty extends PropertyBase
         if (type instanceof String) // resolve a property that is a map event type
         {
             String nestedName = type.toString();
-            boolean isArray = MapEventType.isPropertyArray(nestedName);
+            boolean isArray = EventTypeUtility.isPropertyArray(nestedName);
             if (isArray) {
-                nestedName = MapEventType.getPropertyRemoveArray(nestedName);
+                nestedName = EventTypeUtility.getPropertyRemoveArray(nestedName);
             }
             EventType innerType = eventAdapterService.getExistsTypeByName(nestedName);
             if (!(innerType instanceof MapEventType))
@@ -289,9 +289,9 @@ public class IndexedProperty extends PropertyBase
         if (type instanceof String) // resolve a property that is a map event type
         {
             String nestedName = type.toString();
-            boolean isArray = MapEventType.isPropertyArray(nestedName);
+            boolean isArray = EventTypeUtility.isPropertyArray(nestedName);
             if (isArray) {
-                nestedName = MapEventType.getPropertyRemoveArray(nestedName);
+                nestedName = EventTypeUtility.getPropertyRemoveArray(nestedName);
             }
             EventType innerType = eventAdapterService.getExistsTypeByName(nestedName);
             if (!(innerType instanceof MapEventType))

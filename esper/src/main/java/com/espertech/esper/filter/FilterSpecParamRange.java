@@ -18,24 +18,22 @@ public final class FilterSpecParamRange extends FilterSpecParam
 {
     private final FilterSpecParamRangeValue min;
     private final FilterSpecParamRangeValue max;
-    private final Class type;
     private static final long serialVersionUID = -3381167844631490119L;
 
     /**
      * Constructor.
-     * @param propertyName is the event property name
+     * @param lookupable is the lookupable
      * @param filterOperator is the type of range operator
      * @param min is the begin point of the range
      * @param max is the end point of the range
      * @throws IllegalArgumentException if an operator was supplied that does not take a double range value
      */
-    public FilterSpecParamRange(String propertyName, FilterOperator filterOperator, FilterSpecParamRangeValue min, FilterSpecParamRangeValue max, Class type)
+    public FilterSpecParamRange(FilterSpecLookupable lookupable, FilterOperator filterOperator, FilterSpecParamRangeValue min, FilterSpecParamRangeValue max)
         throws IllegalArgumentException
     {
-        super(propertyName, filterOperator);
+        super(lookupable, filterOperator);
         this.min = min;
         this.max = max;
-        this.type = type;
 
         if (!(filterOperator.isRangeOperator()) && (!(filterOperator.isInvertedRangeOperator())))
         {
@@ -46,7 +44,7 @@ public final class FilterSpecParamRange extends FilterSpecParam
 
     public final Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext)
     {
-        if (type == String.class) {
+        if (lookupable.getReturnType() == String.class) {
             return new StringRange((String)min.getFilterValue(matchedEvents, evaluatorContext), (String) max.getFilterValue(matchedEvents, evaluatorContext));
         }
         Double begin = (Double) min.getFilterValue(matchedEvents, evaluatorContext);
@@ -75,11 +73,6 @@ public final class FilterSpecParamRange extends FilterSpecParam
     public final String toString()
     {
         return super.toString() + "  range=(min=" + min.toString() + ",max=" + max.toString() + ')';
-    }
-
-    public int getFilterHash()
-    {
-        return min.getFilterHash() + 31 * max.getFilterHash();
     }
 
     public boolean equals(Object obj)

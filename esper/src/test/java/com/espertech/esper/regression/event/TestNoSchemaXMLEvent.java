@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.event.EventTypeMetadata;
 import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.xml.SupportXPathFunctionResolver;
 import com.espertech.esper.support.xml.SupportXPathVariableResolver;
 import junit.framework.TestCase;
@@ -51,7 +51,7 @@ public class TestNoSchemaXMLEvent extends TestCase
         updateListener = null;
     }
 
-    public void testVariableResolution() throws Exception
+    public void testVariableAndDotMethodResolution() throws Exception
     {
         // test for ESPER-341 
         Configuration configuration = SupportConfigFactory.getConfiguration();
@@ -59,14 +59,16 @@ public class TestNoSchemaXMLEvent extends TestCase
 
         ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc = new ConfigurationEventTypeXMLDOM();
         xmlDOMEventTypeDesc.setRootElementName("myevent");
+        xmlDOMEventTypeDesc.addXPathProperty("xpathAttrNum", "/myevent/@attrnum", XPathConstants.STRING, "long");
+        xmlDOMEventTypeDesc.addXPathProperty("xpathAttrNumTwo", "/myevent/@attrnumtwo", XPathConstants.STRING, "long");
         configuration.addEventType("TestXMLNoSchemaType", xmlDOMEventTypeDesc);
 
         epService = EPServiceProviderManager.getProvider("TestNoSchemaXML", configuration);
         epService.initialize();
         updateListener = new SupportUpdateListener();
 
-        String stmtText = "select var from TestXMLNoSchemaType.win:length(100)";
-        epService.getEPAdministrator().createEPL(stmtText);
+        String stmtTextOne = "select var, xpathAttrNum.after(xpathAttrNumTwo) from TestXMLNoSchemaType.win:length(100)";
+        epService.getEPAdministrator().createEPL(stmtTextOne);
     }
 
     public void testSimpleXMLXPathProperties() throws Exception
@@ -107,16 +109,16 @@ public class TestNoSchemaXMLEvent extends TestCase
         assertEquals(true, type.getMetadata().isApplicationPreConfigured());
         assertEquals(true, type.getMetadata().isApplicationPreConfiguredStatic());
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("xpathElement1", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("xpathCountE21", Double.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("xpathAttrString", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("xpathAttrNum", Double.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("xpathAttrBool", Boolean.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("stringCastLong", Long.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("stringCastDouble", Double.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("numCastInt", Integer.class, null, false, false, false, false, false),
-           }, type.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("xpathElement1", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("xpathCountE21", Double.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("xpathAttrString", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("xpathAttrNum", Double.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("xpathAttrBool", Boolean.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("stringCastLong", Long.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("stringCastDouble", Double.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("numCastInt", Integer.class, null, false, false, false, false, false),
+        }, type.getPropertyDescriptors());
 
         String stmt =
                 "select xpathElement1, xpathCountE21, xpathAttrString, xpathAttrNum, xpathAttrBool," +
@@ -459,7 +461,7 @@ public class TestNoSchemaXMLEvent extends TestCase
 
         EventBean event = updateListener.assertOneGetNewAndReset();
         Object value = event.get("A");
-        ArrayAssertionUtil.assertProps(event, "A".split(","), new Object[] {new Object[] {"987654321", "9876543210"}});
+        EPAssertionUtil.assertProps(event, "A".split(","), new Object[]{new Object[]{"987654321", "9876543210"}});
     }
 
     private void assertDataSimpleXPath(String element1)

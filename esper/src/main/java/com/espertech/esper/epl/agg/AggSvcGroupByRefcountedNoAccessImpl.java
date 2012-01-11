@@ -71,7 +71,7 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
         AggregationMethod[] groupAggregators;
         if (row == null)
         {
-            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
+            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceId(), groupByKey);
             row = new AggregationMethodRow(methodResolutionService.getCurrentRowCount(groupAggregators, null) + 1, groupAggregators);
             aggregatorsPerGroup.put(groupByKey, row);
         }
@@ -103,7 +103,7 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
         }
         else
         {
-            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
+            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceId(), groupByKey);
             row = new AggregationMethodRow(methodResolutionService.getCurrentRowCount(groupAggregators, null) + 1, groupAggregators);
             aggregatorsPerGroup.put(groupByKey, row);
         }
@@ -120,11 +120,11 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
         if (row.getRefcount() <= 0)
         {
             removedKeys.add(groupByKey);
-            methodResolutionService.removeAggregators(exprEvaluatorContext.getAgentInstanceIds(), groupByKey);  // allow persistence to remove keys already
+            methodResolutionService.removeAggregators(exprEvaluatorContext.getAgentInstanceId(), groupByKey);  // allow persistence to remove keys already
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey, int[] agentInstanceIds)
+    public void setCurrentAccess(MultiKeyUntyped groupByKey, int agentInstanceId)
     {
         AggregationMethodRow row = aggregatorsPerGroup.get(groupByKey);
 
@@ -139,11 +139,11 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
 
         if (currentAggregatorRow == null)
         {
-            currentAggregatorRow = methodResolutionService.newAggregators(aggregators, agentInstanceIds, groupByKey);
+            currentAggregatorRow = methodResolutionService.newAggregators(aggregators, agentInstanceId, groupByKey);
         }
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         return currentAggregatorRow[column].getValue();
     }
@@ -154,5 +154,9 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
 
     public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         return null;
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

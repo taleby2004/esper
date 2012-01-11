@@ -137,59 +137,6 @@ public class QueryGraph
     }
 
     /**
-     * Returns index properties.
-     * @param streamLookup - stream to serve as source for looking up events
-     * @param streamIndexed - stream to look up in
-     * @return index property names
-    public String[] getIndexProperties(int streamLookup, int streamIndexed)
-    {
-        QueryGraphKey key = new QueryGraphKey(streamLookup, streamIndexed);
-        QueryGraphValue value = streamJoinMap.get(key);
-
-        if (value == null)
-        {
-            return null;
-        }
-
-        return value.getPropertiesValue().toArray(new String[value.getPropertiesValue().size()]);
-    }
-     */
-
-    /*
-    public String[] getRangeProperties(int streamLookup, int streamIndexed)
-    {
-        QueryGraphKey key = new QueryGraphKey(streamLookup, streamIndexed);
-        QueryGraphValue value = streamJoinMap.get(key);
-
-        if (value == null)
-        {
-            return null;
-        }
-
-        return value.getRangeEntriesValueProperties();
-    }
-    */
-
-    /**
-     * Returns key properties.
-     * @param streamLookup - stream to serve as source for looking up events
-     * @param streamIndexed - stream to look up in
-     * @return key property names
-    public String[] getKeyProperties(int streamLookup, int streamIndexed)
-    {
-        QueryGraphKey key = new QueryGraphKey(streamLookup, streamIndexed);
-        QueryGraphValue value = streamJoinMap.get(key);
-
-        if (value == null)
-        {
-            return null;
-        }
-
-        return value.getPropertiesKey().toArray(new String[value.getPropertiesKey().size()]);
-    }
-     */
-
-    /**
      * Fill in equivalent key properties (navigation entries) on all streams.
      * For example, if  a=b and b=c  then addRelOpInternal a=c. The method adds new equalivalent key properties
      * until no additional entries to be added are found, ie. several passes can be made.

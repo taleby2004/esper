@@ -328,7 +328,7 @@ public class ViewServiceHelper
 
             Audit audit = AuditEnum.VIEW.getAudit(statementContext.getAnnotations());
             if (audit != null) {
-                viewFactory = (ViewFactory) ViewFactoryProxy.newInstance(statementContext.getStatementName(), viewFactory, spec.getObjectName());
+                viewFactory = (ViewFactory) ViewFactoryProxy.newInstance(statementContext.getEngineURI(), statementContext.getStatementName(), viewFactory, spec.getObjectName());
             }
             factoryChain.add(viewFactory);
 

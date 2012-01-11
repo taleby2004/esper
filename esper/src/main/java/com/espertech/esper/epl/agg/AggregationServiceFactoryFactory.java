@@ -11,7 +11,6 @@ package com.espertech.esper.epl.agg;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.annotation.Hint;
 import com.espertech.esper.client.annotation.HintEnum;
-import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.util.CollectionUtil;
@@ -29,15 +28,15 @@ public class AggregationServiceFactoryFactory
 {
     /**
      * Produces an aggregation service for use with match-recognice.
+     *
      * @param numStreams number of streams
      * @param measureExprNodesPerStream measure nodes
-     * @param methodResolutionService method resolution
      * @param exprEvaluatorContext context for expression evaluatiom
      * @return service
      */
-    public static AggregationServiceMatchRecognizeFactoryDesc getServiceMatchRecognize(int numStreams, Map<Integer, List<ExprAggregateNode>> measureExprNodesPerStream,
-                                                       MethodResolutionService methodResolutionService,
-                                                       ExprEvaluatorContext exprEvaluatorContext)
+    public static AggregationServiceMatchRecognizeFactoryDesc getServiceMatchRecognize(int numStreams,
+                                                                                       Map<Integer, List<ExprAggregateNode>> measureExprNodesPerStream,
+                                                                                       ExprEvaluatorContext exprEvaluatorContext)
     {
         Map<Integer, List<AggregationServiceAggExpressionDesc>> equivalencyListPerStream = new HashMap<Integer, List<AggregationServiceAggExpressionDesc>>();
 
@@ -121,11 +120,11 @@ public class AggregationServiceFactoryFactory
      * Returns an instance to handle the aggregation required by the aggregation expression nodes, depending on
      * whether there are any group-by nodes.
      *
+     *
      * @param selectAggregateExprNodes - aggregation nodes extracted out of the select expression
      * @param havingAggregateExprNodes - aggregation nodes extracted out of the select expression
      * @param orderByAggregateExprNodes - aggregation nodes extracted out of the select expression
      * @param hasGroupByClause - indicator on whethere there is group-by required, or group-all
-     * @param methodResolutionService - is required to resolve aggregation methods
      * @param exprEvaluatorContext context for expression evaluatiom
      * @param annotations - statement annotations
      * @param variableService - variable
@@ -136,16 +135,15 @@ public class AggregationServiceFactoryFactory
      * @throws com.espertech.esper.epl.expression.ExprValidationException if validation fails
      */
     public static AggregationServiceFactoryDesc getService(List<ExprAggregateNode> selectAggregateExprNodes,
-                                                List<ExprAggregateNode> havingAggregateExprNodes,
-                                                List<ExprAggregateNode> orderByAggregateExprNodes,
-                                                boolean hasGroupByClause,
-                                                MethodResolutionService methodResolutionService,
-                                                ExprEvaluatorContext exprEvaluatorContext,
-                                                Annotation[] annotations,
-                                                VariableService variableService,
-                                                boolean isJoin,
-                                                ExprNode whereClause,
-                                                ExprNode havingClause)
+                                                           List<ExprAggregateNode> havingAggregateExprNodes,
+                                                           List<ExprAggregateNode> orderByAggregateExprNodes,
+                                                           boolean hasGroupByClause,
+                                                           ExprEvaluatorContext exprEvaluatorContext,
+                                                           Annotation[] annotations,
+                                                           VariableService variableService,
+                                                           boolean isJoin,
+                                                           ExprNode whereClause,
+                                                           ExprNode havingClause)
             throws ExprValidationException
     {
         // No aggregates used, we do not need this service
@@ -278,7 +276,7 @@ public class AggregationServiceFactoryFactory
                 serviceFactory = new AggSvcGroupAllNoAccessFactory(evaluatorsArr, aggregatorsArr);
             }
             else if ((evaluatorsArr.length == 0) && (!accessorPairs.isEmpty())) {
-                serviceFactory = new AggSvcGroupAllAccessOnlyFactory(methodResolutionService, pairs, accessedStreams, isJoin);
+                serviceFactory = new AggSvcGroupAllAccessOnlyFactory(pairs, accessedStreams, isJoin);
             }
             else {
                 serviceFactory = new AggSvcGroupAllMixedAccessFactory(evaluatorsArr, aggregatorsArr, pairs, accessedStreams, isJoin);
@@ -302,7 +300,7 @@ public class AggregationServiceFactoryFactory
             }
             else if (reclaimGroupAged != null)
             {
-                serviceFactory = new AggSvcGroupByReclaimAgedFactory(evaluatorsArr, aggregatorsArr, methodResolutionService, reclaimGroupAged, reclaimGroupFrequency, variableService, pairs, accessedStreams, isJoin);
+                serviceFactory = new AggSvcGroupByReclaimAgedFactory(evaluatorsArr, aggregatorsArr, reclaimGroupAged, reclaimGroupFrequency, variableService, pairs, accessedStreams, isJoin);
             }
             else
             {

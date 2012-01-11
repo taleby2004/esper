@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.event.EventTypeMetadata;
@@ -20,8 +22,6 @@ import com.espertech.esper.event.MappedEventBean;
 import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -67,7 +67,7 @@ public class TestNamedWindowTypes extends TestCase
         value.put("col1", 10);
         value.put("col2", 11);
         epService.getEPRuntime().sendEvent(value, "SchemaOne");
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNew(), "s1.col1,s1.col2".split(","),new Object[] {10,11});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNew(), "s1.col1,s1.col2".split(","), new Object[]{10, 11});
     }
 
     public void testMapTranspose()
@@ -87,7 +87,7 @@ public class TestNamedWindowTypes extends TestCase
         String stmtTextCreate = "create window MyWindow.win:keepall() as select one, two from OuterType";
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.getEventType().getPropertyNames(), new String[] {"one", "two"});
+        EPAssertionUtil.assertEqualsAnyOrder(stmtCreate.getEventType().getPropertyNames(), new String[]{"one", "two"});
         EventType eventType = stmtCreate.getEventType();
         assertEquals("T1", eventType.getFragmentType("one").getFragmentType().getName());
         assertEquals("T2", eventType.getFragmentType("two").getFragmentType().getName());
@@ -105,7 +105,7 @@ public class TestNamedWindowTypes extends TestCase
         outerData.put("two", innerDataTwo);
 
         epService.getEPRuntime().sendEvent(outerData, "OuterType");
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNew(), "one.i1,two.i2".split(","),new Object[] {1,2});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNew(), "one.i1,two.i2".split(","), new Object[]{1, 2});
     }
 
     public void testNoWildcardWithAs()
@@ -114,7 +114,7 @@ public class TestNamedWindowTypes extends TestCase
         String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, longPrimitive as b, longBoxed as c from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.getEventType().getPropertyNames(), new String[] {"a", "b", "c"});
+        EPAssertionUtil.assertEqualsAnyOrder(stmtCreate.getEventType().getPropertyNames(), new String[]{"a", "b", "c"});
         assertEquals(String.class, stmtCreate.getEventType().getPropertyType("a"));
         assertEquals(long.class, stmtCreate.getEventType().getPropertyType("b"));
         assertEquals(Long.class, stmtCreate.getEventType().getPropertyType("c"));
@@ -145,7 +145,7 @@ public class TestNamedWindowTypes extends TestCase
         String stmtTextSelectOne = "select a, b, c from MyWindow";
         EPStatement stmtSelectOne = epService.getEPAdministrator().createEPL(stmtTextSelectOne);
         stmtSelectOne.addListener(listenerStmtOne);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtSelectOne.getEventType().getPropertyNames(), new String[] {"a", "b", "c"});
+        EPAssertionUtil.assertEqualsAnyOrder(stmtSelectOne.getEventType().getPropertyNames(), new String[]{"a", "b", "c"});
         assertEquals(String.class, stmtCreate.getEventType().getPropertyType("a"));
         assertEquals(long.class, stmtCreate.getEventType().getPropertyType("b"));
         assertEquals(Long.class, stmtCreate.getEventType().getPropertyType("c"));
@@ -157,16 +157,16 @@ public class TestNamedWindowTypes extends TestCase
 
         sendSupportBean("E1", 1L, 10L);
         String[] fields = new String[] {"a", "b", "c"};
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1L, 10L});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1L, 10L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1L, 10L});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1L, 10L});
 
         sendMarketBean("S1", 99L);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"S1", 99L, 99L});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S1", 99L, 99L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"S1", 99L, 99L});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S1", 99L, 99L});
 
         sendMap("M1", 100L, 101L);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"M1", 101L, 100L});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"M1", 101L, 100L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"M1", 101L, 100L});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"M1", 101L, 100L});
     }
 
     public void testNoWildcardNoAs()
@@ -193,16 +193,16 @@ public class TestNamedWindowTypes extends TestCase
 
         sendSupportBean("E1", 1L, 10L);
         String[] fields = new String[] {"string", "longPrimitive", "longBoxed"};
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1L, 10L});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1L, 10L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1L, 10L});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1L, 10L});
 
         sendMarketBean("S1", 99L);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"S1", 99L, 99L});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S1", 99L, 99L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"S1", 99L, 99L});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S1", 99L, 99L});
 
         sendMap("M1", 100L, 101L);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"M1", 101L, 100L});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"M1", 101L, 100L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"M1", 101L, 100L});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"M1", 101L, 100L});
     }
 
     public void testConstantsAs()
@@ -226,12 +226,12 @@ public class TestNamedWindowTypes extends TestCase
 
         sendSupportBean("E1", 1L, 10L);
         String[] fields = new String[] {"string", "longPrimitive", "longBoxed"};
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1L, 10L});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1L, 10L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1L, 10L});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1L, 10L});
 
         sendMarketBean("S1", 99L);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"S1", 99L, 99L});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S1", 99L, 99L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"S1", 99L, 99L});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S1", 99L, 99L});
     }
 
     public void testCreateSchemaModelAfter()
@@ -265,7 +265,7 @@ public class TestNamedWindowTypes extends TestCase
         
         sendSupportBean("E1", 1L, 10L);
         String[] values = (String[]) listenerWindow.assertOneGetNewAndReset().get("myvalue");
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"a","b"}, values);
+        EPAssertionUtil.assertEqualsExactOrder(values, new String[]{"a", "b"});
     }
 
     public void testCreateTableSyntax()
@@ -298,8 +298,8 @@ public class TestNamedWindowTypes extends TestCase
 
         sendSupportBean("E1", 1L, 10L);
         String[] fields = "stringValOne,stringValTwo,intVal,longVal".split(",");
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", "E1", 1, 10L});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1","E1", 1, 10L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1", 1, 10L});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1", 1, 10L});
 
         // create window with two views
         stmtTextCreate = "create window MyWindowTwo.std:unique(stringValOne).win:keepall() (stringValOne varchar, stringValTwo string, intVal int, longVal long)";
@@ -339,8 +339,8 @@ public class TestNamedWindowTypes extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         String[] fields = new String[] {"id"};
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
     }
 
     public void testModelAfterMap()
@@ -358,7 +358,7 @@ public class TestNamedWindowTypes extends TestCase
         sendMap("k1", 100L, 200L);
         EventBean event = listenerWindow.assertOneGetNewAndReset();
         assertTrue(event instanceof MappedEventBean);
-        ArrayAssertionUtil.assertProps(event, "key,primitive".split(","), new Object[] {"k1", 100L});
+        EPAssertionUtil.assertProps(event, "key,primitive".split(","), new Object[]{"k1", 100L});
     }
 
     public void testWildcardInheritance()
@@ -383,12 +383,12 @@ public class TestNamedWindowTypes extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         String[] fields = new String[] {"id"};
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_B("E2"));
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
     }
 
     public void testNoSpecificationBean()
@@ -409,8 +409,8 @@ public class TestNamedWindowTypes extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         String[] fields = new String[] {"id"};
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
     }
 
     public void testWildcardWithFields()
@@ -431,8 +431,8 @@ public class TestNamedWindowTypes extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         String[] fields = new String[] {"id", "myid"};
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", "E1A"});
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1", "E1A"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1A"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1A"});
     }
 
     private SupportBean sendSupportBean(String string, long longPrimitive, Long longBoxed)

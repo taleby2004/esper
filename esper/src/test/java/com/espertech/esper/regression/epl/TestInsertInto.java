@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
@@ -23,8 +25,6 @@ import com.espertech.esper.event.bean.BeanEventBean;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
@@ -230,15 +230,15 @@ public class TestInsertInto extends TestCase
         EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
         assertTrue(spi.getStatementEventTypeRef().isInUse("event1"));
         Set<String> stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("event1");
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtNames.toArray(), new String[] {"stmt1", "stmt2"});
+        EPAssertionUtil.assertEqualsAnyOrder(stmtNames.toArray(), new String[]{"stmt1", "stmt2"});
         assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean.class.getName());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtNames.toArray(), new String[] {"stmt1"});
+        EPAssertionUtil.assertEqualsAnyOrder(stmtNames.toArray(), new String[]{"stmt1"});
 
         stmtOne.destroy();
         assertTrue(spi.getStatementEventTypeRef().isInUse("event1"));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("event1");
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmt2"}, stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmt2"}, stmtNames.toArray());
         assertFalse(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
 
         stmtTwo.destroy();

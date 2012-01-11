@@ -12,9 +12,8 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.pattern.EvalFactoryNode;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Specification for building an event stream out of a pattern statement and views staggered onto the
@@ -27,8 +26,8 @@ import java.util.Map;
 public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamSpecCompiled
 {
     private final EvalFactoryNode evalFactoryNode;
-    private final Map<String, Pair<EventType, String>> taggedEventTypes;       // Stores types for filters with tags, single event
-    private final Map<String, Pair<EventType, String>> arrayEventTypes;       // Stores types for filters with tags, array event
+    private final LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes;       // Stores types for filters with tags, single event
+    private final LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes;       // Stores types for filters with tags, array event
     private static final long serialVersionUID = 1268004301792124753L;
 
     /**
@@ -40,16 +39,16 @@ public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamS
      * @param optionalStreamName - stream name, or null if none supplied
      * @param streamSpecOptions - additional stream options such as unidirectional stream in a join, applicable for joins
      */
-    public PatternStreamSpecCompiled(EvalFactoryNode evalFactoryNode, Map<String, Pair<EventType, String>> taggedEventTypes, Map<String, Pair<EventType, String>> arrayEventTypes, List<ViewSpec> viewSpecs, String optionalStreamName, StreamSpecOptions streamSpecOptions)
+    public PatternStreamSpecCompiled(EvalFactoryNode evalFactoryNode, LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, List<ViewSpec> viewSpecs, String optionalStreamName, StreamSpecOptions streamSpecOptions)
     {
         super(optionalStreamName, viewSpecs, streamSpecOptions);
         this.evalFactoryNode = evalFactoryNode;
 
-        Map<String, Pair<EventType, String>> copy = new HashMap<String, Pair<EventType, String>>();
+        LinkedHashMap<String, Pair<EventType, String>> copy = new LinkedHashMap<String, Pair<EventType, String>>();
         copy.putAll(taggedEventTypes);
         this.taggedEventTypes = copy;
 
-        copy = new HashMap<String, Pair<EventType, String>>();
+        copy = new LinkedHashMap<String, Pair<EventType, String>>();
         copy.putAll(arrayEventTypes);
         this.arrayEventTypes = copy;
     }
@@ -67,7 +66,7 @@ public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamS
      * Returns event types tagged in the pattern expression.
      * @return map of tag and event type tagged in pattern expression
      */
-    public Map<String, Pair<EventType, String>> getTaggedEventTypes()
+    public LinkedHashMap<String, Pair<EventType, String>> getTaggedEventTypes()
     {
         return taggedEventTypes;
     }
@@ -76,7 +75,7 @@ public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamS
      * Returns event types tagged in the pattern expression under a repeat-operator.
      * @return map of tag and event type tagged in pattern expression, repeated an thus producing array events
      */
-    public Map<String, Pair<EventType, String>> getArrayEventTypes()
+    public LinkedHashMap<String, Pair<EventType, String>> getArrayEventTypes()
     {
         return arrayEventTypes;
     }

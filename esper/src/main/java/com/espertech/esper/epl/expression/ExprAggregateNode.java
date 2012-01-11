@@ -18,4 +18,5 @@ public interface ExprAggregateNode extends ExprEvaluator, ExprNode
 {
     public AggregationMethodFactory getFactory();
     public void setAggregationResultFuture(AggregationResultFuture aggregationResultFuture, int column);
+    public boolean isDistinct();
 }

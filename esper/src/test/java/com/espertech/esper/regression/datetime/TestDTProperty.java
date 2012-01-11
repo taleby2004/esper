@@ -15,11 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.support.bean.SupportDateTime;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestDTProperty extends TestCase {
@@ -43,7 +44,7 @@ public class TestDTProperty extends TestCase {
     public void testProp() {
 
         String startTime = "2002-05-30T9:01:02.003";
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(SupportDateTime.make(startTime).getMsecdate()));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(startTime)));
 
         String[] fields = "valmoh,valmoy,valdom,valdow,valdoy,valera,valhod,valmos,valsom,valwye,valyea,val1,val2,val3".split(",");
         String eplFragment = "select " +
@@ -69,7 +70,7 @@ public class TestDTProperty extends TestCase {
         }
 
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{
                 1, 4, 30, 5, 150, 1, 9, 3, 2, 22, 2002, 9, 9, 9
         });
     }

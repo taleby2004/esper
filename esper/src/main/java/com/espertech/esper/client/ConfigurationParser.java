@@ -594,8 +594,15 @@ class ConfigurationParser {
     private static void handlePlugInAggregation(Configuration configuration, Element element)
     {
         String name = getRequiredAttribute(element,"name");
-        String functionClassName = getRequiredAttribute(element, "function-class");
-        configuration.addPlugInAggregationFunction(name, functionClassName);
+        String functionClassName = getOptionalAttribute(element, "function-class");
+        String factoryClassName = getOptionalAttribute(element, "factory-class");
+
+        if (factoryClassName != null) {
+            configuration.addPlugInAggregationFunctionFactory(name, factoryClassName);
+        }
+        else {
+            configuration.addPlugInAggregationFunction(name, functionClassName);
+        }
     }
 
     private static void handlePlugInSingleRow(Configuration configuration, Element element)
@@ -604,11 +611,16 @@ class ConfigurationParser {
         String functionClassName = element.getAttributes().getNamedItem("function-class").getTextContent();
         String functionMethodName = element.getAttributes().getNamedItem("function-method").getTextContent();
         ConfigurationPlugInSingleRowFunction.ValueCache valueCache = ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED;
+        ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable = ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED;
         String valueCacheStr = getOptionalAttribute(element, "value-cache");
         if (valueCacheStr != null) {
             valueCache = ConfigurationPlugInSingleRowFunction.ValueCache.valueOf(valueCacheStr.toUpperCase());
         }
-        configuration.addPlugInSingleRowFunction(name, functionClassName, functionMethodName, valueCache);
+        String filterOptimizableStr = getOptionalAttribute(element, "filter-optimizable");
+        if (filterOptimizableStr != null) {
+            filterOptimizable = ConfigurationPlugInSingleRowFunction.FilterOptimizable.valueOf(filterOptimizableStr.toUpperCase());
+        }
+        configuration.addPlugInSingleRowFunction(name, functionClassName, functionMethodName, valueCache, filterOptimizable);
     }
 
     private static void handlePlugInPatternGuard(Configuration configuration, Element element)
@@ -644,7 +656,12 @@ class ConfigurationParser {
             initValue = initValueNode.getTextContent();
         }
 
-        configuration.addVariable(variableName, variableType, initValue);
+        boolean isConstant = false;
+        if (getOptionalAttribute(element, "constant") != null) {
+            isConstant = Boolean.parseBoolean(getOptionalAttribute(element, "constant"));
+        }
+
+        configuration.addVariable(variableName, variableType, initValue, isConstant);
     }
 
     private static void handlePluginLoaders(Configuration configuration, Element element)
@@ -959,6 +976,10 @@ class ConfigurationParser {
             {
                 configuration.getEngineDefaults().getConditionHandling().addClasses(getHandlerFactories(subElement));
             }
+            if (subElement.getNodeName().equals("scripts"))
+            {
+                handleDefaultScriptConfig(configuration, subElement);
+            }
         }
     }
 
@@ -1123,6 +1144,10 @@ class ConfigurationParser {
                 String valueText = getRequiredAttribute(subElement, "enabled");
                 Boolean value = Boolean.parseBoolean(valueText);
                 configuration.getEngineDefaults().getLogging().setEnableJDBC(value);
+            }
+            if (subElement.getNodeName().equals("audit"))
+            {
+                configuration.getEngineDefaults().getLogging().setAuditPattern(getOptionalAttribute(subElement, "pattern"));
             }
         }
     }
@@ -1365,6 +1390,14 @@ class ConfigurationParser {
         {
             ConfigurationEngineDefaults.ThreadingProfile profile = ConfigurationEngineDefaults.ThreadingProfile.valueOf(threadingProfileStr.toUpperCase());
             configuration.getEngineDefaults().getExecution().setThreadingProfile(profile);
+        }
+    }
+
+    private static void handleDefaultScriptConfig(Configuration configuration, Element parentElement)
+    {
+        String defaultDialect = getOptionalAttribute(parentElement, "default-dialect");
+        if (defaultDialect != null) {
+            configuration.getEngineDefaults().getScripts().setDefaultDialect(defaultDialect);
         }
     }
 

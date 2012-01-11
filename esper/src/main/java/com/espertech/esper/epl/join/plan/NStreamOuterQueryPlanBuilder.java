@@ -336,6 +336,12 @@ public class NStreamOuterQueryPlanBuilder
         // Determine the streams we can navigate to from this stream
         Set<Integer> navigableStreams = queryGraph.getNavigableStreams(streamNum);
 
+        // add unqualified navigable streams (since on-expressions in outer joins are optional)
+        Set<Integer> unqualifiedNavigable = outerInnerGraph.getUnqualifiedNavigableStreams().get(streamNum);
+        if (unqualifiedNavigable != null) {
+            navigableStreams.addAll(unqualifiedNavigable);
+        }
+
         // remove those already done
         navigableStreams.removeAll(completedStreams);
 
@@ -589,23 +595,37 @@ public class NStreamOuterQueryPlanBuilder
             OuterJoinDesc desc = outerJoinDescList.get(i);
             int streamMax = i + 1;       // the outer join must references streams less then streamMax
 
-            // Check outer join
-            int streamOne = desc.getLeftNode().getStreamId();
-            int streamTwo = desc.getRightNode().getStreamId();
+            // Check outer join on-expression, if provided
+            int streamOne;
+            int streamTwo;
+            int lowerStream;
+            int higherStream;
+            if (desc.getOptLeftNode() != null) {
+                streamOne = desc.getOptLeftNode().getStreamId();
+                streamTwo = desc.getOptRightNode().getStreamId();
 
-            if ((streamOne > streamMax) || (streamTwo > streamMax) ||
-                (streamOne == streamTwo))
-            {
-                throw new IllegalArgumentException("Outer join descriptors reference future streams, or same streams");
+                if ((streamOne > streamMax) || (streamTwo > streamMax) ||
+                    (streamOne == streamTwo))
+                {
+                    throw new IllegalArgumentException("Outer join descriptors reference future streams, or same streams");
+                }
+
+                // Determine who is the first stream in the streams listed
+                lowerStream = streamOne;
+                higherStream = streamTwo;
+                if (streamOne > streamTwo)
+                {
+                    lowerStream = streamTwo;
+                    higherStream = streamOne;
+                }
             }
+            else {
+                streamOne = i;
+                streamTwo = i + 1;
+                lowerStream = i;
+                higherStream = i + 1;
 
-            // Determine who is the first stream in the streams listed
-            int lowerStream = streamOne;
-            int higherStream = streamTwo;
-            if (streamOne > streamTwo)
-            {
-                lowerStream = streamTwo;
-                higherStream = streamOne;
+                graph.addUnqualifiedNavigable(streamOne, streamTwo);
             }
 
             // Add to graph

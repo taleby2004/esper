@@ -9,7 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,20 +23,14 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * (i.e. multiple possible exact matches).
  * The implementation is based on a regular HashMap.
  */
-public final class FilterParamIndexIn extends FilterParamIndexPropBase
+public final class FilterParamIndexIn extends FilterParamIndexLookupableBase
 {
     private final Map<Object, List<EventEvaluator>> constantsMap;
     private final Map<MultiKeyUntyped, EventEvaluator> evaluatorsMap;
     private final ReadWriteLock constantsMapRWLock;
 
-    /**
-     * Constructs the index for multiple-exact matches.
-     * @param propertyName is the name of the event property
-     * @param eventType describes the event type and is used to obtain a getter instance for the property
-     */
-    public FilterParamIndexIn(String propertyName, EventType eventType)
-    {
-        super(propertyName, FilterOperator.IN_LIST_OF_VALUES, eventType);
+    public FilterParamIndexIn(FilterSpecLookupable lookupable) {
+        super(FilterOperator.IN_LIST_OF_VALUES, lookupable);
 
         constantsMap = new HashMap<Object, List<EventEvaluator>>();
         evaluatorsMap = new HashMap<MultiKeyUntyped, EventEvaluator>();
@@ -118,7 +112,7 @@ public final class FilterParamIndexIn extends FilterParamIndexPropBase
 
     public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
-        Object attributeValue = this.getGetter().get(eventBean);
+        Object attributeValue = lookupable.getGetter().get(eventBean);
 
         if (attributeValue == null)
         {

@@ -18,6 +18,7 @@ import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.Viewable;
 
+import java.util.List;
 import java.util.Map;
 
 public abstract class StatementAgentInstanceFactoryResult {
@@ -30,8 +31,9 @@ public abstract class StatementAgentInstanceFactoryResult {
     private final Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies;
     private final Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies;
     private final Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies;
+    private final List<StatementAgentInstancePreload> preloadList;
 
-    protected StatementAgentInstanceFactoryResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext, AggregationService optionalAggegationService, Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies, Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies, Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies) {
+    protected StatementAgentInstanceFactoryResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext, AggregationService optionalAggegationService, Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies, Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies, Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies, List<StatementAgentInstancePreload> preloadList) {
         this.finalView = finalView;
         this.stopCallback = stopCallback;
         this.agentInstanceContext = agentInstanceContext;
@@ -39,6 +41,7 @@ public abstract class StatementAgentInstanceFactoryResult {
         this.subselectStrategies = subselectStrategies;
         this.priorNodeStrategies = priorNodeStrategies;
         this.previousNodeStrategies = previousNodeStrategies;
+        this.preloadList = preloadList;
     }
 
     public Viewable getFinalView() {
@@ -67,5 +70,9 @@ public abstract class StatementAgentInstanceFactoryResult {
 
     public Map<ExprPreviousNode, ExprPreviousEvalStrategy> getPreviousNodeStrategies() {
         return previousNodeStrategies;
+    }
+
+    public List<StatementAgentInstancePreload> getPreloadList() {
+        return preloadList;
     }
 }

@@ -10,6 +10,8 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.service.ExpressionResultCacheService;
+import com.espertech.esper.epl.script.AgentInstanceScriptContext;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.schedule.TimeProvider;
 
 /**
@@ -25,11 +27,6 @@ public class ExprEvaluatorContextTimeOnly implements ExprEvaluatorContext
         this.expressionResultCacheService = new ExpressionResultCacheService();
     }
 
-    public ExprEvaluatorContextTimeOnly(TimeProvider timeProvider, ExpressionResultCacheService expressionResultCacheService) {
-        this.timeProvider = timeProvider;
-        this.expressionResultCacheService = expressionResultCacheService;
-    }
-
     /**
      * Returns the time provider.
      * @return time provider
@@ -42,11 +39,31 @@ public class ExprEvaluatorContextTimeOnly implements ExprEvaluatorContext
         return expressionResultCacheService;
     }
 
-    public int[] getAgentInstanceIds() {
-        return null;
+    public int getAgentInstanceId() {
+        return -1;
     }
 
     public EventBean getContextProperties() {
+        return null;
+    }
+
+    public AgentInstanceScriptContext getAgentInstanceScriptContext() {
+        return null;
+    }
+
+    public String getStatementName() {
+        return null;
+    }
+
+    public String getEngineURI() {
+        return null;
+    }
+
+    public String getStatementId() {
+        return null;
+    }
+
+    public StatementAgentInstanceLock getAgentInstanceLock() {
         return null;
     }
 }

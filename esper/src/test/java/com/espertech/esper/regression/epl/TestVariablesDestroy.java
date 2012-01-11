@@ -12,9 +12,9 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 public class TestVariablesDestroy extends TestCase
@@ -144,7 +144,7 @@ public class TestVariablesDestroy extends TestCase
     }
 
     private void assertStmtsRef(String variableName, String[] stmts) {
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmts, epService.getEPAdministrator().getConfiguration().getVariableNameUsedBy(variableName).toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(stmts, epService.getEPAdministrator().getConfiguration().getVariableNameUsedBy(variableName).toArray());
     }
 
     private void assertNotFound(String var) {

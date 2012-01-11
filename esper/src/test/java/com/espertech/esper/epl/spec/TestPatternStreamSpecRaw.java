@@ -196,7 +196,7 @@ public class TestPatternStreamSpecRaw extends TestCase
 
         FilterSpecParamConstant constant = (FilterSpecParamConstant) filterNode.getFilterSpec().getParameters().getFirst();
         assertEquals(FilterOperator.EQUAL, constant.getFilterOperator());
-        assertEquals("intPrimitive", constant.getPropertyName());
+        assertEquals("intPrimitive", constant.getLookupable().getExpression());
         assertEquals(5, constant.getFilterConstant());
 
         // node 1
@@ -206,7 +206,7 @@ public class TestPatternStreamSpecRaw extends TestCase
 
         FilterSpecParamEventProp eventprop = (FilterSpecParamEventProp) filterNode.getFilterSpec().getParameters().getFirst();
         assertEquals(FilterOperator.EQUAL, constant.getFilterOperator());
-        assertEquals("intPrimitive", constant.getPropertyName());
+        assertEquals("intPrimitive", constant.getLookupable().getExpression());
         assertEquals("s", eventprop.getResultEventAsName());
         assertEquals("intBoxed", eventprop.getResultEventProperty());
     }

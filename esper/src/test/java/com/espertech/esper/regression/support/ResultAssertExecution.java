@@ -15,11 +15,11 @@ import com.espertech.esper.client.EPRuntime;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.Assert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -177,10 +177,10 @@ public class ResultAssertExecution
             {
                 String message = "At time " + timeInSec;
                 Assert.assertTrue(message + " expected events but received none", listener.isInvoked());
-                ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), expected.getProperties(),
+                EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), expected.getProperties(),
                         stepDesc.getNewDataPerRow(), "newData");
 
-                ArrayAssertionUtil.assertPropsPerRow(listener.getLastOldData(), expected.getProperties(),
+                EPAssertionUtil.assertPropsPerRow(listener.getLastOldData(), expected.getProperties(),
                         stepDesc.getOldDataPerRow(), "oldData");
             }
             // If we don't expect remove stream events (istream only), then asset new data only if there
@@ -190,7 +190,7 @@ public class ResultAssertExecution
                 if (stepDesc.getNewDataPerRow() != null)
                 {
                     Assert.assertTrue("At time " + timeInSec + " expected events but received none", listener.isInvoked());
-                    ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), expected.getProperties(),
+                    EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), expected.getProperties(),
                             stepDesc.getNewDataPerRow(), "newData");
                 }
                 else

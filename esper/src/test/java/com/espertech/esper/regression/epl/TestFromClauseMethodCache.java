@@ -11,14 +11,14 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodInvocations;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 
 public class TestFromClauseMethodCache extends TestCase
 {
@@ -53,33 +53,33 @@ public class TestFromClauseMethodCache extends TestCase
         // The LRU cache caches per same keys
         String[] fields = new String[] {"id", "p00", "string"};
         sendBeanEvent("E1", 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, "|E1|", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, "|E1|", "E1"});
         
         sendBeanEvent("E2", 2);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2, "|E2|", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2, "|E2|", "E2"});
 
         sendBeanEvent("E3", 3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3, "|E3|", "E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, "|E3|", "E3"});
         assertEquals(3, SupportStaticMethodInvocations.getInvocationSizeReset());
 
         // should be cached
         sendBeanEvent("E3", 3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3, "|E3|", "E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, "|E3|", "E3"});
         assertEquals(0, SupportStaticMethodInvocations.getInvocationSizeReset());
 
         // should not be cached
         sendBeanEvent("E4", 4);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {4, "|E4|", "E4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4, "|E4|", "E4"});
         assertEquals(1, SupportStaticMethodInvocations.getInvocationSizeReset());
 
         // should be cached
         sendBeanEvent("E2", 2);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2, "|E2|", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2, "|E2|", "E2"});
         assertEquals(0, SupportStaticMethodInvocations.getInvocationSizeReset());
 
         // should not be cached
         sendBeanEvent("E1", 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, "|E1|", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, "|E1|", "E1"});
         assertEquals(1, SupportStaticMethodInvocations.getInvocationSizeReset());
     }
 
@@ -107,36 +107,36 @@ public class TestFromClauseMethodCache extends TestCase
         sendTimer(1000);
         String[] fields = new String[] {"id", "p00", "string"};
         sendBeanEvent("E1", 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, "|E1|", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, "|E1|", "E1"});
 
         sendTimer(1500);
         sendBeanEvent("E2", 2);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2, "|E2|", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2, "|E2|", "E2"});
 
         sendTimer(2000);
         sendBeanEvent("E3", 3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3, "|E3|", "E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, "|E3|", "E3"});
         assertEquals(3, SupportStaticMethodInvocations.getInvocationSizeReset());
 
         // should be cached
         sendBeanEvent("E3", 3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3, "|E3|", "E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, "|E3|", "E3"});
         assertEquals(0, SupportStaticMethodInvocations.getInvocationSizeReset());
 
         sendTimer(2100);
         // should not be cached
         sendBeanEvent("E4", 4);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {4, "|E4|", "E4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4, "|E4|", "E4"});
         assertEquals(1, SupportStaticMethodInvocations.getInvocationSizeReset());
 
         // should be cached
         sendBeanEvent("E2", 2);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2, "|E2|", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2, "|E2|", "E2"});
         assertEquals(0, SupportStaticMethodInvocations.getInvocationSizeReset());
 
         // should not be cached
         sendBeanEvent("E1", 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, "|E1|", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, "|E1|", "E1"});
         assertEquals(1, SupportStaticMethodInvocations.getInvocationSizeReset());
     }
 

@@ -12,13 +12,13 @@
 package com.espertech.esper.regression.enummethod;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_Container;
 import com.espertech.esper.support.bean.SupportCollection;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.math.BigDecimal;
@@ -59,19 +59,19 @@ public class TestEnumAverage extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), fields, new Class[]{Double.class, Double.class, Double.class, BigDecimal.class});
 
         epService.getEPRuntime().sendEvent(new SupportBean_Container(null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_Container(Collections.<SupportBean>emptyList()));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null});
 
         List<SupportBean> list = new ArrayList<SupportBean>();
         list.add(make(2,3d,4l,5));
         epService.getEPRuntime().sendEvent(new SupportBean_Container(list));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2d, 3d, 4d, new BigDecimal(5.0d)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2d, 3d, 4d, new BigDecimal(5.0d)});
 
         list.add(make(4,6d,8l,10));
         epService.getEPRuntime().sendEvent(new SupportBean_Container(list));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {(2+4)/2d, (3d+6d)/2d, (4L+8L)/2d, new BigDecimal((5+10)/2d)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{(2 + 4) / 2d, (3d + 6d) / 2d, (4L + 8L) / 2d, new BigDecimal((5 + 10) / 2d)});
     }
 
     public void testAverageScalar() {
@@ -86,13 +86,13 @@ public class TestEnumAverage extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), fields, new Class[]{Double.class, BigDecimal.class});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeNumeric("1,2,3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2d, new BigDecimal(2d)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2d, new BigDecimal(2d)});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeNumeric("1,null,3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2d, new BigDecimal(2d)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2d, new BigDecimal(2d)});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeNumeric("4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {4d, new BigDecimal(4d)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4d, new BigDecimal(4d)});
     }
 
     public void testInvalid() {

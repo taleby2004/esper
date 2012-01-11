@@ -43,7 +43,7 @@ public class ExprRateAggNode extends ExprAggregateNodeBase
                 double secInterval = (Double) ((ExprTimePeriod) first).evaluate(null, true, exprEvaluatorContext);
                 intervalMSec = Math.round(secInterval * 1000d);
             }
-            else if (first instanceof ExprConstantNode) {
+            else if (ExprNodeUtility.isConstantValueExpr(first)) {
                 if (!JavaClassHelper.isNumeric(first.getExprEvaluator().getType())) {
                     throw new ExprValidationException(message);
                 }

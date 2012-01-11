@@ -131,21 +131,6 @@ public class TestFilterServiceImpl extends TestCase
         }
     }
 
-    public void testInvalidType()
-    {
-        try
-        {
-            FilterValueSet spec = SupportFilterSpecBuilder.build(eventTypeTwo, new Object[] {
-                "myString", FilterOperator.GREATER, 2 }).getValueSet(null, null, null);
-            filterService.add(spec, new SupportFilterHandle());
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected exception
-        }
-    }
-
     public void testReusedCallback()
     {
         try

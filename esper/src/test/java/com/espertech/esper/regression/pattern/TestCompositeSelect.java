@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.pattern;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Map;
@@ -51,10 +51,10 @@ public class TestCompositeSelect extends TestCase
             values[count++] = event.get(name);
         }
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("a", SupportBean_A.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("b", SupportBean_B.class, null, false, false, false, false, true)
-           }, ((EPServiceProviderSPI) epService).getEventAdapterService().getExistsTypeByName("StreamOne").getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("a", SupportBean_A.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("b", SupportBean_B.class, null, false, false, false, false, true)
+        }, ((EPServiceProviderSPI) epService).getEventAdapterService().getExistsTypeByName("StreamOne").getPropertyDescriptors());
     }
 
     public void testFragment()
@@ -71,10 +71,10 @@ public class TestCompositeSelect extends TestCase
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
         
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("a", SupportBean_A[].class, SupportBean_A.class, false, false, true, false, true),
-            new EventPropertyDescriptor("b", SupportBean_B.class, null, false, false, false, false, true)
-           }, stmt.getEventType().getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("a", SupportBean_A[].class, SupportBean_A.class, false, false, true, false, true),
+                new EventPropertyDescriptor("b", SupportBean_B.class, null, false, false, false, false, true)
+        }, stmt.getEventType().getPropertyDescriptors());
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
         epService.getEPRuntime().sendEvent(new SupportBean_A("A2"));

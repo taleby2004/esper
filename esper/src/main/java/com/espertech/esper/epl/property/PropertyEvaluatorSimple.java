@@ -12,9 +12,8 @@
 package com.espertech.esper.epl.property;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
@@ -28,31 +27,31 @@ import org.apache.commons.logging.LogFactory;
 public class PropertyEvaluatorSimple implements PropertyEvaluator
 {
     private static final Log log = LogFactory.getLog(PropertyEvaluatorSimple.class);
-    private final EventPropertyGetter getter;
+    private final ContainedEventEval containedEventEval;
     private final FragmentEventType fragmentEventType;
     private final ExprEvaluator filter;
-    private final String propertyName;
+    private final String expressionText;
 
     /**
      * Ctor.
-     * @param getter property getter
+     * @param containedEventEval property getter or other evaluator
      * @param fragmentEventType property event type
      * @param filter optional where-clause expression
-     * @param propertyName the property name
+     * @param expressionText the property name
      */
-    public PropertyEvaluatorSimple(EventPropertyGetter getter, FragmentEventType fragmentEventType, ExprEvaluator filter, String propertyName)
+    public PropertyEvaluatorSimple(ContainedEventEval containedEventEval, FragmentEventType fragmentEventType, ExprEvaluator filter, String expressionText)
     {
         this.fragmentEventType = fragmentEventType;
-        this.getter = getter;
+        this.containedEventEval = containedEventEval;
         this.filter = filter;
-        this.propertyName = propertyName;
+        this.expressionText = expressionText;
     }
 
     public EventBean[] getProperty(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
     {
         try
         {
-            Object result = getter.getFragment(event);
+            Object result = containedEventEval.getFragment(event, new EventBean[] {event}, exprEvaluatorContext);
 
             EventBean[] rows;
             if (fragmentEventType.isIndexed())
@@ -75,7 +74,7 @@ public class PropertyEvaluatorSimple implements PropertyEvaluator
             log.error("Unexpected error evaluating property expression for event of type '" +
                     event.getEventType().getName() +
                     "' and property '" +
-                    propertyName + "': " + ex.getMessage(), ex);
+                    expressionText + "': " + ex.getMessage(), ex);
         }
         return null;
     }
@@ -89,9 +88,9 @@ public class PropertyEvaluatorSimple implements PropertyEvaluator
      * Returns the property name.
      * @return property name
      */
-    public String getPropertyName()
+    public String getExpressionText()
     {
-        return propertyName;
+        return expressionText;
     }
 
     /**
@@ -110,7 +109,7 @@ public class PropertyEvaluatorSimple implements PropertyEvaluator
             return false;
         }
         PropertyEvaluatorSimple other = (PropertyEvaluatorSimple) otherEval;
-        if (!other.getPropertyName().equals(this.getPropertyName()))
+        if (!other.getExpressionText().equals(this.getExpressionText()))
         {
             return false;
         }

@@ -15,12 +15,13 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.support.bean.SupportDateTime;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestDTFormat extends TestCase {
@@ -44,7 +45,7 @@ public class TestDTFormat extends TestCase {
     public void testFormat() {
 
         String startTime = "2002-05-30T9:00:00.000";
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(SupportDateTime.make(startTime).getMsecdate()));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(startTime)));
 
         String[] fields = "val0,val1,val2,val3".split(",");
         String eplFragment = "select " +
@@ -59,9 +60,9 @@ public class TestDTFormat extends TestCase {
 
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
         Object[] expected = SupportDateTime.getArrayCoerced(startTime, "sdf", "sdf", "sdf", "sdf");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, expected);
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, expected);
 
         epService.getEPRuntime().sendEvent(SupportDateTime.make(null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {SupportDateTime.getValueCoerced(startTime, "sdf"), null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{SupportDateTime.getValueCoerced(startTime, "sdf"), null, null, null});
     }
 }

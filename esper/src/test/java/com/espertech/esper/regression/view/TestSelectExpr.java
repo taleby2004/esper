@@ -13,12 +13,12 @@ package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.annotation.Description;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.bean.SupportBeanKeywords;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,7 +62,7 @@ public class TestSelectExpr extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL("select " + fields + " from Keywords");
         stmt.addListener(testListener);
         epService.getEPRuntime().sendEvent(new SupportBeanKeywords());
-        ArrayAssertionUtil.assertEqualsExactOrder(fields.split(","), stmt.getEventType().getPropertyNames());
+        EPAssertionUtil.assertEqualsExactOrder(stmt.getEventType().getPropertyNames(), fields.split(","));
 
         EventBean event = testListener.assertOneGetNewAndReset();
         String[] fieldsArr = fields.split(",");
@@ -106,7 +106,7 @@ public class TestSelectExpr extends TestCase
         stmt = epService.getEPAdministrator().createEPL("select 'volume' as field1, \"sleep\" as field2, \"\\u0041\" as unicodeA from SupportBean");
         stmt.addListener(testListener);
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), new String[] {"field1", "field2", "unicodeA"}, new Object[] {"volume", "sleep", "A"});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), new String[]{"field1", "field2", "unicodeA"}, new Object[]{"volume", "sleep", "A"});
         stmt.destroy();
 
         tryStatementMatch("John's", "select * from SupportBean(string='John\\'s')");
@@ -148,7 +148,7 @@ public class TestSelectExpr extends TestCase
 
         EventType type = selectTestView.getEventType();
         log.debug(".testGetEventType properties=" + Arrays.toString(type.getPropertyNames()));
-        ArrayAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[] {"(3*intPrimitive)", "string", "result", "aBool"});
+        EPAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[]{"(3*intPrimitive)", "string", "result", "aBool"});
         assertEquals(String.class, type.getPropertyType("string"));
         assertEquals(Boolean.class, type.getPropertyType("aBool"));
         assertEquals(Float.class, type.getPropertyType("result"));

@@ -32,6 +32,8 @@ public class OutputLimitClause implements Serializable
     private Expression afterTimePeriodExpression;
     private Integer afterNumberOfEvents;
     private boolean andAfterTerminate;
+    private Expression andAfterTerminateAndExpr;
+    private List<AssignmentPair> andAfterTerminateThenAssignments;
 
     /**
      * Ctor.
@@ -419,19 +421,8 @@ public class OutputLimitClause implements Serializable
             writer.write("when ");
             whenExpression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
 
-            if ((thenAssignments != null) && (thenAssignments.size() > 0))
-            {
-                writer.write(" then set ");
-
-                String delimiter = "";
-                for (AssignmentPair pair : thenAssignments)
-                {
-                    writer.write(delimiter);
-                    writer.write(pair.getName());
-                    writer.write(" = ");
-                    pair.getValue().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
-                    delimiter = ", ";
-                }
+            if ((thenAssignments != null) && (thenAssignments.size() > 0)) {
+                writeThenAssignments(writer, thenAssignments);
             }
         }
         else if (unit == OutputLimitUnit.CRONTAB_EXPRESSION)
@@ -458,6 +449,7 @@ public class OutputLimitClause implements Serializable
         else if (unit == OutputLimitUnit.CONTEXT_PARTITION_TERM)
         {
             writer.write("when terminated");
+            outputAndAfter(writer);
         }
         else
         {
@@ -475,6 +467,7 @@ public class OutputLimitClause implements Serializable
 
         if (andAfterTerminate) {
             writer.write(" and when terminated");
+            outputAndAfter(writer);
         }
     }
 
@@ -574,5 +567,45 @@ public class OutputLimitClause implements Serializable
     {
         this.afterNumberOfEvents = afterNumberOfEvents;
         return this;
+    }
+
+    public Expression getAndAfterTerminateAndExpr() {
+        return andAfterTerminateAndExpr;
+    }
+
+    public void setAndAfterTerminateAndExpr(Expression andAfterTerminateAndExpr) {
+        this.andAfterTerminateAndExpr = andAfterTerminateAndExpr;
+    }
+
+    public List<AssignmentPair> getAndAfterTerminateThenAssignments() {
+        return andAfterTerminateThenAssignments;
+    }
+
+    public void setAndAfterTerminateThenAssignments(List<AssignmentPair> andAfterTerminateThenAssignments) {
+        this.andAfterTerminateThenAssignments = andAfterTerminateThenAssignments;
+    }
+
+    private void writeThenAssignments(StringWriter writer, List<AssignmentPair> thenAssignments) {
+        writer.write(" then set ");
+
+        String delimiter = "";
+        for (AssignmentPair pair : thenAssignments)
+        {
+            writer.write(delimiter);
+            writer.write(pair.getName());
+            writer.write(" = ");
+            pair.getValue().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+            delimiter = ", ";
+        }
+    }
+
+    private void outputAndAfter(StringWriter writer) {
+        if (andAfterTerminateAndExpr != null) {
+            writer.write(" and ");
+            andAfterTerminateAndExpr.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+        }
+        if (andAfterTerminateThenAssignments != null && andAfterTerminateThenAssignments.size() > 0) {
+            writeThenAssignments(writer, andAfterTerminateThenAssignments);
+        }
     }
 }

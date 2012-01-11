@@ -8,9 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.event;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventBeanFactory;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.EventBeanManufacturerBean;
@@ -19,12 +19,11 @@ import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.xml.BaseXMLEventType;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
+import org.w3c.dom.Node;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import org.w3c.dom.Node;
 
 /**
  * Helper for writeable events.
@@ -34,24 +33,20 @@ public class EventAdapterServiceHelper
     public static EventBeanFactory getFactoryForType(EventType type, EventAdapterService eventAdapterService) {
         if (type instanceof WrapperEventType) {
             WrapperEventType wrapperType = (WrapperEventType) type;
-
             if (wrapperType.getUnderlyingEventType() instanceof BeanEventType) {
-
+                return new EventBeanFactoryBeanWrapped(wrapperType.getUnderlyingEventType(), wrapperType, eventAdapterService);
             }
-            return new EventBeanFactoryBeanWrapped(wrapperType.getUnderlyingEventType(), wrapperType, eventAdapterService);
         }
-        else if (type instanceof BeanEventType) {
+        if (type instanceof BeanEventType) {
             return new EventBeanFactoryBean(type, eventAdapterService);
         }
-        else if (type instanceof MapEventType) {
+        if (type instanceof MapEventType) {
             return new EventBeanFactoryMap(type, eventAdapterService);
         }
-        else if (type instanceof BaseXMLEventType) {
+        if (type instanceof BaseXMLEventType) {
             return new EventBeanFactoryXML(type, eventAdapterService);
         }
-        else {
-            throw new IllegalArgumentException("Cannot create event bean factory for event type '" + type.getName() + "': " + type.getClass().getName() + " not a recognized type");
-        }
+        throw new IllegalArgumentException("Cannot create event bean factory for event type '" + type.getName() + "': " + type.getClass().getName() + " is not a recognized event type or supported wrap event type");
     }
 
     /**

@@ -11,16 +11,16 @@
 
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.core.service.StatementType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.core.service.StatementType;
-import com.espertech.esper.core.service.EPStatementSPI;
+import junit.framework.TestCase;
 
 public class TestFromClauseMethod extends TestCase
 {
@@ -48,14 +48,15 @@ public class TestFromClauseMethod extends TestCase
         stmtText = "select max(col1) as maxcol1 from SupportBean.std:unique(string), method:" + className + ".fetchResult100() ";
 
         String[] fields = "maxcol1".split(",");
-        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
+        assertFalse(stmt.getStatementContext().isStatelessSelect());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{9}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{9}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{9}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{9}});
 
         stmt.destroy();
     }
@@ -73,12 +74,12 @@ public class TestFromClauseMethod extends TestCase
 
         String[] fields = "intPrimitive,intBoxed,col1,col2".split(",");
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
         stmt.addListener(listener);
 
         sendSupportBeanEvent(2, 4);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{2,4,2,4}});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{2,4,2,4}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{2, 4, 2, 4}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{2, 4, 2, 4}});
 
         stmt.destroy();
     }
@@ -124,7 +125,7 @@ public class TestFromClauseMethod extends TestCase
                    "left outer join " +
                    "method:" + className + ".fetchResult23(0) as s1 on s0.value = s1.value";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, null}, {2, 2}});
         stmt.destroy();
 
         stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
@@ -132,7 +133,7 @@ public class TestFromClauseMethod extends TestCase
                     "right outer join " +
                     "method:" + className + ".fetchResult12(0) as s0 on s0.value = s1.value";
         stmt = epService.getEPAdministrator().createEPL(stmtText);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, null}, {2, 2}});
         stmt.destroy();
 
         stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
@@ -140,7 +141,7 @@ public class TestFromClauseMethod extends TestCase
                     "full outer join " +
                     "method:" + className + ".fetchResult12(0) as s0 on s0.value = s1.value";
         stmt = epService.getEPAdministrator().createEPL(stmtText);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}, {null, 3}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, null}, {2, 2}, {null, 3}});
         stmt.destroy();
 
         stmtText = "select s0.value as valueOne, s1.value as valueTwo from " +
@@ -148,7 +149,7 @@ public class TestFromClauseMethod extends TestCase
                     "full outer join " +
                     "method:" + className + ".fetchResult23(0) as s1 on s0.value = s1.value";
         stmt = epService.getEPAdministrator().createEPL(stmtText);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}, {null, 3}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, null}, {2, 2}, {null, 3}});
         stmt.destroy();
     }
 
@@ -156,7 +157,7 @@ public class TestFromClauseMethod extends TestCase
     {
         String[] fields = "valueOne,valueTwo".split(",");
         EPStatement stmt = epService.getEPAdministrator().createEPL(expression);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, null}, {2, 2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, null}, {2, 2}});
         stmt.destroy();
     }
 
@@ -210,16 +211,16 @@ public class TestFromClauseMethod extends TestCase
         stmt.addListener(listener);
 
         String[] fields = "valueOne,valueTwo".split(",");
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendSupportBeanEvent(5, 5);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{5, "5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{5, "5"}});
 
         sendSupportBeanEvent(1, 2);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, "1"}, {1, "2"}, {2, "1"}, {2, "2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, "1"}, {1, "2"}, {2, "1"}, {2, "2"}});
 
         sendSupportBeanEvent(0, -1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         stmt.destroy();
         sendSupportBeanEvent(0, -1);
@@ -233,19 +234,19 @@ public class TestFromClauseMethod extends TestCase
         stmt.addListener(listener);
 
         String[] fields = "value,result".split(",");
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendSupportBeanEvent(5, 5);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{5, "|5|"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{5, "|5|"}});
 
         sendSupportBeanEvent(1, 2);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, "|1|"}, {2, "|2|"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, "|1|"}, {2, "|2|"}});
 
         sendSupportBeanEvent(0, -1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendSupportBeanEvent(4, 6);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{4, "|4|"}, {5, "|5|"}, {6, "|6|"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{4, "|4|"}, {5, "|5|"}, {6, "|6|"}});
 
         stmt.destroy();
         sendSupportBeanEvent(0, -1);
@@ -266,16 +267,16 @@ public class TestFromClauseMethod extends TestCase
         listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"value"}, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"value"}, null);
 
         sendSupportBeanEvent(5, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"value"}, new Object[][] {{5}, {6}, {7}, {8}, {9}, {10}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"value"}, new Object[][]{{5}, {6}, {7}, {8}, {9}, {10}});
 
         sendSupportBeanEvent(10, 5);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"value"}, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"value"}, null);
 
         sendSupportBeanEvent(4, 4);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"value"}, new Object[][] {{4}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"value"}, new Object[][]{{4}});
 
         stmt.destroy();
         assertFalse(listener.isInvoked());
@@ -290,29 +291,29 @@ public class TestFromClauseMethod extends TestCase
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(joinStatement);
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendBeanEvent("E1", 0);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendBeanEvent("E2", -1);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendBeanEvent("E3", 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3", 1, "|E3_0|", 100});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E3", 1, "|E3_0|", 100}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", 1, "|E3_0|", 100});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E3", 1, "|E3_0|", 100}});
 
         sendBeanEvent("E4", 2);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
-                new Object[][] {{"E4", 2, "|E4_0|", 100}, {"E4", 2, "|E4_1|", 101}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E3", 1, "|E3_0|", 100}, {"E4", 2, "|E4_0|", 100}, {"E4", 2, "|E4_1|", 101}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
+                new Object[][]{{"E4", 2, "|E4_0|", 100}, {"E4", 2, "|E4_1|", 101}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E3", 1, "|E3_0|", 100}, {"E4", 2, "|E4_0|", 100}, {"E4", 2, "|E4_1|", 101}});
 
         sendBeanEvent("E5", 3);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
-                new Object[][] {{"E5", 3, "|E5_0|", 100}, {"E5", 3, "|E5_1|", 101}, {"E5", 3, "|E5_2|", 102}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E3", 1, "|E3_0|", 100}, 
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
+                new Object[][]{{"E5", 3, "|E5_0|", 100}, {"E5", 3, "|E5_1|", 101}, {"E5", 3, "|E5_2|", 102}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E3", 1, "|E3_0|", 100},
                 {"E4", 2, "|E4_0|", 100}, {"E4", 2, "|E4_1|", 101},
                 {"E5", 3, "|E5_0|", 100}, {"E5", 3, "|E5_1|", 101}, {"E5", 3, "|E5_2|", 102}});
 
@@ -329,13 +330,13 @@ public class TestFromClauseMethod extends TestCase
         String[] fields = new String[] {"string", "intPrimitive", "mapstring", "mapint"};
 
         sendBeanEvent("E1", 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1, "|E1|", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1, "|E1|", 2});
 
         sendBeanEvent("E2", 3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 3, "|E2|", 4});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 3, "|E2|", 4});
 
         sendBeanEvent("E3", 0);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3", 0, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", 0, null, null});
 
         sendBeanEvent("E4", -1);
         assertFalse(listener.isInvoked());
@@ -379,10 +380,10 @@ public class TestFromClauseMethod extends TestCase
         String[] fields = new String[] {"id", "string"};
 
         sendBeanEvent("E1");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"1", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"1", "E1"});
 
         sendBeanEvent("E2");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"1", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"1", "E2"});
 
         stmt.destroy();
     }
@@ -431,26 +432,26 @@ public class TestFromClauseMethod extends TestCase
         assertFalse(listener.isInvoked());
 
         sendBeanEvent("E3", 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A", "E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"A", "E3"});
 
         sendBeanEvent("E4", 2);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"A", "E4"}, {"B", "E4"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"A", "E4"}, {"B", "E4"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendBeanEvent("E5", 3);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"A", "E5"}, {"B", "E5"}, {"C", "E5"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"A", "E5"}, {"B", "E5"}, {"C", "E5"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendBeanEvent("E6", 1);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"A", "E6"}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastOldData(), fields, new Object[][] {{"A", "E3"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"A", "E6"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastOldData(), fields, new Object[][]{{"A", "E3"}});
         listener.reset();
 
         sendBeanEvent("E7", 1);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"A", "E7"}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastOldData(), fields, new Object[][] {{"A", "E4"}, {"B", "E4"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"A", "E7"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastOldData(), fields, new Object[][]{{"A", "E4"}, {"B", "E4"}});
         listener.reset();
 
         stmt.destroy();
@@ -467,10 +468,10 @@ public class TestFromClauseMethod extends TestCase
         String[] fields = new String[] {"id", "string"};
 
         sendBeanEvent("E1");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"2", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"2", "E1"});
 
         sendBeanEvent("E2");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"2", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"2", "E2"});
     }
 
     public void testObjectWithArg()
@@ -484,13 +485,13 @@ public class TestFromClauseMethod extends TestCase
         String[] fields = new String[] {"id", "string"};
 
         sendBeanEvent("E1");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"|E1|", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"|E1|", "E1"});
 
         sendBeanEvent(null);
         assertFalse(listener.isInvoked());
 
         sendBeanEvent("E2");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"|E2|", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"|E2|", "E2"});
     }
 
     public void testInvocationTargetEx()

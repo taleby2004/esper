@@ -9,12 +9,11 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprTimePeriod;
 import com.espertech.esper.util.MetaDefItem;
 
-import java.util.List;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Spec for defining an output rate
@@ -32,6 +31,8 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
     private final ExprTimePeriod afterTimePeriodExpr;
     private final Integer afterNumberOfEvents;
     private final boolean andAfterTerminate;
+    private ExprNode andAfterTerminateExpr;
+    private List<OnTriggerSetAssignment> andAfterTerminateThenExpressions;
     private static final long serialVersionUID = 7314871194757342071L;
 
     /**
@@ -48,7 +49,7 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
      * @param afterTimePeriodExpr - after-keyword time period
      * @param afterNumberOfEvents - after-keyword number of events
      */
-    public OutputLimitSpec(Double rate, String variableForRate, OutputLimitRateType rateType, OutputLimitLimitType displayLimit, ExprNode whenExpressionNode, List<OnTriggerSetAssignment> thenExpressions, List<ExprNode> crontabAtSchedule, ExprTimePeriod timePeriodExpr, ExprTimePeriod afterTimePeriodExpr, Integer afterNumberOfEvents, boolean andAfterTerminate)
+    public OutputLimitSpec(Double rate, String variableForRate, OutputLimitRateType rateType, OutputLimitLimitType displayLimit, ExprNode whenExpressionNode, List<OnTriggerSetAssignment> thenExpressions, List<ExprNode> crontabAtSchedule, ExprTimePeriod timePeriodExpr, ExprTimePeriod afterTimePeriodExpr, Integer afterNumberOfEvents, boolean andAfterTerminate, ExprNode andAfterTerminateExpr, List<OnTriggerSetAssignment> andAfterTerminateSetExpressions)
 	{
 		this.rate = rate;
 		this.displayLimit = displayLimit;
@@ -61,6 +62,8 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
         this.afterTimePeriodExpr = afterTimePeriodExpr;
         this.afterNumberOfEvents = afterNumberOfEvents;
         this.andAfterTerminate = andAfterTerminate;
+        this.andAfterTerminateExpr = andAfterTerminateExpr;
+        this.andAfterTerminateThenExpressions = andAfterTerminateSetExpressions;
     }
 
     /**
@@ -162,7 +165,23 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
         return afterNumberOfEvents;
     }
 
+    public ExprNode getAndAfterTerminateExpr() {
+        return andAfterTerminateExpr;
+    }
+
+    public void setAndAfterTerminateExpr(ExprNode andAfterTerminateExpr) {
+        this.andAfterTerminateExpr = andAfterTerminateExpr;
+    }
+
     public boolean isAndAfterTerminate() {
         return andAfterTerminate;
+    }
+
+    public List<OnTriggerSetAssignment> getAndAfterTerminateThenExpressions() {
+        return andAfterTerminateThenExpressions;
+    }
+
+    public void setAndAfterTerminateThenExpressions(List<OnTriggerSetAssignment> andAfterTerminateThenExpressions) {
+        this.andAfterTerminateThenExpressions = andAfterTerminateThenExpressions;
     }
 }

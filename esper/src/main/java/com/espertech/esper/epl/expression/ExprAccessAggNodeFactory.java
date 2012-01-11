@@ -86,12 +86,12 @@ public class ExprAccessAggNodeFactory implements AggregationMethodFactory
         throw new IllegalStateException("Access type is undefined or not known as code '" + accessType + "'");
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
         if (accessType == AggregationAccessType.FIRST) {
-            return methodResolutionService.makeFirstEverValueAggregator(agentInstanceIds, groupId, aggregationId, resultType, false);
+            return methodResolutionService.makeFirstEverValueAggregator(agentInstanceId, groupId, aggregationId, resultType, false);
         }
         else if (accessType == AggregationAccessType.LAST) {
-            return methodResolutionService.makeLastEverValueAggregator(agentInstanceIds, groupId, aggregationId, resultType, false);
+            return methodResolutionService.makeLastEverValueAggregator(agentInstanceId, groupId, aggregationId, resultType, false);
         }
         throw new RuntimeException("Window aggregation function is not available");
     }

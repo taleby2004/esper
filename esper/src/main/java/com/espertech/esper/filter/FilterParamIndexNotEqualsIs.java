@@ -9,6 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,13 +23,13 @@ import java.util.Map;
  */
 public final class FilterParamIndexNotEqualsIs extends FilterParamIndexNotEqualsBase
 {
-    public FilterParamIndexNotEqualsIs(String propertyName, EventType eventType) {
-        super(propertyName, FilterOperator.IS_NOT, eventType);
+    public FilterParamIndexNotEqualsIs(FilterSpecLookupable lookupable) {
+        super(lookupable, FilterOperator.IS_NOT);
     }
 
     public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
-        Object attributeValue = this.getGetter().get(eventBean);
+        Object attributeValue = lookupable.getGetter().get(eventBean);
 
         // Look up in hashtable
         constantsMapRWLock.readLock().lock();

@@ -50,4 +50,8 @@ public class ExprIdentNodeEvaluatorContext implements ExprIdentNodeEvaluator {
     public Map<String, Object> getEventType() throws ExprValidationException {
         return null;
     }
+
+    public EventPropertyGetter getGetter() {
+        return getter;
+    }
 }

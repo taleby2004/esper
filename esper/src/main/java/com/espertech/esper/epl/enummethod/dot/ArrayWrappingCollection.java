@@ -20,6 +20,12 @@ public class ArrayWrappingCollection implements Collection {
     private Object array;
 
     public ArrayWrappingCollection(Object array) {
+        if (array == null) {
+            throw new IllegalArgumentException("Null array provided");
+        }
+        if (!array.getClass().isArray()) {
+            throw new IllegalArgumentException("Non-array value provided to collection, expected array type but received type " + array.getClass().getName());
+        }
         this.array = array;
     }
 

@@ -54,7 +54,7 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
 
     public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped groupKey, ExprEvaluatorContext exprEvaluatorContext)
     {
-        AggregationAccess[] row = getAssertRow(exprEvaluatorContext.getAgentInstanceIds(), groupKey);
+        AggregationAccess[] row = getAssertRow(exprEvaluatorContext.getAgentInstanceId(), groupKey);
         for (AggregationAccess access : row) {
             access.applyEnter(eventsPerStream);
         }
@@ -62,18 +62,18 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
 
     public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped groupKey, ExprEvaluatorContext exprEvaluatorContext)
     {
-        AggregationAccess[] row = getAssertRow(exprEvaluatorContext.getAgentInstanceIds(), groupKey);
+        AggregationAccess[] row = getAssertRow(exprEvaluatorContext.getAgentInstanceId(), groupKey);
         for (AggregationAccess access : row) {
             access.applyLeave(eventsPerStream);
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId)
     {
-        currentAccess = getAssertRow(agentInstanceIds, groupKey);
+        currentAccess = getAssertRow(agentInstanceId, groupKey);
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         AggregationAccessorSlotPair pair = accessors[column];
         return pair.getAccessor().getValue(currentAccess[pair.getSlot()]);
@@ -94,7 +94,7 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
         accessMap.clear();
     }
 
-    private AggregationAccess[] getAssertRow(int[] agentInstanceId, MultiKeyUntyped groupKey) {
+    private AggregationAccess[] getAssertRow(int agentInstanceId, MultiKeyUntyped groupKey) {
         AggregationAccess[] row = accessMap.get(groupKey);
         if (row != null) {
             return row;
@@ -103,5 +103,9 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
         row = AggregationAccessUtil.getNewAccesses(agentInstanceId, isJoin, streams, methodResolutionService, groupKey);
         accessMap.put(groupKey, row);
         return row;
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

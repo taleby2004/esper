@@ -11,6 +11,7 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
@@ -19,7 +20,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 import java.util.Iterator;
 
@@ -91,22 +91,22 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         Object eventOne = sendEvent("SYM", 1);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventOne});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{eventOne}, stmt.iterator());
 
         Object eventTwo = sendEvent("OCC", 2);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventOne});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{eventTwo, eventOne}, stmt.iterator());
 
         Object eventThree = sendEvent("TOC", 3);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventOne, eventThree});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{eventTwo, eventOne, eventThree}, stmt.iterator());
 
         Object eventFour = sendEvent("SYM", 0);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventFour, eventOne, eventThree});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{eventTwo, eventFour, eventOne, eventThree}, stmt.iterator());
 
         Object eventFive = sendEvent("SYM", 10);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventFour, eventOne, eventFive, eventThree});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{eventTwo, eventFour, eventOne, eventFive, eventThree}, stmt.iterator());
 
         Object eventSix = sendEvent("SYM", 4);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new Object[] {eventTwo, eventFour, eventSix, eventFive, eventThree});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{eventTwo, eventFour, eventSix, eventFive, eventThree}, stmt.iterator());
     }
 
     public void testOrderByProps()
@@ -117,16 +117,16 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"SYM", 1L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 1L}});
 
         sendEvent("OCC", 2);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"OCC", 2L}, {"SYM", 1L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"OCC", 2L}, {"SYM", 1L}});
 
         sendEvent("SYM", 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"OCC", 2L}, {"SYM", 0L}, {"SYM", 1L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"OCC", 2L}, {"SYM", 0L}, {"SYM", 1L}});
 
         sendEvent("OCC", 3);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"OCC", 2L}, {"OCC", 3L}, {"SYM", 0L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"OCC", 2L}, {"OCC", 3L}, {"SYM", 0L}});
     }
 
     public void testFilter()
@@ -139,30 +139,30 @@ public class TestIterator extends TestCase
 
         sendEvent("SYM", 100);
         assertFalse(stmt.iterator().hasNext());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("SYM", -1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"SYM", -10L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -10L}});
 
         sendEvent("SYM", -6);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -10L}, {"SYM", -60L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -10L}, {"SYM", -60L}});
 
         sendEvent("SYM", 1);
         sendEvent("SYM", 16);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -10L}, {"SYM", -60L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -10L}, {"SYM", -60L}});
 
         sendEvent("SYM", -9);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -10L}, {"SYM", -60L}, {"SYM", -90L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -10L}, {"SYM", -60L}, {"SYM", -90L}});
 
         sendEvent("SYM", 2);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -60L}, {"SYM", -90L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -60L}, {"SYM", -90L}});
 
         sendEvent("SYM", 3);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -90L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -90L}});
 
         sendEvent("SYM", 4);
         sendEvent("SYM", 5);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -90L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -90L}});
         sendEvent("SYM", 6);
         assertFalse(stmt.iterator().hasNext());
     }
@@ -179,22 +179,22 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 100L}});
 
         sendEvent("OCC", 5);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"OCC", 5L}, {"SYM", 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"OCC", 5L}, {"SYM", 100L}});
 
         sendEvent("SYM", 10);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"OCC", 5L}, {"SYM", 110L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"OCC", 5L}, {"SYM", 110L}});
 
         sendEvent("OCC", 6);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"OCC", 11L}, {"SYM", 110L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"OCC", 11L}, {"SYM", 110L}});
 
         sendEvent("ATB", 8);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"ATB", 8L}, {"OCC", 11L}, {"SYM", 110L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"ATB", 8L}, {"OCC", 11L}, {"SYM", 110L}});
 
         sendEvent("ATB", 7);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"ATB", 15L}, {"OCC", 11L}, {"SYM", 10L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"ATB", 15L}, {"OCC", 11L}, {"SYM", 10L}});
     }
 
     public void testGroupByRowPerGroup()
@@ -208,28 +208,28 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 100L}});
 
         sendEvent("SYM", 10);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 110L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 110L}});
 
         sendEvent("TAC", 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 110L}, {"TAC", 1L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 110L}, {"TAC", 1L}});
 
         sendEvent("SYM", 11);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 121L}, {"TAC", 1L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 121L}, {"TAC", 1L}});
 
         sendEvent("TAC", 2);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 121L}, {"TAC", 3L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 121L}, {"TAC", 3L}});
 
         sendEvent("OCC", 55);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 21L}, {"TAC", 3L}, {"OCC", 55L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 21L}, {"TAC", 3L}, {"OCC", 55L}});
 
         sendEvent("OCC", 4);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"TAC", 3L}, {"SYM", 11L}, {"OCC", 59L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"TAC", 3L}, {"SYM", 11L}, {"OCC", 59L}});
 
         sendEvent("OCC", 3);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 11L}, {"TAC", 2L}, {"OCC", 62L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 11L}, {"TAC", 2L}, {"OCC", 62L}});
     }
 
     public void testGroupByRowPerGroupHaving()
@@ -243,28 +243,28 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 100L}});
 
         sendEvent("SYM", 5);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 105L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 105L}});
 
         sendEvent("TAC", 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 105L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 105L}});
 
         sendEvent("SYM", 3);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 108L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 108L}});
 
         sendEvent("TAC", 12);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 108L}, {"TAC", 13L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 108L}, {"TAC", 13L}});
 
         sendEvent("OCC", 55);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"TAC", 13L}, {"OCC", 55L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"TAC", 13L}, {"OCC", 55L}});
 
         sendEvent("OCC", 4);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"TAC", 13L}, {"OCC", 59L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"TAC", 13L}, {"OCC", 59L}});
 
         sendEvent("OCC", 3);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"TAC", 12L}, {"OCC", 62L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"TAC", 12L}, {"OCC", 62L}});
     }
 
     public void testGroupByComplex()
@@ -281,7 +281,7 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("SYM", 100000d, 0L, null));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", "1x1000.0"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", "1x1000.0"}});
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("SYM", 1d, 1L, null));
         assertFalse(stmt.iterator().hasNext());
@@ -299,27 +299,27 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", -1, 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -1d, 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -1d, 100L}});
 
         sendEvent("TAC", -2, 12);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 100L}, {"TAC", -2d, 12L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 100L}, {"TAC", -2d, 12L}});
 
         sendEvent("TAC", -3, 13);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 100L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 100L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
 
         sendEvent("SYM", -4, 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 101L}, {"SYM", -4d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 101L}, {"SYM", -4d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
 
         sendEvent("OCC", -5, 99);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"OCC", -5d, 99L}, {"SYM", -1d, 101L}, {"SYM", -4d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"OCC", -5d, 99L}, {"SYM", -1d, 101L}, {"SYM", -4d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
 
         sendEvent("TAC", -6, 2);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"OCC", -5d, 99L}, {"SYM", -4d, 1L}, {"TAC", -2d, 27L}, {"TAC", -3d, 27L}, {"TAC", -6d, 27L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"OCC", -5d, 99L}, {"SYM", -4d, 1L}, {"TAC", -2d, 27L}, {"TAC", -3d, 27L}, {"TAC", -6d, 27L}});
     }
 
     public void testGroupByRowPerEvent()
@@ -333,27 +333,27 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", -1, 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -1d, 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -1d, 100L}});
 
         sendEvent("TAC", -2, 12);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 100L}, {"TAC", -2d, 12L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 100L}, {"TAC", -2d, 12L}});
 
         sendEvent("TAC", -3, 13);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 100L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 100L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
 
         sendEvent("SYM", -4, 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}, {"SYM", -4d, 101L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}, {"SYM", -4d, 101L}});
 
         sendEvent("OCC", -5, 99);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}, {"SYM", -4d, 101L}, {"OCC", -5d, 99L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}, {"SYM", -4d, 101L}, {"OCC", -5d, 99L}});
 
         sendEvent("TAC", -6, 2);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"TAC", -2d, 27L}, {"TAC", -3d, 27L}, {"SYM", -4d, 1L}, {"OCC", -5d, 99L}, {"TAC", -6d, 27L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"TAC", -2d, 27L}, {"TAC", -3d, 27L}, {"SYM", -4d, 1L}, {"OCC", -5d, 99L}, {"TAC", -6d, 27L}});
     }
 
     public void testGroupByRowPerEventHaving()
@@ -367,27 +367,27 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", -1, 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", -1d, 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", -1d, 100L}});
 
         sendEvent("TAC", -2, 12);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 100L}});
 
         sendEvent("TAC", -3, 13);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 100L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 100L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}});
 
         sendEvent("SYM", -4, 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}, {"SYM", -4d, 101L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}, {"SYM", -4d, 101L}});
 
         sendEvent("OCC", -5, 99);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"SYM", -1d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}, {"SYM", -4d, 101L}, {"OCC", -5d, 99L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"SYM", -1d, 101L}, {"TAC", -2d, 25L}, {"TAC", -3d, 25L}, {"SYM", -4d, 101L}, {"OCC", -5d, 99L}});
 
         sendEvent("TAC", -6, 2);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] { {"TAC", -2d, 27L}, {"TAC", -3d, 27L}, {"OCC", -5d, 99L}, {"TAC", -6d, 27L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"TAC", -2d, 27L}, {"TAC", -3d, 27L}, {"OCC", -5d, 99L}, {"TAC", -6d, 27L}});
     }
 
     public void testAggregateAll()
@@ -400,16 +400,16 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 100L}});
 
         sendEvent("TAC", 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 101L}, {"TAC", 101L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 101L}, {"TAC", 101L}});
 
         sendEvent("MOV", 3);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 104L}, {"TAC", 104L}, {"MOV", 104L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 104L}, {"TAC", 104L}, {"MOV", 104L}});
 
         sendEvent("SYM", 10);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"TAC", 14L}, {"MOV", 14L}, {"SYM", 14L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"TAC", 14L}, {"MOV", 14L}, {"SYM", 14L}});
     }
 
     public void testAggregateAllOrdered()
@@ -423,16 +423,16 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("SYM", 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 100L}});
 
         sendEvent("TAC", 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 101L}, {"TAC", 101L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 101L}, {"TAC", 101L}});
 
         sendEvent("MOV", 3);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"MOV", 104L}, {"SYM", 104L}, {"TAC", 104L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"MOV", 104L}, {"SYM", 104L}, {"TAC", 104L}});
 
         sendEvent("SYM", 10);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"MOV", 14L}, {"SYM", 14L}, {"TAC", 14L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"MOV", 14L}, {"SYM", 14L}, {"TAC", 14L}});
     }
 
     public void testAggregateAllHaving()
@@ -448,10 +448,10 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent("TAC", 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 101L}, {"TAC", 101L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 101L}, {"TAC", 101L}});
 
         sendEvent("MOV", 3);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {"SYM", 104L}, {"TAC", 104L}, {"MOV", 104L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"SYM", 104L}, {"TAC", 104L}, {"MOV", 104L}});
 
         sendEvent("SYM", 10);
         assertFalse(stmt.iterator().hasNext());
@@ -464,19 +464,19 @@ public class TestIterator extends TestCase
                           "from " + SupportMarketDataBean.class.getName() + ".win:length(3) ";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {null}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{null}});
 
         sendEvent(100);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {100L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{100L}});
 
         sendEvent(50);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {150L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{150L}});
 
         sendEvent(25);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {175L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{175L}});
 
         sendEvent(10);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {85L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{85L}});
     }
 
     public void testRowForAllHaving()
@@ -492,10 +492,10 @@ public class TestIterator extends TestCase
         assertFalse(stmt.iterator().hasNext());
 
         sendEvent(50);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {150L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{150L}});
 
         sendEvent(25);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] { {175L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{175L}});
 
         sendEvent(10);
         assertFalse(stmt.iterator().hasNext());

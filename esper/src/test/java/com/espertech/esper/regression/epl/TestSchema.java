@@ -13,16 +13,18 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.deploy.DeploymentResult;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.event.EventTypeMetadata;
 import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
+import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +45,59 @@ public class TestSchema extends TestCase
         listener = null;
     }
 
+    // TODO
+    // test configured Map type
+
+    public void testSchemaWithEventType() {
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_S0", SupportBean_S0.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("BeanSourceEvent", BeanSourceEvent.class);
+        BeanSourceEvent event = new BeanSourceEvent(new SupportBean("E1", 1), new SupportBean_S0[] {new SupportBean_S0(2)});
+
+        // test schema
+        EPStatement stmtSchema = epService.getEPAdministrator().createEPL("create schema MySchema (bean SupportBean, beanarray SupportBean_S0[])");
+        assertEquals(new EventPropertyDescriptor("bean", SupportBean.class, null, false, false, false, false, true), stmtSchema.getEventType().getPropertyDescriptor("bean"));
+        assertEquals(new EventPropertyDescriptor("beanarray", SupportBean_S0[].class, SupportBean_S0.class, false, false, true, false, true), stmtSchema.getEventType().getPropertyDescriptor("beanarray"));
+
+        EPStatement stmtSchemaInsert = epService.getEPAdministrator().createEPL("insert into MySchema select sb as bean, s0Arr as beanarray from BeanSourceEvent");
+        stmtSchemaInsert.addListener(listener);
+        epService.getEPRuntime().sendEvent(event);
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
+        stmtSchemaInsert.destroy();
+
+        // test named window
+        EPStatement stmtWindow = epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as (bean SupportBean, beanarray SupportBean_S0[])");
+        stmtWindow.addListener(listener);
+        assertEquals(new EventPropertyDescriptor("bean", SupportBean.class, null, false, false, false, false, true), stmtWindow.getEventType().getPropertyDescriptor("bean"));
+        assertEquals(new EventPropertyDescriptor("beanarray", SupportBean_S0[].class, SupportBean_S0.class, false, false, true, false, true), stmtWindow.getEventType().getPropertyDescriptor("beanarray"));
+
+        EPStatement stmtWindowInsert = epService.getEPAdministrator().createEPL("insert into MyWindow select sb as bean, s0Arr as beanarray from BeanSourceEvent");
+        epService.getEPRuntime().sendEvent(event);
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
+        stmtWindowInsert.destroy();
+
+        // insert pattern to named window
+        EPStatement stmtWindowPattern = epService.getEPAdministrator().createEPL("insert into MyWindow select sb as bean, s0Arr as beanarray from pattern [sb=SupportBean -> s0Arr=SupportBean_S0 until SupportBean_S0(id=0)]");
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "S0_1"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(20, "S0_2"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "S0_3"));
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id,beanarray[1].id".split(","), new Object[] {"E2", 10, 20});
+        stmtWindowPattern.destroy();
+
+        // test configured Map type
+        Map<String, Object> configDef = new HashMap<String, Object>();
+        configDef.put("bean", "SupportBean");
+        configDef.put("beanarray", "SupportBean_S0[]");
+        epService.getEPAdministrator().getConfiguration().addEventType("MyConfiguredMap", configDef);
+        
+        EPStatement stmtMapInsert = epService.getEPAdministrator().createEPL("insert into MyConfiguredMap select sb as bean, s0Arr as beanarray from BeanSourceEvent");
+        stmtMapInsert.addListener(listener);
+        epService.getEPRuntime().sendEvent(event);
+        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
+        stmtMapInsert.destroy();
+    }
+
     public void testSchemaCopyProperties() {
         epService.getEPAdministrator().createEPL("create schema BaseOne (prop1 String, prop2 int)");
         epService.getEPAdministrator().createEPL("create schema BaseTwo (prop3 long)");
@@ -58,7 +113,7 @@ public class TestSchema extends TestCase
         eventE1.put("prop1", "v1");
         eventE1.put("prop2", 2);
         epService.getEPRuntime().sendEvent(eventE1, "E1");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "prop1,prop2".split(","), new Object[] {"v1", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "prop1,prop2".split(","), new Object[]{"v1", 2});
 
         // test two copy-from types
         epService.getEPAdministrator().createEPL("create schema E2 () copyfrom BaseOne, BaseTwo");
@@ -201,7 +256,7 @@ public class TestSchema extends TestCase
         data.put("col5", "abc");
         data.put("col6", 1);
         epService.getEPRuntime().sendEvent(data, "MyEventType");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col5,col6".split(","), new Object[] {"abc", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col5,col6".split(","), new Object[]{"abc", 1});
         
         // assert type information
         EventTypeSPI typeSPI = (EventTypeSPI) stmtSelect.getEventType();
@@ -230,7 +285,7 @@ public class TestSchema extends TestCase
         stmtSelectTwo.addListener(listener);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getNewDataListFlattened(), "string,intPrimitive".split(","), new Object[][] {{"E1", 2}, {"E1", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataListFlattened(), "string,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E1", 2}});
 
         // assert type information
         EventTypeSPI typeSPI = (EventTypeSPI) stmtSelectOne.getEventType();
@@ -271,7 +326,7 @@ public class TestSchema extends TestCase
         outerData.put("col1", innerData);
         outerData.put("col2", new Map[] {innerData, innerData});
         epService.getEPRuntime().sendEvent(outerData, "MyOuterType");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1.col1[1],col2[1].col2[1]".split(","), new Object[] {"def", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1.col1[1],col2[1].col2[1]".split(","), new Object[]{"def", 2});
     }
 
     public void testInherit() throws Exception
@@ -358,5 +413,23 @@ public class TestSchema extends TestCase
         assertEquals(SupportBean.class, eventType.getPropertyType("sbean"));
         assertEquals(Integer.class, eventType.getPropertyType("col3.col4"));
         assertEquals(4, eventType.getPropertyDescriptors().length);
+    }
+
+    public static class BeanSourceEvent {
+        private SupportBean sb;
+        private SupportBean_S0[] s0Arr;
+
+        public BeanSourceEvent(SupportBean sb, SupportBean_S0[] s0Arr) {
+            this.sb = sb;
+            this.s0Arr = s0Arr;
+        }
+
+        public SupportBean getSb() {
+            return sb;
+        }
+
+        public SupportBean_S0[] getS0Arr() {
+            return s0Arr;
+        }
     }
 }

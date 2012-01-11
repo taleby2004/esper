@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestFirstLastAllAggregation extends TestCase {
@@ -46,7 +46,7 @@ public class TestFirstLastAllAggregation extends TestCase {
         stmt.addListener(listener);
         
         epService.getEPRuntime().sendEvent(new ChainEvent("p1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1".split(","), new Object[] {"p1", "abc"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1".split(","), new Object[]{"p1", "abc"});
     }
 
     public void testLastMaxMixedOnSelect() {
@@ -60,21 +60,21 @@ public class TestFirstLastAllAggregation extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 10));
         epService.getEPRuntime().sendEvent(new SupportBean("B1", -1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, 10});
 
         for (int i = 11; i < 20; i++) {
             epService.getEPRuntime().sendEvent(new SupportBean("A1", i));
             epService.getEPRuntime().sendEvent(new SupportBean("Bx", -1));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {i, i});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{i, i});
         }
 
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("B1", -1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, 19});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, 19});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("B1", -1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2, 19});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2, 19});
     }
 
     public void testPrevNthIndexedFirstLast() {
@@ -94,16 +94,16 @@ public class TestFirstLastAllAggregation extends TestCase {
         String[] fields = "p0,p1,p2,n0,n1,n2,l1,l2,l3".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, null, null, 10, null, null, 10, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, null, null, 10, null, null, 10, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {11, 10, null, 11, 10, null, 11, 10, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{11, 10, null, 11, 10, null, 11, 10, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 12));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {12, 11, 10,  12, 11, 10,  12, 11, 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{12, 11, 10, 12, 11, 10, 12, 11, 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 13));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {13, 12, 11,  13, 12, 11,  13, 12, 11});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{13, 12, 11, 13, 12, 11, 13, 12, 11});
     }
 
     public void testFirstLastIndexed() {
@@ -148,11 +148,11 @@ public class TestFirstLastAllAggregation extends TestCase {
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 12));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {12});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{12});
         
         epService.getEPRuntime().setVariableValue("indexvar", 0);
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 13));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10});
         stmt.destroy();
         
         // test as part of function
@@ -162,16 +162,16 @@ public class TestFirstLastAllAggregation extends TestCase {
     private void runAssertionFirstLastIndexed() {
         String[] fields = "f0,f1,f2,f3,l0,l1,l2,l3".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, null, null, null, 10, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, null, null, null, 10, null, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, 11, null, null, 11, 10, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, 11, null, null, 11, 10, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 12));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, 11, 12, null, 12, 11, 10, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, 11, 12, null, 12, 11, 10, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 13));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {11, 12, 13, null, 13, 12, 11, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{11, 12, 13, null, 13, 12, 11, null});
     }
 
     public void testInvalid() {
@@ -213,19 +213,19 @@ public class TestFirstLastAllAggregation extends TestCase {
         String[] fields = "id,w".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"A1", null});
 
         SupportBean beanOne = sendEvent(epService, "E1", 0, 1);
         epService.getEPRuntime().sendEvent(new SupportBean_A("A2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A2", new Object[] {beanOne}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"A2", new Object[]{beanOne}});
 
         SupportBean beanTwo = sendEvent(epService, "E2", 0, 1);
         epService.getEPRuntime().sendEvent(new SupportBean_A("A3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A3", new Object[] {beanOne, beanTwo}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"A3", new Object[]{beanOne, beanTwo}});
 
         SupportBean beanThree = sendEvent(epService, "E2", 0, 1);
         epService.getEPRuntime().sendEvent(new SupportBean_A("A4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A4", new Object[] {beanTwo, beanThree}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"A4", new Object[]{beanTwo, beanThree}});
     }
 
     public void testMethodAndAccessTogether() {
@@ -235,13 +235,13 @@ public class TestFirstLastAllAggregation extends TestCase {
         String[] fields = "si,wi".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, intArray(1)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, intArray(1)});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3, intArray(1, 2)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, intArray(1, 2)});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {5, intArray(2, 3)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5, intArray(2, 3)});
 
         stmt.destroy();
         epl = "select sum(intPrimitive) as si, window(sa.intPrimitive) as wi from SupportBean.win:keepall() as sa group by string";
@@ -249,16 +249,16 @@ public class TestFirstLastAllAggregation extends TestCase {
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, intArray(1)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, intArray(1)});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2, intArray(2)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2, intArray(2)});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {5, intArray(2, 3)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5, intArray(2, 3)});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {5, intArray(1, 4)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5, intArray(1, 4)});
     }
 
     public void testOutputRateLimiting() {
@@ -269,17 +269,17 @@ public class TestFirstLastAllAggregation extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{
                 {1, intArray(1)},
-                {3, intArray(1,2)},
-                });
+                {3, intArray(1, 2)},
+        });
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {
-                {6, intArray(1,2,3)},
-                {10, intArray(1,2,3,4)},
-                });
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{
+                {6, intArray(1, 2, 3)},
+                {10, intArray(1, 2, 3, 4)},
+        });
     }
 
     public void testTypeAndColNameAndEquivalency() {
@@ -338,11 +338,11 @@ public class TestFirstLastAllAggregation extends TestCase {
 
         SupportBean beanOne = sendEvent(epService, "E1", 10d, 100);
         Object[] expected = new Object[] {110d, 100, new Object[] {beanOne}, beanOne};
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, expected);
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, expected);
         if (isCheckStatic) {
             Object[] params = SupportStaticMethodLib.getInvocations().get(0);
             SupportStaticMethodLib.getInvocations().clear();
-            ArrayAssertionUtil.assertEqualsExactOrder(params, expected);
+            EPAssertionUtil.assertEqualsExactOrder(expected, params);
         }
     }
 
@@ -365,37 +365,37 @@ public class TestFirstLastAllAggregation extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A1", "B1", "A1", split("A1"), "A1", "B1", split("B1"), "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"A1", "B1", "A1", split("A1"), "A1", "B1", split("B1"), "B1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A2"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
-                new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
+                new Object[][]{
                         {"A2", "B1", "A1", split("A1,A2"), "A2", "B1", split("B1"), "B1"}
                 });
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A3"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
-                new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
+                new Object[][]{
                         {"A3", "B1", "A2", split("A2,A3"), "A3", "B1", split("B1"), "B1"}
                 });
 
         epService.getEPRuntime().sendEvent(new SupportBean_B("B2"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
-                new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
+                new Object[][]{
                         {"A2", "B2", "A2", split("A2,A3"), "A3", "B1", split("B1,B2"), "B2"},
                         {"A3", "B2", "A2", split("A2,A3"), "A3", "B1", split("B1,B2"), "B2"}
                 });
 
         epService.getEPRuntime().sendEvent(new SupportBean_B("B3"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
-                new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
+                new Object[][]{
                         {"A2", "B3", "A2", split("A2,A3"), "A3", "B2", split("B2,B3"), "B3"},
                         {"A3", "B3", "A2", split("A2,A3"), "A3", "B2", split("B2,B3"), "B3"}
                 });
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A4"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
-                new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
+                new Object[][]{
                         {"A4", "B2", "A3", split("A3,A4"), "A4", "B2", split("B2,B3"), "B3"},
                         {"A4", "B3", "A3", split("A3,A4"), "A4", "B2", split("B2,B3"), "B3"}
                 });
@@ -420,26 +420,26 @@ public class TestFirstLastAllAggregation extends TestCase {
         String[] fields = "aid,bid,fb,wb,lb".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {1, null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{1, null, null, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(1, "A"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {1, 1, "A", split("A"), "A"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{1, 1, "A", split("A"), "A"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "B"));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "A"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {2, 2, "A", split("A,B"), "B"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{2, 2, "A", split("A,B"), "B"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(3, "C"));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3, "C"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {3, 3, "A", split("A,B,C"), "C"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{3, 3, "A", split("A,B,C"), "C"});
     }
 
     public void testBatchWindow()
@@ -456,20 +456,20 @@ public class TestFirstLastAllAggregation extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {null, null, null});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E1", split("E1,E2"), "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E1", split("E1,E2"), "E2"});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 0));
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E1", split("E1,E2"), "E2"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E3", split("E3,E4"), "E4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E1", split("E1,E2"), "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E3", split("E3,E4"), "E4"});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 0));
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E3", split("E3,E4"), "E4"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E5", split("E5,E6"), "E6"});
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E3", split("E3,E4"), "E4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E5", split("E5,E6"), "E6"});
         listener.reset();
     }
 
@@ -493,10 +493,10 @@ public class TestFirstLastAllAggregation extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 31));
         assertFalse(listener.isInvoked());
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 12));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {
-                {"E1", 10, intArray(10,11,12), 12},
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{
+                {"E1", 10, intArray(10, 11, 12), 12},
                 {"E2", 20, intArray(20), 20},
-                {"E3", 30, intArray(30,31), 31}
+                {"E3", 30, intArray(30, 31), 31}
         });
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 13));
@@ -506,8 +506,8 @@ public class TestFirstLastAllAggregation extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 17));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 18));
         EventBean[] result = listener.getAndResetLastNewData();
-        ArrayAssertionUtil.assertPropsPerRow(result, fields, new Object[][] {
-                {"E1", 13, intArray(13,14,15,16,17,18), 18},
+        EPAssertionUtil.assertPropsPerRow(result, fields, new Object[][]{
+                {"E1", 13, intArray(13, 14, 15, 16, 17, 18), 18},
                 {"E2", null, null, null},
                 {"E3", null, null, null}
         });
@@ -531,7 +531,7 @@ public class TestFirstLastAllAggregation extends TestCase {
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 30));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", split("E1,E2,E3"), "E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", split("E1,E2,E3"), "E3"});
     }
 
     public void testOnDelete()
@@ -550,34 +550,34 @@ public class TestFirstLastAllAggregation extends TestCase {
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", split("E1"), "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", split("E1"), "E1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", split("E1,E2"), "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", split("E1,E2"), "E2"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 30));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", split("E1,E2,E3"), "E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", split("E1,E2,E3"), "E3"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", split("E1,E3"), "E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", split("E1,E3"), "E3"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", split("E1"), "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", split("E1"), "E1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 40));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4", split("E4"), "E4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4", split("E4"), "E4"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 50));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4", split("E4,E5"), "E5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4", split("E4,E5"), "E5"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5", split("E5"), "E5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5", split("E5"), "E5"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 60));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5", split("E5,E6"), "E6"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5", split("E5,E6"), "E6"});
     }
 
     public void testOnDemandQuery()
@@ -593,12 +593,12 @@ public class TestFirstLastAllAggregation extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 12));
 
         EPOnDemandPreparedQuery q = epService.getEPRuntime().prepareQuery("select first(intPrimitive) as f, window(intPrimitive) as w, last(intPrimitive) as l from MyWindow as s");
-        ArrayAssertionUtil.assertPropsPerRow(q.execute().getArray(), "f,w,l".split(","),
-                new Object[][] {{10, intArray(10, 20, 30, 31, 11, 12), 12}});
+        EPAssertionUtil.assertPropsPerRow(q.execute().getArray(), "f,w,l".split(","),
+                new Object[][]{{10, intArray(10, 20, 30, 31, 11, 12), 12}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 13));
-        ArrayAssertionUtil.assertPropsPerRow(q.execute().getArray(), "f,w,l".split(","),
-                new Object[][] {{10, intArray(10, 20, 30, 31, 11, 12, 13), 13}});
+        EPAssertionUtil.assertPropsPerRow(q.execute().getArray(), "f,w,l".split(","),
+                new Object[][]{{10, intArray(10, 20, 30, 31, 11, 12, 13), 13}});
 
         q = epService.getEPRuntime().prepareQuery("select string as s, first(intPrimitive) as f, window(intPrimitive) as w, last(intPrimitive) as l from MyWindow as s group by string order by string asc");
         Object[][] expected = new Object[][] {
@@ -606,8 +606,8 @@ public class TestFirstLastAllAggregation extends TestCase {
                         {"E2", 20, intArray(20), 20},
                         {"E3", 30, intArray(30, 31), 31}
                 };
-        ArrayAssertionUtil.assertPropsPerRow(q.execute().getArray(), "s,f,w,l".split(","), expected);
-        ArrayAssertionUtil.assertPropsPerRow(q.execute().getArray(), "s,f,w,l".split(","), expected);
+        EPAssertionUtil.assertPropsPerRow(q.execute().getArray(), "s,f,w,l".split(","), expected);
+        EPAssertionUtil.assertPropsPerRow(q.execute().getArray(), "s,f,w,l".split(","), expected);
     }
 
     public void testStar()
@@ -640,17 +640,17 @@ public class TestFirstLastAllAggregation extends TestCase {
         Object beanE1 = new SupportBean("E1", 10);
         epService.getEPRuntime().sendEvent(beanE1);
         Object[] window = new Object[] {beanE1};
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {beanE1, beanE1, beanE1, beanE1, window, window});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{beanE1, beanE1, beanE1, beanE1, window, window});
 
         Object beanE2 = new SupportBean("E2", 20);
         epService.getEPRuntime().sendEvent(beanE2);
         window = new Object[] {beanE1, beanE2};
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {beanE1, beanE1, beanE2, beanE2, window, window});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{beanE1, beanE1, beanE2, beanE2, window, window});
 
         Object beanE3 = new SupportBean("E3", 30);
         epService.getEPRuntime().sendEvent(beanE3);
         window = new Object[] {beanE2, beanE3};
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {beanE2, beanE2, beanE3, beanE3, window, window});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{beanE2, beanE2, beanE3, beanE3, window, window});
     }
 
     public void testUnboundedStream()
@@ -669,13 +669,13 @@ public class TestFirstLastAllAggregation extends TestCase {
         String[] fields = "f1,f2,f3,l1,l2,l3".split(",");
 
         SupportBean beanOne = sendEvent(epService, "E1", 1d, 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", beanOne, beanOne, "E1", beanOne, beanOne});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", beanOne, beanOne, "E1", beanOne, beanOne});
 
         SupportBean beanTwo = sendEvent(epService, "E2", 2d, 2);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", beanOne, beanOne, "E2", beanTwo, beanTwo});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", beanOne, beanOne, "E2", beanTwo, beanTwo});
 
         SupportBean beanThree = sendEvent(epService, "E3", 3d, 3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", beanOne, beanOne, "E3", beanThree, beanThree});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", beanOne, beanOne, "E3", beanThree, beanThree});
     }
 
     public void testWindowedUnGrouped()
@@ -757,46 +757,46 @@ public class TestFirstLastAllAggregation extends TestCase {
         String[] fields = "string,firststring,firstint,laststring,lastint,allint".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", "E1", 10, "E1", 10, new int[] {10}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1", 10, "E1", 10, new int[]{10}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", "E2", 11, "E2", 11, new int[] {11}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "E2", 11, "E2", 11, new int[]{11}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 12));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", "E1", 10, "E1", 12, new int[] {10, 12}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1", 10, "E1", 12, new int[]{10, 12}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 13));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", "E2", 11, "E2", 13, new int[] {11, 13}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "E2", 11, "E2", 13, new int[]{11, 13}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 14));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", "E2", 11, "E2", 14, new int[] {11, 13, 14}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "E2", 11, "E2", 14, new int[]{11, 13, 14}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 15));  // push out E1/10
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", "E1", 12, "E1", 15, new int[] {12, 15}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1", 12, "E1", 15, new int[]{12, 15}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 16));  // push out E2/11 --> 2 events
         EventBean[] received = listener.getAndResetLastNewData();
-        ArrayAssertionUtil.assertPropsPerRow(received, fields,
-                new Object[][] {
-                        new Object[] {"E1", "E1", 12, "E1", 16, new int[] {12, 15, 16}},
-                        new Object[] {"E2", "E2", 13, "E2", 14, new int[] {13, 14}}
-                        });
+        EPAssertionUtil.assertPropsPerRow(received, fields,
+                new Object[][]{
+                        new Object[]{"E1", "E1", 12, "E1", 16, new int[]{12, 15, 16}},
+                        new Object[]{"E2", "E2", 13, "E2", 14, new int[]{13, 14}}
+                });
     }
 
     private void runAssertionUngrouped() {
         String[] fields = "firststring,firstint,laststring,lastint,allint".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 10, "E1", 10, new int[] {10}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 10, "E1", 10, new int[]{10}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 10, "E2", 11, new int[] {10,11}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 10, "E2", 11, new int[]{10, 11}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 12));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 11, "E3", 12, new int[] {11,12}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 11, "E3", 12, new int[]{11, 12}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 13));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3", 12, "E4", 13, new int[] {12,13}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", 12, "E4", 13, new int[]{12, 13}});
     }
 
     private Object split(String s)

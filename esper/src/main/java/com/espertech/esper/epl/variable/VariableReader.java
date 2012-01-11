@@ -8,9 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.epl.variable;
 
+import com.espertech.esper.client.EventType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.client.EventType;
 
 /**
  * Reads and writes variable values.
@@ -27,6 +27,7 @@ public class VariableReader
     private volatile VersionedValueList<Object> versionsLow;
     private final Class type;
     private final EventType eventType;
+    private final boolean constant;
 
     /**
      * Ctor.
@@ -37,7 +38,7 @@ public class VariableReader
      * @param variableNumber number of the variable
      * @param versions a list of versioned-values to ask for the version
      */
-    public VariableReader(VariableVersionThreadLocal versionThreadLocal, Class type, EventType eventType, String variableName, int variableNumber, VersionedValueList<Object> versions)
+    public VariableReader(VariableVersionThreadLocal versionThreadLocal, Class type, EventType eventType, String variableName, int variableNumber, VersionedValueList<Object> versions, boolean constant)
     {
         this.variableName = variableName;
         this.variableNumber = variableNumber;
@@ -46,6 +47,7 @@ public class VariableReader
         this.eventType = eventType;
         this.versionsLow = versions;
         this.versionsHigh = null;
+        this.constant = constant;
     }
 
     /**
@@ -130,5 +132,9 @@ public class VariableReader
             }
         }
         return versions.getVersion(myVersion);
-    }    
+    }
+
+    public boolean isConstant() {
+        return constant;
+    }
 }

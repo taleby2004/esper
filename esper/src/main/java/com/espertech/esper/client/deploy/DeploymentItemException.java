@@ -30,7 +30,7 @@ public class DeploymentItemException extends DeploymentException {
      * @param lineNumber line number
      */
     public DeploymentItemException(String message, String expression, RuntimeException inner, int lineNumber) {
-        super(message);
+        super(message, inner);
         this.expression = expression;
         this.inner = inner;
         this.lineNumber = lineNumber;

@@ -15,12 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanRange;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -112,7 +112,7 @@ public class TestPerf2StreamExprJoin extends TestCase
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             epService.getEPRuntime().sendEvent(event);
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{expected});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{expected});
         }
         long delta = System.currentTimeMillis() - startTime;
         assertTrue("delta=" + delta, delta < 500);

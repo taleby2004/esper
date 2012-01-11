@@ -12,13 +12,14 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
+import java.util.Collections;
 import java.util.HashMap;
 
 public class TestSplitStream extends TestCase
@@ -127,7 +128,7 @@ public class TestSplitStream extends TestCase
 
     public void test2SplitNoDefaultOutputFirst()
     {
-        String stmtOrigText = "on SupportBean " +
+        String stmtOrigText = "@Audit on SupportBean " +
                     "insert into AStream select * where intPrimitive = 1 " +
                     "insert into BStream select * where intPrimitive = 1 or intPrimitive = 2";
         EPStatement stmtOrig = epService.getEPAdministrator().createEPL(stmtOrigText);
@@ -135,6 +136,7 @@ public class TestSplitStream extends TestCase
 
         // statement object model
         EPStatementObjectModel model = new EPStatementObjectModel();
+        model.setAnnotations(Collections.singletonList(new AnnotationPart("Audit")));
         model.setFromClause(FromClause.create(FilterStream.create("SupportBean")));
         model.setInsertInto(InsertIntoClause.create("AStream"));
         model.setSelectClause(SelectClause.createWildcard());

@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.rowrecog;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.soda.MatchRecognizeRegEx;
-import com.espertech.esper.core.soda.SODAAnalyzer;
+import com.espertech.esper.epl.spec.util.SODAAnalyzer;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import junit.framework.Assert;
 import org.apache.commons.logging.Log;

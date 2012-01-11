@@ -26,6 +26,7 @@ public class StatementAgentInstanceFactoryOnTriggerResult extends StatementAgent
     public StatementAgentInstanceFactoryOnTriggerResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext, AggregationService aggregationService, Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies) {
         super(finalView, stopCallback, agentInstanceContext, aggregationService, subselectStrategies,
                 Collections.<ExprPriorNode, ExprPriorEvalStrategy>emptyMap(),
-                Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap());
+                Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap(),
+                Collections.<StatementAgentInstancePreload>emptyList());
     }
 }

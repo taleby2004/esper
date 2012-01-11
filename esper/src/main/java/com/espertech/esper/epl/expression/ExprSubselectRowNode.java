@@ -56,7 +56,7 @@ public class ExprSubselectRowNode extends ExprSubselectNode
         return getRowType();
     }
 
-    public void validate(ExprValidationContext validationContext) throws ExprValidationException
+    public void validateSubquery(ExprValidationContext validationContext) throws ExprValidationException
     {
     }
 
@@ -192,7 +192,7 @@ public class ExprSubselectRowNode extends ExprSubselectNode
         }
         if ((filterExpr == null) && (matchingEvents.size() > 1))
         {
-            log.warn("Subselect returned more then one row in subselect '" + toExpressionString() + "', returning null result");
+            log.warn(getMultirowMessage());
             return null;
         }
 
@@ -213,7 +213,7 @@ public class ExprSubselectRowNode extends ExprSubselectNode
                 {
                     if (subSelectResult != null)
                     {
-                        log.warn("Subselect returned more then one row in subselect '" + toExpressionString() + "', returning null result");
+                        log.warn(getMultirowMessage());
                         return null;
                     }
                     subSelectResult = subselectEvent;
@@ -281,6 +281,10 @@ public class ExprSubselectRowNode extends ExprSubselectNode
             }
         }
         return type;
+    }
+
+    public Object getMultirowMessage() {
+        return "Subselect of statement '" + statementName + "' returned more then one row in subselect " + subselectNumber + " '" + toExpressionString() + "', returning null result";
     }
 
     private static class SubselectMultirowType {

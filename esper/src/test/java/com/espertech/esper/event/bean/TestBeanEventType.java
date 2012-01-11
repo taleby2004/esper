@@ -12,10 +12,10 @@
 package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.event.EventTypeAssertionUtil;
 import com.espertech.esper.support.event.SupportEventAdapterService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 import java.io.Serializable;
@@ -75,26 +75,26 @@ public class TestBeanEventType extends TestCase
         assertTrue(properties.length == 2);
         assertTrue(properties[0].equals("myInt"));
         assertTrue(properties[1].equals("myString"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("myInt", int.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("myString", String.class, null, false, false, false, false, false)
-           }, eventTypeSimple.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("myInt", int.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("myString", String.class, null, false, false, false, false, false)
+        }, eventTypeSimple.getPropertyDescriptors());
 
         properties = eventTypeComplex.getPropertyNames();
-        ArrayAssertionUtil.assertEqualsAnyOrder(SupportBeanComplexProps.PROPERTIES, properties);
+        EPAssertionUtil.assertEqualsAnyOrder(SupportBeanComplexProps.PROPERTIES, properties);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("simpleProperty", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("mapProperty", Map.class, null, false, false, false, true, false),
-            new EventPropertyDescriptor("mapped", String.class, null, false, true, false, true, false),
-            new EventPropertyDescriptor("indexed", int.class, null, true, false, true, false, false),
-            new EventPropertyDescriptor("nested", SupportBeanComplexProps.SupportBeanSpecialGetterNested.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("arrayProperty", int[].class, int.class, false, false, true, false, false),
-            new EventPropertyDescriptor("objectArray", Object[].class, Object.class, false, false, true, false, false),
-           }, eventTypeComplex.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("simpleProperty", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("mapProperty", Map.class, null, false, false, false, true, false),
+                new EventPropertyDescriptor("mapped", String.class, null, false, true, false, true, false),
+                new EventPropertyDescriptor("indexed", int.class, null, true, false, true, false, false),
+                new EventPropertyDescriptor("nested", SupportBeanComplexProps.SupportBeanSpecialGetterNested.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("arrayProperty", int[].class, int.class, false, false, true, false, false),
+                new EventPropertyDescriptor("objectArray", Object[].class, Object.class, false, false, true, false, false),
+        }, eventTypeComplex.getPropertyDescriptors());
 
         properties = eventTypeNested.getPropertyNames();
-        ArrayAssertionUtil.assertEqualsAnyOrder(SupportBeanCombinedProps.PROPERTIES, properties);
+        EPAssertionUtil.assertEqualsAnyOrder(SupportBeanCombinedProps.PROPERTIES, properties);
     }
 
     public void testGetUnderlyingType()
@@ -221,14 +221,14 @@ public class TestBeanEventType extends TestCase
         BeanEventTypeFactory beanEventTypeFactory = SupportEventAdapterService.getService().getBeanEventTypeFactory();
 
         assertEquals(5, deepSuperTypes.size());
-        ArrayAssertionUtil.assertEqualsAnyOrder(
+        EPAssertionUtil.assertEqualsAnyOrder(
                 deepSuperTypes.toArray(),
-                new EventType[] {
-                    beanEventTypeFactory.createBeanType("e1", ISupportAImplSuperG.class, false, false, false),
-                    beanEventTypeFactory.createBeanType("e2", ISupportBaseAB.class, false, false, false),
-                    beanEventTypeFactory.createBeanType("e3", ISupportA.class, false, false, false),
-                    beanEventTypeFactory.createBeanType("e4", ISupportB.class, false, false, false),
-                    beanEventTypeFactory.createBeanType("e5", ISupportC.class, false, false, false)
+                new EventType[]{
+                        beanEventTypeFactory.createBeanType("e1", ISupportAImplSuperG.class, false, false, false),
+                        beanEventTypeFactory.createBeanType("e2", ISupportBaseAB.class, false, false, false),
+                        beanEventTypeFactory.createBeanType("e3", ISupportA.class, false, false, false),
+                        beanEventTypeFactory.createBeanType("e4", ISupportB.class, false, false, false),
+                        beanEventTypeFactory.createBeanType("e5", ISupportC.class, false, false, false)
                 });
     }
 
@@ -238,12 +238,12 @@ public class TestBeanEventType extends TestCase
         BeanEventType.getSuper(ISupportAImplSuperGImplPlus.class, classes);
 
         assertEquals(7, classes.size());
-        ArrayAssertionUtil.assertEqualsAnyOrder(
+        EPAssertionUtil.assertEqualsAnyOrder(
                 classes.toArray(),
-                new Class[] {
-                    ISupportAImplSuperG.class, ISupportBaseAB.class,
-                    ISupportA.class, ISupportB.class, ISupportC.class,
-                    Serializable.class, Object.class,
+                new Class[]{
+                        ISupportAImplSuperG.class, ISupportBaseAB.class,
+                        ISupportA.class, ISupportB.class, ISupportC.class,
+                        Serializable.class, Object.class,
                 }
         );
 
@@ -268,9 +268,9 @@ public class TestBeanEventType extends TestCase
 
         BeanEventType type = new BeanEventType(null, 1, ISupportD.class, SupportEventAdapterService.getService(), null);
         assertEquals(3, type.getPropertyNames().length);
-        ArrayAssertionUtil.assertEqualsAnyOrder(
+        EPAssertionUtil.assertEqualsAnyOrder(
                 type.getPropertyNames(),
-                new String[] {"d", "baseD", "baseDBase"});
+                new String[]{"d", "baseD", "baseDBase"});
     }
 
     private static void tryInvalidGetPropertyType(BeanEventType type, String property)

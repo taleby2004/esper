@@ -42,15 +42,7 @@ public class ExprIdentNodeUtil
             }
             catch (StreamTypesException ex)
             {
-                String suggestion = getSuggestion(ex);
-                if (suggestion != null)
-                {
-                    throw new ExprValidationPropertyException(ex.getMessage() + suggestion);
-                }
-                else
-                {
-                    throw new ExprValidationPropertyException(ex.getMessage());
-                }
+                throw getSuggestionException(ex);
             }
             catch (PropertyAccessException ex)
             {
@@ -88,19 +80,98 @@ public class ExprIdentNodeUtil
             typeExceptionTwo = ex;
         }
 
+        throw getSuggestionExceptionSecondStep(propertyNameCandidate, typeExceptionOne, typeExceptionTwo);
+    }
+
+    /**
+     * This method only resolves against explicitly-listed properties (for use with XML or other types that allow any name as a property name).
+     * @param streamTypeService stream types
+     * @param unresolvedPropertyName property name
+     * @param streamOrPropertyName optional stream name
+     * @return property info
+     * @throws ExprValidationPropertyException if the property could not be resolved
+     */
+    protected static Pair<PropertyResolutionDescriptor, String> getTypeFromStreamExplicitProperties(StreamTypeService streamTypeService, String unresolvedPropertyName, String streamOrPropertyName)
+        throws ExprValidationPropertyException
+    {
+        PropertyResolutionDescriptor propertyInfo;
+
+        // no stream/property name supplied
+        if (streamOrPropertyName == null)
+        {
+            try
+            {
+                propertyInfo = streamTypeService.resolveByPropertyNameExplicitProps(unresolvedPropertyName);
+            }
+            catch (StreamTypesException ex)
+            {
+                throw getSuggestionException(ex);
+            }
+            catch (PropertyAccessException ex)
+            {
+                throw new ExprValidationPropertyException(ex.getMessage());
+            }
+
+            // resolves without a stream name, return descriptor and null stream name
+            return new Pair<PropertyResolutionDescriptor, String>(propertyInfo, propertyInfo.getStreamName());
+        }
+
+        // try to resolve the property name and stream name as it is (ie. stream name as a stream name)
+        StreamTypesException typeExceptionOne;
+        try
+        {
+            propertyInfo = streamTypeService.resolveByStreamAndPropNameExplicitProps(streamOrPropertyName, unresolvedPropertyName);
+            // resolves with a stream name, return descriptor and stream name
+            return new Pair<PropertyResolutionDescriptor, String>(propertyInfo, streamOrPropertyName);
+        }
+        catch (StreamTypesException ex)
+        {
+            typeExceptionOne = ex;
+        }
+
+        // try to resolve the property name to a nested property 's0.p0'
+        StreamTypesException typeExceptionTwo;
+        String propertyNameCandidate = streamOrPropertyName + '.' + unresolvedPropertyName;
+        try
+        {
+            propertyInfo = streamTypeService.resolveByPropertyNameExplicitProps(propertyNameCandidate);
+            // resolves without a stream name, return null for stream name
+            return new Pair<PropertyResolutionDescriptor, String>(propertyInfo, null);
+        }
+        catch (StreamTypesException ex)
+        {
+            typeExceptionTwo = ex;
+        }
+
+        throw getSuggestionExceptionSecondStep(propertyNameCandidate, typeExceptionOne, typeExceptionTwo);
+    }
+
+    private static ExprValidationPropertyException getSuggestionExceptionSecondStep(String propertyNameCandidate, StreamTypesException typeExceptionOne, StreamTypesException typeExceptionTwo) {
         String suggestionOne = getSuggestion(typeExceptionOne);
         String suggestionTwo = getSuggestion(typeExceptionTwo);
         if (suggestionOne != null)
         {
-            throw new ExprValidationPropertyException(typeExceptionOne.getMessage() + suggestionOne);
+            return new ExprValidationPropertyException(typeExceptionOne.getMessage() + suggestionOne);
         }
         if (suggestionTwo != null)
         {
-            throw new ExprValidationPropertyException(typeExceptionTwo.getMessage() + suggestionTwo);
+            return new ExprValidationPropertyException(typeExceptionTwo.getMessage() + suggestionTwo);
         }
 
         // fail to resolve
-        throw new ExprValidationPropertyException("Failed to resolve property '" + propertyNameCandidate + "' to a stream or nested property in a stream");
+        return new ExprValidationPropertyException("Failed to resolve property '" + propertyNameCandidate + "' to a stream or nested property in a stream");
+    }
+
+    private static ExprValidationPropertyException getSuggestionException(StreamTypesException ex) {
+        String suggestion = getSuggestion(ex);
+        if (suggestion != null)
+        {
+            return new ExprValidationPropertyException(ex.getMessage() + suggestion);
+        }
+        else
+        {
+            return new ExprValidationPropertyException(ex.getMessage());
+        }
     }
 
     private static String getSuggestion(StreamTypesException ex)

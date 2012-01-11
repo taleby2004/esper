@@ -27,7 +27,7 @@ public abstract class UpdateDispatchViewBase extends ViewSupport implements Disp
     /**
      * Handles result delivery
      */
-    protected final StatementResultService statementResultServiceImpl;
+    protected final StatementResultService statementResultService;
 
     /**
      * Dispatches events to listeners.
@@ -56,7 +56,7 @@ public abstract class UpdateDispatchViewBase extends ViewSupport implements Disp
     public UpdateDispatchViewBase(StatementResultService statementResultServiceImpl, DispatchService dispatchService)
     {
         this.dispatchService = dispatchService;
-        this.statementResultServiceImpl = statementResultServiceImpl;
+        this.statementResultService = statementResultServiceImpl;
     }
 
     public EventType getEventType()
@@ -72,7 +72,7 @@ public abstract class UpdateDispatchViewBase extends ViewSupport implements Disp
     public void execute()
     {
         isDispatchWaiting.set(false);
-        statementResultServiceImpl.execute();
+        statementResultService.execute();
     }
 
     /**
@@ -81,6 +81,10 @@ public abstract class UpdateDispatchViewBase extends ViewSupport implements Disp
     public void clear()
     {
         lastIterableEvent = null;
+    }
+
+    public StatementResultService getStatementResultService() {
+        return statementResultService;
     }
 
     private static Log log = LogFactory.getLog(UpdateDispatchViewBase.class);

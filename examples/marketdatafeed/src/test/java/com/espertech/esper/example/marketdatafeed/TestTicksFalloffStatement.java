@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.example.marketdatafeed;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.Configuration;

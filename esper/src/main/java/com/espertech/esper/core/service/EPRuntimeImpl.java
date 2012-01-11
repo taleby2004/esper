@@ -9,6 +9,7 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.CurrentTimeSpanEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
@@ -18,14 +19,21 @@ import com.espertech.esper.collection.ArrayBackedCollection;
 import com.espertech.esper.collection.DualWorkQueue;
 import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandleComparator;
 import com.espertech.esper.core.start.EPPreparedExecuteMethod;
 import com.espertech.esper.core.thread.*;
 import com.espertech.esper.epl.annotation.AnnotationUtil;
+import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
+import com.espertech.esper.epl.expression.ExprDotNode;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.expression.ExprNodeSubselectDeclaredDotVisitor;
+import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.metric.MetricReportingPath;
+import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
+import com.espertech.esper.epl.spec.util.StatementSpecRawAnalyzer;
 import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.event.util.EventRendererImpl;
 import com.espertech.esper.filter.FilterHandle;
@@ -111,11 +119,31 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 return expressionResultCacheService;
             }
 
-            public int[] getAgentInstanceIds() {
-                return null;
+            public int getAgentInstanceId() {
+                return -1;
             }
 
             public EventBean getContextProperties() {
+                return null;
+            }
+
+            public AgentInstanceScriptContext getAgentInstanceScriptContext() {
+                return null;
+            }
+
+            public String getStatementName() {
+                return null;
+            }
+
+            public String getEngineURI() {
+                return null;
+            }
+
+            public String getStatementId() {
+                return null;
+            }
+
+            public StatementAgentInstanceLock getAgentInstanceLock() {
                 return null;
             }
         };
@@ -127,19 +155,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 {
                     if (isPrioritized)
                     {
-                        return new TreeMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(new Comparator<EPStatementAgentInstanceHandle>()
-                        {
-                            public int compare(EPStatementAgentInstanceHandle o1, EPStatementAgentInstanceHandle o2)
-                            {
-                                if (o1 == o2) {
-                                    return 0;
-                                }
-                                if (o1.equals(o2)) {
-                                    return 0;
-                                }
-                                return o1.getPriority() >= o2.getPriority() ? -1 : 1;
-                            }
-                        });
+                        return new TreeMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(EPStatementAgentInstanceHandleComparator.INSTANCE);
                     }
                     else
                     {
@@ -154,19 +170,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
                 {
                     if (isPrioritized)
                     {
-                        return new TreeMap<EPStatementAgentInstanceHandle, Object>(new Comparator<EPStatementAgentInstanceHandle>()
-                        {
-                            public int compare(EPStatementAgentInstanceHandle o1, EPStatementAgentInstanceHandle o2)
-                            {
-                                if (o1 == o2) {
-                                    return 0;
-                                }
-                                if (o1.equals(o2)) {
-                                    return 0;
-                                }
-                                return o1.getPriority() >= o2.getPriority() ? -1 : 1;
-                            }
-                        });
+                        return new TreeMap<EPStatementAgentInstanceHandle, Object>(EPStatementAgentInstanceHandleComparator.INSTANCE);
                     }
                     else
                     {
@@ -1272,9 +1276,11 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     public void setVariableValue(String variableName, Object variableValue) throws EPException
     {
         VariableReader reader = services.getVariableService().getReader(variableName);
-        if (reader == null)
-        {
+        if (reader == null) {
             throw new VariableNotFoundException("Variable by name '" + variableName + "' has not been declared");
+        }
+        if (reader.isConstant()) {
+            throw new VariableConstantValueException("Variable by name '" + variableName + "' is declared as constant and may not be assigned a new value");
         }
 
         services.getVariableService().checkAndWrite(reader.getVariableNumber(), variableValue);
@@ -1283,16 +1289,24 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     public void setVariableValue(Map<String, Object> variableValues) throws EPException
     {
+        // verify
         for (Map.Entry<String, Object> entry : variableValues.entrySet())
         {
             String variableName = entry.getKey();
             VariableReader reader = services.getVariableService().getReader(variableName);
-            if (reader == null)
-            {
-                services.getVariableService().rollback();
+            if (reader == null) {
                 throw new VariableNotFoundException("Variable by name '" + variableName + "' has not been declared");
             }
+            if (reader.isConstant()) {
+                throw new VariableConstantValueException("Variable by name '" + variableName + "' is declared as constant and may not be assigned a new value");
+            }
+        }
 
+        // set values
+        for (Map.Entry<String, Object> entry : variableValues.entrySet())
+        {
+            String variableName = entry.getKey();
+            VariableReader reader = services.getVariableService().getReader(variableName);
             try
             {
                 services.getVariableService().checkAndWrite(reader.getVariableNumber(), entry.getValue());
@@ -1311,8 +1325,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     {
         services.getVariableService().setLocalVersion();
         VariableReader reader = services.getVariableService().getReader(variableName);
-        if (reader == null)
-        {
+        if (reader == null) {
             throw new VariableNotFoundException("Variable by name '" + variableName + "' has not been declared");
         }
         Object value = reader.getValue();
@@ -1378,12 +1391,23 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         return reader.getType();
     }
 
-    public EPOnDemandQueryResult executeQuery(String epl)
+    public EPOnDemandQueryResult executeQuery(String epl, ContextPartitionSelector[] contextPartitionSelectors) {
+        if (contextPartitionSelectors == null) {
+            throw new IllegalArgumentException("No context partition selectors provided");
+        }
+        return executeQueryInternal(epl, contextPartitionSelectors);
+    }
+
+    public EPOnDemandQueryResult executeQuery(String epl) {
+        return executeQueryInternal(epl, null);
+    }
+
+    private EPOnDemandQueryResult executeQueryInternal(String epl, ContextPartitionSelector[] contextPartitionSelectors)
     {
         try
         {
             EPPreparedExecuteMethod executeMethod = getExecuteMethod(epl);
-            EPPreparedQueryResult result = executeMethod.execute();
+            EPPreparedQueryResult result = executeMethod.execute(contextPartitionSelectors);
             return new EPQueryResultImpl(result);
         }
         catch (EPStatementException ex)
@@ -1397,7 +1421,6 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             throw new EPStatementException(message, epl);
         }
     }
-
 
     public EPOnDemandPreparedQuery prepareQuery(String epl)
     {
@@ -1427,8 +1450,23 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         {
             StatementSpecRaw spec = EPAdministratorHelper.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
             Annotation[] annotations = AnnotationUtil.compileAnnotations(spec.getAnnotations(), services.getEngineImportService(), epl);
-            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null, true, annotations, null, null, null);
+<<<<<<< .working
+            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null, true, annotations, null, null, spec.getOptionalContextName(), true, false);
+
+            // walk subselects, declared expressions, dot-expressions
+            ExprNodeSubselectDeclaredDotVisitor visitor;
+            try {
+                visitor = StatementSpecRawAnalyzer.walkSubselectAndDeclaredDotExpr(spec);
+            }
+            catch (ExprValidationException ex) {
+                throw new EPStatementException(ex.getMessage(), epl);
+            }
+
+            StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations, visitor.getSubselects(), Collections.<ExprDotNode>emptyList(), Collections.<ExprDeclaredNode>emptyList());
+=======
+            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, services, null, true, annotations, null, spec);
             StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations);
+>>>>>>> .merge-right.r2821
             return new EPPreparedExecuteMethod(compiledSpec, services, statementContext);
         }
         catch (EPStatementException ex)
@@ -1485,6 +1523,10 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
         }
         return result;
+    }
+
+    public String getEngineURI() {
+        return services.getEngineURI();
     }
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);

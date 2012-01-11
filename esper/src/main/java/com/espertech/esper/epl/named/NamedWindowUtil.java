@@ -9,8 +9,12 @@
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandleComparator;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class NamedWindowUtil
 {
@@ -22,19 +26,28 @@ public class NamedWindowUtil
         }
         else
         {
+<<<<<<< .working
+            return new TreeMap<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>>(EPStatementAgentInstanceHandleComparator.INSTANCE);
+=======
             return new TreeMap<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>>(new Comparator<EPStatementAgentInstanceHandle>()
             {
                 public int compare(EPStatementAgentInstanceHandle o1, EPStatementAgentInstanceHandle o2)
                 {
-                    if (o1 == o2) {
-                        return 0;
+                    if (o1.getPriority() == o2.getPriority()) {
+                        if (o1 == o2 || o1.equals(o2)) {
+                            return 0;
+                        }
+                        if (!o1.getStatementId().equals(o2.getStatementId())) {
+                            return o1.getStatementId().compareTo(o2.getStatementId());
+                        }
+                        return o1.getAgentInstanceIds()[0] > o2.getAgentInstanceIds()[0] ? -1 : 1;
                     }
-                    if (o1.equals(o2)) {
-                        return 0;
+                    else {
+                        return o1.getPriority() > o2.getPriority() ? -1 : 1;
                     }
-                    return o1.getPriority() >= o2.getPriority() ? -1 : 1;
                 }
             });
+>>>>>>> .merge-right.r2821
         }
     }
 }

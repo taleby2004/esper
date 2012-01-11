@@ -11,6 +11,8 @@
 
 package com.espertech.esper.support.bean;
 
+import com.espertech.esper.client.util.DateTime;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -71,7 +73,7 @@ public class SupportTimeStartEndB {
             return new SupportTimeStartEndB(key, null, null, null, null, null, null);
         }
         // expected : 2002-05-30T09:00:00.000
-        long start = SupportDateTime.parseGetMSec(datestr);
+        long start = DateTime.parseDefaultMSec(datestr);
         long end = start + duration;
 
         return new SupportTimeStartEndB(key, start, SupportDateTime.toDate(start), SupportDateTime.toCalendar(start),

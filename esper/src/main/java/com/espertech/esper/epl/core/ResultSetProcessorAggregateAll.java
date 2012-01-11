@@ -14,6 +14,7 @@ import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.UniformPair;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -36,7 +37,7 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
     private final SelectExprProcessor selectExprProcessor;
     private final OrderByProcessor orderByProcessor;
     private final AggregationService aggregationService; 
-    private final ExprEvaluatorContext exprEvaluatorContext;
+    private ExprEvaluatorContext exprEvaluatorContext;
 
     public ResultSetProcessorAggregateAll(ResultSetProcessorAggregateAllFactory prototype, SelectExprProcessor selectExprProcessor, OrderByProcessor orderByProcessor, AggregationService aggregationService, ExprEvaluatorContext exprEvaluatorContext) {
         this.prototype = prototype;
@@ -44,6 +45,10 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         this.orderByProcessor = orderByProcessor;
         this.aggregationService = aggregationService;
         this.exprEvaluatorContext = exprEvaluatorContext;
+    }
+
+    public void setAgentInstanceContext(AgentInstanceContext context) {
+        this.exprEvaluatorContext = context;
     }
 
     public EventType getResultEventType()

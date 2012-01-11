@@ -11,13 +11,11 @@
 
 package com.espertech.esper.event.bean;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.ConfigurationEventTypeLegacy;
-import com.espertech.esper.event.bean.InternalEventPropDescriptor;
 import com.espertech.esper.event.EventPropertyType;
-import com.espertech.esper.event.bean.PropertyListBuilderPublic;
 import com.espertech.esper.support.bean.SupportLegacyBean;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -59,7 +57,7 @@ public class TestPropertyListBuilderPublic extends TestCase
 
         expected.add(new InternalEventPropDescriptor("x", SupportLegacyBean.class.getField("fieldNested"), EventPropertyType.SIMPLE));
         expected.add(new InternalEventPropDescriptor("y", SupportLegacyBean.class.getMethod("readLegacyBeanVal"), EventPropertyType.SIMPLE));
-        ArrayAssertionUtil.assertEqualsAnyOrder(expected.toArray(), descList.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(expected.toArray(), descList.toArray());
     }
 
     private static Log log = LogFactory.getLog(TestPropertyListBuilderPublic.class);

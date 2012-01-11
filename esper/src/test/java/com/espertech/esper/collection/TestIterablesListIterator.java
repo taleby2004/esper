@@ -11,13 +11,13 @@
 
 package com.espertech.esper.collection;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Map;
 
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.event.EventFactoryHelper;
 import com.espertech.esper.client.EventBean;
 
@@ -114,6 +114,6 @@ public class TestIterablesListIterator extends TestCase
     private void checkResults(List<Iterable<EventBean>> iterables, EventBean[] expectedValues)
     {
         IterablesListIterator iterator = new IterablesListIterator(iterables);
-        ArrayAssertionUtil.assertEqualsExactOrder(iterator, expectedValues);
+        EPAssertionUtil.assertEqualsExactOrder(expectedValues, iterator);
     }
 }

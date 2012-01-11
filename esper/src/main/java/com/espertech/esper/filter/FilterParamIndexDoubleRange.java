@@ -9,11 +9,12 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.SortedMap;
 
 /**
  * Index for filter parameter constants for the range operators (range open/closed/half).
@@ -22,8 +23,8 @@ import java.util.*;
  */
 public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRangeBase
 {
-    public FilterParamIndexDoubleRange(String attributeName, FilterOperator filterOperator, EventType eventType) {
-        super(attributeName, filterOperator, eventType);
+    public FilterParamIndexDoubleRange(FilterSpecLookupable lookupable, FilterOperator filterOperator) {
+        super(lookupable, filterOperator);
         if (!(filterOperator.isRangeOperator()))
         {
             throw new IllegalArgumentException("Invalid filter operator " + filterOperator);
@@ -32,7 +33,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
     
     public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
-        Object objAttributeValue = this.getGetter().get(eventBean);
+        Object objAttributeValue = lookupable.getGetter().get(eventBean);
 
         if (objAttributeValue == null)
         {

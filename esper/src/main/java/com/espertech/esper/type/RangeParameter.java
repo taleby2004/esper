@@ -8,9 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.type;
 
-import java.util.Set;
 import java.util.HashSet;
-import java.io.StringWriter;
+import java.util.Set;
 
 /**
  * Represents a range of numbers as a parameter.
@@ -21,6 +20,9 @@ public class RangeParameter implements NumberSetParameter
     private int high;
     private static final long serialVersionUID = 8495531153029613902L;
 
+    public RangeParameter() {
+    }
+
     /**
      * Ctor.
      * @param low - start of range
@@ -29,6 +31,14 @@ public class RangeParameter implements NumberSetParameter
     public RangeParameter(int low, int high)
     {
         this.low = low;
+        this.high = high;
+    }
+
+    public void setLow(int low) {
+        this.low = low;
+    }
+
+    public void setHigh(int high) {
         this.high = high;
     }
 
@@ -73,5 +83,13 @@ public class RangeParameter implements NumberSetParameter
         }
 
         return values;
+    }
+
+    public boolean containsPoint(int point) {
+        return (low <= point && point <= high);
+    }
+
+    public String formatted() {
+        return Integer.toString(low) + "-" + Integer.toString(high);
     }
 }

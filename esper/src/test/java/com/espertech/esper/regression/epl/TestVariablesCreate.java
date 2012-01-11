@@ -11,6 +11,8 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
@@ -20,8 +22,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.core.service.StatementType;
 
@@ -69,7 +69,7 @@ public class TestVariablesCreate extends TestCase
 
         String[] fieldsVar = new String[] {"var1", "var2"};
         sendSupportBean("E1", 10);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsVar, new Object[] {null, "abc"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsVar, new Object[]{null, "abc"});
     }
 
     public void testCompileStartStop()
@@ -90,7 +90,7 @@ public class TestVariablesCreate extends TestCase
 
         String[] fieldsVar = new String[] {"var1", "var2"};
         sendSupportBean("E1", 10);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsVar, new Object[] {null, "abc"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsVar, new Object[]{null, "abc"});
 
         // ESPER-545
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
@@ -112,7 +112,7 @@ public class TestVariablesCreate extends TestCase
         assertEquals(StatementType.CREATE_VARIABLE, ((EPStatementSPI) stmtCreateOne).getStatementMetadata().getStatementType());
         stmtCreateOne.addListener(listenerCreateOne);
         String[] fieldsVar1 = new String[] {"var1"};
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateOne.iterator(), fieldsVar1, new Object[][] {{null}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateOne.iterator(), fieldsVar1, new Object[][]{{null}});
         assertFalse(listenerCreateOne.isInvoked());
 
         EventType typeSet = stmtCreateOne.getEventType();
@@ -124,37 +124,37 @@ public class TestVariablesCreate extends TestCase
         EPStatement stmtCreateTwo = epService.getEPAdministrator().createEPL(stmtCreateTextTwo);
         stmtCreateTwo.addListener(listenerCreateTwo);
         String[] fieldsVar2 = new String[] {"var2"};
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateTwo.iterator(), fieldsVar2, new Object[][] {{20L}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateTwo.iterator(), fieldsVar2, new Object[][]{{20L}});
         assertFalse(listenerCreateTwo.isInvoked());
 
         String stmtTextSet = "on " + SupportBean.class.getName() + " set var1 = intPrimitive * 2, var2 = var1 + 1";
         epService.getEPAdministrator().createEPL(stmtTextSet);
 
         sendSupportBean("E1", 100);
-        ArrayAssertionUtil.assertProps(listenerCreateOne.getLastNewData()[0], fieldsVar1, new Object[] {200L});
-        ArrayAssertionUtil.assertProps(listenerCreateOne.getLastOldData()[0], fieldsVar1, new Object[] {null});
+        EPAssertionUtil.assertProps(listenerCreateOne.getLastNewData()[0], fieldsVar1, new Object[]{200L});
+        EPAssertionUtil.assertProps(listenerCreateOne.getLastOldData()[0], fieldsVar1, new Object[]{null});
         listenerCreateOne.reset();
-        ArrayAssertionUtil.assertProps(listenerCreateTwo.getLastNewData()[0], fieldsVar2, new Object[] {201L});
-        ArrayAssertionUtil.assertProps(listenerCreateTwo.getLastOldData()[0], fieldsVar2, new Object[] {20L});
+        EPAssertionUtil.assertProps(listenerCreateTwo.getLastNewData()[0], fieldsVar2, new Object[]{201L});
+        EPAssertionUtil.assertProps(listenerCreateTwo.getLastOldData()[0], fieldsVar2, new Object[]{20L});
         listenerCreateOne.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateOne.iterator(), fieldsVar1, new Object[][] {{200L}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateTwo.iterator(), fieldsVar2, new Object[][] {{201L}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateOne.iterator(), fieldsVar1, new Object[][]{{200L}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateTwo.iterator(), fieldsVar2, new Object[][]{{201L}});
 
         sendSupportBean("E2", 200);
-        ArrayAssertionUtil.assertProps(listenerCreateOne.getLastNewData()[0], fieldsVar1, new Object[] {400L});
-        ArrayAssertionUtil.assertProps(listenerCreateOne.getLastOldData()[0], fieldsVar1, new Object[] {200L});
+        EPAssertionUtil.assertProps(listenerCreateOne.getLastNewData()[0], fieldsVar1, new Object[]{400L});
+        EPAssertionUtil.assertProps(listenerCreateOne.getLastOldData()[0], fieldsVar1, new Object[]{200L});
         listenerCreateOne.reset();
-        ArrayAssertionUtil.assertProps(listenerCreateTwo.getLastNewData()[0], fieldsVar2, new Object[] {401L});
-        ArrayAssertionUtil.assertProps(listenerCreateTwo.getLastOldData()[0], fieldsVar2, new Object[] {201L});
+        EPAssertionUtil.assertProps(listenerCreateTwo.getLastNewData()[0], fieldsVar2, new Object[]{401L});
+        EPAssertionUtil.assertProps(listenerCreateTwo.getLastOldData()[0], fieldsVar2, new Object[]{201L});
         listenerCreateOne.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateOne.iterator(), fieldsVar1, new Object[][] {{400L}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateTwo.iterator(), fieldsVar2, new Object[][] {{401L}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateOne.iterator(), fieldsVar1, new Object[][]{{400L}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateTwo.iterator(), fieldsVar2, new Object[][]{{401L}});
 
         stmtCreateTwo.stop();
         stmtCreateTwo.start();
 
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateOne.iterator(), fieldsVar1, new Object[][] {{400L}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateTwo.iterator(), fieldsVar2, new Object[][] {{401L}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateOne.iterator(), fieldsVar1, new Object[][]{{400L}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateTwo.iterator(), fieldsVar2, new Object[][]{{401L}});
     }
 
     public void testDeclarationAndSelect() throws Exception

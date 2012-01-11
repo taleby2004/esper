@@ -11,19 +11,14 @@
 
 package com.espertech.esper.support.bean.lambda;
 
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.Assert;
 
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 
 public class LambdaAssertionUtil {
 
@@ -34,7 +29,7 @@ public class LambdaAssertionUtil {
             return;
         }
         Object[] arr = ((Collection) result).toArray();
-        ArrayAssertionUtil.assertEqualsExactOrder(arr, expected);
+        EPAssertionUtil.assertEqualsExactOrder(expected, arr);
     }
 
     public static void assertST0Id(SupportUpdateListener listener, String property, String expectedList) {

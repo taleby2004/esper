@@ -12,13 +12,13 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.SupportSubscriber;
 import junit.framework.TestCase;
 
@@ -115,7 +115,7 @@ public class TestIsolationUnit extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         EPServiceProviderIsolated unit = epService.getEPServiceIsolated("i1");
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {"i1"}, epService.getEPServiceIsolatedNames());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{"i1"}, epService.getEPServiceIsolatedNames());
 
         // send fake to wrong place
         unit.getEPRuntime().sendEvent(new SupportBean("E1", -1));
@@ -128,7 +128,7 @@ public class TestIsolationUnit extends TestCase
 
         // send to 'right' engine
         unit.getEPRuntime().sendEvent(new SupportBean("E1", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,a.intPrimitive,b.intPrimitive".split(","), new Object[] {"E1", 1, 3});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,a.intPrimitive,b.intPrimitive".split(","), new Object[]{"E1", 1, 3});
 
         // send second pair, and a fake to the wrong place
         unit.getEPRuntime().sendEvent(new SupportBean("E2", 4));
@@ -142,12 +142,12 @@ public class TestIsolationUnit extends TestCase
 
         // send to 'right' engine
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 6));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,a.intPrimitive,b.intPrimitive".split(","), new Object[] {"E2", 4, 6});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,a.intPrimitive,b.intPrimitive".split(","), new Object[]{"E2", 4, 6});
 
         epService.getEPAdministrator().destroyAllStatements();
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {"i1"}, epService.getEPServiceIsolatedNames());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{"i1"}, epService.getEPServiceIsolatedNames());
         epService.getEPServiceIsolated("i1").destroy();
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[0], epService.getEPServiceIsolatedNames());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[0], epService.getEPServiceIsolatedNames());
     }
 
     public void testDestroy()
@@ -193,7 +193,7 @@ public class TestIsolationUnit extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimerIso(10000, unit);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"E1"});
 
         sendTimerIso(11000, unit);
         unit.getEPRuntime().sendEvent(new SupportBean("E2", 1));
@@ -207,7 +207,7 @@ public class TestIsolationUnit extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimerUnisolated(130000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"E2"});
 
         sendTimerIso(30000, unit);
         assertFalse(listener.isInvoked());
@@ -235,7 +235,7 @@ public class TestIsolationUnit extends TestCase
 
         unit.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         assertFalse(listenerSelect.getAndClearIsInvoked());
-        ArrayAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "string".split(","), new Object[] {"E2"});
+        EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E2"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
         assertFalse(listenerSelect.getAndClearIsInvoked());
@@ -245,16 +245,16 @@ public class TestIsolationUnit extends TestCase
         unit.getEPAdministrator().removeStatement(stmtInsert);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
-        ArrayAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "string".split(","), new Object[] {"E4"});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "string".split(","), new Object[] {"E4"});
+        EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E4"});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E4"});
 
         unit.getEPRuntime().sendEvent(new SupportBean("E5", 5));
         assertFalse(listenerSelect.getAndClearIsInvoked());
         assertFalse(listenerInsert.getAndClearIsInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
-        ArrayAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "string".split(","), new Object[] {"E6"});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "string".split(","), new Object[] {"E6"});
+        EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E6"});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E6"});
 
         epService.getEPAdministrator().destroyAllStatements();
     }
@@ -285,8 +285,8 @@ public class TestIsolationUnit extends TestCase
         }
         assertFalse(listeners[0].isInvoked());
         assertFalse(listeners[2].isInvoked());
-        ArrayAssertionUtil.assertProps(listeners[1].assertOneGetNewAndReset(), fields, new Object[] {"1", 1});
-        ArrayAssertionUtil.assertProps(listeners[3].assertOneGetNewAndReset(), fields, new Object[] {"3", 3});
+        EPAssertionUtil.assertProps(listeners[1].assertOneGetNewAndReset(), fields, new Object[]{"1", 1});
+        EPAssertionUtil.assertProps(listeners[3].assertOneGetNewAndReset(), fields, new Object[]{"3", 3});
         
         // send to isolated
         for (int i = 0; i < count; i++)
@@ -295,11 +295,11 @@ public class TestIsolationUnit extends TestCase
         }
         assertFalse(listeners[1].isInvoked());
         assertFalse(listeners[3].isInvoked());
-        ArrayAssertionUtil.assertProps(listeners[0].assertOneGetNewAndReset(), fields, new Object[] {"0", 0});
-        ArrayAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[] {"2", 2});
+        EPAssertionUtil.assertProps(listeners[0].assertOneGetNewAndReset(), fields, new Object[]{"0", 0});
+        EPAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[]{"2", 2});
 
         unit.getEPRuntime().sendEvent(new SupportBean(Integer.toString(2), 2));
-        ArrayAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[] {"2", 4});
+        EPAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[]{"2", 4});
 
         // return
         unit.getEPAdministrator().removeStatement(statements);
@@ -309,10 +309,10 @@ public class TestIsolationUnit extends TestCase
         {
             epService.getEPRuntime().sendEvent(new SupportBean(Integer.toString(i), i));
         }
-        ArrayAssertionUtil.assertProps(listeners[0].assertOneGetNewAndReset(), fields, new Object[] {"0", 0});
-        ArrayAssertionUtil.assertProps(listeners[1].assertOneGetNewAndReset(), fields, new Object[] {"1", 2});
-        ArrayAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[] {"2", 6});
-        ArrayAssertionUtil.assertProps(listeners[3].assertOneGetNewAndReset(), fields, new Object[] {"3", 6});
+        EPAssertionUtil.assertProps(listeners[0].assertOneGetNewAndReset(), fields, new Object[]{"0", 0});
+        EPAssertionUtil.assertProps(listeners[1].assertOneGetNewAndReset(), fields, new Object[]{"1", 2});
+        EPAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[]{"2", 6});
+        EPAssertionUtil.assertProps(listeners[3].assertOneGetNewAndReset(), fields, new Object[]{"3", 6});
 
         // send to isolated
         for (int i = 0; i < count; i++)
@@ -336,30 +336,30 @@ public class TestIsolationUnit extends TestCase
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
         unit.getEPRuntime().sendEvent(new SupportBean("E2", 0));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E2"}});
 
         stmt.stop();
 
         unit.getEPAdministrator().removeStatement(stmt);
 
         stmt.start();
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 0));
         unit.getEPRuntime().sendEvent(new SupportBean("E4", 0));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E3"}});
 
         unit.getEPAdministrator().addStatement(stmt);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 0));
         unit.getEPRuntime().sendEvent(new SupportBean("E6", 0));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E3"}, {"E6"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E3"}, {"E6"}});
 
         unit.getEPAdministrator().removeStatement(stmt);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E7", 0));
         unit.getEPRuntime().sendEvent(new SupportBean("E8", 0));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E3"}, {"E6"}, {"E7"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E3"}, {"E6"}, {"E7"}});
 
         stmt.stop();
 
@@ -376,23 +376,23 @@ public class TestIsolationUnit extends TestCase
         stmtConsume.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1"}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E1"}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
 
         EPServiceProviderIsolated unit = epService.getEPServiceIsolated("i1");
         unit.getEPAdministrator().addStatement(epService.getEPAdministrator().getStatement("create"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 0));
         unit.getEPRuntime().sendEvent(new SupportBean("E3", 0));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E1"}});
         assertFalse(listener.isInvoked());
 
         unit.getEPAdministrator().addStatement(stmtInsert);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 0));
         unit.getEPRuntime().sendEvent(new SupportBean("E5", 0));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1"}, {"E5"}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5"});    // yes receives it
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E1"}, {"E5"}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});    // yes receives it
 
         // Note: Named window is global across isolation units: they are a relation and not a stream.
         
@@ -401,15 +401,15 @@ public class TestIsolationUnit extends TestCase
         // Consumers to a named window always receive all changes to a named window (regardless of whether the consuming statement is isolated or not), even if the window itself was isolated.
         //
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E5"}});
 
         unit.getEPAdministrator().addStatement(stmtDelete);
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E5"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E5"}});
 
         unit.getEPRuntime().sendEvent(new SupportBean_A("E5"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, null);
 
         epService.getEPAdministrator().destroyAllStatements();
     }
@@ -434,27 +434,27 @@ public class TestIsolationUnit extends TestCase
         sendTimerIso(9000, unit);
         unit.getEPRuntime().sendEvent(new SupportBean("E3", 3));
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1"}, {"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E1"}, {"E2"}, {"E3"}});
         unit.getEPAdministrator().removeStatement(new EPStatement[] {stmtCreate});
 
         sendTimerUnisolated(101000);    // equivalent to 10000  (E3 is 1 seconds old)
 
         sendTimerUnisolated(102000);    // equivalent to 11000  (E3 is 2 seconds old)
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E2"}, {"E3"}});
 
         sendTimerUnisolated(103000);    // equivalent to 12000  (E3 is 3 seconds old)
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E3"}});
 
         sendTimerUnisolated(109000);    // equivalent to 18000 (E3 is 9 seconds old)
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E3"}});
 
         unit.getEPAdministrator().addStatement(new EPStatement[] {stmtCreate});
 
         sendTimerIso(9999, unit);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, new Object[][] {{"E3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, new Object[][]{{"E3"}});
 
         sendTimerIso(10000, unit);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmtCreate.iterator(), fields, null);
 
         epService.getEPAdministrator().destroyAllStatements();
     }
@@ -467,14 +467,14 @@ public class TestIsolationUnit extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {5000L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5000L});
 
         EPServiceProviderIsolated unit = epService.getEPServiceIsolated("i1");
         sendTimerIso(100000, unit);
         unit.getEPAdministrator().addStatement(new EPStatement[] {stmt});
 
         unit.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {100000L});        
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{100000L});
 
         epService.getEPAdministrator().destroyAllStatements();
 
@@ -486,12 +486,12 @@ public class TestIsolationUnit extends TestCase
 
         sendTimerUnisolated(10000);
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
-        
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
+
         unit.getEPAdministrator().addStatement(stmt);
 
         unit.getEPRuntime().sendEvent(new SupportBean("E2", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         stmt.destroy();
         stmt = epService.getEPAdministrator().createEPL("select string as ct from SupportBean where current_timestamp() >= 120000");
@@ -504,7 +504,7 @@ public class TestIsolationUnit extends TestCase
         sendTimerIso(120000, unit);
 
         unit.getEPRuntime().sendEvent(new SupportBean("E4", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4"});
     }
 
     public void testUpdate()
@@ -517,7 +517,7 @@ public class TestIsolationUnit extends TestCase
         stmtSelect.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"X"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"X"});
 
         EPServiceProviderIsolated unit = epService.getEPServiceIsolated("i1");
         unit.getEPAdministrator().addStatement(new EPStatement[] {stmtSelect});
@@ -530,16 +530,16 @@ public class TestIsolationUnit extends TestCase
          */
         unit.getEPAdministrator().addStatement(new EPStatement[] {stmtInsert});
         unit.getEPRuntime().sendEvent(new SupportBean("E1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"X"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"X"});
 
         unit.getEPAdministrator().addStatement(stmtUpd);
         unit.getEPRuntime().sendEvent(new SupportBean("E2", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"X"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"X"});
 
         stmtUpd.stop();
 
         unit.getEPRuntime().sendEvent(new SupportBean("E3", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3"});
 
         epService.getEPAdministrator().destroyAllStatements();
     }
@@ -567,7 +567,7 @@ public class TestIsolationUnit extends TestCase
 
         EPServiceProviderIsolated unit = epService.getEPServiceIsolated("i1");
         unit.getEPAdministrator().addStatement(new EPStatement[] {stmt, stmtTwo});
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {stmt.getName(), stmtTwo.getName()}, unit.getEPAdministrator().getStatementNames());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{stmt.getName(), stmtTwo.getName()}, unit.getEPAdministrator().getStatementNames());
         assertEquals("i1", stmt.getServiceIsolated());
         assertEquals("i1", stmt.getServiceIsolated());
 
@@ -575,31 +575,31 @@ public class TestIsolationUnit extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 0));
         sendTimerUnisolated(15000);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1"}, {"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E2"}, {"E3"}});
 
         unit.getEPAdministrator().removeStatement(new EPStatement[] {stmt, stmtTwo});
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[0], unit.getEPAdministrator().getStatementNames());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[0], unit.getEPAdministrator().getStatementNames());
         assertNull(stmt.getServiceIsolated());
         assertNull(stmt.getServiceIsolated());
 
         sendTimerUnisolated(18999);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1"}, {"E2"}, {"E3"}});
-        
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E2"}, {"E3"}});
+
         sendTimerUnisolated(19000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E2"}, {"E3"}});
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E2"}, {"E3"}});
 
         sendTimerUnisolated(23999);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[] {"E2"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E3"}});
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[]{"E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E3"}});
 
         sendTimerUnisolated(24000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[] {"E3"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[]{"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendTimerUnisolated(25000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"x"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"x"});
 
         epService.getEPAdministrator().destroyAllStatements();
     }
@@ -618,7 +618,7 @@ public class TestIsolationUnit extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimerIso(11000, unit);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {11000L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{11000L});
 
         sendTimerIso(15000, unit);
 
@@ -628,7 +628,7 @@ public class TestIsolationUnit extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimerUnisolated(106000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {106000L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{106000L});
 
         epService.getEPAdministrator().destroyAllStatements();
     }

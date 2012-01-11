@@ -49,6 +49,14 @@ public class CronParameter implements NumberSetParameter {
         return false;
     }
 
+    public boolean containsPoint(int point) {
+        throw new UnsupportedOperationException();
+    }
+
+    public String formatted() {
+        return operator + "(day " + day + " month " + month + ")";
+    }
+
     public Set<Integer> getValuesInRange(int min, int max) {
         Set<Integer> values = new HashSet<Integer>();
         if (((min != 0) && (min != 1)) || ((max != 6) && (max != 31))) {

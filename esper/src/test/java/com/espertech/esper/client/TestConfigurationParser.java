@@ -12,9 +12,9 @@
 package com.espertech.esper.client;
 
 import com.espertech.esper.client.annotation.Name;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.soda.StreamSelector;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.type.StringPatternSet;
 import com.espertech.esper.type.StringPatternSetLike;
 import com.espertech.esper.type.StringPatternSetRegex;
@@ -79,6 +79,7 @@ public class TestConfigurationParser extends TestCase
         assertTrue(config.getEngineDefaults().getLogging().isEnableTimerDebug());
         assertFalse(config.getEngineDefaults().getLogging().isEnableQueryPlan());
         assertFalse(config.getEngineDefaults().getLogging().isEnableJDBC());
+        assertNull(config.getEngineDefaults().getLogging().getAuditPattern());
         assertEquals(15000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
         assertEquals(null, config.getEngineDefaults().getPatterns().getMaxSubexpressions());
         assertEquals(true, config.getEngineDefaults().getPatterns().isMaxSubexpressionPreventStart());
@@ -97,6 +98,7 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getExpression().isDuckTyping());
         assertNull(config.getEngineDefaults().getExceptionHandling().getHandlerFactories());
         assertNull(config.getEngineDefaults().getConditionHandling().getHandlerFactories());
+        assertEquals("js", config.getEngineDefaults().getScripts().getDefaultDialect());
 
         ConfigurationEventTypeXMLDOM domType = new ConfigurationEventTypeXMLDOM();
         assertFalse(domType.isXPathPropertyExpr());
@@ -169,7 +171,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals(expectedProps, config.getEventTypesMapEvents().get("MyMapEvent"));
         assertEquals(1, config.getMapTypeConfigurations().size());
         Set<String> superTypes = config.getMapTypeConfigurations().get("MyMapEvent").getSuperTypes();
-        ArrayAssertionUtil.assertEqualsExactOrder(superTypes.toArray(), new Object[] {"MyMapSuperType1", "MyMapSuperType2"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"MyMapSuperType1", "MyMapSuperType2"}, superTypes.toArray());
         assertEquals("startts", config.getMapTypeConfigurations().get("MyMapEvent").getStartTimestampPropertyName());
         assertEquals("endts", config.getMapTypeConfigurations().get("MyMapEvent").getEndTimestampPropertyName());
 
@@ -283,13 +285,23 @@ public class TestConfigurationParser extends TestCase
         assertEquals(0, pluginTwo.getConfigProperties().size());
 
         // assert plug-in aggregation function loaded
-        assertEquals(2, config.getPlugInAggregationFunctions().size());
+        assertEquals(4, config.getPlugInAggregationFunctions().size());
         ConfigurationPlugInAggregationFunction pluginAgg = config.getPlugInAggregationFunctions().get(0);
-        assertEquals("com.mycompany.MyMatrixAggregationMethod0", pluginAgg.getFunctionClassName());
+        assertEquals("com.mycompany.MyMatrixAggregationMethod0DEPRECATED", pluginAgg.getFunctionClassName());
         assertEquals("func1", pluginAgg.getName());
+        assertEquals(null, pluginAgg.getFactoryClassName());
         pluginAgg = config.getPlugInAggregationFunctions().get(1);
-        assertEquals("com.mycompany.MyMatrixAggregationMethod1", pluginAgg.getFunctionClassName());
+        assertEquals("com.mycompany.MyMatrixAggregationMethod1DEPRECATED", pluginAgg.getFunctionClassName());
         assertEquals("func2", pluginAgg.getName());
+        assertEquals(null, pluginAgg.getFactoryClassName());
+        pluginAgg = config.getPlugInAggregationFunctions().get(2);
+        assertEquals(null, pluginAgg.getFunctionClassName());
+        assertEquals("func1a", pluginAgg.getName());
+        assertEquals("com.mycompany.MyMatrixAggregationMethod0Factory", pluginAgg.getFactoryClassName());
+        pluginAgg = config.getPlugInAggregationFunctions().get(3);
+        assertEquals(null, pluginAgg.getFunctionClassName());
+        assertEquals("func2a", pluginAgg.getName());
+        assertEquals("com.mycompany.MyMatrixAggregationMethod1Factory", pluginAgg.getFactoryClassName());
 
         // assert plug-in singlerow function loaded
         assertEquals(2, config.getPlugInSingleRowFunctions().size());
@@ -297,11 +309,14 @@ public class TestConfigurationParser extends TestCase
         assertEquals("com.mycompany.MyMatrixSingleRowMethod0", pluginSingleRow.getFunctionClassName());
         assertEquals("method1", pluginSingleRow.getFunctionMethodName());
         assertEquals("func3", pluginSingleRow.getName());
+        assertEquals(ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, pluginSingleRow.getValueCache());
+        assertEquals(ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED, pluginSingleRow.getFilterOptimizable());
         pluginSingleRow = config.getPlugInSingleRowFunctions().get(1);
         assertEquals("com.mycompany.MyMatrixSingleRowMethod1", pluginSingleRow.getFunctionClassName());
         assertEquals("func4", pluginSingleRow.getName());
         assertEquals("method2", pluginSingleRow.getFunctionMethodName());
         assertEquals(ConfigurationPlugInSingleRowFunction.ValueCache.ENABLED, pluginSingleRow.getValueCache());
+        assertEquals(ConfigurationPlugInSingleRowFunction.FilterOptimizable.DISABLED, pluginSingleRow.getFilterOptimizable());
 
         // assert plug-in guard objects loaded
         assertEquals(4, config.getPlugInPatternObjects().size());
@@ -357,6 +372,7 @@ public class TestConfigurationParser extends TestCase
         assertFalse(config.getEngineDefaults().getLogging().isEnableTimerDebug());
         assertTrue(config.getEngineDefaults().getLogging().isEnableQueryPlan());
         assertTrue(config.getEngineDefaults().getLogging().isEnableJDBC());
+        assertEquals("[%u] %m", config.getEngineDefaults().getLogging().getAuditPattern());
         assertEquals(30000, config.getEngineDefaults().getVariables().getMsecVersionRelease());
         assertEquals(3L, (long) config.getEngineDefaults().getPatterns().getMaxSubexpressions());
         assertEquals(false, config.getEngineDefaults().getPatterns().isMaxSubexpressionPreventStart());
@@ -404,15 +420,20 @@ public class TestConfigurationParser extends TestCase
         assertEquals(2, config.getEngineDefaults().getConditionHandling().getHandlerFactories().size());
         assertEquals("my.company.cep.LoggingConditionHandlerFactory", config.getEngineDefaults().getConditionHandling().getHandlerFactories().get(0));
         assertEquals("my.company.cep.AlertConditionHandlerFactory", config.getEngineDefaults().getConditionHandling().getHandlerFactories().get(1));
+        assertEquals("abc", config.getEngineDefaults().getScripts().getDefaultDialect());
 
         // variables
-        assertEquals(2, config.getVariables().size());
+        assertEquals(3, config.getVariables().size());
         ConfigurationVariable variable = config.getVariables().get("var1");
         assertEquals(Integer.class.getName(), variable.getType());
         assertEquals("1", variable.getInitializationValue());
+        assertFalse(variable.isConstant());
         variable = config.getVariables().get("var2");
         assertEquals(String.class.getName(), variable.getType());
         assertEquals(null, variable.getInitializationValue());
+        assertFalse(variable.isConstant());
+        variable = config.getVariables().get("var3");
+        assertTrue(variable.isConstant());
 
         // method references
         assertEquals(2, config.getMethodInvocationReferences().size());
@@ -459,7 +480,7 @@ public class TestConfigurationParser extends TestCase
         assertTrue(configRev.getNameBaseEventTypes().contains("MyBaseEventName"));
         assertTrue(configRev.getNameDeltaEventTypes().contains("MyDeltaEventNameOne"));
         assertTrue(configRev.getNameDeltaEventTypes().contains("MyDeltaEventNameTwo"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"id", "id2"}, configRev.getKeyPropertyNames());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"id", "id2"}, configRev.getKeyPropertyNames());
         assertEquals(ConfigurationRevisionEventType.PropertyRevision.MERGE_NON_NULL, configRev.getPropertyRevision());
 
         // variance types

@@ -14,7 +14,6 @@ package com.espertech.esper.view.stream;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.annotation.Audit;
 import com.espertech.esper.client.annotation.AuditEnum;
-import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecParam;
@@ -30,13 +29,12 @@ import java.lang.reflect.Method;
 
 public class EventStreamProxy implements java.lang.reflect.InvocationHandler {
 
-    private static final Log auditLog = LogFactory.getLog(AuditPath.AUDIT_LOG);
-
+    private final String engineURI;
     private final String statementName;
     private final String eventTypeAndFilter;
     private final EventStream eventStream;
 
-    public static EventStream getAuditProxy(String statementName, Annotation[] annotations, FilterSpecCompiled filterSpec, EventStream designated) {
+    public static EventStream getAuditProxy(String engineURI, String statementName, Annotation[] annotations, FilterSpecCompiled filterSpec, EventStream designated) {
         Audit audit = AuditEnum.STREAM.getAudit(annotations);
         if (audit == null) {
             return designated;
@@ -49,7 +47,7 @@ public class EventStreamProxy implements java.lang.reflect.InvocationHandler {
             String delimiter = "";
             for (FilterSpecParam param : filterSpec.getParameters()) {
                 filterAndParams.write(delimiter);
-                filterAndParams.write(param.getPropertyName());
+                filterAndParams.write(param.getLookupable().getExpression());
                 filterAndParams.write(param.getFilterOperator().getTextualOp());
                 filterAndParams.write("...");
                 delimiter = ",";
@@ -57,17 +55,18 @@ public class EventStreamProxy implements java.lang.reflect.InvocationHandler {
             filterAndParams.write(')');
         }
 
-        return (EventStream) EventStreamProxy.newInstance(statementName, filterAndParams.toString(), designated);
+        return (EventStream) EventStreamProxy.newInstance(engineURI, statementName, filterAndParams.toString(), designated);
     }
 
-    public static Object newInstance(String statementName, String eventTypeAndFilter, EventStream eventStream) {
+    public static Object newInstance(String engineURI, String statementName, String eventTypeAndFilter, EventStream eventStream) {
         return java.lang.reflect.Proxy.newProxyInstance(
                 eventStream.getClass().getClassLoader(),
                 JavaClassHelper.getSuperInterfaces(eventStream.getClass()),
-                new EventStreamProxy(statementName, eventTypeAndFilter, eventStream));
+                new EventStreamProxy(engineURI, statementName, eventTypeAndFilter, eventStream));
     }
 
-    public EventStreamProxy(String statementName, String eventTypeAndFilter, EventStream eventStream) {
+    public EventStreamProxy(String engineURI, String statementName, String eventTypeAndFilter, EventStream eventStream) {
+        this.engineURI = engineURI;
         this.statementName = statementName;
         this.eventTypeAndFilter = eventTypeAndFilter;
         this.eventStream = eventStream;
@@ -77,7 +76,7 @@ public class EventStreamProxy implements java.lang.reflect.InvocationHandler {
             throws Throwable {
 
         if (m.getName().equals("insert")) {
-            if (auditLog.isInfoEnabled()) {
+            if (AuditPath.isInfoEnabled()) {
                 Object arg = args[0];
                 String events = "(undefined)";
                 if (arg instanceof EventBean[]) {
@@ -86,7 +85,7 @@ public class EventStreamProxy implements java.lang.reflect.InvocationHandler {
                 else if (arg instanceof EventBean) {
                     events = EventBeanUtility.summarize((EventBean) arg);
                 }
-                auditLog.info("Statement " + statementName + " stream " + eventTypeAndFilter + " inserted " + events);
+                AuditPath.auditLog(engineURI, statementName, "stream " + eventTypeAndFilter + " inserted " + events);
             }
         }
 

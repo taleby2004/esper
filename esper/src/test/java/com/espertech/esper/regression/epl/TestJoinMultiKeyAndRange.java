@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.bean.SupportBeanRange;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
 public class TestJoinMultiKeyAndRange extends TestCase
@@ -75,9 +75,9 @@ public class TestJoinMultiKeyAndRange extends TestCase
         Object eventTwo = sendSupportBean("G", 101, 5);
         sendEvent(new SupportBeanRange("R4", "G", 0, 10));
         EventBean[] events = listener.getAndResetLastNewData();
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {eventOne, eventTwo}, ArrayAssertionUtil.getUnderlying(events));
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{eventOne, eventTwo}, EPAssertionUtil.getUnderlying(events));
         events = listenerTwo.getAndResetLastNewData();
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {eventOne, eventTwo}, ArrayAssertionUtil.getUnderlying(events));
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{eventOne, eventTwo}, EPAssertionUtil.getUnderlying(events));
 
         // test string compare
         String eplThree = "select sb.* from SupportBeanRange.win:keepall() sb, SupportBean.std:lastevent() where string in [rangeStartStr:rangeEndStr]";

@@ -12,8 +12,8 @@
 package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -47,19 +47,19 @@ public class TestQueryPlanIndexBuilder extends TestCase
         QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, types);
 
         String[][] expected = new String[][] { {"p00"}, {"p01"} };
-        ArrayAssertionUtil.assertEqualsStringArr(indexes[0].getIndexProps(), expected);
+        EPAssertionUtil.assertEqualsExactOrder(expected, indexes[0].getIndexProps());
 
         expected = new String[][] { {"p10"} };
-        ArrayAssertionUtil.assertEqualsStringArr(indexes[1].getIndexProps(), expected);
+        EPAssertionUtil.assertEqualsExactOrder(expected, indexes[1].getIndexProps());
 
         expected = new String[][] { {"p20"}, {"p21"} };
-        ArrayAssertionUtil.assertEqualsStringArr(indexes[2].getIndexProps(), expected);
+        EPAssertionUtil.assertEqualsExactOrder(expected, indexes[2].getIndexProps());
 
         expected = new String[][] { {"p30", "p31"} };
-        ArrayAssertionUtil.assertEqualsStringArr(indexes[3].getIndexProps(), expected);
+        EPAssertionUtil.assertEqualsExactOrder(expected, indexes[3].getIndexProps());
 
         expected = new String[][] { {"p42"}, {"p40", "p41"} };
-        ArrayAssertionUtil.assertEqualsStringArr(indexes[4].getIndexProps(), expected);
+        EPAssertionUtil.assertEqualsExactOrder(expected, indexes[4].getIndexProps());
 
         // Test no index, should have a single entry with a zero-length property name array
         queryGraph = new QueryGraph(3);
@@ -76,7 +76,7 @@ public class TestQueryPlanIndexBuilder extends TestCase
         QueryPlanIndex[] indexes = QueryPlanIndexBuilder.buildIndexSpec(queryGraph, types);
 
         String[][] expected = new String[][] { {"p00"} };
-        ArrayAssertionUtil.assertEqualsStringArr(indexes[0].getIndexProps(), expected);
+        EPAssertionUtil.assertEqualsExactOrder(expected, indexes[0].getIndexProps());
     }
 
     private Map<String, Object> createType(String propCSV) {

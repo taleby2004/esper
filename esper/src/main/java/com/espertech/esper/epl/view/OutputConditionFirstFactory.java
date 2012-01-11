@@ -25,7 +25,7 @@ public class OutputConditionFirstFactory implements OutputConditionFactory
 	public OutputConditionFirstFactory(OutputLimitSpec outputLimitSpec, StatementContext statementContext, boolean isGrouped, boolean isWithHavingClause)
             throws ExprValidationException
     {
-		OutputLimitSpec innerSpec = new OutputLimitSpec(outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), outputLimitSpec.getRateType(), OutputLimitLimitType.DEFAULT, outputLimitSpec.getWhenExpressionNode(), outputLimitSpec.getThenExpressions(), outputLimitSpec.getCrontabAtSchedule(), outputLimitSpec.getTimePeriodExpr(), outputLimitSpec.getAfterTimePeriodExpr(), outputLimitSpec.getAfterNumberOfEvents(), outputLimitSpec.isAndAfterTerminate());
+		OutputLimitSpec innerSpec = new OutputLimitSpec(outputLimitSpec.getRate(), outputLimitSpec.getVariableName(), outputLimitSpec.getRateType(), OutputLimitLimitType.DEFAULT, outputLimitSpec.getWhenExpressionNode(), outputLimitSpec.getThenExpressions(), outputLimitSpec.getCrontabAtSchedule(), outputLimitSpec.getTimePeriodExpr(), outputLimitSpec.getAfterTimePeriodExpr(), outputLimitSpec.getAfterNumberOfEvents(), outputLimitSpec.isAndAfterTerminate(), outputLimitSpec.getAndAfterTerminateExpr(), outputLimitSpec.getAndAfterTerminateThenExpressions());
 		this.innerConditionFactory = OutputConditionFactoryFactory.createCondition(innerSpec, statementContext, isGrouped, isWithHavingClause);
 	}
 

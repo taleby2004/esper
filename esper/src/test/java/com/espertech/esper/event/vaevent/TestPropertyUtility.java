@@ -12,10 +12,10 @@
 package com.espertech.esper.event.vaevent;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.event.SupportEventAdapterService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -55,23 +55,23 @@ public class TestPropertyUtility extends TestCase
         assertEquals(4, groups.length);
 
         assertEquals(0, groups[0].getGroupNum());
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {"p1", "p5"}, groups[0].getProperties());
+        EPAssertionUtil.assertEqualsExactOrder(groups[0].getProperties(), new Object[]{"p1", "p5"});
         assertEquals(2, groups[0].getTypes().size());
         assertEquals("D1", groups[0].getTypes().get(types[0]));
         assertEquals("D5", groups[0].getTypes().get(types[4]));
 
         assertEquals(1, groups[1].getGroupNum());
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {"p0", "p2", "p3"}, groups[1].getProperties());
+        EPAssertionUtil.assertEqualsExactOrder(groups[1].getProperties(), new Object[]{"p0", "p2", "p3"});
         assertEquals(1, groups[1].getTypes().size());
         assertEquals("D2", groups[1].getTypes().get(types[1]));
 
         assertEquals(2, groups[2].getGroupNum());
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {"p0", "p4"}, groups[2].getProperties());
+        EPAssertionUtil.assertEqualsExactOrder(groups[2].getProperties(), new Object[]{"p0", "p4"});
         assertEquals(1, groups[2].getTypes().size());
         assertEquals("D3", groups[2].getTypes().get(types[2]));
 
         assertEquals(3, groups[3].getGroupNum());
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {"p0", "p2", "p5"}, groups[3].getProperties());
+        EPAssertionUtil.assertEqualsExactOrder(groups[3].getProperties(), new Object[]{"p0", "p2", "p5"});
         assertEquals(1, groups[3].getTypes().size());
         assertEquals("D4", groups[3].getTypes().get(types[3]));
     }
@@ -85,7 +85,7 @@ public class TestPropertyUtility extends TestCase
         for (Map.Entry<String, int[]> entry : expectedPropertyGroups.entrySet())
         {
             int[] result = groupsPerProp.get(entry.getKey());
-            ArrayAssertionUtil.assertEqualsExactOrder(result, entry.getValue());
+            EPAssertionUtil.assertEqualsExactOrder(entry.getValue(), result);
         }
     }
 }

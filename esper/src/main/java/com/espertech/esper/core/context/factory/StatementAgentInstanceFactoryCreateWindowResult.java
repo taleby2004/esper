@@ -23,7 +23,8 @@ public class StatementAgentInstanceFactoryCreateWindowResult extends StatementAg
     public StatementAgentInstanceFactoryCreateWindowResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext) {
         super(finalView, stopCallback, agentInstanceContext,
                     null, Collections.<ExprSubselectNode, SubSelectStrategyHolder>emptyMap(),
-                Collections.<ExprPriorNode, ExprPriorEvalStrategy>emptyMap(), Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap()
+                Collections.<ExprPriorNode, ExprPriorEvalStrategy>emptyMap(), Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap(),
+                Collections.<StatementAgentInstancePreload>emptyList()
         );
     }
 }

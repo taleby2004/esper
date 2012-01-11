@@ -12,6 +12,7 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.epl.core.MethodResolutionService;
 
 /**
  * Aggregation service for use when only first/last/window aggregation functions are used an none other.
@@ -37,7 +38,7 @@ public class AggSvcGroupByAccessOnlyFactory implements AggregationServiceFactory
         this.isJoin = isJoin;
     }
 
-    public AggregationService makeService(AgentInstanceContext agentInstanceContext) {
-        return new AggSvcGroupByAccessOnlyImpl(agentInstanceContext.getMethodResolutionService(), accessors, streams, isJoin);
+    public AggregationService makeService(AgentInstanceContext agentInstanceContext, MethodResolutionService methodResolutionService) {
+        return new AggSvcGroupByAccessOnlyImpl(methodResolutionService, accessors, streams, isJoin);
     }
 }

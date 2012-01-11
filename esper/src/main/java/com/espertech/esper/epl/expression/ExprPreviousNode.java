@@ -86,7 +86,7 @@ public class ExprPreviousNode extends ExprNodeBase implements ExprEvaluator, Exp
         }
 
         // the row recognition patterns allows "prev(prop, index)", we switch index the first position
-        if (this.getChildNodes().get(1) instanceof ExprConstantNode)
+        if (ExprNodeUtility.isConstantValueExpr(this.getChildNodes().get(1)))
         {
             ExprNode first = this.getChildNodes().get(0);
             ExprNode second = this.getChildNodes().get(1);

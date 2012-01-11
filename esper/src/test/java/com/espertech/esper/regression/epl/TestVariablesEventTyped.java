@@ -12,10 +12,10 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Collections;
@@ -102,7 +102,7 @@ public class TestVariablesEventTyped extends TestCase
         stmtSelect.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
 
         EPStatement stmtSet = epService.getEPAdministrator().createEPL("on A set varbean.string = 'A', varbean.intPrimitive = 1");
         stmtSet.addListener(listenerSet);
@@ -110,17 +110,17 @@ public class TestVariablesEventTyped extends TestCase
         listenerSet.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
 
         SupportBean setBean = new SupportBean();
         epService.getEPRuntime().setVariableValue("varbean", setBean);
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"A", 1});
         assertNotSame(setBean, epService.getEPRuntime().getVariableValue("varbean"));
         assertEquals(1, ((SupportBean) epService.getEPRuntime().getVariableValue("varbean")).getIntPrimitive());
-        ArrayAssertionUtil.assertProps(listenerSet.assertOneGetNewAndReset(), "varbean.string,varbean.intPrimitive".split(","), new Object[] {"A", 1});
-        ArrayAssertionUtil.assertProps(stmtSet.iterator().next(), "varbean.string,varbean.intPrimitive".split(","), new Object[] {"A", 1});
+        EPAssertionUtil.assertProps(listenerSet.assertOneGetNewAndReset(), "varbean.string,varbean.intPrimitive".split(","), new Object[]{"A", 1});
+        EPAssertionUtil.assertProps(stmtSet.iterator().next(), "varbean.string,varbean.intPrimitive".split(","), new Object[]{"A", 1});
 
         // test self evaluate
         stmtSet.destroy();
@@ -160,7 +160,7 @@ public class TestVariablesEventTyped extends TestCase
 
         // test null
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null, null});
 
         // test objects
         SupportBean_A a1objectOne = new SupportBean_A("A1");
@@ -170,7 +170,7 @@ public class TestVariablesEventTyped extends TestCase
         epService.getEPRuntime().setVariableValue("vartype", s0objectOne);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"abc", a1objectOne, a1objectOne.getId(), s0objectOne, s0objectOne.getId()});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"abc", a1objectOne, a1objectOne.getId(), s0objectOne, s0objectOne.getId()});
 
         // test on-set for Object and EventType
         String[] fieldsTop = "varobject,vartype,varbean".split(",");
@@ -182,8 +182,8 @@ public class TestVariablesEventTyped extends TestCase
         assertEquals(1, epService.getEPRuntime().getVariableValue("varobject"));
         assertEquals(s0objectTwo, epService.getEPRuntime().getVariableValue("vartype"));
         assertEquals(s0objectTwo, epService.getEPRuntime().getVariableValue(Collections.singleton("vartype")).get("vartype"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTop, new Object[] {1, s0objectTwo, null});
-        ArrayAssertionUtil.assertProps(stmtSet.iterator().next(), fieldsTop, new Object[] {1, s0objectTwo, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTop, new Object[]{1, s0objectTwo, null});
+        EPAssertionUtil.assertProps(stmtSet.iterator().next(), fieldsTop, new Object[]{1, s0objectTwo, null});
 
         // set via API to null
         Map<String,Object> newValues = new HashMap<String, Object>();
@@ -192,7 +192,7 @@ public class TestVariablesEventTyped extends TestCase
         newValues.put("varbean", null);
         epService.getEPRuntime().setVariableValue(newValues);
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null, null});
 
         // set via API to values
         newValues.put("varobject", 10L);
@@ -200,7 +200,7 @@ public class TestVariablesEventTyped extends TestCase
         newValues.put("varbean", a1objectOne);
         epService.getEPRuntime().setVariableValue(newValues);
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10L, a1objectOne, a1objectOne.getId(), s0objectTwo, s0objectTwo.getId()});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10L, a1objectOne, a1objectOne.getId(), s0objectTwo, s0objectTwo.getId()});
 
         // test on-set for Bean class
         stmtSet = epService.getEPAdministrator().createEPL("on " + SupportBean_A.class.getName() + "(id='Y') arrival set varobject=null, vartype=null, varbean=arrival");
@@ -210,8 +210,8 @@ public class TestVariablesEventTyped extends TestCase
         assertEquals(null, epService.getEPRuntime().getVariableValue("varobject"));
         assertEquals(null, epService.getEPRuntime().getVariableValue("vartype"));
         assertEquals(a1objectTwo, epService.getEPRuntime().getVariableValue(Collections.singleton("varbean")).get("varbean"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTop, new Object[] {null, null, a1objectTwo});
-        ArrayAssertionUtil.assertProps(stmtSet.iterator().next(), fieldsTop, new Object[] {null, null, a1objectTwo});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTop, new Object[]{null, null, a1objectTwo});
+        EPAssertionUtil.assertProps(stmtSet.iterator().next(), fieldsTop, new Object[]{null, null, a1objectTwo});
     }
 
     private void tryInvalid(EPServiceProvider engine, String epl, String message)

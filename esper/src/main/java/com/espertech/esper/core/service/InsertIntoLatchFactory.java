@@ -18,12 +18,13 @@ import com.espertech.esper.timer.TimeSourceService;
  */
 public class InsertIntoLatchFactory
 {
+    private final String name;
     private final boolean useSpin;
     private final TimeSourceService timeSourceService;
+    private final long msecWait;
 
     private InsertIntoLatchSpin currentLatchSpin;
     private InsertIntoLatchWait currentLatchWait;
-    private long msecWait;
 
     /**
      * Ctor.
@@ -35,6 +36,7 @@ public class InsertIntoLatchFactory
     public InsertIntoLatchFactory(String name, long msecWait, ConfigurationEngineDefaults.Threading.Locking locking,
                                   TimeSourceService timeSourceService)
     {
+        this.name = name;
         this.msecWait = msecWait;
         this.timeSourceService = timeSourceService;
 
@@ -43,11 +45,11 @@ public class InsertIntoLatchFactory
         // construct a completed latch as an initial root latch
         if (useSpin)
         {
-            currentLatchSpin = new InsertIntoLatchSpin(timeSourceService);
+            currentLatchSpin = new InsertIntoLatchSpin(this);
         }
         else
         {
-            currentLatchWait = new InsertIntoLatchWait();
+            currentLatchWait = new InsertIntoLatchWait(this);
         }
     }
 
@@ -62,16 +64,24 @@ public class InsertIntoLatchFactory
     {
         if (useSpin)
         {
-            InsertIntoLatchSpin nextLatch = new InsertIntoLatchSpin(currentLatchSpin, msecWait, payload, timeSourceService);
+            InsertIntoLatchSpin nextLatch = new InsertIntoLatchSpin(this, currentLatchSpin, msecWait, payload);
             currentLatchSpin = nextLatch;
             return nextLatch;
         }
         else
         {
-            InsertIntoLatchWait nextLatch = new InsertIntoLatchWait(currentLatchWait, msecWait, payload);
+            InsertIntoLatchWait nextLatch = new InsertIntoLatchWait(this, currentLatchWait, msecWait, payload);
             currentLatchWait.setLater(nextLatch);
             currentLatchWait = nextLatch;
             return nextLatch;
         }
+    }
+
+    public TimeSourceService getTimeSourceService() {
+        return timeSourceService;
+    }
+
+    public String getName() {
+        return name;
     }
 }

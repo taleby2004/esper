@@ -157,6 +157,10 @@ public class StatementResultServiceImpl implements StatementResultService
         return lastIterableEvent;
     }
 
+    public String getStatementName() {
+        return statementName;
+    }
+
     public void setUpdateListeners(EPStatementListenerSet statementListenerSet)
     {
         // indicate that listeners were updated for potential persistence of listener set, once the statement context is known

@@ -11,10 +11,10 @@
 
 package com.espertech.esper.regression.db;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -108,27 +108,27 @@ public class TestDatabase2StreamOuterJoin extends TestCase
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields, null);
 
         // Result as the SQL query returns 1 row and therefore the on-clause filters it out, but because of left out still getting a row
         sendEvent(1, "xxx");
         EventBean received = listener.assertOneGetNewAndReset();
         assertEquals(1, received.get("MyInt"));
         assertReceived(received, null, null, null, null, null, null, null, null, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{1, null}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{1, null}});
 
         // Result as the SQL query returns 0 rows
         sendEvent(-1, "xxx");
         received = listener.assertOneGetNewAndReset();
         assertEquals(-1, received.get("MyInt"));
         assertReceived(received, null, null, null, null, null, null, null, null, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{-1, null}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{-1, null}});
 
         sendEvent(2, "B");
         received = listener.assertOneGetNewAndReset();
         assertEquals(2, received.get("MyInt"));
         assertReceived(received, 2l, 20, "B", "Y", false, new BigDecimal(100), new BigDecimal(200), 2.2d, 2.3d);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{2, 20}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{2, 20}});
     }
 
     public void testRightOuterJoinOnFilter()
@@ -141,27 +141,27 @@ public class TestDatabase2StreamOuterJoin extends TestCase
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields, null);
 
         // No result as the SQL query returns 1 row and therefore the on-clause filters it out
         sendEvent(1, "xxx");
         EventBean received = listener.assertOneGetNewAndReset();
         assertEquals(1, received.get("MyInt"));
         assertReceived(received, null, null, null, null, null, null, null, null, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{1, null}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{1, null}});
 
         // Result as the SQL query returns 0 rows
         sendEvent(-1, "xxx");
         received = listener.assertOneGetNewAndReset();
         assertEquals(-1, received.get("MyInt"));
         assertReceived(received, null, null, null, null, null, null, null, null, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{-1, null}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{-1, null}});
 
         sendEvent(2, "B");
         received = listener.assertOneGetNewAndReset();
         assertEquals(2, received.get("MyInt"));
         assertReceived(received, 2l, 20, "B", "Y", false, new BigDecimal(100), new BigDecimal(200), 2.2d, 2.3d);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{2, 20}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{2, 20}});
     }
 
     public void testOuterJoinReversedOnFilter()
@@ -176,18 +176,18 @@ public class TestDatabase2StreamOuterJoin extends TestCase
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         statement.addListener(listener);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields, null);
 
         // No result as the SQL query returns 1 row and therefore the on-clause filters it out
         sendEvent(1, "xxx");
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields, null);
 
         sendEvent(-1, "A");
         EventBean received = listener.assertOneGetNewAndReset();
         assertEquals(-1, received.get("MyInt"));
         assertEquals("A", received.get("MyVarChar"));
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{-1, "A"}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{-1, "A"}});
     }
 
     public void tryOuterJoinNoResult(String statementText)

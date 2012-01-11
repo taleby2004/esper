@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.db;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanTwo;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportDatabaseService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Properties;
@@ -68,11 +68,11 @@ public class TestDatabase3StreamOuterJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T2", 30));
         epService.getEPRuntime().sendEvent(new SupportBean("T2", -1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T2", "T2", 30});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T2", "T2", 30});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T3", -1));
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T3", 40));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T3", "T3", 40});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", "T3", 40});
     }
 
     public void testOuterJoinLeftS0()
@@ -93,16 +93,16 @@ public class TestDatabase3StreamOuterJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T1", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("T1", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T1", "T1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T1", "T1", null});
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T2", 30));
         epService.getEPRuntime().sendEvent(new SupportBean("T2", -2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T2", "T2", 30});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T2", "T2", 30});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T3", -1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T3", null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T3", 40));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[] {"T3", "T3", 40});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", "T3", 40});
     }
 }

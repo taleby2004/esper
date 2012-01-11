@@ -8,14 +8,18 @@
  **************************************************************************************/
 package com.espertech.esper.view;
 
-import com.espertech.esper.view.std.*;
-import com.espertech.esper.view.ext.*;
-import com.espertech.esper.view.window.*;
-import com.espertech.esper.view.stat.*;
+import com.espertech.esper.rowregex.EventRowRegexNFAViewFactory;
+import com.espertech.esper.view.ext.SortWindowViewFactory;
+import com.espertech.esper.view.ext.TimeOrderViewFactory;
+import com.espertech.esper.view.internal.IntersectViewFactory;
 import com.espertech.esper.view.internal.PriorEventViewFactory;
 import com.espertech.esper.view.internal.UnionViewFactory;
-import com.espertech.esper.view.internal.IntersectViewFactory;
-import com.espertech.esper.rowregex.EventRowRegexNFAViewFactory;
+import com.espertech.esper.view.stat.CorrelationViewFactory;
+import com.espertech.esper.view.stat.RegressionLinestViewFactory;
+import com.espertech.esper.view.stat.UnivariateStatisticsViewFactory;
+import com.espertech.esper.view.stat.WeightedAverageViewFactory;
+import com.espertech.esper.view.std.*;
+import com.espertech.esper.view.window.*;
 
 /**
  * Enum for all build-in views.
@@ -158,9 +162,14 @@ public enum ViewEnum
     INTERNAL_MATCH_RECOG("internal", "match_recognize", EventRowRegexNFAViewFactory.class, null),
 
     /**
-     * Length window.
+     * Expression window.
      */
-    EXPRESSION_WINDOW("win", "expr", ExpressionWindowViewFactory.class, null);
+    EXPRESSION_WINDOW("win", "expr", ExpressionWindowViewFactory.class, null),
+
+    /**
+     * Expression batch window.
+     */
+    EXPRESSION_BATCH_WINDOW("win", "expr_batch", ExpressionBatchViewFactory.class, null);
 
     private final String namespace;
     private final String name;

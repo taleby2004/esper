@@ -11,11 +11,11 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestNamedWindowRemoveStream extends TestCase
 {
@@ -41,16 +41,16 @@ public class TestNamedWindowRemoveStream extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt1.iterator(), fields, new Object[][] {{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt1.iterator(), fields, new Object[][]{{"E1"}, {"E2"}});
         
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt1.iterator(), fields, new Object[][] {{"E2"}, {"E3"}});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt2.iterator(), fields, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt1.iterator(), fields, new Object[][]{{"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt2.iterator(), fields, new Object[][]{{"E1"}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt1.iterator(), fields, new Object[][] {{"E4"}, {"E5"}});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt2.iterator(), fields, new Object[][] {{"E2"}, {"E3"}});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt3.iterator(), fields, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt1.iterator(), fields, new Object[][]{{"E4"}, {"E5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt2.iterator(), fields, new Object[][]{{"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt3.iterator(), fields, new Object[][]{{"E1"}});
     }
 }

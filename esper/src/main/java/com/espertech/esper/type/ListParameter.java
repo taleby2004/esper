@@ -8,11 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.type;
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.HashSet;
 import java.io.StringWriter;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Represents a list of values in a set of numeric parameters.
@@ -79,5 +79,32 @@ public class ListParameter implements NumberSetParameter
         }
 
         return result;
+    }
+
+    public boolean containsPoint(int point) {
+        return containsPoint(parameters, point);
+    }
+
+    public String formatted() {
+        StringWriter writer = new StringWriter();
+        String delimiter = "";
+        for (NumberSetParameter param : parameters)
+        {
+            writer.append(delimiter);
+            writer.append(param.formatted());
+            delimiter = ", ";
+        }
+        return writer.toString();
+    }
+
+    public static boolean containsPoint(List<NumberSetParameter> parameters, int point) {
+        for (NumberSetParameter param : parameters)
+        {
+            if (param.containsPoint(point))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

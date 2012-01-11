@@ -11,9 +11,9 @@
 
 package com.espertech.esper.support.epl;
 
-import com.espertech.esper.epl.core.*;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.core.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
@@ -41,6 +41,14 @@ public class SupportStreamTypeSvc3Stream implements StreamTypeService
     public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamAndPropertyName) throws DuplicatePropertyException, PropertyNotFoundException
     {
         return impl.resolveByStreamAndPropName(streamAndPropertyName);
+    }
+
+    public PropertyResolutionDescriptor resolveByPropertyNameExplicitProps(String propertyName) throws PropertyNotFoundException, DuplicatePropertyException {
+        return impl.resolveByPropertyNameExplicitProps(propertyName);
+    }
+
+    public PropertyResolutionDescriptor resolveByStreamAndPropNameExplicitProps(String streamName, String propertyName) throws PropertyNotFoundException, StreamNotFoundException {
+        return impl.resolveByStreamAndPropNameExplicitProps(streamName, propertyName);
     }
 
     public String[] getStreamNames()

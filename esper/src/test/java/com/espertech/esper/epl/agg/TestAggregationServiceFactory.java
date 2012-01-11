@@ -39,18 +39,18 @@ public class TestAggregationServiceFactory extends TestCase
     {
         // Test with aggregates but no group by
         selectAggregateNodes.add(SupportExprNodeFactory.makeSumAggregateNode());
-        AggregationServiceFactoryDesc service = AggregationServiceFactoryFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, false, methodResolutionService, null, null, null, false, null, null);
+        AggregationServiceFactoryDesc service = AggregationServiceFactoryFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, false, null, null, null, false, null, null);
         assertTrue(service.getAggregationServiceFactory() instanceof AggSvcGroupAllNoAccessFactory);
 
         // Test with aggregates and group by
-        service = AggregationServiceFactoryFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, true, methodResolutionService, null, null, null, false, null, null);
+        service = AggregationServiceFactoryFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, true, null, null, null, false, null, null);
         assertTrue(service.getAggregationServiceFactory() instanceof AggSvcGroupByRefcountedNoAccessFactory);
     }
 
     public void testGetNullService() throws Exception
     {
         // Test no aggregates and no group-by
-    	AggregationServiceFactoryDesc service = AggregationServiceFactoryFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, false, methodResolutionService, null, null, null, false, null, null);
+    	AggregationServiceFactoryDesc service = AggregationServiceFactoryFactory.getService(selectAggregateNodes, havingAggregateNodes, orderByAggregateNodes, false, null, null, null, false, null, null);
     	assertTrue(service.getAggregationServiceFactory() instanceof AggregationServiceNullFactory);
     }
 }

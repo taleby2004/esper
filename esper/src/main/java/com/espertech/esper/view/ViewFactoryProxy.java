@@ -19,18 +19,20 @@ public class ViewFactoryProxy implements java.lang.reflect.InvocationHandler {
 
     private static Method target = JavaClassHelper.getMethodByName(ViewFactory.class, "makeView");
 
+    private String engineURI;
     private String statementName;
     private ViewFactory viewFactory;
     private String viewName;
 
-    public static Object newInstance(String statementName, ViewFactory viewFactory, String viewName) {
+    public static Object newInstance(String engineURI, String statementName, ViewFactory viewFactory, String viewName) {
         return java.lang.reflect.Proxy.newProxyInstance(
                 viewFactory.getClass().getClassLoader(),
                 JavaClassHelper.getSuperInterfaces(viewFactory.getClass()),
-                new ViewFactoryProxy(statementName, viewFactory, viewName));
+                new ViewFactoryProxy(engineURI, statementName, viewFactory, viewName));
     }
 
-    public ViewFactoryProxy(String statementName, ViewFactory viewFactory, String viewName) {
+    public ViewFactoryProxy(String engineURI, String statementName, ViewFactory viewFactory, String viewName) {
+        this.engineURI = engineURI;
         this.statementName = statementName;
         this.viewFactory = viewFactory;
         this.viewName = viewName;
@@ -44,7 +46,7 @@ public class ViewFactoryProxy implements java.lang.reflect.InvocationHandler {
         }
 
         View view = (View) m.invoke(viewFactory, args);
-        return ViewProxy.newInstance(statementName, viewName, view);
+        return ViewProxy.newInstance(engineURI, statementName, viewName, view);
     }
 }
 

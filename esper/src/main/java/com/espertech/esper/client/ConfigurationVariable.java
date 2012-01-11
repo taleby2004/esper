@@ -17,6 +17,7 @@ public class ConfigurationVariable implements Serializable
 {
     private String type;
     private Object initializationValue;
+    private boolean constant;
     private static final long serialVersionUID = 4273849084807284503L;
 
     /**
@@ -57,5 +58,13 @@ public class ConfigurationVariable implements Serializable
     public void setInitializationValue(Object initializationValue)
     {
         this.initializationValue = initializationValue;
+    }
+
+    public boolean isConstant() {
+        return constant;
+    }
+
+    public void setConstant(boolean constant) {
+        this.constant = constant;
     }
 }

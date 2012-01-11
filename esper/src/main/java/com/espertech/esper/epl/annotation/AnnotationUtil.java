@@ -14,12 +14,9 @@ package com.espertech.esper.epl.annotation;
 import com.espertech.esper.client.EPStatementException;
 import com.espertech.esper.client.annotation.Hint;
 import com.espertech.esper.client.annotation.HintEnum;
-import com.espertech.esper.client.annotation.HookType;
-import com.espertech.esper.client.annotation.Hook;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
-import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.spec.AnnotationDesc;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.SimpleTypeCaster;
@@ -98,7 +95,7 @@ public class AnnotationUtil
         final Class annotationClass;
         try
         {
-            annotationClass = engineImportService.resolveClass(desc.getName());
+            annotationClass = engineImportService.resolveAnnotation(desc.getName());
         }
         catch (EngineImportException e)
         {
@@ -340,6 +337,22 @@ public class AnnotationUtil
             }
         }
         return null;
+    }
+
+    public static List<Annotation> findAnnotations(Annotation[] annotations, Class annotationClass) {
+        if (!annotationClass.isAnnotation()) {
+            throw new IllegalArgumentException("Class " + annotationClass.getName() + " is not an annotation class");
+        }
+        if (annotations == null || annotations.length == 0) {
+            return null;
+        }
+        List<Annotation> annotationsList = new ArrayList<Annotation>();
+        for (Annotation anno : annotations) {
+            if (JavaClassHelper.isImplementsInterface(anno.getClass(), annotationClass)) {
+                annotationsList.add(anno);
+            }
+        }
+        return annotationsList;
     }
 
     public static String getAssignedValue(String value, String enumValue) {

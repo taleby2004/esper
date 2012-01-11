@@ -19,11 +19,13 @@ import com.espertech.esper.util.SimpleNumberCoercer;
 public final class FilterSpecParamContextProp extends FilterSpecParam
 {
     private static final long serialVersionUID = -1651262234386299344L;
+    private final String contextPropertyName;
     private final EventPropertyGetter getter;
     private transient final SimpleNumberCoercer numberCoercer;
 
-    public FilterSpecParamContextProp(String propertyName, FilterOperator filterOperator, EventPropertyGetter getter, SimpleNumberCoercer numberCoercer) {
-        super(propertyName, filterOperator);
+    public FilterSpecParamContextProp(FilterSpecLookupable lookupable, FilterOperator filterOperator, String contextPropertyName, EventPropertyGetter getter, SimpleNumberCoercer numberCoercer) {
+        super(lookupable, filterOperator);
+        this.contextPropertyName = contextPropertyName;
         this.getter = getter;
         this.numberCoercer = numberCoercer;
     }
@@ -40,7 +42,21 @@ public final class FilterSpecParamContextProp extends FilterSpecParam
         return numberCoercer.coerceBoxed((Number) result);
     }
 
-    public int getFilterHash() {
-        return super.hashCode();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        FilterSpecParamContextProp that = (FilterSpecParamContextProp) o;
+
+        if (!contextPropertyName.equals(that.contextPropertyName)) return false;
+
+        return true;
+    }
+
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + contextPropertyName.hashCode();
+        return result;
     }
 }

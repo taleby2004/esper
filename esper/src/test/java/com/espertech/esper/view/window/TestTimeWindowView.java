@@ -12,10 +12,10 @@
 package com.espertech.esper.view.window;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.event.EventFactoryHelper;
 import com.espertech.esper.support.schedule.SupportSchedulingServiceImpl;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.view.SupportBeanClassView;
 import com.espertech.esper.support.view.SupportStatementContextFactory;
 import com.espertech.esper.support.view.SupportViewDataChecker;
@@ -51,7 +51,7 @@ public class TestTimeWindowView extends TestCase
         Map<String, EventBean> events = EventFactoryHelper.makeEventMap(
             new String[] {"a1", "b1", "b2", "c1", "d1", "e1", "f1", "f2"});
 
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         SupportViewDataChecker.checkOldData(childView,null);
         SupportViewDataChecker.checkNewData(childView, null);
 
@@ -61,7 +61,7 @@ public class TestTimeWindowView extends TestCase
         assertTrue(schedulingServiceStub.getAdded().get(TEST_WINDOW_MSEC) != null);
         schedulingServiceStub.getAdded().clear();
 
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{ events.get("a1") });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a1")}, myView.iterator());
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[]{ events.get("a1") });
 
@@ -70,7 +70,7 @@ public class TestTimeWindowView extends TestCase
         myView.update(new EventBean[]{ events.get("b1"), events.get("b2") }, null);
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
 
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{ events.get("a1"), events.get("b1"), events.get("b2") });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a1"), events.get("b1"), events.get("b2")}, myView.iterator());
         SupportViewDataChecker.checkOldData(childView,null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[]{ events.get("b1"), events.get("b2") });
 
@@ -79,14 +79,14 @@ public class TestTimeWindowView extends TestCase
         myView.update(new EventBean[]{ events.get("c1") }, null);
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
 
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{ events.get("a1"), events.get("b1"), events.get("b2"), events.get("c1") });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a1"), events.get("b1"), events.get("b2"), events.get("c1")}, myView.iterator());
         SupportViewDataChecker.checkOldData(childView,null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[]{ events.get("c1") });
 
         // Pretend we are getting the callback from scheduling, check old data and check new scheduling
         schedulingServiceStub.setTime(startTime + TEST_WINDOW_MSEC);
         myView.expire();
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{ events.get("b1"), events.get("b2"), events.get("c1") });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("b1"), events.get("b2"), events.get("c1")}, myView.iterator());
         SupportViewDataChecker.checkOldData(childView,new EventBean[]{ events.get("a1") });
         SupportViewDataChecker.checkNewData(childView, null);
 
@@ -105,7 +105,7 @@ public class TestTimeWindowView extends TestCase
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
         SupportViewDataChecker.checkOldData(childView,null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[]{ events.get("e1") });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{ events.get("b1"), events.get("b2"), events.get("c1"), events.get("d1"), events.get("e1") } );
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("b1"), events.get("b2"), events.get("c1"), events.get("d1"), events.get("e1")}, myView.iterator());
 
         // Pretend callback received
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
@@ -113,7 +113,7 @@ public class TestTimeWindowView extends TestCase
         myView.expire();
         SupportViewDataChecker.checkOldData(childView,new EventBean[]{ events.get("b1"), events.get("b2") });
         SupportViewDataChecker.checkNewData(childView, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{ events.get("c1"), events.get("d1"), events.get("e1") } );
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("c1"), events.get("d1"), events.get("e1")}, myView.iterator());
 
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
         assertTrue(schedulingServiceStub.getAdded().get(49999L) != null);
@@ -124,7 +124,7 @@ public class TestTimeWindowView extends TestCase
         myView.expire();
         SupportViewDataChecker.checkOldData(childView,new EventBean[]{ events.get("c1") });
         SupportViewDataChecker.checkNewData(childView, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{ events.get("d1"), events.get("e1") });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("d1"), events.get("e1")}, myView.iterator());
 
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
         assertTrue(schedulingServiceStub.getAdded().get(1L) != null);
@@ -136,7 +136,7 @@ public class TestTimeWindowView extends TestCase
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
         SupportViewDataChecker.checkOldData(childView,null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[]{ events.get("f1"), events.get("f2") });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{ events.get("d1"), events.get("e1"), events.get("f1"), events.get("f2") });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("d1"), events.get("e1"), events.get("f1"), events.get("f2")}, myView.iterator());
 
         // Pretend callback received, we didn't schedule for 1 msec after, but for 100 msec after
         // testing what happens when clock resolution or some other delay happens
@@ -144,7 +144,7 @@ public class TestTimeWindowView extends TestCase
         myView.expire();
         SupportViewDataChecker.checkOldData(childView,new EventBean[]{ events.get("d1"), events.get("e1") });
         SupportViewDataChecker.checkNewData(childView, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),new EventBean[]{ events.get("f1"), events.get("f2") } );
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("f1"), events.get("f2")}, myView.iterator());
 
         assertTrue(schedulingServiceStub.getAdded().size() == 1);
         assertTrue(schedulingServiceStub.getAdded().get(101L) != null);
@@ -155,7 +155,7 @@ public class TestTimeWindowView extends TestCase
         myView.expire();
         SupportViewDataChecker.checkOldData(childView,new EventBean[]{ events.get("f1"), events.get("f2") });
         SupportViewDataChecker.checkNewData(childView, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
         assertTrue(schedulingServiceStub.getAdded().size() == 0);
     }
 

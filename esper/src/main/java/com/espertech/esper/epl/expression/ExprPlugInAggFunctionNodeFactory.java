@@ -14,6 +14,7 @@ package com.espertech.esper.epl.expression;
 import com.espertech.esper.epl.agg.*;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
+@Deprecated
 public class ExprPlugInAggFunctionNodeFactory implements AggregationMethodFactory
 {
     private final AggregationSupport aggregationSupport;
@@ -42,13 +43,13 @@ public class ExprPlugInAggFunctionNodeFactory implements AggregationMethodFactor
         return null;  // no accessor
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
 
         AggregationMethod method = methodResolutionService.makePlugInAggregator(aggregationSupport.getFunctionName());
         if (!distinct) {
             return method;
         }
-        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, aggregatedValueType,false);
+        return methodResolutionService.makeDistinctAggregator(agentInstanceId, groupId, aggregationId, method, aggregatedValueType,false);
     }
 
     public AggregationMethodFactory getPrototypeAggregator() {

@@ -12,11 +12,11 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
 import com.espertech.esper.support.filter.SupportFilterHandle;
 import com.espertech.esper.support.filter.SupportFilterSpecBuilder;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.concurrent.*;
@@ -58,7 +58,7 @@ public class TestFilterServiceMT extends TestCase
         }
 
         Object[] result = tryMT(callables);
-        ArrayAssertionUtil.assertAllBooleanTrue(result);
+        EPAssertionUtil.assertAllBooleanTrue(result);
     }
 
     private Object[] tryMT(Callable[] callables) throws Exception

@@ -149,7 +149,7 @@ public class IntervalComputerFactory {
             }
             return new ExprOptionalConstant(exprNode.getExprEvaluator(), constant);
         }
-        else if (exprNode instanceof ExprConstantNode) {
+        else if (ExprNodeUtility.isConstantValueExpr(exprNode)) {
             ExprConstantNode constantNode = (ExprConstantNode) exprNode;
             return new ExprOptionalConstant(constantNode.getExprEvaluator(), ((Number)constantNode.getValue()).longValue());
         }

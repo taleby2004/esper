@@ -8,8 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.join.plan;
 
-import com.espertech.esper.epl.expression.ExprConstantNode;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 
 public class QueryGraphValueEntryHashKeyedExpr extends QueryGraphValueEntryHashKeyed
 {
@@ -27,7 +27,7 @@ public class QueryGraphValueEntryHashKeyedExpr extends QueryGraphValueEntryHashK
     }
 
     public boolean isConstant() {
-        return super.getKeyExpr() instanceof ExprConstantNode;
+        return ExprNodeUtility.isConstantValueExpr(super.getKeyExpr());
     }
 
     public String toQueryPlan() {

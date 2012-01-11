@@ -182,7 +182,7 @@ public class ExprDeclaredNodeImpl extends ExprNodeBase implements ExprDeclaredNo
 
         Audit audit = AuditEnum.EXPRDEF.getAudit(validationContext.getAnnotations());
         if (audit != null) {
-            exprEvaluator = (ExprEvaluator) ExprEvaluatorProxy.newInstance(validationContext.getStatementName(), prototype.getName(), exprEvaluator);
+            exprEvaluator = (ExprEvaluator) ExprEvaluatorProxy.newInstance(validationContext.getStreamTypeService().getEngineURIQualifier(), validationContext.getStatementName(), prototype.getName(), exprEvaluator);
         }
     }
 

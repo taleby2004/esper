@@ -14,6 +14,7 @@ package com.espertech.esper.core.context.stmt;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.ArrayWrap;
 import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.epl.agg.AggregationRowRemovedCallback;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
@@ -28,9 +29,7 @@ public class AIRegistryAggregationMultiPerm implements AIRegistryAggregation {
     }
 
     public void assignService(int serviceId, AggregationService aggregationService) {
-        if (serviceId > services.getArray().length - 1) {
-            services.expand(100);
-        }
+        AIRegistryUtil.checkExpand(serviceId, services);
         services.getArray()[serviceId] = aggregationService;
         count++;
     }
@@ -45,30 +44,34 @@ public class AIRegistryAggregationMultiPerm implements AIRegistryAggregation {
     }
 
     public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext) {
-        services.getArray()[exprEvaluatorContext.getAgentInstanceIds()[0]].applyEnter(eventsPerStream, optionalGroupKeyPerRow, exprEvaluatorContext);
+        services.getArray()[exprEvaluatorContext.getAgentInstanceId()].applyEnter(eventsPerStream, optionalGroupKeyPerRow, exprEvaluatorContext);
     }
 
     public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext) {
-        services.getArray()[exprEvaluatorContext.getAgentInstanceIds()[0]].applyLeave(eventsPerStream, optionalGroupKeyPerRow, exprEvaluatorContext);
+        services.getArray()[exprEvaluatorContext.getAgentInstanceId()].applyLeave(eventsPerStream, optionalGroupKeyPerRow, exprEvaluatorContext);
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds) {
-        services.getArray()[agentInstanceIds[0]].setCurrentAccess(groupKey, agentInstanceIds);
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId) {
+        services.getArray()[agentInstanceId].setCurrentAccess(groupKey, agentInstanceId);
     }
 
     public void clearResults(ExprEvaluatorContext exprEvaluatorContext) {
-        services.getArray()[exprEvaluatorContext.getAgentInstanceIds()[0]].clearResults(exprEvaluatorContext);
+        services.getArray()[exprEvaluatorContext.getAgentInstanceId()].clearResults(exprEvaluatorContext);
     }
 
-    public Object getValue(int column, int[] agentInstanceIds) {
-        return services.getArray()[agentInstanceIds[0]].getValue(column, agentInstanceIds);
+    public Object getValue(int column, int agentInstanceId) {
+        return services.getArray()[agentInstanceId].getValue(column, agentInstanceId);
     }
 
     public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context) {
-        return services.getArray()[context.getAgentInstanceIds()[0]].getCollection(column, context);
+        return services.getArray()[context.getAgentInstanceId()].getCollection(column, context);
     }
 
     public EventBean getEventBean(int column, ExprEvaluatorContext context) {
-        return services.getArray()[context.getAgentInstanceIds()[0]].getEventBean(column, context);
+        return services.getArray()[context.getAgentInstanceId()].getEventBean(column, context);
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

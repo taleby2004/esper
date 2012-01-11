@@ -33,12 +33,12 @@ public class ExprAvedevNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
-        AggregationMethod method = methodResolutionService.makeAvedevAggregator(agentInstanceIds, groupId, aggregationId, hasFilter);
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeAvedevAggregator(agentInstanceId, groupId, aggregationId, hasFilter);
         if (!isDistinct) {
             return method;
         }
-        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, aggregatedValueType, hasFilter);
+        return methodResolutionService.makeDistinctAggregator(agentInstanceId, groupId, aggregationId, method, aggregatedValueType, hasFilter);
     }
 
     public AggregationMethodFactory getPrototypeAggregator() {

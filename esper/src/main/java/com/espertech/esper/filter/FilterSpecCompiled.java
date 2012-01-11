@@ -125,8 +125,7 @@ public final class FilterSpecCompiled
         {
             Object filterForValue = specParam.getFilterValue(matchedEvents, exprEvaluatorContext);
 
-            FilterValueSetParam valueParam = new FilterValueSetParamImpl(specParam.getPropertyName(),
-                    specParam.getFilterOperator(), filterForValue);
+            FilterValueSetParam valueParam = new FilterValueSetParamImpl(specParam.getLookupable(), specParam.getFilterOperator(), filterForValue);
             valueList.add(valueParam);
         }
     }
@@ -208,9 +207,7 @@ public final class FilterSpecCompiled
         int hashCode = filterForEventType.hashCode();
         for (FilterSpecParam param : parameters)
         {
-            hashCode = 31*hashCode;
-            hashCode ^= param.getPropertyName().hashCode();
-            hashCode ^= (31 * param.getFilterHash());
+            hashCode ^= 31 * param.hashCode();
         }
         return hashCode;
     }
@@ -238,7 +235,7 @@ public final class FilterSpecCompiled
 
             boolean hasDuplicate = false;
             for (FilterSpecParam existing : list) {
-                if (existing.getPropertyName().equals(parameter.propertyName)) {
+                if (existing.getLookupable().equals(parameter.getLookupable())) {
                     hasDuplicate = true;
                     break;
                 }

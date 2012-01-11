@@ -13,11 +13,8 @@ package com.espertech.esper.filter;
 
 import junit.framework.TestCase;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.LinkedList;
-
-import com.espertech.esper.collection.MultiKeyUntyped;
+import java.util.List;
 
 public class TestFilterSpecParamIn extends TestCase
 {
@@ -25,12 +22,12 @@ public class TestFilterSpecParamIn extends TestCase
 
     public void testEquals()
     {
-        values = new FilterSpecParamIn("a", FilterOperator.IN_LIST_OF_VALUES, getList(new Object[] {"A", "B"}));
-        FilterSpecParamIn values2 = new FilterSpecParamIn("a", FilterOperator.IN_LIST_OF_VALUES, getList(new Object[] {"A"}));
-        FilterSpecParamIn values3 = new FilterSpecParamIn("a", FilterOperator.IN_LIST_OF_VALUES, getList(new Object[] {"A", "B"}));
-        FilterSpecParamIn values4 = new FilterSpecParamIn("a", FilterOperator.IN_LIST_OF_VALUES, getList(new Object[] {"A", "C"}));
+        values = new FilterSpecParamIn(makeLookupable("a"), FilterOperator.IN_LIST_OF_VALUES, getList(new Object[] {"A", "B"}));
+        FilterSpecParamIn values2 = new FilterSpecParamIn(makeLookupable("a"), FilterOperator.IN_LIST_OF_VALUES, getList(new Object[] {"A"}));
+        FilterSpecParamIn values3 = new FilterSpecParamIn(makeLookupable("a"), FilterOperator.IN_LIST_OF_VALUES, getList(new Object[] {"A", "B"}));
+        FilterSpecParamIn values4 = new FilterSpecParamIn(makeLookupable("a"), FilterOperator.IN_LIST_OF_VALUES, getList(new Object[] {"A", "C"}));
 
-        assertFalse(values.equals(new FilterSpecParamConstant("a", FilterOperator.EQUAL, "a")));
+        assertFalse(values.equals(new FilterSpecParamConstant(makeLookupable("a"), FilterOperator.EQUAL, "a")));
         assertFalse(values.equals(values2));
         assertTrue(values.equals(values3));
         assertFalse(values.equals(values4));
@@ -44,5 +41,9 @@ public class TestFilterSpecParamIn extends TestCase
             list.add(new InSetOfValuesConstant(keys[i]));
         }
         return list;
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, null, null);
     }
 }

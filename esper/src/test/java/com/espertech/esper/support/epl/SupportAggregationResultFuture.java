@@ -26,7 +26,7 @@ public class SupportAggregationResultFuture implements AggregationResultFuture
         this.values = values;
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         return values[column];
     }

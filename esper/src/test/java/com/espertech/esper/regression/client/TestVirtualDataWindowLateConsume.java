@@ -13,25 +13,16 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.hook.VirtualDataWindow;
-import com.espertech.esper.client.hook.VirtualDataWindowKeyRange;
-import com.espertech.esper.client.hook.VirtualDataWindowLookupContext;
-import com.espertech.esper.client.hook.VirtualDataWindowLookupFieldDesc;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportBeanRange;
-import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.virtualdw.SupportVirtualDW;
 import com.espertech.esper.support.virtualdw.SupportVirtualDWFactory;
-import com.espertech.esper.support.virtualdw.SupportVirtualDWInvalidFactory;
 import junit.framework.TestCase;
 
 import javax.naming.NamingException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class TestVirtualDataWindowLateConsume extends TestCase {
 
@@ -66,13 +57,13 @@ public class TestVirtualDataWindowLateConsume extends TestCase {
         String[] fields = "val0".split(",");
         EPStatement stmtAggregate = epService.getEPAdministrator().createEPL("select sum(intPrimitive) as val0 from MyVDW");
         stmtAggregate.addListener(listener);
-        ArrayAssertionUtil.assertProps(stmtAggregate.iterator().next(), fields, new Object[] {100});
+        EPAssertionUtil.assertProps(stmtAggregate.iterator().next(), fields, new Object[]{100});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {110});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{110});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {130});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{130});
     }
 
     private VirtualDataWindow getFromContext(String name) {

@@ -15,12 +15,13 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.support.bean.SupportDateTime;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Calendar;
@@ -51,7 +52,7 @@ public class TestDTWithTime extends TestCase {
         epService.getEPAdministrator().createEPL("create variable int varsec");
         epService.getEPAdministrator().createEPL("create variable int varmsec");
         String startTime = "2002-05-30T9:00:00.000";
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(SupportDateTime.make(startTime).getMsecdate()));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(startTime)));
 
         String[] fields = "val0,val1,val2,val3".split(",");
         String eplFragment = "select " +
@@ -65,12 +66,12 @@ public class TestDTWithTime extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), fields, new Class[]{Long.class, Date.class, Long.class, Calendar.class});
 
         epService.getEPRuntime().sendEvent(SupportDateTime.make(null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {SupportDateTime.getValueCoerced(startTime, "msec"), null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{SupportDateTime.getValueCoerced(startTime, "msec"), null, null, null});
 
         String expectedTime = "2002-05-30T09:00:00.000";
         epService.getEPRuntime().setVariableValue("varhour", null); // variable is null
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expectedTime, "msec", "util", "msec", "cal"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expectedTime, "msec", "util", "msec", "cal"));
 
         expectedTime = "2002-05-30T1:02:03.004";
         epService.getEPRuntime().setVariableValue("varhour", 1);
@@ -78,7 +79,7 @@ public class TestDTWithTime extends TestCase {
         epService.getEPRuntime().setVariableValue("varsec", 3);
         epService.getEPRuntime().setVariableValue("varmsec", 4);
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expectedTime, "msec", "util", "msec", "cal"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expectedTime, "msec", "util", "msec", "cal"));
 
         expectedTime = "2002-05-30T0:00:00.006";
         epService.getEPRuntime().setVariableValue("varhour", 0);
@@ -86,6 +87,6 @@ public class TestDTWithTime extends TestCase {
         epService.getEPRuntime().setVariableValue("varsec", null);
         epService.getEPRuntime().setVariableValue("varmsec", 6);
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expectedTime, "msec", "util", "msec", "cal"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expectedTime, "msec", "util", "msec", "cal"));
     }
 }

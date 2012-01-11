@@ -10,6 +10,7 @@ package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.core.service.StatementResultService;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
@@ -90,7 +91,8 @@ public class NamedWindowTailView
         };
 
         // Construct consumer view, allow a callback to this view to remove the consumer
-        NamedWindowConsumerView consumerView = new NamedWindowConsumerView(ExprNodeUtility.getEvaluators(consumerDesc.getFilterList()), consumerDesc.getOptPropertyEvaluator(), eventType, consumerCallback, consumerDesc.getAgentInstanceContext());
+        boolean audit = AuditEnum.STREAM.getAudit(consumerDesc.getAgentInstanceContext().getStatementContext().getAnnotations()) != null;
+        NamedWindowConsumerView consumerView = new NamedWindowConsumerView(ExprNodeUtility.getEvaluators(consumerDesc.getFilterList()), consumerDesc.getOptPropertyEvaluator(), eventType, consumerCallback, consumerDesc.getAgentInstanceContext(), audit);
 
         // Keep a list of consumer views per statement to accomodate joins and subqueries
         List<NamedWindowConsumerView> viewsPerStatements = consumersNonContext.get(consumerDesc.getAgentInstanceContext().getEpStatementAgentInstanceHandle());
@@ -132,7 +134,7 @@ public class NamedWindowTailView
         }
         if (handleRemoved != null)
         {
-            Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> newConsumers = new LinkedHashMap<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>>();
+            Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> newConsumers = NamedWindowUtil.createConsumerMap(isPrioritized);
             newConsumers.putAll(consumersNonContext);
             newConsumers.remove(handleRemoved);
             consumersNonContext = newConsumers;

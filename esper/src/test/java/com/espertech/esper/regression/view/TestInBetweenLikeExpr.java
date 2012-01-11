@@ -11,13 +11,13 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.util.SerializableObjectCopier;
 
 public class TestInBetweenLikeExpr extends TestCase
@@ -99,17 +99,17 @@ public class TestInBetweenLikeExpr extends TestCase
 
         String fields[] = "resOne, resTwo".split(",");
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(new int[] {10, 20, 30}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(new int[] {10, 1, 30}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(new int[] { 30}, new Long[] {20L, 1L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(new int[] {}, new Long[] {null, 1L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(null, new Long[] {1L, 100L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(null, new Long[] {0L, 100L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         stmt.destroy();
 
         // Collection
@@ -118,15 +118,15 @@ public class TestInBetweenLikeExpr extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(true, new int[] {10, 20, 30}, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(true, new int[] {10, 20, 1}, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(true, new int[] { 30}, new Long[] {20L, 1L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(true, new int[] {}, new Long[] {null, 1L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(true, null, new Long[] {1L, 100L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         stmt.destroy();
 
         // Maps
@@ -135,15 +135,15 @@ public class TestInBetweenLikeExpr extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(false, new int[] {10, 20, 30}, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(false, new int[] {10, 20, 1}, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(false, new int[] { 30}, new Long[] {20L, 1L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(false, new int[] {}, new Long[] {null, 1L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(false, null, new Long[] {1L, 100L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         stmt.destroy();
 
         // Mixed
@@ -152,17 +152,17 @@ public class TestInBetweenLikeExpr extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(1L, new int[0], new Long[0], new int[0]));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(2L, null, new Long[0], new int[0]));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
 
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(null, null, null, new int[] {3,4,5,6,7,7,7,8,8,8,1}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
 
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(-1L, null, new Long[] {1L}, new int[] {3,4,5,6,7,7,7,8,8}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(-1L, new int[] {1}, null, new int[] {}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
         stmt.destroy();
 
         // Object array
@@ -171,13 +171,13 @@ public class TestInBetweenLikeExpr extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(new Object[] {}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(new Object[] {1, 2}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(new Object[] {1d, 2L}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false});
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(new Object[] {null, 2}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, true});
         stmt.destroy();
 
         // Object array
@@ -186,7 +186,7 @@ public class TestInBetweenLikeExpr extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBeanArrayCollMap(new Object[] {}));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
     }
 
     public void testInStringExprOM() throws Exception
@@ -403,19 +403,19 @@ public class TestInBetweenLikeExpr extends TestCase
         stmt.addListener(listener);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false, false, false, true, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false, false, false, true, true, true, true});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true, true, false, true, false, false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true, true, false, true, false, false, true});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true, true, true, false, false, false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true, true, true, false, false, false, false});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true, false, true, true, false, true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true, false, true, true, false, true, false});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false, false, false, true, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false, false, false, true, true, true, true});
 
         // test range reversed
         stmt.destroy();
@@ -425,7 +425,7 @@ public class TestInBetweenLikeExpr extends TestCase
         
         fields = "r1,r2".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true});
         
         // test string type
         stmt.destroy();
@@ -434,16 +434,16 @@ public class TestInBetweenLikeExpr extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("a", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(new SupportBean("b", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
 
         epService.getEPRuntime().sendEvent(new SupportBean("c", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
 
         epService.getEPRuntime().sendEvent(new SupportBean("d", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
     }
 
     public void testBetweenNumericCoercionDouble()

@@ -14,11 +14,11 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.deploy.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.io.InputStream;
@@ -212,7 +212,7 @@ public class TestDeployAdmin extends TestCase
         assertEquals(result.getDeploymentId(), deploymentAdmin.getDeployments()[0]);
     }
 
-    public void testLineNumber() throws Exception {
+    public void testLineNumberAndComments() throws Exception {
         String moduleText = newline + newline + "select * from ABC;" +
                             newline + "select * from DEF";
         
@@ -220,6 +220,12 @@ public class TestDeployAdmin extends TestCase
         assertEquals(2, module.getItems().size());
         assertEquals(3, module.getItems().get(0).getLineNumber());
         assertEquals(4, module.getItems().get(1).getLineNumber());
+
+        module = deploymentAdmin.parse("/* abc */");
+		deploymentAdmin.deploy(module, new DeploymentOptions());
+
+        module = deploymentAdmin.parse("select * from java.lang.Object; \r\n/* abc */\r\n");
+		deploymentAdmin.deploy(module, new DeploymentOptions());
     }
 
     public void testShortcutReadDeploy() throws Exception {
@@ -371,7 +377,7 @@ public class TestDeployAdmin extends TestCase
             DeploymentItemException first = ex.getExceptions().get(0);
             assertEquals(textTwo, first.getExpression());
             assertEquals(errorTextTwo, first.getInner().getMessage());
-            ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"A"}, epService.getEPAdministrator().getStatementNames());
+            EPAssertionUtil.assertEqualsExactOrder(epService.getEPAdministrator().getStatementNames(), new String[]{"A"});
             epService.getEPAdministrator().getStatement("A").destroy();
         }
 
@@ -387,7 +393,7 @@ public class TestDeployAdmin extends TestCase
             DeploymentItemException first = ex.getExceptions().get(0);
             assertEquals(textTwo, first.getExpression());
             assertEquals(errorTextTwo, first.getInner().getMessage());
-            ArrayAssertionUtil.assertEqualsExactOrder(epService.getEPAdministrator().getStatementNames(), new String[] {"A", "C"});
+            EPAssertionUtil.assertEqualsExactOrder(new String[]{"A", "C"}, epService.getEPAdministrator().getStatementNames());
         }
     }
 

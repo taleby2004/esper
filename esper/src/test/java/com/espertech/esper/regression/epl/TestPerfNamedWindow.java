@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.support.bean.SupportBeanRange;
 import junit.framework.TestCase;
@@ -19,8 +21,6 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 
 public class TestPerfNamedWindow extends TestCase
 {
@@ -135,7 +135,7 @@ public class TestPerfNamedWindow extends TestCase
         assertTrue("Delta=" + delta, delta < 500);
 
         // assert they are deleted
-        assertEquals(50000 - 10000, ArrayAssertionUtil.iteratorCount(stmtCreate.iterator()));
+        assertEquals(50000 - 10000, EPAssertionUtil.iteratorCount(stmtCreate.iterator()));
         assertEquals(10000, listener.getOldDataList().size());
     }
 
@@ -171,7 +171,7 @@ public class TestPerfNamedWindow extends TestCase
         assertTrue("Delta=" + delta, delta < 500);
 
         // assert they are deleted
-        assertEquals(50000 - 10000, ArrayAssertionUtil.iteratorCount(stmtCreate.iterator()));
+        assertEquals(50000 - 10000, EPAssertionUtil.iteratorCount(stmtCreate.iterator()));
         assertEquals(10000, listener.getOldDataList().size());
     }
 
@@ -212,7 +212,7 @@ public class TestPerfNamedWindow extends TestCase
         assertTrue("Delta=" + delta, delta < 500);
 
         // assert they are all deleted
-        assertEquals(0, ArrayAssertionUtil.iteratorCount(stmtCreate.iterator()));
+        assertEquals(0, EPAssertionUtil.iteratorCount(stmtCreate.iterator()));
         assertEquals(20000, listener.getOldDataList().size());
     }
 
@@ -243,7 +243,7 @@ public class TestPerfNamedWindow extends TestCase
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
         assertTrue("Delta=" + delta, delta < 1000);
-        assertEquals(10000, ArrayAssertionUtil.iteratorCount(stmtCreate.iterator()));
+        assertEquals(10000, EPAssertionUtil.iteratorCount(stmtCreate.iterator()));
 
         // destroy all
         for (int i = 0; i < statements.length; i++)

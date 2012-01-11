@@ -34,11 +34,6 @@ public class RangeValueString implements FilterSpecParamRangeValue
         return string;
     }
 
-    public int getFilterHash()
-    {
-        return string.hashCode();
-    }
-
     public final String toString()
     {
         return string;

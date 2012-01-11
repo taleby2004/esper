@@ -851,6 +851,10 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         return new BeanEventBeanWriter(writers);
     }
 
+    public boolean equalsCompareType(EventType eventType) {
+        return this == eventType;
+    }
+
     private void initializeWriters()
     {
         Set<WriteablePropertyDescriptor> writables = PropertyHelper.getWritableProperties(fastClass.getJavaClass());

@@ -11,6 +11,8 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
@@ -18,8 +20,6 @@ import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 
 public class TestVariablesOutputRate extends TestCase
 {
@@ -85,7 +85,7 @@ public class TestVariablesOutputRate extends TestCase
         assertFalse(listener.isInvoked());
 
         sendSupportBeans("E3");
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {3L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{3L});
         listener.reset();
 
         // set output limit to 5
@@ -97,7 +97,7 @@ public class TestVariablesOutputRate extends TestCase
         assertFalse(listener.isInvoked());
 
         sendSupportBeans("E8");
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {8L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{8L});
         listener.reset();
 
         // set output limit to 2
@@ -107,25 +107,25 @@ public class TestVariablesOutputRate extends TestCase
         assertFalse(listener.isInvoked());
 
         sendSupportBeans("E10");
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {10L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{10L});
         listener.reset();
 
         // set output limit to 1
         sendSetterBean(1L);
 
         sendSupportBeans("E11");
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {11L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{11L});
         listener.reset();
 
         sendSupportBeans("E12");
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {12L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{12L});
         listener.reset();
 
         // set output limit to null -- this continues at the current rate
         sendSetterBean(null);
 
         sendSupportBeans("E13");
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {13L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{13L});
         listener.reset();
     }
 
@@ -143,7 +143,7 @@ public class TestVariablesOutputRate extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(3000);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {2L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{2L});
         listener.reset();
 
         // set output limit to 5
@@ -160,7 +160,7 @@ public class TestVariablesOutputRate extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(4000);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {4L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{4L});
         listener.reset();
 
         // set output limit to 4 seconds (takes effect next time rescheduled, and is related to reference point which is 0)
@@ -169,13 +169,13 @@ public class TestVariablesOutputRate extends TestCase
         sendTimer(4999);
         assertFalse(listener.isInvoked());
         sendTimer(5000);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {4L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{4L});
         listener.reset();
 
         sendTimer(7999);
         assertFalse(listener.isInvoked());
         sendTimer(8000);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {4L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{4L});
         listener.reset();
 
         sendSupportBeans("E5", "E6");   // varargs: sends 2 events
@@ -183,7 +183,7 @@ public class TestVariablesOutputRate extends TestCase
         sendTimer(11999);
         assertFalse(listener.isInvoked());
         sendTimer(12000);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {6L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{6L});
         listener.reset();
 
         sendTimer(13000);
@@ -197,13 +197,13 @@ public class TestVariablesOutputRate extends TestCase
         // set output limit to null : should stay at 2 seconds
         sendSetterBean(null);
         sendTimer(14000);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {8L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{8L});
         listener.reset();
 
         sendTimer(15999);
         assertFalse(listener.isInvoked());
         sendTimer(16000);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], new String[] {"cnt"}, new Object[] {8L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], new String[]{"cnt"}, new Object[]{8L});
         listener.reset();
     }
 

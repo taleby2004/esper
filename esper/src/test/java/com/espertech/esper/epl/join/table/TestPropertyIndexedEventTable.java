@@ -11,6 +11,7 @@
 
 package com.espertech.esper.epl.join.table;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
@@ -19,7 +20,6 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 import java.util.Set;
 
@@ -136,16 +136,16 @@ public class TestPropertyIndexedEventTable extends TestCase
         assertTrue(result.contains(testEvents[4]));
 
         // iterate
-        Object[] underlying = ArrayAssertionUtil.iteratorToArrayUnderlying(index.iterator());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {testEventsUnd[0], testEventsUnd[2], testEventsUnd[3], testEventsUnd[4], testEventsUnd[5]}, underlying);
+        Object[] underlying = EPAssertionUtil.iteratorToArrayUnderlying(index.iterator());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{testEventsUnd[0], testEventsUnd[2], testEventsUnd[3], testEventsUnd[4], testEventsUnd[5]}, underlying);
 
         index.remove(new EventBean[] {testEvents[4]});
         result = index.lookup(new Object[] {1, "b"});
         assertNull(result);
 
         // iterate
-        underlying = ArrayAssertionUtil.iteratorToArrayUnderlying(index.iterator());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {testEventsUnd[0], testEventsUnd[2], testEventsUnd[3], testEventsUnd[5]}, underlying);
+        underlying = EPAssertionUtil.iteratorToArrayUnderlying(index.iterator());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{testEventsUnd[0], testEventsUnd[2], testEventsUnd[3], testEventsUnd[5]}, underlying);
 
         index.add(new EventBean[] {testEvents[1]});
         result = index.lookup(new Object[] {1, "b"});
@@ -153,14 +153,14 @@ public class TestPropertyIndexedEventTable extends TestCase
         assertTrue(result.contains(testEvents[1]));
 
         // iterate
-        underlying = ArrayAssertionUtil.iteratorToArrayUnderlying(index.iterator());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {testEventsUnd[0], testEventsUnd[1], testEventsUnd[2], testEventsUnd[3], testEventsUnd[5]}, underlying);
+        underlying = EPAssertionUtil.iteratorToArrayUnderlying(index.iterator());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{testEventsUnd[0], testEventsUnd[1], testEventsUnd[2], testEventsUnd[3], testEventsUnd[5]}, underlying);
     }
 
     public void testIterator()
     {
-        Object[] underlying = ArrayAssertionUtil.iteratorToArrayUnderlying(index.iterator());
-        ArrayAssertionUtil.assertEqualsAnyOrder(testEventsUnd, underlying);
+        Object[] underlying = EPAssertionUtil.iteratorToArrayUnderlying(index.iterator());
+        EPAssertionUtil.assertEqualsAnyOrder(testEventsUnd, underlying);
     }
 
     private EventBean makeBean (int intValue, String stringValue)

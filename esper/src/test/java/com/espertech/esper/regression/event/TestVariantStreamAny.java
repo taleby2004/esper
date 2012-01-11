@@ -12,10 +12,10 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.EventTypeMetadata;
 import com.espertech.esper.client.EventType;
@@ -95,16 +95,16 @@ public class TestVariantStreamAny extends TestCase
 
         String[] fields = "string,id,intPrimitive".split(",");
         epService.getEPRuntime().sendEvent(new SupportBeanVariantStream("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", null, 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", null, 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, "E3", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, "E3", null});
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("s1", 100, 1000L, "f1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"s1", "f1", 1000L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"s1", "f1", 1000L});
     }
 
     public void testAnyTypeStaggered()
@@ -122,15 +122,15 @@ public class TestVariantStreamAny extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
 
-        EventBean[] arr = ArrayAssertionUtil.iteratorToArray(epService.getEPAdministrator().getStatement("Target").iterator());
-        ArrayAssertionUtil.assertPropsPerRow(arr, new String[] {"abc"}, new Object[][] {{"E1"}});
+        EventBean[] arr = EPAssertionUtil.iteratorToArray(epService.getEPAdministrator().getStatement("Target").iterator());
+        EPAssertionUtil.assertPropsPerRow(arr, new String[]{"abc"}, new Object[][]{{"E1"}});
 
         epService.getEPAdministrator().createEPL("insert into MyStream2 select feed from SupportMarketDataBean");
         epService.getEPAdministrator().createEPL("insert into VarStream select feed as abc from MyStream2");
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 1, 1L, "E2"));
 
-        arr = ArrayAssertionUtil.iteratorToArray(epService.getEPAdministrator().getStatement("Target").iterator());
-        ArrayAssertionUtil.assertPropsPerRow(arr, new String[] {"abc"}, new Object[][] {{"E1"}, {"E2"}});
+        arr = EPAssertionUtil.iteratorToArray(epService.getEPAdministrator().getStatement("Target").iterator());
+        EPAssertionUtil.assertPropsPerRow(arr, new String[]{"abc"}, new Object[][]{{"E1"}, {"E2"}});
     }
 }

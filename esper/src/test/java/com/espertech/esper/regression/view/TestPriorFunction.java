@@ -11,17 +11,18 @@
 
 package com.espertech.esper.regression.view;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 import java.util.Random;
 
@@ -347,8 +348,9 @@ public class TestPriorFunction extends TestCase
                           " prior(3, symbol) as prior0Symbol " +
                           "from " + SupportMarketDataBean.class.getName();
 
-        EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
+        EPStatementSPI selectTestView = (EPStatementSPI) epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
+        assertFalse(selectTestView.getStatementContext().isStatelessSelect());
 
         Random random = new Random();
         // 200000 is a better number for a memory test, however for short unit tests this is 2000

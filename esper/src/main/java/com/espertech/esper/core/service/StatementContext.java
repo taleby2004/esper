@@ -9,10 +9,12 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.ConfigurationInformation;
+import com.espertech.esper.core.context.mgr.ContextControllerFactoryService;
 import com.espertech.esper.core.context.stmt.StatementAIResourceRegistry;
 import com.espertech.esper.core.context.util.ContextDescriptor;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.metric.MetricReportingServiceSPI;
+import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
@@ -74,9 +76,13 @@ public final class StatementContext
     private final StatementAIResourceRegistry statementAgentInstanceRegistry;
     private final ContextDescriptor contextDescriptor;
     private final PatternSubexpressionPoolStmtSvc patternSubexpressionPoolSvc;
+    private final boolean statelessSelect;
+    private final ContextControllerFactoryService contextControllerFactoryService;
 
     // settable for view-sharing
     private StatementAgentInstanceLock defaultAgentInstanceLock;
+
+    private AgentInstanceScriptContext defaultAgentInstanceScriptContext;
 
     /**
      * Constructor.
@@ -139,7 +145,10 @@ public final class StatementContext
                               StatementAIResourceRegistry statementAgentInstanceRegistry,
                               StatementAgentInstanceLock defaultAgentInstanceLock,
                               ContextDescriptor contextDescriptor,
-                              PatternSubexpressionPoolStmtSvc patternSubexpressionPoolSvc)
+                              PatternSubexpressionPoolStmtSvc patternSubexpressionPoolSvc,
+                              boolean statelessSelect,
+                              ContextControllerFactoryService contextControllerFactoryService,
+                              AgentInstanceScriptContext defaultAgentInstanceScriptContext)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -177,6 +186,9 @@ public final class StatementContext
         this.defaultAgentInstanceLock = defaultAgentInstanceLock;
         this.contextDescriptor = contextDescriptor;
         this.patternSubexpressionPoolSvc = patternSubexpressionPoolSvc;
+        this.statelessSelect = statelessSelect;
+        this.contextControllerFactoryService = contextControllerFactoryService;
+        this.defaultAgentInstanceScriptContext = defaultAgentInstanceScriptContext;
     }
 
     /**
@@ -488,7 +500,7 @@ public final class StatementContext
         return eventTypeIdGenerator;
     }
 
-    public int[] getAgentInstanceIds() {
+    public int getAgentInstanceId() {
         throw new RuntimeException("Statement agent instance information is not available when providing a context");
     }
 
@@ -514,5 +526,17 @@ public final class StatementContext
 
     public PatternSubexpressionPoolStmtSvc getPatternSubexpressionPoolSvc() {
         return patternSubexpressionPoolSvc;
+    }
+
+    public boolean isStatelessSelect() {
+        return statelessSelect;
+    }
+
+    public ContextControllerFactoryService getContextControllerFactoryService() {
+        return contextControllerFactoryService;
+    }
+
+    public AgentInstanceScriptContext getDefaultAgentInstanceScriptContext() {
+        return defaultAgentInstanceScriptContext;
     }
 }

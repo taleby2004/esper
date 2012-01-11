@@ -12,6 +12,7 @@
 package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -20,8 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestQueryGraph extends TestCase
 {
@@ -156,10 +155,10 @@ public class TestQueryGraph extends TestCase
         queryGraph.addStrictEquals(1, "p1", null, 2, "p2", null);
 
         assertEquals(0, queryGraph.getNavigableStreams(0).size());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {2}, queryGraph.getNavigableStreams(1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {1,3}, queryGraph.getNavigableStreams(2));
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {2,4}, queryGraph.getNavigableStreams(3));
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3}, queryGraph.getNavigableStreams(4));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{2}, queryGraph.getNavigableStreams(1));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{1, 3}, queryGraph.getNavigableStreams(2));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{2, 4}, queryGraph.getNavigableStreams(3));
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3}, queryGraph.getNavigableStreams(4));
     }
 
     public void testGetProperties()

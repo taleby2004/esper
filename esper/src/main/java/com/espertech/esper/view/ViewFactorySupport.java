@@ -163,7 +163,7 @@ public abstract class ViewFactorySupport implements ViewFactory
                 message += ": " + ex.getMessage();
             }
             log.error(message, ex);
-            throw new ViewParameterException(message);
+            throw new ViewParameterException(message, ex);
         }
     }
 
@@ -186,7 +186,7 @@ public abstract class ViewFactorySupport implements ViewFactory
                 message += ": " + ex.getMessage();
             }
             log.error(message, ex);
-            throw new ViewParameterException(message);
+            throw new ViewParameterException(message, ex);
         }
         return validated;
     }

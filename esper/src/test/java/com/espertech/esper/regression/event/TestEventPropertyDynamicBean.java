@@ -11,8 +11,8 @@
 
 package com.espertech.esper.regression.event;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.client.EPServiceProvider;

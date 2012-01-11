@@ -9,8 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.client.EventPropertyGetter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -26,7 +25,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * The index only accepts numeric constants. It keeps a lower and upper bounds of all constants in the index
  * for fast range checking, since the assumption is that frequently values fall within a range.
  */
-public final class FilterParamIndexCompare extends FilterParamIndexPropBase
+public final class FilterParamIndexCompare extends FilterParamIndexLookupableBase
 {
     private final TreeMap<Object, EventEvaluator> constantsMap;
     private final ReadWriteLock constantsMapRWLock;
@@ -34,16 +33,9 @@ public final class FilterParamIndexCompare extends FilterParamIndexPropBase
     private Double lowerBounds;
     private Double upperBounds;
 
-    /**
-     * Constructs the index for matching comparison operators (<, >, <=, >=).
-     * @param propertyName is the name of the event attribute field
-     * @param filterOperator is the type of relational comparison operator
-     * @param eventType describes the event type and is used to obtain a getter instance for the property
-     * for fast get value access.
-     */
-    public FilterParamIndexCompare(String propertyName, FilterOperator filterOperator, EventType eventType)
-    {
-        super(propertyName, filterOperator, eventType);
+    public FilterParamIndexCompare(FilterSpecLookupable lookupable, FilterOperator filterOperator) {
+        super(filterOperator, lookupable);
+
         constantsMap = new TreeMap<Object, EventEvaluator>();
         constantsMapRWLock = new ReentrantReadWriteLock();
 
@@ -54,22 +46,15 @@ public final class FilterParamIndexCompare extends FilterParamIndexPropBase
         {
             throw new IllegalArgumentException("Invalid filter operator for index of " + filterOperator);
         }
-
-        if (!JavaClassHelper.isNumeric(this.getPropertyBoxedType()))
-        {
-            throw new IllegalArgumentException("Property named '" + propertyName + "' is not numeric");
-        }
     }
 
     public final EventEvaluator get(Object filterConstant)
     {
-        checkType(filterConstant);
         return constantsMap.get(filterConstant);
     }
 
     public final void put(Object filterConstant, EventEvaluator matcher)
     {
-        checkType(filterConstant);
         constantsMap.put(filterConstant, matcher);
 
         // Update bounds
@@ -108,7 +93,7 @@ public final class FilterParamIndexCompare extends FilterParamIndexPropBase
 
     public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
-        Object propertyValue = this.getGetter().get(eventBean);
+        Object propertyValue = lookupable.getGetter().get(eventBean);
 
         if (propertyValue == null)
         {
@@ -201,15 +186,6 @@ public final class FilterParamIndexCompare extends FilterParamIndexPropBase
         }
         lowerBounds = ((Number) constantsMap.firstKey()).doubleValue();
         upperBounds = ((Number) constantsMap.lastKey()).doubleValue();
-    }
-
-    private void checkType(Object filterConstant)
-    {
-        if (this.getPropertyBoxedType() != filterConstant.getClass())
-        {
-            throw new IllegalArgumentException("Invalid type of filter constant of " +
-                    filterConstant.getClass().getName() + " for property " + this.getPropertyName());
-        }
     }
 
     private static final Log log = LogFactory.getLog(FilterParamIndexCompare.class);

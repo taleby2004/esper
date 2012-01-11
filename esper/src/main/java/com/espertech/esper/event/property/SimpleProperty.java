@@ -8,22 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.event.property;
 
-import com.espertech.esper.event.*;
-import com.espertech.esper.event.map.MapEventType;
-import com.espertech.esper.event.map.MapEventPropertyGetter;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventPropertyType;
+import com.espertech.esper.event.EventTypeUtility;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.InternalEventPropDescriptor;
+import com.espertech.esper.event.map.MapEventPropertyGetter;
+import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.xml.*;
-import com.espertech.esper.event.xml.DOMSimpleAttributeGetter;
-import com.espertech.esper.event.xml.DOMComplexElementGetter;
-import com.espertech.esper.event.xml.DOMAttributeAndElementGetter;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.PropertyAccessException;
 
-import java.util.Map;
 import java.io.StringWriter;
+import java.util.Map;
 
 /**
  * Represents a simple property of a given name.
@@ -101,9 +100,9 @@ public class SimpleProperty extends PropertyBase
         else if (def instanceof String)
         {
             String propertyName = def.toString();
-            boolean isArray = MapEventType.isPropertyArray(propertyName);
+            boolean isArray = EventTypeUtility.isPropertyArray(propertyName);
             if (isArray) {
-                propertyName = MapEventType.getPropertyRemoveArray(propertyName);
+                propertyName = EventTypeUtility.getPropertyRemoveArray(propertyName);
             }
 
             EventType eventType = eventAdapterService.getExistsTypeByName(propertyName);

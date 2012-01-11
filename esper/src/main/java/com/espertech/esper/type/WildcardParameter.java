@@ -33,4 +33,12 @@ public class WildcardParameter implements NumberSetParameter
         }
         return result;
     }
+
+    public boolean containsPoint(int point) {
+        return true;
+    }
+
+    public String formatted() {
+        return "*";
+    }
 }

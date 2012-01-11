@@ -82,6 +82,9 @@ public class VariableReadWritePackage
             {
                 throw new ExprValidationException("Variable by name '" + variableName + "' has not been created or configured");
             }
+            if (variableReader.isConstant()) {
+                throw new ExprValidationException("Variable by name '" + variableName + "' is declared constant and may not be set");
+            }
 
             if (subPropertyName != null) {
                 if (variableReader.getEventType() == null) {

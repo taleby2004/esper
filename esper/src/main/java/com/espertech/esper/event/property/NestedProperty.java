@@ -12,6 +12,7 @@ import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventTypeUtility;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.NestedPropertyGetter;
 import com.espertech.esper.event.map.MapEventPropertyGetter;
@@ -246,17 +247,23 @@ public class NestedProperty implements Property
             if (nestedType instanceof String)       // property type is the name of a map event type
             {
                 String nestedName = nestedType.toString();
-                boolean isArray = MapEventType.isPropertyArray(nestedName);
+                boolean isArray = EventTypeUtility.isPropertyArray(nestedName);
                 if (isArray) {
-                    nestedName = MapEventType.getPropertyRemoveArray(nestedName);
+                    nestedName = EventTypeUtility.getPropertyRemoveArray(nestedName);
                 }
 
                 EventType innerType = eventAdapterService.getExistsTypeByName(nestedName);
-                if (!(innerType instanceof MapEventType))
+                if (innerType == null)
                 {
                     return null;
                 }
-                
+
+                String remainingProps = toPropertyEPL(properties, count);
+                return innerType.getPropertyType(remainingProps);
+            }
+            else if (nestedType instanceof EventType)       // property type is the name of a map event type
+            {
+                EventType innerType = (EventType) nestedType;
                 String remainingProps = toPropertyEPL(properties, count);
                 return innerType.getPropertyType(remainingProps);
             }
@@ -325,19 +332,36 @@ public class NestedProperty implements Property
                     else if (propertyReturnType instanceof String)
                     {
                         String nestedName = propertyReturnType.toString();
-                        boolean isArray = MapEventType.isPropertyArray(nestedName);
+                        boolean isArray = EventTypeUtility.isPropertyArray(nestedName);
                         if (isArray) {
-                            nestedName = MapEventType.getPropertyRemoveArray(nestedName);
+                            nestedName = EventTypeUtility.getPropertyRemoveArray(nestedName);
                         }
 
                         EventType innerType = eventAdapterService.getExistsTypeByName(nestedName);
-                        if (!(innerType instanceof MapEventType))
+                        if (innerType == null)
                         {
                             return null;
                         }
 
                         String remainingProps = toPropertyEPL(properties, count);
-                        getters.add(innerType.getGetter(remainingProps));
+                        EventPropertyGetter getterInner = innerType.getGetter(remainingProps);
+                        if (getterInner == null) {
+                            return null;
+                        }
+
+                        getters.add(getterInner);
+                        break; // the single Pojo getter handles the rest
+                    }
+                    else if (propertyReturnType instanceof EventType)
+                    {
+                        EventType innerType = (EventType) propertyReturnType;
+                        String remainingProps = toPropertyEPL(properties, count);
+                        EventPropertyGetter getterInner = innerType.getGetter(remainingProps);
+                        if (getterInner == null) {
+                            return null;
+                        }
+
+                        getters.add(getterInner);
                         break; // the single Pojo getter handles the rest
                     }
                     else
@@ -348,7 +372,11 @@ public class NestedProperty implements Property
                         {
                             BeanEventType beanType = eventAdapterService.getBeanEventTypeFactory().createBeanType(pojoClass.getName(), pojoClass, false, false, false);
                             String remainingProps = toPropertyEPL(properties, count);
-                            getters.add(beanType.getGetter(remainingProps));
+                            EventPropertyGetter getterInner = beanType.getGetter(remainingProps);
+                            if (getterInner == null) {
+                                return null;
+                            }
+                            getters.add(getterInner);
                             break; // the single Pojo getter handles the rest
                         }
                         else
@@ -356,7 +384,11 @@ public class NestedProperty implements Property
                             Class componentType = pojoClass.getComponentType();
                             BeanEventType beanType = eventAdapterService.getBeanEventTypeFactory().createBeanType(componentType.getName(), componentType, false, false, false);
                             String remainingProps = toPropertyEPL(properties, count);
-                            getters.add(beanType.getGetter(remainingProps));
+                            EventPropertyGetter getterInner = beanType.getGetter(remainingProps);
+                            if (getterInner == null) {
+                                return null;
+                            }
+                            getters.add(getterInner);
                             break; // the single Pojo getter handles the rest
                         }
                     }

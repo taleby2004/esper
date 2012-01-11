@@ -81,7 +81,7 @@ public class StatementAgentInstanceFactoryCreateWindow implements StatementAgent
 
         try {
             // Register interest
-            ViewableActivationResult activationResult = activator.activate(agentInstanceContext);
+            ViewableActivationResult activationResult = activator.activate(agentInstanceContext, false);
             stopCallbacks.add(activationResult.getStopCallback());
             Viewable eventStreamParentViewable = activationResult.getViewable();
 

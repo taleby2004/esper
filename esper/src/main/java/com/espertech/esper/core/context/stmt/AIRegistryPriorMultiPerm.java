@@ -28,9 +28,7 @@ public class AIRegistryPriorMultiPerm implements AIRegistryPrior, ExprPriorEvalS
     }
 
     public void assignService(int num, ExprPriorEvalStrategy value) {
-        if (num > strategies.getArray().length - 1) {
-            strategies.expand(100);
-        }
+        AIRegistryUtil.checkExpand(num, strategies);
         strategies.getArray()[num] = value;
         count++;
     }
@@ -45,7 +43,7 @@ public class AIRegistryPriorMultiPerm implements AIRegistryPrior, ExprPriorEvalS
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext, int streamNumber, ExprEvaluator evaluator, int constantIndexNumber) {
-        int agentInstanceId = exprEvaluatorContext.getAgentInstanceIds()[0];
+        int agentInstanceId = exprEvaluatorContext.getAgentInstanceId();
         ExprPriorEvalStrategy strategy = strategies.getArray()[agentInstanceId];
         return strategy.evaluate(eventsPerStream, isNewData, exprEvaluatorContext, streamNumber, evaluator, constantIndexNumber);
     }

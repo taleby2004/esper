@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
+import com.espertech.esper.client.context.ContextPartitionSelector;
+
 /**
  * Interface for a prepared on-demand query that can be executed multiple times.
  */
@@ -18,6 +20,12 @@ public interface EPOnDemandPreparedQuery
      * @return query result
      */
     public EPOnDemandQueryResult execute();
+
+    /**
+     * Execute the prepared query returning query results.
+     * @return query result
+     */
+    public EPOnDemandQueryResult execute(ContextPartitionSelector[] contextPartitionSelectors);
 
     /**
      * Returns the event type, representing the columns of the select-clause.

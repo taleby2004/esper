@@ -40,8 +40,8 @@ public class ExprFirstEverNodeFactory implements AggregationMethodFactory
         throw new UnsupportedOperationException();
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
-        return methodResolutionService.makeFirstEverValueAggregator(agentInstanceIds, groupId, aggregationId, childType, hasFilter);
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
+        return methodResolutionService.makeFirstEverValueAggregator(agentInstanceId, groupId, aggregationId, childType, hasFilter);
     }
 }
 

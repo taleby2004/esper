@@ -15,12 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestOutputLimitAfter extends TestCase
@@ -79,7 +79,7 @@ public class TestOutputLimitAfter extends TestCase
          sendEvent("E5");
 
          sendTimer(25000);
-         ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E4"}, {"E5"}});
+         EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E4"}, {"E5"}});
          listener.reset();
 
          sendTimer(27000);
@@ -89,7 +89,7 @@ public class TestOutputLimitAfter extends TestCase
          assertFalse(listener.isInvoked());
 
          sendTimer(30000);
-         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E6"});
+         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E6"});
      }
 
      public void testDirectNumberOfEvents()
@@ -104,10 +104,10 @@ public class TestOutputLimitAfter extends TestCase
          assertFalse(listener.isInvoked());
 
          sendEvent("E4");
-         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4"});
+         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4"});
 
          sendEvent("E5");
-         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5"});
+         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
 
          stmt.destroy();
          
@@ -126,10 +126,10 @@ public class TestOutputLimitAfter extends TestCase
          assertFalse(listener.isInvoked());
 
          sendEvent("E4");
-         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4"});
+         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4"});
 
          sendEvent("E5");
-         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5"});
+         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
          
          model = epService.getEPAdministrator().compileEPL("select string from SupportBean.win:keepall() output after 3 events");
          assertEquals("select string from SupportBean.win:keepall() output after 3 events ", model.toEPL());
@@ -154,11 +154,11 @@ public class TestOutputLimitAfter extends TestCase
 
          sendTimer(20000);
          sendEvent("E4");
-         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4"});
+         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4"});
 
          sendTimer(21000);
          sendEvent("E5");
-         ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5"});
+         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
      }
 
      public void testSnapshotVariable()
@@ -216,12 +216,12 @@ public class TestOutputLimitAfter extends TestCase
 
          sendTimer(20000);
          sendEvent("E4");
-         ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1"},{"E2"},{"E3"},{"E4"}});
+         EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1"}, {"E2"}, {"E3"}, {"E4"}});
          listener.reset();
 
          sendTimer(21000);
          sendEvent("E5");
-         ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1"},{"E2"},{"E3"},{"E4"},{"E5"}});
+         EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1"}, {"E2"}, {"E3"}, {"E4"}, {"E5"}});
          listener.reset();
      }
 

@@ -12,7 +12,7 @@
 package com.espertech.esper.util;
 
 import com.espertech.esper.client.ConfigurationEventTypeMap;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -54,28 +54,28 @@ public class TestGraphUtil extends TestCase
         assertEquals(0, GraphUtil.getTopDownOrder(graph).size());
 
         add(graph, "1_1", "1");
-        ArrayAssertionUtil.assertEqualsExactOrder("1,1_1".split(","), GraphUtil.getTopDownOrder(graph).toArray());
+        EPAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "1,1_1".split(","));
 
         add(graph, "1_1_1", "1_1");
-        ArrayAssertionUtil.assertEqualsExactOrder("1,1_1,1_1_1".split(","), GraphUtil.getTopDownOrder(graph).toArray());
+        EPAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "1,1_1,1_1_1".split(","));
 
         add(graph, "0_1", "0");
-        ArrayAssertionUtil.assertEqualsExactOrder("0,0_1,1,1_1,1_1_1".split(","), GraphUtil.getTopDownOrder(graph).toArray());
+        EPAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "0,0_1,1,1_1,1_1_1".split(","));
 
         add(graph, "1_2", "1");
-        ArrayAssertionUtil.assertEqualsExactOrder("0,0_1,1,1_1,1_1_1,1_2".split(","), GraphUtil.getTopDownOrder(graph).toArray());
+        EPAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "0,0_1,1,1_1,1_1_1,1_2".split(","));
 
         add(graph, "1_1_2", "1_1");
-        ArrayAssertionUtil.assertEqualsExactOrder("0,0_1,1,1_1,1_1_1,1_1_2,1_2".split(","), GraphUtil.getTopDownOrder(graph).toArray());
+        EPAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "0,0_1,1,1_1,1_1_1,1_1_2,1_2".split(","));
 
         add(graph, "1_2_1", "1_2");
-        ArrayAssertionUtil.assertEqualsExactOrder("0,0_1,1,1_1,1_1_1,1_1_2,1_2,1_2_1".split(","), GraphUtil.getTopDownOrder(graph).toArray());
+        EPAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "0,0_1,1,1_1,1_1_1,1_1_2,1_2,1_2_1".split(","));
 
         add(graph, "0", "R");
-        ArrayAssertionUtil.assertEqualsExactOrder("1,1_1,1_1_1,1_1_2,1_2,1_2_1,R,0,0_1,".split(","), GraphUtil.getTopDownOrder(graph).toArray());
+        EPAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "1,1_1,1_1_1,1_1_2,1_2,1_2_1,R,0,0_1,".split(","));
 
         add(graph, "1", "R");
-        ArrayAssertionUtil.assertEqualsExactOrder("R,0,0_1,1,1_1,1_1_1,1_1_2,1_2,1_2_1".split(","), GraphUtil.getTopDownOrder(graph).toArray());
+        EPAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "R,0,0_1,1,1_1,1_1_1,1_1_2,1_2,1_2_1".split(","));
     }
 
     public void testAcyclicTopDownOrder() throws Exception
@@ -85,16 +85,16 @@ public class TestGraphUtil extends TestCase
         add(graph, "1_1", "R2");
         add(graph, "A", "R1");
         add(graph, "A", "R2");
-        ArrayAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "R1,R2,1_1,A".split(","));
+        EPAssertionUtil.assertEqualsExactOrder("R1,R2,1_1,A".split(","), GraphUtil.getTopDownOrder(graph).toArray());
 
         add(graph, "R1", "R2");
-        ArrayAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "R2,1_1,R1,A".split(","));
+        EPAssertionUtil.assertEqualsExactOrder("R2,1_1,R1,A".split(","), GraphUtil.getTopDownOrder(graph).toArray());
 
         add(graph, "1_1", "A");
-        ArrayAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "R2,R1,A,1_1".split(","));
+        EPAssertionUtil.assertEqualsExactOrder("R2,R1,A,1_1".split(","), GraphUtil.getTopDownOrder(graph).toArray());
 
         add(graph, "0", "1_1");
-        ArrayAssertionUtil.assertEqualsExactOrder(GraphUtil.getTopDownOrder(graph).toArray(), "R2,R1,A,1_1,0".split(","));
+        EPAssertionUtil.assertEqualsExactOrder("R2,R1,A,1_1,0".split(","), GraphUtil.getTopDownOrder(graph).toArray());
 
         add(graph, "R1", "0");
         tryInvalid(graph, "Circular dependency detected between [1_1, A, R1, 0]");

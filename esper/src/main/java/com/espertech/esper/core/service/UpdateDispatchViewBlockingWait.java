@@ -42,7 +42,7 @@ public class UpdateDispatchViewBlockingWait extends UpdateDispatchViewBase
 
     public void newResult(UniformPair<EventBean[]> results)
     {
-        statementResultServiceImpl.indicate(results);
+        statementResultService.indicate(results);
 
         if (!isDispatchWaiting.get())
         {

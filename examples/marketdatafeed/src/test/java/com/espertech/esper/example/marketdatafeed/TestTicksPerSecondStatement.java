@@ -11,6 +11,7 @@ package com.espertech.esper.example.marketdatafeed;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import junit.framework.TestCase;

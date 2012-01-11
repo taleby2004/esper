@@ -11,11 +11,11 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -63,10 +63,10 @@ public class TestArrayExpression extends TestCase
         epService.getEPRuntime().sendEvent(bean);
 
         EventBean event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"a", "b"}, (String[]) event.get("stringArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[0], (Object[]) event.get("emptyArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {1}, (Integer[]) event.get("oneEleArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {1,2,3}, (Integer[]) event.get("intArray"));
+        EPAssertionUtil.assertEqualsExactOrder((String[]) event.get("stringArray"), new String[]{"a", "b"});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("emptyArray"), new Object[0]);
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("oneEleArray"), new Integer[]{1});
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("intArray"), new Integer[]{1, 2, 3});
     }
 
     public void testArrayExpressions_Compile()
@@ -87,10 +87,10 @@ public class TestArrayExpression extends TestCase
         epService.getEPRuntime().sendEvent(bean);
 
         EventBean event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"a", "b"}, (String[]) event.get("stringArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[0], (Object[]) event.get("emptyArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {1}, (Integer[]) event.get("oneEleArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {1,2,3}, (Integer[]) event.get("intArray"));
+        EPAssertionUtil.assertEqualsExactOrder((String[]) event.get("stringArray"), new String[]{"a", "b"});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("emptyArray"), new Object[0]);
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("oneEleArray"), new Integer[]{1});
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("intArray"), new Integer[]{1, 2, 3});
     }
 
     public void testArrayExpressions()
@@ -123,28 +123,28 @@ public class TestArrayExpression extends TestCase
         epService.getEPRuntime().sendEvent(bean);
 
         EventBean event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"a", "b"}, (String[]) event.get("stringArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[0], (Object[]) event.get("emptyArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {1}, (Integer[]) event.get("oneEleArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {1,2,3}, (Integer[]) event.get("intArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {1,null}, (Integer[]) event.get("intNullArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Long[] {1L,10L}, (Long[]) event.get("longArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {"a", 1, 1e20}, (Object[]) event.get("mixedArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Double[] {1d, 1.1,1e20}, (Double[]) event.get("doubleArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Long[] {5L, 6L}, (Long[]) event.get("intLongArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {null}, (Object[]) event.get("nullArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"a", "b"}, (String[]) event.get("func"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Boolean[] {true, false}, (Boolean[]) event.get("boolArray"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {10}, (Integer[]) event.get("dynIntArr"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Long[] {10L, 999L}, (Long[]) event.get("dynLongArr"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {10, "a"}, (Object[]) event.get("dynMixedArr"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {10, 20, 30}, (Integer[]) event.get("dynCalcArr"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {null, null, "aa"}, (Object[]) event.get("dynCalcArrNulls"));
+        EPAssertionUtil.assertEqualsExactOrder((String[]) event.get("stringArray"), new String[]{"a", "b"});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("emptyArray"), new Object[0]);
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("oneEleArray"), new Integer[]{1});
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("intArray"), new Integer[]{1, 2, 3});
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("intNullArray"), new Integer[]{1, null});
+        EPAssertionUtil.assertEqualsExactOrder((Long[]) event.get("longArray"), new Long[]{1L, 10L});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("mixedArray"), new Object[]{"a", 1, 1e20});
+        EPAssertionUtil.assertEqualsExactOrder((Double[]) event.get("doubleArray"), new Double[]{1d, 1.1, 1e20});
+        EPAssertionUtil.assertEqualsExactOrder((Long[]) event.get("intLongArray"), new Long[]{5L, 6L});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("nullArray"), new Object[]{null});
+        EPAssertionUtil.assertEqualsExactOrder((String[]) event.get("func"), new String[]{"a", "b"});
+        EPAssertionUtil.assertEqualsExactOrder((Boolean[]) event.get("boolArray"), new Boolean[]{true, false});
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("dynIntArr"), new Integer[]{10});
+        EPAssertionUtil.assertEqualsExactOrder((Long[]) event.get("dynLongArr"), new Long[]{10L, 999L});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("dynMixedArr"), new Object[]{10, "a"});
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("dynCalcArr"), new Integer[]{10, 20, 30});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("dynCalcArrNulls"), new Object[]{null, null, "aa"});
 
         // assert function parameters
-        ArrayAssertionUtil.assertEqualsExactOrder(new Integer[] {1}, callbackInts);
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"a"}, callbackStrings);
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {1, "d", null, true}, callbackObjects);
+        EPAssertionUtil.assertEqualsExactOrder(callbackInts, new Integer[]{1});
+        EPAssertionUtil.assertEqualsExactOrder(callbackStrings, new String[]{"a"});
+        EPAssertionUtil.assertEqualsExactOrder(callbackObjects, new Object[]{1, "d", null, true});
     }
 
     public void testComplexTypes()

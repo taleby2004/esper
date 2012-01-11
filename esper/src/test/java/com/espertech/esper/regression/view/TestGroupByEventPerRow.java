@@ -15,12 +15,12 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -69,13 +69,13 @@ public class TestGroupByEventPerRow extends TestCase
         selectTestView.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G1", 10, 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 9));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G1", 9, 9});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 9, 9});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G1", 11, 9});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 11, 9});
     }
 
     public void testAggregationOverGroupedProps()
@@ -90,41 +90,41 @@ public class TestGroupByEventPerRow extends TestCase
         selectTestView.addListener(listener);
 
         sendEvent(SYMBOL_DELL, 1000, 10);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1000L, "DELL", 10.0, 1L});
-        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1000L, "DELL", 10.0, 1L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1000L, "DELL", 10.0, 1L});
+        EPAssertionUtil.assertPropsPerRow(selectTestView.iterator(), fields, new Object[][]{{1000L, "DELL", 10.0, 1L}});
 
         sendEvent(SYMBOL_DELL, 900, 11);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {900L, "DELL", 11.0, 1L});
-        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1000L, "DELL", 10.0, 1L}, {900L, "DELL", 11.0, 1L}});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{900L, "DELL", 11.0, 1L});
+        EPAssertionUtil.assertPropsPerRow(selectTestView.iterator(), fields, new Object[][]{{1000L, "DELL", 10.0, 1L}, {900L, "DELL", 11.0, 1L}});
         listener.reset();
 
         sendEvent(SYMBOL_DELL, 1500, 10);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {1500L, "DELL", 10.0, 2L});
-        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1000L, "DELL", 10.0, 2L}, {900L, "DELL", 11.0, 1L}, {1500L, "DELL", 10.0, 2L}});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{1500L, "DELL", 10.0, 2L});
+        EPAssertionUtil.assertPropsPerRow(selectTestView.iterator(), fields, new Object[][]{{1000L, "DELL", 10.0, 2L}, {900L, "DELL", 11.0, 1L}, {1500L, "DELL", 10.0, 2L}});
         listener.reset();
 
         sendEvent(SYMBOL_IBM, 500, 5);
         assertEquals(1, listener.getNewDataList().size());
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {500L, "IBM", 5.0, 1L});
-        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1000L, "DELL", 10.0, 2L}, {900L, "DELL", 11.0, 1L}, {1500L, "DELL", 10.0, 2L}, {500L, "IBM", 5.0, 1L}});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{500L, "IBM", 5.0, 1L});
+        EPAssertionUtil.assertPropsPerRow(selectTestView.iterator(), fields, new Object[][]{{1000L, "DELL", 10.0, 2L}, {900L, "DELL", 11.0, 1L}, {1500L, "DELL", 10.0, 2L}, {500L, "IBM", 5.0, 1L}});
         listener.reset();
 
         sendEvent(SYMBOL_IBM, 600, 5);
         assertEquals(1, listener.getLastNewData().length);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {600L, "IBM", 5.0, 2L});
-        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1000L, "DELL", 10.0, 2L}, {900L, "DELL", 11.0, 1L}, {1500L, "DELL", 10.0, 2L}, {500L, "IBM", 5.0, 2L}, {600L, "IBM", 5.0, 2L}});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{600L, "IBM", 5.0, 2L});
+        EPAssertionUtil.assertPropsPerRow(selectTestView.iterator(), fields, new Object[][]{{1000L, "DELL", 10.0, 2L}, {900L, "DELL", 11.0, 1L}, {1500L, "DELL", 10.0, 2L}, {500L, "IBM", 5.0, 2L}, {600L, "IBM", 5.0, 2L}});
         listener.reset();
 
         sendEvent(SYMBOL_IBM, 500, 5);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {500L, "IBM", 5.0, 3L});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {1000L, "DELL", 10.0, 1L});
-        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{900L, "DELL", 11.0, 1L}, {1500L, "DELL", 10.0, 1L}, {500L, "IBM", 5.0, 3L}, {600L, "IBM", 5.0, 3L}, {500L, "IBM", 5.0, 3L}});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{500L, "IBM", 5.0, 3L});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{1000L, "DELL", 10.0, 1L});
+        EPAssertionUtil.assertPropsPerRow(selectTestView.iterator(), fields, new Object[][]{{900L, "DELL", 11.0, 1L}, {1500L, "DELL", 10.0, 1L}, {500L, "IBM", 5.0, 3L}, {600L, "IBM", 5.0, 3L}, {500L, "IBM", 5.0, 3L}});
         listener.reset();
 
         sendEvent(SYMBOL_IBM, 600, 5);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {600L, "IBM", 5.0, 4L});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {900L, "DELL", 11.0, 0L});
-        ArrayAssertionUtil.assertEqualsExactOrder(selectTestView.iterator(), fields, new Object[][] {{1500L, "DELL", 10.0, 1L}, {500L, "IBM", 5.0, 4L}, {600L, "IBM", 5.0, 4L}, {500L, "IBM", 5.0, 4L}, {600L, "IBM", 5.0, 4L}});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{600L, "IBM", 5.0, 4L});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{900L, "DELL", 11.0, 0L});
+        EPAssertionUtil.assertPropsPerRow(selectTestView.iterator(), fields, new Object[][]{{1500L, "DELL", 10.0, 1L}, {500L, "IBM", 5.0, 4L}, {600L, "IBM", 5.0, 4L}, {500L, "IBM", 5.0, 4L}, {600L, "IBM", 5.0, 4L}});
         listener.reset();
     }
 
@@ -205,7 +205,7 @@ public class TestGroupByEventPerRow extends TestCase
     private void runAssertion(EPStatement selectTestView)
     {
         String[] fields = new String[] {"symbol", "volume", "mySum"};
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, null);
 
         // assert select result type
         assertEquals(String.class, selectTestView.getEventType().getPropertyType("symbol"));
@@ -214,27 +214,27 @@ public class TestGroupByEventPerRow extends TestCase
 
         sendEvent(SYMBOL_DELL, 10000, 51);
         assertEvents(SYMBOL_DELL, 10000, 51);
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{
                 {"DELL", 10000L, 51d}});
 
         sendEvent(SYMBOL_DELL, 20000, 52);
         assertEvents(SYMBOL_DELL, 20000, 103);
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{
                 {"DELL", 10000L, 103d}, {"DELL", 20000L, 103d}});
 
         sendEvent(SYMBOL_IBM, 30000, 70);
         assertEvents(SYMBOL_IBM, 30000, 70);
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{
                 {"DELL", 10000L, 103d}, {"DELL", 20000L, 103d}, {"IBM", 30000L, 70d}});
 
         sendEvent(SYMBOL_IBM, 10000, 20);
         assertEvents(SYMBOL_DELL, 10000, 52, SYMBOL_IBM, 10000, 90);
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{
                 {"DELL", 20000L, 52d}, {"IBM", 30000L, 90d}, {"IBM", 10000L, 90d}});
 
         sendEvent(SYMBOL_DELL, 40000, 45);
         assertEvents(SYMBOL_DELL, 20000, 45, SYMBOL_DELL, 40000, 45);
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{
                 {"IBM", 10000L, 90d}, {"IBM", 30000L, 90d}, {"DELL", 40000L, 45d}});
     }
 

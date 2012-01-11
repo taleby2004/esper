@@ -21,15 +21,15 @@ public final class FilterSpecParamConstant extends FilterSpecParam
 
     /**
      * Constructor.
-     * @param propertyName is the event property name
+     * @param lookupable is the lookupable
      * @param filterOperator is the type of compare
      * @param filterConstant contains the value to match against the event's property value
      * @throws IllegalArgumentException if an operator was supplied that does not take a single constant value
      */
-    public FilterSpecParamConstant(String propertyName, FilterOperator filterOperator, Object filterConstant)
+    public FilterSpecParamConstant(FilterSpecLookupable lookupable, FilterOperator filterOperator, Object filterConstant)
         throws IllegalArgumentException
     {
-        super(propertyName, filterOperator);
+        super(lookupable, filterOperator);
         this.filterConstant = filterConstant;
 
         if (filterOperator.isRangeOperator())
@@ -37,15 +37,6 @@ public final class FilterSpecParamConstant extends FilterSpecParam
             throw new IllegalArgumentException("Illegal filter operator " + filterOperator + " supplied to " +
                     "constant filter parameter");
         }
-    }
-
-    public int getFilterHash()
-    {
-        if (filterConstant != null)
-        {
-            return filterConstant.hashCode();
-        }
-        return 0;
     }
 
     public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext)
@@ -67,33 +58,20 @@ public final class FilterSpecParamConstant extends FilterSpecParam
         return super.toString() + " filterConstant=" + filterConstant;
     }
 
-    public boolean equals(Object obj)
-    {
-        if (this == obj)
-        {
-            return true;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
 
-        if (!(obj instanceof FilterSpecParamConstant))
-        {
-            return false;
-        }
+        FilterSpecParamConstant that = (FilterSpecParamConstant) o;
 
-        FilterSpecParamConstant other = (FilterSpecParamConstant) obj;
-        if (!super.equals(other))
-        {
+        if (filterConstant != null ? !filterConstant.equals(that.filterConstant) : that.filterConstant != null)
             return false;
-        }
 
-        if (this.filterConstant != other.filterConstant)
-        {
-            return false;
-        }
         return true;
     }
 
-    public int hashCode()
-    {
+    public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (filterConstant != null ? filterConstant.hashCode() : 0);
         return result;

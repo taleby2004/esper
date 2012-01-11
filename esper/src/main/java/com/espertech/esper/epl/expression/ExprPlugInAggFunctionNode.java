@@ -16,6 +16,7 @@ import com.espertech.esper.epl.core.StreamTypeService;
 
 /**
  * Represents a custom aggregation function in an expresson tree.
+ * @deprecated
  */
 public class ExprPlugInAggFunctionNode extends ExprAggregateNodeBase
 {

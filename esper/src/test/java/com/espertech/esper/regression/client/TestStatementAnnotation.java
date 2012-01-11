@@ -15,11 +15,11 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.annotation.*;
 import com.espertech.esper.client.soda.EPStatementFormatter;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.epl.annotation.AnnotationUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportEnum;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.core.service.EPStatementSPI;
 import junit.framework.TestCase;
 
 import java.lang.annotation.Annotation;
@@ -67,7 +67,7 @@ public class TestStatementAnnotation extends TestCase
         tryInvalid("@MyAnnotationValue(value='a', value='a') select * from Bean", false,
                    "Failed to process statement annotations: Annotation 'MyAnnotationValue' has duplicate attribute values for attribute 'value' [@MyAnnotationValue(value='a', value='a') select * from Bean]");
         tryInvalid("@ABC select * from Bean", false,
-                   "Failed to process statement annotations: Failed to resolve @-annotation class: Could not load class by name 'ABC', please check imports [@ABC select * from Bean]");
+                   "Failed to process statement annotations: Failed to resolve @-annotation class: Could not load annotation class by name 'ABC', please check imports [@ABC select * from Bean]");
 
         tryInvalid("@MyAnnotationSimple(5) select * from Bean", false,
                    "Failed to process statement annotations: Annotation 'MyAnnotationSimple' does not have an attribute 'value' [@MyAnnotationSimple(5) select * from Bean]");
@@ -173,6 +173,7 @@ public class TestStatementAnnotation extends TestCase
         // NoLock
         stmt = epService.getEPAdministrator().createEPL("@NoLock select * from Bean");
         assertNotNull(AnnotationUtil.findAnnotation(stmt.getAnnotations(), NoLock.class));
+        assertEquals(1, AnnotationUtil.findAnnotations(stmt.getAnnotations(), NoLock.class).size());
     }
 
     private void runAssertion(EPStatement stmt)

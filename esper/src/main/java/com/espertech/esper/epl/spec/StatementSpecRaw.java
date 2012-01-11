@@ -48,6 +48,7 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
     private List<ExprSubstitutionNode> substitutionParameters;
     private CreateContextDesc createContextDesc;
     private String optionalContextName;
+    private List<ExpressionScriptProvided> scriptExpressions;
 
     private static final long serialVersionUID = 5390766716794133693L;
 
@@ -475,5 +476,13 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
 
     public void setOptionalContextName(String optionalContextName) {
         this.optionalContextName = optionalContextName;
+    }
+
+    public List<ExpressionScriptProvided> getScriptExpressions() {
+        return scriptExpressions;
+    }
+
+    public void setScriptExpressions(List<ExpressionScriptProvided> scriptExpressions) {
+        this.scriptExpressions = scriptExpressions;
     }
 }

@@ -21,6 +21,7 @@ import com.espertech.esper.collection.ArrayBackedCollection;
 import com.espertech.esper.collection.DualWorkQueue;
 import com.espertech.esper.collection.ThreadWorkQueue;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
+import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandleComparator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprEvaluatorContextTimeOnly;
 import com.espertech.esper.filter.FilterHandle;
@@ -73,19 +74,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
                 {
                     if (isPrioritized)
                     {
-                        return new TreeMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(new Comparator<EPStatementAgentInstanceHandle>()
-                        {
-                            public int compare(EPStatementAgentInstanceHandle o1, EPStatementAgentInstanceHandle o2)
-                            {
-                                if (o1 == o2) {
-                                    return 0;
-                                }
-                                if (o1.equals(o2)) {
-                                    return 0;
-                                }
-                                return o1.getPriority() >= o2.getPriority() ? -1 : 1;
-                            }
-                        });
+                        return new TreeMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(EPStatementAgentInstanceHandleComparator.INSTANCE);
                     }
                     else
                     {
@@ -100,19 +89,7 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
                 {
                     if (isPrioritized)
                     {
-                        return new TreeMap<EPStatementAgentInstanceHandle, Object>(new Comparator<EPStatementAgentInstanceHandle>()
-                        {
-                            public int compare(EPStatementAgentInstanceHandle o1, EPStatementAgentInstanceHandle o2)
-                            {
-                                if (o1 == o2) {
-                                    return 0;
-                                }
-                                if (o1.equals(o2)) {
-                                    return 0;
-                                }
-                                return o1.getPriority() >= o2.getPriority() ? -1 : 1;
-                            }
-                        });
+                        return new TreeMap<EPStatementAgentInstanceHandle, Object>(EPStatementAgentInstanceHandleComparator.INSTANCE);
                     }
                     else
                     {
@@ -861,6 +838,10 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
 
     public Map<String, Long> getStatementNearestSchedules() {
         return EPRuntimeImpl.getStatementNearestSchedulesInternal(services.getSchedulingService(), unisolatedServices.getStatementLifecycleSvc());
+    }
+
+    public String getEngineURI() {
+        return unisolatedServices.getEngineURI();
     }
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);

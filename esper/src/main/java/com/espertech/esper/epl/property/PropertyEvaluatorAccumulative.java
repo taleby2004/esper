@@ -12,7 +12,6 @@
 package com.espertech.esper.epl.property;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -32,7 +31,7 @@ public class PropertyEvaluatorAccumulative
 {
     private static final Log log = LogFactory.getLog(PropertyEvaluatorAccumulative.class);
 
-    private final EventPropertyGetter[] getter;
+    private final ContainedEventEval[] containedEventEvals;
     private final FragmentEventType[] fragmentEventType;
     private final ExprEvaluator[] whereClauses;
     private final EventBean[] eventsPerStream;
@@ -42,15 +41,15 @@ public class PropertyEvaluatorAccumulative
 
     /**
      * Ctor.
-     * @param getter property getters
+     * @param containedEventEvals property getters or other evaluators
      * @param fragmentEventType property fragment types
      * @param whereClauses filters, if any
      * @param propertyNames the property names that are staggered
      */
-    public PropertyEvaluatorAccumulative(EventPropertyGetter[] getter, FragmentEventType[] fragmentEventType, ExprEvaluator[] whereClauses, List<String> propertyNames)
+    public PropertyEvaluatorAccumulative(ContainedEventEval[] containedEventEvals, FragmentEventType[] fragmentEventType, ExprEvaluator[] whereClauses, List<String> propertyNames)
     {
         this.fragmentEventType = fragmentEventType;
-        this.getter = getter;
+        this.containedEventEvals = containedEventEvals;
         this.whereClauses = whereClauses;
         lastLevel = fragmentEventType.length - 1;
         levels = fragmentEventType.length + 1;
@@ -80,7 +79,7 @@ public class PropertyEvaluatorAccumulative
     {
         try
         {
-            Object result = getter[level].getFragment(branch);
+            Object result = containedEventEvals[level].getFragment(branch, eventsPerStream, exprEvaluatorContext);
 
             if (fragmentEventType[level].isIndexed())
             {

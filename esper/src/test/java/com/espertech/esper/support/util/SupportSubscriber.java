@@ -56,13 +56,6 @@ public class SupportSubscriber
         return lastNewData;
     }
 
-    public Object[] getLastNewDataAndReset()
-    {
-        Object[] hold = lastNewData;
-        reset();
-        return hold;
-    }
-
     public Object[] getAndResetLastNewData()
     {
         Object[] lastNew = lastNewData;

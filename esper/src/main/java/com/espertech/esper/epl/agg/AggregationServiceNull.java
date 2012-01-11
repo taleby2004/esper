@@ -30,10 +30,10 @@ public class AggregationServiceNull implements AggregationService {
                            ExprEvaluatorContext exprEvaluatorContext) {
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds) {
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId) {
     }
 
-    public Object getValue(int column, int[] agentInstanceIds) {
+    public Object getValue(int column, int agentInstanceId) {
         return null;
     }
 
@@ -48,5 +48,9 @@ public class AggregationServiceNull implements AggregationService {
     public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
     {
         // no state to clear
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

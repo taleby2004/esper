@@ -130,7 +130,7 @@ public abstract class ExprAggregateNodeBase extends ExprNodeBase implements Expr
 
 	public final Object evaluate(EventBean[] events, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
 	{
-		return aggregationResultFuture.getValue(column, exprEvaluatorContext.getAgentInstanceIds());
+		return aggregationResultFuture.getValue(column, exprEvaluatorContext.getAgentInstanceId());
 	}
 
     /**
@@ -150,9 +150,9 @@ public abstract class ExprAggregateNodeBase extends ExprNodeBase implements Expr
             return false;
         }
 
-        ExprAggregateNodeBase other = (ExprAggregateNodeBase) node;
+        ExprAggregateNode other = (ExprAggregateNode) node;
 
-        if (other.isDistinct != this.isDistinct)
+        if (other.isDistinct() != this.isDistinct)
         {
             return false;
         }

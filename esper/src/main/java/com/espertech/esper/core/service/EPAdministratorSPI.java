@@ -15,6 +15,7 @@ import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPPreparedStatementImpl;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.epn.EPNetworkAdmin;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
@@ -58,6 +59,14 @@ public interface EPAdministratorSPI extends EPAdministrator
     public PatternExpr compilePatternToSODA(String expression) throws EPException;
 
     /**
+     * Compile pattern.
+     * @param expression to compile
+     * @return compiled expression
+     * @throws EPException if compile failed
+     */
+    public EPStatementObjectModel compilePatternToSODAModel(String expression) throws EPException;
+
+    /**
      * Compile annotation expressions.
      * @param annotationExpression to compile
      * @return model representation
@@ -83,4 +92,11 @@ public interface EPAdministratorSPI extends EPAdministrator
     public EPStatement createModelStatementId(EPStatementObjectModel sodaStatement, String statementName, Object userObject, String statementId) throws EPException;
     public EPStatement createPatternStatementId(String pattern, String statementName, Object userObject, String statementId) throws EPException;
     public EPStatement createPreparedEPLStatementId(EPPreparedStatementImpl prepared, String statementName, Object userObject, String statementId) throws EPException;
+    public String getStatementNameForId(String statementId);
+
+    /**
+     * Returns EP-network administrative services.
+     * @return network administration
+     */
+    public EPNetworkAdmin getNetworkAdmin();
 }

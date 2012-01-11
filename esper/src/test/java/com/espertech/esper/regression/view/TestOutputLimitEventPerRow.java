@@ -12,10 +12,10 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportBean;
@@ -90,24 +90,24 @@ public class TestOutputLimitEventPerRow extends TestCase
         assertFalse(listener.isInvoked());
 
         sendBeanEvent("E2", 105, 5);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 105L, 25});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 105L, 25});
 
         sendBeanEvent("E2", 106, -6);    // to 19, does not count toward condition
         sendBeanEvent("E2", 107, 2);    // to 21, counts toward condition
         assertFalse(listener.isInvoked());
         sendBeanEvent("E2", 108, 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 108L, 22});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 108L, 22});
 
         sendBeanEvent("E2", 109, 1);    // to 23, counts toward condition
         assertFalse(listener.isInvoked());
         sendBeanEvent("E2", 110, 1);     // to 24
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 110L, 24});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 110L, 24});
 
         sendBeanEvent("E2", 111, -10);    // to 14
         sendBeanEvent("E2", 112, 10);    // to 24, counts toward condition
         assertFalse(listener.isInvoked());
         sendBeanEvent("E2", 113, 0);    // to 24, counts toward condition
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 113L, 24});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 113L, 24});
 
         sendBeanEvent("E2", 114, -10);    // to 14
         sendBeanEvent("E2", 115, 1);     // to 15
@@ -117,19 +117,19 @@ public class TestOutputLimitEventPerRow extends TestCase
         assertFalse(listener.isInvoked());
 
         sendBeanEvent("E2", 119, 0);    // to 21
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 119L, 21});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 119L, 21});
 
         // remove events
         sendMDEvent("E2", 0);   // remove 113, 117, 119 (any order of delete!)
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLimited, new Object[] {"E2", 21});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLimited, new Object[]{"E2", 21});
 
         // remove events
         sendMDEvent("E2", -10); // remove 111, 114
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLimited, new Object[] {"E2", 41});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLimited, new Object[]{"E2", 41});
 
         // remove events
         sendMDEvent("E2", -6);  // since there is 3*0 we output the next one
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLimited, new Object[] {"E2", 47});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsLimited, new Object[]{"E2", 47});
 
         sendMDEvent("E2", 2);
         assertFalse(listener.isInvoked());
@@ -607,7 +607,7 @@ public class TestOutputLimitEventPerRow extends TestCase
 
         sendTimer(1000);
         String fields[] = new String[] {"symbol", "volume", "sumprice"};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"s0", 1L, 34d}, {"IBM", 2L, 16d}, {"s0", 3L, 34d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"s0", 1L, 34d}, {"IBM", 2L, 16d}, {"s0", 3L, 34d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -616,13 +616,13 @@ public class TestOutputLimitEventPerRow extends TestCase
         sendEvent("IBM", 5, 30);
 
         sendTimer(10000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
-                new Object[][] {{"s0", 1L, 34d}, {"IBM", 2L, 46d}, {"s0", 3L, 34d}, {"MSFT", 4L, 18d}, {"IBM", 5L, 46d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
+                new Object[][]{{"s0", 1L, 34d}, {"IBM", 2L, 46d}, {"s0", 3L, 34d}, {"MSFT", 4L, 18d}, {"IBM", 5L, 46d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"MSFT", 4L, 18d}, {"IBM", 5L, 30d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"MSFT", 4L, 18d}, {"IBM", 5L, 30d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -662,7 +662,7 @@ public class TestOutputLimitEventPerRow extends TestCase
 
         sendTimer(1000);
         String fields[] = new String[] {"symbol", "volume", "sumprice"};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"ABC", 1L, 34d}, {"ABC", 3L, 34d}, {"IBM", 2L, 16d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"ABC", 1L, 34d}, {"ABC", 3L, 34d}, {"IBM", 2L, 16d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -671,14 +671,14 @@ public class TestOutputLimitEventPerRow extends TestCase
         sendEvent("IBM", 5, 30);
 
         sendTimer(10000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
-                new Object[][] {{"ABC", 1L, 34d}, {"ABC", 3L, 34d}, {"IBM", 2L, 46d}, {"IBM", 5L, 46d}, {"MSFT", 4L, 18d}, });
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields,
+                new Object[][]{{"ABC", 1L, 34d}, {"ABC", 3L, 34d}, {"IBM", 2L, 46d}, {"IBM", 5L, 46d}, {"MSFT", 4L, 18d},});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendTimer(10500);
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"IBM", 5L, 30d}, {"MSFT", 4L, 18d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"IBM", 5L, 30d}, {"MSFT", 4L, 18d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -897,7 +897,7 @@ public class TestOutputLimitEventPerRow extends TestCase
 
         sendEvent("IBM", 3, -3);
         String fields[] = "symbol,volume,sumprice".split(",");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"IBM", 2L, 11.0});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"IBM", 2L, 11.0});
 
         sendTimer(5000);
         sendEvent("IBM", 4, 10);
@@ -906,15 +906,15 @@ public class TestOutputLimitEventPerRow extends TestCase
 
         sendEvent("IBM", 6, 1);
         assertEquals(3, listener.getLastNewData().length);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"IBM", 4L, 18.0});
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[1], fields, new Object[] {"IBM", 5L, 18.0});
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[2], fields, new Object[] {"IBM", 6L, 19.0});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{"IBM", 4L, 18.0});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[1], fields, new Object[]{"IBM", 5L, 18.0});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[2], fields, new Object[]{"IBM", 6L, 19.0});
         listener.reset();
 
         sendTimer(11000);
         assertEquals(3, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"IBM", 1L, 11.0});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[1], fields, new Object[] {"IBM", 2L, 11.0});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"IBM", 1L, 11.0});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[1], fields, new Object[]{"IBM", 2L, 11.0});
         listener.reset();
     }
 
@@ -933,13 +933,13 @@ public class TestOutputLimitEventPerRow extends TestCase
         UniformPair<EventBean[]> events = listener.getDataListsFlattened();
         if (events.getFirst()[0].get("symbol").equals(SYMBOL_IBM))
         {
-            ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                    new Object[][] {{SYMBOL_IBM, 500L, 20.0}, {SYMBOL_DELL, 10000L, 51.0}});
+            EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                    new Object[][]{{SYMBOL_IBM, 500L, 20.0}, {SYMBOL_DELL, 10000L, 51.0}});
         }
         else
         {
-            ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                    new Object[][] {{SYMBOL_DELL, 10000L, 51.0}, {SYMBOL_IBM, 500L, 20.0}});
+            EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                    new Object[][]{{SYMBOL_DELL, 10000L, 51.0}, {SYMBOL_IBM, 500L, 20.0}});
         }
         assertNull(listener.getLastOldData());
 
@@ -950,8 +950,8 @@ public class TestOutputLimitEventPerRow extends TestCase
 
     	sendEvent(SYMBOL_DELL, 40000, 45);
         events = listener.getDataListsFlattened();
-        ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                new Object[][] {{SYMBOL_DELL, 20000L, 51.0+52.0}, {SYMBOL_DELL, 40000L, 51.0+52.0+45.0}});
+        EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                new Object[][]{{SYMBOL_DELL, 20000L, 51.0 + 52.0}, {SYMBOL_DELL, 40000L, 51.0 + 52.0 + 45.0}});
         assertNull(listener.getLastOldData());
     }
 
@@ -970,13 +970,13 @@ public class TestOutputLimitEventPerRow extends TestCase
         UniformPair<EventBean[]> events = listener.getDataListsFlattened();
         if (events.getFirst()[0].get("symbol").equals(SYMBOL_IBM))
         {
-            ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                    new Object[][] {{SYMBOL_IBM, 500L, 20.0}, {SYMBOL_DELL, 10000L, 51.0}});
+            EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                    new Object[][]{{SYMBOL_IBM, 500L, 20.0}, {SYMBOL_DELL, 10000L, 51.0}});
         }
         else
         {
-            ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                    new Object[][] {{SYMBOL_DELL, 10000L, 51.0}, {SYMBOL_IBM, 500L, 20.0}});
+            EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                    new Object[][]{{SYMBOL_DELL, 10000L, 51.0}, {SYMBOL_IBM, 500L, 20.0}});
         }
         assertNull(listener.getLastOldData());
         listener.reset();
@@ -988,13 +988,13 @@ public class TestOutputLimitEventPerRow extends TestCase
         events = listener.getDataListsFlattened();
         if (events.getFirst()[0].get("symbol").equals(SYMBOL_IBM))
         {
-            ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                    new Object[][] {{SYMBOL_IBM, 500L, 20.0}, {SYMBOL_DELL, 20000L, 51.0+52.0}, {SYMBOL_DELL, 40000L, 51.0+52.0+45.0}});
+            EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                    new Object[][]{{SYMBOL_IBM, 500L, 20.0}, {SYMBOL_DELL, 20000L, 51.0 + 52.0}, {SYMBOL_DELL, 40000L, 51.0 + 52.0 + 45.0}});
         }
         else
         {
-            ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                    new Object[][] {{SYMBOL_DELL, 20000L, 51.0+52.0}, {SYMBOL_DELL, 40000L, 51.0+52.0+45.0}, {SYMBOL_IBM, 500L, 20.0}});
+            EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                    new Object[][]{{SYMBOL_DELL, 20000L, 51.0 + 52.0}, {SYMBOL_DELL, 40000L, 51.0 + 52.0 + 45.0}, {SYMBOL_IBM, 500L, 20.0}});
         }
         assertNull(listener.getLastOldData());
     }
@@ -1007,8 +1007,8 @@ public class TestOutputLimitEventPerRow extends TestCase
 
         sendEvent(SYMBOL_DELL, 20000, 52);
         UniformPair<EventBean[]> events = listener.getDataListsFlattened();
-        ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                new Object[][] {{SYMBOL_DELL, 20000L, 103.0}});
+        EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                new Object[][]{{SYMBOL_DELL, 20000L, 103.0}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -1019,13 +1019,13 @@ public class TestOutputLimitEventPerRow extends TestCase
         events = listener.getDataListsFlattened();
         if (events.getFirst()[0].get("symbol").equals(SYMBOL_DELL))
         {
-            ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                    new Object[][] {{SYMBOL_DELL, 30000L, 173.0}, {SYMBOL_IBM, 10000L, 20.0}});
+            EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                    new Object[][]{{SYMBOL_DELL, 30000L, 173.0}, {SYMBOL_IBM, 10000L, 20.0}});
         }
         else
         {
-            ArrayAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
-                    new Object[][] {{SYMBOL_IBM, 10000L, 20.0}, {SYMBOL_DELL, 30000L, 173.0}});
+            EPAssertionUtil.assertPropsPerRow(events.getFirst(), fields,
+                    new Object[][]{{SYMBOL_IBM, 10000L, 20.0}, {SYMBOL_DELL, 30000L, 173.0}});
         }
         assertNull(listener.getLastOldData());
     }

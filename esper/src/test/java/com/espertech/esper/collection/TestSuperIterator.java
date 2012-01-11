@@ -11,7 +11,7 @@
 
 package com.espertech.esper.collection;
 
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
@@ -33,16 +33,16 @@ public class TestSuperIterator extends TestCase {
 
     public void testFlow() {
         SuperIterator<String> it = new SuperIterator<String>(make("a"), make(null));
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {"a"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"a"}, it);
 
         it = new SuperIterator<String>(make("a,b"), make(null));
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {"a", "b"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"a", "b"}, it);
 
         it = new SuperIterator<String>(make("a"), make("b"));
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {"a", "b"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"a", "b"}, it);
 
         it = new SuperIterator<String>(make(null), make("a,b"));
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {"a", "b"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"a", "b"}, it);
     }
 
     private Iterator<String> make(String csv) {

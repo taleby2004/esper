@@ -8,8 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
@@ -48,12 +48,12 @@ public class AggSvcGroupAllNoAccessImpl extends AggregationServiceBaseUngrouped
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId)
     {
         // no action needed - this implementation does not group and the current row is the single group
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         return aggregators[column].getValue();
     }
@@ -72,5 +72,9 @@ public class AggSvcGroupAllNoAccessImpl extends AggregationServiceBaseUngrouped
         {
             aggregator.clear();
         }
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

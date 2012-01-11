@@ -12,7 +12,6 @@
 package com.espertech.esper.epl.property;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.epl.expression.ExprEvaluator;
@@ -34,28 +33,28 @@ public class PropertyEvaluatorNested implements PropertyEvaluator
 {
     private static final Log log = LogFactory.getLog(PropertyEvaluatorNested.class);
     
-    private final EventPropertyGetter[] getter;
+    private final ContainedEventEval[] containedEventEvals;
     private final FragmentEventType[] fragmentEventType;
     private final ExprEvaluator[] whereClauses;
     private final EventBean[] eventsPerStream;
     private final int lastLevel;
-    private final List<String> propertyNames;
+    private final List<String> expressionTexts;
 
     /**
      * Ctor.
-     * @param getter property getter
+     * @param containedEventEvals property getters or other evaluators
      * @param fragmentEventType the fragments
      * @param whereClauses the where clauses
-     * @param propertyNames the property names that are staggered
+     * @param expressionTexts the property names that are staggered
      */
-    public PropertyEvaluatorNested(EventPropertyGetter[] getter, FragmentEventType[] fragmentEventType, ExprEvaluator[] whereClauses, List<String> propertyNames)
+    public PropertyEvaluatorNested(ContainedEventEval[] containedEventEvals, FragmentEventType[] fragmentEventType, ExprEvaluator[] whereClauses, List<String> expressionTexts)
     {
         this.fragmentEventType = fragmentEventType;
-        this.getter = getter;
+        this.containedEventEvals = containedEventEvals;
         this.whereClauses = whereClauses;
         lastLevel = fragmentEventType.length - 1;
         eventsPerStream = new EventBean[fragmentEventType.length + 1];
-        this.propertyNames = propertyNames;
+        this.expressionTexts = expressionTexts;
     }
 
     public EventBean[] getProperty(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
@@ -74,7 +73,7 @@ public class PropertyEvaluatorNested implements PropertyEvaluator
     {
         try
         {
-            Object result = getter[level].getFragment(branch);
+            Object result = containedEventEvals[level].getFragment(branch, eventsPerStream, exprEvaluatorContext);
 
             if (fragmentEventType[level].isIndexed())
             {
@@ -161,7 +160,7 @@ public class PropertyEvaluatorNested implements PropertyEvaluator
             log.error("Unexpected error evaluating property expression for event of type '" +
                     branch.getEventType().getName() +
                     "' and property '" +
-                    propertyNames.get(level + 1) + "': " + ex.getMessage(), ex);
+                    expressionTexts.get(level + 1) + "': " + ex.getMessage(), ex);
         }
     }
 

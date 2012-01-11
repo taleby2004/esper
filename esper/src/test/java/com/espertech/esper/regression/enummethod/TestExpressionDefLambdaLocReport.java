@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.enummethod;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.lrreport.Item;
 import com.espertech.esper.support.bean.lrreport.LRUtil;
 import com.espertech.esper.support.bean.lrreport.LocationReportFactory;
 import com.espertech.esper.support.bean.lrreport.LocationReport;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

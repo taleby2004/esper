@@ -13,6 +13,9 @@ package com.espertech.esper.core.context.stmt;
 
 public class AIRegistryExprMultiPerm extends AIRegistryExprBase {
 
+    public AIRegistryExprMultiPerm() {
+    }
+
     public AIRegistrySubselect allocateAIRegistrySubselect() {
         return new AIRegistrySubselectMultiPerm();
     }

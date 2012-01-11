@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,19 +19,13 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Index for filter parameter constants to match using the equals (=) operator.
  * The implementation is based on a regular HashMap.
  */
-public abstract class FilterParamIndexEqualsBase extends FilterParamIndexPropBase
+public abstract class FilterParamIndexEqualsBase extends FilterParamIndexLookupableBase
 {
     protected final Map<Object, EventEvaluator> constantsMap;
     protected final ReadWriteLock constantsMapRWLock;
 
-    /**
-     * Constructs the index for exact matches.
-     * @param propertyName is the name of the event property
-     * @param eventType describes the event type and is used to obtain a getter instance for the property
-     */
-    public FilterParamIndexEqualsBase(String propertyName, FilterOperator filterOperator, EventType eventType)
-    {
-        super(propertyName, filterOperator, eventType);
+    protected FilterParamIndexEqualsBase(FilterSpecLookupable lookupable, FilterOperator filterOperator) {
+        super(filterOperator, lookupable);
 
         constantsMap = new HashMap<Object, EventEvaluator>();
         constantsMapRWLock = new ReentrantReadWriteLock();
@@ -39,13 +33,11 @@ public abstract class FilterParamIndexEqualsBase extends FilterParamIndexPropBas
 
     public final EventEvaluator get(Object filterConstant)
     {
-        checkType(filterConstant);
         return constantsMap.get(filterConstant);
     }
 
     public final void put(Object filterConstant, EventEvaluator evaluator)
     {
-        checkType(filterConstant);
         constantsMap.put(filterConstant, evaluator);
     }
 
@@ -66,17 +58,5 @@ public abstract class FilterParamIndexEqualsBase extends FilterParamIndexPropBas
     public final ReadWriteLock getReadWriteLock()
     {
         return constantsMapRWLock;
-    }
-
-    protected void checkType(Object filterConstant)
-    {
-        if (filterConstant != null)
-        {
-            if ((this.getPropertyBoxedType() != filterConstant.getClass()) && (!this.getPropertyBoxedType().isAssignableFrom(filterConstant.getClass())))
-            {
-                throw new IllegalArgumentException("Invalid type of filter constant of " +
-                        filterConstant.getClass().getName() + " for property " + this.getPropertyName());
-            }
-        }
     }
 }

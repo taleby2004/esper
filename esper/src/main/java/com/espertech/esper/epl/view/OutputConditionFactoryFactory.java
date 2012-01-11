@@ -8,16 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.StatementContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.espertech.esper.epl.spec.OutputLimitSpec;
+import com.espertech.esper.epl.expression.ExprConstantNodeImpl;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
 import com.espertech.esper.epl.spec.OutputLimitLimitType;
 import com.espertech.esper.epl.spec.OutputLimitRateType;
+import com.espertech.esper.epl.spec.OutputLimitSpec;
 import com.espertech.esper.epl.variable.VariableReader;
-import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.util.JavaClassHelper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.Collections;
 
 /**
  * Factory for output condition instances.
@@ -69,7 +72,7 @@ public class OutputConditionFactoryFactory
         }
         else if(outputLimitSpec.getRateType() == OutputLimitRateType.WHEN_EXPRESSION)
         {
-            return new OutputConditionExpressionFactory(outputLimitSpec.getWhenExpressionNode(), outputLimitSpec.getThenExpressions(), statementContext);
+            return new OutputConditionExpressionFactory(outputLimitSpec.getWhenExpressionNode(), outputLimitSpec.getThenExpressions(), statementContext, outputLimitSpec.getAndAfterTerminateExpr(), outputLimitSpec.getAndAfterTerminateThenExpressions());
         }
         else if(outputLimitSpec.getRateType() == OutputLimitRateType.EVENTS)
 		{
@@ -92,7 +95,12 @@ public class OutputConditionFactoryFactory
 		}
 		else if (outputLimitSpec.getRateType() == OutputLimitRateType.TERM)
 		{
-            return new OutputConditionTermFactory();
+            if (outputLimitSpec.getAndAfterTerminateExpr() == null && (outputLimitSpec.getAndAfterTerminateThenExpressions() == null || outputLimitSpec.getAndAfterTerminateThenExpressions().isEmpty())) {
+                return new OutputConditionTermFactory();
+            }
+            else {
+                return new OutputConditionExpressionFactory(new ExprConstantNodeImpl(false), Collections.<OnTriggerSetAssignment>emptyList(), statementContext, outputLimitSpec.getAndAfterTerminateExpr(), outputLimitSpec.getAndAfterTerminateThenExpressions());
+            }
 		}
         else {
             if (log.isDebugEnabled())

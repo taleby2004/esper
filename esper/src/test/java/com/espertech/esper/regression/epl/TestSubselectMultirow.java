@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestSubselectMultirow extends TestCase
@@ -65,7 +65,7 @@ public class TestSubselectMultirow extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("T3", 15));
         epService.getEPRuntime().sendEvent(new SupportBean("T1", 6));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, new int[] {5,10,15,6}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, new int[]{5, 10, 15, 6}});
 
         // test named window and late start
         stmt.destroy();
@@ -75,11 +75,11 @@ public class TestSubselectMultirow extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, new int[] {10,15,6}});   // length window 3
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, new int[]{10, 15, 6}});   // length window 3
 
         epService.getEPRuntime().sendEvent(new SupportBean("T1", 5));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, new int[] {15,6,5}});   // length window 3
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, new int[]{15, 6, 5}});   // length window 3
     }
 
     public void testMultirowUnderlyingCorrelated()
@@ -110,7 +110,7 @@ public class TestSubselectMultirow extends TestCase
 
         EventBean received = listener.assertOneGetNewAndReset();
         assertEquals(SupportBean[].class, received.get("val").getClass());
-        ArrayAssertionUtil.assertEqualsAnyOrder((Object[]) received.get("val"), new Object[] {sb1});
+        EPAssertionUtil.assertEqualsAnyOrder((Object[]) received.get("val"), new Object[]{sb1});
 
         SupportBean sb2 = new SupportBean("T2", 20);
         epService.getEPRuntime().sendEvent(sb2);
@@ -119,6 +119,6 @@ public class TestSubselectMultirow extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3, "T2"));
 
         received = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertEqualsAnyOrder((Object[]) received.get("val"), new Object[] {sb2, sb3});
+        EPAssertionUtil.assertEqualsAnyOrder((Object[]) received.get("val"), new Object[]{sb2, sb3});
     }
 }

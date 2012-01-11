@@ -15,8 +15,8 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -50,7 +50,7 @@ public class TestOrderBySelfJoin extends TestCase
         sendEvent(1, 1, null);
         sendEvent(3, 2, 2);
         sendEvent(3, 2, 2);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{1,2},{2,2}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{1, 2}, {2, 2}});
     }
 
     private void sendEvent(Integer ecid, Integer priority, Integer parent)

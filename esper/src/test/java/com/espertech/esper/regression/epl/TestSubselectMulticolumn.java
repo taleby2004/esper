@@ -12,14 +12,14 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Map;
@@ -119,15 +119,15 @@ public class TestSubselectMulticolumn extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
         EventBean event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(event, fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(event, fields, new Object[]{null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 20});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 20});
     }
 
     public void testCorrelatedAggregation()
@@ -176,7 +176,7 @@ public class TestSubselectMulticolumn extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "T1"));
         EventBean row = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(row, fields, new Object[] {"T1", null, null});
+        EPAssertionUtil.assertProps(row, fields, new Object[]{"T1", null, null});
         assertNull(row.get("subrow.v3"));
         assertNull(row.get("subrow.v4"));
 
@@ -184,16 +184,16 @@ public class TestSubselectMulticolumn extends TestCase
         epService.getEPRuntime().sendEvent(sb1);
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "T1"));
         row = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(row, fields, new Object[] {"T1", 10, 11});
-        ArrayAssertionUtil.assertEqualsAnyOrder((int[]) row.get("subrow.v3"), new int[] {10});
-        ArrayAssertionUtil.assertEqualsAnyOrder((Object[]) row.get("subrow.v4"), new Object[] {sb1});
+        EPAssertionUtil.assertProps(row, fields, new Object[]{"T1", 10, 11});
+        EPAssertionUtil.assertEqualsAnyOrder((int[]) row.get("subrow.v3"), new int[]{10});
+        EPAssertionUtil.assertEqualsAnyOrder((Object[]) row.get("subrow.v4"), new Object[]{sb1});
 
         SupportBean sb2 = new SupportBean("T1", 20);
         epService.getEPRuntime().sendEvent(sb2);
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3, "T1"));
         row = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(row, fields, new Object[] {"T1", 30, 32});
-        ArrayAssertionUtil.assertEqualsAnyOrder((int[]) row.get("subrow.v3"), new int[] {10,20});
-        ArrayAssertionUtil.assertEqualsAnyOrder((Object[]) row.get("subrow.v4"), new Object[] {sb1,sb2});
+        EPAssertionUtil.assertProps(row, fields, new Object[]{"T1", 30, 32});
+        EPAssertionUtil.assertEqualsAnyOrder((int[]) row.get("subrow.v3"), new int[]{10, 20});
+        EPAssertionUtil.assertEqualsAnyOrder((Object[]) row.get("subrow.v4"), new Object[]{sb1, sb2});
     }
 }

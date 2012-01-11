@@ -11,13 +11,13 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,14 +66,14 @@ public class TestNamedWindowJoin extends TestCase
         stmt.addListener(listenerStmtOne);
 
         sendPortfolio("Portfolio", "productB");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), new String[] {"portfolio", "ProductWin.product", "size"}, new Object[] {"Portfolio", "productB", 2});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), new String[]{"portfolio", "ProductWin.product", "size"}, new Object[]{"Portfolio", "productB", 2});
 
         sendPortfolio("Portfolio", "productC");
         listenerStmtOne.reset();
 
         sendProduct("productC", 3);
         sendPortfolio("Portfolio", "productC");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), new String[] {"portfolio", "ProductWin.product", "size"}, new Object[] {"Portfolio", "productC", 3});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), new String[]{"portfolio", "ProductWin.product", "size"}, new Object[]{"Portfolio", "productC", 3});
     }
 
     private void sendProduct(String product, int size) {
@@ -188,10 +188,10 @@ public class TestNamedWindowJoin extends TestCase
                     };
 
         // assert iterator results
-        EventBean[] received = ArrayAssertionUtil.iteratorToArray(stmtTwo.iterator());
-        ArrayAssertionUtil.assertPropsPerRow(received, "loc,sku,avgTime,cntEnter,cntLeave,diff".split(","),expected);
-        received = ArrayAssertionUtil.iteratorToArray(stmtOne.iterator());
-        ArrayAssertionUtil.assertPropsPerRow(received, "loc,sku,avgTime,cntEnter,cntLeave,diff".split(","),expected);
+        EventBean[] received = EPAssertionUtil.iteratorToArray(stmtTwo.iterator());
+        EPAssertionUtil.assertPropsPerRow(received, "loc,sku,avgTime,cntEnter,cntLeave,diff".split(","), expected);
+        received = EPAssertionUtil.iteratorToArray(stmtOne.iterator());
+        EPAssertionUtil.assertPropsPerRow(received, "loc,sku,avgTime,cntEnter,cntLeave,diff".split(","), expected);
     }
 
     public void testFullOuterJoinNamedAggregationLateStart()
@@ -222,7 +222,7 @@ public class TestNamedWindowJoin extends TestCase
         bean.setBoolPrimitive(true);
         epService.getEPRuntime().sendEvent(bean);
 
-        EventBean[] received = ArrayAssertionUtil.iteratorToArray(stmtCreate.iterator());
+        EventBean[] received = EPAssertionUtil.iteratorToArray(stmtCreate.iterator());
         assertEquals(19, received.length);
 
         // create select stmt
@@ -237,9 +237,9 @@ public class TestNamedWindowJoin extends TestCase
         this.sendMarketBean("c3");
 
         // get iterator results
-        received = ArrayAssertionUtil.iteratorToArray(stmtSelect.iterator());
-        ArrayAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,cntBool,symbol".split(","),
-                new Object[][] {
+        received = EPAssertionUtil.iteratorToArray(stmtSelect.iterator());
+        EPAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,cntBool,symbol".split(","),
+                new Object[][]{
                         {null, null, 0L, "c3"},
                         {"c0", 0, 2L, "c0"},
                         {"c0", 1, 2L, "c0"},
@@ -250,7 +250,7 @@ public class TestNamedWindowJoin extends TestCase
                         {"c2", 0, 2L, null},
                         {"c2", 1, 2L, null},
                         {"c2", 2, 2L, null},
-                    });
+                });
         /*
         for (int i = 0; i < received.length; i++)
         {
@@ -288,7 +288,7 @@ public class TestNamedWindowJoin extends TestCase
                                              "MyWindow as s1 where s1.a = symbol";
         EPStatement stmtSelectOne = epService.getEPAdministrator().createEPL(stmtTextSelectOne);
         stmtSelectOne.addListener(listenerStmtOne);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtSelectOne.getEventType().getPropertyNames(), new String[] {"symbol", "a", "b"});
+        EPAssertionUtil.assertEqualsAnyOrder(stmtSelectOne.getEventType().getPropertyNames(), new String[]{"symbol", "a", "b"});
         assertEquals(String.class, stmtSelectOne.getEventType().getPropertyType("symbol"));
         assertEquals(String.class, stmtSelectOne.getEventType().getPropertyType("a"));
         assertEquals(int.class, stmtSelectOne.getEventType().getPropertyType("b"));
@@ -297,10 +297,10 @@ public class TestNamedWindowJoin extends TestCase
         assertFalse(listenerStmtOne.isInvoked());
 
         sendSupportBean("S1", 1);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S1", "S1", 1});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S1", "S1", 1});
 
         sendSupportBean_A("S1"); // deletes from window
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[] {"S1", "S1", 1});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[]{"S1", "S1", 1});
 
         sendMarketBean("S1");
         assertFalse(listenerStmtOne.isInvoked());
@@ -309,7 +309,7 @@ public class TestNamedWindowJoin extends TestCase
         assertFalse(listenerStmtOne.isInvoked());
 
         sendMarketBean("S2");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S2", "S2", 2});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S2", "S2", 2});
 
         sendSupportBean("S3", 3);
         sendSupportBean("S3", 4);
@@ -366,16 +366,16 @@ public class TestNamedWindowJoin extends TestCase
         assertFalse(listenerStmtOne.isInvoked());
 
         sendSupportBean(false, "S0", 2);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S0", 1, "S0", 2});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S0", 1, "S0", 2});
 
         sendSupportBean(false, "S1", 3);
         assertFalse(listenerStmtOne.isInvoked());
 
         sendSupportBean(true, "S1", 4);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S1", 4, "S1", 3});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S1", 4, "S1", 3});
 
         sendSupportBean(true, "S1", 5);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S1", 5, "S1", 3});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S1", 5, "S1", 3});
 
         sendSupportBean(false, "S1", 6);
         assertEquals(2, listenerStmtOne.getLastNewData().length);
@@ -383,17 +383,17 @@ public class TestNamedWindowJoin extends TestCase
 
         // delete and insert back in
         sendMarketBean("S0", 0);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[] {"S0", 1, "S0", 2});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[]{"S0", 1, "S0", 2});
 
         sendSupportBean(false, "S0", 7);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S0", 1, "S0", 7});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S0", 1, "S0", 7});
 
         // delete and insert back in
         sendMarketBean("S0", 1);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[] {"S0", 1, "S0", 7});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[]{"S0", 1, "S0", 7});
 
         sendSupportBean(true, "S0", 8);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S0", 8, "S0", 7});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S0", 8, "S0", 7});
     }
 
     public void testJoinBetweenSameNamed()
@@ -421,13 +421,13 @@ public class TestNamedWindowJoin extends TestCase
         stmtSelectOne.addListener(listenerStmtOne);
 
         sendSupportBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1, "E1", 1});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1, "E1", 1});
 
         sendSupportBean("E2", 2);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2, "E2", 2});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2, "E2", 2});
 
         sendMarketBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[] {"E1", 1, "E1", 1});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[]{"E1", 1, "E1", 1});
 
         sendMarketBean("E0", 0);
         assertFalse(listenerStmtOne.isInvoked());
@@ -472,16 +472,16 @@ public class TestNamedWindowJoin extends TestCase
         assertFalse(listenerStmtOne.isInvoked());
 
         sendSupportBean(false, "S0", 2);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S0", 1, "S0", 2});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S0", 1, "S0", 2});
 
         sendSupportBean(false, "S1", 3);
         assertFalse(listenerStmtOne.isInvoked());
 
         sendSupportBean(true, "S1", 4);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S1", 4, "S1", 3});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S1", 4, "S1", 3});
 
         sendSupportBean(true, "S1", 5);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S1", 5, "S1", 3});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S1", 5, "S1", 3});
 
         sendSupportBean(false, "S1", 6);
         assertEquals(2, listenerStmtOne.getLastNewData().length);
@@ -489,17 +489,17 @@ public class TestNamedWindowJoin extends TestCase
 
         // delete and insert back in
         sendMarketBean("S0", 0);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[] {"S0", 1, "S0", 2});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[]{"S0", 1, "S0", 2});
 
         sendSupportBean(false, "S0", 7);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S0", 1, "S0", 7});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S0", 1, "S0", 7});
 
         // delete and insert back in
         sendMarketBean("S0", 1);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[] {"S0", 1, "S0", 7});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetOldAndReset(), fields, new Object[]{"S0", 1, "S0", 7});
 
         sendSupportBean(true, "S0", 8);
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {"S0", 8, "S0", 7});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{"S0", 8, "S0", 7});
     }
 
     public void testUnidirectional()

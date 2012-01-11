@@ -207,6 +207,13 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         plugInAggregationFunctions.add(entry);
     }
 
+    public void addPlugInAggregationFunctionFactory(String functionName, String aggregationFactoryClassName) throws ConfigurationException {
+        ConfigurationPlugInAggregationFunction entry = new ConfigurationPlugInAggregationFunction();
+        entry.setName(functionName);
+        entry.setFactoryClassName(aggregationFactoryClassName);
+        plugInAggregationFunctions.add(entry);
+    }
+
     public void addPlugInSingleRowFunction(String functionName, String className, String methodName) throws ConfigurationException
     {
         addPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED);
@@ -214,11 +221,23 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 
     public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws ConfigurationException
     {
+        addPlugInSingleRowFunction(functionName, className, methodName, valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
+    }
+
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws ConfigurationException {
+        addPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, filterOptimizable);
+    }
+
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName,
+                                           ConfigurationPlugInSingleRowFunction.ValueCache valueCache,
+                                           ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws ConfigurationException
+    {
         ConfigurationPlugInSingleRowFunction entry = new ConfigurationPlugInSingleRowFunction();
         entry.setFunctionClassName(className);
         entry.setFunctionMethodName(methodName);
         entry.setName(functionName);
         entry.setValueCache(valueCache);
+        entry.setFilterOptimizable(filterOptimizable);
         plugInSingleRowFunctions.add(entry);
     }
 
@@ -606,17 +625,24 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 
     public void addVariable(String variableName, Class type, Object initializationValue)
     {
-        ConfigurationVariable configVar = new ConfigurationVariable();
-        configVar.setType(type.getName());
-        configVar.setInitializationValue(initializationValue);
-        variables.put(variableName, configVar);
+        addVariable(variableName, type.getName(), initializationValue, false);
+    }
+
+    public void addVariable(String variableName, Class type, Object initializationValue, boolean constant)
+    {
+        addVariable(variableName, type.getName(), initializationValue, constant);
     }
 
     public void addVariable(String variableName, String type, Object initializationValue) throws ConfigurationException
     {
+        addVariable(variableName, type, initializationValue, false);
+    }
+
+    public void addVariable(String variableName, String type, Object initializationValue, boolean constant) throws ConfigurationException {
         ConfigurationVariable configVar = new ConfigurationVariable();
         configVar.setType(type);
         configVar.setInitializationValue(initializationValue);
+        configVar.setConstant(constant);
         variables.put(variableName, configVar);
     }
 

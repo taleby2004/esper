@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.rowrecog;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestRowPatternRecognitionVariantStream extends TestCase {
@@ -51,10 +51,10 @@ public class TestRowPatternRecognitionVariantStream extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "S0"));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "S1"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{1, 2}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{1, 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{1, 2}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{1, 2}});
 
         String epl = "// Declare one sample type\n" +
                 "create schema ST0 as (col string)\n;" +

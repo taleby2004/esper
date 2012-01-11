@@ -15,12 +15,12 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanArrayCollMap;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Arrays;
@@ -77,7 +77,7 @@ public class TestAnyAllSomeExpr extends TestCase
             bean.setIntBoxed(testdata[i][1]);
             epService.getEPRuntime().sendEvent(bean);
             //System.out.println("line " + i);
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
         }
         
         // test OM
@@ -93,7 +93,7 @@ public class TestAnyAllSomeExpr extends TestCase
             bean.setIntBoxed(testdata[i][1]);
             epService.getEPRuntime().sendEvent(bean);
             //System.out.println("line " + i);
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
         }
     }
 
@@ -111,15 +111,15 @@ public class TestAnyAllSomeExpr extends TestCase
         arrayBean.setLongCol(Arrays.asList(1L, 1L));
         arrayBean.setLongBoxed(1L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
 
         arrayBean.setIntArr(new int[] {1, 1, 0});
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false});
 
         arrayBean.setLongBoxed(2L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
     }
 
     public void testEqualsAnyArray()
@@ -136,15 +136,15 @@ public class TestAnyAllSomeExpr extends TestCase
         arrayBean.setLongCol(Arrays.asList(1L, 1L));
         arrayBean.setLongBoxed(1L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, false});
 
         arrayBean.setIntArr(new int[] {1, 1, 0});
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true});
 
         arrayBean.setLongBoxed(2L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
     }
 
     public void testRelationalOpAllArray()
@@ -161,23 +161,23 @@ public class TestAnyAllSomeExpr extends TestCase
         arrayBean.setIntCol(Arrays.asList(1, 2));
         arrayBean.setLongBoxed(3L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true});
 
         arrayBean.setLongBoxed(2L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
 
         arrayBean = new SupportBeanArrayCollMap(new int[] {1, 3});
         arrayBean.setIntCol(Arrays.asList(1, 2));
         arrayBean.setLongBoxed(3L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
 
         arrayBean = new SupportBeanArrayCollMap(new int[] {1, 2});
         arrayBean.setIntCol(Arrays.asList(1, 3));
         arrayBean.setLongBoxed(3L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
 
         // test OM
         stmt.destroy();
@@ -190,7 +190,7 @@ public class TestAnyAllSomeExpr extends TestCase
         arrayBean.setIntCol(Arrays.asList(1, 2));
         arrayBean.setLongBoxed(3L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true});
     }
 
     public void testRelationalOpNullOrNoRows()
@@ -205,16 +205,16 @@ public class TestAnyAllSomeExpr extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E3", null, null, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
         sendEvent("E4", 1, null, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
 
         sendEvent("E5", null, 1d, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
         sendEvent("E6", 1, 1d, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, true});
         sendEvent("E7", 0, 1d, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false});
 
         // test fields
         stmt.destroy();
@@ -227,16 +227,16 @@ public class TestAnyAllSomeExpr extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E3", null, null, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
         sendEvent("E4", 1, null, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
 
         sendEvent("E5", null, 1d, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
         sendEvent("E6", 1, 1d, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, true});
         sendEvent("E7", 0, 1d, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false});
     }
 
     public void testRelationalOpAnyArray()
@@ -253,23 +253,23 @@ public class TestAnyAllSomeExpr extends TestCase
         arrayBean.setIntCol(Arrays.asList(1, 2));
         arrayBean.setLongBoxed(1L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
 
         arrayBean.setLongBoxed(2L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true, true});
 
         arrayBean = new SupportBeanArrayCollMap(new int[] {2, 2});
         arrayBean.setIntCol(Arrays.asList(2, 1));
         arrayBean.setLongBoxed(1L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, true});
 
         arrayBean = new SupportBeanArrayCollMap(new int[] {1, 1});
         arrayBean.setIntCol(Arrays.asList(1, 1));
         arrayBean.setLongBoxed(0L);
         epService.getEPRuntime().sendEvent(arrayBean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, false});
     }
 
     public void testEqualsAny()
@@ -305,7 +305,7 @@ public class TestAnyAllSomeExpr extends TestCase
             bean.setIntBoxed(testdata[i][1]);
             epService.getEPRuntime().sendEvent(bean);
             //System.out.println("line " + i);
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
         }
     }
 
@@ -334,7 +334,7 @@ public class TestAnyAllSomeExpr extends TestCase
         {
             epService.getEPRuntime().sendEvent(new SupportBean("E1", i));
             //System.out.println("line " + i);
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
         }
     }
 
@@ -363,7 +363,7 @@ public class TestAnyAllSomeExpr extends TestCase
         {
             epService.getEPRuntime().sendEvent(new SupportBean("E1", i));
             //System.out.println("line " + i);
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, result[i]);
         }
     }
 
@@ -382,16 +382,16 @@ public class TestAnyAllSomeExpr extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E3", null, null, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null, null});
         sendEvent("E4", 1, null, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null, null});
 
         sendEvent("E5", null, null, 1L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null, null});
         sendEvent("E6", 1, null, 1L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, true, false, null, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, true, false, null, true});
         sendEvent("E7", 0, null, 1L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, null,  null, true, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, null, null, true, null});
 
         // test non-array case
         stmt.destroy();
@@ -407,16 +407,16 @@ public class TestAnyAllSomeExpr extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E3", null, null, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null, null});
         sendEvent("E4", 1, null, null);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null, null});
 
         sendEvent("E5", null, null, 1L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null, null});
         sendEvent("E6", 1, null, 1L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, true, false, null, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, true, false, null, true});
         sendEvent("E7", 0, null, 1L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {false, null,  null, true, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false, null, null, true, null});
     }
 
     public void testInvalid()

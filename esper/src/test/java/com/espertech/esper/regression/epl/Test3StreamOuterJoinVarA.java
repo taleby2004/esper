@@ -12,15 +12,15 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.bean.SupportBean_S2;
 import com.espertech.esper.support.bean.SupportBean_S3;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.ArrayHandlingUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.type.OuterJoinType;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
@@ -76,25 +76,25 @@ public class Test3StreamOuterJoinVarA extends TestCase
         assertFalse(updateListener.isInvoked());
 
         sendMapEvent("type1", "b1", "a1");
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {"b1", "a1", null, null, null, null});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{"b1", "a1", null, null, null, null});
 
         sendMapEvent("type1", "a1", "a1");
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {"a1", "a1", null, null, null, null});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{"a1", "a1", null, null, null, null});
 
         sendMapEvent("type1", "b1", "b1");
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {"b1", "b1", null, null, null, null});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{"b1", "b1", null, null, null, null});
 
         sendMapEvent("type1", "a1", "b1");
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {"a1", "b1", "a1", "b1", null, null});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{"a1", "b1", "a1", "b1", null, null});
 
         sendMapEvent("type3", "c1", "b1");
         assertFalse(updateListener.isInvoked());
 
         sendMapEvent("type1", "d1", "b1");
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {"d1", "b1", null, null, null, null});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{"d1", "b1", null, null, null, null});
 
         sendMapEvent("type3", "d1", "bx");
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {"d1", "b1", null, null, "d1", "bx"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{"d1", "b1", null, null, "d1", "bx"});
 
         assertFalse(updateListener.isInvoked());
     }
@@ -124,19 +124,19 @@ public class Test3StreamOuterJoinVarA extends TestCase
         assertFalse(updateListener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "A_3", "B_3"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {1, "A_3", "B_3", null, null, null, null, null, null});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{1, "A_3", "B_3", null, null, null, null, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "A_1", "B_3"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {2, "A_1", "B_3", null, null, null, null, null, null});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{2, "A_1", "B_3", null, null, null, null, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3, "A_3", "B_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {3, "A_3", "B_1", null, null, null, null, null, null});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{3, "A_3", "B_1", null, null, null, null, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(4, "A_2", "B_2"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {4, "A_2", "B_2", 13, "A_2", "B_2", 23, "A_2", "B_2"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{4, "A_2", "B_2", 13, "A_2", "B_2", 23, "A_2", "B_2"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(5, "A_2", "B_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {5, "A_2", "B_1", 11, "A_2", "B_1", 21, "A_2", "B_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{5, "A_2", "B_1", 11, "A_2", "B_1", 21, "A_2", "B_1"});
     }
 
     public void testLeftOuterJoin_root_s0_OM() throws Exception
@@ -250,17 +250,17 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[0], s2Events[1] },
             { s0Events[0], s1Events[1], s2Events[1] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s0 outer join to s1 and s2, no results for each s1 and s2
         //
         s0Events = SupportBean_S0.makeS0("B", new String[] {"B-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], null, null}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], null, null}}, getAndResetNewEvents());
 
         s0Events = SupportBean_S0.makeS0("B", new String[] {"B-s0-2"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], null, null}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], null, null}}, getAndResetNewEvents());
 
         // Test s0 outer join to s1 and s2, one row for s1 and no results for s2
         //
@@ -270,7 +270,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
 
         s0Events = SupportBean_S0.makeS0("C", new String[] {"C-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], s1Events[0], null}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], s1Events[0], null}}, getAndResetNewEvents());
 
         // Test s0 outer join to s1 and s2, two rows for s1 and no results for s2
         //
@@ -280,9 +280,9 @@ public class Test3StreamOuterJoinVarA extends TestCase
 
         s0Events = SupportBean_S0.makeS0("D", new String[] {"D-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], null},
-            { s0Events[0], s1Events[1], null}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], null},
+                {s0Events[0], s1Events[1], null}}, getAndResetNewEvents());
 
         // Test s0 outer join to s1 and s2, one row for s2 and no results for s1
         //
@@ -292,7 +292,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
 
         s0Events = SupportBean_S0.makeS0("E", new String[] {"E-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], null, s2Events[0]}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], null, s2Events[0]}}, getAndResetNewEvents());
 
         // Test s0 outer join to s1 and s2, two rows for s2 and no results for s1
         //
@@ -302,9 +302,9 @@ public class Test3StreamOuterJoinVarA extends TestCase
 
         s0Events = SupportBean_S0.makeS0("F", new String[] {"F-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], null, s2Events[0]},
-            { s0Events[0], null, s2Events[1]}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], null, s2Events[0]},
+                {s0Events[0], null, s2Events[1]}}, getAndResetNewEvents());
 
         // Test s0 outer join to s1 and s2, one row for s1 and two rows s2
         //
@@ -322,7 +322,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[0], s2Events[0] },
             { s0Events[0], s1Events[0], s2Events[1] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s0 outer join to s1 and s2, one row for s2 and two rows s1
         //
@@ -340,7 +340,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[0], s2Events[0] },
             { s0Events[0], s1Events[1], s2Events[0] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s0 outer join to s1 and s2, one row for each s1 and s2
         //
@@ -357,19 +357,19 @@ public class Test3StreamOuterJoinVarA extends TestCase
         expected = new Object[][] {
             { s0Events[0], s1Events[0], s2Events[0] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s1 inner join to s0 and outer to s2:  s0 with 1 rows, s2 with 2 rows
         //
         s0Events = SupportBean_S0.makeS0("Q", new String[] {"Q-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], null, null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], null, null}}, getAndResetNewEvents());
 
         s2Events = SupportBean_S2.makeS2("Q", new String[] {"Q-s2-1", "Q-s2-2"});
         sendEvent(s2Events[0]);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], null, s2Events[0]}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], null, s2Events[0]}}, getAndResetNewEvents());
         sendEvent(s2Events[1]);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], null, s2Events[1]}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], null, s2Events[1]}}, getAndResetNewEvents());
 
         s1Events = SupportBean_S1.makeS1("Q", new String[] {"Q-s1-1"});
         sendEvent(s1Events);
@@ -377,7 +377,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[0], s2Events[0] },
             { s0Events[0], s1Events[0], s2Events[1] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s1 inner join to s0 and outer to s2:  s0 with 0 rows, s2 with 2 rows
         //
@@ -392,24 +392,24 @@ public class Test3StreamOuterJoinVarA extends TestCase
         //
         s0Events = SupportBean_S0.makeS0("S", new String[] {"S-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], null, null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], null, null}}, getAndResetNewEvents());
 
         s1Events = SupportBean_S1.makeS1("S", new String[] {"S-s1-1"});
         sendEvent(s1Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], s1Events[0], null}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], s1Events[0], null}}, getAndResetNewEvents());
 
         // Test s1 inner join to s0 and outer to s2:  s0 with 1 rows, s2 with 1 rows
         //
         s0Events = SupportBean_S0.makeS0("T", new String[] {"T-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], null, null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], null, null}}, getAndResetNewEvents());
 
         s2Events = SupportBean_S2.makeS2("T", new String[] {"T-s2-1"});
         sendEventsAndReset(s2Events);
 
         s1Events = SupportBean_S1.makeS1("T", new String[] {"T-s1-1"});
         sendEvent(s1Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], s1Events[0], s2Events[0]}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], s1Events[0], s2Events[0]}}, getAndResetNewEvents());
 
         // Test s1 inner join to s0 and outer to s2:  s0 with 2 rows, s2 with 0 rows
         //
@@ -422,7 +422,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[0], null },
             { s0Events[1], s1Events[0], null },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s1 inner join to s0 and outer to s2:  s0 with 2 rows, s2 with 1 rows
         //
@@ -438,7 +438,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[0], s2Events[0] },
             { s0Events[1], s1Events[0], s2Events[0] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s1 inner join to s0 and outer to s2:  s0 with 2 rows, s2 with 2 rows
         //
@@ -456,7 +456,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[0], s2Events[1] },
             { s0Events[1], s1Events[0], s2Events[1] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s2 inner join to s0 and outer to s1:  s0 with 1 rows, s1 with 2 rows
         //
@@ -472,7 +472,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[0], s2Events[0] },
             { s0Events[0], s1Events[1], s2Events[0] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s2 inner join to s0 and outer to s1:  s0 with 0 rows, s1 with 2 rows
         //
@@ -490,7 +490,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
 
         s2Events = SupportBean_S2.makeS2("L", new String[] {"L-s2-1"});
         sendEvent(s2Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], null, s2Events[0]}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], null, s2Events[0]}}, getAndResetNewEvents());
 
         // Test s2 inner join to s0 and outer to s1:  s0 with 1 rows, s1 with 1 rows
         //
@@ -502,7 +502,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
 
         s2Events = SupportBean_S2.makeS2("M", new String[] {"M-s2-1"});
         sendEvent(s2Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {{ s0Events[0], s1Events[0], s2Events[0]}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{{s0Events[0], s1Events[0], s2Events[0]}}, getAndResetNewEvents());
 
         // Test s2 inner join to s0 and outer to s1:  s0 with 2 rows, s1 with 0 rows
         //
@@ -515,7 +515,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], null, s2Events[0]},
             { s0Events[1], null, s2Events[0]},
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s2 inner join to s0 and outer to s1:  s0 with 2 rows, s1 with 1 rows
         //
@@ -531,7 +531,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[0], s2Events[0] },
             { s0Events[1], s1Events[0], s2Events[0] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
 
         // Test s2 inner join to s0 and outer to s1:  s0 with 2 rows, s1 with 2 rows
         //
@@ -549,7 +549,7 @@ public class Test3StreamOuterJoinVarA extends TestCase
             { s0Events[0], s1Events[1], s2Events[0] },
             { s0Events[1], s1Events[1], s2Events[0] },
         };
-        ArrayAssertionUtil.assertRefAnyOrderArr(expected, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
     }
 
     public void testInvalidMulticolumn()

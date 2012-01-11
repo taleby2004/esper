@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.type.OuterJoinType;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
@@ -102,7 +102,7 @@ public class Test2StreamOuterJoin extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("K1", 30));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"K1", 30, "K1", 20, 30}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"K1", 30, "K1", 20, 30}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("K1", 40));
         epService.getEPRuntime().sendEvent(new SupportBean("K1", 31));
@@ -110,24 +110,24 @@ public class Test2StreamOuterJoin extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBeanRange("R2", "K1", 39, 41));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"K1", 40, "K1", 39, 41}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"K1", 40, "K1", 39, 41}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanRange("R2", "K1", 38, 40));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"K1", 40, "K1", 38, 40}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"K1", 40, "K1", 38, 40}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanRange("R2", "K1", 40, 42));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"K1", 40, "K1", 40, 42}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"K1", 40, "K1", 40, 42}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanRange("R2", "K1", 41, 42));
         epService.getEPRuntime().sendEvent(new SupportBeanRange("R2", "K1", 38, 39));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("K1", 41));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{
                 {"K1", 41, "K1", 39, 41}, {"K1", 41, "K1", 40, 42}, {"K1", 41, "K1", 41, 42}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanRange("R2", "K1", 35, 42));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]
                 {{"K1", 40, "K1", 35, 42}, {"K1", 41, "K1", 35, 42}});
 
         outerJoinView.destroy();
@@ -160,7 +160,7 @@ public class Test2StreamOuterJoin extends TestCase
         sendEvent("c2", 2);
 
         SafeIterator iterator = outerJoinView.safeIterator();
-        EventBean[] events = ArrayAssertionUtil.iteratorToArray(iterator);
+        EventBean[] events = EPAssertionUtil.iteratorToArray(iterator);
         assertEquals(10, events.length);
 
         /* For debugging, comment in
@@ -175,8 +175,8 @@ public class Test2StreamOuterJoin extends TestCase
         }
         */
 
-        ArrayAssertionUtil.assertPropsPerRow(events, "string,intPrimitive,symbol,volume".split(","),
-                new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(events, "string,intPrimitive,symbol,volume".split(","),
+                new Object[][]{
                         {null, null, "c3", 400L},
                         {"c0", 0, "c0", 200L},
                         {"c0", 1, "c0", 200L},
@@ -187,7 +187,7 @@ public class Test2StreamOuterJoin extends TestCase
                         {"c2", 0, null, null},
                         {"c2", 1, null, null},
                         {"c2", 2, null, null}
-                    });
+                });
     }
 
     public void testFullOuterJoin(EPStatement outerJoinView)
@@ -197,46 +197,46 @@ public class Test2StreamOuterJoin extends TestCase
         // Send S0[0]
         sendEvent(eventsS0[0]);
         compareEvent(listener.assertOneGetNewAndReset(), 100, "0", null, null);
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{100, "0", null, null}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{100, "0", null, null}});
 
         // Send S1[1]
         sendEvent(eventsS1[1]);
         compareEvent(listener.assertOneGetNewAndReset(), null, null, 201, "1");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{100, "0", null, null},
-                                {null, null, 201, "1"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{100, "0", null, null},
+                        {null, null, 201, "1"}});
 
         // Send S1[2] and S0[2]
         sendEvent(eventsS1[2]);
         compareEvent(listener.assertOneGetNewAndReset(), null, null, 202, "2");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{100, "0", null, null},
-                                {null, null, 201, "1"},
-                                {null, null, 202, "2"} });
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{100, "0", null, null},
+                        {null, null, 201, "1"},
+                        {null, null, 202, "2"}});
 
         sendEvent(eventsS0[2]);
         compareEvent(listener.assertOneGetNewAndReset(), 102, "2", 202, "2");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{100, "0", null, null},
-                                {null, null, 201, "1"},
-                                {102, "2", 202, "2"} });
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{100, "0", null, null},
+                        {null, null, 201, "1"},
+                        {102, "2", 202, "2"}});
 
         // Send S0[3] and S1[3]
         sendEvent(eventsS0[3]);
         compareEvent(listener.assertOneGetNewAndReset(), 103, "3", null, null);
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{100, "0", null, null},
-                                {null, null, 201, "1"},
-                                {102, "2", 202, "2"},
-                                {103, "3", null, null}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{100, "0", null, null},
+                        {null, null, 201, "1"},
+                        {102, "2", 202, "2"},
+                        {103, "3", null, null}});
         sendEvent(eventsS1[3]);
         compareEvent(listener.assertOneGetNewAndReset(), 103, "3", 203, "3");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{100, "0", null, null},
-                                {null, null, 201, "1"},
-                                {102, "2", 202, "2"},
-                                {103, "3", 203, "3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{100, "0", null, null},
+                        {null, null, 201, "1"},
+                        {102, "2", 202, "2"},
+                        {103, "3", 203, "3"}});
 
         // Send S0[4], pushes S0[0] out of window
         sendEvent(eventsS0[4]);
@@ -245,30 +245,30 @@ public class Test2StreamOuterJoin extends TestCase
         compareEvent(oldEvent, 100, "0", null, null);
         compareEvent(newEvent, 104, "4", null, null);
         listener.reset();
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{null, null, 201, "1"},
-                                {102, "2", 202, "2"},
-                                {103, "3", 203, "3"},
-                                {104, "4", null, null}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{null, null, 201, "1"},
+                        {102, "2", 202, "2"},
+                        {103, "3", 203, "3"},
+                        {104, "4", null, null}});
 
         // Send S1[4]
         sendEvent(eventsS1[4]);
         compareEvent(listener.assertOneGetNewAndReset(), 104, "4", 204, "4");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{null, null, 201, "1"},
-                                {102, "2", 202, "2"},
-                                {103, "3", 203, "3"},
-                                {104, "4", 204, "4"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{null, null, 201, "1"},
+                        {102, "2", 202, "2"},
+                        {103, "3", 203, "3"},
+                        {104, "4", 204, "4"}});
 
         // Send S1[5]
         sendEvent(eventsS1[5]);
         compareEvent(listener.assertOneGetNewAndReset(), null, null, 205, "5");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{null, null, 201, "1"},
-                                {102, "2", 202, "2"},
-                                {103, "3", 203, "3"},
-                                {104, "4", 204, "4"},
-                                {null, null, 205, "5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{null, null, 201, "1"},
+                        {102, "2", 202, "2"},
+                        {103, "3", 203, "3"},
+                        {104, "4", 204, "4"},
+                        {null, null, 205, "5"}});
 
         // Send S1[6], pushes S1[1] out of window
         sendEvent(eventsS1[5]);
@@ -276,12 +276,12 @@ public class Test2StreamOuterJoin extends TestCase
         newEvent = listener.getLastNewData()[0];
         compareEvent(oldEvent, null, null, 201, "1");
         compareEvent(newEvent, null, null, 205, "5");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", 202, "2"},
-                                {103, "3", 203, "3"},
-                                {104, "4", 204, "4"},
-                                {null, null, 205, "5"},
-                                {null, null, 205, "5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", 202, "2"},
+                        {103, "3", 203, "3"},
+                        {104, "4", 204, "4"},
+                        {null, null, 205, "5"},
+                        {null, null, 205, "5"}});
     }
 
     public void testMultiColumnLeft_OM() throws Exception
@@ -324,10 +324,10 @@ public class Test2StreamOuterJoin extends TestCase
     {
         String fields[] = "s0.id, s0.p00, s0.p01, s1.id, s1.p10, s1.p11".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "A_1", "B_1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, "A_1", "B_1", null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, "A_1", "B_1", null, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "A_1", "B_1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, "A_1", "B_1", 2, "A_1", "B_1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, "A_1", "B_1", 2, "A_1", "B_1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(3, "A_2", "B_1"));
         assertFalse(listener.isInvoked());
@@ -352,13 +352,13 @@ public class Test2StreamOuterJoin extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "A_1", "B_1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, "A_1", "B_1", 2, "A_1", "B_1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, "A_1", "B_1", 2, "A_1", "B_1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(3, "A_2", "B_1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, 3, "A_2", "B_1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, 3, "A_2", "B_1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(4, "A_1", "B_2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null, null, 4, "A_1", "B_2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, 4, "A_1", "B_2"});
     }
 
     public void testMultiColumnRightCoercion()
@@ -374,7 +374,7 @@ public class Test2StreamOuterJoin extends TestCase
         outerJoinView.addListener(listener);
 
         sendEvent("S1_1", 10, 20d);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, "S1_1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, "S1_1"});
 
         sendEvent("S0_2", 11, 22d);
         assertFalse(listener.isInvoked());
@@ -386,13 +386,13 @@ public class Test2StreamOuterJoin extends TestCase
         assertFalse(listener.isInvoked());
 
         sendEvent("S1_2", 11, 22d);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, "S1_2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, "S1_2"});
 
         sendEvent("S1_3", 22, 11d);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"S0_2", "S1_3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_2", "S1_3"});
 
         sendEvent("S0_5", 22, 11d);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"S0_5", "S1_2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_5", "S1_2"});
     }
 
     public void testRightOuterJoin()
@@ -403,52 +403,52 @@ public class Test2StreamOuterJoin extends TestCase
         sendEvent(eventsS0[0]);
         sendEvent(eventsS0[1]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields, null);
 
         // Send S1[2]
         sendEvent(eventsS1[2]);
         EventBean event = listener.assertOneGetNewAndReset();
         compareEvent(event, null, null, 202, "2");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{null, null, 202, "2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{null, null, 202, "2"}});
 
         // Send S0[2] events, joined event expected
         sendEvent(eventsS0[2]);
         event = listener.assertOneGetNewAndReset();
         compareEvent(event, 102, "2", 202, "2");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", 202, "2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", 202, "2"}});
 
         // Send S1[3]
         sendEvent(eventsS1[3]);
         event = listener.assertOneGetNewAndReset();
         compareEvent(event, null, null, 203, "3");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", 202, "2"},
-                                {null, null, 203, "3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", 202, "2"},
+                        {null, null, 203, "3"}});
 
         // Send some more S0 events
         sendEvent(eventsS0[3]);
         event = listener.assertOneGetNewAndReset();
         compareEvent(event, 103, "3", 203, "3");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", 202, "2"},
-                                {103, "3", 203, "3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", 202, "2"},
+                        {103, "3", 203, "3"}});
 
         // Send some more S0 events
         sendEvent(eventsS0[4]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", 202, "2"},
-                                {103, "3", 203, "3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", 202, "2"},
+                        {103, "3", 203, "3"}});
 
         // Push S0[2] out of the window
         sendEvent(eventsS0[5]);
         event = listener.assertOneGetOldAndReset();
         compareEvent(event, 102, "2", 202, "2");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{null, null, 202, "2"},
-                                {103, "3", 203, "3"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{null, null, 202, "2"},
+                        {103, "3", 203, "3"}});
 
         // Some more S1 events
         sendEvent(eventsS1[6]);
@@ -457,12 +457,12 @@ public class Test2StreamOuterJoin extends TestCase
         compareEvent(listener.assertOneGetNewAndReset(), null, null, 207, "7");
         sendEvent(eventsS1[8]);
         compareEvent(listener.assertOneGetNewAndReset(), null, null, 208, "8");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{null, null, 202, "2"},
-                                {103, "3", 203, "3"},
-                                {null, null, 206, "6"},
-                                {null, null, 207, "7"},
-                                {null, null, 208, "8"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{null, null, 202, "2"},
+                        {103, "3", 203, "3"},
+                        {null, null, 206, "6"},
+                        {null, null, 207, "7"},
+                        {null, null, 208, "8"}});
 
         // Push S1[2] out of the window
         sendEvent(eventsS1[9]);
@@ -470,12 +470,12 @@ public class Test2StreamOuterJoin extends TestCase
         EventBean newEvent = listener.getLastNewData()[0];
         compareEvent(oldEvent, null, null, 202, "2");
         compareEvent(newEvent, null, null, 209, "9");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{103, "3", 203, "3"},
-                                {null, null, 206, "6"},
-                                {null, null, 207, "7"},
-                                {null, null, 208, "8"},
-                                {null, null, 209, "9"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{103, "3", 203, "3"},
+                        {null, null, 206, "6"},
+                        {null, null, 207, "7"},
+                        {null, null, 208, "8"},
+                        {null, null, 209, "9"}});
     }
 
     public void testLeftOuterJoin()
@@ -487,55 +487,55 @@ public class Test2StreamOuterJoin extends TestCase
         sendEvent(eventsS1[1]);
         sendEvent(eventsS1[3]);
         assertNull(listener.getLastNewData());    // No events expected
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields, null);
 
         // Send S0 event, expect event back from outer join
         sendEvent(eventsS0[2]);
         EventBean event = listener.assertOneGetNewAndReset();
         compareEvent(event, 102, "2", null, null);
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", null, null}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", null, null}});
 
         // Send S1 event matching S0, expect event back
         sendEvent(eventsS1[2]);
         event = listener.assertOneGetNewAndReset();
         compareEvent(event, 102, "2", 202, "2");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", 202, "2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", 202, "2"}});
 
         // Send some more unmatched events
         sendEvent(eventsS1[4]);
         sendEvent(eventsS1[5]);
         sendEvent(eventsS1[6]);
         assertNull(listener.getLastNewData());    // No events expected
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", 202, "2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", 202, "2"}});
 
         // Send event, expect a join result
         sendEvent(eventsS0[5]);
         event = listener.assertOneGetNewAndReset();
         compareEvent(event, 105, "5", 205, "5");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", 202, "2"},
-                                {105, "5", 205, "5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", 202, "2"},
+                        {105, "5", 205, "5"}});
 
         // Let S1[2] go out of the window (lenght 5), expected old join event
         sendEvent(eventsS1[7]);
         sendEvent(eventsS1[8]);
         event = listener.assertOneGetOldAndReset();
         compareEvent(event, 102, "2", 202, "2");
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", null, null},
-                                {105, "5", 205, "5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", null, null},
+                        {105, "5", 205, "5"}});
 
         // S0[9] should generate an outer join event
         sendEvent(eventsS0[9]);
         event = listener.assertOneGetNewAndReset();
         compareEvent(event, 109, "9", null, null);
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{102, "2", null, null},
-                                {109, "9", null, null},
-                                {105, "5", 205, "5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{102, "2", null, null},
+                        {109, "9", null, null},
+                        {105, "5", 205, "5"}});
 
         // S0[2] Should leave the window (length 3), should get OLD and NEW event
         sendEvent(eventsS0[10]);
@@ -543,10 +543,10 @@ public class Test2StreamOuterJoin extends TestCase
         EventBean newEvent = listener.getLastNewData()[0];
         compareEvent(oldEvent, 102, "2", null, null);     // S1[2] has left the window already
         compareEvent(newEvent, 110, "10", null, null);
-        ArrayAssertionUtil.assertEqualsAnyOrder(outerJoinView.iterator(), fields,
-                new Object[][] {{110, "10", null, null},
-                                {109, "9", null, null},
-                                {105, "5", 205, "5"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(outerJoinView.iterator(), fields,
+                new Object[][]{{110, "10", null, null},
+                        {109, "9", null, null},
+                        {105, "5", 205, "5"}});
     }
 
     public void testEventType()

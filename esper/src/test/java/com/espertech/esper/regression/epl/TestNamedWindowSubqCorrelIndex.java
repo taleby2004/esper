@@ -15,11 +15,11 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestNamedWindowSubqCorrelIndex extends TestCase
@@ -104,10 +104,10 @@ public class TestNamedWindowSubqCorrelIndex extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 30));
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {1, "E1", 10});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{1, "E1", 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "E2"));
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {2, "E2", 20});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{2, "E2", 20});
 
         // test late start
         consumeStmt.destroy();
@@ -115,10 +115,10 @@ public class TestNamedWindowSubqCorrelIndex extends TestCase
         consumeStmt.addListener(listenerStmtOne);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {1, "E1", 10});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{1, "E1", 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "E2"));
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[] {2, "E2", 20});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fields, new Object[]{2, "E2", 20});
 
         if (stmtIndex != null) {
             stmtIndex.destroy();

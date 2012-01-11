@@ -15,6 +15,8 @@ import com.espertech.esper.client.EPOnDemandQueryResult;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.soda.SelectClause;
 import com.espertech.esper.client.soda.FromClause;
@@ -24,8 +26,6 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_N;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.SupportSubscriber;
 import junit.framework.TestCase;
 
@@ -99,13 +99,13 @@ public class TestDistinct extends TestCase
         
         String query = "select distinct string, intPrimitive from MyWindow order by string, intPrimitive";
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(result.getArray(), fields, new Object[][]{{"E1", 1}, {"E1", 2}, {"E2", 2}});
 
         EPStatement stmt = epService.getEPAdministrator().createEPL("on SupportBean_A select distinct string, intPrimitive from MyWindow order by string, intPrimitive asc");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("x"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1", 1}, {"E1", 2}, {"E2", 2}});
     }
 
     public void testSubquery()
@@ -116,11 +116,11 @@ public class TestDistinct extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 3});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 3});
     }
 
     // Since the "this" property will always be unique, this test verifies that condition
@@ -132,13 +132,13 @@ public class TestDistinct extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E1", 1}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E1", 1}});
     }
 
     public void testBeanEventWildcardSODA()
@@ -149,13 +149,13 @@ public class TestDistinct extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1"}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E2"}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E2"}});
         
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(statementText);
         assertEquals(statementText, model.toEPL());
@@ -174,13 +174,13 @@ public class TestDistinct extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_N(1, 8));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, 3, 8}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, 3, 8}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_N(1, 3));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, 3, 8}, {1, 3, 3}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, 3, 8}, {1, 3, 3}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_N(1, 8));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1, 3, 8}, {1, 3, 3}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1, 3, 8}, {1, 3, 3}});
     }
 
     public void testMapEventWildcard()
@@ -196,13 +196,13 @@ public class TestDistinct extends TestCase
         stmt.addListener(listener);
 
         sendMapEvent("E1", 1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}});
 
         sendMapEvent("E2", 2);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         sendMapEvent("E1", 1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
     }
 
     public void testOutputSimpleColumn()
@@ -274,21 +274,21 @@ public class TestDistinct extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}});
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E2", 2}, {"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E2", 2}, {"E1", 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E2", 3}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E2", 3}});
 
         stmt.destroy();
 
@@ -303,7 +303,7 @@ public class TestDistinct extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fieldsTwo, new Object[][] {{"E1", 1}, {"E2", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fieldsTwo, new Object[][]{{"E1", 1}, {"E2", 1}});
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
         assertFalse(listener.isInvoked());
@@ -324,17 +324,17 @@ public class TestDistinct extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E2", 2}, {"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E2", 2}, {"E1", 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E2", 3}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E2", 3}});
     }
 
     public void testBatchWindowInsertInto()
@@ -350,93 +350,93 @@ public class TestDistinct extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertProps(listener.getNewDataListFlattened()[0], fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertProps(listener.getNewDataListFlattened()[1], fields, new Object[] {"E3", 3});
+        EPAssertionUtil.assertProps(listener.getNewDataListFlattened()[0], fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertProps(listener.getNewDataListFlattened()[1], fields, new Object[]{"E3", 3});
     }
 
     private void runAssertionOutputEvery(EPStatement stmt, String[] fields)
     {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}});
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E2", 2}, {"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E2", 2}, {"E1", 1}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E2", 3}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E2", 3}});
         listener.reset();
     }
 
     private void runAssertionSimpleColumn(EPStatement stmt, String[] fields)
     {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 1}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 1});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 1}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 1}, {"E1", 2}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 2});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 1}, {"E1", 2}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 1}, {"E1", 2}, {"E2", 2}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 1}, {"E1", 2}, {"E2", 2}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 1}, {"E1", 2}, {"E2", 2}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 1}, {"E1", 2}, {"E2", 2}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 1}, {"E1", 2}, {"E2", 2}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 1}, {"E1", 2}, {"E2", 2}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
     }
 
     private void runAssertionSnapshotColumn(EPStatement stmt, String[] fields)
     {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}});
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
         listener.reset();
     }
 

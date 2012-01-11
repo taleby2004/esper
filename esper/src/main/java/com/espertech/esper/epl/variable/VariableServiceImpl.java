@@ -211,7 +211,7 @@ public class VariableServiceImpl implements VariableService
         }
     }
 
-    public void createNewVariable(String variableName, String variableType, Object value, StatementExtensionSvcContext extensionServicesContext) throws VariableExistsException, VariableTypeException
+    public void createNewVariable(String variableName, String variableType, Object value, boolean constant, StatementExtensionSvcContext extensionServicesContext) throws VariableExistsException, VariableTypeException
     {
         // Determime the variable type
         Class type = JavaClassHelper.getClassForSimpleName(variableType);
@@ -236,10 +236,10 @@ public class VariableServiceImpl implements VariableService
             eventType = eventAdapterService.addBeanType(type.getName(), type, false, false, false);
         }
 
-        createNewVariable(variableName, type, eventType, value, extensionServicesContext);
+        createNewVariable(variableName, type, eventType, value, constant, extensionServicesContext);
     }
 
-    private synchronized void createNewVariable(String variableName, Class type, EventType eventType, Object value, StatementExtensionSvcContext extensionServicesContext)
+    private synchronized void createNewVariable(String variableName, Class type, EventType eventType, Object value, boolean constant, StatementExtensionSvcContext extensionServicesContext)
             throws VariableExistsException, VariableTypeException
     {
         // check coercion
@@ -348,7 +348,7 @@ public class VariableServiceImpl implements VariableService
         }
 
         // create reader
-        reader = new VariableReader(versionThreadLocal, variableType, eventType, variableName, variableNumber, valuePerVersion);
+        reader = new VariableReader(versionThreadLocal, variableType, eventType, variableName, variableNumber, valuePerVersion, constant);
         variables.put(variableName, reader);
     }
 

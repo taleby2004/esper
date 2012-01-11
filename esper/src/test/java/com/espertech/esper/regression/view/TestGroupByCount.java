@@ -15,9 +15,9 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -87,22 +87,22 @@ public class TestGroupByCount extends TestCase
         stmt.addListener(testListener);
 
         sendEvent(SYMBOL_DELL, 50L);
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "symbol,cnt,val".split(","), new Object[] {"DELL", 1L, 1d});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "symbol,cnt,val".split(","), new Object[]{"DELL", 1L, 1d});
 
         sendEvent(SYMBOL_DELL, 51L);
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "symbol,cnt,val".split(","), new Object[] {"DELL", 2L, 1.5d});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "symbol,cnt,val".split(","), new Object[]{"DELL", 2L, 1.5d});
 
         sendEvent(SYMBOL_DELL, 52L);
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "symbol,cnt,val".split(","), new Object[] {"DELL", 3L, 2d});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "symbol,cnt,val".split(","), new Object[]{"DELL", 3L, 2d});
 
         sendEvent("IBM", 52L);
         EventBean[] events = testListener.getLastNewData();
-        ArrayAssertionUtil.assertProps(events[0], "symbol,cnt,val".split(","), new Object[] {"DELL", 2L, 2d});
-        ArrayAssertionUtil.assertProps(events[1], "symbol,cnt,val".split(","), new Object[] {"IBM", 1L, 1d});
+        EPAssertionUtil.assertProps(events[0], "symbol,cnt,val".split(","), new Object[]{"DELL", 2L, 2d});
+        EPAssertionUtil.assertProps(events[1], "symbol,cnt,val".split(","), new Object[]{"IBM", 1L, 1d});
         testListener.reset();
 
         sendEvent(SYMBOL_DELL, 53L);
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "symbol,cnt,val".split(","), new Object[] {"DELL", 2L, 2.5d});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "symbol,cnt,val".split(","), new Object[]{"DELL", 2L, 2.5d});
     }
 
     public void testCountOneViewCompile() throws Exception

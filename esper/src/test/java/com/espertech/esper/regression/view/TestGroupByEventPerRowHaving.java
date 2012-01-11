@@ -14,8 +14,8 @@ package com.espertech.esper.regression.view;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -90,13 +90,13 @@ public class TestGroupByEventPerRowHaving extends TestCase
         assertFalse(testListener.isInvoked());
 
         sendEvent(SYMBOL_DELL, 20000, 54);
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[] {SYMBOL_DELL, 20000L, 103d});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[]{SYMBOL_DELL, 20000L, 103d});
 
         sendEvent(SYMBOL_IBM, 1000, 10);
         assertFalse(testListener.isInvoked());
 
         sendEvent(SYMBOL_IBM, 5000, 20);
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetOldAndReset(), fields, new Object[] {SYMBOL_DELL, 10000L, 54d});
+        EPAssertionUtil.assertProps(testListener.assertOneGetOldAndReset(), fields, new Object[]{SYMBOL_DELL, 10000L, 54d});
 
         sendEvent(SYMBOL_IBM, 6000, 5);
         assertFalse(testListener.isInvoked());

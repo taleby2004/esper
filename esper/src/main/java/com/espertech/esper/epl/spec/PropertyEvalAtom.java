@@ -21,7 +21,8 @@ import java.io.Serializable;
  */
 public class PropertyEvalAtom implements MetaDefItem, Serializable
 {
-    private final String propertyName;
+    private final ExprNode splitterExpression;
+    private final String optionalResultEventType;
     private final String optionalAsName;
     private final SelectClauseSpecRaw optionalSelectClause;
     private final ExprNode optionalWhereClause;
@@ -29,17 +30,17 @@ public class PropertyEvalAtom implements MetaDefItem, Serializable
 
     /**
      * Ctor.
-     * @param propertyName property name
      * @param optionalAsName column name assigned, if any
      * @param optionalSelectClause select clause, if any
      * @param optionalWhereClause where clause, if any
      */
-    public PropertyEvalAtom(String propertyName, String optionalAsName, SelectClauseSpecRaw optionalSelectClause, ExprNode optionalWhereClause)
+    public PropertyEvalAtom(ExprNode splitterExpression, String optionalResultEventType, String optionalAsName, SelectClauseSpecRaw optionalSelectClause, ExprNode optionalWhereClause)
     {
+        this.splitterExpression = splitterExpression;
+        this.optionalResultEventType = optionalResultEventType;
         this.optionalAsName = optionalAsName;
         this.optionalSelectClause = optionalSelectClause;
         this.optionalWhereClause = optionalWhereClause;
-        this.propertyName = propertyName;
     }
 
     /**
@@ -69,12 +70,11 @@ public class PropertyEvalAtom implements MetaDefItem, Serializable
         return optionalWhereClause;
     }
 
-    /**
-     * Returns the property name.
-     * @return property name
-     */
-    public String getPropertyName()
-    {
-        return propertyName;
+    public ExprNode getSplitterExpression() {
+        return splitterExpression;
+    }
+
+    public String getOptionalResultEventType() {
+        return optionalResultEventType;
     }
 }

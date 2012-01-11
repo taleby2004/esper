@@ -481,7 +481,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
         if (existingType != null)
         {
             // The existing type must be the same as the type createdStatement
-            if (!newEventType.equals(existingType))
+            if (!newEventType.equalsCompareType(existingType))
             {
                 String message = newEventType.getEqualsMessage(existingType);
                 throw new EventAdapterException("Event type named '" + eventTypeName +
@@ -653,7 +653,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 	    if (existingType != null)
 	    {
 	        // The existing type must be the same as the type created
-	        if (!newEventType.equals(existingType))
+	        if (!newEventType.equalsCompareType(existingType))
 	        {
                 // It is possible that the wrapped event type is compatible: a child type of the desired type
                 String message = isCompatibleWrapper(existingType, underlyingEventType, propertyTypes);

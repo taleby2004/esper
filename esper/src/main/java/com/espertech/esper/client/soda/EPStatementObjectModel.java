@@ -44,6 +44,7 @@ public class EPStatementObjectModel implements Serializable
 
     private List<AnnotationPart> annotations;
     private List<ExpressionDeclaration> expressionDeclarations;
+    private List<ScriptExpression> scriptExpressions;
     private String contextName;
     private UpdateClause updateClause;
     private CreateVariableClause createVariable;
@@ -325,6 +326,7 @@ public class EPStatementObjectModel implements Serializable
 
         AnnotationPart.toEPL(writer, annotations, formatter);
         ExpressionDeclaration.toEPL(writer, expressionDeclarations, formatter);
+        ScriptExpression.toEPL(writer, scriptExpressions, formatter);
 
         if (contextName != null) {
             formatter.beginContext(writer);
@@ -730,5 +732,13 @@ public class EPStatementObjectModel implements Serializable
      */
     public void setContextName(String contextName) {
         this.contextName = contextName;
+    }
+
+    public List<ScriptExpression> getScriptExpressions() {
+        return scriptExpressions;
+    }
+
+    public void setScriptExpressions(List<ScriptExpression> scriptExpressions) {
+        this.scriptExpressions = scriptExpressions;
     }
 }

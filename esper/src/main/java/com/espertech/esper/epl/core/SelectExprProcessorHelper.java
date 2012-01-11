@@ -25,6 +25,7 @@ import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
+import com.espertech.esper.event.vaevent.VariantEventType;
 import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
@@ -146,7 +147,7 @@ public class SelectExprProcessorHelper
         SelectExprJoinWildcardProcessor joinWildcardProcessor = null;
         if(typeService.getStreamNames().length > 1 && isUsingWildcard)
         {
-        	joinWildcardProcessor = new SelectExprJoinWildcardProcessor(assignedTypeNumberStack, statementId, typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService, null, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext);
+        	joinWildcardProcessor = new SelectExprJoinWildcardProcessor(assignedTypeNumberStack, statementId, typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService, null, selectExprEventTypeRegistry, methodResolutionService);
         }
 
         // Resolve underlying event type in the case of wildcard select
@@ -298,6 +299,35 @@ public class SelectExprProcessorHelper
                 // A match was found, we replace the expression
                 final EventPropertyGetter getter = eventTypeStream.getGetter(propertyName);
                 final Class returnType = eventTypeStream.getPropertyType(propertyName);
+                evaluatorFragment = new ExprEvaluator() {
+                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+                    {
+                        EventBean streamEvent = eventsPerStream[streamNum];
+                        if (streamEvent == null)
+                        {
+                            return null;
+                        }
+                        return getter.get(streamEvent);
+                    }
+                    public Class getType()
+                    {
+                        return returnType;
+                    }
+                    @Override
+                    public Map<String, Object> getEventType() {
+                        return null;
+                    }
+                };
+                exprEvaluators[i] = evaluatorFragment;
+            }
+            // same for arrays: may need to unwrap the fragment if the target type has this underlying type
+            else if ((targetType != null) && expressionReturnTypes[i] instanceof Class &&
+                (fragmentType.getFragmentType().getUnderlyingType() == ((Class) expressionReturnTypes[i]).getComponentType()) &&
+                ((targetFragment == null) || (targetFragment != null && targetFragment.isNative())) )
+            {
+                ExprEvaluator evaluatorFragment;
+                final EventPropertyGetter getter = eventTypeStream.getGetter(propertyName);
+                final Class returnType = JavaClassHelper.getArrayType(eventTypeStream.getPropertyType(propertyName));
                 evaluatorFragment = new ExprEvaluator() {
                     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
                     {
@@ -581,7 +611,13 @@ public class SelectExprProcessorHelper
                 else    // there are onle or more streams selected with column name such as "stream.* as columnOne"
                 {
                     resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeName(), selPropertyTypes, null, false, false, false, false, true);
-                    return new EvalSelectStreamNoUnderlying(selectExprContext, resultEventType, namedStreams, isUsingWildcard);
+                    Set<String> propertiesToUnwrap = getEventBeanToObjectProps(selPropertyTypes, resultEventType);
+                    if (propertiesToUnwrap.isEmpty()) {
+                        return new EvalSelectStreamNoUnderlying(selectExprContext, resultEventType, namedStreams, isUsingWildcard);
+                    }
+                    else {
+                        return new EvalSelectStreamNoUndWEventBeanToObj(selectExprContext, resultEventType, namedStreams, isUsingWildcard, propertiesToUnwrap);
+                    }
                 }
             }
 
@@ -622,7 +658,7 @@ public class SelectExprProcessorHelper
                     {
                         selectExprInsertEventBean.initialize(isUsingWildcard, typeService, exprEvaluators, columnNames, expressionReturnTypes, methodResolutionService, eventAdapterService);
                         resultEventType = existingType;
-                        return new EvalInsertNative(resultEventType, selectExprInsertEventBean, exprEvaluatorContext);
+                        return new EvalInsertNative(resultEventType, selectExprInsertEventBean);
                     }
                     else if (existingType != null && selPropertyTypes.isEmpty() && existingType instanceof MapEventType) {
                         resultEventType = existingType;
@@ -739,7 +775,7 @@ public class SelectExprProcessorHelper
                     {
                         selectExprInsertEventBean.initialize(isUsingWildcard, typeService, exprEvaluators, columnNames, expressionReturnTypes, methodResolutionService, eventAdapterService);
                         resultEventType = existingType;
-                        return new EvalInsertNative(resultEventType, selectExprInsertEventBean, exprEvaluatorContext);
+                        return new EvalInsertNative(resultEventType, selectExprInsertEventBean);
                     }
                     else
                     {
@@ -764,7 +800,15 @@ public class SelectExprProcessorHelper
                         return new EvalInsertNoWildcardSingleColCoercionBean(selectExprContext, resultEventType);
                     }
                     else {
-                        return new EvalInsertNoWildcardSingleColCoercionBeanWrap(selectExprContext, resultEventType);
+                        WrapperEventType wrapperEventType = (WrapperEventType) resultEventType;
+                        if (wrapperEventType.getUnderlyingEventType() instanceof VariantEventType) {
+                            VariantEventType variantEventType = (VariantEventType) wrapperEventType.getUnderlyingEventType();
+                            vaeProcessor = valueAddEventService.getValueAddProcessor(variantEventType.getName());
+                            return new EvalInsertNoWildcardSingleColCoercionBeanWrapVariant(selectExprContext, resultEventType, vaeProcessor);
+                        }
+                        else {
+                            return new EvalInsertNoWildcardSingleColCoercionBeanWrap(selectExprContext, resultEventType);
+                        }
                     }
                 }
                 else {
@@ -789,8 +833,30 @@ public class SelectExprProcessorHelper
         catch (EventAdapterException ex)
         {
             log.debug("Exception provided by event adapter: " + ex.getMessage(), ex);
-            throw new ExprValidationException(ex.getMessage());
+            throw new ExprValidationException(ex.getMessage(), ex);
         }
+    }
+
+    // Determine which properties provided by the Map must be downcast from EventBean to Object
+    private static Set<String> getEventBeanToObjectProps(Map<String, Object> selPropertyTypes, EventType resultEventType) {
+
+        if (!(resultEventType instanceof MapEventType)) {
+            return Collections.emptySet();
+        }
+        MapEventType mapEventType = (MapEventType) resultEventType;
+        Set<String> props = null;
+        for (Map.Entry<String, Object> entry : selPropertyTypes.entrySet()) {
+            if (entry.getValue() instanceof BeanEventType && mapEventType.getTypes().get(entry.getKey()) instanceof Class) {
+                if (props == null) {
+                    props = new HashSet<String>();
+                }
+                props.add(entry.getKey());
+            }
+        }
+        if (props == null) {
+            return Collections.emptySet();
+        }
+        return props;
     }
 
     private static void verifyInsertInto(InsertIntoDesc insertIntoDesc,

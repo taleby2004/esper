@@ -73,7 +73,18 @@ public class ASTOutputLimitHelper
         List<OnTriggerSetAssignment> thenExpressions = null;
         ExprTimePeriod timePeriodExpr = null;
 
+        ExprNode andAfterTerminateExpr = null;
+        List<OnTriggerSetAssignment> andAfterTerminateSetExpressions = null;
         if (node.getType() == EsperEPL2GrammarParser.TERM_LIMIT_EXPR) {
+            Tree terminated = ASTUtil.findFirstNode(node, EsperEPL2GrammarParser.TERMINATED);
+            if (terminated.getChildCount() != 0) {
+                andAfterTerminateExpr = astExprNodeMap.remove(terminated.getChild(0));
+                Tree setExprNode = ASTUtil.findFirstNode(terminated, EsperEPL2GrammarParser.ON_SET_EXPR);
+                if (setExprNode != null) {
+                    andAfterTerminateSetExpressions = ASTExprHelper.getOnTriggerSetAssignments(setExprNode, astExprNodeMap);
+                }
+            }
+
             // no action to walk any other expression
         }
         else if (node.getType() == EsperEPL2GrammarParser.WHEN_LIMIT_EXPR)
@@ -83,7 +94,7 @@ public class ASTOutputLimitHelper
             if (node.getChildCount() > count+1)
             {
                 Tree setExpr = ASTUtil.findFirstNode(node, EsperEPL2GrammarParser.ON_SET_EXPR);
-                thenExpressions = EPLTreeWalker.getOnTriggerSetAssignments(setExpr, astExprNodeMap);
+                thenExpressions = ASTExprHelper.getOnTriggerSetAssignments(setExpr, astExprNodeMap);
             }
         }
         else if (node.getType() == EsperEPL2GrammarParser.CRONTAB_LIMIT_EXPR)
@@ -94,7 +105,7 @@ public class ASTOutputLimitHelper
                 parent = node.getChild(1);
             }
 
-            crontabScheduleSpec = ASTUtil.getRemoveAllChildExpr(parent, astExprNodeMap);
+            crontabScheduleSpec = ASTExprHelper.getRemoveAllChildExpr(parent, astExprNodeMap);
         }
         else if (node.getType() == EsperEPL2GrammarParser.AFTER_LIMIT_EXPR)
         {
@@ -152,22 +163,30 @@ public class ASTOutputLimitHelper
             }
         }
 
-        boolean andAfterTerminate = node.getChild(node.getChildCount() - 1).getType() == EsperEPL2GrammarParser.TERMINATED;
+        Tree lastNode = node.getChild(node.getChildCount() - 1);
+        boolean andAfterTerminate = (lastNode.getType() == EsperEPL2GrammarParser.TERMINATED) && andAfterTerminateExpr == null && node.getType() != EsperEPL2GrammarParser.TERM_LIMIT_EXPR;
+        if (andAfterTerminate && lastNode.getChildCount() > 0) {
+            andAfterTerminateExpr = astExprNodeMap.remove(lastNode.getChild(0));
+            Tree setExprNode = ASTUtil.findFirstNode(lastNode, EsperEPL2GrammarParser.ON_SET_EXPR);
+            if (setExprNode != null) {
+                andAfterTerminateSetExpressions = ASTExprHelper.getOnTriggerSetAssignments(setExprNode, astExprNodeMap);
+            }
+        }
 
         switch (node.getType())
         {
             case EsperEPL2GrammarParser.EVENT_LIMIT_EXPR:
-                return new OutputLimitSpec(rate, variableName, OutputLimitRateType.EVENTS, displayLimit, null, null, null, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate);
+                return new OutputLimitSpec(rate, variableName, OutputLimitRateType.EVENTS, displayLimit, null, null, null, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate, andAfterTerminateExpr, andAfterTerminateSetExpressions);
             case EsperEPL2GrammarParser.TIMEPERIOD_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.TIME_PERIOD, displayLimit, null, null, null, timePeriodExpr, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.TIME_PERIOD, displayLimit, null, null, null, timePeriodExpr, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate, andAfterTerminateExpr, andAfterTerminateSetExpressions);
             case EsperEPL2GrammarParser.CRONTAB_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.CRONTAB, displayLimit, null, null, crontabScheduleSpec, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.CRONTAB, displayLimit, null, null, crontabScheduleSpec, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate, andAfterTerminateExpr, andAfterTerminateSetExpressions);
             case EsperEPL2GrammarParser.WHEN_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.WHEN_EXPRESSION, displayLimit, whenExpression, thenExpressions, null, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.WHEN_EXPRESSION, displayLimit, whenExpression, thenExpressions, null, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate, andAfterTerminateExpr, andAfterTerminateSetExpressions);
             case EsperEPL2GrammarParser.AFTER_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.AFTER, displayLimit, null, null, null, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.AFTER, displayLimit, null, null, null, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate, andAfterTerminateExpr, andAfterTerminateSetExpressions);
             case EsperEPL2GrammarParser.TERM_LIMIT_EXPR:
-                return new OutputLimitSpec(null, null, OutputLimitRateType.TERM, displayLimit, null, null, null, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate);
+                return new OutputLimitSpec(null, null, OutputLimitRateType.TERM, displayLimit, null, null, null, null, afterTimePeriodExpr, afterNumberOfEvents, andAfterTerminate, andAfterTerminateExpr, andAfterTerminateSetExpressions);
             default:
                 throw new IllegalArgumentException("Node type " + node.getType() + " not a recognized output limit type");
 		 }

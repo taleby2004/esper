@@ -9,7 +9,9 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.ConfigurationMethodRef;
+import com.espertech.esper.client.ConfigurationPlugInAggregationFunction;
 import com.espertech.esper.client.ConfigurationPlugInSingleRowFunction;
+import com.espertech.esper.client.hook.AggregationFunctionFactory;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.epl.expression.*;
@@ -34,7 +36,7 @@ public class EngineImportServiceImpl implements EngineImportService
     private static final Log log = LogFactory.getLog(EngineImportServiceImpl.class);
 
 	private final List<String> imports;
-    private final Map<String, String> aggregationFunctions;
+    private final Map<String, ConfigurationPlugInAggregationFunction> aggregationFunctions;
     private final Map<String, EngineImportSingleRowDesc> singleRowFunctions;
     private final Map<String, ConfigurationMethodRef> methodInvocationRef;
     private final boolean allowExtendedAggregationFunc;
@@ -48,7 +50,7 @@ public class EngineImportServiceImpl implements EngineImportService
 	public EngineImportServiceImpl(boolean allowExtendedAggregationFunc, boolean isUdfCache, boolean isDuckType)
     {
         imports = new ArrayList<String>();
-        aggregationFunctions = new HashMap<String, String>();
+        aggregationFunctions = new HashMap<String, ConfigurationPlugInAggregationFunction>();
         singleRowFunctions = new HashMap<String, EngineImportSingleRowDesc>();
         methodInvocationRef = new HashMap<String, ConfigurationMethodRef>();
         this.allowExtendedAggregationFunc = allowExtendedAggregationFunc;
@@ -91,9 +93,9 @@ public class EngineImportServiceImpl implements EngineImportService
         imports.add(importName);
     }
 
-    public void addAggregation(String functionName, String aggregationClass) throws EngineImportException
+    public void addAggregation(String functionName, ConfigurationPlugInAggregationFunction aggregationDesc) throws EngineImportException
     {
-        String existing = aggregationFunctions.get(functionName);
+        ConfigurationPlugInAggregationFunction existing = aggregationFunctions.get(functionName);
         if (existing != null)
         {
             throw new EngineImportException("Aggregation function by name '" + functionName + "' is already defined");
@@ -106,15 +108,22 @@ public class EngineImportServiceImpl implements EngineImportService
         {
             throw new EngineImportException("Invalid aggregation function name '" + functionName + "'");
         }
-        if(!isClassName(aggregationClass))
-        {
-            throw new EngineImportException("Invalid class name for aggregation '" + aggregationClass + "'");
+        if (aggregationDesc.getFactoryClassName() != null) {
+            if(!isClassName(aggregationDesc.getFactoryClassName()))
+            {
+                throw new EngineImportException("Invalid class name for aggregation factory '" + aggregationDesc.getFactoryClassName() + "'");
+            }
         }
-        aggregationFunctions.put(functionName.toLowerCase(), aggregationClass);
+        else {
+            if(!isClassName(aggregationDesc.getFunctionClassName()))
+            {
+                throw new EngineImportException("Invalid class name for aggregation function '" + aggregationDesc.getFunctionClassName() + "'");
+            }
+        }
+        aggregationFunctions.put(functionName.toLowerCase(), aggregationDesc);
     }
 
-    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws EngineImportException
-    {
+    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws EngineImportException {
         EngineImportSingleRowDesc existing = singleRowFunctions.get(functionName);
         if (existing != null)
         {
@@ -132,21 +141,22 @@ public class EngineImportServiceImpl implements EngineImportService
         {
             throw new EngineImportException("Invalid class name for aggregation '" + singleRowFuncClass + "'");
         }
-        singleRowFunctions.put(functionName.toLowerCase(), new EngineImportSingleRowDesc(singleRowFuncClass, methodName, valueCache));
+        singleRowFunctions.put(functionName.toLowerCase(), new EngineImportSingleRowDesc(singleRowFuncClass, methodName, valueCache, filterOptimizable));
     }
 
     public AggregationSupport resolveAggregation(String name) throws EngineImportException, EngineImportUndefinedException
     {
-        String className = aggregationFunctions.get(name);
-        if (className == null)
+        ConfigurationPlugInAggregationFunction desc = aggregationFunctions.get(name);
+        if (desc == null)
         {
-            className = aggregationFunctions.get(name.toLowerCase());
+            desc = aggregationFunctions.get(name.toLowerCase());
         }
-        if (className == null)
+        if (desc == null || desc.getFunctionClassName() == null)
         {
             throw new EngineImportUndefinedException("A function named '" + name + "' is not defined");
         }
 
+        String className = desc.getFunctionClassName();
         Class clazz;
         try
         {
@@ -177,6 +187,50 @@ public class EngineImportServiceImpl implements EngineImportService
             throw new EngineImportException("Aggregation class by name '" + className + "' does not subclass AggregationSupport");
         }
         return (AggregationSupport) object;
+    }
+
+    public AggregationFunctionFactory resolveAggregationFactory(String name) throws EngineImportUndefinedException, EngineImportException {
+        ConfigurationPlugInAggregationFunction desc = aggregationFunctions.get(name);
+        if (desc == null)
+        {
+            desc = aggregationFunctions.get(name.toLowerCase());
+        }
+        if (desc == null || desc.getFactoryClassName() == null)
+        {
+            throw new EngineImportUndefinedException("A function named '" + name + "' is not defined");
+        }
+
+        String className = desc.getFactoryClassName();
+        Class clazz;
+        try
+        {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            clazz = Class.forName(className, true, cl);
+        }
+        catch (ClassNotFoundException ex)
+        {
+            throw new EngineImportException("Could not load aggregation class by name '" + className + "'", ex);
+        }
+
+        Object object;
+        try
+        {
+            object = clazz.newInstance();
+        }
+        catch (InstantiationException e)
+        {
+            throw new EngineImportException("Error instantiating aggregation class by name '" + className + "'", e);
+        }
+        catch (IllegalAccessException e)
+        {
+            throw new EngineImportException("Illegal access instatiating aggregation function class by name '" + className + "'", e);
+        }
+
+        if (!(object instanceof AggregationFunctionFactory))
+        {
+            throw new EngineImportException("Aggregation class by name '" + className + "' does not implement AggregationFunctionFactory");
+        }
+        return (AggregationFunctionFactory) object;
     }
 
     public Pair<Class, EngineImportSingleRowDesc> resolveSingleRow(String name) throws EngineImportException, EngineImportUndefinedException
@@ -210,7 +264,7 @@ public class EngineImportServiceImpl implements EngineImportService
         Class clazz;
         try
         {
-            clazz = resolveClassInternal(className);
+            clazz = resolveClassInternal(className, false);
         }
         catch (ClassNotFoundException e)
         {
@@ -244,7 +298,7 @@ public class EngineImportServiceImpl implements EngineImportService
         Class clazz;
         try
         {
-            clazz = resolveClassInternal(className);
+            clazz = resolveClassInternal(className, false);
         }
         catch (ClassNotFoundException e)
         {
@@ -284,11 +338,25 @@ public class EngineImportServiceImpl implements EngineImportService
         Class clazz;
         try
         {
-            clazz = resolveClassInternal(className);
+            clazz = resolveClassInternal(className, false);
         }
         catch (ClassNotFoundException e)
         {
             throw new EngineImportException("Could not load class by name '" + className + "', please check imports", e);
+        }
+
+        return clazz;
+    }
+
+    public Class resolveAnnotation(String className) throws EngineImportException {
+        Class clazz;
+        try
+        {
+            clazz = resolveClassInternal(className, true);
+        }
+        catch (ClassNotFoundException e)
+        {
+            throw new EngineImportException("Could not load annotation class by name '" + className + "', please check imports", e);
         }
 
         return clazz;
@@ -300,7 +368,7 @@ public class EngineImportServiceImpl implements EngineImportService
      * @return class
      * @throws ClassNotFoundException if the class cannot be loaded
      */
-    protected Class resolveClassInternal(String className) throws ClassNotFoundException
+    protected Class resolveClassInternal(String className, boolean requireAnnotation) throws ClassNotFoundException
     {
 		// Attempt to retrieve the class with the name as-is
 		try
@@ -337,7 +405,10 @@ public class EngineImportServiceImpl implements EngineImportService
 				try
 				{
                     ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                    return Class.forName(prefixedClassName, true, cl);
+                    Class clazz = Class.forName(prefixedClassName, true, cl);
+                    if (!requireAnnotation || clazz.isAnnotation()) {
+                        return clazz;
+                    }
 				}
 				catch(ClassNotFoundException e){
                     if (log.isDebugEnabled())
@@ -356,7 +427,10 @@ public class EngineImportServiceImpl implements EngineImportService
                 try
                 {
                     ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                    return Class.forName(name, true, cl);
+                    Class clazz = Class.forName(name, true, cl);
+                    if (!requireAnnotation || clazz.isAnnotation()) {
+                        return clazz;
+                    }
                 }
                 catch (ClassNotFoundException e1)
                 {

@@ -232,4 +232,8 @@ public class VariantEventType implements EventTypeSPI
     public EventPropertyGetterIndexed getGetterIndexed(String indexedProperty) {
         return null;
     }
+
+    public boolean equalsCompareType(EventType eventType) {
+        return this == eventType;
+    }
 }

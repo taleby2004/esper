@@ -15,12 +15,12 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestConsumingFilter extends TestCase implements SupportBeanConstants
@@ -46,15 +46,15 @@ public class TestConsumingFilter extends TestCase implements SupportBeanConstant
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 0));
         engine.getEPRuntime().sendEvent(new SupportBean("E2", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E2"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("E3", 0));
         engine.getEPRuntime().sendEvent(new SupportBean("E4", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", "E4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", "E4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("E5", 0));
         engine.getEPRuntime().sendEvent(new SupportBean("E6", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5", "E6"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5", "E6"});
     }
 
     public void testAnd() {
@@ -63,7 +63,7 @@ public class TestConsumingFilter extends TestCase implements SupportBeanConstant
         engine.getEPAdministrator().createEPL(pattern).addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1"});
         engine.getEPAdministrator().destroyAllStatements();
 
         pattern = "select a.string as a, b.string as b from pattern [every (a=SupportBean and b=SupportBean(intPrimitive = 10)@consume(2))]";
@@ -71,12 +71,12 @@ public class TestConsumingFilter extends TestCase implements SupportBeanConstant
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         engine.getEPRuntime().sendEvent(new SupportBean("E2", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "E1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("E3", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("E4", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("E5", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3", "E5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", "E5"});
         engine.getEPAdministrator().destroyAllStatements();
         
         // test SODA
@@ -88,7 +88,7 @@ public class TestConsumingFilter extends TestCase implements SupportBeanConstant
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         engine.getEPRuntime().sendEvent(new SupportBean("E2", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "E1"});
     }
 
     public void testOr() {
@@ -160,10 +160,10 @@ public class TestConsumingFilter extends TestCase implements SupportBeanConstant
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 10));
 
         if (expected instanceof Object[][]) {
-            ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, (Object[][]) expected);
+            EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, (Object[][]) expected);
         }
         else {
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, (Object[]) expected);
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, (Object[]) expected);
         }
     }
 }

@@ -21,6 +21,7 @@ public class InsertIntoLatchWait
     private static final Log log = LogFactory.getLog(InsertIntoLatchWait.class);
 
     // The earlier latch is the latch generated before this latch
+    private InsertIntoLatchFactory factory;
     private InsertIntoLatchWait earlier;
     private long msecTimeout;
     private EventBean payload;
@@ -35,8 +36,9 @@ public class InsertIntoLatchWait
      * @param msecTimeout the timeout after which delivery occurs
      * @param payload the payload is an event to deliver
      */
-    public InsertIntoLatchWait(InsertIntoLatchWait earlier, long msecTimeout, EventBean payload)
+    public InsertIntoLatchWait(InsertIntoLatchFactory factory, InsertIntoLatchWait earlier, long msecTimeout, EventBean payload)
     {
+        this.factory = factory;
         this.earlier = earlier;
         this.msecTimeout = msecTimeout;
         this.payload = payload;
@@ -45,8 +47,9 @@ public class InsertIntoLatchWait
     /**
      * Ctor - use for the first and unused latch to indicate completion.
      */
-    public InsertIntoLatchWait()
+    public InsertIntoLatchWait(InsertIntoLatchFactory factory)
     {
+        this.factory = factory;
         isCompleted = true;
         earlier = null;
         msecTimeout = 0;

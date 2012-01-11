@@ -65,7 +65,7 @@ public class EPStatementStartMethodCreateVariable extends EPStatementStartMethod
         // Create variable
         try
         {
-            services.getVariableService().createNewVariable(createDesc.getVariableName(), createDesc.getVariableType(), value, statementContext.getExtensionServicesContext());
+            services.getVariableService().createNewVariable(createDesc.getVariableName(), createDesc.getVariableType(), value, createDesc.isConstant(), statementContext.getExtensionServicesContext());
         }
         catch (VariableExistsException ex)
         {
@@ -97,7 +97,7 @@ public class EPStatementStartMethodCreateVariable extends EPStatementStartMethod
         StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {createView.getEventType()}, new String[] {"create_variable"}, new boolean[] {true}, services.getEngineURI(), false);
         AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
         ResultSetProcessorFactoryDesc resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                statementSpec, agentInstanceContext, typeService, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+                statementSpec, statementContext, typeService, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         ResultSetProcessor resultSetProcessor = EPStatementStartMethodHelperAssignExpr.getAssignResultSetProcessor(agentInstanceContext, resultSetProcessorPrototype);
 
         // Attach output view

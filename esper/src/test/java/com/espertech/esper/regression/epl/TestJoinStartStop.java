@@ -11,6 +11,8 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
@@ -19,8 +21,6 @@ import com.espertech.esper.client.EPStatementException;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 
@@ -100,7 +100,7 @@ public class TestJoinStartStop extends TestCase
 
         assertFalse(spi.getStatementEventTypeRef().isInUse(SupportMarketDataBean.class.getName()));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportMarketDataBean.class.getName());
-        ArrayAssertionUtil.assertEqualsAnyOrder(null, stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(null, stmtNames.toArray());
         assertFalse(stmtNames.contains("MyJoin"));
     }
 

@@ -12,14 +12,17 @@
 package com.espertech.esper.regression.context;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.context.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.filter.FilterServiceSPI;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
+
+import java.util.*;
 
 // Test invalid:
 // - segmented context: validate if statement indeed has such filters
@@ -47,6 +50,46 @@ public class TestContextPartitioned extends TestCase {
         listener = null;
     }
 
+    public void testIterateTargetedCP() {
+        epService.getEPAdministrator().createEPL("create context PartitionedByString partition by string from SupportBean");
+        String[] fields = "c0,c1".split(",");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("@Name('StmtOne') context PartitionedByString select context.key1 as c0, sum(intPrimitive) as c1 from SupportBean.win:length(5)");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 21));
+
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), stmt.safeIterator(), fields, new Object[][]{{"E1", 10}, {"E2", 41}});
+
+        // test iterator targeted
+        SupportSelectorPartitioned selector = new SupportSelectorPartitioned(Collections.singletonList(new Object[]{"E2"}));
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(selector), stmt.safeIterator(selector), fields, new Object[][]{{"E2", 41}});
+        assertFalse(stmt.iterator(new SupportSelectorPartitioned(null)).hasNext());
+        assertFalse(stmt.iterator(new SupportSelectorPartitioned(Collections.singletonList(new Object[]{"EX"}))).hasNext());
+        assertFalse(stmt.iterator(new SupportSelectorPartitioned(Collections.<Object[]>emptyList())).hasNext());
+
+        // test iterator filtered
+        MySelectorFilteredPartitioned filtered = new MySelectorFilteredPartitioned(new Object[] {"E2"});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(filtered), stmt.safeIterator(filtered), fields, new Object[][]{{"E2", 41}});
+
+        // test always-false filter - compare context partition info
+        MySelectorFilteredPartitioned filteredFalse = new MySelectorFilteredPartitioned(null);
+        assertFalse(stmt.iterator(filteredFalse).hasNext());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{new Object[]{"E1"}, new Object[]{"E2"}}, filteredFalse.getContexts().toArray());
+        
+        try {
+            stmt.iterator(new ContextPartitionSelectorCategory() {
+                public Set<String> getLabels() {
+                    return null;
+                }
+            });
+            fail();
+        }
+        catch (InvalidContextPartitionSelector ex) {
+            assertTrue("message: " + ex.getMessage(), ex.getMessage().startsWith("Invalid context partition selector, expected an implementation class of any of [ContextPartitionSelectorAll, ContextPartitionSelectorFiltered, ContextPartitionSelectorById, ContextPartitionSelectorSegmented] interfaces but received com."));
+        }
+    }
+
     public void testInvalid() {
         String epl;
 
@@ -56,30 +99,30 @@ public class TestContextPartitioned extends TestCase {
 
         // property not found
         epl = "create context SegmentedByAString partition by dummy from SupportBean";
-        tryInvalid(epl, "Error starting statement: Property name 'dummy' not found on type SupportBean [");
+        tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' property name 'dummy' not found on type SupportBean [");
 
         // mismatch number pf properties
         epl = "create context SegmentedByAString partition by string from SupportBean, id, p00 from SupportBean_S0";
-        tryInvalid(epl, "Error starting statement: Expected the same number of property names for each event type, found 1 properties for event type 'SupportBean' and 2 properties for event type 'SupportBean_S0' [");
+        tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' expected the same number of property names for each event type, found 1 properties for event type 'SupportBean' and 2 properties for event type 'SupportBean_S0' [create context SegmentedByAString partition by string from SupportBean, id, p00 from SupportBean_S0]");
 
         // incompatible property types
         epl = "create context SegmentedByAString partition by string from SupportBean, id from SupportBean_S0";
-        tryInvalid(epl, "Error starting statement: Found mismatch of property types, property 'string' of type 'java.lang.String' compared to property 'id' of type 'java.lang.Integer' [");
+        tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' for context 'SegmentedByAString' found mismatch of property types, property 'string' of type 'java.lang.String' compared to property 'id' of type 'java.lang.Integer' [");
 
         // duplicate type specification
         epl = "create context SegmentedByAString partition by string from SupportBean, string from SupportBean";
-        tryInvalid(epl, "Error starting statement: The event type 'SupportBean' is listed twice [");
+        tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' the event type 'SupportBean' is listed twice [");
 
         // duplicate type: subtype
         epService.getEPAdministrator().getConfiguration().addEventType(ISupportBaseAB.class);
         epService.getEPAdministrator().getConfiguration().addEventType(ISupportA.class);
         epl = "create context SegmentedByAString partition by baseAB from ISupportBaseAB, a from ISupportA";
-        tryInvalid(epl, "Error starting statement: The event type 'ISupportA' is listed twice: Event type 'ISupportA' is a subtype or supertype of event type 'ISupportBaseAB' [");
+        tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' the event type 'ISupportA' is listed twice: Event type 'ISupportA' is a subtype or supertype of event type 'ISupportBaseAB' [");
 
         // validate statement not applicable filters
         epService.getEPAdministrator().createEPL("create context SegmentedByAString partition by string from SupportBean");
         epl = "context SegmentedByAString select * from SupportBean_S0";
-        tryInvalid(epl, "Error starting statement: Segmented context requires that any of the events types that are listed in the segmented context also appear in any of the filter expressions of the statement [");
+        tryInvalid(epl, "Error starting statement: Segmented context 'SegmentedByAString' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement [");
     }
 
     private void tryInvalid(String epl, String expected) {
@@ -109,7 +152,7 @@ public class TestContextPartitioned extends TestCase {
         
         for (int i = 0; i < 10000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBean("E" + i, i));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{i});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{i});
         }
     }
 
@@ -138,20 +181,20 @@ public class TestContextPartitioned extends TestCase {
         assertEquals(2, filterSPI.getFilterCountApprox());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "S0"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean("S1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(-2, "S0"));
         epService.getEPRuntime().sendEvent(new SupportBean("S1", -10));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3, "S1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, 3});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, 3});
 
         epService.getEPRuntime().sendEvent(new SupportBean("S0", 9));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{9, 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{9, 2});
 
         epService.getEPAdministrator().destroyAllStatements();
         assertEquals(0, filterSPI.getFilterCountApprox());
@@ -174,17 +217,17 @@ public class TestContextPartitioned extends TestCase {
         assertEquals(2, filterSPI.getFilterCountApprox());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "S0"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10});
 
         assertEquals(3, filterSPI.getFilterCountApprox());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(8, "S1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{8});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{8});
 
         assertEquals(4, filterSPI.getFilterCountApprox());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(4, "S0"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{14});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{14});
 
         assertEquals(4, filterSPI.getFilterCountApprox());
 
@@ -194,12 +237,12 @@ public class TestContextPartitioned extends TestCase {
         assertEquals(6, filterSPI.getFilterCountApprox());
 
         epService.getEPRuntime().sendEvent(new SupportBean("S0", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5});
 
         assertEquals(6, filterSPI.getFilterCountApprox());
 
         epService.getEPRuntime().sendEvent(new SupportBean("S2", 6));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{6});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{6});
 
         assertEquals(8, filterSPI.getFilterCountApprox());
 
@@ -223,16 +266,16 @@ public class TestContextPartitioned extends TestCase {
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new ISupportAImpl("A1", "AB1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1L});
 
         epService.getEPRuntime().sendEvent(new ISupportAImpl("A2", "AB1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2L});
 
         epService.getEPRuntime().sendEvent(new ISupportAImpl("A3", "AB2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1L});
 
         epService.getEPRuntime().sendEvent(new ISupportAImpl("A4", "AB1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3L});
     }
 
     public void testSegmentedJoinMultitypeMultifield() {
@@ -252,16 +295,16 @@ public class TestContextPartitioned extends TestCase {
         assertFalse(listener.isInvoked());
         
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 1, 1, "G2", "G2", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 1, 1, "G2", "G2", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "G2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 2, 2, "G2", "G2", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 2, 2, "G2", "G2", 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "G1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 1, 1, "G1", "G1", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 1, 1, "G1", "G1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 2, 2, "G1", "G1", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 2, 2, "G1", "G1", 2});
     }
 
     public void testSegmentedSubselectPrevPrior() {
@@ -273,21 +316,21 @@ public class TestContextPartitioned extends TestCase {
         stmtPrev.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[] {"G1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[]{"G1", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[]{"G1", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[]{"G1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[] {"G2", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[]{"G2", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "E2"));
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 21));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[]{"G2", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[]{"G2", 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 12));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[]{"G1", null});  // since returning multiple rows
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrev, new Object[]{"G1", null});  // since returning multiple rows
 
         stmtPrev.stop();
 
@@ -297,21 +340,21 @@ public class TestContextPartitioned extends TestCase {
         stmtPrior.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[] {"G1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[]{"G1", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[]{"G1", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[]{"G1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[] {"G2", 1});    // since category started as soon as statement added
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[]{"G2", null});    // since category started as soon as statement added
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "E2"));
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 21));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[]{"G2", null}); // since returning multiple rows
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[]{"G2", 2}); // since returning multiple rows
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 12));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[]{"G1", null});  // since returning multiple rows
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsPrior, new Object[]{"G1", null});  // since returning multiple rows
     }
 
     public void testSegmentedPrior() {
@@ -323,13 +366,13 @@ public class TestContextPartitioned extends TestCase {
         stmtOne.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {20, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{20, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {11, 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{11, 10});
         
         stmtOne.stop();
 
@@ -347,24 +390,24 @@ public class TestContextPartitioned extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "s1"));
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G1", 10, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "s2"));
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G1", 10, "s2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, "s2"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G2", 10, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 10, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "s3"));
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G2", 10, "s3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 10, "s3"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G3", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G3", 10, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G3", 10, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G1", 10, "s3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, "s3"});
     }
 
     public void testSegmentedSubqueryNamedWindowIndexShared() {
@@ -398,20 +441,20 @@ public class TestContextPartitioned extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "s1"));
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, "s1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, "s1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 10, "s1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 10, "s1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G3", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G3", 20, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G3", 20, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(20, "s2"));
         epService.getEPRuntime().sendEvent(new SupportBean("G3", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G3", 20, "s2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G3", 20, "s2"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 20, "s2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 20, "s2"});
     }
 
     public void testSegmentedJoin() {
@@ -428,17 +471,17 @@ public class TestContextPartitioned extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G2", 20, 20});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 20, 20});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(30));
         epService.getEPRuntime().sendEvent(new SupportBean("G3", 30));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 30));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G1", 30, 30});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 30, 30});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 30));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G2", 30, 30});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 30, 30});
     }
 
     public void testSegmentedPattern() {
@@ -456,13 +499,13 @@ public class TestContextPartitioned extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 21));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G2", 20, "G2", 21});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 20, "G2", 21});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, "G1", 11});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, "G1", 11});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 22));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G2", 21, "G2", 22});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 21, "G2", 22});
 
         stmtOne.destroy();
 
@@ -478,10 +521,10 @@ public class TestContextPartitioned extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 21));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G2", 20, "G2", 21});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 20, "G2", 21});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, "G1", 11});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, "G1", 11});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 22));
         assertFalse(listener.isInvoked());
@@ -499,8 +542,7 @@ public class TestContextPartitioned extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "E1"));   // should be 2 output rows
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsThree, new Object[] {"G1", 10, 10, "E1"});
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsThree, new Object[] {"G2", 10, 10, "E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(listener.getLastNewData(), fieldsThree, new Object[][] {{"G1", 10, 10, "E1"}, {"G2", 10, 10, "E1"}});
     }
 
     public void testSegmentedViews() {
@@ -514,14 +556,14 @@ public class TestContextPartitioned extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
         assertViewData(10, new Object[][]{{"G1", 10}}, null);
-        ArrayAssertionUtil.assertPropsPerRow(stmtOne.iterator(), stmtOne.safeIterator(), fieldsIterate, new Object[][] {{10}});
+        EPAssertionUtil.assertPropsPerRow(stmtOne.iterator(), stmtOne.safeIterator(), fieldsIterate, new Object[][]{{10}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
         assertViewData(20, new Object[][]{{"G2", 20}}, null);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
         assertViewData(11, new Object[][]{{"G1", 11}, {"G1", 10}}, null);
-        ArrayAssertionUtil.assertPropsPerRow(stmtOne.iterator(), stmtOne.safeIterator(), fieldsIterate, new Object[][] {{10}, {11}, {20}});
+        EPAssertionUtil.assertPropsPerRow(stmtOne.iterator(), stmtOne.safeIterator(), fieldsIterate, new Object[][]{{10}, {11}, {20}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 21));
         assertViewData(21, new Object[][]{{"G2", 21}, {"G2", 20}}, null);
@@ -550,7 +592,7 @@ public class TestContextPartitioned extends TestCase {
         stmtTwo.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {ctx, 0, "G1", "G1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{ctx, 0, "G1", "G1"});
     }
 
     private void assertViewData(int newIntExpected, Object[][] newArrayExpected, Integer oldIntExpected) {
@@ -571,5 +613,31 @@ public class TestContextPartitioned extends TestCase {
             assertNull(listener.getLastOldData());
         }
         listener.reset();
+    }
+
+    private static class MySelectorFilteredPartitioned implements ContextPartitionSelectorFiltered {
+
+        private Object[] match;
+
+        private List<Object[]> contexts = new ArrayList<Object[]>();
+        private LinkedHashSet<Integer> cpids = new LinkedHashSet<Integer>();
+
+        private MySelectorFilteredPartitioned(Object[] match) {
+            this.match = match;
+        }
+
+        public boolean filter(ContextPartitionIdentifier contextPartitionIdentifier) {
+            ContextPartitionIdentifierPartitioned id = (ContextPartitionIdentifierPartitioned) contextPartitionIdentifier;
+            if (match == null && cpids.contains(id.getContextPartitionId())) {
+                throw new RuntimeException("Already exists context id: " + id.getContextPartitionId());
+            }
+            cpids.add(id.getContextPartitionId());
+            contexts.add(id.getKeys());
+            return Arrays.equals(id.getKeys(), match);
+        }
+
+        public List<Object[]> getContexts() {
+            return contexts;
+        }
     }
 }

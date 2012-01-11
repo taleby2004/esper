@@ -15,11 +15,11 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -180,19 +180,19 @@ public class TestOrderByEventPerGroup extends TestCase {
         sendEvent("IBM", 49);
         sendEvent("CAT", 15);
         sendEvent("IBM", 100);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields,
-                new Object[][] {
-                                {"CAT", 65d},
-                                {"IBM", 149d},
-                                });
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields,
+                new Object[][]{
+                        {"CAT", 65d},
+                        {"IBM", 149d},
+                });
 
         sendEvent("KGB", 75);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields,
-                new Object[][] {
-                                {"CAT", 65d},
-                                {"IBM", 149d},
-                                {"KGB", 75d},
-                                });
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields,
+                new Object[][]{
+                        {"CAT", 65d},
+                        {"IBM", 149d},
+                        {"KGB", 75d},
+                });
     }
 
     private void sendEvent(String symbol, double price)
@@ -214,10 +214,10 @@ public class TestOrderByEventPerGroup extends TestCase {
         sendEvent("CAT", 5);
         sendEvent("CAT", 6);
 
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"CMU", 3.0}, {"IBM", 7.0}, {"CAT", 11.0}});
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
-                new Object[][] {{"CAT", null}, {"CMU", null}, {"IBM", null}, });
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"CMU", 3.0}, {"IBM", 7.0}, {"CAT", 11.0}});
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
+                new Object[][]{{"CAT", null}, {"CMU", null}, {"IBM", null},});
 
         sendEvent("IBM", 3);
         sendEvent("IBM", 4);
@@ -226,10 +226,10 @@ public class TestOrderByEventPerGroup extends TestCase {
         sendEvent("DOG", 0);
         sendEvent("DOG", 1);
 
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"DOG", 1.0}, {"CMU", 13.0}, {"IBM", 14.0}});
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
-                new Object[][] {{"DOG", null}, {"CMU", 3.0}, {"IBM", 7.0}});
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"DOG", 1.0}, {"CMU", 13.0}, {"IBM", 14.0}});
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
+                new Object[][]{{"DOG", null}, {"CMU", 3.0}, {"IBM", 7.0}});
     }
 
     private void runAssertionNoHaving(EPStatement statement)
@@ -244,10 +244,10 @@ public class TestOrderByEventPerGroup extends TestCase {
         sendEvent("CMU", 2);
         sendEvent("CAT", 5);
         sendEvent("CAT", 6);
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"CMU", 1.0}, {"CMU", 3.0}, {"IBM", 3.0}, {"CAT", 5.0}, {"IBM", 7.0}, {"CAT", 11.0} });
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
-                new Object[][] {{"CAT", null}, {"CMU", null}, {"IBM", null}, {"CMU", 1.0}, {"IBM", 3.0}, {"CAT", 5.0} });
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"CMU", 1.0}, {"CMU", 3.0}, {"IBM", 3.0}, {"CAT", 5.0}, {"IBM", 7.0}, {"CAT", 11.0}});
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
+                new Object[][]{{"CAT", null}, {"CMU", null}, {"IBM", null}, {"CMU", 1.0}, {"IBM", 3.0}, {"CAT", 5.0}});
         testListener.reset();
 
         sendEvent("IBM", 3);
@@ -256,10 +256,10 @@ public class TestOrderByEventPerGroup extends TestCase {
         sendEvent("CMU", 5);
         sendEvent("DOG", 0);
         sendEvent("DOG", 1);
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"DOG", 0.0}, {"DOG", 1.0}, {"CMU", 8.0}, {"IBM", 10.0}, {"CMU", 13.0}, {"IBM", 14.0}});
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
-                new Object[][] {{"DOG", null}, {"DOG", 0.0}, {"CMU", 3.0}, {"IBM", 7.0}, {"CMU", 8.0}, {"IBM", 10.0} });
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"DOG", 0.0}, {"DOG", 1.0}, {"CMU", 8.0}, {"IBM", 10.0}, {"CMU", 13.0}, {"IBM", 14.0}});
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
+                new Object[][]{{"DOG", null}, {"DOG", 0.0}, {"CMU", 3.0}, {"IBM", 7.0}, {"CMU", 8.0}, {"IBM", 10.0}});
     }
 
     private void runAssertionHaving(EPStatement statement)
@@ -274,10 +274,10 @@ public class TestOrderByEventPerGroup extends TestCase {
         sendEvent("CAT", 5);
         sendEvent("CAT", 6);
 
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"CMU", 1.0}, {"CMU", 3.0}, {"IBM", 3.0}, {"CAT", 5.0}, {"IBM", 7.0}, {"CAT", 11.0} });
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
-                new Object[][] {{"CMU", 1.0}, {"IBM", 3.0}, {"CAT", 5.0} });
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"CMU", 1.0}, {"CMU", 3.0}, {"IBM", 3.0}, {"CAT", 5.0}, {"IBM", 7.0}, {"CAT", 11.0}});
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
+                new Object[][]{{"CMU", 1.0}, {"IBM", 3.0}, {"CAT", 5.0}});
         testListener.reset();
 
         sendEvent("IBM", 3);
@@ -286,9 +286,9 @@ public class TestOrderByEventPerGroup extends TestCase {
         sendEvent("CMU", 5);
         sendEvent("DOG", 0);
         sendEvent("DOG", 1);
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"DOG", 1.0}, {"CMU", 8.0}, {"IBM", 10.0}, {"CMU", 13.0}, {"IBM", 14.0}});
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
-                new Object[][] {{"CMU", 3.0}, {"IBM", 7.0}, {"CMU", 8.0}, {"IBM", 10.0} });
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"DOG", 1.0}, {"CMU", 8.0}, {"IBM", 10.0}, {"CMU", 13.0}, {"IBM", 14.0}});
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastOldData(), fields,
+                new Object[][]{{"CMU", 3.0}, {"IBM", 7.0}, {"CMU", 8.0}, {"IBM", 10.0}});
     }
 }

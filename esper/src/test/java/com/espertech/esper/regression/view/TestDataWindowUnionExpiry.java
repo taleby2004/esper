@@ -12,14 +12,14 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestDataWindowUnionExpiry extends TestCase
@@ -45,26 +45,26 @@ public class TestDataWindowUnionExpiry extends TestCase
         String[] fields = new String[] {"string", "intPrimitive"};
 
         sendEvent("E1", 1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(nwstmt.iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
 
         sendEvent("E1", 99);
-        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 99}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 99});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(nwstmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E1", 99}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 99});
 
         sendEvent("E2", 2);
-        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 99}, {"E2", 2}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(nwstmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E1", 99}, {"E2", 2}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E2", 2}});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], "string".split(","), new Object[] {"E1"});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[1], "string".split(","), new Object[] {"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(nwstmt.iterator(), fields, new Object[][]{{"E2", 2}});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], "string".split(","), new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[1], "string".split(","), new Object[]{"E1"});
         listener.reset();
 
         sendEvent("E1", 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(nwstmt.iterator(), fields, new Object[][] {{"E1", 3}, {"E2", 2}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 3});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(nwstmt.iterator(), fields, new Object[][]{{"E1", 3}, {"E2", 2}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 3});
     }
 
     public void testFirstUniqueAndFirstLength()
@@ -92,27 +92,27 @@ public class TestDataWindowUnionExpiry extends TestCase
         String[] fields = new String[] {"string", "intPrimitive"};
 
         sendEvent("E1", 1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
 
         sendEvent("E1", 2);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 2});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E1", 2}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 2});
 
         sendEvent("E2", 1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 1}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 1});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E1", 2}, {"E2", 1}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 1});
 
         sendEvent("E2", 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 1}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E1", 2}, {"E2", 1}});
         assertFalse(listener.getAndClearIsInvoked());
 
         sendEvent("E3", 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 1}, {"E3", 3}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E1", 2}, {"E2", 1}, {"E3", 3}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", 3});
 
         sendEvent("E3", 4);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{"E1", 1}, {"E1", 2}, {"E2", 1}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}, {"E1", 2}, {"E2", 1}, {"E3", 3}});
         assertFalse(listener.getAndClearIsInvoked());
     }
 
@@ -125,41 +125,41 @@ public class TestDataWindowUnionExpiry extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E1", 1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
 
         sendEvent("E2", 2);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         sendEvent("E3", 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3"});
 
         sendEvent("E4", 4);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4"});
 
         sendEvent("E5", 4);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
 
         sendEvent("E6", 4);     // remove stream is E1, E2, E3
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E6"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E6"});
 
         sendEvent("E7", 5);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6", "E7"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E7"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6", "E7"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E7"});
 
         sendEvent("E8", 6);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E5", "E4", "E6", "E7", "E8"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E8"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E5", "E4", "E6", "E7", "E8"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E8"});
 
         sendEvent("E9", 7);     // remove stream is E4, E5, E6; E4 and E5 get removed as their
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E6", "E7", "E8", "E9"));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastOldData(), fields, new Object[][] {{"E4"}, {"E5"}});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E9"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E6", "E7", "E8", "E9"));
+        EPAssertionUtil.assertPropsPerRow(listener.getLastOldData(), fields, new Object[][]{{"E4"}, {"E5"}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E9"});
         listener.reset();
     }
 
@@ -172,16 +172,16 @@ public class TestDataWindowUnionExpiry extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E1", 1, 10, 100d);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr(100d));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {100d});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr(100d));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{100d});
 
         sendEvent("E2", 2, 20, 50d);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr(150d));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {150d});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr(150d));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{150d});
 
         sendEvent("E3", 1, 20, 20d);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr(170d));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {170d});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr(170d));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{170d});
     }
 
     public void testUnionGroupBy()
@@ -194,41 +194,41 @@ public class TestDataWindowUnionExpiry extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E1", 1, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
 
         sendEvent("E2", 2, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         sendEvent("E3", 1, 20);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3"});
 
         sendEvent("E4", 1, 30);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4"});
 
         sendEvent("E5", 2, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
 
         sendEvent("E6", 1, 20);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E4", "E5", "E6"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E3"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E6"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E4", "E5", "E6"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E6"});
         listener.reset();
 
         sendEvent("E7", 1, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E4", "E5", "E6", "E7"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E7"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E4", "E5", "E6", "E7"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E7"});
         listener.reset();
 
         sendEvent("E8", 2, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E6", "E7", "E8"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E2"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E8"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E6", "E7", "E8"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E8"});
         listener.reset();
     }
 
@@ -271,21 +271,21 @@ public class TestDataWindowUnionExpiry extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E1", 1, 10, 100d);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
 
         sendEvent("E2", 2, 10, 200d);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         sendEvent("E3", 2, 20, 100d);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3"});
 
         sendEvent("E4", 1, 30, 300d);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E3", "E4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E3", "E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E4"});
         listener.reset();
     }
 
@@ -300,19 +300,19 @@ public class TestDataWindowUnionExpiry extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "E2"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1E2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1E2"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "E3"));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(20, "E4"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1E2", "E3E4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3E4"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1E2", "E3E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3E4"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E5"));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "E6"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E3E4", "E5E6"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E1E2"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E5E6"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E3E4", "E5E6"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E1E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E5E6"});
     }
 
     public void testUnionTwoUnique()
@@ -324,55 +324,55 @@ public class TestDataWindowUnionExpiry extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E1", 1, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
 
         sendEvent("E2", 2, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         sendEvent("E3", 1, 20);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E3"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E3"});
         listener.reset();
 
         sendEvent("E4", 1, 20);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E3"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E4"});
         listener.reset();
 
         sendEvent("E5", 2, 30);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E4", "E5"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E4", "E5"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
 
         sendEvent("E6", 3, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E6"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E2"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E6"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E6"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E6"});
         listener.reset();
 
         sendEvent("E7", 3, 30);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E6", "E7"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E7"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E6", "E7"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E7"});
 
         sendEvent("E8", 4, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E7", "E8"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E6"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E8"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E7", "E8"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E6"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E8"});
         listener.reset();
 
         sendEvent("E9", 3, 50);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E7", "E8", "E9"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E9"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E4", "E5", "E7", "E8", "E9"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E9"});
 
         sendEvent("E10", 2, 30);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E4", "E8", "E9", "E10"));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E4", "E8", "E9", "E10"));
         assertEquals(2, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"E5"});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[1], fields, new Object[] {"E7"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E10"});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"E5"});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[1], fields, new Object[]{"E7"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E10"});
         listener.reset();
     }
 
@@ -385,37 +385,37 @@ public class TestDataWindowUnionExpiry extends TestCase
         stmt.addListener(listener);
 
         sendEvent("E1", 1, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
 
         sendEvent("E2", 2, 9);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         sendEvent("E3", 0, 0);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3"});
 
         sendEvent("E4", -1, -1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E3", "E4"));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E3", "E4"));
         assertEquals(2, listener.getLastOldData().length);
         Object[] result = {listener.getLastOldData()[0].get("string"), listener.getLastOldData()[1].get("string")};
-        ArrayAssertionUtil.assertEqualsAnyOrder(result, new String[] {"E1", "E2"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertEqualsAnyOrder(result, new String[]{"E1", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E4"});
         listener.reset();
 
         sendEvent("E5", 1, 1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E3", "E4"));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E3", "E4"));
         assertEquals(1, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E5"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E5"});
         listener.reset();
 
         sendEvent("E6", 0, 0);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E4", "E6"));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E4", "E6"));
         assertEquals(1, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[] {"E3"});
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"E6"});
+        EPAssertionUtil.assertProps(listener.assertOneGetOld(), fields, new Object[]{"E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E6"});
         listener.reset();
     }
 
@@ -471,51 +471,51 @@ public class TestDataWindowUnionExpiry extends TestCase
 
         sendTimer(1000);
         sendEvent("E1", 1, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
 
         sendTimer(2000);
         sendEvent("E2", 2, 20);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[] {"E2"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[]{"E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1"));
 
         sendTimer(3000);
         sendEvent("E3", 3, 30);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E3"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3"});
         sendEvent("E4", 3, 40);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4"});
 
         sendTimer(4000);
         sendEvent("E5", 4, 50);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4", "E5"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4", "E5"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
         sendEvent("E6", 4, 50);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4", "E5", "E6"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E6"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4", "E5", "E6"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E6"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(20));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4", "E5", "E6"));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4", "E5", "E6"));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(50));
         assertEquals(2, listener.getLastOldData().length);
         Object[] result = {listener.getLastOldData()[0].get("string"), listener.getLastOldData()[1].get("string")};
-        ArrayAssertionUtil.assertEqualsAnyOrder(result, new String[] {"E5", "E6"});
+        EPAssertionUtil.assertEqualsAnyOrder(result, new String[]{"E5", "E6"});
         listener.reset();
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4"));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4"));
 
         sendTimer(12999);
         assertFalse(listener.isInvoked());
 
         sendTimer(13000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[] {"E3"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E4"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[]{"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E4"));
 
         sendTimer(10000000);
         assertFalse(listener.isInvoked());
@@ -527,66 +527,66 @@ public class TestDataWindowUnionExpiry extends TestCase
 
         sendTimer(1000);
         sendEvent("E1", 1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1"});
 
         sendTimer(2000);
         sendEvent("E2", 2);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         sendTimer(3000);
         sendEvent("E3", 1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3"});
 
         sendTimer(4000);
         sendEvent("E4", 3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4"});
         sendEvent("E5", 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E5"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5"));
         sendEvent("E6", 3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E6"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E6"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6"));
 
         sendTimer(5000);
         sendEvent("E7", 4);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E7"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E7"});
         sendEvent("E8", 4);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E8"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E8"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"));
 
         sendTimer(6000);
         sendEvent("E9", 4);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E9"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E9"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9"));
 
         sendTimer(10999);
         assertFalse(listener.isInvoked());
         sendTimer(11000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9"));
 
         sendTimer(12999);
         assertFalse(listener.isInvoked());
         sendTimer(13000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[] {"E3"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E4", "E5", "E6", "E7", "E8", "E9"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[]{"E3"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E4", "E5", "E6", "E7", "E8", "E9"));
 
         sendTimer(14000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[] {"E4"});
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E5", "E6", "E7", "E8", "E9"));
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[]{"E4"});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E5", "E6", "E7", "E8", "E9"));
 
         sendTimer(15000);
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"E7"});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[1], fields, new Object[] {"E8"});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"E7"});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[1], fields, new Object[]{"E8"});
         listener.reset();
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E5", "E6", "E9"));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E5", "E6", "E9"));
 
         sendTimer(1000000);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, toArr("E2", "E5", "E6", "E9"));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E2", "E5", "E6", "E9"));
     }
 
     public void testInvalid()

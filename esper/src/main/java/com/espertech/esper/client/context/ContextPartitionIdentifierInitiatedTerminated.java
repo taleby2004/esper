@@ -1,0 +1,44 @@
+/*
+ * *************************************************************************************
+ *  Copyright (C) 2008 EsperTech, Inc. All rights reserved.                            *
+ *  http://esper.codehaus.org                                                          *
+ *  http://www.espertech.com                                                           *
+ *  ---------------------------------------------------------------------------------- *
+ *  The software in this package is published under the terms of the GPL license       *
+ *  a copy of which has been included with this distribution in the license.txt file.  *
+ * *************************************************************************************
+ */
+
+package com.espertech.esper.client.context;
+
+import java.util.Map;
+
+public class ContextPartitionIdentifierInitiatedTerminated extends ContextPartitionIdentifier {
+    private Map<String, Object> properties;
+    private long startTime;
+    private Long endTime;
+
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public Long getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Long endTime) {
+        this.endTime = endTime;
+    }
+}

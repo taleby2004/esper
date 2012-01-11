@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.enummethod;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0_Container;
 import com.espertech.esper.support.bean.SupportCollection;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestEnumSequenceEqual extends TestCase {
@@ -48,16 +48,16 @@ public class TestEnumSequenceEqual extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), "val0".split(","), new Class[]{Boolean.class});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make3Value("I1,E1,0", "I2,E2,0"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make3Value("I3,I3,0", "X4,X4,0"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make3Value("I3,I3,0", "X4,Y4,0"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make3Value("I3,I3,0", "Y4,X4,0"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
     }
 
     public void testTwoProperties() {
@@ -71,46 +71,46 @@ public class TestEnumSequenceEqual extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), "val0".split(","), new Class[]{Boolean.class});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2,E3", "E1,E2,E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E3", "E1,E2,E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E3", "E1,E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2,E3", "E1,E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2,null,E3", "E1,E2,null,E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2,E3", "E1,E2,null"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2,null", "E1,E2,E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1", ""));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("", "E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1", "E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("", ""));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{true});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString(null, ""));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("", null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{false});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString(null, null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null});
     }
 
     public void testInvalid() {

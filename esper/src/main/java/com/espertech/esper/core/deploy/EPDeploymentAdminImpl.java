@@ -131,6 +131,10 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
         if (options.isCompile()) {
             List<DeploymentItemException> exceptions = new ArrayList<DeploymentItemException>();
             for (ModuleItem item : module.getItems()) {
+                if (item.isCommentOnly()) {
+                    continue;
+                }
+
                 try {
                     epService.compileEPL(item.getExpression());
                 }
@@ -154,6 +158,10 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
         Set<String> eventTypesReferenced = new HashSet<String>();
 
         for (ModuleItem item : module.getItems()) {
+            if (item.isCommentOnly()) {
+                continue;
+            }
+
             try {
 
                 EPStatement stmt;
@@ -298,6 +306,7 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
         if (info.getState() == DeploymentState.UNDEPLOYED) {
             throw new DeploymentStateException("Deployment by id '" + deploymentId + "' is already in undeployed state");
         }
+
         UndeploymentResult result = undeployRemoveInternal(info);
         DeploymentInformation updated = new DeploymentInformation(deploymentId, info.getModule(), info.getAddedDate(), Calendar.getInstance(), new DeploymentInformationItem[0], DeploymentState.UNDEPLOYED);
         deploymentStateService.addUpdateDeployment(updated);

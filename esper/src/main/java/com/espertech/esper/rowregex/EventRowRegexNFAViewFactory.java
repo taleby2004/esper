@@ -239,7 +239,7 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
                 aggNodesForStream.add(aggregateNode);
             }
 
-            AggregationServiceMatchRecognizeFactoryDesc factoryDesc = AggregationServiceFactoryFactory.getServiceMatchRecognize(streamVariables.size(), measureExprAggNodesPerStream, statementContext.getMethodResolutionService(), exprEvaluatorContext);
+            AggregationServiceMatchRecognizeFactoryDesc factoryDesc = AggregationServiceFactoryFactory.getServiceMatchRecognize(streamVariables.size(), measureExprAggNodesPerStream, exprEvaluatorContext);
             aggregationService = factoryDesc.getAggregationServiceFactory().makeService(agentInstanceContext);
             aggregationExpressions = factoryDesc.getExpressions();
         }

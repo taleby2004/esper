@@ -13,10 +13,10 @@ package com.espertech.esper.regression.rowrecog;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.annotation.Hint;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,8 +61,8 @@ public class TestRowPatternRecognitionIterateOnly extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E2", 2));
         epService.getEPRuntime().setVariableValue("mySleepDuration", 0);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E2"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E2"}});
     }
 
     public void testPrev()
@@ -93,12 +93,12 @@ public class TestRowPatternRecognitionIterateOnly extends TestCase {
         assertFalse(stmt.iterator().hasNext());
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E6", 4));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E6"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E6"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E7", 2));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E7"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E7"}});
         assertFalse(listener.isInvoked());
     }
 
@@ -131,12 +131,12 @@ public class TestRowPatternRecognitionIterateOnly extends TestCase {
         assertFalse(stmt.iterator().hasNext());
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E6", "A", 1));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E6", "A"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E6", "A"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E7", "B", 3));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E7", "B"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E7", "B"}});
         assertFalse(listener.isInvoked());
     }
 }

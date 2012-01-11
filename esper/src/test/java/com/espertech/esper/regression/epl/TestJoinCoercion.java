@@ -11,13 +11,13 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBeanRange;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -53,13 +53,13 @@ public class TestJoinCoercion extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 100));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 100, "R1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 100, "R1"});
 
         epService.getEPRuntime().sendEvent(SupportBeanRange.makeLong("R2", "G", 90L, 100L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 100, "R2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 100, "R2"});
 
         epService.getEPRuntime().sendEvent(SupportBeanRange.makeLong("R3", "G", 1L, 99L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 10, "R3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 10, "R3"});
 
         epService.getEPRuntime().sendEvent(SupportBeanRange.makeLong("R4", "G", 2000L, 3000L));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1000));
@@ -76,13 +76,13 @@ public class TestJoinCoercion extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G", 101));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G", 101, "R1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G", 101, "R1"});
 
         epService.getEPRuntime().sendEvent(SupportBeanRange.makeLong("R2", "G", 90L, 102L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G", 101, "R2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G", 101, "R2"});
 
         epService.getEPRuntime().sendEvent(SupportBeanRange.makeLong("R3", "G", 1L, 99L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G", 10, "R3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G", 10, "R3"});
 
         epService.getEPRuntime().sendEvent(SupportBeanRange.makeLong("R4", "G", 2000L, 3000L));
         epService.getEPRuntime().sendEvent(new SupportBean("G", 1000));

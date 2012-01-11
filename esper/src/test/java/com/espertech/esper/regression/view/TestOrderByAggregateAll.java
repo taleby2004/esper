@@ -15,11 +15,11 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -59,23 +59,23 @@ public class TestOrderByAggregateAll extends TestCase
         sendEvent("IBM", 49);
         sendEvent("CAT", 15);
         sendEvent("IBM", 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields,
-                new Object[][] {
-                                {"CAT", 214d},
-                                {"CAT", 214d},
-                                {"IBM", 214d},
-                                {"IBM", 214d},
-                                });
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields,
+                new Object[][]{
+                        {"CAT", 214d},
+                        {"CAT", 214d},
+                        {"IBM", 214d},
+                        {"IBM", 214d},
+                });
 
         sendEvent("KGB", 75);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields,
-                new Object[][] {
-                                {"CAT", 289d},
-                                {"CAT", 289d},
-                                {"IBM", 289d},
-                                {"IBM", 289d},
-                                {"KGB", 289d},
-                                });
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields,
+                new Object[][]{
+                        {"CAT", 289d},
+                        {"CAT", 289d},
+                        {"IBM", 289d},
+                        {"IBM", 289d},
+                        {"KGB", 289d},
+                });
     }
 
     public void testAliases()
@@ -97,7 +97,7 @@ public class TestOrderByAggregateAll extends TestCase
         sendEvent("CAT", 6);
 
         String fields[] = "mySymbol,mySum".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT", 15.0}, {"CAT", 21.0}, {"CMU", 8.0}, {"CMU", 10.0}, {"IBM", 3.0}, {"IBM", 7.0}});
     }
     
@@ -127,7 +127,7 @@ public class TestOrderByAggregateAll extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBeanString("DOG"));
 
         String fields[] = "symbol".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT"}, {"CAT"}, {"CMU"}, {"IBM"}, {"IBM"}, {"KGB"}});
     }
 
@@ -150,7 +150,7 @@ public class TestOrderByAggregateAll extends TestCase
         sendEvent("CAT", 5);
 
         String fields[] = "symbol".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT"}, {"CAT"}, {"CMU"}, {"IBM"}, {"IBM"}, {"KGB"}});
 	}
 
@@ -173,7 +173,7 @@ public class TestOrderByAggregateAll extends TestCase
         sendEvent("CAT", 6);
 
         String fields[] = "symbol,sum(price)".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT", 15.0}, {"CAT", 21.0}, {"CMU", 8.0}, {"CMU", 10.0}, {"IBM", 3.0}, {"IBM", 7.0}});
     }
 
@@ -196,7 +196,7 @@ public class TestOrderByAggregateAll extends TestCase
         sendEvent("CAT", 6);
 
         String fields[] = "symbol,max(sum(price))".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT", 15.0}, {"CAT", 21.0}, {"CMU", 8.0}, {"CMU", 10.0}, {"IBM", 3.0}, {"IBM", 7.0}});
     }
 
@@ -220,7 +220,7 @@ public class TestOrderByAggregateAll extends TestCase
         sendEvent("CAT", 6);
 
         String fields[] = "symbol,sum(price)".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT", 15.0}, {"CAT", 21.0}, {"CMU", 8.0}, {"CMU", 10.0}, {"IBM", 3.0}, {"IBM", 7.0}});
     }
 
@@ -243,7 +243,7 @@ public class TestOrderByAggregateAll extends TestCase
         sendEvent("CAT", 6);
 
         String fields[] = "symbol,sum(price)".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT", 15.0}, {"CAT", 21.0}, {"CMU", 8.0}, {"CMU", 10.0}, {"IBM", 3.0}, {"IBM", 7.0}});
     }
 
@@ -272,7 +272,7 @@ public class TestOrderByAggregateAll extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBeanString("CMU"));
 
         String fields[] = "symbol,sum(price)".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT", 11.0}, {"CAT", 11.0}, {"CMU", 21.0}, {"CMU", 21.0}, {"IBM", 18.0}, {"IBM", 18.0}});
     }
 
@@ -301,7 +301,7 @@ public class TestOrderByAggregateAll extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBeanString("CMU"));
 
         String fields[] = "symbol,max(sum(price))".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT", 11.0}, {"CAT", 11.0}, {"CMU", 21.0}, {"CMU", 21.0}, {"IBM", 18.0}, {"IBM", 18.0}});
     }
 
@@ -330,7 +330,7 @@ public class TestOrderByAggregateAll extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBeanString("CMU"));
 
         String fields[] = "symbol,sum(price)".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields, new Object[][]{
                 {"CAT", 11.0}, {"CAT", 11.0}, {"CMU", 21.0}, {"CMU", 21.0}, {"IBM", 18.0}, {"IBM", 18.0}});
     }
     

@@ -15,12 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestOutputLimitFirstHaving extends TestCase {
@@ -72,7 +72,7 @@ public class TestOutputLimitFirstHaving extends TestCase {
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
         sendBeanEvent(11);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {101d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{101d});
 
         sendBeanEvent(1);
 
@@ -85,7 +85,7 @@ public class TestOutputLimitFirstHaving extends TestCase {
         assertFalse(listener.isInvoked());
 
         sendBeanEvent(100);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {114d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{114d});
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(4999));
         sendBeanEvent(0);
@@ -93,7 +93,7 @@ public class TestOutputLimitFirstHaving extends TestCase {
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(5000));
         sendBeanEvent(0);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {102d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{102d});
     }
 
     public void testHavingAvgOutputFirstEveryTwoMinutes()

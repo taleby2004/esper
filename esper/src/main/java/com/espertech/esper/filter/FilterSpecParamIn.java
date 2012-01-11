@@ -28,17 +28,17 @@ public final class FilterSpecParamIn extends FilterSpecParam
 
     /**
      * Ctor.
-     * @param propertyName is the event property name
+     * @param lookupable is the event property or function
      * @param filterOperator is expected to be the IN-list operator
      * @param listofValues is a list of constants and event property names
      * @throws IllegalArgumentException for illegal args
      */
-    public FilterSpecParamIn(String propertyName,
+    public FilterSpecParamIn(FilterSpecLookupable lookupable,
                              FilterOperator filterOperator,
                              List<FilterSpecParamInValue> listofValues)
         throws IllegalArgumentException
     {
-        super(propertyName, filterOperator);
+        super(lookupable, filterOperator);
         this.listOfValues = listofValues;
 
         boolean isAllConstants = false;
@@ -99,11 +99,6 @@ public final class FilterSpecParamIn extends FilterSpecParam
     public final String toString()
     {
         return super.toString() + "  in=(listOfValues=" + listOfValues.toString() + ')';
-    }
-
-    public int getFilterHash()
-    {
-        return 0;
     }
 
     public boolean equals(Object obj)

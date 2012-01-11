@@ -11,13 +11,13 @@
 
 package com.espertech.esper.view.ext;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.view.SupportBeanClassView;
 import com.espertech.esper.support.view.SupportStreamImpl;
 import com.espertech.esper.support.view.SupportViewDataChecker;
@@ -49,14 +49,14 @@ public class TestSortWindowView extends TestCase
         stream.insert(bean[0]);
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[0] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[0] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[0]}, myView.iterator());
 
         bean[1] = makeBean(800);
         bean[2] = makeBean(1200);
         stream.insert(new EventBean[] { bean[1], bean[2] });
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[1], bean[2] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[1], bean[0], bean[2] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[1], bean[0], bean[2]}, myView.iterator());
 
         bean[3] = makeBean(1200);
         bean[4] = makeBean(1000);
@@ -65,7 +65,7 @@ public class TestSortWindowView extends TestCase
         stream.insert(new EventBean[] { bean[3], bean[4], bean[5], bean[6] });
         SupportViewDataChecker.checkOldData(childView, new EventBean[] { bean[5], bean[2] });
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[3], bean[4], bean[5], bean[6] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[1], bean[4], bean[0], bean[6], bean[3] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[1], bean[4], bean[0], bean[6], bean[3]}, myView.iterator());
 
         bean[7] = makeBean(800);
         bean[8] = makeBean(700);
@@ -73,19 +73,19 @@ public class TestSortWindowView extends TestCase
         stream.insert(new EventBean[] { bean[7], bean[8], bean[9] });
         SupportViewDataChecker.checkOldData(childView, new EventBean[] { bean[3], bean[9], bean[6] });
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[7], bean[8], bean[9] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[8], bean[7], bean[1], bean[4], bean[0] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[8], bean[7], bean[1], bean[4], bean[0]}, myView.iterator());
 
         bean[10] = makeBean(1050);
         stream.insert(new EventBean[] { bean[10] });       // Thus bean[0] will be old data !
         SupportViewDataChecker.checkOldData(childView, new EventBean[] { bean[0] });
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[10] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[8], bean[7], bean[1], bean[4], bean[10] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[8], bean[7], bean[1], bean[4], bean[10]}, myView.iterator());
 
         bean[11] = makeBean(2000);
         stream.insert(new EventBean[] { bean[11] });       // Thus bean[1] will be old data !
         SupportViewDataChecker.checkOldData(childView, new EventBean[] { bean[1] });
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[11] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[8], bean[7], bean[4], bean[10], bean[11] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[8], bean[7], bean[4], bean[10], bean[11]}, myView.iterator());
     }
 
     public void testViewTwoProperties() throws Exception
@@ -106,14 +106,14 @@ public class TestSortWindowView extends TestCase
         stream.insert(bean[0]);
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[0] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[0] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[0]}, myView.iterator());
 
         bean[1] = makeBean(19d, 800);
         bean[2] = makeBean(18d, 1200);
         stream.insert(new EventBean[] { bean[1], bean[2] });
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[1], bean[2] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[1], bean[0], bean[2] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[1], bean[0], bean[2]}, myView.iterator());
 
         bean[3] = makeBean(17d, 1200);
         bean[4] = makeBean(16d, 1000);
@@ -122,7 +122,7 @@ public class TestSortWindowView extends TestCase
         stream.insert(new EventBean[] { bean[3], bean[4], bean[5], bean[6] });
         SupportViewDataChecker.checkOldData(childView, new EventBean[] { bean[5], bean[3] });
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[3], bean[4], bean[5], bean[6] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[1], bean[0], bean[4], bean[6], bean[2] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[1], bean[0], bean[4], bean[6], bean[2]}, myView.iterator());
 
         bean[7] = makeBean(13d, 800);
         bean[8] = makeBean(12d, 700);
@@ -130,19 +130,19 @@ public class TestSortWindowView extends TestCase
         stream.insert(new EventBean[] { bean[7], bean[8], bean[9] });
         SupportViewDataChecker.checkOldData(childView, new EventBean[] { bean[9], bean[2], bean[6] });
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[7], bean[8], bean[9] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[8], bean[1], bean[7], bean[0], bean[4] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[8], bean[1], bean[7], bean[0], bean[4]}, myView.iterator());
 
         bean[10] = makeBean(10d, 1050);
         stream.insert(new EventBean[] { bean[10] });       // Thus bean[0] will be old data !
         SupportViewDataChecker.checkOldData(childView, new EventBean[] { bean[0] });
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[10] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[8], bean[1], bean[7], bean[4], bean[10] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[8], bean[1], bean[7], bean[4], bean[10]}, myView.iterator());
 
         bean[11] = makeBean(2000);
         stream.insert(new EventBean[] { bean[11] });       // Thus bean[1] will be old data !
         SupportViewDataChecker.checkOldData(childView, new EventBean[] { bean[1] });
         SupportViewDataChecker.checkNewData(childView, new EventBean[] { bean[11] });
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), new EventBean[] { bean[8], bean[7], bean[4], bean[10], bean[11] });
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{bean[8], bean[7], bean[4], bean[10], bean[11]}, myView.iterator());
     }
 
     private EventBean makeBean(long volume)

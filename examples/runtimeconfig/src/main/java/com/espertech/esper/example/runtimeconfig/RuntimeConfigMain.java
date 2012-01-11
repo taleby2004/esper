@@ -89,7 +89,7 @@ public class RuntimeConfigMain
 
     private void configureCustomAggregationFunction() {
         // define a append-string aggregation function provided by another class
-        provider.getEPAdministrator().getConfiguration().addPlugInAggregationFunction("concat", MyConcatAggregationFunction.class.getName());
+        provider.getEPAdministrator().getConfiguration().addPlugInAggregationFunctionFactory("concat", MyConcatAggregationFunctionFactory.class.getName());
 
         // Add an event type that has a string-type property value
         Map<String, Object> typeDefinition = new HashMap<String, Object>();

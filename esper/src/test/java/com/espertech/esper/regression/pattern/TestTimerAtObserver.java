@@ -12,14 +12,14 @@
 package com.espertech.esper.regression.pattern;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
@@ -359,7 +359,7 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
         expectedResult[3] = cal.getTime().toString();
         cal.set(2008, 7, 8, 8, 0, 0); //"Fri Aug 08 08:00:00 EDT 2008"
         expectedResult[4] = cal.getTime().toString();
-        ArrayAssertionUtil.assertEqualsExactOrder(invocations.toArray(), expectedResult);
+        EPAssertionUtil.assertEqualsExactOrder(expectedResult, invocations.toArray());
     }
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)

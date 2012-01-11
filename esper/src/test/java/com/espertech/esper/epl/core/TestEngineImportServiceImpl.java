@@ -11,8 +11,9 @@
 
 package com.espertech.esper.epl.core;
 
-import junit.framework.TestCase;
+import com.espertech.esper.client.ConfigurationPlugInAggregationFunction;
 import com.espertech.esper.support.epl.SupportPluginAggregationMethodOne;
+import junit.framework.TestCase;
 
 import java.lang.reflect.Method;
 
@@ -43,9 +44,9 @@ public class TestEngineImportServiceImpl extends TestCase
 
     public void testAddAggregation() throws EngineImportException
     {
-        engineImportService.addAggregation("abc", "abcdef.G");
-        engineImportService.addAggregation("abcDefGhk", "ab");
-        engineImportService.addAggregation("a", "Yh");
+        engineImportService.addAggregation("abc", new ConfigurationPlugInAggregationFunction("abc", "abcdef.G", null));
+        engineImportService.addAggregation("abcDefGhk", new ConfigurationPlugInAggregationFunction("abcDefGhk", "ab", null));
+        engineImportService.addAggregation("a", new ConfigurationPlugInAggregationFunction("a", "Yh", null));
 
         tryInvalidAddAggregation("g h", "");
         tryInvalidAddAggregation("gh", "j j");
@@ -54,7 +55,7 @@ public class TestEngineImportServiceImpl extends TestCase
 
     public void testResolveAggregationMethod() throws Exception
     {
-        engineImportService.addAggregation("abc", SupportPluginAggregationMethodOne.class.getName());
+        engineImportService.addAggregation("abc", new ConfigurationPlugInAggregationFunction("abc", SupportPluginAggregationMethodOne.class.getName(), null));
         assertTrue(engineImportService.resolveAggregation("abc") instanceof SupportPluginAggregationMethodOne);
     }
 
@@ -69,7 +70,7 @@ public class TestEngineImportServiceImpl extends TestCase
             // expected
         }
         
-        engineImportService.addAggregation("abc", "abcdef.G");
+        engineImportService.addAggregation("abc", new ConfigurationPlugInAggregationFunction("abc", "abcdef.G", null));
         try
         {
             engineImportService.resolveAggregation("abc");
@@ -84,15 +85,15 @@ public class TestEngineImportServiceImpl extends TestCase
     {
         String className = "java.lang.Math";
         Class expected = Math.class;
-        assertEquals(expected, engineImportService.resolveClassInternal(className));
+        assertEquals(expected, engineImportService.resolveClassInternal(className, false));
 
         engineImportService.addImport("java.lang.Math");
-        assertEquals(expected, engineImportService.resolveClassInternal(className));
+        assertEquals(expected, engineImportService.resolveClassInternal(className, false));
 
         engineImportService.addImport("java.lang.*");
         className = "String";
         expected = String.class;
-        assertEquals(expected, engineImportService.resolveClassInternal(className));
+        assertEquals(expected, engineImportService.resolveClassInternal(className, false));
     }
 
     public void testResolveClassInvalid()
@@ -100,7 +101,7 @@ public class TestEngineImportServiceImpl extends TestCase
         String className = "Math";
         try
         {
-            engineImportService.resolveClassInternal(className);
+            engineImportService.resolveClassInternal(className, false);
             fail();
         }
         catch (ClassNotFoundException e)
@@ -148,7 +149,7 @@ public class TestEngineImportServiceImpl extends TestCase
     {
         try
         {
-            engineImportService.addAggregation(funcName, className);
+            engineImportService.addAggregation(funcName, new ConfigurationPlugInAggregationFunction(funcName, className, null));
         }
         catch (EngineImportException ex)
         {

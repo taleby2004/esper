@@ -11,15 +11,15 @@
 
 package com.espertech.esper.regression.view;
 
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import junit.framework.TestCase;
 
 public class TestCountAll extends TestCase
 {
@@ -57,10 +57,10 @@ public class TestCountAll extends TestCase
         String[] fields = "size,symbol,feed".split(",");
 
         sendEvent("DELL", 1L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1L, "DELL", "f1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1L, "DELL", "f1"});
 
         sendEvent("DELL", 1L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2L, "DELL", "f1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2L, "DELL", "f1"});
     }
 
     public void testCountPlusStar()
@@ -155,6 +155,6 @@ public class TestCountAll extends TestCase
 
     private void assertSize(long newSize, long oldSize)
     {
-        listener.assertFieldEqualsAndReset("size", new Object[] {newSize}, new Object[] {oldSize});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "size", new Object[]{newSize}, new Object[]{oldSize});
     }
 }

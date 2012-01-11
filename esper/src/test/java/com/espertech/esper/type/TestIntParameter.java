@@ -11,8 +11,7 @@
 
 package com.espertech.esper.type;
 
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.type.IntParameter;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 
 import java.util.Set;
 
@@ -33,18 +32,29 @@ public class TestIntParameter extends TestCase
     {
         IntParameter intParam = new IntParameter(3);
         Set<Integer> result = intParam.getValuesInRange(1, 8);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3}, result);
 
         result = intParam.getValuesInRange(1, 2);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{}, result);
 
         result = intParam.getValuesInRange(4, 10);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{}, result);
 
         result = intParam.getValuesInRange(1, 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3}, result);
 
         result = intParam.getValuesInRange(3, 5);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3}, result);
+    }
+
+    public void testContainsPoint() {
+        IntParameter intParam = new IntParameter(3);
+        assertTrue(intParam.containsPoint(3));
+        assertFalse(intParam.containsPoint(2));
+    }
+
+    public void testFormat() {
+        IntParameter intParam = new IntParameter(3);
+        assertEquals("3", intParam.formatted());
     }
 }

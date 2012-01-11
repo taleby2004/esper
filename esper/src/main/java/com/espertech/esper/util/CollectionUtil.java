@@ -181,4 +181,26 @@ public class CollectionUtil
         }
         return true;
     }
+
+    public static String toStringArray(Object[] received) {
+        StringBuilder buf = new StringBuilder();
+        String delimiter = "";
+        buf.append("[");
+        for (Object t : received)
+        {
+            buf.append(delimiter);
+            if (t == null) {
+                buf.append("null");
+            }
+            else if (t instanceof Object[]) {
+                buf.append(toStringArray((Object[]) t));
+            }
+            else {
+                buf.append(t);
+            }
+            delimiter = ", ";
+        }
+        buf.append("]");
+        return buf.toString();
+    }
 }

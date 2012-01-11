@@ -9,13 +9,13 @@
 package com.espertech.esperio.regression.adapter;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.adapter.InputAdapter;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.AdapterCoordinatorImpl;
 import com.espertech.esperio.AdapterCoordinator;
-import com.espertech.esperio.support.util.SupportUpdateListener;
 import com.espertech.esperio.csv.CSVInputAdapter;
 import com.espertech.esperio.csv.CSVInputAdapterSpec;
 import junit.framework.TestCase;

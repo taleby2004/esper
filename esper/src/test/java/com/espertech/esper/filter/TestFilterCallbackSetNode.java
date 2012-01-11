@@ -11,16 +11,19 @@
 
 package com.espertech.esper.filter;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanSimple;
+import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.event.SupportEventTypeFactory;
 import com.espertech.esper.support.filter.SupportEventEvaluator;
 import com.espertech.esper.support.filter.SupportFilterHandle;
 import com.espertech.esper.support.filter.SupportFilterParamIndex;
-import com.espertech.esper.support.event.SupportEventBeanFactory;
+import junit.framework.TestCase;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class TestFilterCallbackSetNode extends TestCase
 {
@@ -52,7 +55,9 @@ public class TestFilterCallbackSetNode extends TestCase
         assertFalse(testNode.isEmpty());
 
         // Add an indexOne
-        FilterParamIndexBase indexOne = new SupportFilterParamIndex();
+        EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
+        FilterSpecLookupable lookupable = new FilterSpecLookupable("intPrimitive", eventType.getGetter("intPrimitive"), eventType.getPropertyType("intPrimitive"));
+        FilterParamIndexBase indexOne = new SupportFilterParamIndex(lookupable);
         testNode.add(indexOne);
 
         // Check after add
@@ -84,7 +89,7 @@ public class TestFilterCallbackSetNode extends TestCase
         matches.clear();
 
         // Create, add and populate an index node
-        FilterParamIndexBase index = new FilterParamIndexEquals("myString", eventBean.getEventType());
+        FilterParamIndexBase index = new FilterParamIndexEquals(makeLookupable("myString", eventBean.getEventType()));
         testNode.add(index);
         index.put("DepositEvent_1", testEvaluator);
 
@@ -95,5 +100,9 @@ public class TestFilterCallbackSetNode extends TestCase
         assertTrue(testEvaluator.getLastEvent() == eventBean);
         assertEquals(1, matches.size());
         assertEquals(expr, matches.get(0));
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName, EventType eventType) {
+        return new FilterSpecLookupable(fieldName, eventType.getGetter(fieldName), eventType.getPropertyType(fieldName));
     }
 }

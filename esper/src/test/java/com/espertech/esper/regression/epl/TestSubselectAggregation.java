@@ -12,13 +12,13 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestSubselectAggregation extends TestCase
@@ -52,23 +52,23 @@ public class TestSubselectAggregation extends TestCase
         String[] fields = "p00,sump00".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "T1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"T1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"T1", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T1", 10));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "T1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"T1", 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"T1", 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T1", 11));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3, "T1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"T1", 21});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"T1", 21});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(4, "T2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"T2", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"T2", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T2", -2));
         epService.getEPRuntime().sendEvent(new SupportBean("T2", -7));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(5, "T2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"T2", -9});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"T2", -9});
     }
 
     public void testCorrelatedAggregationWhereGreater()
@@ -100,14 +100,14 @@ public class TestSubselectAggregation extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(11, "T1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"T1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"T1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T1", 11));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(21, "T1"));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(22, "T1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"T1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"T1"});
     }
 
     public void testPriceMap()

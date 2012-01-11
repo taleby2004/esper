@@ -19,6 +19,7 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
     private String functionClassName;
     private String functionMethodName;
     private ValueCache valueCache = ValueCache.DISABLED;
+    private FilterOptimizable filterOptimizable = FilterOptimizable.ENABLED;
     private static final long serialVersionUID = 4096734947283212246L;
 
     /**
@@ -98,6 +99,14 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
         this.valueCache = valueCache;
     }
 
+    public FilterOptimizable getFilterOptimizable() {
+        return filterOptimizable;
+    }
+
+    public void setFilterOptimizable(FilterOptimizable filterOptimizable) {
+        this.filterOptimizable = filterOptimizable;
+    }
+
     /**
      * Enum for single-row function value cache setting.
      */
@@ -119,4 +128,8 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
         CONFIGURED
     }
 
+    public enum FilterOptimizable {
+        DISABLED,
+        ENABLED
+    }
 }

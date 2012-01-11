@@ -52,9 +52,14 @@ public class ASTAnnotationHelper
                 Object enumValue = walkClassIdent(node.getChild(i), engineImportService);
                 values.add(new Pair<String, Object>("value", enumValue));
             }
+            else if (node.getChild(i).getType() == EsperEPL2Ast.ANNOTATION_ARRAY)
+            {
+                Object[] arrayValues = walkArray(node.getChild(1), engineImportService);
+                values.add(new Pair<String, Object>("value", arrayValues));
+            }
             else
             {
-                value = walkValue(node.getChild(i));
+                value = walkValue(node.getChild(i), engineImportService);
                 values.add(new Pair<String, Object>("value", value));
             }
         }
@@ -62,9 +67,24 @@ public class ASTAnnotationHelper
         return new AnnotationDesc(name, values);
     }
 
-    private static Object walkValue(Tree child)
+    private static Object walkValue(Tree child, EngineImportService engineImportService)
     {
-        return ASTConstantHelper.parse(child);
+        if (child.getType() == EsperEPL2Ast.ANNOTATION_ARRAY)
+        {
+            return walkArray(child, engineImportService);
+        }
+        if (child.getType() == EsperEPL2Ast.ANNOTATION)
+        {
+            return walk(child, engineImportService);
+        }
+        else if (child.getType() == EsperEPL2Ast.CLASS_IDENT)
+        {
+            return walkClassIdent(child, engineImportService);
+        }
+        else
+        {
+            return ASTConstantHelper.parse(child);
+        }
     }
 
     private static Pair<String, Object> walkValuePair(Tree node, EngineImportService engineImportService)
@@ -72,7 +92,7 @@ public class ASTAnnotationHelper
         String name = node.getChild(0).getText();
         if (node.getChild(1).getType() == EsperEPL2Ast.ANNOTATION_ARRAY)
         {
-            Object[] values = walkArray(node.getChild(1));
+            Object[] values = walkArray(node.getChild(1), engineImportService);
             return new Pair<String, Object>(name, values);
         }
         if (node.getChild(1).getType() == EsperEPL2Ast.ANNOTATION)
@@ -111,12 +131,12 @@ public class ASTAnnotationHelper
         throw new ASTWalkException("Annotation enumeration value '" + enumValueText + "' not recognized as an enumeration class, please check imports or type used");
     }
 
-    private static Object[] walkArray(Tree node)
+    private static Object[] walkArray(Tree node, EngineImportService engineImportService)
     {
         Object[] values = new Object[node.getChildCount()];
         for (int i = 0; i < node.getChildCount(); i++)
         {
-            values[i] = walkValue(node.getChild(i));
+            values[i] = walkValue(node.getChild(i), engineImportService);
         }
         return values;
     }

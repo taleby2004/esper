@@ -11,7 +11,7 @@
 
 package com.espertech.esper.epl.view;
 
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestOutputConditionNull extends TestCase

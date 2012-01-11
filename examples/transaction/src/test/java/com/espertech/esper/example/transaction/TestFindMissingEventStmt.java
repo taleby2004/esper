@@ -1,5 +1,6 @@
 package com.espertech.esper.example.transaction;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.EventBean;

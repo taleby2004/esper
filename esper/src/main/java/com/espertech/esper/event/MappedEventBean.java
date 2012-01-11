@@ -11,12 +11,14 @@
 
 package com.espertech.esper.event;
 
+import com.espertech.esper.client.EventBean;
+
 import java.util.Map;
 
 /**
  * For events that are maps of properties.
  */
-public interface MappedEventBean
+public interface MappedEventBean extends EventBean
 {
     /**
      * Returns property map.

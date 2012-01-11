@@ -11,12 +11,12 @@
 
 package com.espertech.esper.epl.core;
 
-import junit.framework.TestCase;
-import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.epl.SupportStreamTypeSvc3Stream;
 import com.espertech.esper.support.event.SupportEventAdapterService;
+import junit.framework.TestCase;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ public class TestSelectExprJoinWildcardProcessor extends TestCase
         SupportStreamTypeSvc3Stream supportTypes = new SupportStreamTypeSvc3Stream();
 
         processor = new SelectExprJoinWildcardProcessor(Collections.<Integer>emptyList(), "id", supportTypes.getStreamNames(), supportTypes.getEventTypes(),
-                SupportEventAdapterService.getService(), null, selectExprEventTypeRegistry, null, null);
+                SupportEventAdapterService.getService(), null, selectExprEventTypeRegistry, null);
     }
 
     public void testProcess()

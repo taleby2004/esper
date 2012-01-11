@@ -12,14 +12,12 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.event.EventTypeAssertionUtil;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import javax.xml.xpath.XPathConstants;
@@ -51,12 +49,12 @@ public class TestSchemaXMLEventReplace extends TestCase
         EventType type = wildStmt.getEventType();
         EventTypeAssertionUtil.assertConsistency(type);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("nested1", Node.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("prop4", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested3", Node.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
-           }, type.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("nested1", Node.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("prop4", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested3", Node.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
+        }, type.getPropertyDescriptors());
 
         // update type and replace
         schemaUri = TestSchemaXMLEventReplace.class.getClassLoader().getResource(CLASSLOADER_SCHEMA_VERSION2_URI).toString();
@@ -68,14 +66,14 @@ public class TestSchemaXMLEventReplace extends TestCase
         type = wildStmt.getEventType();
         EventTypeAssertionUtil.assertConsistency(type);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("nested1", Node.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("prop4", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("prop5", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested3", Node.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("countProp", Double.class, null, false, false, false, false, false),
-           }, type.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("nested1", Node.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("prop4", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("prop5", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested3", Node.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("countProp", Double.class, null, false, false, false, false, false),
+        }, type.getPropertyDescriptors());
     }
 
     private static final Log log = LogFactory.getLog(TestSchemaXMLEventReplace.class);

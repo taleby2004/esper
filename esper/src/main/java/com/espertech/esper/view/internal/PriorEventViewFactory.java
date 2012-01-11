@@ -51,7 +51,7 @@ public class PriorEventViewFactory implements ViewFactory
         return new PriorEventView(agentInstanceViewFactoryContext.getPriorViewUpdatedCollection());
     }
 
-    public ViewUpdatedCollection makeViewUpdatedCollection(SortedMap<Integer, List<ExprPriorNode>> callbacksPerIndex, int[] agentInstanceIds) {
+    public ViewUpdatedCollection makeViewUpdatedCollection(SortedMap<Integer, List<ExprPriorNode>> callbacksPerIndex, int agentInstanceId) {
 
         if (callbacksPerIndex.isEmpty())
         {

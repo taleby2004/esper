@@ -11,13 +11,15 @@
 
 package com.espertech.esper.epl.variable;
 
-import junit.framework.TestCase;
 import com.espertech.esper.schedule.SchedulingServiceImpl;
-import com.espertech.esper.timer.TimeSourceService;
-import com.espertech.esper.timer.TimeSourceServiceImpl;
 import com.espertech.esper.support.event.SupportEventAdapterService;
+import com.espertech.esper.timer.TimeSourceServiceImpl;
+import junit.framework.TestCase;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 public class TestVariableService extends TestCase
 {
@@ -67,7 +69,7 @@ public class TestVariableService extends TestCase
             char c = 'A';
             c+=i;
             variables[i] = Character.toString(c);
-            service.createNewVariable(variables[i], Integer.class.getName(), 0, null);
+            service.createNewVariable(variables[i], Integer.class.getName(), 0, false, null);
         }
 
         ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
@@ -101,7 +103,7 @@ public class TestVariableService extends TestCase
     {
         assertNull(service.getReader("a"));
 
-        service.createNewVariable("a", Long.class.getName(), 100L, null);
+        service.createNewVariable("a", Long.class.getName(), 100L, false, null);
         VariableReader reader = service.getReader("a");
         assertEquals(Long.class, reader.getType());
         assertEquals(100L, reader.getValue());
@@ -127,7 +129,7 @@ public class TestVariableService extends TestCase
         VariableReader readers[] = new VariableReader[variables.length];
         for (int i = 0; i < variables.length; i++)
         {
-            service.createNewVariable(variables[i], Long.class.getName(), 100L, null);
+            service.createNewVariable(variables[i], Long.class.getName(), 100L, false, null);
             readers[i] = service.getReader(variables[i]);
         }
 
@@ -153,12 +155,12 @@ public class TestVariableService extends TestCase
 
     public void testInvalid() throws Exception
     {
-        service.createNewVariable("a", Long.class.getName(), null, null);
+        service.createNewVariable("a", Long.class.getName(), null, false, null);
         assertNull(service.getReader("dummy"));
 
         try
         {
-            service.createNewVariable("a", Long.class.getName(), null, null);
+            service.createNewVariable("a", Long.class.getName(), null, false, null);
             fail();
         }
         catch (VariableExistsException e)

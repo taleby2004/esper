@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +55,7 @@ public class TestNewExpr extends TestCase
 
         String[] fieldsInner = "string,intPrimitive".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", -5));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {"xE1x", -3});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{"xE1x", -3});
     }
 
     public void testDefaultColumnsAndSODA()
@@ -100,13 +100,13 @@ public class TestNewExpr extends TestCase
 
         String[] fieldsInner = "string,intPrimitive,col2".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {null, null, null});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{null, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 2));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {"Q", 2, "AA"});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{"Q", 2, "AA"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B", 3));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {"B", 10, "BB"});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{"B", 10, "BB"});
 
         stmt.destroy();
     }
@@ -145,16 +145,16 @@ public class TestNewExpr extends TestCase
 
         String[] fieldsInner = "col1,col2".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {"Z", 30});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{"Z", 30});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 2));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {"X", 10});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{"X", 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B", 3));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {"Y", 20});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{"Y", 20});
 
         epService.getEPRuntime().sendEvent(new SupportBean("C", 4));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {null, null});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{null, null});
 
         stmt.destroy();
     }

@@ -12,10 +12,10 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.event.EventTypeAssertionUtil;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -80,12 +80,12 @@ public class TestEventPropertyDynamicXML extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("type?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("dyn[1]?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested.nes2?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("map('a')?", Node.class, null, false, false, false, false, false),
-           }, stmt.getEventType().getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("type?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("dyn[1]?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested.nes2?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("map('a')?", Node.class, null, false, false, false, false, false),
+        }, stmt.getEventType().getPropertyDescriptors());
         EventTypeAssertionUtil.assertConsistency(stmt.getEventType());
 
         EventSender sender = epService.getEPRuntime().getEventSender("MyEvent");
@@ -119,12 +119,12 @@ public class TestEventPropertyDynamicXML extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("type?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("dyn[1]?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested.nes2?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("map('a')?", Node.class, null, false, false, false, false, false),
-           }, stmt.getEventType().getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("type?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("dyn[1]?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested.nes2?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("map('a')?", Node.class, null, false, false, false, false, false),
+        }, stmt.getEventType().getPropertyDescriptors());
         EventTypeAssertionUtil.assertConsistency(stmt.getEventType());
 
         EventSender sender = epService.getEPRuntime().getEventSender("MyEvent");
@@ -153,13 +153,13 @@ public class TestEventPropertyDynamicXML extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("type?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("dyn[1]?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested.nes2?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("map('a')?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("other?", Node.class, null, false, false, false, false, false),
-           }, stmt.getEventType().getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("type?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("dyn[1]?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested.nes2?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("map('a')?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("other?", Node.class, null, false, false, false, false, false),
+        }, stmt.getEventType().getPropertyDescriptors());
         EventTypeAssertionUtil.assertConsistency(stmt.getEventType());
 
         Document root = SupportXML.sendEvent(epService.getEPRuntime(), NOSCHEMA_XML);
@@ -186,12 +186,12 @@ public class TestEventPropertyDynamicXML extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("type?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("dyn[1]?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested.nes2?", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("map('a')?", Node.class, null, false, false, false, false, false),
-           }, stmt.getEventType().getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("type?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("dyn[1]?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested.nes2?", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("map('a')?", Node.class, null, false, false, false, false, false),
+        }, stmt.getEventType().getPropertyDescriptors());
         EventTypeAssertionUtil.assertConsistency(stmt.getEventType());
 
         Document root = SupportXML.sendEvent(epService.getEPRuntime(), NOSCHEMA_XML);

@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -115,12 +116,13 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
         Viewable[] streamViews;
         Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies;
         Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies;
+        List<StatementAgentInstancePreload> preloadList = new ArrayList<StatementAgentInstancePreload>();
 
         try {
             // create root viewables
             Viewable[] eventStreamParentViewable = new Viewable[numStreams];
             for (int stream = 0; stream < eventStreamParentViewableActivators.length; stream++) {
-                ViewableActivationResult activationResult = eventStreamParentViewableActivators[stream].activate(agentInstanceContext);
+                ViewableActivationResult activationResult = eventStreamParentViewableActivators[stream].activate(agentInstanceContext, false);
                 viewableActivationResult[stream] = activationResult;
                 stopCallbacks.add(activationResult.getStopCallback());
 
@@ -173,14 +175,15 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
 
             // obtain result set processor and aggregation services
             Pair<ResultSetProcessor, AggregationService> processorPair = EPStatementStartMethodHelperUtil.startResultSetAndAggregation(resultSetProcessorFactoryDesc, agentInstanceContext);
-            ResultSetProcessor resultSetProcessor = processorPair.getFirst();
+            final ResultSetProcessor resultSetProcessor = processorPair.getFirst();
             aggregationService = processorPair.getSecond();
 
             // for just 1 event stream without joins, handle the one-table process separatly.
-            JoinPreloadMethod joinPreloadMethod = null;
+            final JoinPreloadMethod joinPreloadMethod;
             if (streamViews.length == 1)
             {
                 finalView = handleSimpleSelect(streamViews[0], resultSetProcessor, agentInstanceContext);
+                joinPreloadMethod = null;
             }
             else
             {
@@ -194,7 +197,9 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
             boolean hasNamedWindow = false;
             for (int i = 0; i < statementSpec.getStreamSpecs().size(); i++)
             {
+                final int streamNum = i;
                 StreamSpecCompiled streamSpec = statementSpec.getStreamSpecs().get(i);
+
                 if (streamSpec instanceof NamedWindowConsumerStreamSpec)
                 {
                     hasNamedWindow = true;
@@ -202,48 +207,59 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
                     NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(namedSpec.getWindowName());
                     NamedWindowProcessorInstance processorInstance = processor.getProcessorInstance(agentInstanceContext);
                     if (processorInstance != null) {
-                        NamedWindowTailViewInstance consumerView = processorInstance.getTailViewInstance();
-                        NamedWindowConsumerView view = (NamedWindowConsumerView) viewableActivationResult[i].getViewable();
+                        final NamedWindowTailViewInstance consumerView = processorInstance.getTailViewInstance();
+                        final NamedWindowConsumerView view = (NamedWindowConsumerView) viewableActivationResult[i].getViewable();
 
                         // preload view for stream unless the expiry policy is batch window
-                        ArrayList<EventBean> eventsInWindow = new ArrayList<EventBean>();
-                        if (!consumerView.getTailView().isParentBatchWindow())
+                        Iterator<EventBean> consumerViewIterator = consumerView.iterator();
+                        if (!consumerView.getTailView().isParentBatchWindow() && consumerViewIterator.hasNext() && !isRecoveringResilient)
                         {
-                            for (EventBean aConsumerView : consumerView)
-                            {
-                                eventsInWindow.add(aConsumerView);
-                            }
-                        }
-                        if (!eventsInWindow.isEmpty() && !isRecoveringResilient)
-                        {
-                            EventBean[] newEvents = eventsInWindow.toArray(new EventBean[eventsInWindow.size()]);
-                            view.update(newEvents, null);
-                            if (joinPreloadMethod != null && !joinPreloadMethod.isPreloading() && agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable() != null) {
-                                agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable().execute(agentInstanceContext);
-                            }
+                            preloadList.add(new StatementAgentInstancePreload() {
+                                public void executePreload() {
+                                    ArrayList<EventBean> eventsInWindow = new ArrayList<EventBean>();
+                                    for (EventBean aConsumerView : consumerView) {
+                                        eventsInWindow.add(aConsumerView);
+                                    }
+
+                                    EventBean[] newEvents = eventsInWindow.toArray(new EventBean[eventsInWindow.size()]);
+                                    view.update(newEvents, null);
+                                    if (joinPreloadMethod != null && !joinPreloadMethod.isPreloading() && agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable() != null) {
+                                        agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable().execute(agentInstanceContext);
+                                    }
+                                }
+                            });
                         }
                     }
                     else {
                         log.info("Named window access is out-of-context, the named window '" + namedSpec.getWindowName() + "' has been declared for a different context then the current statement, the aggregation and join state will not be initialized for statement expression [" + statementContext.getExpression() + "]");
                     }
 
-                    // in a join, preload indexes, if any
-                    if (joinPreloadMethod != null)
-                    {
-                        joinPreloadMethod.preloadFromBuffer(i);
-                    }
-                    else
-                    {
-                        if (agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable() != null) {
-                            agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable().execute(agentInstanceContext);
+                    preloadList.add(new StatementAgentInstancePreload() {
+                        public void executePreload() {
+                            // in a join, preload indexes, if any
+                            if (joinPreloadMethod != null)
+                            {
+                                joinPreloadMethod.preloadFromBuffer(streamNum);
+                            }
+                            else
+                            {
+                                if (agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable() != null) {
+                                    agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable().execute(agentInstanceContext);
+                                }
+                            }
                         }
-                    }
+                    });
                 }
             }
+            
             // last, for aggregation we need to send the current join results to the result set processor
             if ((hasNamedWindow) && (joinPreloadMethod != null) && (!isRecoveringResilient) && resultSetProcessorFactoryDesc.getResultSetProcessorFactory().hasAggregation())
             {
-                joinPreloadMethod.preloadAggregation(resultSetProcessor);
+                preloadList.add(new StatementAgentInstancePreload() {
+                    public void executePreload() {
+                        joinPreloadMethod.preloadAggregation(resultSetProcessor);
+                    }
+                });
             }
         }
         catch (RuntimeException ex) {
@@ -251,7 +267,7 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
             throw ex;
         }
 
-        return new StatementAgentInstanceFactorySelectResult(finalView, stopCallback, agentInstanceContext, aggregationService, subselectStrategies, priorNodeStrategies, previousNodeStrategies);
+        return new StatementAgentInstanceFactorySelectResult(finalView, stopCallback, agentInstanceContext, aggregationService, subselectStrategies, priorNodeStrategies, previousNodeStrategies, preloadList);
     }
 
     private Viewable handleSimpleSelect(Viewable view,

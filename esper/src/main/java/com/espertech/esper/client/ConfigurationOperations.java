@@ -33,14 +33,27 @@ public interface ConfigurationOperations
     public void addEventTypeAutoName(String packageName);
 
     /**
+     * Adds a plug-in aggregation function given a EPL function name and an aggregation factory class name.
+     * <p>
+     * The same function name cannot be added twice.
+     * @param functionName is the new aggregation function name for use in EPL
+     * @param aggregationFactoryClassName is the fully-qualified class name of the class implementing the aggregation function factory interface {@link com.espertech.esper.client.hook.AggregationFunctionFactory}
+     * @throws ConfigurationException is thrown to indicate a problem adding the aggregation function
+     */
+    public void addPlugInAggregationFunctionFactory(String functionName, String aggregationFactoryClassName) throws ConfigurationException;
+
+    /**
      * Adds a plug-in aggregation function given a EPL function name and an aggregation class name.
+     * <p>
+     * Use {@link #addPlugInAggregationFunctionFactory} instead.
      * <p>
      * The aggregation class must extends the base class {@link com.espertech.esper.epl.agg.AggregationSupport}.
      * <p>
      * The same function name cannot be added twice.
      * @param functionName is the new aggregation function name for use in EPL
      * @param aggregationClassName is the fully-qualified class name of the class implementing the aggregation function
-     * @throws ConfigurationException is thrown to indicate a problem adding the aggregation function
+     * @throws ConfigurationException is thrown to indicate a problem adding the aggregation functionz
+     * @deprecated
      */
     public void addPlugInAggregationFunction(String functionName, String aggregationClassName) throws ConfigurationException;
 
@@ -55,6 +68,18 @@ public interface ConfigurationOperations
      * @throws ConfigurationException is thrown to indicate a problem adding the single-row function
      */
     public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws ConfigurationException;
+
+    /**
+     * Adds a plug-in single-row function given a EPL function name, a class name, method name and setting for value-cache behavior.
+     * <p>
+     * The same function name cannot be added twice.
+     * @param functionName is the new single-row function name for use in EPL
+     * @param className is the fully-qualified class name of the class implementing the single-row function
+     * @param methodName is the public static method provided by the class that implements the single-row function
+     * @param filterOptimizable whether the single-row function, when used in filters, may be subject to reverse index lookup based on the function result
+     * @throws ConfigurationException is thrown to indicate a problem adding the single-row function
+     */
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws ConfigurationException;
 
     /**
      * Adds a plug-in single-row function given a EPL function name, a class name and a method name.
@@ -235,6 +260,20 @@ public interface ConfigurationOperations
      * is already in use
      */
     public void addVariable(String variableName, String type, Object initializationValue) throws ConfigurationException;
+
+    /**
+     * Add a variable, allowing constants.
+     * <p>
+     * Use the runtime API to set variable values or EPL statements to change variable values.
+     * @param variableName name of the variable to add
+     * @param type the type name of the variable, must be a primitive or boxed Java-builtin scalar type or "object" for any
+     * value or an event type name.
+     * @param initializationValue is the first assigned value
+     * @param constant true to identify the variable as a constant
+     * @throws ConfigurationException if the type and initialization value don't match or the variable name
+     * is already in use
+     */
+    public void addVariable(String variableName, String type, Object initializationValue, boolean constant) throws ConfigurationException;
 
     /**
      * Adds an name for an event type that one of the plug-in event representations resolves to an event type.

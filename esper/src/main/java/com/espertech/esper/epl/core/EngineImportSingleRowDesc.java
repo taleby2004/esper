@@ -8,37 +8,25 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
-import com.espertech.esper.client.ConfigurationMethodRef;
 import com.espertech.esper.client.ConfigurationPlugInSingleRowFunction;
-import com.espertech.esper.collection.Pair;
-import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.epl.expression.*;
-import com.espertech.esper.util.JavaClassHelper;
-import com.espertech.esper.util.MethodResolver;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Provides information about a single-row function.
  */
-public class EngineImportSingleRowDesc
+public class EngineImportSingleRowDesc implements Serializable
 {
     private final String className;
     private final String methodName;
     private final ConfigurationPlugInSingleRowFunction.ValueCache valueCache;
+    private final ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable;
 
-    public EngineImportSingleRowDesc(String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) {
+    public EngineImportSingleRowDesc(String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) {
         this.className = className;
         this.methodName = methodName;
         this.valueCache = valueCache;
+        this.filterOptimizable = filterOptimizable;
     }
 
     public String getClassName() {
@@ -51,5 +39,9 @@ public class EngineImportSingleRowDesc
 
     public ConfigurationPlugInSingleRowFunction.ValueCache getValueCache() {
         return valueCache;
+    }
+
+    public ConfigurationPlugInSingleRowFunction.FilterOptimizable getFilterOptimizable() {
+        return filterOptimizable;
     }
 }

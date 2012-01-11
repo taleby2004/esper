@@ -9,7 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -23,8 +23,8 @@ import java.util.Map;
  */
 public final class FilterParamIndexDoubleRangeInverted extends FilterParamIndexDoubleRangeBase
 {
-    public FilterParamIndexDoubleRangeInverted(String attributeName, FilterOperator filterOperator, EventType eventType) {
-        super(attributeName, filterOperator, eventType);
+    public FilterParamIndexDoubleRangeInverted(FilterSpecLookupable lookupable, FilterOperator filterOperator) {
+        super(lookupable, filterOperator);
         if (!(filterOperator.isInvertedRangeOperator()))
         {
             throw new IllegalArgumentException("Invalid filter operator " + filterOperator);
@@ -33,7 +33,7 @@ public final class FilterParamIndexDoubleRangeInverted extends FilterParamIndexD
 
     public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
-        Object objAttributeValue = this.getGetter().get(eventBean);
+        Object objAttributeValue = lookupable.getGetter().get(eventBean);
 
         if (objAttributeValue == null)
         {

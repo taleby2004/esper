@@ -8,13 +8,16 @@
  **************************************************************************************/
 package com.espertech.esperio.db;
 
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esperio.db.config.Column;
+import com.espertech.esperio.db.config.ConfigurationDBAdapter;
+import com.espertech.esperio.db.config.Executor;
+import com.espertech.esperio.db.config.UpsertQuery;
 import junit.framework.TestCase;
 
-import com.espertech.esperio.db.config.*;
-import com.espertech.esper.client.*;
-
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TestDBAdapterUpsert extends TestCase
 {
@@ -61,16 +64,16 @@ public class TestDBAdapterUpsert extends TestCase
 
         String[] fields = "key1,key2,value1,value2".split(",");
         EPStatement stmt = provider.getEPAdministrator().createEPL("select * from sql:testdb ['select * from mytestupsert order by key1']");
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"myk1", 10, "myv1", 20.2d}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"myk1", 10, "myv1", 20.2d}});
 
         provider.getEPRuntime().sendEvent(new SupportDBBean("myk2", 11, "myv2", 23.2d));
         Thread.sleep(500); // required since configured for threadpool exec
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][]
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]
                 {{"myk1", 10, "myv1", 20.2d}, {"myk2", 11, "myv2", 23.2d}});
 
         provider.getEPRuntime().sendEvent(new SupportDBBean("myk3", null, null, null));
         Thread.sleep(500); // required since configured for threadpool exec
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][]
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]
                 {{"myk1", 10, "myv1", 20.2d}, {"myk2", 11, "myv2", 23.2d}, {"myk3", null, null, null}});
 
         dbAdapter.destroy();

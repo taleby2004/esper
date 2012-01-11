@@ -48,7 +48,6 @@ public class WrapperEventType implements EventTypeSPI
     private final Map<String, EventPropertyDescriptor> propertyDescriptorMap;
     private final int eventTypeId;
 
-    private final int hashCode;
     private final boolean isNoMapProperties;
     private final Map<String, EventPropertyGetter> propertyGetterCache;
     private final EventAdapterService eventAdapterService;
@@ -74,7 +73,6 @@ public class WrapperEventType implements EventTypeSPI
 		this.underlyingEventType = eventType;
         EventTypeMetadata metadataMapType = EventTypeMetadata.createAnonymous(typeName);
         this.underlyingMapType = new MapEventType(metadataMapType, typeName, 0, eventAdapterService, properties, null, null, null);
-        this.hashCode = underlyingMapType.hashCode() ^ underlyingEventType.hashCode();
         this.isNoMapProperties = properties.isEmpty();
         this.eventAdapterService = eventAdapterService;
         this.eventTypeId = eventTypeId;
@@ -371,31 +369,30 @@ public class WrapperEventType implements EventTypeSPI
 		"underlyingMapType=" + underlyingMapType;
 	}
 
-    public boolean equals(Object obj)
+    public boolean equalsCompareType(EventType otherEventType)
     {
-        if (this == obj)
+        if (this == otherEventType)
         {
             return true;
         }
 
-        if (!(obj instanceof WrapperEventType))
+        if (!(otherEventType instanceof WrapperEventType))
         {
             return false;
         }
 
-        WrapperEventType other = (WrapperEventType) obj;
-
-        if ((other.underlyingEventType.equals(this.underlyingEventType)) &&
-            (other.underlyingMapType.equals(this.underlyingMapType)))
-        {
-            return true;
+        WrapperEventType other = (WrapperEventType) otherEventType;
+        if (!other.underlyingMapType.equalsCompareType(this.underlyingMapType)) {
+            return false;
         }
-        return false;
-    }
 
-    public int hashCode()
-    {
-        return hashCode;
+        if (!(other.underlyingEventType instanceof EventTypeSPI) || (!(this.underlyingEventType instanceof EventTypeSPI))) {
+            return other.underlyingEventType.equals(this.underlyingEventType);
+        }
+
+        EventTypeSPI otherUnderlying = (EventTypeSPI) other.underlyingEventType;
+        EventTypeSPI thisUnderlying = (EventTypeSPI) this.underlyingEventType;
+        return otherUnderlying.equalsCompareType(thisUnderlying);
     }
 
     public EventTypeMetadata getMetadata()

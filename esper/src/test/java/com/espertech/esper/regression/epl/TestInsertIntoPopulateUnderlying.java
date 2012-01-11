@@ -12,13 +12,13 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.SupportSubscriber;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
+import com.espertech.esper.support.util.SupportSubscriber;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -303,9 +303,9 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         epService.getEPRuntime().sendEvent(new HashMap(), "MyMap");
         SupportBean received = (SupportBean) listener.assertOneGetNewAndReset().getUnderlying();
         assertEquals("E1", received.getString());
-        ArrayAssertionUtil.assertProps(received,
+        EPAssertionUtil.assertPropsPOJO(received,
                 "intPrimitive,intBoxed,longPrimitive,longBoxed,boolPrimitive,charPrimitive,bytePrimitive,floatPrimitive,doublePrimitive,shortPrimitive,enumValue".split(","),
-                new Object[] {1, 2, 3l, null, true, 'x', (byte) 10, 8f, 9d, (short)5, SupportEnum.ENUM_VALUE_2});
+                new Object[]{1, 2, 3l, null, true, 'x', (byte) 10, 8f, 9d, (short) 5, SupportEnum.ENUM_VALUE_2});
 
         // test insert-into column names
         stmtOne.destroy();
@@ -326,9 +326,9 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         epService.getEPRuntime().sendEvent(new HashMap(), "MyMap");
         received = (SupportBean) listener.assertOneGetNewAndReset().getUnderlying();
         assertEquals("E1", received.getString());
-        ArrayAssertionUtil.assertProps(received,
+        EPAssertionUtil.assertPropsPOJO(received,
                 "intPrimitive,intBoxed,longPrimitive,longBoxed,boolPrimitive,charPrimitive,bytePrimitive,floatPrimitive,doublePrimitive,shortPrimitive,enumValue".split(","),
-                new Object[] {1, 2, 3l, null, true, 'x', (byte) 10, 8f, 9d, (short)5, SupportEnum.ENUM_VALUE_2});
+                new Object[]{1, 2, 3l, null, true, 'x', (byte) 10, 8f, 9d, (short) 5, SupportEnum.ENUM_VALUE_2});
 
         // test convert Integer boxed to Long boxed
         stmtOne.destroy();
@@ -341,7 +341,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         vals.put("intBoxed", 4);
         vals.put("floatBoxed", 0f);
         epService.getEPRuntime().sendEvent(vals, "MyMap");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(),"longBoxed,doubleBoxed".split(","), new Object[] {4L, 0d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "longBoxed,doubleBoxed".split(","), new Object[]{4L, 0d});
     }
 
     public void testBeanWildcard()
@@ -364,9 +364,9 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         vals.put("boolPrimitive", true);
 
         epService.getEPRuntime().sendEvent(vals, "MySupportMap");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(),
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(),
                 "intPrimitive,longBoxed,string,boolPrimitive".split(","),
-                new Object[] {4, 100L, "E1", true});
+                new Object[]{4, 100L, "E1", true});
     }
 
     public void testPopulateBeanObjects()
@@ -462,7 +462,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         bean.setDoubleBoxed(1001d);
         epService.getEPRuntime().sendEvent(bean);
         
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(),"intVal,stringVal,doubleVal".split(","),new Object[] {1000, "E1", 1001d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "intVal,stringVal,doubleVal".split(","), new Object[]{1000, "E1", 1001d});
     }
 
     public void testBeanFactoryMethod()
@@ -485,7 +485,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         stmtOne.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new HashMap(), "MyMap");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "id,type,device,measurement,confidence".split(","), new Object[] {2,"A01","DHC1000",100.0,5.0});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "id,type,device,measurement,confidence".split(","), new Object[]{2, "A01", "DHC1000", 100.0, 5.0});
 
         try
         {

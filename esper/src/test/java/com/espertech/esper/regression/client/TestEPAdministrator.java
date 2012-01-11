@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.core.service.EPAdministratorSPI;
 import com.espertech.esper.epl.expression.ExprDotNode;
@@ -22,8 +24,6 @@ import com.espertech.esper.pattern.EvalFollowedByFactoryNode;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.io.StringWriter;
@@ -102,11 +102,11 @@ public class TestEPAdministrator extends TestCase
 
         String[] names = new String[] {"s1"};
         EPStatement[] stmtsSetOne = createStmts(names);
-        ArrayAssertionUtil.assertEqualsAnyOrder(names, epService.getEPAdministrator().getStatementNames());
+        EPAssertionUtil.assertEqualsAnyOrder(names, epService.getEPAdministrator().getStatementNames());
 
         names = new String[] {"s1", "s2"};
         EPStatement[] stmtsSetTwo = createStmts(names);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"s1", "s1--0", "s2"} , epService.getEPAdministrator().getStatementNames());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"s1", "s1--0", "s2"}, epService.getEPAdministrator().getStatementNames());
     }
 
     public void testCreateEPLByName()
@@ -287,6 +287,10 @@ public class TestEPAdministrator extends TestCase
 
         PatternExpr patternExpr = spi.compilePatternToSODA("every A -> B");
         assertEquals(PatternFollowedByExpr.class, patternExpr.getClass());
+
+        EPStatementObjectModel modelPattern = spi.compilePatternToSODAModel("@Name('test') every A -> B");
+        assertEquals("Name", modelPattern.getAnnotations().get(0).getName());
+        assertEquals(PatternFollowedByExpr.class, ((PatternStream) modelPattern.getFromClause().getStreams().get(0)).getExpression().getClass());
 
         AnnotationPart part = spi.compileAnnotationToSODA("@somevalue(a='test', b=5)");
         assertEquals("somevalue", part.getName());

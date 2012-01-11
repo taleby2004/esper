@@ -15,6 +15,7 @@ import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.epl.agg.AggregationRowRemovedCallback;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprValidationException;
@@ -36,19 +37,18 @@ import java.util.*;
  * each event and uses a set of the group-by keys to generate the result rows, using the first (old or new, anyone) event
  * for each distinct group-by key.
  */
-public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
-{
+public class ResultSetProcessorRowPerGroup implements ResultSetProcessor, AggregationRowRemovedCallback {
     private static final Log log = LogFactory.getLog(ResultSetProcessorRowPerGroup.class);
 
-    private final ResultSetProcessorRowPerGroupFactory prototype;
-    private final SelectExprProcessor selectExprProcessor;
-    private final OrderByProcessor orderByProcessor;
-    private final AggregationService aggregationService;
-    private final AgentInstanceContext agentInstanceContext;
+    protected final ResultSetProcessorRowPerGroupFactory prototype;
+    protected final SelectExprProcessor selectExprProcessor;
+    protected final OrderByProcessor orderByProcessor;
+    protected final AggregationService aggregationService;
+    protected AgentInstanceContext agentInstanceContext;
 
     // For output rate limiting, keep a representative event for each group for
     // representing each group in an output limit clause
-    private final Map<MultiKeyUntyped, EventBean[]> groupRepsView = new LinkedHashMap<MultiKeyUntyped, EventBean[]>();
+    protected final Map<MultiKeyUntyped, EventBean[]> groupRepsView = new LinkedHashMap<MultiKeyUntyped, EventBean[]>();
 
     private final Map<MultiKeyUntyped, OutputConditionPolled> outputState = new HashMap<MultiKeyUntyped, OutputConditionPolled>();
 
@@ -57,6 +57,11 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         this.selectExprProcessor = selectExprProcessor;
         this.orderByProcessor = orderByProcessor;
         this.aggregationService = aggregationService;
+        this.agentInstanceContext = agentInstanceContext;
+        aggregationService.setRemovedCallback(this);
+    }
+
+    public void setAgentInstanceContext(AgentInstanceContext agentInstanceContext) {
         this.agentInstanceContext = agentInstanceContext;
     }
 
@@ -160,7 +165,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         return null;
     }
 
-    private EventBean[] generateOutputEventsView(Map<MultiKeyUntyped, EventBean> keysAndEvents, boolean isNewData, boolean isSynthesize)
+    protected EventBean[] generateOutputEventsView(Map<MultiKeyUntyped, EventBean> keysAndEvents, boolean isNewData, boolean isSynthesize)
     {
         EventBean[] eventsPerStream = new EventBean[1];
         EventBean[] events = new EventBean[keysAndEvents.size()];
@@ -175,7 +180,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         for (Map.Entry<MultiKeyUntyped, EventBean> entry : keysAndEvents.entrySet())
         {
             // Set the current row of aggregation states
-            aggregationService.setCurrentAccess(entry.getKey(), agentInstanceContext.getAgentInstanceIds());
+            aggregationService.setCurrentAccess(entry.getKey(), agentInstanceContext.getAgentInstanceId());
 
             eventsPerStream[0] = entry.getValue();
 
@@ -238,7 +243,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         for (Map.Entry<MultiKeyUntyped, EventBean> entry : keysAndEvents.entrySet())
         {
             // Set the current row of aggregation states
-            aggregationService.setCurrentAccess(entry.getKey(), agentInstanceContext.getAgentInstanceIds());
+            aggregationService.setCurrentAccess(entry.getKey(), agentInstanceContext.getAgentInstanceId());
 
             eventsPerStream[0] = entry.getValue();
 
@@ -272,7 +277,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
     private void generateOutputBatched(MultiKeyUntyped mk, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, List<EventBean> resultEvents, List<MultiKeyUntyped> optSortKeys)
     {
         // Set the current row of aggregation states
-        aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceIds());
+        aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceId());
 
         // Filter the having clause
         if (prototype.getOptionalHavingNode() != null)
@@ -305,7 +310,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         int count = 0;
         for (Map.Entry<MultiKeyUntyped, EventBean[]> entry : keysAndEvents.entrySet())
         {
-            aggregationService.setCurrentAccess(entry.getKey(), agentInstanceContext.getAgentInstanceIds());
+            aggregationService.setCurrentAccess(entry.getKey(), agentInstanceContext.getAgentInstanceId());
             EventBean[] eventsPerStream = entry.getValue();
 
             // Filter the having clause
@@ -378,7 +383,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         return keys;
     }
 
-    private MultiKeyUntyped[] generateGroupKeys(EventBean[] events, Map<MultiKeyUntyped, EventBean> eventPerKey, boolean isNewData)
+    protected MultiKeyUntyped[] generateGroupKeys(EventBean[] events, Map<MultiKeyUntyped, EventBean> eventPerKey, boolean isNewData)
     {
         if (events == null)
         {
@@ -461,6 +466,10 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         {
             return new ResultSetRowPerGroupIterator(parent.iterator(), this, aggregationService, agentInstanceContext);
         }
+        return getIteratorSorted(parent.iterator());
+    }
+
+    protected Iterator<EventBean> getIteratorSorted(Iterator<EventBean> parentIter) {
 
         // Pull all parent events, generate order keys
         EventBean[] eventsPerStream = new EventBean[1];
@@ -468,12 +477,12 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
         List<MultiKeyUntyped> orderKeys = new ArrayList<MultiKeyUntyped>();
         Set<MultiKeyUntyped> priorSeenGroups = new HashSet<MultiKeyUntyped>();
 
-        for (EventBean candidate : parent)
-        {
+        for (;parentIter.hasNext();) {
+            EventBean candidate = parentIter.next();
             eventsPerStream[0] = candidate;
 
             MultiKeyUntyped groupKey = generateGroupKey(eventsPerStream, true);
-            aggregationService.setCurrentAccess(groupKey, agentInstanceContext.getAgentInstanceIds());
+            aggregationService.setCurrentAccess(groupKey, agentInstanceContext.getAgentInstanceId());
 
             Boolean pass = true;
             if (prototype.getOptionalHavingNode() != null)
@@ -838,7 +847,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
                         for (MultiKey<EventBean> aNewData : newData)
                         {
                             MultiKeyUntyped mk = newDataMultiKey[count];
-                            aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceIds());
+                            aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceId());
 
                             // Filter the having clause
                             Boolean result = (Boolean) prototype.getOptionalHavingNode().evaluate(aNewData.getArray(), true, agentInstanceContext);
@@ -879,7 +888,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
                         for (MultiKey<EventBean> anOldData : oldData)
                         {
                             MultiKeyUntyped mk = oldDataMultiKey[count];
-                            aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceIds());
+                            aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceId());
 
                             // Filter the having clause
                             Boolean result = (Boolean) prototype.getOptionalHavingNode().evaluate(anOldData.getArray(), false, agentInstanceContext);
@@ -1358,7 +1367,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
                         {
                             MultiKeyUntyped mk = newDataMultiKey[i];
                             eventsPerStreamOneStream[0] = newData[i];
-                            aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceIds());
+                            aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceId());
 
                             // Filter the having clause
                             Boolean result = (Boolean) prototype.getOptionalHavingNode().evaluate(eventsPerStreamOneStream, true, agentInstanceContext);
@@ -1398,7 +1407,7 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
                         {
                             MultiKeyUntyped mk = oldDataMultiKey[i];
                             eventsPerStreamOneStream[0] = oldData[i];
-                            aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceIds());
+                            aggregationService.setCurrentAccess(mk, agentInstanceContext.getAgentInstanceId());
 
                             // Filter the having clause
                             Boolean result = (Boolean) prototype.getOptionalHavingNode().evaluate(eventsPerStreamOneStream, false, agentInstanceContext);
@@ -1574,5 +1583,10 @@ public class ResultSetProcessorRowPerGroup implements ResultSetProcessor
 
     public boolean hasAggregation() {
         return true;
+    }
+
+    public void removed(MultiKeyUntyped key) {
+        groupRepsView.remove(key);
+        outputState.remove(key);
     }
 }

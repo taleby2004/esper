@@ -44,7 +44,7 @@ public class ExprSubselectExistsNode extends ExprSubselectNode
         return null;
     }
 
-    public void validate(ExprValidationContext validationContext) throws ExprValidationException
+    public void validateSubquery(ExprValidationContext validationContext) throws ExprValidationException
     {
     }
 

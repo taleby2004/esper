@@ -55,6 +55,10 @@ public class TestFilterSpecParamEventProp extends TestCase
     private FilterSpecParamEventProp makeParam(String eventAsName, String property)
     {
         SimpleNumberCoercer numberCoercer = SimpleNumberCoercerFactory.getCoercer(int.class, int.class);
-        return new FilterSpecParamEventProp("intPrimitive", FilterOperator.EQUAL, eventAsName, property, false, numberCoercer, int.class, "Test");
+        return new FilterSpecParamEventProp(makeLookupable("intPrimitive"), FilterOperator.EQUAL, eventAsName, property, false, numberCoercer, int.class, "Test");
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, null, null);
     }
 }

@@ -76,7 +76,7 @@ public class UpdateDispatchFutureSpin implements Dispatchable
                 long spinDelta = timeSourceService.getTimeMillis() - spinStartTime;
                 if (spinDelta > msecTimeout)
                 {
-                    log.info("Spin wait timeout exceeded in listener dispatch");
+                    log.info("Spin wait timeout exceeded in listener dispatch for statement '" + view.getStatementResultService().getStatementName() + "'");
                     break;
                 }
             }

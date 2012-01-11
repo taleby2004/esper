@@ -8,7 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
+import com.espertech.esper.client.context.ContextPartitionSelector;
+
 import java.lang.annotation.Annotation;
+import java.util.Iterator;
 
 /**
  * Statement interface that provides methods to start, stop and destroy a statement as well as
@@ -165,4 +168,8 @@ public interface EPStatement extends EPListenable, EPIterable
      * @return isolated service name or null for statements that are not currently isolated
      */
     public String getServiceIsolated();
+
+    public Iterator<EventBean> iterator(ContextPartitionSelector selector);
+
+    public SafeIterator<EventBean> safeIterator(ContextPartitionSelector selector);
 }

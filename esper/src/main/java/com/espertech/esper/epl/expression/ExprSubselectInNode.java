@@ -57,7 +57,7 @@ public class ExprSubselectInNode extends ExprSubselectNode
         return isNotIn;
     }
 
-    public void validate(ExprValidationContext validationContext) throws ExprValidationException
+    public void validateSubquery(ExprValidationContext validationContext) throws ExprValidationException
     {
         subselectEvalStrategy = SubselectEvalStrategyFactory.createStrategy(this, isNotIn, false, false, null);
     }

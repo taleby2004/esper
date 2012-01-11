@@ -11,8 +11,8 @@
 
 package com.espertech.esper.epl.join.assemble;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.epl.join.SupportJoinProcNode;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 public class TestBaseAssemblyNode extends TestCase
@@ -35,6 +35,6 @@ public class TestBaseAssemblyNode extends TestCase
         child_1_1.addChild(child_1_1_1);
 
         int[] result = top.getSubstreams();
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {2, 5, 1, 6, 7, 0}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{2, 5, 1, 6, 7, 0}, result);
     }
 }

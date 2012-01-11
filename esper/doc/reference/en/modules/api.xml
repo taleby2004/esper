@@ -588,13 +588,17 @@ statement.addListener(myListener);]]></programlisting>
 			</para>
 
 			<para>
-				The <literal>safeIterator</literal> method on <literal>EPStatement</literal> returns a concurrency-safe iterator returning current statement results, even while concurrent threads may send events into the engine for processing. The safe iterator guarantees correct results even as events are being processed by other threads. The cost is that the iterator obtains and holds zero, one or multiple context partition locks for that statement that must be released via the <literal>close</literal> method on the <literal>SafeIterator</literal> instance. 
+				The <literal>safeIterator</literal> method on <literal>EPStatement</literal> returns a concurrency-safe iterator returning current statement results, even while concurrent threads may send events into the engine for processing. The engine employs a read-write lock per context partition and obtains a read lock for iteration. Thus safe iterator guarantees correct results even as events are being processed by other threads and other context partitions. The cost is that the iterator obtains and holds zero, one or multiple context partition locks for that statement that must be released via the <literal>close</literal> method on the <literal>SafeIterator</literal> instance. 
 			</para>
 
 			<para>
 				The <literal>iterator</literal> method on <literal>EPStatement</literal> returns a concurrency-unsafe iterator. This iterator is only useful for applications that are single-threaded, or applications that themselves perform coordination between the iterating thread and the  threads that send events into the engine for processing. The advantage to this iterator is that it does not hold a lock.
 			</para>
-
+			
+			<para>
+			  When statements are used with contexts and context partitions, the APIs to identify, filter and select context partitions for statement iteration are described in <xref linkend="api-contextpartitionselection"/>.
+			</para>
+			
 			<para>
 				The next code snippet shows a short example of use of safe iterators:
 			</para>
@@ -652,8 +656,25 @@ finally {
 				</listitem>
 				<listitem>
 					<para>
-						When iterating a statement that selects an unbound stream (no data window declared), the iterator returns the last event. When iterating a statement that groups and aggregates values from an unbound stream, the iterated result contains only the last updated group.
+						When iterating a statement that operates on an unbound stream (no data window declared), please note the following:
 					</para>
+					<itemizedlist spacing="compact">
+						<listitem>
+							<para>
+								When iterating a statement that groups and aggregates values from an unbound stream and that specifies <literal>output snapshot</literal>, the engine retains groups and aggregations for output as iteration results or upon the output snapshot condition .
+							</para>
+						</listitem>
+						<listitem>
+							<para>
+								When iterating a statement that groups and aggregates values from an unbound stream and that does not specify <literal>output snapshot</literal>, the engine only retains the last aggregation values and the iterated result contains only the last updated group.
+							</para>
+						</listitem>
+						<listitem>
+							<para>
+								When iterating a statement that operates on an unbound stream and does not group and aggregate, the iterator returns the last event.
+							</para>
+						</listitem>
+					</itemizedlist>				
 				</listitem>
 			</orderedlist>
 		</sect2>
@@ -865,6 +886,10 @@ sender.sendEvent(myEvent);]]></programlisting>
 				Esper also provides the facility to explicitly index named windows to speed up queries. Please consult <xref linkend="named_explicit_index"/> for more information.
 			</para>
 			
+			<para>
+			  When named windows are used with contexts and context partitions, the APIs to identify, filter and select context partitions for on-demand queries can be found in <xref linkend="api-contextpartitionselection"/>.
+			</para>
+
 			<para>
 				The following limitations apply:
 			</para>
@@ -1266,7 +1291,11 @@ In the default configuration, each engine instance maintains a single timer thre
         </para>
         
 		<para>
-Each engine instance performs minimal locking to enable high levels of concurrency. An engine instance locks on a context partition level to protect context partition resources. You may turn off context partition locking engine-wide (also read the caution notice) as described in <xref linkend="config-engine-execution-disablelock"/>. You may disable context partition locking for a given statement by providing the <literal>@NoLock</literal> annotation as part of your EPL. Note, we provide the <literal>@NoLock</literal> annotation for the purpose of identifying locking overhead, or when your application is single-threaded, or when using an external mechanism for concurrency control or for example with virtual data windows or plug-in data windows to allow customizing concurrency for a given statement or named window. Using this annotation may have unpredictable results unless your application is taking concurrency under consideration.
+Each engine instance performs minimal locking to enable high levels of concurrency. An engine instance locks on a context partition level to protect context partition resources. For stateless EPL select-statements the engine does not use a context-partition lock and operates lock-free for the context partition. For stateful statements, the maximum (theoretical) degree of parallelism is 2^31-1 (2,147,483,647) parallel threads working to process a single EPL statement under a hash segmented context.
+        </para>
+
+		<para>
+You may turn off context partition locking engine-wide (also read the caution notice) as described in <xref linkend="config-engine-execution-disablelock"/>. You may disable context partition locking for a given statement by providing the <literal>@NoLock</literal> annotation as part of your EPL. Note, we provide the <literal>@NoLock</literal> annotation for the purpose of identifying locking overhead, or when your application is single-threaded, or when using an external mechanism for concurrency control or for example with virtual data windows or plug-in data windows to allow customizing concurrency for a given statement or named window. Using this annotation may have unpredictable results unless your application is taking concurrency under consideration.
         </para>
 
 		<para>
@@ -1426,7 +1455,7 @@ ThreadPoolExecutor threadpool = spi.getThreadingService().getInboundThreadPool()
 		<sect2 id="api-processingorder">
 			<title>Processing Order</title>
 				
-z			<sect3 id="api-processingorder-competingstmt">
+			<sect3 id="api-processingorder-competingstmt">
 				<title>Competing Statements</title>
 			
 				<para>
@@ -2684,4 +2713,249 @@ for (Annotation annotation : stmt.getAnnotations()) {
 			The output of the sample code shown above is <literal>Tag name direct-output value sink 1</literal>.
 		</para>
 	</sect1>
+
+    <sect1 id="api-contextpartitionselection">
+        <title>Context Partition Selection</title>
+
+        <para>
+			This chapter discusses how to select context partitions. Contexts are discussed in <xref linkend="context"/> and the reasons for context partition selection are introduced in <xref linkend="context_selection"/>.
+        </para>
+        
+        <para>
+			The section is only relevant when you declare a context. It applies to all different types of hash, partitioned, category, overlapping or other temporal contexts. The section uses a category context for the purpose of illustration. The API discussed herein is general and handles all different types of contexts including nested contexts.
+        </para>
+
+		<para>
+			Consider a category context that separates bank transactions into small, medium and large:
+		</para>
+		<programlisting><![CDATA[// declare category context
+create context TxnCategoryContext 
+  group by amount < 100 as small, 
+  group by amount between 100 and 1000 as medium, 
+  group by amount > 1000 as large from BankTxn]]></programlisting>
+		<programlisting><![CDATA[// retain 1 minute of events of each category separately
+context TxnCategoryContext select * from BankTxn.win:time(1 minute)]]></programlisting>
+
+		<para>
+		  In order for your application to iterate one or more specific categories it is necessary to identify which category, i.e. which context partition, to iterate. Similarly for on-demand queries, to execute on-demand queries against one or more specific categories, it is necessary to identify which context partition to execute the on-demand query against.
+		</para>
+
+        <para>
+			Your application may iterate one or more specific context partitions using either the <literal>iterate</literal> or <literal>safeIterate</literal> method of <literal>EPStatement</literal> by providing an implementation of the <literal>ContextPartitionSelector</literal> interface.
+        </para>
+
+		<para>
+			For example, assume your application must obtain all bank transactions for small amounts. It may use the API to identify the category and iterate the associated context partition:
+		</para>
+		<programlisting><![CDATA[ContextPartitionSelectorCategory categorySmall = new ContextPartitionSelectorCategory() {
+    public Set<String> getLabels() {
+      return Collections.singleton("small");
+    }
+  };
+Iterator<EventBean> it = stmt.iterator(categorySmall);]]></programlisting>
+
+        <para>
+             Your application may execute on-demand queries against one or more specific context partitions by using the <literal>executeQuery</literal> method on <literal>EPRuntime</literal> or the <literal>execute</literal> method on <literal>EPOnDemandPreparedQuery</literal> and by providing an implementation of <literal>ContextPartitionSelector</literal>.
+        </para>
+        
+		<para>
+			On-demand queries execute against named windows, therefore below EPL statement creates a named window which the engine manages separately for small, medium and large transactions according to the context declared earlier:
+		</para>
+		<programlisting><![CDATA[// Named window per category
+context TxnCategoryContext create window BankTxnWindow.win:time(1 min) as BankTxn]]></programlisting>
+
+		<para>			
+			The following code demonstrates how to fire an on-demand query against the small and the medium category:
+		</para>
+		<programlisting><![CDATA[ContextPartitionSelectorCategory categorySmallMed = new ContextPartitionSelectorCategory() {
+    public Set<String> getLabels() {
+      return new HashSet<String>(Arrays.asList("small", "medium"));
+    }
+  };
+epService.getEPRuntime().executeQuery(
+   "select count(*) from BankTxnWindow", 
+   new ContextPartitionSelector[] {categorySmallMed});]]></programlisting>
+   
+			<para>
+				The following limitations apply:
+			</para>
+
+			<itemizedlist>
+				<listitem>
+					<para>
+						On-demand queries may not join named windows that declare a context.
+					</para>
+				</listitem>
+			</itemizedlist>
+
+			<sect2 id="api-contextpartitionselection-selectors">
+				<title>Selectors</title>
+				
+				<para>
+				  This section summarizes the selector interfaces that are available for use to identify and interrogate context partitions. Please refer to the JavaDoc documentation for package <literal>com.espertech.esper.client.context</literal> and classes therein for additional information.
+				</para>
+				
+				<para>
+					Use an implementation of <literal>ContextPartitionSelectorAll</literal> or the <literal>ContextPartitionSelectorAll.INSTANCE</literal> object to instruct the engine to consider all context partitions.
+				</para>
+
+				<para>
+					Use an implementation of <literal>ContextPartitionSelectorById</literal> if your application knows the context partition ids to query. This selector instructs the engine to consider only those provided context partitions based on their integer id value. The engine outputs the context partition id in the built-in property <literal>context.id</literal>.
+				</para>
+				
+				<para>
+				    Use an implementation of <literal>ContextPartitionSelectorFiltered</literal> to receive and interrogate context partitions. Use the <literal>filter</literal> method that receives a <literal>ContextPartitionIdentifier</literal> to return a boolean indicator whether to include the context partition or not. The <literal>ContextPartitionIdentifier</literal> provides information about each context partition. Your application may not retain <literal>ContextPartitionIdentifier</literal> instances between <literal>filter</literal> method invocations as the engine reuses the same instance. This selector is not supported with nested contexts.
+				</para>
+				
+				<para>
+				    Use an implementation of <literal>ContextPartitionSelectorCategory</literal> with category contexts.
+				</para>
+
+				<para>
+				    Use an implementation of <literal>ContextPartitionSelectorSegmented</literal> with keyed segmented contexts.
+				</para>
+
+				<para>
+				    Use an implementation of <literal>ContextPartitionSelectorHash</literal> with hash segmented contexts.
+				</para>
+
+				<para>
+				    Use an implementation of <literal>ContextPartitionSelectorNested</literal> in combination with the selectors described above with nested contexts.
+				</para>
+			</sect2>
+     </sect1>
+     
+    <sect1 id="api-testing">
+        <title>Test and Assertion Support</title>        
+		<indexterm><primary>testing</primary></indexterm>
+		<indexterm><primary>API</primary><secondary>testing</secondary></indexterm>
+		
+        <para>
+			Esper offers a listener and an assertions class to facilitate automated testing of EPL rules, for example when using a test framework such as <literal>JUnit</literal> or <literal>TestNG</literal>. 
+        </para>
+
+        <para>
+			Esper does not require any specific test framework. If your application has the <literal>JUnit</literal> test framework in classpath Esper uses <literal>junit.framework.AssertionFailedError</literal> to indicate assertion errors, so as to integrate with continuous integration tools.
+        </para>
+        
+        <para>
+            For detailed method-level information, please consult the JavaDoc of the package <literal>com.espertech.esper.client.scopetest</literal>.
+        </para>
+        
+        <para>
+            The class <literal>com.espertech.esper.client.scopetest.EPAssertionUtil</literal> provides methods to assert or compare event property values as well as perform various array arthithmatic, sort events and convert events or iterators to arrays.
+        </para>
+
+        <para>
+            The class <literal>com.espertech.esper.client.scopetest.SupportUpdateListener</literal> provides an <literal>UpdateListener</literal> implementation that collects events and returns event data for assertion.
+        </para>
+		
+		<sect2 id="api-testing-assertion">
+			<title><literal>EPAssertionUtil</literal> Summary</title>        
+			
+			<para>
+			  The below table only summarizes the most relevant assertion methods offered by <literal>EPAssertionUtil</literal>. Methods provide multiple footprints that are not listed in detail below. Please consult the JavaDoc for additional method-level information.
+			</para>
+			
+			<table frame="topbot" id="api-testing-assertion-summary" revision="2">
+				<title>Method Summary for EPAssertionUtil</title>
+				<tgroup cols="2">
+					<colspec colwidth="0.75*"/>
+					<colspec colwidth="1.0*"/>
+					<thead>
+						<row>
+							<entry>Name</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry><literal>assertProps</literal></entry>
+							<entry><para>Methods that assert that property values of a single <literal>EventBean</literal>, POJO or Map matches compared to expected values.</para></entry>
+						</row>
+						<row>
+							<entry><literal>assertPropsPerRow</literal></entry>
+							<entry><para>Methods that assert that property values of multiple <literal>EventBean</literal>, POJOs or Maps match compared to expected values.</para></entry>
+						</row>
+						<row>
+							<entry><literal>assertPropsPerRowAnyOrder</literal></entry>
+							<entry><para>Same as above, but any row may match. Useful for unordered result sets.</para></entry>
+						</row>
+						<row>
+							<entry><literal>assertEqualsExactOrder</literal></entry>
+							<entry><para>Methods that compare arrays, allowing <literal>null</literal>. as parameters.</para></entry>
+						</row>
+						<row>
+							<entry><literal>assertEqualsAnyOrder</literal></entry>
+							<entry><para>Same as above, but any row may match. Useful for unordered result sets.</para></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+		</sect2>
+
+		<sect2 id="api-testing-listener">
+			<title><literal>SupportUpdateListener</literal> Summary</title>        
+			<para>
+			  The below table only summarizes the most relevant methods offered by <literal>SupportUpdateListener</literal>. Please consult the JavaDoc for additional information.
+			</para>
+
+			<table frame="topbot" id="api-testing-listener-summary" revision="2">
+				<title>Method Summary for SupportUpdateListener</title>
+				<tgroup cols="2">
+					<colspec colwidth="0.75*"/>
+					<colspec colwidth="1.0*"/>
+					<thead>
+						<row>
+							<entry>Name</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry><literal>reset</literal></entry>
+							<entry><para>Initializes listener clearing current events and resetting the invoked flag.</para></entry>
+						</row>
+						<row>
+							<entry><literal>getAndClearIsInvoked</literal></entry>
+							<entry><para>Returns the "invoked" flag indicating the listener has been invoked, and clears the flag.</para></entry>
+						</row>
+						<row>
+							<entry><literal>getLastNewData</literal></entry>
+							<entry><para>Returns the last events received by the listener.</para></entry>
+						</row>
+						<row>
+							<entry><literal>assertOneGetNewAndReset</literal></entry>
+							<entry><para>Asserts that exactly one new event was received and no removed events, returns the event and resets the listener.</para></entry>
+						</row>
+						<row>
+							<entry><literal>assertOneGetNew</literal></entry>
+							<entry><para>Asserts that exactly one new event was received and returns the event.</para></entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</table>
+		</sect2>
+
+		<sect2 id="api-testing-usage">
+			<title>Usage Example</title>        
+			<para>
+			  The next code block is a short but complete programming example that asserts that the properties received from output events match expected value.
+			</para>
+			
+			<programlisting><![CDATA[String epl = "select personName, count(*) as cnt from PersonEvent.win:length(3) group by personName";
+EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+
+SupportUpdateListener listener = new SupportUpdateListener();
+stmt.addListener(listener);
+
+epService.getEPRuntime().sendEvent(new PersonEvent("Joe"));
+EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "personName,cnt".split(","), new Object[]{"Joe", 1L});]]></programlisting>
+
+			<para>
+			  Please refer to the Esper codebase test sources for more examples using the assertion class and the listener class. 
+			</para>
+		</sect2>
+    </sect1>
+     
 </chapter>

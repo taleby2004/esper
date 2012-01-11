@@ -14,10 +14,10 @@ package com.espertech.esper.regression.view;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -70,10 +70,10 @@ public class TestViewGroupWithinGroup extends TestCase
 
         populateMap(expectedValues[0], SYMBOL_GE, FEED_INFO, 1L, 0);
         mapList.add(expectedValues[0]);
-        ArrayAssertionUtil.compare(listener.getLastOldData(), mapList);
+        EPAssertionUtil.assertPropsPerRow(listener.getLastOldData(), mapList);
         populateMap(expectedValues[0], SYMBOL_GE, FEED_INFO, 1L, 1);
-        ArrayAssertionUtil.compare(listener.getLastNewData(), mapList);
-        ArrayAssertionUtil.compare(viewGrouped.iterator(), mapList);
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), mapList);
+        EPAssertionUtil.assertPropsPerRow(viewGrouped.iterator(), mapList);
 
         // Send a couple of events
         sendEvent(SYMBOL_GE, FEED_INFO, 1);
@@ -85,9 +85,9 @@ public class TestViewGroupWithinGroup extends TestCase
         populateMap(expectedValues[1], SYMBOL_MSFT, FEED_INFO, 100, 0);
         mapList.clear();
         mapList.add(expectedValues[1]);
-        ArrayAssertionUtil.compare(listener.getLastOldData(), mapList );
+        EPAssertionUtil.assertPropsPerRow(listener.getLastOldData(), mapList);
         populateMap(expectedValues[1], SYMBOL_MSFT, FEED_INFO, 100, 1);
-        ArrayAssertionUtil.compare(listener.getLastNewData(), mapList );
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), mapList);
 
         populateMap(expectedValues[0], SYMBOL_GE, FEED_INFO, 1, 3);
         populateMap(expectedValues[2], SYMBOL_GE, FEED_INFO, 2, 1);
@@ -97,7 +97,7 @@ public class TestViewGroupWithinGroup extends TestCase
         mapList.add(expectedValues[2]);
         mapList.add(expectedValues[3]);
         mapList.add(expectedValues[1]);
-        ArrayAssertionUtil.compare(viewGrouped.iterator(), mapList);
+        EPAssertionUtil.assertPropsPerRow(viewGrouped.iterator(), mapList);
     }
 
     private void populateMap(Map<String, Object> map, String symbol, String feed, long volume, long size)

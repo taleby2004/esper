@@ -45,12 +45,15 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
      */
     protected transient EventType rawEventType;
 
+    protected String statementName;
+
     private transient StreamTypeService filterSubqueryStreamTypes;
     private StatementSpecRaw statementSpecRaw;
     private transient StatementSpecCompiled statementSpecCompiled;
     private transient ExprSubselectStrategy strategy;
     private transient boolean aggregatedSubquery;
-    private int subselectNumber;
+    protected int subselectNumber;
+    private boolean filterStreamSubselect;
 
     /**
      * Evaluate the lookup expression returning an evaluation result object.
@@ -65,6 +68,8 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
     public abstract Collection evaluateGetCollScalar(EventBean[] eventsPerStream, boolean isNewData, Collection<EventBean> matchingEvents, ExprEvaluatorContext exprEvaluatorContext);
 
     public abstract boolean isAllowMultiColumnSelect();
+
+    public abstract void validateSubquery(ExprValidationContext validationContext) throws ExprValidationException;
 
     /**
      * Ctor.
@@ -83,6 +88,11 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
     public boolean isConstantResult()
     {
         return false;
+    }
+
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException {
+        this.statementName = validationContext.getStatementName();
+        validateSubquery(validationContext);
     }
 
     /**
@@ -252,5 +262,13 @@ public abstract class ExprSubselectNode extends ExprNodeBase implements ExprEval
 
     public int getSubselectNumber() {
         return subselectNumber;
+    }
+
+    public void setFilterStreamSubselect(boolean filterStreamSubselect) {
+        this.filterStreamSubselect = filterStreamSubselect;
+    }
+
+    public boolean isFilterStreamSubselect() {
+        return filterStreamSubselect;
     }
 }

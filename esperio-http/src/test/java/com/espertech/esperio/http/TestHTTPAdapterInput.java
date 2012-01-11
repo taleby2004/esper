@@ -12,6 +12,8 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Properties;
@@ -53,7 +55,7 @@ public class TestHTTPAdapterInput extends TestCase
         SupportHTTPClient client = new SupportHTTPClient(port);
         String[] fields = "stringProp,intProp".split(",");
         client.request(port, "sendevent", "stream", "SupportBean", "stringProp", "abc", "intProp", "5");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[] {"abc", 5});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"abc", 5});
 
         listener.reset();
         provider.destroy();

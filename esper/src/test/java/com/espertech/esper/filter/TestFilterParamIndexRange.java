@@ -11,15 +11,15 @@
 
 package com.espertech.esper.filter;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.filter.SupportEventEvaluator;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.filter.SupportEventEvaluator;
+import junit.framework.TestCase;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class TestFilterParamIndexRange extends TestCase
 {
@@ -39,29 +39,6 @@ public class TestFilterParamIndexRange extends TestCase
         matchesList = new LinkedList<FilterHandle>();
 
         testRange = new DoubleRange(10d, 20d);
-    }
-
-    public void testInvalid()
-    {
-        try
-        {
-            new FilterParamIndexDoubleRange("doublePrimitive", FilterOperator.EQUAL, testEventType);
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected exception
-        }
-
-        try
-        {
-            new FilterParamIndexCompare("string", FilterOperator.RANGE_CLOSED, testEventType);
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected exception
-        }
     }
 
     public void testLongBothEndpointsIncluded()
@@ -174,7 +151,7 @@ public class TestFilterParamIndexRange extends TestCase
 
     public void testDoubleFixedRangeSize()
     {
-        FilterParamIndexDoubleRange index = new FilterParamIndexDoubleRange("doublePrimitive", FilterOperator.RANGE_OPEN, testEventType);
+        FilterParamIndexDoubleRange index = makeOne("doublePrimitive", FilterOperator.RANGE_OPEN, testEventType);
 
         for (int i = 0; i < 10000; i++)
         {
@@ -189,7 +166,7 @@ public class TestFilterParamIndexRange extends TestCase
 
     public void testDoubleVariableRangeSize()
     {
-        FilterParamIndexDoubleRange index = new FilterParamIndexDoubleRange("doublePrimitive", FilterOperator.RANGE_CLOSED, testEventType);
+        FilterParamIndexDoubleRange index = makeOne("doublePrimitive", FilterOperator.RANGE_CLOSED, testEventType);
 
         for (int i = 0; i < 100; i++)
         {
@@ -213,7 +190,7 @@ public class TestFilterParamIndexRange extends TestCase
 
     private FilterParamIndexDoubleRange getLongDataset(FilterOperator operatorType)
     {
-        FilterParamIndexDoubleRange index = new FilterParamIndexDoubleRange("longPrimitive", operatorType, testEventType);
+        FilterParamIndexDoubleRange index = makeOne("longPrimitive", operatorType, testEventType);
 
         addToIndex(index,0,5);
         addToIndex(index,0,6);
@@ -234,7 +211,7 @@ public class TestFilterParamIndexRange extends TestCase
 
     private FilterParamIndexDoubleRange getDoubleDataset(FilterOperator operatorType)
     {
-        FilterParamIndexDoubleRange index = new FilterParamIndexDoubleRange("doublePrimitive", operatorType, testEventType);
+        FilterParamIndexDoubleRange index = makeOne("doublePrimitive", operatorType, testEventType);
 
         addToIndex(index, 1.5, 2.5);
         addToIndex(index, 3.5, 4.5 );
@@ -242,6 +219,10 @@ public class TestFilterParamIndexRange extends TestCase
         addToIndex(index, 5.6, 6.7);
 
         return index;
+    }
+
+    private FilterParamIndexDoubleRange makeOne(String fieldName, FilterOperator operatorType, EventType testEventType) {
+        return new FilterParamIndexDoubleRange(makeLookupable(fieldName), operatorType);
     }
 
     private void verifyDoublePrimitive(FilterParamIndexBase index, double testValue, int numExpected)
@@ -262,5 +243,9 @@ public class TestFilterParamIndexRange extends TestCase
     {
         DoubleRange r = new DoubleRange(min,max);
         index.put(r, testEvaluator);
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, testEventType.getGetter(fieldName), testEventType.getPropertyType(fieldName));
     }
 }

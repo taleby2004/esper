@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBeanInt;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportJoinMethods;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Random;
@@ -69,7 +69,7 @@ public class TestPerfHistoricalMethodJoin extends TestCase
             sendBeanInt("E1", num);
 
             Object[][] result = new Object[][] {{"E1", "H0" + num, "H1" + num}};
-            ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
+            EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
         }
         long end = System.currentTimeMillis();
         long delta = end - start;
@@ -103,7 +103,7 @@ public class TestPerfHistoricalMethodJoin extends TestCase
             sendBeanInt("E1", num);
 
             Object[][] result = new Object[][] {{"E1", "H0" + num, "H1" + num}};
-            ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
+            EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
         }
         long end = System.currentTimeMillis();
         long delta = end - start;
@@ -135,7 +135,7 @@ public class TestPerfHistoricalMethodJoin extends TestCase
             sendBeanInt("F1", num);
 
             Object[][] result = new Object[][] {{"E1", "F1", "H0" + num}};
-            ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
+            EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
 
             // send reset events to avoid duplicate matches
             sendBeanInt("E1", 0);
@@ -172,7 +172,7 @@ public class TestPerfHistoricalMethodJoin extends TestCase
             sendBeanInt("H0" + num, num);
 
             Object[][] result = new Object[][] {{"E1", "H0" + num, "H0" + num, num}};
-            ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
+            EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
 
             // send reset events to avoid duplicate matches
             sendBeanInt("E1", 0);

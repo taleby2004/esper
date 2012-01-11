@@ -9,11 +9,11 @@
 package com.espertech.esper.epl.join.table;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.NullIterator;
+import com.espertech.esper.util.CollectionUtil;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Arrays;
 
 /**
  * Simple table of events without an index, based on a List implementation rather then a set
@@ -21,7 +21,6 @@ import java.util.Arrays;
  */
 public class UnindexedEventTableList implements EventTable
 {
-    private static final NullIterator<EventBean> emptyIterator = new NullIterator<EventBean>();
     private List<EventBean> eventSet;
 
     /**
@@ -60,7 +59,7 @@ public class UnindexedEventTableList implements EventTable
     {
         if (eventSet == null)
         {
-            return emptyIterator;
+            return CollectionUtil.NULL_EVENT_ITERATOR;
         }
         return eventSet.iterator();
     }

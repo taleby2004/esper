@@ -35,7 +35,7 @@ public class ViewableActivatorPattern implements ViewableActivator {
         this.hasConsumingFilter = hasConsumingFilter;
     }
 
-    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext) {
+    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
         PatternAgentInstanceContext patternAgentInstanceContext = agentInstanceContext.getStatementContext().getPatternContextFactory().createPatternAgentContext(patternContext, agentInstanceContext, hasConsumingFilter);
         EvalRootNode rootNode = EvalNodeUtil.makeRootNodeFromFactory(rootFactoryNode, patternAgentInstanceContext);
 

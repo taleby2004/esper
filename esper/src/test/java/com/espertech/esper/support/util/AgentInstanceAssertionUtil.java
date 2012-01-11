@@ -28,6 +28,4 @@ public class AgentInstanceAssertionUtil {
         Assert.assertEquals(numPrev, registry.getAgentInstanceExprService().getPreviousAgentInstanceCount());
         Assert.assertEquals(numPrior, registry.getAgentInstanceExprService().getPriorAgentInstanceCount());
     }
-
-
 }

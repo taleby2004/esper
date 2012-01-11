@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.regression.support.ResultAssertExecution;
@@ -21,8 +23,6 @@ import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestOutputLimitEventPerGroup extends TestCase
@@ -63,14 +63,14 @@ public class TestOutputLimitEventPerGroup extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
 
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), new String[] {"string","intp"}, new Object[][] {{"E1", 3}, {"E2", 21}, {"E3", 31}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), new String[]{"string", "intp"}, new Object[][]{{"E1", 3}, {"E2", 21}, {"E3", 31}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 31));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 33));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
 
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), new String[] {"string","intp"}, new Object[][] {{"E1", 5}, {"E3", 33}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), new String[]{"string", "intp"}, new Object[][]{{"E1", 5}, {"E3", 33}});
 }
 
     public void testOutputFirstHavingJoinNoJoin() {
@@ -110,24 +110,24 @@ public class TestOutputLimitEventPerGroup extends TestCase
         assertFalse(listener.isInvoked());
 
         sendBeanEvent("E2", 5);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 25});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 25});
 
         sendBeanEvent("E2", -6);    // to 19, does not count toward condition
         sendBeanEvent("E2", 2);    // to 21, counts toward condition
         assertFalse(listener.isInvoked());
         sendBeanEvent("E2", 1);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 22});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 22});
 
         sendBeanEvent("E2", 1);    // to 23, counts toward condition
         assertFalse(listener.isInvoked());
         sendBeanEvent("E2", 1);     // to 24
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 24});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 24});
 
         sendBeanEvent("E2", -10);    // to 14
         sendBeanEvent("E2", 10);    // to 24, counts toward condition
         assertFalse(listener.isInvoked());
         sendBeanEvent("E2", 0);    // to 24, counts toward condition
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 24});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 24});
 
         sendBeanEvent("E2", -10);    // to 14
         sendBeanEvent("E2", 1);     // to 15
@@ -137,19 +137,19 @@ public class TestOutputLimitEventPerGroup extends TestCase
         assertFalse(listener.isInvoked());
 
         sendBeanEvent("E2", 0);    // to 21
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 21});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 21});
         
         // remove events
         sendMDEvent("E2", 0);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 21});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 21});
 
         // remove events
         sendMDEvent("E2", -10);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 41});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 41});
 
         // remove events
         sendMDEvent("E2", -6);  // since there is 3*-10 we output the next one
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 47});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 47});
 
         sendMDEvent("E2", 2);
         assertFalse(listener.isInvoked());
@@ -168,7 +168,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
         stmt.addListener(listener);
 
         sendBeanEvent("E1", 10);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 10});
 
         sendTimer(2 * 60 * 1000 - 1);
         sendBeanEvent("E1", 11);
@@ -176,10 +176,10 @@ public class TestOutputLimitEventPerGroup extends TestCase
 
         sendTimer(2 * 60 * 1000);
         sendBeanEvent("E1", 12);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 33});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 33});
 
         sendBeanEvent("E2", 20);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 20});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 20});
 
         sendBeanEvent("E2", 21);
         sendTimer(4 * 60 * 1000 - 1);
@@ -189,9 +189,9 @@ public class TestOutputLimitEventPerGroup extends TestCase
 
         sendTimer(4 * 60 * 1000);
         sendBeanEvent("E2", 23);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 86});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 86});
         sendBeanEvent("E1", 14);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 60});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 60});
     }
 
     public void testOutputFirstWhenThen() {
@@ -209,12 +209,12 @@ public class TestOutputLimitEventPerGroup extends TestCase
 
         epService.getEPRuntime().setVariableValue("varout", true);
         sendBeanEvent("E1", 12);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 33});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 33});
         assertEquals(false, epService.getEPRuntime().getVariableValue("varout"));
 
         epService.getEPRuntime().setVariableValue("varout", true);
         sendBeanEvent("E2", 20);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 20});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 20});
         assertEquals(false, epService.getEPRuntime().getVariableValue("varout"));
 
         sendBeanEvent("E1", 13);
@@ -231,28 +231,28 @@ public class TestOutputLimitEventPerGroup extends TestCase
         stmt.addListener(listener);
 
         sendBeanEvent("E1", 10);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 10});
 
         sendBeanEvent("E1", 12);
         sendBeanEvent("E1", 11);
         assertFalse(listener.isInvoked());
         
         sendBeanEvent("E1", 13);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 46});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 46});
 
         this.sendMDEvent("S1", 12);
         this.sendMDEvent("S1", 11);
         assertFalse(listener.isInvoked());
 
         this.sendMDEvent("S1", 10);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 13});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 13});
 
         sendBeanEvent("E1", 14);
         sendBeanEvent("E1", 15);
         assertFalse(listener.isInvoked());
 
         sendBeanEvent("E2", 20);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 20});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 20});
 
         // test variable
         epService.getEPAdministrator().createEPL("create variable int myvar = 1");
@@ -261,10 +261,10 @@ public class TestOutputLimitEventPerGroup extends TestCase
         stmt.addListener(listener);
         
         sendBeanEvent("E3", 10);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E3", 10}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E3", 10}});
 
         sendBeanEvent("E1", 5);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E1", 47}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E1", 47}});
 
         epService.getEPRuntime().setVariableValue("myvar", 2);
 
@@ -272,13 +272,13 @@ public class TestOutputLimitEventPerGroup extends TestCase
         assertFalse(listener.isInvoked());
 
         sendBeanEvent("E1", 7);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E1", 60}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E1", 60}});
 
         sendBeanEvent("E1", 1);
         assertFalse(listener.isInvoked());
 
         sendBeanEvent("E1", 1);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E1", 62}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E1", 62}});
     }
 
     public void testWildcardEventPerGroup() {
@@ -747,9 +747,9 @@ public class TestOutputLimitEventPerGroup extends TestCase
         sendTimer(1000);        // newdata is 2 eventa, old data is the same 2 events, therefore the sum is null
         UniformPair<EventBean[]> result = listener.getDataListsFlattened();
         assertEquals(2, result.getFirst().length);
-        ArrayAssertionUtil.assertPropsPerRow(result.getFirst(), fields, new Object[][] {{"JOIN_KEY", 1.0}, {"JOIN_KEY", 2.0}});
+        EPAssertionUtil.assertPropsPerRow(result.getFirst(), fields, new Object[][]{{"JOIN_KEY", 1.0}, {"JOIN_KEY", 2.0}});
         assertEquals(2, result.getSecond().length);
-        ArrayAssertionUtil.assertPropsPerRow(result.getSecond(), fields, new Object[][] {{"JOIN_KEY", null}, {"JOIN_KEY", 1.0}});
+        EPAssertionUtil.assertPropsPerRow(result.getSecond(), fields, new Object[][]{{"JOIN_KEY", null}, {"JOIN_KEY", 1.0}});
     }
 
     public void testLimitSnapshot()
@@ -769,7 +769,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
 
         sendTimer(1000);
         String fields[] = new String[] {"symbol", "minprice"};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"ABC", 14d}, {"IBM", 16d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"ABC", 14d}, {"IBM", 16d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -778,12 +778,12 @@ public class TestOutputLimitEventPerGroup extends TestCase
         sendMDEvent("MSFT", 30);
 
         sendTimer(10000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"ABC", 14d}, {"IBM", 16d}, {"MSFT", 30d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"ABC", 14d}, {"IBM", 16d}, {"MSFT", 30d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"IBM", 18d}, {"MSFT", 30d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"IBM", 18d}, {"MSFT", 30d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -819,7 +819,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
 
         sendTimer(1000);
         String fields[] = new String[] {"symbol", "minprice"};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"ABC", 14d}, {"IBM", 16d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"ABC", 14d}, {"IBM", 16d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -828,13 +828,13 @@ public class TestOutputLimitEventPerGroup extends TestCase
         sendMDEvent("MSFT", 30);
 
         sendTimer(10000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"ABC", 14d}, {"IBM", 16d}, {"MSFT", 30d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"ABC", 14d}, {"IBM", 16d}, {"MSFT", 30d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendTimer(10500);
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"IBM", 18d}, {"MSFT", 30d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"IBM", 18d}, {"MSFT", 30d}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -866,10 +866,10 @@ public class TestOutputLimitEventPerGroup extends TestCase
     	assertTrue(updateListener.getAndClearIsInvoked());
     	EventBean[] newData = updateListener.getLastNewData();
     	assertEquals(3, newData.length);
-        ArrayAssertionUtil.assertPropsPerRow(newData, fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(newData, fields, new Object[][]{
                 {"IBM", 6d}, {"HP", 1d}, {"MAC", 1d}});
     	EventBean[] oldData = updateListener.getLastOldData();
-        ArrayAssertionUtil.assertPropsPerRow(oldData, fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(oldData, fields, new Object[][]{
                 {"IBM", null}, {"HP", null}, {"MAC", null}});
     }
 
@@ -895,9 +895,9 @@ public class TestOutputLimitEventPerGroup extends TestCase
         EventBean[] oldData = updateListener.getLastOldData();
     	assertEquals(5, newData.length);
         assertEquals(5, oldData.length);
-        ArrayAssertionUtil.assertPropsPerRow(newData, fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(newData, fields, new Object[][]{
                 {"IBM", 1d}, {"IBM", 3d}, {"HP", 1d}, {"IBM", 6d}, {"MAC", 1d}});
-        ArrayAssertionUtil.assertPropsPerRow(oldData, fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(oldData, fields, new Object[][]{
                 {"IBM", null}, {"IBM", 1d}, {"HP", null}, {"IBM", 3d}, {"MAC", null}});        
     }
 
@@ -920,9 +920,9 @@ public class TestOutputLimitEventPerGroup extends TestCase
         sendTimer(1000);        // newdata is 2 eventa, old data is the same 2 events, therefore the sum is null
         UniformPair<EventBean[]> result = listener.getDataListsFlattened();
         assertEquals(3, result.getFirst().length);
-        ArrayAssertionUtil.assertPropsPerRow(result.getFirst(), fields, new Object[][] {{"SYM1", 1.0}, {"SYM1", 2.0}, {"SYM1", null}});
+        EPAssertionUtil.assertPropsPerRow(result.getFirst(), fields, new Object[][]{{"SYM1", 1.0}, {"SYM1", 2.0}, {"SYM1", null}});
         assertEquals(3, result.getSecond().length);
-        ArrayAssertionUtil.assertPropsPerRow(result.getSecond(), fields, new Object[][] {{"SYM1", null}, {"SYM1", 1.0}, {"SYM1", 2.0}});
+        EPAssertionUtil.assertPropsPerRow(result.getSecond(), fields, new Object[][]{{"SYM1", null}, {"SYM1", 1.0}, {"SYM1", 2.0}});
     }
 
     public void testNoJoinLast()

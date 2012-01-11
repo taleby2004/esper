@@ -43,6 +43,10 @@ public class ExprIdentNodeEvaluatorImpl implements ExprIdentNodeEvaluator
         return null;
     }
 
+    public EventPropertyGetter getGetter() {
+        return propertyGetter;
+    }
+
     /**
      * Returns true if the property exists, or false if not.
      * @param eventsPerStream each stream's events

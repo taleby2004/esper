@@ -15,14 +15,13 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.lrreport.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
-import sun.jdbc.odbc.ee.ObjectPool;
 
 import java.util.Collection;
 
@@ -285,7 +284,7 @@ public class TestEnumDocSamples extends TestCase {
 
         if (expected instanceof Object[]) {
             Object[] returned = ((Collection) result).toArray();
-            ArrayAssertionUtil.assertEqualsExactOrder(returned, (Object[]) expected);
+            EPAssertionUtil.assertEqualsExactOrder((Object[]) expected, returned);
         }
         else {
             assertEquals(expected, result);

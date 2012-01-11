@@ -11,6 +11,7 @@ package com.espertech.esper.epl.core;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.*;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.OutputLimitLimitType;
@@ -36,7 +37,7 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
     private final SelectExprProcessor selectExprProcessor;
     private final OrderByProcessor orderByProcessor;
     private final AggregationService aggregationService;
-    private final ExprEvaluatorContext exprEvaluatorContext;
+    private ExprEvaluatorContext exprEvaluatorContext;
 
     public ResultSetProcessorRowForAll(ResultSetProcessorRowForAllFactory prototype, SelectExprProcessor selectExprProcessor, OrderByProcessor orderByProcessor, AggregationService aggregationService, ExprEvaluatorContext exprEvaluatorContext) {
         this.prototype = prototype;
@@ -44,6 +45,10 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
         this.orderByProcessor = orderByProcessor;
         this.aggregationService = aggregationService;
         this.exprEvaluatorContext = exprEvaluatorContext;
+    }
+
+    public void setAgentInstanceContext(AgentInstanceContext context) {
+        this.exprEvaluatorContext = context;
     }
 
     public EventType getResultEventType()
@@ -174,7 +179,7 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
         EventBean[] selectNewEvents = getSelectListEvents(true, true);
         if (selectNewEvents == null)
         {
-            return new NullIterator();
+            return CollectionUtil.NULL_EVENT_ITERATOR;
         }
         return new SingleEventIterator(selectNewEvents[0]);
     }

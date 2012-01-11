@@ -43,8 +43,4 @@ public class RangeValueContextProp implements FilterSpecParamRangeValue {
         return value.doubleValue();
 
     }
-
-    public int getFilterHash() {
-        return propertyName.hashCode();
-    }
 }

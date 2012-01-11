@@ -8,11 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
+import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.client.util.EventRenderer;
 
+import java.net.URI;
 import java.util.Map;
 import java.util.Set;
-import java.net.URI;
 
 /**
  * Interface to event stream processing runtime services.
@@ -218,6 +219,8 @@ public interface EPRuntime
      * @return query result
      */
     public EPOnDemandQueryResult executeQuery(String epl);
+
+    public EPOnDemandQueryResult executeQuery(String epl, ContextPartitionSelector[] contextPartitionSelectors);
 
     /**
      * Prepare an on-demand query before execution and for repeated execution.

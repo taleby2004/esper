@@ -12,7 +12,6 @@
 package com.espertech.esper.core.context.mgr;
 
 import com.espertech.esper.core.context.factory.StatementAgentInstanceFactory;
-import com.espertech.esper.core.context.factory.StatementAgentInstanceFactory;
 import com.espertech.esper.core.context.subselect.SubSelectStrategyCollection;
 import com.espertech.esper.core.context.util.ContextMergeView;
 import com.espertech.esper.core.service.StatementContext;
@@ -21,7 +20,7 @@ import com.espertech.esper.epl.spec.StatementSpecCompiled;
 
 import java.util.List;
 
-public class ContextManagedStatementSelectDesc extends ContextManagedStatementBase {
+public class ContextManagedStatementSelectDesc extends ContextControllerStatementBase {
 
     private final List<AggregationServiceAggExpressionDesc> aggregationExpressions;
     private final SubSelectStrategyCollection subSelectPrototypeCollection;

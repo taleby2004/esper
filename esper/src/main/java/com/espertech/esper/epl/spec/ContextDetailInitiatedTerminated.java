@@ -11,57 +11,35 @@
 
 package com.espertech.esper.epl.spec;
 
-import com.espertech.esper.epl.expression.ExprTimePeriod;
-import com.espertech.esper.filter.FilterSpecCompiled;
-import com.espertech.esper.pattern.EvalFactoryNode;
-
 public class ContextDetailInitiatedTerminated implements ContextDetail {
 
-    private static final long serialVersionUID = -57813075143127850L;
-    private final EvalFactoryNode initiatedPattern;
-    private final FilterSpecRaw initiatedFilter;
-    private final String initiatedFilterAsName;
-    private final ExprTimePeriod terminatedTimePeriod;
+    private ContextDetailCondition start;
+    private ContextDetailCondition end;
+    private boolean overlapping;
 
-    private transient PatternStreamSpecCompiled initiatedPatternCompiled;
-    private transient FilterSpecCompiled initiatedFilterCompiled;
-
-    public ContextDetailInitiatedTerminated(EvalFactoryNode initiatedPattern, FilterSpecRaw initiatedFilter, String initiatedFilterAsName, ExprTimePeriod terminatedTimePeriod) {
-        this.initiatedPattern = initiatedPattern;
-        this.initiatedFilter = initiatedFilter;
-        this.initiatedFilterAsName = initiatedFilterAsName;
-        this.terminatedTimePeriod = terminatedTimePeriod;
+    public ContextDetailInitiatedTerminated(ContextDetailCondition start, ContextDetailCondition end, boolean overlapping) {
+        this.start = start;
+        this.end = end;
+        this.overlapping = overlapping;
     }
 
-    public EvalFactoryNode getInitiatedPattern() {
-        return initiatedPattern;
+    public ContextDetailCondition getStart() {
+        return start;
     }
 
-    public ExprTimePeriod getTerminatedTimePeriod() {
-        return terminatedTimePeriod;
+    public ContextDetailCondition getEnd() {
+        return end;
     }
 
-    public void setInitiatedPatternCompiled(PatternStreamSpecCompiled initiatedPatternCompiled) {
-        this.initiatedPatternCompiled = initiatedPatternCompiled;
+    public void setStart(ContextDetailCondition start) {
+        this.start = start;
     }
 
-    public PatternStreamSpecCompiled getInitiatedPatternCompiled() {
-        return initiatedPatternCompiled;
+    public void setEnd(ContextDetailCondition end) {
+        this.end = end;
     }
 
-    public FilterSpecRaw getInitiatedFilter() {
-        return initiatedFilter;
-    }
-
-    public String getInitiatedFilterAsName() {
-        return initiatedFilterAsName;
-    }
-
-    public FilterSpecCompiled getInitiatedFilterCompiled() {
-        return initiatedFilterCompiled;
-    }
-
-    public void setInitiatedFilterCompiled(FilterSpecCompiled initiatedFilterCompiled) {
-        this.initiatedFilterCompiled = initiatedFilterCompiled;
+    public boolean isOverlapping() {
+        return overlapping;
     }
 }

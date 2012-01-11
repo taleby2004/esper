@@ -19,38 +19,38 @@ public class IndexFactory
      * Factory for indexes that store filter parameter constants for a given event property and filter
      * operator.
      * <p>Does not perform any check of validity of property name.
-     * @param eventType is the event type to create an index for
-     * @param propertyName is the event property name
+     *
      * @param filterOperator is the type of index to use
      * @return the proper index based on the filter operator type
      */
-    public static FilterParamIndexBase createIndex(EventType eventType, String propertyName, FilterOperator filterOperator)
+    public static FilterParamIndexBase createIndex(FilterSpecLookupable lookupable, FilterOperator filterOperator)
     {
         FilterParamIndexBase index;
+        Class returnValueType = lookupable.getReturnType();
 
         // Handle all EQUAL comparisons
         if (filterOperator == FilterOperator.EQUAL)
         {
-            index = new FilterParamIndexEquals(propertyName, eventType);
+            index = new FilterParamIndexEquals(lookupable);
             return index;
         }
 
         // Handle all NOT-EQUAL comparisons
         if (filterOperator == FilterOperator.NOT_EQUAL)
         {
-            index = new FilterParamIndexNotEquals(propertyName, eventType);
+            index = new FilterParamIndexNotEquals(lookupable);
             return index;
         }
 
         if (filterOperator == FilterOperator.IS)
         {
-            index = new FilterParamIndexEqualsIs(propertyName, eventType);
+            index = new FilterParamIndexEqualsIs(lookupable);
             return index;
         }
 
         if (filterOperator == FilterOperator.IS_NOT)
         {
-            index = new FilterParamIndexNotEqualsIs(propertyName, eventType);
+            index = new FilterParamIndexNotEqualsIs(lookupable);
             return index;
         }
 
@@ -60,12 +60,11 @@ public class IndexFactory
             (filterOperator == FilterOperator.LESS) ||
             (filterOperator == FilterOperator.LESS_OR_EQUAL))
         {
-            Class type = eventType.getPropertyType(propertyName);
-            if (type != String.class) {
-                index = new FilterParamIndexCompare(propertyName, filterOperator, eventType);
+            if (returnValueType != String.class) {
+                index = new FilterParamIndexCompare(lookupable, filterOperator);
             }
             else {
-                index = new FilterParamIndexCompareString(propertyName, filterOperator, eventType);
+                index = new FilterParamIndexCompareString(lookupable, filterOperator);
             }
             return index;
         }
@@ -73,34 +72,32 @@ public class IndexFactory
         // Handle all normal and inverted RANGE comparisons
         if (filterOperator.isRangeOperator())
         {
-            Class type = eventType.getPropertyType(propertyName);
-            if (type != String.class) {
-                index = new FilterParamIndexDoubleRange(propertyName, filterOperator, eventType);
+            if (returnValueType != String.class) {
+                index = new FilterParamIndexDoubleRange(lookupable, filterOperator);
             }
             else {
-                index = new FilterParamIndexStringRange(propertyName, filterOperator, eventType);
+                index = new FilterParamIndexStringRange(lookupable, filterOperator);
             }
             return index;
         }
         if (filterOperator.isInvertedRangeOperator())
         {
-            Class type = eventType.getPropertyType(propertyName);
-            if (type != String.class) {
-                return new FilterParamIndexDoubleRangeInverted(propertyName, filterOperator, eventType);
+            if (returnValueType != String.class) {
+                return new FilterParamIndexDoubleRangeInverted(lookupable, filterOperator);
             }
             else {
-                return new FilterParamIndexStringRangeInverted(propertyName, filterOperator, eventType);
+                return new FilterParamIndexStringRangeInverted(lookupable, filterOperator);
             }
         }
 
         // Handle all IN and NOT IN comparisons
         if (filterOperator == FilterOperator.IN_LIST_OF_VALUES)
         {
-            return new FilterParamIndexIn(propertyName, eventType);
+            return new FilterParamIndexIn(lookupable);
         }
         if (filterOperator == FilterOperator.NOT_IN_LIST_OF_VALUES)
         {
-            return new FilterParamIndexNotIn(propertyName, eventType);
+            return new FilterParamIndexNotIn(lookupable);
         }
 
         // Handle all boolean expression

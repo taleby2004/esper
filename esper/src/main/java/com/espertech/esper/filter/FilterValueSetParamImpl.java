@@ -15,26 +15,25 @@ public class FilterValueSetParamImpl implements FilterValueSetParam
 {
     private static final long serialVersionUID = 6010018248791276406L;
     
-    private final String propertyName;
+    private final FilterSpecLookupable lookupable;
     private final FilterOperator filterOperator;
     private final Object filterValue;
 
     /**
      * Ctor.
-     * @param propertyName - property to interrogate
+     * @param lookupable - stuff to use to interrogate
      * @param filterOperator - operator to apply
      * @param filterValue - value to look for
      */
-    public FilterValueSetParamImpl(String propertyName, FilterOperator filterOperator, Object filterValue)
+    public FilterValueSetParamImpl(FilterSpecLookupable lookupable, FilterOperator filterOperator, Object filterValue)
     {
-        this.propertyName = propertyName;
+        this.lookupable = lookupable;
         this.filterOperator = filterOperator;
         this.filterValue = filterValue;
     }
 
-    public String getPropertyName()
-    {
-        return propertyName;
+    public FilterSpecLookupable getLookupable() {
+        return lookupable;
     }
 
     public FilterOperator getFilterOperator()
@@ -49,7 +48,7 @@ public class FilterValueSetParamImpl implements FilterValueSetParam
 
     public String toString() {
         return "FilterValueSetParamImpl{" +
-                "propertyName='" + propertyName + '\'' +
+                "lookupable='" + lookupable + '\'' +
                 ", filterOperator=" + filterOperator +
                 ", filterValue=" + filterValue +
                 '}';

@@ -12,9 +12,9 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.event.EventTypeSPI;
@@ -49,7 +49,7 @@ public class TestLegacyBeanEvents extends TestCase
         // test remove type with statement used (no force)
         configOps.addEventType("MyBeanEvent", SupportBean_A.class);
         EPStatement stmt = epService.getEPAdministrator().createEPL("select id from MyBeanEvent", "stmtOne");
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"stmtOne"}, configOps.getEventTypeNameUsedBy("MyBeanEvent").toArray());
+        EPAssertionUtil.assertEqualsExactOrder(configOps.getEventTypeNameUsedBy("MyBeanEvent").toArray(), new String[]{"stmtOne"});
 
         try {
             configOps.removeEventType("MyBeanEvent", false);
@@ -80,7 +80,7 @@ public class TestLegacyBeanEvents extends TestCase
 
         // compile
         epService.getEPAdministrator().createEPL("select boolPrimitive from MyBeanEvent", "stmtTwo");
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"stmtTwo"}, configOps.getEventTypeNameUsedBy("MyBeanEvent").toArray());
+        EPAssertionUtil.assertEqualsExactOrder(configOps.getEventTypeNameUsedBy("MyBeanEvent").toArray(), new String[]{"stmtTwo"});
         try {
             epService.getEPAdministrator().createEPL("select id from MyBeanEvent");
             fail();

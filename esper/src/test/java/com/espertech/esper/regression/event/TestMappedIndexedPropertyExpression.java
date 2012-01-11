@@ -14,11 +14,11 @@ package com.espertech.esper.regression.event;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Collections;
@@ -99,7 +99,7 @@ public class TestMappedIndexedPropertyExpression extends TestCase {
 
         epService.getEPRuntime().sendEvent(makeMapEvent(), "MapEvent");
         epService.getEPRuntime().sendEvent(new SupportBean("keyOne", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1".split(","), new Object[]{"valueOne", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1".split(","), new Object[]{"valueOne", 2});
         stmtMap.destroy();
     }
 
@@ -109,7 +109,7 @@ public class TestMappedIndexedPropertyExpression extends TestCase {
 
         epService.getEPRuntime().sendEvent(SupportBeanComplexProps.makeDefaultBean());
         epService.getEPRuntime().sendEvent(new SupportBean("keyOne", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1".split(","), new Object[]{"valueOne", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1".split(","), new Object[]{"valueOne", 2});
         stmt.destroy();
     }
 

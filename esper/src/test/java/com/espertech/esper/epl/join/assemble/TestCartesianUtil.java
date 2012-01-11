@@ -12,8 +12,8 @@
 package com.espertech.esper.epl.join.assemble;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.epl.join.SupportJoinResultNodeFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -59,32 +59,32 @@ public class TestCartesianUtil extends TestCase
         rowsB = null;
         tryCompute(rowsA, rowsB);
         assertEquals(1, results.size());
-        ArrayAssertionUtil.assertEqualsExactOrder(rowsA.get(0), results.get(0));
+        EPAssertionUtil.assertEqualsExactOrder(results.get(0), rowsA.get(0));
 
         // test side B one row, A empty
         rowsA = null;
         rowsB = makeRowsB(1);
         tryCompute(rowsA, rowsB);
         assertEquals(1, results.size());
-        ArrayAssertionUtil.assertEqualsExactOrder(rowsB.get(0), results.get(0));
+        EPAssertionUtil.assertEqualsExactOrder(results.get(0), rowsB.get(0));
 
         // test A and B one row
         rowsA = makeRowsA(1);
         rowsB = makeRowsB(1);
         tryCompute(rowsA, rowsB);
         assertEquals(1, results.size());
-        ArrayAssertionUtil.assertEqualsExactOrder(
-                new EventBean[] {rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]}, results.get(0));
+        EPAssertionUtil.assertEqualsExactOrder(
+                results.get(0), new EventBean[]{rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]});
 
         // test A=2 rows and B=1 row
         rowsA = makeRowsA(2);
         rowsB = makeRowsB(1);
         tryCompute(rowsA, rowsB);
         assertEquals(2, results.size());
-        ArrayAssertionUtil.assertEqualsAnyOrder( new EventBean[][] {
-                new EventBean[] {rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]},
-                new EventBean[] {rowsA.get(1)[0], rowsB.get(0)[1], null, rowsA.get(1)[3]}
-                }
+        EPAssertionUtil.assertEqualsAnyOrder(new EventBean[][]{
+                new EventBean[]{rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]},
+                new EventBean[]{rowsA.get(1)[0], rowsB.get(0)[1], null, rowsA.get(1)[3]}
+        }
                 , SupportJoinResultNodeFactory.convertTo2DimArr(results));
 
         // test A=1 rows and B=2 row
@@ -92,10 +92,10 @@ public class TestCartesianUtil extends TestCase
         rowsB = makeRowsB(2);
         tryCompute(rowsA, rowsB);
         assertEquals(2, results.size());
-        ArrayAssertionUtil.assertEqualsAnyOrder( new EventBean[][] {
-                new EventBean[] {rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]},
-                new EventBean[] {rowsA.get(0)[0], rowsB.get(1)[1], null, rowsA.get(0)[3]}
-                }
+        EPAssertionUtil.assertEqualsAnyOrder(new EventBean[][]{
+                new EventBean[]{rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]},
+                new EventBean[]{rowsA.get(0)[0], rowsB.get(1)[1], null, rowsA.get(0)[3]}
+        }
                 , SupportJoinResultNodeFactory.convertTo2DimArr(results));
 
         // test A=2 rows and B=2 row
@@ -103,12 +103,12 @@ public class TestCartesianUtil extends TestCase
         rowsB = makeRowsB(2);
         tryCompute(rowsA, rowsB);
         assertEquals(4, results.size());
-        ArrayAssertionUtil.assertEqualsAnyOrder( new EventBean[][] {
-                new EventBean[] {rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]},
-                new EventBean[] {rowsA.get(0)[0], rowsB.get(1)[1], null, rowsA.get(0)[3]},
-                new EventBean[] {rowsA.get(1)[0], rowsB.get(0)[1], null, rowsA.get(1)[3]},
-                new EventBean[] {rowsA.get(1)[0], rowsB.get(1)[1], null, rowsA.get(1)[3]}
-                }
+        EPAssertionUtil.assertEqualsAnyOrder(new EventBean[][]{
+                new EventBean[]{rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]},
+                new EventBean[]{rowsA.get(0)[0], rowsB.get(1)[1], null, rowsA.get(0)[3]},
+                new EventBean[]{rowsA.get(1)[0], rowsB.get(0)[1], null, rowsA.get(1)[3]},
+                new EventBean[]{rowsA.get(1)[0], rowsB.get(1)[1], null, rowsA.get(1)[3]}
+        }
                 , SupportJoinResultNodeFactory.convertTo2DimArr(results));
 
         // test A=2 rows and B=3 row
@@ -116,14 +116,14 @@ public class TestCartesianUtil extends TestCase
         rowsB = makeRowsB(3);
         tryCompute(rowsA, rowsB);
         assertEquals(6, results.size());
-        ArrayAssertionUtil.assertEqualsAnyOrder( new EventBean[][] {
-                new EventBean[] {rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]},
-                new EventBean[] {rowsA.get(0)[0], rowsB.get(1)[1], null, rowsA.get(0)[3]},
-                new EventBean[] {rowsA.get(0)[0], rowsB.get(2)[1], null, rowsA.get(0)[3]},
-                new EventBean[] {rowsA.get(1)[0], rowsB.get(0)[1], null, rowsA.get(1)[3]},
-                new EventBean[] {rowsA.get(1)[0], rowsB.get(1)[1], null, rowsA.get(1)[3]},
-                new EventBean[] {rowsA.get(1)[0], rowsB.get(2)[1], null, rowsA.get(1)[3]}
-                }
+        EPAssertionUtil.assertEqualsAnyOrder(new EventBean[][]{
+                new EventBean[]{rowsA.get(0)[0], rowsB.get(0)[1], null, rowsA.get(0)[3]},
+                new EventBean[]{rowsA.get(0)[0], rowsB.get(1)[1], null, rowsA.get(0)[3]},
+                new EventBean[]{rowsA.get(0)[0], rowsB.get(2)[1], null, rowsA.get(0)[3]},
+                new EventBean[]{rowsA.get(1)[0], rowsB.get(0)[1], null, rowsA.get(1)[3]},
+                new EventBean[]{rowsA.get(1)[0], rowsB.get(1)[1], null, rowsA.get(1)[3]},
+                new EventBean[]{rowsA.get(1)[0], rowsB.get(2)[1], null, rowsA.get(1)[3]}
+        }
                 , SupportJoinResultNodeFactory.convertTo2DimArr(results));
     }
 

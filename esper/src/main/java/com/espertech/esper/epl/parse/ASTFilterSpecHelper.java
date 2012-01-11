@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.parse;
 
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
 import org.antlr.runtime.tree.Tree;
 
@@ -76,6 +77,14 @@ public class ASTFilterSpecHelper
         }
 
         return buffer.toString();
+    }
+
+    public static Pair<String, String> getMappedPropertyPair(Tree node) {
+        if (node.getChild(0).getType() != EsperEPL2GrammarParser.EVENT_PROP_MAPPED) {
+            return null;
+        }
+        return new Pair<String, String>(escapeDot(node.getChild(0).getChild(0).getText()),
+                node.getChild(0).getChild(1).getText());
     }
 
     /**

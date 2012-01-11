@@ -36,12 +36,12 @@ public class ExprCountNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
-        AggregationMethod method = methodResolutionService.makeCountAggregator(agentInstanceIds, groupId, aggregationId, ignoreNulls, hasFilter);
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeCountAggregator(agentInstanceId, groupId, aggregationId, ignoreNulls, hasFilter);
         if (!isDistinct) {
             return method;
         }
-        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, countedValueType, hasFilter);
+        return methodResolutionService.makeDistinctAggregator(agentInstanceId, groupId, aggregationId, method, countedValueType, hasFilter);
     }
 
     public AggregationMethodFactory getPrototypeAggregator() {

@@ -15,12 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0_Container;
 import com.espertech.esper.support.bean.SupportCollection;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestEnumCountOf extends TestCase {
@@ -54,23 +54,23 @@ public class TestEnumCountOf extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), fields, new Class[]{Integer.class, Integer.class});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value("E1,1", "E2,9", "E2,9"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {2, 3});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{2, 3});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value(null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{null, null});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value(new String[0]));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {0, 0});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{0, 0});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value("E1,9"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
                 new Object[]{1, 1});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value("E1,1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
                 new Object[]{0, 1});
     }
 
@@ -86,9 +86,9 @@ public class TestEnumCountOf extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), fields, new Class[]{Integer.class, Integer.class});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2, 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2, 1});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2,E1,E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {4, 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4, 2});
     }
 }

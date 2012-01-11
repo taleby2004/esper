@@ -21,5 +21,5 @@ public interface StatementLockFactory
      * @param expressionText is the statement expression text
      * @return lock
      */
-    public StatementAgentInstanceLock getStatementLock(String statementName, String expressionText, Annotation[] annotations);
+    public StatementAgentInstanceLock getStatementLock(String statementName, String expressionText, Annotation[] annotations, boolean stateless);
 }

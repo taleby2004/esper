@@ -11,14 +11,10 @@
 
 package com.espertech.esper.type;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.Set;
-
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.type.FrequencyParameter;
-import com.espertech.esper.type.ListParameter;
-import com.espertech.esper.type.IntParameter;
 
 public class TestListParameter extends TestCase
 {
@@ -41,6 +37,19 @@ public class TestListParameter extends TestCase
     public void testGetValues()
     {
         Set<Integer> result = listParam.getValuesInRange(1, 8);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3, 5, 6}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3, 5, 6}, result);
+    }
+
+    public void testContainsPoint() {
+        assertTrue(listParam.containsPoint(0));
+        assertFalse(listParam.containsPoint(1));
+        assertFalse(listParam.containsPoint(2));
+        assertTrue(listParam.containsPoint(3));
+        assertFalse(listParam.containsPoint(4));
+        assertTrue(listParam.containsPoint(5));
+    }
+
+    public void testFormat() {
+        assertEquals("5, */3", listParam.formatted());
     }
 }

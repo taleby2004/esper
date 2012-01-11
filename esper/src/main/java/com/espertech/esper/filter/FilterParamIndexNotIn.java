@@ -9,7 +9,7 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,21 +22,16 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Index for filter parameter constants to match using the 'not in' operator to match against a
  * all other values then the supplied set of values.
  */
-public final class FilterParamIndexNotIn extends FilterParamIndexPropBase
+public final class FilterParamIndexNotIn extends FilterParamIndexLookupableBase
 {
     private final Map<Object, Set<EventEvaluator>> constantsMap;
     private final Map<MultiKeyUntyped, EventEvaluator> filterValueEvaluators;
     private final Set<EventEvaluator> evaluatorsSet;
     private final ReadWriteLock constantsMapRWLock;
 
-    /**
-     * Constructs the index for multiple-exact matches.
-     * @param propertyName is the name of the event property
-     * @param eventType describes the event type and is used to obtain a getter instance for the property
-     */
-    public FilterParamIndexNotIn(String propertyName, EventType eventType)
+    public FilterParamIndexNotIn(FilterSpecLookupable lookupable)
     {
-        super(propertyName, FilterOperator.NOT_IN_LIST_OF_VALUES, eventType);
+        super(FilterOperator.NOT_IN_LIST_OF_VALUES, lookupable);
 
         constantsMap = new HashMap<Object, Set<EventEvaluator>>();
         filterValueEvaluators = new HashMap<MultiKeyUntyped, EventEvaluator>();
@@ -112,7 +107,7 @@ public final class FilterParamIndexNotIn extends FilterParamIndexPropBase
 
     public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
     {
-        Object attributeValue = this.getGetter().get(eventBean);
+        Object attributeValue = lookupable.getGetter().get(eventBean);
 
         if (attributeValue == null)
         {

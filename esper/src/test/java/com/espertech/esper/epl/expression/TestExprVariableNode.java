@@ -11,16 +11,18 @@
 
 package com.espertech.esper.epl.expression;
 
-import junit.framework.TestCase;
+import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
+import junit.framework.TestCase;
 
 public class TestExprVariableNode extends TestCase
 {
-    private ExprVariableNode varNode;
+    private ExprVariableNodeImpl varNode;
+    private VariableService variableService;
 
     public void setUp() throws Exception
     {
-        varNode = new ExprVariableNode("var1");
+        varNode = new ExprVariableNodeImpl("var1", null);
     }
 
     public void testGetType()  throws Exception
@@ -38,18 +40,18 @@ public class TestExprVariableNode extends TestCase
     public void testValidate() throws Exception
     {
         // variable doesn't exists
-        tryInvalidValidate(new ExprVariableNode("dummy"));
+        tryInvalidValidate(new ExprVariableNodeImpl("dummy", null));
 
         // variable and property are ambigours
-        tryInvalidValidate(new ExprVariableNode("intPrimitive"));
+        tryInvalidValidate(new ExprVariableNodeImpl("intPrimitive", null));
     }
 
     public void testEquals()  throws Exception
     {
         ExprInNode otherInNode = SupportExprNodeFactory.makeInSetNode(false);
-        ExprVariableNode otherVarOne = new ExprVariableNode("dummy");
-        ExprVariableNode otherVarTwo = new ExprVariableNode("var1");
-        ExprVariableNode otherVarThree = new ExprVariableNode("var1.abc");
+        ExprVariableNodeImpl otherVarOne = new ExprVariableNodeImpl("dummy", null);
+        ExprVariableNodeImpl otherVarTwo = new ExprVariableNodeImpl("var1", null);
+        ExprVariableNodeImpl otherVarThree = new ExprVariableNodeImpl("var1.abc", null);
 
         assertTrue(varNode.equalsNode(varNode));
         assertTrue(varNode.equalsNode(otherVarTwo));
@@ -63,7 +65,7 @@ public class TestExprVariableNode extends TestCase
         assertEquals("var1", varNode.toExpressionString());
     }
 
-    private void tryInvalidValidate(ExprVariableNode varNode) throws Exception
+    private void tryInvalidValidate(ExprVariableNodeImpl varNode) throws Exception
     {
         try {
             SupportExprNodeFactory.validate3Stream(varNode);

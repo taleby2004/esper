@@ -12,19 +12,17 @@
 package com.espertech.esper.regression.pattern;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Array;
-import java.util.Arrays;
 
 public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
 {
@@ -314,7 +312,7 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         epService.getEPRuntime().sendEvent(eventB1);
 
         EventBean event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {eventA1, eventA2}, (Object[]) event.get("a"));
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("a"), new Object[]{eventA1, eventA2});
         assertSame(eventA1, event.get("a0"));
         assertSame(eventA2, event.get("a1"));
         assertNull(event.get("a2"));
@@ -334,7 +332,7 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         epService.getEPRuntime().sendEvent(eventB1);
 
         event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {eventA1, eventA2}, (Object[]) event.get("a"));
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("a"), new Object[]{eventA1, eventA2});
         assertSame(eventA1, event.get("a[0]"));
         assertSame(eventA2, event.get("a[1]"));
         assertNull(event.get("a[2]"));
@@ -540,7 +538,7 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "b[0].string,b[1].string".split(","), new Object[] {"E1", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "b[0].string,b[1].string".split(","), new Object[]{"E1", "E2"});
 
         // test substitution parameter
         String epl = "select * from pattern[[?] SupportBean]";

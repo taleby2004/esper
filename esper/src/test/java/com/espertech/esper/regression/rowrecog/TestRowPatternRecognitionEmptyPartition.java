@@ -15,10 +15,9 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,25 +50,25 @@ public class TestRowPatternRecognitionEmptyPartition extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("A", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("B", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("B", 2));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("A", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("B", 3));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("A", 4));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("A", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("B", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {4});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("A", 6));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("B", 7));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("B", 8));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("A", 7));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {7});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{7});
 
         /**
          * Comment-in for testing partition removal.
@@ -77,7 +76,7 @@ public class TestRowPatternRecognitionEmptyPartition extends TestCase {
         for (int i = 0; i < 1000000; i++) {
             epService.getEPRuntime().sendEvent(new SupportRecogBean("A", i));
             //epService.getEPRuntime().sendEvent(new SupportRecogBean("B", i));
-            //ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {i});
+            //EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {i});
         }
     }
 }

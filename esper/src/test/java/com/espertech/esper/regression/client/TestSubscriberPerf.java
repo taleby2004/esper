@@ -11,11 +11,11 @@
 
 package com.espertech.esper.regression.client;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.client.EventBean;
 
 import java.util.List;
@@ -65,7 +65,7 @@ public class TestSubscriberPerf extends TestCase
         assertEquals(NUM_LOOP, results.size());
         for (int i = 0; i < NUM_LOOP; i++)
         {
-            ArrayAssertionUtil.assertEqualsAnyOrder(results.get(i), new Object[] {"E1", 1000 + i});
+            EPAssertionUtil.assertEqualsAnyOrder(results.get(i), new Object[] {"E1", 1000 + i});
         }
         System.out.println("delta=" + (end - start));
     }
@@ -96,7 +96,7 @@ public class TestSubscriberPerf extends TestCase
         assertEquals(NUM_LOOP, results.size());
         for (int i = 0; i < NUM_LOOP; i++)
         {
-            ArrayAssertionUtil.assertEqualsAnyOrder(results.get(i), new Object[] {"E1", 1000 + i});
+            EPAssertionUtil.assertEqualsAnyOrder(results.get(i), new Object[]{"E1", 1000 + i});
         }
         // System.out.println("delta=" + (end - start));
     }

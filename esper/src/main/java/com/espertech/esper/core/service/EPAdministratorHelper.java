@@ -112,11 +112,11 @@ public class EPAdministratorHelper
             log.debug(".createEPLStmt statementName=" + statementName + " eplStatement=" + eplStatement);
         }
 
-        ParseResult parseResult = ParseHelper.parse(eplStatement, eplStatementForErrorMsg, addPleaseCheck, eplParseRule);
+        ParseResult parseResult = ParseHelper.parse(eplStatement, eplStatementForErrorMsg, addPleaseCheck, eplParseRule, true);
         Tree ast = parseResult.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
 
-        EPLTreeWalker walker = new EPLTreeWalker(nodes, parseResult.getTokenStream(), engineImportService, variableService, schedulingService, defaultStreamSelector, engineURI, configSnapshot, patternNodeFactory, contextManagementService);
+        EPLTreeWalker walker = new EPLTreeWalker(nodes, parseResult.getTokenStream(), engineImportService, variableService, schedulingService, defaultStreamSelector, engineURI, configSnapshot, patternNodeFactory, contextManagementService, parseResult.getScripts());
 
         try
         {
@@ -151,10 +151,10 @@ public class EPAdministratorHelper
     public static StatementSpecRaw compilePattern(String expression, String expressionForErrorMessage, boolean addPleaseCheck, EPServicesContext services, SelectClauseStreamSelectorEnum defaultStreamSelector)
     {
         // Parse and walk
-        ParseResult parseResult = ParseHelper.parse(expression, expressionForErrorMessage, addPleaseCheck, patternParseRule);
+        ParseResult parseResult = ParseHelper.parse(expression, expressionForErrorMessage, addPleaseCheck, patternParseRule, true);
         Tree ast = parseResult.getTree();
         CommonTreeNodeStream nodes = new CommonTreeNodeStream(ast);
-        EPLTreeWalker walker = new EPLTreeWalker(nodes, parseResult.getTokenStream(), services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), defaultStreamSelector, services.getEngineURI(), services.getConfigSnapshot(), services.getPatternNodeFactory(), services.getContextManagementService());
+        EPLTreeWalker walker = new EPLTreeWalker(nodes, parseResult.getTokenStream(), services.getEngineImportService(), services.getVariableService(), services.getSchedulingService(), defaultStreamSelector, services.getEngineURI(), services.getConfigSnapshot(), services.getPatternNodeFactory(), services.getContextManagementService(), parseResult.getScripts());
 
         try
         {

@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.core.service.StatementType;
@@ -20,8 +22,6 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportNamedWindowObserver;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Set;
@@ -85,20 +85,20 @@ public class TestNamedWindowStartStop extends TestCase
 
         // send 1 event
         sendSupportBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
 
         // Delete all events, 1 row expected
         sendSupportBean_A("A2");
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetOldAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetOldAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
 
         sendSupportBean("E2", 2);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2", 2}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2", 2}});
 
         // Stop the deleting statement
         stmtDelete.stop();
@@ -109,14 +109,14 @@ public class TestNamedWindowStartStop extends TestCase
         stmtDelete.start();
 
         sendSupportBean_A("A3");
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetOldAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetOldAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
 
         sendSupportBean("E3", 3);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E3", 3}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E3", 3}});
 
         stmtDelete.destroy();
         sendSupportBean_A("A3");
@@ -142,32 +142,32 @@ public class TestNamedWindowStartStop extends TestCase
 
         // send 1 event
         sendSupportBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
 
         // stop consumer
         stmtSelect.stop();
         sendSupportBean("E2", 2);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
         assertFalse(listenerSelect.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         // start consumer: the consumer has the last event even though he missed it
         stmtSelect.start();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         // consumer receives the next event
         sendSupportBean("E3", 3);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
 
         // destroy consumer
         stmtSelect.destroy();
         sendSupportBean("E4", 4);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E4", 4});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E4", 4});
         assertFalse(listenerSelect.isInvoked());
     }
 
@@ -177,7 +177,7 @@ public class TestNamedWindowStartStop extends TestCase
 
         // test remove type with statement used (no force)
         EPStatement stmt = epService.getEPAdministrator().createEPL("create window MyWindowEventType.win:keepall() (a int, b string)", "stmtOne");
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"stmtOne"}, configOps.getEventTypeNameUsedBy("MyWindowEventType").toArray());
+        EPAssertionUtil.assertEqualsExactOrder(configOps.getEventTypeNameUsedBy("MyWindowEventType").toArray(), new String[]{"stmtOne"});
 
         try {
             configOps.removeEventType("MyWindowEventType", false);
@@ -209,7 +209,7 @@ public class TestNamedWindowStartStop extends TestCase
         // compile
         epService.getEPAdministrator().createEPL("select d from MyWindowEventType", "stmtTwo");
         Object[] usedBy = configOps.getEventTypeNameUsedBy("MyWindowEventType").toArray();
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtOne", "stmtTwo"}, usedBy);
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmtOne", "stmtTwo"}, usedBy);
         try {
             epService.getEPAdministrator().createEPL("select a from MyWindowEventType");
             fail();
@@ -264,9 +264,9 @@ public class TestNamedWindowStartStop extends TestCase
 
         // send 1 event
         sendSupportBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
 
         // stop inserter
         stmtInsert.stop();
@@ -279,10 +279,10 @@ public class TestNamedWindowStartStop extends TestCase
 
         // consumer receives the next event
         sendSupportBean("E3", 3);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 3}});
 
         // destroy inserter
         stmtInsert.destroy();
@@ -314,10 +314,10 @@ public class TestNamedWindowStartStop extends TestCase
 
         // send 1 event
         sendSupportBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E1", 1}});
 
         // stop creator
         stmtCreate.stop();
@@ -325,26 +325,26 @@ public class TestNamedWindowStartStop extends TestCase
         assertFalse(listenerSelect.isInvoked());
         assertFalse(listenerWindow.isInvoked());
         assertNull(stmtCreate.iterator());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E1", 1}});
 
         // start creator
         stmtCreate.start();
         sendSupportBean("E3", 3);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E3", 3});
         assertFalse(listenerSelect.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E1", 1}});
 
         // stop and start consumer: should pick up last event
         stmtSelect.stop();
         stmtSelect.start();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E3", 3}});
 
         sendSupportBean("E4", 4);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E4", 4});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E4", 4});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E3", 3}, {"E4", 4}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}, {"E4", 4}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E4", 4});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E4", 4});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E3", 3}, {"E4", 4}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E3", 3}, {"E4", 4}});
 
         // destroy creator
         stmtCreate.destroy();
@@ -352,7 +352,7 @@ public class TestNamedWindowStartStop extends TestCase
         assertFalse(listenerSelect.isInvoked());
         assertFalse(listenerWindow.isInvoked());
         assertNull(stmtCreate.iterator());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}, {"E4", 4}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E3", 3}, {"E4", 4}});
 
         // create window anew
         stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
@@ -360,10 +360,10 @@ public class TestNamedWindowStartStop extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         sendSupportBean("E6", 6);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E6", 6});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E6", 6}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E6", 6});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E6", 6}});
         assertFalse(listenerSelect.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}, {"E4", 4}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E3", 3}, {"E4", 4}});
 
         // create select stmt
         String stmtTextOnSelect = "on " + SupportBean_A.class.getName() + " insert into A select * from MyWindow";
@@ -374,42 +374,42 @@ public class TestNamedWindowStartStop extends TestCase
 
         assertTrue(spi.getStatementEventTypeRef().isInUse("MyWindow"));
         Set<String> stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("MyWindow");
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtCreate", "stmtSelect", "stmtInsert", "stmtDelete", "stmtOnSelect"},stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmtCreate", "stmtSelect", "stmtInsert", "stmtDelete", "stmtOnSelect"}, stmtNames.toArray());
 
         assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean.class.getName());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtCreate", "stmtInsert"}, stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmtCreate", "stmtInsert"}, stmtNames.toArray());
 
         assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean_A.class.getName()));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean_A.class.getName());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtDelete", "stmtOnSelect"}, stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmtDelete", "stmtOnSelect"}, stmtNames.toArray());
 
         stmtInsert.destroy();
         stmtDelete.destroy();
 
         assertTrue(spi.getStatementEventTypeRef().isInUse("MyWindow"));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("MyWindow");
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtCreate", "stmtSelect", "stmtOnSelect"},stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmtCreate", "stmtSelect", "stmtOnSelect"}, stmtNames.toArray());
 
         assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean.class.getName());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtCreate"}, stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmtCreate"}, stmtNames.toArray());
 
         assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean_A.class.getName()));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean_A.class.getName());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtOnSelect"}, stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmtOnSelect"}, stmtNames.toArray());
 
         stmtCreate.destroy();
 
         assertTrue(spi.getStatementEventTypeRef().isInUse("MyWindow"));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType("MyWindow");
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtSelect", "stmtOnSelect"},stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmtSelect", "stmtOnSelect"}, stmtNames.toArray());
 
         assertFalse(spi.getStatementEventTypeRef().isInUse(SupportBean.class.getName()));
 
         assertTrue(spi.getStatementEventTypeRef().isInUse(SupportBean_A.class.getName()));
         stmtNames = spi.getStatementEventTypeRef().getStatementNamesForType(SupportBean_A.class.getName());
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[] {"stmtOnSelect"}, stmtNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[]{"stmtOnSelect"}, stmtNames.toArray());
 
         stmtOnSelect.destroy();
         stmtSelect.destroy();

@@ -9,10 +9,10 @@
 package com.espertech.esperio.representation.axiom;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
-import com.espertech.esperio.support.util.ArrayAssertionUtil;
-import com.espertech.esperio.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -84,13 +84,13 @@ public class TestAxiom extends TestCase
         assertEquals(5, eventType.getPropertyDescriptors().length);
         assertEquals(5, eventType.getPropertyNames().length);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("xpathElement1", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("xpathCountE21", Double.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("xpathAttrString", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("xpathAttrNum", Double.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("xpathAttrBool", Boolean.class, null, false, false, false, false, false),
-           }, eventType.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("xpathElement1", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("xpathCountE21", Double.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("xpathAttrString", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("xpathAttrNum", Double.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("xpathAttrBool", Boolean.class, null, false, false, false, false, false),
+        }, eventType.getPropertyDescriptors());
     }
 
     public void testConfigurationXML() throws Exception

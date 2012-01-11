@@ -12,6 +12,7 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esperio.http.config.ConfigurationHTTPAdapter;
 import com.espertech.esperio.http.config.Request;
 import junit.framework.TestCase;

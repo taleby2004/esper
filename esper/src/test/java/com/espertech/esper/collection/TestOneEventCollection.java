@@ -11,9 +11,9 @@
 
 package com.espertech.esper.collection;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.client.EventBean;
 
 public class TestOneEventCollection extends TestCase
@@ -30,18 +30,18 @@ public class TestOneEventCollection extends TestCase
     public void testFlow()
     {
         assertTrue(list.isEmpty());
-        ArrayAssertionUtil.assertEqualsExactOrder(new EventBean[0], list.toArray());
+        EPAssertionUtil.assertEqualsExactOrder(list.toArray(), new EventBean[0]);
 
         list.add(events[0]);
         assertFalse(list.isEmpty());
-        ArrayAssertionUtil.assertEqualsExactOrder(new EventBean[] {events[0]}, list.toArray());
+        EPAssertionUtil.assertEqualsExactOrder(list.toArray(), new EventBean[]{events[0]});
 
         list.add(events[1]);
         assertFalse(list.isEmpty());
-        ArrayAssertionUtil.assertEqualsExactOrder(new EventBean[] {events[0], events[1]}, list.toArray());
+        EPAssertionUtil.assertEqualsExactOrder(list.toArray(), new EventBean[]{events[0], events[1]});
 
         list.add(events[2]);
         assertFalse(list.isEmpty());
-        ArrayAssertionUtil.assertEqualsExactOrder(new EventBean[] {events[0], events[1], events[2]}, list.toArray());
+        EPAssertionUtil.assertEqualsExactOrder(list.toArray(), new EventBean[]{events[0], events[1], events[2]});
     }
 }

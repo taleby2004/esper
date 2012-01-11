@@ -25,7 +25,6 @@ import junit.framework.TestCase;
 
 import java.util.ArrayDeque;
 import java.util.List;
-import java.util.SortedSet;
 import java.util.Vector;
 
 public class TestFilterSpecCompiled extends TestCase
@@ -37,22 +36,6 @@ public class TestFilterSpecCompiled extends TestCase
     {
         eventTypeName = SupportBean.class.getName();
         eventType = SupportEventAdapterService.getService().addBeanType(eventTypeName, SupportBean.class, true, true, true);
-    }
-
-    public void testHashCode()
-    {
-        FilterSpecCompiled spec = SupportFilterSpecBuilder.build(eventType, new Object[] { "intPrimitive", FilterOperator.EQUAL, 2,
-                                                                 "intBoxed", FilterOperator.EQUAL, 3 });
-
-        int expectedHash = eventType.hashCode();
-        expectedHash *= 31;
-        expectedHash ^= "intPrimitive".hashCode();
-        expectedHash ^= 31*Integer.valueOf(2).hashCode();
-        expectedHash *= 31;
-        expectedHash ^= "intBoxed".hashCode();
-        expectedHash ^= 31*Integer.valueOf(3).hashCode();
-        
-        assertEquals(expectedHash, spec.hashCode());
     }
 
     public void testEquals()
@@ -86,10 +69,10 @@ public class TestFilterSpecCompiled extends TestCase
 
     public void testGetValueSet()
     {
-        List<FilterSpecParam> params = SupportFilterSpecBuilder.buildList(new Object[]
+        List<FilterSpecParam> params = SupportFilterSpecBuilder.buildList(eventType, new Object[]
                                     { "intPrimitive", FilterOperator.EQUAL, 2 });
         SimpleNumberCoercer numberCoercer = SimpleNumberCoercerFactory.getCoercer(int.class, Double.class);
-        params.add(new FilterSpecParamEventProp("doubleBoxed", FilterOperator.EQUAL, "asName", "doublePrimitive", false, numberCoercer, Double.class, "Test"));
+        params.add(new FilterSpecParamEventProp(makeLookupable("doubleBoxed"), FilterOperator.EQUAL, "asName", "doublePrimitive", false, numberCoercer, Double.class, "Test"));
         FilterSpecCompiled filterSpec = new FilterSpecCompiled(eventType, "SupportBean", params, null);
 
         SupportBean eventBean = new SupportBean();
@@ -105,15 +88,19 @@ public class TestFilterSpecCompiled extends TestCase
 
         // Assert the first param
         FilterValueSetParam param = valueSet.getParameters().getFirst();
-        assertEquals("intPrimitive", param.getPropertyName());
+        assertEquals("intPrimitive", param.getLookupable().getExpression());
         assertEquals(FilterOperator.EQUAL, param.getFilterOperator());
         assertEquals(2, param.getFilterForValue());
 
         // Assert the second param
         param = (FilterValueSetParam) valueSet.getParameters().toArray()[1];
-        assertEquals("doubleBoxed", param.getPropertyName());
+        assertEquals("doubleBoxed", param.getLookupable().getExpression());
         assertEquals(FilterOperator.EQUAL, param.getFilterOperator());
         assertEquals(999.999, param.getFilterForValue());
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, eventType.getGetter(fieldName), eventType.getPropertyType(fieldName));
     }
 
     public void testPresortParameters()
@@ -128,12 +115,12 @@ public class TestFilterSpecCompiled extends TestCase
 
         ArrayDeque<FilterSpecParam> copy = spec.getParameters();
 
-        assertEquals("intPrimitive", copy.remove().getPropertyName());
-        assertEquals("string", copy.remove().getPropertyName());
-        assertEquals("intBoxed", copy.remove().getPropertyName());
-        assertEquals("floatBoxed", copy.remove().getPropertyName());
-        assertEquals("doublePrimitive", copy.remove().getPropertyName());
-        assertEquals("doubleBoxed", copy.remove().getPropertyName());
+        assertEquals("intPrimitive", copy.remove().getLookupable().getExpression());
+        assertEquals("string", copy.remove().getLookupable().getExpression());
+        assertEquals("intBoxed", copy.remove().getLookupable().getExpression());
+        assertEquals("floatBoxed", copy.remove().getLookupable().getExpression());
+        assertEquals("doublePrimitive", copy.remove().getLookupable().getExpression());
+        assertEquals("doubleBoxed", copy.remove().getLookupable().getExpression());
     }
 
     private FilterSpecCompiled makeFilterValues(Object ... filterSpecArgs)

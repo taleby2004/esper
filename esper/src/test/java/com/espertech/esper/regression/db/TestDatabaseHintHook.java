@@ -13,11 +13,11 @@ package com.espertech.esper.regression.db;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.hook.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportDatabaseService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.sql.Types;
@@ -66,7 +66,7 @@ public class TestDatabaseHintHook extends TestCase
         stmt.addListener(listener);
 
         assertEquals(Boolean.class, stmt.getEventType().getPropertyType("myint"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{false}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{false}});
 
         // assert contexts
         SQLColumnTypeContext type = SupportSQLColumnTypeConversion.getTypeContexts().get(0);
@@ -83,7 +83,7 @@ public class TestDatabaseHintHook extends TestCase
         assertEquals(1, val.getColumnNumber());
 
         epService.getEPRuntime().setVariableValue("myvariable", 60);    // greater 50 turns true
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{true}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{true}});
     }
 
     public void testInputParameterConversion() {
@@ -98,7 +98,7 @@ public class TestDatabaseHintHook extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().setVariableValue("myvariable", "x60");    // greater 50 turns true
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{true}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{true}});
 
         SQLInputParameterContext param = SupportSQLColumnTypeConversion.getParamContexts().get(0);
         assertEquals(1, param.getParameterNumber());
@@ -117,7 +117,7 @@ public class TestDatabaseHintHook extends TestCase
         stmt.addListener(listener);
 
         assertEquals(SupportBean.class, stmt.getEventType().getUnderlyingType());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{">10<", 99010}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{">10<", 99010}});
 
         SQLOutputRowTypeContext type = SupportSQLOutputRowConversion.getTypeContexts().get(0);
         assertEquals("MyDB", type.getDb());
@@ -128,9 +128,9 @@ public class TestDatabaseHintHook extends TestCase
         assertEquals(10, val.getValues().get("myint"));
 
         epService.getEPRuntime().setVariableValue("myvariable", 60);    // greater 50 turns true
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{">60<", 99060}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{">60<", 99060}});
 
         epService.getEPRuntime().setVariableValue("myvariable", 90);    // greater 50 turns true
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
     }
 }

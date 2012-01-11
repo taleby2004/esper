@@ -19,6 +19,7 @@ public class ExprNodeAdapterBase
 {
     private static final Log log = LogFactory.getLog(ExprNodeAdapterBase.class);
 
+    protected final String statementName;
     protected final ExprNode exprNode;
     protected final ExprEvaluator exprNodeEval;
     protected final ExprEvaluatorContext evaluatorContext;
@@ -27,8 +28,9 @@ public class ExprNodeAdapterBase
      * Ctor.
      * @param exprNode is the boolean expression
      */
-    public ExprNodeAdapterBase(ExprNode exprNode, ExprEvaluatorContext evaluatorContext)
+    public ExprNodeAdapterBase(String statementName, ExprNode exprNode, ExprEvaluatorContext evaluatorContext)
     {
+        this.statementName = statementName;
         this.exprNode = exprNode;
         this.exprNodeEval = exprNode.getExprEvaluator();
         this.evaluatorContext = evaluatorContext;
@@ -55,7 +57,7 @@ public class ExprNodeAdapterBase
             return result;
         }
         catch (RuntimeException ex) {
-            log.error("Error evaluating expression '" + exprNode.toExpressionString() + "': " + ex.getMessage(), ex);
+            log.error("Error evaluating expression '" + exprNode.toExpressionString() + "' statement '" + statementName + "': " + ex.getMessage(), ex);
             return false;
         }
     }

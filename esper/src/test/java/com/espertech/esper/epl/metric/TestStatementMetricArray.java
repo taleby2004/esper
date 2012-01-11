@@ -11,9 +11,9 @@
 
 package com.espertech.esper.epl.metric;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.metric.StatementMetric;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestStatementMetricArray extends TestCase
 {
@@ -45,7 +45,7 @@ public class TestStatementMetricArray extends TestCase
         }
 
         StatementMetric flushed[] = rep.flushMetrics();
-        ArrayAssertionUtil.assertSameExactOrder(metrics, flushed);
+        EPAssertionUtil.assertSameExactOrder(metrics, flushed);
 
         assertEquals(1, rep.addStatementGetIndex("007"));
         assertEquals(4, rep.addStatementGetIndex("008"));

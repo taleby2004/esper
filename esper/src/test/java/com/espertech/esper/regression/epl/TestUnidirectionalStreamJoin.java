@@ -11,15 +11,15 @@
 
 package com.espertech.esper.regression.epl;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
+import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.type.OuterJoinType;
+import junit.framework.TestCase;
 
 public class TestUnidirectionalStreamJoin extends TestCase
 {
@@ -29,6 +29,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
     public void setUp()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getLogging().setEnableQueryPlan(true);
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
         listener = new SupportUpdateListener();
@@ -36,6 +37,166 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
     protected void tearDown() throws Exception {
         listener = null;
+    }
+
+    public void testPatternUnidirectionalOuterJoinNoOn()
+    {
+        // test 2-stream left outer join and SODA
+        //
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_S0", SupportBean_S0.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_S1", SupportBean_S1.class);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
+
+        String stmtTextLO = "select sum(intPrimitive) as c0, count(*) as c1 " +
+                "from pattern [every timer:interval(1 seconds)] unidirectional " +
+                "left outer join " +
+                "SupportBean.win:keepall()";
+        EPStatement stmtLO = epService.getEPAdministrator().createEPL(stmtTextLO);
+        stmtLO.addListener(listener);
+
+        runAssertionPatternUniOuterJoinNoOn(0);
+
+        stmtLO.destroy();
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtTextLO);
+        assertEquals(stmtTextLO, model.toEPL());
+        stmtLO = epService.getEPAdministrator().create(model);
+        assertEquals(stmtTextLO, stmtLO.getText());
+        stmtLO.addListener(listener);
+
+        runAssertionPatternUniOuterJoinNoOn(100000);
+
+        stmtLO.destroy();
+
+        // test 2-stream inner join
+        //
+        String[] fieldsIJ = "c0,c1".split(",");
+        String stmtTextIJ = "select sum(intPrimitive) as c0, count(*) as c1 " +
+                "from SupportBean_S0 unidirectional " +
+                "inner join " +
+                "SupportBean.win:keepall()";
+        EPStatement stmtIJ = epService.getEPAdministrator().createEPL(stmtTextIJ);
+        stmtIJ.addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "S0_1"));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 100));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "S0_2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsIJ, new Object[] {100, 1L});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 200));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(3, "S0_3"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsIJ, new Object[] {300, 2L});
+        stmtIJ.destroy();
+
+        // test 3-stream inner join
+        //
+        String[] fields3IJ = "c0,c1".split(",");
+        String stmtText3IJ = "select sum(intPrimitive) as c0, count(*) as c1 " +
+                "from " +
+                "SupportBean_S0.win:keepall()" +
+                "inner join " +
+                "SupportBean_S1.win:keepall()" +
+                "inner join " +
+                "SupportBean.win:keepall()";
+
+        EPStatement stmt3IJ = epService.getEPAdministrator().createEPL(stmtText3IJ);
+        stmt3IJ.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "S0_1"));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 50));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(10, "S1_1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields3IJ, new Object[] {50, 1L});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 51));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields3IJ, new Object[] {101, 2L});
+
+        stmt3IJ.destroy();
+
+        // test 3-stream full outer join
+        //
+        String[] fields3FOJ = "p00,p10,string".split(",");
+        String stmtText3FOJ = "select p00, p10, string " +
+                "from " +
+                "SupportBean_S0.win:keepall()" +
+                "full outer join " +
+                "SupportBean_S1.win:keepall()" +
+                "full outer join " +
+                "SupportBean.win:keepall()";
+
+        EPStatement stmt3FOJ = epService.getEPAdministrator().createEPL(stmtText3FOJ);
+        stmt3FOJ.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "S0_1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields3FOJ, new Object[] {"S0_1", null, null});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E10", 0));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields3FOJ, new Object[] {null, null, "E10"});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "S0_2"));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields3FOJ, new Object[][] {{"S0_2", null, null}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(1, "S1_0"));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(listener.getAndResetLastNewData(), fields3FOJ, new Object[][] {{"S0_1", "S1_0", "E10"}, {"S0_2", "S1_0", "E10"}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "S0_3"));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields3FOJ, new Object[][] {{"S0_3", "S1_0", "E10"}});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E11", 0));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(listener.getAndResetLastNewData(), fields3FOJ, new Object[][] {{"S0_1", "S1_0", "E11"}, {"S0_2", "S1_0", "E11"}, {"S0_3", "S1_0", "E11"}});
+        assertEquals(6, EPAssertionUtil.iteratorCount(stmt3FOJ.iterator()));
+
+        stmt3FOJ.destroy();
+
+        // test 3-stream full outer join with where-clause
+        //
+        String[] fields3FOJW = "p00,p10,string".split(",");
+        String stmtText3FOJW = "select p00, p10, string " +
+                "from " +
+                "SupportBean_S0.win:keepall() as s0 " +
+                "full outer join " +
+                "SupportBean_S1.win:keepall() as s1 " +
+                "full outer join " +
+                "SupportBean.win:keepall() as sb " +
+                "where s0.p00 = s1.p10";
+
+        EPStatement stmt3FOJW = epService.getEPAdministrator().createEPL(stmtText3FOJW);
+        stmt3FOJW.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "X1"));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(1, "Y1"));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "Y1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields3FOJW, new Object[] {"Y1", "Y1", null});
+    }
+
+    private void runAssertionPatternUniOuterJoinNoOn(long startTime) {
+        String[] fields = "c0,c1".split(",");
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(startTime + 2000));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, 1L});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(startTime + 3000));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, 1L});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(startTime + 4000));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {21, 2L});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 12));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(startTime + 5000));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {33, 3L});
     }
 
     public void test2TableJoinGrouped()
@@ -58,16 +219,16 @@ public class TestUnidirectionalStreamJoin extends TestCase
         assertFalse(listener.isInvoked());
 
         sendEventMD("E1", 2L);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"E1", 1L});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"E1", 0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{"E1", 1L});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"E1", 0L});
         listener.reset();
 
         sendEvent("E1", 20);
         assertFalse(listener.isInvoked());
 
         sendEventMD("E1", 3L);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"E1", 2L});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"E1", 0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{"E1", 2L});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"E1", 0L});
         listener.reset();
 
         try
@@ -83,8 +244,8 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
         sendEvent("E2", 40);
         sendEventMD("E2", 4L);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"E2", 1L});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"E2", 0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{"E2", 1L});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"E2", 0L});
         listener.reset();
     }
 
@@ -108,22 +269,22 @@ public class TestUnidirectionalStreamJoin extends TestCase
         assertFalse(listener.isInvoked());
 
         sendEventMD("E1", 2L);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {1L});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{1L});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{0L});
         listener.reset();
 
         sendEvent("E1", 20);
         assertFalse(listener.isInvoked());
 
         sendEventMD("E1", 3L);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {2L});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{2L});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{0L});
         listener.reset();
 
         sendEvent("E2", 40);
         sendEventMD("E2", 4L);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {1L});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{1L});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{0L});
         listener.reset();
     }
 
@@ -216,21 +377,21 @@ public class TestUnidirectionalStreamJoin extends TestCase
         String[] fields = "s0.id,s1.id,s2.id".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, null, null});
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "E1"));
         epService.getEPRuntime().sendEvent(new SupportBean_S2(3, "E1"));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(20, "E2"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, 20, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, 20, null});
         epService.getEPRuntime().sendEvent(new SupportBean_S2(30, "E2"));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S2(300, "E3"));
         assertFalse(listener.isInvoked());
         epService.getEPRuntime().sendEvent(new SupportBean_S0(100, "E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {100, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{100, null, null});
         epService.getEPRuntime().sendEvent(new SupportBean_S1(200, "E3"));
         assertFalse(listener.isInvoked());
 
@@ -238,7 +399,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_S1(21, "E4"));
         assertFalse(listener.isInvoked());
         epService.getEPRuntime().sendEvent(new SupportBean_S0(11, "E4"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {11, 21, 31});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{11, 21, 31});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S2(32, "E4"));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(22, "E4"));
@@ -322,7 +483,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(11, "E4"));
         String[] fields = "s0.id,s1.id,s2.id".split(",");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {11, 21, 31});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{11, 21, 31});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S2(32, "E4"));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(22, "E4"));
@@ -444,13 +605,13 @@ public class TestUnidirectionalStreamJoin extends TestCase
         // send event, expect result
         sendEventMD("E1", 1L);
         String[] fields = "symbol,volume,string,intPrimitive".split(",");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1L, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1L, null, null});
 
         sendEvent("E1", 10);
         assertFalse(listener.isInvoked());
 
         sendEventMD("E1", 2L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 2L, "E1", 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 2L, "E1", 10});
 
         sendEvent("E1", 20);
         assertFalse(listener.isInvoked());
@@ -471,7 +632,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
         assertFalse(listener.isInvoked());
 
         sendEventMD("E1", 2L);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 2L, "E1", 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 2L, "E1", 10});
 
         sendEvent("E1", 20);
         assertFalse(listener.isInvoked());

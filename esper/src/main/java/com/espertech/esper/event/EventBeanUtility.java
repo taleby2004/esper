@@ -22,6 +22,7 @@ import com.espertech.esper.util.JavaClassHelper;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -426,6 +427,19 @@ public class EventBeanUtility
         return writer.toString();
     }
 
+    public static String printEvents(EventBean[] events)
+    {
+        StringWriter writer = new StringWriter();
+        PrintWriter buf = new PrintWriter(writer);
+        int count = 0;
+        for (EventBean event : events) {
+            count++;
+            buf.println("Event " + String.format("%6d:", count));
+            printEvent(buf, event);
+        }
+        return writer.toString();
+    }
+
     private static void printEvent(PrintWriter writer, EventBean event)
     {
         String[] properties = event.getEventType().getPropertyNames();
@@ -438,9 +452,13 @@ public class EventBeanUtility
             {
                 printProperty = "null";
             }
-            else if (property.getClass().isArray())
+            else if (property instanceof Object[])
             {
                 printProperty = "Array :" + Arrays.toString((Object[]) property);
+            }
+            else if (property.getClass().isArray())
+            {
+                printProperty = "Array :" + printArray(property);
             }
             else
             {
@@ -448,6 +466,14 @@ public class EventBeanUtility
             }
             writer.println( "#" + i + "  " + propName + " = " + printProperty);
         }
+    }
+
+    private static String printArray(Object array) {
+        Object[] objects = new Object[Array.getLength(array)];
+        for (int i = 0; i < Array.getLength(array); i++) {
+            objects[i] = Array.get(array, i);
+        }
+        return Arrays.toString(objects);
     }
 
     public static void appendEvent(StringWriter writer, EventBean event)
@@ -704,7 +730,7 @@ public class EventBeanUtility
         if (event == null) {
             return "(null)";
         }
-        return event.getUnderlying().toString();
+        return event.getEventType().getName() + "[" + event.getUnderlying().toString() + "]";
     }
 
     public static String summarize(EventBean[] events) {
@@ -721,12 +747,7 @@ public class EventBeanUtility
             writer.write("event ");
             writer.write(Integer.toString(i));
             writer.write(":");
-            if (events[i] == null) {
-                writer.write("null");
-            }
-            else {
-                writer.write(events[i].getUnderlying().toString());
-            }
+            writer.write(summarize(events[i]));
             delimiter = ", ";
         }
         return writer.toString();
@@ -739,5 +760,70 @@ public class EventBeanUtility
         else {
             System.arraycopy(eventsPerStream, 0, eventsLambda, 0, eventsLambda.length);
         }
+    }
+
+    public static EventBean[] getNewDataNonRemoved(EventBean[] newData, HashSet<EventBean> removedEvents) {
+        boolean filter = false;
+        for (int i = 0; i < newData.length; i++) {
+            if (removedEvents.contains(newData[i])) {
+                filter = true;
+            }
+        }
+        if (!filter) {
+            return newData;
+        }
+        if (newData.length == 1) {
+            return null;
+        }
+        ArrayDeque<EventBean> events = new ArrayDeque<EventBean>(newData.length - 1);
+        for (int i = 0; i < newData.length; i++) {
+            if (!removedEvents.contains(newData[i])) {
+                events.add(newData[i]);
+            }
+        }
+        if (events.isEmpty()) {
+            return null;
+        }
+        return events.toArray(new EventBean[events.size()]);
+    }
+
+    public static EventBean[] getNewDataNonRemoved(EventBean[] newData, HashSet<EventBean> removedEvents, EventBean[][] newEventsPerView) {
+        if (newData == null || newData.length == 0) {
+            return null;
+        }
+        if (newData.length == 1) {
+            if (removedEvents.contains(newData[0])) {
+                return null;
+            }
+            boolean pass = findEvent(newData[0], newEventsPerView);
+            return pass ? newData : null;
+        }
+        ArrayDeque<EventBean> events = new ArrayDeque<EventBean>(newData.length - 1);
+        for (int i = 0; i < newData.length; i++) {
+            if (!removedEvents.contains(newData[i])) {
+                boolean pass = findEvent(newData[i], newEventsPerView);
+                if (pass) {
+                    events.add(newData[i]);
+                }
+            }
+        }
+        if (events.isEmpty()) {
+            return null;
+        }
+        return events.toArray(new EventBean[events.size()]);
+    }
+
+    private static boolean findEvent(EventBean event, EventBean[][] eventsPerView) {
+        for (int i = 0; i < eventsPerView.length; i++) {
+            if (eventsPerView[i] == null) {
+                continue;
+            }
+            for (int j = 0; j < eventsPerView[i].length; j++) {
+                if (eventsPerView[i][j] == event) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

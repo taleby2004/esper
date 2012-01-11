@@ -23,4 +23,8 @@ public class ViewParameterException extends Exception
     {
         super(message);
     }
+
+    public ViewParameterException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

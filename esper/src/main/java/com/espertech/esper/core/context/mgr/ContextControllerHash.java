@@ -1,0 +1,151 @@
+/*
+ * *************************************************************************************
+ *  Copyright (C) 2008 EsperTech, Inc. All rights reserved.                            *
+ *  http://esper.codehaus.org                                                          *
+ *  http://www.espertech.com                                                           *
+ *  ---------------------------------------------------------------------------------- *
+ *  The software in this package is published under the terms of the GPL license       *
+ *  a copy of which has been included with this distribution in the license.txt file.  *
+ * *************************************************************************************
+ */
+
+package com.espertech.esper.core.context.mgr;
+
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.context.ContextPartitionIdentifierHash;
+import com.espertech.esper.client.context.ContextPartitionSelector;
+import com.espertech.esper.client.context.ContextPartitionSelectorFiltered;
+import com.espertech.esper.client.context.ContextPartitionSelectorHash;
+import com.espertech.esper.core.context.util.ContextControllerSelectorUtil;
+import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
+import com.espertech.esper.epl.spec.ContextDetailHashItem;
+import com.espertech.esper.type.NumberSetParameter;
+
+import java.util.*;
+
+public class ContextControllerHash implements ContextController, ContextControllerHashedInstanceCallback {
+
+    protected final int pathId;
+    protected final ContextControllerLifecycleCallback activationCallback;
+    protected final ContextControllerHashFactory factory;
+
+    protected final List<ContextControllerHashedFilterCallback> filterCallbacks = new ArrayList<ContextControllerHashedFilterCallback>();
+    protected final Map<Integer, ContextControllerInstanceHandle> partitionKeys = new LinkedHashMap<Integer, ContextControllerInstanceHandle>();
+
+    protected int currentSubpathId;
+    protected List<NumberSetParameter> optionalPartitionRanges;
+
+    public ContextControllerHash(int pathId, ContextControllerLifecycleCallback activationCallback, ContextControllerHashFactory factory) {
+        this.pathId = pathId;
+        this.activationCallback = activationCallback;
+        this.factory = factory;
+    }
+
+    public Collection<Integer> getSelectedContextPartitionPathIds(ContextPartitionSelector contextPartitionSelector) {
+        if (contextPartitionSelector instanceof ContextPartitionSelectorHash) {
+            ContextPartitionSelectorHash hash = (ContextPartitionSelectorHash) contextPartitionSelector;
+            if (hash.getHashes() == null || hash.getHashes().isEmpty()) {
+                return Collections.emptyList();
+            }
+            if (hash.getHashes().size() == 1) {
+                return Collections.singleton(hash.getHashes().iterator().next());
+            }
+            return new ArrayList<Integer>(hash.getHashes());
+        }
+        if (contextPartitionSelector instanceof ContextPartitionSelectorFiltered) {
+            ContextPartitionSelectorFiltered filter = (ContextPartitionSelectorFiltered) contextPartitionSelector;
+            ContextPartitionIdentifierHash identifierHash = new ContextPartitionIdentifierHash();
+            List<Integer> accepted = new ArrayList<Integer>();
+            for (Map.Entry<Integer, ContextControllerInstanceHandle> entry : partitionKeys.entrySet()) {
+                identifierHash.setHash(entry.getKey());
+                identifierHash.setContextPartitionId(entry.getValue().getContextPartitionOrPathId());
+                if (filter.filter(identifierHash)) {
+                    accepted.add(entry.getValue().getContextPartitionOrPathId());
+                }
+            }
+            return accepted;
+        }
+        throw ContextControllerSelectorUtil.getInvalidSelector(new Class[]{ContextPartitionSelectorHash.class}, contextPartitionSelector);
+    }
+
+    public void activate(EventBean optionalTriggeringEvent, ContextControllerState states) {
+        ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
+
+        // handle preallocate
+        if (factory.getHashedSpec().isPreallocate()) {
+            for (int i = 0; i < factory.getHashedSpec().getGranularity(); i++) {
+                Map<String, Object> properties = ContextPropertyEventType.getHashBean(factoryContext.getContextName(), i);
+                currentSubpathId++;
+                ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, i, properties, states);
+                partitionKeys.put(i, handle);
+            }
+            return;
+        }
+
+        // start filters if not preallocated
+        activateFilters(optionalTriggeringEvent);
+    }
+
+    protected void activateFilters(EventBean optionalTriggeringEvent) {
+        ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
+        for (ContextDetailHashItem item : factory.getHashedSpec().getItems()) {
+            ContextControllerHashedFilterCallback callback = new ContextControllerHashedFilterCallback(factoryContext.getServicesContext(), factoryContext.getAgentInstanceContextCreate(), item, this);
+            filterCallbacks.add(callback);
+
+            if (optionalTriggeringEvent != null) {
+                boolean match = StatementAgentInstanceUtil.evaluateFilterForStatement(factoryContext.getServicesContext(), optionalTriggeringEvent, factoryContext.getAgentInstanceContextCreate(), callback.getFilterHandle());
+
+                if (match) {
+                    callback.matchFound(optionalTriggeringEvent, null);
+                }
+            }
+        }
+    }
+
+    public void setContextPartitionRange(List<NumberSetParameter> partitionRanges) {
+        optionalPartitionRanges = partitionRanges;
+    }
+
+    public synchronized void create(int id, EventBean event) {
+        ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
+        if (partitionKeys.containsKey(id)) {
+            return;
+        }
+
+        // check if the partition range falls within the responsibility as assign, if any
+        if (optionalPartitionRanges != null) {
+            boolean pass = false;
+            for (NumberSetParameter param : optionalPartitionRanges) {
+                if (param.containsPoint(id)) {
+                    pass = true;
+                    break;
+                }
+            }
+            if (!pass) {
+                return;
+            }
+        }
+        
+        Map<String, Object> properties = ContextPropertyEventType.getHashBean(factoryContext.getContextName(), id);
+        currentSubpathId++;
+        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, event, id, properties, null);
+        partitionKeys.put(id, handle);
+    }
+
+    public ContextControllerFactory getFactory() {
+        return factory;
+    }
+
+    public int getPathId() {
+        return pathId;
+    }
+
+    public void deactivate() {
+        ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
+        for (ContextControllerHashedFilterCallback callback : filterCallbacks) {
+            callback.destroy(factoryContext.getServicesContext().getFilterService());
+        }
+        partitionKeys.clear();
+        filterCallbacks.clear();
+    }
+}

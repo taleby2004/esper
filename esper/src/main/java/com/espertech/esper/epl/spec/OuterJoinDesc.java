@@ -21,27 +21,27 @@ import java.util.List;
 public class OuterJoinDesc implements MetaDefItem, Serializable
 {
     private OuterJoinType outerJoinType;
-    private ExprIdentNode leftNode;
-    private ExprIdentNode rightNode;
-    private ExprIdentNode[] addLeftNode;
-    private ExprIdentNode[] addRightNode;
+    private ExprIdentNode optLeftNode;
+    private ExprIdentNode optRightNode;
+    private ExprIdentNode[] optAddLeftNode;
+    private ExprIdentNode[] optAddRightNode;
     private static final long serialVersionUID = -2616847070429124382L;
 
     /**
      * Ctor.
      * @param outerJoinType - type of the outer join
-     * @param leftNode - left hand identifier node
-     * @param rightNode - right hand identifier node
-     * @param addLeftNode - additional optional left hand identifier nodes for the on-clause in a logical-and
-     * @param addRightNode - additional optional right hand identifier nodes for the on-clause in a logical-and
+     * @param optLeftNode - left hand identifier node
+     * @param optRightNode - right hand identifier node
+     * @param optAddLeftNode - additional optional left hand identifier nodes for the on-clause in a logical-and
+     * @param optAddRightNode - additional optional right hand identifier nodes for the on-clause in a logical-and
      */
-    public OuterJoinDesc(OuterJoinType outerJoinType, ExprIdentNode leftNode, ExprIdentNode rightNode, ExprIdentNode[] addLeftNode, ExprIdentNode[] addRightNode)
+    public OuterJoinDesc(OuterJoinType outerJoinType, ExprIdentNode optLeftNode, ExprIdentNode optRightNode, ExprIdentNode[] optAddLeftNode, ExprIdentNode[] optAddRightNode)
     {
         this.outerJoinType = outerJoinType;
-        this.leftNode = leftNode;
-        this.rightNode = rightNode;
-        this.addLeftNode = addLeftNode;
-        this.addRightNode = addRightNode;
+        this.optLeftNode = optLeftNode;
+        this.optRightNode = optRightNode;
+        this.optAddLeftNode = optAddLeftNode;
+        this.optAddRightNode = optAddRightNode;
     }
 
     /**
@@ -57,18 +57,18 @@ public class OuterJoinDesc implements MetaDefItem, Serializable
      * Returns left hand identifier node.
      * @return left hand
      */
-    public ExprIdentNode getLeftNode()
+    public ExprIdentNode getOptLeftNode()
     {
-        return leftNode;
+        return optLeftNode;
     }
 
     /**
      * Returns right hand identifier node.
      * @return right hand
      */
-    public ExprIdentNode getRightNode()
+    public ExprIdentNode getOptRightNode()
     {
-        return rightNode;
+        return optRightNode;
     }
 
     /**
@@ -77,7 +77,7 @@ public class OuterJoinDesc implements MetaDefItem, Serializable
      */
     public ExprIdentNode[] getAdditionalLeftNodes()
     {
-        return addLeftNode;
+        return optAddLeftNode;
     }
 
     /**
@@ -86,7 +86,7 @@ public class OuterJoinDesc implements MetaDefItem, Serializable
      */
     public ExprIdentNode[] getAdditionalRightNodes()
     {
-        return addRightNode;
+        return optAddRightNode;
     }
 
     /**
@@ -97,10 +97,10 @@ public class OuterJoinDesc implements MetaDefItem, Serializable
     public ExprNode makeExprNode(ExprEvaluatorContext exprEvaluatorContext)
     {
         ExprNode representativeNode = new ExprEqualsNodeImpl(false, false);
-        representativeNode.addChildNode(leftNode);
-        representativeNode.addChildNode(rightNode);
+        representativeNode.addChildNode(optLeftNode);
+        representativeNode.addChildNode(optRightNode);
 
-        if (addLeftNode == null) {
+        if (optAddLeftNode == null) {
             topValidate(representativeNode, exprEvaluatorContext);
             return representativeNode;
         }
@@ -110,11 +110,11 @@ public class OuterJoinDesc implements MetaDefItem, Serializable
         andNode.addChildNode(representativeNode);
         representativeNode = andNode;
 
-        for (int i = 0; i < addLeftNode.length; i++)
+        for (int i = 0; i < optAddLeftNode.length; i++)
         {
             ExprEqualsNode eqNode = new ExprEqualsNodeImpl(false, false);
-            eqNode.addChildNode(addLeftNode[i]);
-            eqNode.addChildNode(addRightNode[i]);
+            eqNode.addChildNode(optAddLeftNode[i]);
+            eqNode.addChildNode(optAddRightNode[i]);
             topValidate(eqNode, exprEvaluatorContext);
             andNode.addChildNode(eqNode);
         }

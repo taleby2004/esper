@@ -11,6 +11,7 @@ package com.espertech.esper.core.service;
 import com.espertech.esper.client.EPOnDemandQueryResult;
 import com.espertech.esper.client.EPStatementException;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.core.start.EPPreparedExecuteMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,9 +39,20 @@ public class EPPreparedQueryImpl implements EPOnDemandPreparedQuerySPI
 
     public EPOnDemandQueryResult execute()
     {
+        return executeInternal(null);
+    }
+
+    public EPOnDemandQueryResult execute(ContextPartitionSelector[] contextPartitionSelectors) {
+        if (contextPartitionSelectors == null) {
+            throw new IllegalArgumentException("No context partition selectors provided");
+        }
+        return executeInternal(contextPartitionSelectors);
+    }
+
+    private EPOnDemandQueryResult executeInternal(ContextPartitionSelector[] contextPartitionSelectors) {
         try
         {
-            EPPreparedQueryResult result = executeMethod.execute();
+            EPPreparedQueryResult result = executeMethod.execute(contextPartitionSelectors);
             return new EPQueryResultImpl(result);
         }
         catch (EPStatementException ex)

@@ -11,13 +11,12 @@
 
 package com.espertech.esper.regression.epl;
 
-import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 
 import java.util.HashMap;
 
@@ -60,7 +59,7 @@ public class TestNamedWindowUpdate extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
         
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), "string,intPrimitive".split(","), new Object[][]{{"E1", 3}, {"E2", 7}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), "string,intPrimitive".split(","), new Object[][]{{"E1", 3}, {"E2", 7}});
     }
 
     public void testMultipleDataWindowIntersect() {
@@ -81,12 +80,12 @@ public class TestNamedWindowUpdate extends TestCase
         EventBean[] oldevents = listenerWindow.getLastOldData();
 
         assertEquals(1, newevents.length);
-        ArrayAssertionUtil.assertProps(newevents[0], "intPrimitive".split(","), new Object[] {300});
+        EPAssertionUtil.assertProps(newevents[0], "intPrimitive".split(","), new Object[]{300});
         assertEquals(2, oldevents.length);
-        oldevents = ArrayAssertionUtil.sort(oldevents, "string");
-        ArrayAssertionUtil.assertPropsPerRow(oldevents, "string,intPrimitive".split(","), new Object[][] {{"E1", 2}, {"E2", 3}});
+        oldevents = EPAssertionUtil.sort(oldevents, "string");
+        EPAssertionUtil.assertPropsPerRow(oldevents, "string,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E2", 3}});
 
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), "string,intPrimitive".split(","), new Object[][] {{"E2", 300}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), "string,intPrimitive".split(","), new Object[][]{{"E2", 300}});
     }
     
     public void testMultipleDataWindowIntersectOnUpdate() {
@@ -103,19 +102,19 @@ public class TestNamedWindowUpdate extends TestCase
 
         epService.getEPRuntime().sendEvent(createEvent("AComp", 3.0, 0.0), "S2");
         assertEquals(1L, listener.assertOneGetNewAndReset().get("cnt"));
-        ArrayAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][] {{"AComp", 3.0, 0.0}});
+        EPAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][]{{"AComp", 3.0, 0.0}});
 
         epService.getEPRuntime().sendEvent(createEvent("AComp", 6.0, 0.0), "S2");
         assertEquals(1L, listener.assertOneGetNewAndReset().get("cnt"));
-        ArrayAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][] {{"AComp", 3.0, 9.0}});
+        EPAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][]{{"AComp", 3.0, 9.0}});
 
         epService.getEPRuntime().sendEvent(createEvent("AComp", 5.0, 0.0), "S2");
         assertEquals(1L, listener.assertOneGetNewAndReset().get("cnt"));
-        ArrayAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][] {{"AComp", 3.0, 8.0}});
+        EPAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][]{{"AComp", 3.0, 8.0}});
 
         epService.getEPRuntime().sendEvent(createEvent("BComp", 4.0, 0.0), "S2");
         assertEquals(2L, listener.assertOneGetNewAndReset().get("cnt"));
-        ArrayAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][] {{"AComp", 3.0, 7.0}, {"BComp", 4.0, 0.0}});
+        EPAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][]{{"AComp", 3.0, 7.0}, {"BComp", 4.0, 0.0}});
     }
 
     private HashMap<String, Object> createEvent(String company, double value, double total) {
@@ -144,12 +143,12 @@ public class TestNamedWindowUpdate extends TestCase
         EventBean[] oldevents = listenerWindow.getLastOldData();
 
         assertEquals(1, newevents.length);
-        ArrayAssertionUtil.assertProps(newevents[0], "intPrimitive".split(","), new Object[] {300});
+        EPAssertionUtil.assertProps(newevents[0], "intPrimitive".split(","), new Object[]{300});
         assertEquals(1, oldevents.length);
-        ArrayAssertionUtil.assertPropsPerRow(oldevents, "string,intPrimitive".split(","), new Object[][] {{"E2", 3}});
+        EPAssertionUtil.assertPropsPerRow(oldevents, "string,intPrimitive".split(","), new Object[][]{{"E2", 3}});
 
-        EventBean[] events = ArrayAssertionUtil.sort(stmtCreate.iterator(), "string");
-        ArrayAssertionUtil.assertPropsPerRow(events, "string,intPrimitive".split(","), new Object[][] {{"E1", 2}, {"E2", 300}});
+        EventBean[] events = EPAssertionUtil.sort(stmtCreate.iterator(), "string");
+        EPAssertionUtil.assertPropsPerRow(events, "string,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E2", 300}});
     }
 
     public void testSubclass()
@@ -171,6 +170,6 @@ public class TestNamedWindowUpdate extends TestCase
         listenerWindow.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertProps(listenerWindow.getLastNewData()[0], new String[] {"v1", "v2"}, new Object[] {"E1", "E1"});
+        EPAssertionUtil.assertProps(listenerWindow.getLastNewData()[0], new String[]{"v1", "v2"}, new Object[]{"E1", "E1"});
     }
 }

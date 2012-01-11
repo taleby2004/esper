@@ -12,13 +12,13 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestNamedWindowSubquery extends TestCase
@@ -50,6 +50,35 @@ public class TestNamedWindowSubquery extends TestCase
         listenerStmtDelete = null;
     }
 
+    public void testSubqueryTwoConsumerWindow() throws Exception {
+        String epl =
+            "\n create window MyWindowTwo.win:length(1) as (mycount long);" +
+            "\n @Name('insert-count') insert into MyWindowTwo select 1L as mycount from SupportBean;" +
+            "\n create variable long myvar = 0;" +
+            "\n @Name('assign') on MyWindowTwo set myvar = (select mycount from MyWindowTwo);";
+        EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider();
+        engine.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+
+        engine.getEPAdministrator().getDeploymentAdmin().parseDeploy(epl);
+
+        engine.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertEquals(1L, engine.getEPRuntime().getVariableValue("myvar"));   // if the subquery-consumer executes first, this will be null
+    }
+
+    public void testSubqueryLateConsumerAggregation() {
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from MyWindow where (select count(*) from MyWindow) > 0");
+        stmt.addListener(listenerStmtOne);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 1));
+        assertTrue(listenerStmtOne.isInvoked());
+    }
+
     public void testSubquerySelfCheck()
     {
         String fields[] = new String[] {"key", "value"};
@@ -65,20 +94,20 @@ public class TestNamedWindowSubquery extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         sendSupportBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
 
         sendSupportBean("E2", 2);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         sendSupportBean("E1", 3);
         assertFalse(listenerWindow.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         sendSupportBean("E3", 4);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E3", 4});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 4}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E3", 4});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 4}});
 
         // Add delete
         String stmtTextDelete = "on " + SupportBean_A.class.getName() + " delete from MyWindow where key = id";
@@ -87,12 +116,12 @@ public class TestNamedWindowSubquery extends TestCase
 
         // delete E2
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 4}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 4}});
 
         sendSupportBean("E2", 5);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2", 5});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 4}, {"E2", 5}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E2", 5});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 4}, {"E2", 5}});
     }
 
     public void testSubqueryDeleteInsertReplace()
@@ -114,18 +143,18 @@ public class TestNamedWindowSubquery extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         sendSupportBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
 
         sendSupportBean("E2", 2);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
 
         sendSupportBean("E1", 3);
         assertEquals(2, listenerWindow.getNewDataList().size());
-        ArrayAssertionUtil.assertProps(listenerWindow.getOldDataList().get(0)[0], fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerWindow.getNewDataList().get(1)[0], fields, new Object[] {"E1", 3});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2", 2}, {"E1", 3}});
+        EPAssertionUtil.assertProps(listenerWindow.getOldDataList().get(0)[0], fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerWindow.getNewDataList().get(1)[0], fields, new Object[]{"E1", 3});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2", 2}, {"E1", 3}});
     }
 
     public void testInvalidSubquery()
@@ -160,15 +189,15 @@ public class TestNamedWindowSubquery extends TestCase
 
         sendMarketBean("M1");
         String fieldsStmt[] = new String[] {"value", "symbol"};
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M1"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{null, "M1"});
 
         sendSupportBean("S1", 5L, -1L);
         sendMarketBean("M2");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {5L, "M2"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{5L, "M2"});
 
         sendSupportBean("S2", 10L, -1L);
         sendMarketBean("M3");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {15L, "M3"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{15L, "M3"});
 
         // create 2nd consumer
         EPStatement stmtSelectTwo = epService.getEPAdministrator().createEPL(stmtTextSelectOne); // same stmt
@@ -176,8 +205,8 @@ public class TestNamedWindowSubquery extends TestCase
 
         sendSupportBean("S3", 8L, -1L);
         sendMarketBean("M4");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {23L, "M4"});
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {23L, "M4"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{23L, "M4"});
+        EPAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[]{23L, "M4"});
     }
 
     private SupportBean sendSupportBean(String string, long longPrimitive, Long longBoxed)

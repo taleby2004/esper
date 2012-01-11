@@ -15,12 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -191,8 +191,8 @@ public class TestOrderByEventPerRow extends TestCase
         sendEvent("CAT", 106, 6);
 
         String fields[] = "symbol,volume,sum(price)".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"CMU", 104L, 3.0}, {"IBM", 102L, 7.0}, {"CAT", 106L, 11.0}});
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"CMU", 104L, 3.0}, {"IBM", 102L, 7.0}, {"CAT", 106L, 11.0}});
         assertNull(testListener.getLastOldData());
 
         sendEvent("IBM", 201, 3);
@@ -202,8 +202,8 @@ public class TestOrderByEventPerRow extends TestCase
         sendEvent("DOG", 205, 0);
         sendEvent("DOG", 206, 1);
 
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"DOG", 206L, 1.0}, {"CMU", 204L, 13.0}, {"IBM", 202L, 14.0}});
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"DOG", 206L, 1.0}, {"CMU", 204L, 13.0}, {"IBM", 202L, 14.0}});
         assertNull(testListener.getLastOldData());
     }
 
@@ -223,23 +223,23 @@ public class TestOrderByEventPerRow extends TestCase
         sendEvent("IBM", 49);
         sendEvent("CAT", 15);
         sendEvent("IBM", 100);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields,
-                new Object[][] {
-                                {"CAT", "CAT", 65d},
-                                {"CAT", "CAT", 65d},
-                                {"IBM", "IBM", 149d},
-                                {"IBM", "IBM", 149d},
-                                });
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields,
+                new Object[][]{
+                        {"CAT", "CAT", 65d},
+                        {"CAT", "CAT", 65d},
+                        {"IBM", "IBM", 149d},
+                        {"IBM", "IBM", 149d},
+                });
 
         sendEvent("KGB", 75);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields,
-                new Object[][] {
-                                {"CAT", "CAT", 65d},
-                                {"CAT", "CAT", 65d},
-                                {"IBM", "IBM", 149d},
-                                {"IBM", "IBM", 149d},
-                                {"KGB", "KGB", 75d},
-                                });
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields,
+                new Object[][]{
+                        {"CAT", "CAT", 65d},
+                        {"CAT", "CAT", 65d},
+                        {"IBM", "IBM", 149d},
+                        {"IBM", "IBM", 149d},
+                        {"KGB", "KGB", 75d},
+                });
     }
 
     private void sendEvent(String symbol, double price)
@@ -273,9 +273,9 @@ public class TestOrderByEventPerRow extends TestCase
         sendEvent("CAT", 160, 6);
 
         String fields[] = "symbol,volume,mySum".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"CMU", 130L, 1.0}, {"CMU", 140L, 3.0}, {"IBM", 110L, 3.0},
-                        {"CAT", 150L, 5.0}, {"IBM", 120L, 7.0}, {"CAT", 160L, 11.0} });
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"CMU", 130L, 1.0}, {"CMU", 140L, 3.0}, {"IBM", 110L, 3.0},
+                        {"CAT", 150L, 5.0}, {"IBM", 120L, 7.0}, {"CAT", 160L, 11.0}});
         assertNull(testListener.getLastOldData());
     }
 
@@ -289,9 +289,9 @@ public class TestOrderByEventPerRow extends TestCase
         sendEvent("CAT", 160, 6);
 
         String fields[] = "symbol,sum(price)".split(",");
-        ArrayAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
-                new Object[][] {{"CMU", 1.0}, {"CMU", 3.0}, {"IBM", 3.0},
-                        {"CAT", 5.0}, {"IBM", 7.0}, {"CAT", 11.0} });
+        EPAssertionUtil.assertPropsPerRow(testListener.getLastNewData(), fields,
+                new Object[][]{{"CMU", 1.0}, {"CMU", 3.0}, {"IBM", 3.0},
+                        {"CAT", 5.0}, {"IBM", 7.0}, {"CAT", 11.0}});
         assertNull(testListener.getLastOldData());
     }
 }

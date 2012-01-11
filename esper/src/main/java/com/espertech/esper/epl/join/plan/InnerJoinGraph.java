@@ -82,21 +82,25 @@ public class InnerJoinGraph {
             OuterJoinDesc desc = outerJoinDescList.get(i);
             int streamMax = i + 1;       // the outer join must references streams less then streamMax
 
-            // Check outer join
-            int streamOne = desc.getLeftNode().getStreamId();
-            int streamTwo = desc.getRightNode().getStreamId();
+            // Check outer join on-expression, if provided
+            if (desc.getOptLeftNode() != null) {
+                int streamOne = desc.getOptLeftNode().getStreamId();
+                int streamTwo = desc.getOptRightNode().getStreamId();
 
-            if ((streamOne > streamMax) || (streamTwo > streamMax) ||
-                (streamOne == streamTwo))
-            {
-                throw new IllegalArgumentException("Outer join descriptors reference future streams, or same streams");
+                if ((streamOne > streamMax) || (streamTwo > streamMax) ||
+                    (streamOne == streamTwo))
+                {
+                    throw new IllegalArgumentException("Outer join descriptors reference future streams, or same streams");
+                }
+
+                if (desc.getOuterJoinType() == OuterJoinType.INNER)
+                {
+                    graph.add(new InterchangeablePair<Integer, Integer>(streamOne, streamTwo));
+                }
             }
 
-            if (desc.getOuterJoinType() == OuterJoinType.INNER)
+            if (desc.getOuterJoinType() != OuterJoinType.INNER)
             {
-                graph.add(new InterchangeablePair<Integer, Integer>(streamOne, streamTwo));
-            }
-            else {
                 allInnerJoin = false;
             }
         }

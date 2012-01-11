@@ -12,6 +12,9 @@
 package com.espertech.esper.regression.context;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.context.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.core.service.EPStatementSPI;
@@ -20,9 +23,9 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.AgentInstanceAssertionUtil;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
+
+import java.util.*;
 
 public class TestContextCategory extends TestCase {
 
@@ -47,6 +50,51 @@ public class TestContextCategory extends TestCase {
         listener = null;
     }
 
+    public void testContextPartitionSelection() {
+        String[] fields = "c0,c1,c2,c3".split(",");
+        epService.getEPAdministrator().createEPL("create context MyCtx as group by intPrimitive < -5 as grp1, group by intPrimitive between -5 and +5 as grp2, group by intPrimitive > 5 as grp3 from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, context.label as c1, string as c2, sum(intPrimitive) as c3 from SupportBean.win:keepall() group by string");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", -5));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", -100));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", -8));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 60));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), stmt.safeIterator(), fields, new Object[][]{{0, "grp1", "E3", -108}, {1, "grp2", "E1", 3}, {1, "grp2", "E2", -5}, {2, "grp3", "E1", 60}});
+
+        // test iterator targeted by context partition id
+        SupportSelectorById selectorById = new SupportSelectorById(Collections.singleton(1));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(selectorById), stmt.safeIterator(selectorById), fields, new Object[][]{{1, "grp2", "E1", 3}, {1, "grp2", "E2", -5}});
+
+        // test iterator targeted for a given category
+        SupportSelectorCategory selector = new SupportSelectorCategory(new HashSet<String>(Arrays.asList("grp1", "grp3")));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(selector), stmt.safeIterator(selector), fields, new Object[][]{{0, "grp1", "E3", -108}, {2, "grp3", "E1", 60}});
+
+        // test iterator targeted for a given filtered category
+        MySelectorFilteredCategory filtered = new MySelectorFilteredCategory("grp1");
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(filtered), stmt.safeIterator(filtered), fields, new Object[][]{{0, "grp1", "E3", -108}});
+        assertFalse(stmt.iterator(new SupportSelectorCategory(null)).hasNext());
+        assertFalse(stmt.iterator(new SupportSelectorCategory(Collections.<String>emptySet())).hasNext());
+
+        // test always-false filter - compare context partition info
+        filtered = new MySelectorFilteredCategory(null);
+        assertFalse(stmt.iterator(filtered).hasNext());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{"grp1", "grp2", "grp3"}, filtered.getCategories());
+
+        try {
+            stmt.iterator(new ContextPartitionSelectorSegmented() {
+                public List<Object[]> getPartitionKeys() {
+                    return null;
+                }
+            });
+            fail();
+        }
+        catch (InvalidContextPartitionSelector ex) {
+            assertTrue("message: " + ex.getMessage(), ex.getMessage().startsWith("Invalid context partition selector, expected an implementation class of any of [ContextPartitionSelectorAll, ContextPartitionSelectorFiltered, ContextPartitionSelectorById, ContextPartitionSelectorCategory] interfaces but received com."));
+        }
+    }
+
     public void testInvalid() {
         String epl;
 
@@ -61,7 +109,7 @@ public class TestContextCategory extends TestCase {
         // validate statement not applicable filters
         epService.getEPAdministrator().createEPL("create context ACtx group intPrimitive < 10 as cat1 from SupportBean");
         epl = "context ACtx select * from SupportBean_S0";
-        tryInvalid(epl, "Error starting statement: Category context requires that any of the events types that are listed in the category context also appear in any of the filter expressions of the statement [");
+        tryInvalid(epl, "Error starting statement: Category context 'ACtx' requires that any of the events types that are listed in the category context also appear in any of the filter expressions of the statement [");
     }
 
     private void tryInvalid(String epl, String expected) {
@@ -86,33 +134,33 @@ public class TestContextCategory extends TestCase {
                 "group intPrimitive > 20 as cat3 " +
                 "from SupportBean");
 
-        String[] fields = "c0,c1,c2,c3".split(",");
+        String[] fields = "c0,c1,c2".split(",");
         EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context CategorizedContext " +
-                "select context.name as c0, context.id as c1, context.label as c2, sum(intPrimitive) as c3 from SupportBean");
+                "select context.name as c0, context.label as c1, sum(intPrimitive) as c2 from SupportBean");
         statement.addListener(listener);
         assertEquals(3, filterSPI.getFilterCountApprox());
         AgentInstanceAssertionUtil.assertInstanceCounts(statement.getStatementContext(), 3, 0, 0, 0);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, 0, "cat1", 5});
-        ArrayAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, new Object[][] {{ctx, 0, "cat1", 5}, {ctx, 1, "cat2", null}, {ctx, 2, "cat3", null}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, "cat1", 5});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, new Object[][]{{ctx, "cat1", 5}, {ctx, "cat2", null}, {ctx, "cat3", null}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, 0, "cat1", 9});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, "cat1", 9});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, 1, "cat2", 11});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, "cat2", 11});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 25));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, 2, "cat3", 25});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, "cat3", 25});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 25));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, 2, "cat3", 50});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, "cat3", 50});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, 0, "cat1", 12});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, "cat1", 12});
 
-        ArrayAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, new Object[][] {{ctx, 0, "cat1", 12}, {ctx, 1, "cat2", 11}, {ctx, 2, "cat3", 50}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, new Object[][]{{ctx, "cat1", 12}, {ctx, "cat2", 11}, {ctx, "cat3", 50}});
 
         statement.stop();
         assertEquals(0, filterSPI.getFilterCountApprox());
@@ -133,7 +181,7 @@ public class TestContextCategory extends TestCase {
                 "from SupportBean";
         epService.getEPAdministrator().createEPL(eplCtx);
 
-        String eplStmt = "context CategorizedContext select context.name as c0, context.id as c1, context.label as c2, prior(1, intPrimitive) as c3 from SupportBean";
+        String eplStmt = "context CategorizedContext select context.name as c0, context.label as c1, prior(1, intPrimitive) as c2 from SupportBean";
         EPStatementSPI statementOne = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplStmt);
 
         runAssertion(ctx, statementOne);
@@ -155,15 +203,15 @@ public class TestContextCategory extends TestCase {
     private void runAssertion(String ctx, EPStatementSPI statement) {
         statement.addListener(listener);
 
-        String[] fields = "c0,c1,c2,c3".split(",");
+        String[] fields = "c0,c1,c2".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, 0, "cat1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, "cat1", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, 0, "cat1", 5});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{ctx, "cat1", 5});
 
         epService.getEPAdministrator().getStatement("context").destroy();
         assertEquals(1, spi.getContextManagementService().getContextCount());
@@ -171,5 +219,31 @@ public class TestContextCategory extends TestCase {
         epService.getEPAdministrator().destroyAllStatements();
         AgentInstanceAssertionUtil.assertInstanceCounts(statement.getStatementContext(), 0, 0, 0, 0);
         assertEquals(0, spi.getContextManagementService().getContextCount());
+    }
+
+    private static class MySelectorFilteredCategory implements ContextPartitionSelectorFiltered {
+
+        private final String matchCategory;
+
+        private List<Object> categories = new ArrayList<Object>();
+        private LinkedHashSet<Integer> cpids = new LinkedHashSet<Integer>();
+
+        private MySelectorFilteredCategory(String matchCategory) {
+            this.matchCategory = matchCategory;
+        }
+
+        public boolean filter(ContextPartitionIdentifier contextPartitionIdentifier) {
+            ContextPartitionIdentifierCategory id = (ContextPartitionIdentifierCategory) contextPartitionIdentifier;
+            if (matchCategory == null && cpids.contains(id.getContextPartitionId())) {
+                throw new RuntimeException("Already exists context id: " + id.getContextPartitionId());
+            }
+            cpids.add(id.getContextPartitionId());
+            categories.add(id.getLabel());
+            return matchCategory != null && matchCategory.equals(id.getLabel());
+        }
+
+        public Object[] getCategories() {
+            return categories.toArray();
+        }
     }
 }

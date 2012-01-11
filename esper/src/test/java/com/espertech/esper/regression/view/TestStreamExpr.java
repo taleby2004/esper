@@ -11,7 +11,8 @@
 
 package com.espertech.esper.regression.view;
 
-import com.espertech.esper.event.bean.BeanEventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.support.bean.*;
 import junit.framework.TestCase;
@@ -21,8 +22,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -122,7 +121,7 @@ public class TestStreamExpr extends TestCase
 
         SupportMarketDataBean eventA = new SupportMarketDataBean("ACME", 0, 0L, null);
         epService.getEPRuntime().sendEvent(eventA);
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[] {"symbol", "string"}, new Object[] {"ACME", null});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[]{"symbol", "string"}, new Object[]{"ACME", null});
     }
 
     public void testInstanceMethodStatic()
@@ -139,14 +138,14 @@ public class TestStreamExpr extends TestCase
         SupportMarketDataBean eventA = new SupportMarketDataBean("ACME", 0, 0L, null);
         epService.getEPRuntime().sendEvent(eventA);
         EventBean event = listenerOne.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(event, new String[] {"symbol", "simpleprop"}, new Object[] {"ACME", null});
+        EPAssertionUtil.assertProps(event, new String[]{"symbol", "simpleprop"}, new Object[]{"ACME", null});
         assertNull(event.get("def"));
 
         SupportBeanComplexProps eventComplexProps = SupportBeanComplexProps.makeDefaultBean();
         eventComplexProps.setSimpleProperty("ACME");
         epService.getEPRuntime().sendEvent(eventComplexProps);
         event = listenerOne.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(event, new String[] {"symbol", "simpleprop"}, new Object[] {"ACME", "ACME"});
+        EPAssertionUtil.assertProps(event, new String[]{"symbol", "simpleprop"}, new Object[]{"ACME", "ACME"});
         assertNotNull(event.get("def"));
     }
 
@@ -168,7 +167,7 @@ public class TestStreamExpr extends TestCase
 
         SupportMarketDataBean eventA = new SupportMarketDataBean("ACME", 4, 99L, null);
         epService.getEPRuntime().sendEvent(eventA);
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[] {"volume", "symbol", "pvf"}, new Object[] {99L, "ACME", 4d * 99L * 2});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[]{"volume", "symbol", "pvf"}, new Object[]{99L, "ACME", 4d * 99L * 2});
     }
 
     public void testStreamInstanceMethodNoAlias()
@@ -188,7 +187,7 @@ public class TestStreamExpr extends TestCase
 
         SupportMarketDataBean eventA = new SupportMarketDataBean("ACME", 4, 2L, null);
         epService.getEPRuntime().sendEvent(eventA);
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[] {"s0.getVolume()", "s0.getPriceTimesVolume(3)"}, new Object[] {2L, 4d * 2L * 3d});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[]{"s0.getVolume()", "s0.getPriceTimesVolume(3)"}, new Object[]{2L, 4d * 2L * 3d});
     }
 
     public void testJoinStreamSelectNoWildcard()
@@ -216,7 +215,7 @@ public class TestStreamExpr extends TestCase
 
         SupportBean eventB = new SupportBean();
         epService.getEPRuntime().sendEvent(eventB);
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[] {"s0stream", "s1stream"}, new Object[] {eventA, eventB});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[]{"s0stream", "s1stream"}, new Object[]{eventA, eventB});
 
         stmtOne.destroy();
 
@@ -237,7 +236,7 @@ public class TestStreamExpr extends TestCase
 
         epService.getEPRuntime().sendEvent(eventA);
         epService.getEPRuntime().sendEvent(eventB);
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[] {"s0", "s1"}, new Object[] {eventA, eventB});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[]{"s0", "s1"}, new Object[]{eventA, eventB});
     }
 
     public void testPatternStreamSelectNoWildcard()
@@ -256,7 +255,7 @@ public class TestStreamExpr extends TestCase
 
         SupportBean eventB = new SupportBean("ACME", 1);
         epService.getEPRuntime().sendEvent(eventB);
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[] {"e1", "e2"}, new Object[] {eventA, eventB});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[]{"e1", "e2"}, new Object[]{eventA, eventB});
 
         stmtOne.destroy();
     }

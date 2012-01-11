@@ -9,6 +9,8 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.epl.enummethod.dot.ExprDotStaticMethodWrap;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastMethod;
@@ -18,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
-public class ExprDotEvalStaticMethod implements ExprEvaluator
+public class ExprDotEvalStaticMethod implements ExprEvaluator, EventPropertyGetter
 {
     private static final Log log = LogFactory.getLog(ExprDotEvalStaticMethod.class);
 
@@ -112,6 +114,35 @@ public class ExprDotEvalStaticMethod implements ExprEvaluator
             String message = JavaClassHelper.getMessageInvocationTarget(statementName, staticMethod.getJavaMethod(), classOrPropertyName, args, e);
             log.error(message, e.getTargetException());
 		}
+        return null;
+    }
+
+    public Object get(EventBean eventBean) throws PropertyAccessException {
+        Object[] args = new Object[childEvals.length];
+        for(int i = 0; i < args.length; i++)
+        {
+            args[i] = childEvals[i].evaluate(new EventBean[] {eventBean}, false, null);
+        }
+
+        // The method is static so the object it is invoked on
+        // can be null
+        try
+        {
+            return staticMethod.invoke(null, args);
+        }
+        catch (InvocationTargetException e)
+        {
+            String message = JavaClassHelper.getMessageInvocationTarget(statementName, staticMethod.getJavaMethod(), classOrPropertyName, args, e);
+            log.error(message, e.getTargetException());
+        }
+        return null;
+    }
+
+    public boolean isExistsProperty(EventBean eventBean) {
+        return false;
+    }
+
+    public Object getFragment(EventBean eventBean) throws PropertyAccessException {
         return null;
     }
 }

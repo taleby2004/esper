@@ -11,16 +11,15 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Iterator;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.DoubleValueAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.view.ViewFieldEnum;
 import com.espertech.esper.client.EventBean;
 

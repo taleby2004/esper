@@ -27,15 +27,18 @@ import java.util.Set;
 public class OutputConditionExpressionFactory implements OutputConditionFactory
 {
     private final ExprEvaluator whenExpressionNodeEval;
+    private final ExprEvaluator andWhenTerminatedExpressionNodeEval;
     private final VariableReadWritePackage variableReadWritePackage;
+    private final VariableReadWritePackage variableReadWritePackageAfterTerminated;
     private final Set<String> variableNames;
 
     private EventType builtinPropertiesEventType;
 
-    public OutputConditionExpressionFactory(ExprNode whenExpressionNode, List<OnTriggerSetAssignment> assignments, final StatementContext statementContext)
+    public OutputConditionExpressionFactory(ExprNode whenExpressionNode, List<OnTriggerSetAssignment> assignments, final StatementContext statementContext, ExprNode andWhenTerminatedExpr, List<OnTriggerSetAssignment> afterTerminateAssignments)
             throws ExprValidationException
     {
         this.whenExpressionNodeEval = whenExpressionNode.getExprEvaluator();
+        this.andWhenTerminatedExpressionNodeEval = andWhenTerminatedExpr != null ? andWhenTerminatedExpr.getExprEvaluator() : null;
 
         // determine if using variables
         ExprNodeVariableVisitor variableVisitor = new ExprNodeVariableVisitor();
@@ -43,21 +46,21 @@ public class OutputConditionExpressionFactory implements OutputConditionFactory
         variableNames = variableVisitor.getVariableNames();
 
         // determine if using properties
-        boolean containsBuiltinProperties = false;
-        if (containsBuiltinProperties(whenExpressionNode))
-        {
-            containsBuiltinProperties = true;
+        boolean containsBuiltinProperties = containsBuiltinProperties(whenExpressionNode);
+        if (!containsBuiltinProperties && assignments != null) {
+            for (OnTriggerSetAssignment assignment : assignments) {
+                if (containsBuiltinProperties(assignment.getExpression())) {
+                    containsBuiltinProperties = true;
+                }
+            }
         }
-        else
-        {
-            if (assignments != null)
-            {
-                for (OnTriggerSetAssignment assignment : assignments)
-                {
-                    if (containsBuiltinProperties(assignment.getExpression()))
-                    {
-                        containsBuiltinProperties = true;
-                    }
+        if (!containsBuiltinProperties && andWhenTerminatedExpressionNodeEval != null) {
+            containsBuiltinProperties = containsBuiltinProperties(andWhenTerminatedExpr);
+        }
+        if (!containsBuiltinProperties && afterTerminateAssignments != null) {
+            for (OnTriggerSetAssignment assignment : afterTerminateAssignments) {
+                if (containsBuiltinProperties(assignment.getExpression())) {
+                    containsBuiltinProperties = true;
                 }
             }
         }
@@ -67,13 +70,18 @@ public class OutputConditionExpressionFactory implements OutputConditionFactory
             builtinPropertiesEventType = getBuiltInEventType(statementContext.getEventAdapterService());
         }
 
-        if (assignments != null)
-        {
+        if (assignments != null) {
             variableReadWritePackage = new VariableReadWritePackage(assignments, statementContext.getVariableService(), statementContext.getEventAdapterService());
         }
-        else
-        {
+        else{
             variableReadWritePackage = null;
+        }
+
+        if (afterTerminateAssignments != null) {
+            variableReadWritePackageAfterTerminated = new VariableReadWritePackage(afterTerminateAssignments, statementContext.getVariableService(), statementContext.getEventAdapterService());
+        }
+        else {
+            variableReadWritePackageAfterTerminated = null;
         }
     }
 
@@ -85,8 +93,16 @@ public class OutputConditionExpressionFactory implements OutputConditionFactory
         return whenExpressionNodeEval;
     }
 
+    public ExprEvaluator getAndWhenTerminatedExpressionNodeEval() {
+        return andWhenTerminatedExpressionNodeEval;
+    }
+
     public VariableReadWritePackage getVariableReadWritePackage() {
         return variableReadWritePackage;
+    }
+
+    public VariableReadWritePackage getVariableReadWritePackageAfterTerminated() {
+        return variableReadWritePackageAfterTerminated;
     }
 
     public EventType getBuiltinPropertiesEventType() {
@@ -107,6 +123,8 @@ public class OutputConditionExpressionFactory implements OutputConditionFactory
         Map<String, Object> outputLimitProperties = new HashMap<String, Object>();
         outputLimitProperties.put("count_insert", Integer.class);
         outputLimitProperties.put("count_remove", Integer.class);
+        outputLimitProperties.put("count_insert_total", Integer.class);
+        outputLimitProperties.put("count_remove_total", Integer.class);
         outputLimitProperties.put("last_output_timestamp", Long.class);
         return eventAdapterService.createAnonymousMapType(OutputConditionExpressionFactory.class.getName(), outputLimitProperties);
     }

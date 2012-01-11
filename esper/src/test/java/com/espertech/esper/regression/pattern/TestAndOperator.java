@@ -13,15 +13,15 @@ package com.espertech.esper.regression.pattern;
 
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.core.soda.SODAAnalyzer;
+import com.espertech.esper.epl.spec.util.SODAAnalyzer;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.bean.SupportBean_C;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 

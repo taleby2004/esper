@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestNamedWindowOutputrate extends TestCase
@@ -54,21 +54,21 @@ public class TestNamedWindowOutputrate extends TestCase
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
 
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"A", 2L}, {"B", 1L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A", 2L}, {"B", 1L}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B", 5));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
 
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"A", 2L}, {"B", 2L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A", 2L}, {"B", 2L}});
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(3000));
 
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"A", 2L}, {"B", 2L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A", 2L}, {"B", 2L}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 5));
         epService.getEPRuntime().sendEvent(new SupportBean("C", 1));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(4000));
 
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"A", 3L}, {"B", 2L}, {"C", 1L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"A", 3L}, {"B", 2L}, {"C", 1L}});
     }
 }

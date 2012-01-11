@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import com.sun.org.apache.bcel.internal.util.ClassLoader;
 import junit.framework.TestCase;
@@ -64,11 +64,11 @@ public class TestStaticFunctions extends TestCase
 
         LevelOne.setField("v1");
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[] {"v1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{"v1"});
 
         LevelOne.setField("v2");
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[] {"v2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{"v2"});
     }
 
     public void testChainedStatic() {
@@ -92,8 +92,8 @@ public class TestStaticFunctions extends TestCase
         }
         
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), new String[] {subexp},
-                new Object[] {SupportChainTop.make().getChildOne("abc",1).getChildTwo("def").getText()});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), new String[]{subexp},
+                new Object[]{SupportChainTop.make().getChildOne("abc", 1).getChildTwo("def").getText()});
     }
 
     public void testEscape() {
@@ -107,7 +107,7 @@ public class TestStaticFunctions extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 99));
 
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), "value".split(","), new Object[] {"E1 99"});        
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), "value".split(","), new Object[]{"E1 99"});
     }
 
     public void testReturnsMapIndexProperty()
@@ -125,7 +125,7 @@ public class TestStaticFunctions extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean());
         
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), "v0,v1".split(","), new Object[] {"A1", 200});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), "v0,v1".split(","), new Object[]{"A1", 200});
     }
 
     public void testPattern()
@@ -187,7 +187,7 @@ public class TestStaticFunctions extends TestCase
             epService.getEPAdministrator().createEPL(query);
         }
         catch (EPStatementException ex) {
-            assertEquals("Failed to resolve 'Math' to a property, stream or class name: Could not load class by name 'Math', please check imports [select * from SupportBean(Math.abs(-1) = 1) ]", ex.getMessage());
+            assertEquals("Failed to resolve 'Math.abs' to a property, single-row function, script, stream or class name [select * from SupportBean(Math.abs(-1) = 1) ]", ex.getMessage());
         }
 
 		configuration.addImport("java.lang.*");
@@ -215,7 +215,7 @@ public class TestStaticFunctions extends TestCase
         }
         catch (EPStatementException ex)
         {
-            assertEquals("Error starting statement: Failed to resolve 'SupportStaticMethodLib' to a property, stream or class name: Could not load class by name 'SupportStaticMethodLib', please check imports [select SupportStaticMethodLib.minusOne(doublePrimitive) from com.espertech.esper.support.bean.SupportBean]", ex.getMessage());
+            assertEquals("Error starting statement: Failed to resolve 'SupportStaticMethodLib.minusOne' to a property, single-row function, script, stream or class name [select SupportStaticMethodLib.minusOne(doublePrimitive) from com.espertech.esper.support.bean.SupportBean]", ex.getMessage());
         }
 
         epService.getEPAdministrator().getConfiguration().addImport(SupportStaticMethodLib.class.getName());
@@ -238,10 +238,10 @@ public class TestStaticFunctions extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "v1,v2,v3,v4".split(","), new Object[] {10, 10d, 10d, 10d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "v1,v2,v3,v4".split(","), new Object[]{10, 10d, 10d, 10d});
     }
 
-	public void testNoParameters()
+    public void testNoParameters()
 	{
 		Long startTime = System.currentTimeMillis();
 		statementText = "select System.currentTimeMillis() " + stream;

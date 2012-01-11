@@ -12,13 +12,13 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestNamedWindowSubqUncorrel extends TestCase
@@ -82,18 +82,18 @@ public class TestNamedWindowSubqUncorrel extends TestCase
         }
         EPStatement stmtSelectOne = epService.getEPAdministrator().createEPL(stmtTextSelectOne);
         stmtSelectOne.addListener(listenerStmtOne);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtSelectOne.getEventType().getPropertyNames(), new String[] {"value", "symbol"});
+        EPAssertionUtil.assertEqualsAnyOrder(stmtSelectOne.getEventType().getPropertyNames(), new String[]{"value", "symbol"});
         assertEquals(String.class, stmtSelectOne.getEventType().getPropertyType("value"));
         assertEquals(String.class, stmtSelectOne.getEventType().getPropertyType("symbol"));
 
         sendMarketBean("M1");
         String fieldsStmt[] = new String[] {"value", "symbol"};
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M1"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{null, "M1"});
 
         sendSupportBean("S1", 1L, 2L);
         assertFalse(listenerStmtOne.isInvoked());
         String fieldsWin[] = new String[] {"a", "b", "c"};
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsWin, new Object[] {"S1", 1L, 2L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsWin, new Object[]{"S1", 1L, 2L});
 
         // create consumer 2 -- note that this one should not start empty now
         String stmtTextSelectTwo = "select irstream (select a from MyWindow) as value, symbol from " + SupportMarketDataBean.class.getName();
@@ -104,17 +104,17 @@ public class TestNamedWindowSubqUncorrel extends TestCase
         stmtSelectTwo.addListener(listenerStmtTwo);
 
         sendMarketBean("M1");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S1", "M1"});
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S1", "M1"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{"S1", "M1"});
+        EPAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[]{"S1", "M1"});
 
         sendSupportBean("S2", 10L, 20L);
         assertFalse(listenerStmtOne.isInvoked());
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsWin, new Object[] {"S2", 10L, 20L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsWin, new Object[]{"S2", 10L, 20L});
 
         sendMarketBean("M2");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M2"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{null, "M2"});
         assertFalse(listenerWindow.isInvoked());
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M2"});
+        EPAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[]{null, "M2"});
 
         // create delete stmt
         String stmtTextDelete = "on " + SupportBean_A.class.getName() + " delete from MyWindow where id = a";
@@ -123,26 +123,26 @@ public class TestNamedWindowSubqUncorrel extends TestCase
 
         // delete S1
         epService.getEPRuntime().sendEvent(new SupportBean_A("S1"));
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fieldsWin, new Object[] {"S1", 1L, 2L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fieldsWin, new Object[]{"S1", 1L, 2L});
 
         sendMarketBean("M3");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S2", "M3"});
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S2", "M3"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{"S2", "M3"});
+        EPAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[]{"S2", "M3"});
 
         // delete S2
         epService.getEPRuntime().sendEvent(new SupportBean_A("S2"));
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fieldsWin, new Object[] {"S2", 10L, 20L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fieldsWin, new Object[]{"S2", 10L, 20L});
 
         sendMarketBean("M4");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M4"});
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {null, "M4"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{null, "M4"});
+        EPAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[]{null, "M4"});
 
         sendSupportBean("S3", 100L, 200L);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsWin, new Object[] {"S3", 100L, 200L});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsWin, new Object[]{"S3", 100L, 200L});
 
         sendMarketBean("M5");
-        ArrayAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S3", "M5"});
-        ArrayAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[] {"S3", "M5"});
+        EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), fieldsStmt, new Object[]{"S3", "M5"});
+        EPAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[]{"S3", "M5"});
         epService.getEPAdministrator().destroyAllStatements();
     }
 

@@ -13,15 +13,15 @@ package com.espertech.esper.core.context.util;
 
 import com.espertech.esper.core.service.EPStatementDispatch;
 import com.espertech.esper.core.service.EPStatementHandle;
-import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.core.service.StatementAgentInstanceFilterVersion;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 public class EPStatementAgentInstanceHandle {
     private final EPStatementHandle statementHandle;
     private final String statementId;
     private transient StatementAgentInstanceLock statementAgentInstanceLock = null;
-    private final int[] agentInstanceIds;
+    private final int agentInstanceId;
     private final int priority;
     private final boolean isPreemptive;
     private final boolean isHasVariables;
@@ -32,16 +32,16 @@ public class EPStatementAgentInstanceHandle {
 
     private final int hashCode;
 
-    public EPStatementAgentInstanceHandle(EPStatementHandle statementHandle, StatementAgentInstanceLock statementAgentInstanceLock, int[] agentInstanceIds, StatementAgentInstanceFilterVersion statementFilterVersion) {
+    public EPStatementAgentInstanceHandle(EPStatementHandle statementHandle, StatementAgentInstanceLock statementAgentInstanceLock, int agentInstanceId, StatementAgentInstanceFilterVersion statementFilterVersion) {
         this.statementHandle = statementHandle;
         this.statementId = statementHandle.getStatementId();
         this.statementAgentInstanceLock = statementAgentInstanceLock;
-        this.agentInstanceIds = agentInstanceIds;
+        this.agentInstanceId = agentInstanceId;
         this.priority = statementHandle.getPriority();
         isPreemptive = statementHandle.isPreemptive();
         isHasVariables = statementHandle.isHasVariables();
         isCanSelfJoin = statementHandle.isCanSelfJoin();
-        this.hashCode = statementHandle.hashCode();
+        hashCode = 31 * statementHandle.hashCode() + agentInstanceId;
         this.statementFilterVersion = statementFilterVersion;
     }
 
@@ -57,8 +57,8 @@ public class EPStatementAgentInstanceHandle {
         return statementAgentInstanceLock;
     }
 
-    public int[] getAgentInstanceIds() {
-        return agentInstanceIds;
+    public int getAgentInstanceId() {
+        return agentInstanceId;
     }
 
     public int getPriority() {
@@ -100,17 +100,12 @@ public class EPStatementAgentInstanceHandle {
             return true;
         }
 
-        if (!(otherObj instanceof EPStatementAgentInstanceHandle))
-        {
+        if (!(otherObj instanceof EPStatementAgentInstanceHandle)) {
             return false;
         }
 
         EPStatementAgentInstanceHandle other = (EPStatementAgentInstanceHandle) otherObj;
-        if (other.statementId.equals(this.statementId))
-        {
-            return true;
-        }
-        return false;
+        return other.statementId.equals(this.statementId) && other.agentInstanceId == this.agentInstanceId;
     }
 
     public int hashCode()
@@ -152,5 +147,11 @@ public class EPStatementAgentInstanceHandle {
 
     public void setDestroyed(boolean destroyed) {
         this.destroyed = destroyed;
+    }
+
+    public String toString() {
+        return "EPStatementAgentInstanceHandle{" +
+                "name=" + statementHandle.getStatementName() +
+                '}';
     }
 }

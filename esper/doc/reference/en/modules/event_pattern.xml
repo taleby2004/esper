@@ -1016,6 +1016,12 @@ a=A -> every-distinct(a.aprop) b=B]]></programlisting>
 			<para>
 				In the example above, if for a given A event and its timestamp value the same timestamp value occurs again for another A event before 10 seconds passed, the A event is not a match. If 10 seconds passed the pattern indicates a second match.
 			</para>
+
+            <para>
+              You may not use every-distinct with a timer-within guard to expire keys: The expiry time notation as above is the recommended means to expire keys.
+            </para>
+			<programlisting><![CDATA[// This is not the same as above; It does not expire transaction ids and is not recommended
+every-distinct(a.timestamp) a=A where timer:within(10 sec)]]></programlisting>
         </sect2>
 
         <sect2 id="pattern-repeat" >

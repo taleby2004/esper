@@ -8,12 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.core.start;
 
-import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.context.ContextPartitionSelector;
+import com.espertech.esper.client.context.ContextPartitionSelectorAll;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.UniformPair;
+import com.espertech.esper.core.context.mgr.ContextManager;
 import com.espertech.esper.core.context.mgr.ContextPropertyRegistryImpl;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPPreparedQueryResult;
@@ -55,10 +57,10 @@ public class EPPreparedExecuteMethod
     private final StatementSpecCompiled statementSpec;
     private final ResultSetProcessor resultSetProcessor;
     private final NamedWindowProcessor[] processors;
-    private final JoinSetComposer joinComposer;
-    private final JoinSetFilter joinFilter;
     private final AgentInstanceContext agentInstanceContext;
+    private final EPServicesContext services;
     private EventBeanReader eventBeanReader;
+    private JoinSetComposerPrototype joinSetComposerPrototype;
     private final FilterSpecCompiled[] filters;
 
     /**
@@ -80,6 +82,7 @@ public class EPPreparedExecuteMethod
         }
 
         this.statementSpec = statementSpec;
+        this.services = services;
 
         validateExecuteQuery();
 
@@ -87,10 +90,9 @@ public class EPPreparedExecuteMethod
         EventType[] typesPerStream = new EventType[numStreams];
         String[] namesPerStream = new String[numStreams];
         processors = new NamedWindowProcessor[numStreams];
-        StreamJoinAnalysisResult streamJoinAnalysisResult = new StreamJoinAnalysisResult(numStreams);
-        Arrays.fill(streamJoinAnalysisResult.getNamedWindow(), true);
-        agentInstanceContext = new AgentInstanceContext(statementContext, null, null, null, null);
+        agentInstanceContext = new AgentInstanceContext(statementContext, null, -1, null, null, statementContext.getDefaultAgentInstanceScriptContext());
 
+        // resolve types and named window processors
         for (int i = 0; i < numStreams; i++)
         {
             final StreamSpecCompiled streamSpec = statementSpec.getStreamSpecs().get(i);
@@ -107,12 +109,7 @@ public class EPPreparedExecuteMethod
             if (processors[i] == null) {
                 throw new ExprValidationException("A named window by name '" + namedSpec.getWindowName() + "' does not exist");
             }
-            NamedWindowProcessorInstance processorInstance = processors[i].getProcessorInstance(agentInstanceContext);
             typesPerStream[i] = processors[i].getTailView().getEventType();
-
-            if (processors[i].isVirtualDataWindow()) {
-                streamJoinAnalysisResult.getViewExternal()[i] = processorInstance.getRootViewInstance().getVirtualDataWindow();
-            }
         }
 
         // compile filter to optimize access to named window
@@ -125,11 +122,7 @@ public class EPPreparedExecuteMethod
                     filters[i] = FilterSpecCompiler.makeFilterSpec(typesPerStream[i], namesPerStream[i],
                             Collections.singletonList(statementSpec.getFilterRootNode()), null,
                             tagged, tagged, types,
-                            statementContext.getMethodResolutionService(),
-                            statementContext.getTimeProvider(),
-                            statementContext.getVariableService(),
-                            statementContext.getEventAdapterService(),
-                            services.getEngineURI(), null, statementContext, Collections.singleton(i), null, statementContext.getConfigSnapshot());
+                            null, statementContext, Collections.singleton(i));
                 }
                 catch (Exception ex) {
                     log.warn("Unexpected exception analyzing filter paths: " + ex.getMessage(), ex);
@@ -137,12 +130,13 @@ public class EPPreparedExecuteMethod
             }
         }
 
+        // obtain result set processor
         boolean[] isIStreamOnly = new boolean[namesPerStream.length];
         Arrays.fill(isIStreamOnly, true);
         StreamTypeService typeService = new StreamTypeServiceImpl(typesPerStream, namesPerStream, isIStreamOnly, services.getEngineURI(), true);
         EPStatementStartMethodHelperValidate.validateNodes(statementSpec, statementContext, typeService, null);
 
-        ResultSetProcessorFactoryDesc resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(statementSpec, agentInstanceContext, typeService, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        ResultSetProcessorFactoryDesc resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(statementSpec, statementContext, typeService, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         resultSetProcessor = EPStatementStartMethodHelperAssignExpr.getAssignResultSetProcessor(agentInstanceContext, resultSetProcessorPrototype);
 
         if (statementSpec.getSelectClauseSpec().isDistinct())
@@ -157,29 +151,28 @@ public class EPPreparedExecuteMethod
             }
         }
 
+        // plan joins or simple queries
         if (numStreams > 1)
         {
-            Viewable[] viewablePerStream = new Viewable[numStreams];
-            for (int i = 0; i < numStreams; i++)
-            {
-                viewablePerStream[i] = processors[i].getProcessorInstance(agentInstanceContext).getTailViewInstance();
+            StreamJoinAnalysisResult streamJoinAnalysisResult = new StreamJoinAnalysisResult(numStreams);
+            Arrays.fill(streamJoinAnalysisResult.getNamedWindow(), true);
+            for (int i = 0; i < numStreams; i++) {
+                NamedWindowProcessorInstance processorInstance = processors[i].getProcessorInstance(agentInstanceContext);
+                if (processors[i].isVirtualDataWindow()) {
+                    streamJoinAnalysisResult.getViewExternal()[i] = processorInstance.getRootViewInstance().getVirtualDataWindow();
+                }
             }
-            JoinSetComposerPrototype joinSetComposerPrototype = JoinSetComposerPrototypeFactory.makeComposerPrototype(null, null,
+
+            joinSetComposerPrototype = JoinSetComposerPrototypeFactory.makeComposerPrototype(null, null,
                     statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typesPerStream, namesPerStream,
                     streamJoinAnalysisResult, queryPlanLogging, null, new HistoricalViewableDesc(numStreams), agentInstanceContext);
-            JoinSetComposerDesc joinSetComposerDesc = joinSetComposerPrototype.create(viewablePerStream);
-            joinComposer = joinSetComposerDesc.getJoinSetComposer();
-            if (joinSetComposerDesc.getPostJoinFilterEvaluator() != null) {
-                joinFilter = new JoinSetFilter(joinSetComposerDesc.getPostJoinFilterEvaluator());
-            }
-            else {
-                joinFilter = null;
-            }
         }
-        else
-        {
-            joinComposer = null;
-            joinFilter = null;
+
+        // check context partition use
+        if (statementSpec.getOptionalContextName() != null) {
+            if (numStreams > 1) {
+                throw new ExprValidationException("Joins in runtime queries for context partitions are not supported");
+            }
         }
     }
 
@@ -196,33 +189,108 @@ public class EPPreparedExecuteMethod
      * Executes the prepared query.
      * @return query results
      */
-    public EPPreparedQueryResult execute()
+    public EPPreparedQueryResult execute(ContextPartitionSelector[] contextPartitionSelectors)
     {
         int numStreams = processors.length;
 
-        Collection<EventBean>[] snapshots = new Collection[numStreams];
-        for (int i = 0; i < numStreams; i++)
-        {
-            final StreamSpecCompiled streamSpec = statementSpec.getStreamSpecs().get(i);
-            NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) streamSpec;
-            NamedWindowProcessorInstance processorInstance = processors[i].getProcessorInstance(agentInstanceContext);
-            if (processorInstance == null) {
-                throw new EPException("Named window '" + namedSpec.getWindowName() + "' is associated to context '" + processors[i].getContextName() + "' that is not available for querying");
-            }
-            snapshots[i] = processorInstance.getTailViewInstance().snapshot(filters[i], statementSpec.getAnnotations());
+        if (contextPartitionSelectors != null && contextPartitionSelectors.length != numStreams) {
+            throw new IllegalArgumentException("Number of context partition selectors does not match the number of named windows in the from-clause");
+        }
 
-            if (namedSpec.getFilterExpressions().size() != 0)
-            {
-                snapshots[i] = getFiltered(snapshots[i], namedSpec.getFilterExpressions());
+        // handle non-context case
+        if (statementSpec.getOptionalContextName() == null) {
+
+            Collection<EventBean>[] snapshots = new Collection[numStreams];
+            for (int i = 0; i < numStreams; i++) {
+
+                ContextPartitionSelector selector = contextPartitionSelectors == null ? null : contextPartitionSelectors[i];
+                snapshots[i] = getStreamFilterSnapshot(i, selector);
+            }
+
+            resultSetProcessor.clear();
+            return process(snapshots);
+        }
+
+        List<ContextPartitionResult> contextPartitionResults = new ArrayList<ContextPartitionResult>();
+
+        // context partition runtime query
+        Collection<Integer> agentInstanceIds;
+        if (contextPartitionSelectors == null || contextPartitionSelectors[0] instanceof ContextPartitionSelectorAll) {
+            agentInstanceIds = processors[0].getProcessorInstancesAll();
+        }
+        else {
+            ContextManager contextManager = services.getContextManagementService().getContextManager(statementSpec.getOptionalContextName());
+            agentInstanceIds = contextManager.getAgentInstanceIds(contextPartitionSelectors[0]);
+        }
+
+        // collect events and agent instances
+        for (int agentInstanceId : agentInstanceIds) {
+            NamedWindowProcessorInstance processorInstance = processors[0].getProcessorInstance(agentInstanceId);
+            if (processorInstance != null) {
+                Collection<EventBean> coll = processorInstance.getTailViewInstance().snapshot(filters[0], statementSpec.getAnnotations());
+                contextPartitionResults.add(new ContextPartitionResult(coll, processorInstance.getTailViewInstance().getAgentInstanceContext()));
             }
         }
 
-        resultSetProcessor.clear();
-
-        return process(snapshots);
+        // process context partitions
+        ArrayDeque<EventBean[]> events = new ArrayDeque<EventBean[]>();
+        for (ContextPartitionResult contextPartitionResult : contextPartitionResults) {
+            Collection<EventBean> snapshot = contextPartitionResult.getEvents();
+            if (statementSpec.getFilterRootNode() != null) {
+                snapshot = getFiltered(snapshot, Collections.singletonList(statementSpec.getFilterRootNode()));
+            }
+            EventBean[] rows = snapshot.toArray(new EventBean[snapshot.size()]);
+            resultSetProcessor.setAgentInstanceContext(contextPartitionResult.getContext());
+            UniformPair<EventBean[]> results = resultSetProcessor.processViewResult(rows, null, true);
+            if (results != null && results.getFirst() != null && results.getFirst().length > 0) {
+                events.add(results.getFirst());
+            }
+        }
+        return new EPPreparedQueryResult(resultSetProcessor.getResultEventType(), EventBeanUtility.flatten(events));
     }
 
-    public EPPreparedQueryResult process(Collection<EventBean>[] snapshots) {
+    private Collection<EventBean> getStreamFilterSnapshot(int streamNum, ContextPartitionSelector contextPartitionSelector) {
+        final StreamSpecCompiled streamSpec = statementSpec.getStreamSpecs().get(streamNum);
+        NamedWindowConsumerStreamSpec namedSpec = (NamedWindowConsumerStreamSpec) streamSpec;
+        NamedWindowProcessor namedWindowProcessor = processors[streamNum];
+
+        // handle the case of a single or matching agent instance
+        NamedWindowProcessorInstance processorInstance = namedWindowProcessor.getProcessorInstance(agentInstanceContext);
+        if (processorInstance != null) {
+            return getStreamSnapshotInstance(streamNum, namedSpec, processorInstance);
+        }
+
+        // context partition runtime query
+        Collection<Integer> contextPartitions;
+        if (contextPartitionSelector == null || contextPartitionSelector instanceof ContextPartitionSelectorAll) {
+            contextPartitions = namedWindowProcessor.getProcessorInstancesAll();
+        }
+        else {
+            ContextManager contextManager = services.getContextManagementService().getContextManager(namedWindowProcessor.getContextName());
+            contextPartitions = contextManager.getAgentInstanceIds(contextPartitionSelector);
+        }
+
+        // collect events
+        ArrayDeque<EventBean> events = new ArrayDeque<EventBean>();
+        for (int agentInstanceId : contextPartitions) {
+            processorInstance = namedWindowProcessor.getProcessorInstance(agentInstanceId);
+            if (processorInstance != null) {
+                Collection<EventBean> coll = processorInstance.getTailViewInstance().snapshot(filters[streamNum], statementSpec.getAnnotations());
+                events.addAll(coll);
+            }
+        }
+        return events;
+    }
+
+    private Collection<EventBean> getStreamSnapshotInstance(int streamNum, NamedWindowConsumerStreamSpec namedSpec, NamedWindowProcessorInstance processorInstance) {
+        Collection<EventBean> coll = processorInstance.getTailViewInstance().snapshot(filters[streamNum], statementSpec.getAnnotations());
+        if (namedSpec.getFilterExpressions().size() != 0) {
+            coll = getFiltered(coll, namedSpec.getFilterExpressions());
+        }
+        return coll;
+    }
+
+    private EPPreparedQueryResult process(Collection<EventBean>[] snapshots) {
 
         int numStreams = processors.length;
 
@@ -238,6 +306,26 @@ public class EPPreparedExecuteMethod
         }
         else
         {
+            Viewable[] viewablePerStream = new Viewable[numStreams];
+            for (int i = 0; i < numStreams; i++)
+            {
+                NamedWindowProcessorInstance instance = processors[i].getProcessorInstance(agentInstanceContext);
+                if (instance == null) {
+                    throw new UnsupportedOperationException("Joins against named windows that are under context are not supported");
+                }
+                viewablePerStream[i] = instance.getTailViewInstance();
+            }
+
+            JoinSetComposerDesc joinSetComposerDesc = joinSetComposerPrototype.create(viewablePerStream);
+            JoinSetComposer joinComposer = joinSetComposerDesc.getJoinSetComposer();
+            JoinSetFilter joinFilter;
+            if (joinSetComposerDesc.getPostJoinFilterEvaluator() != null) {
+                joinFilter = new JoinSetFilter(joinSetComposerDesc.getPostJoinFilterEvaluator());
+            }
+            else {
+                joinFilter = null;
+            }
+
             EventBean[][] oldDataPerStream = new EventBean[numStreams][];
             EventBean[][] newDataPerStream = new EventBean[numStreams][];
             for (int i = 0; i < numStreams; i++)
@@ -323,5 +411,24 @@ public class EPPreparedExecuteMethod
 
     public NamedWindowProcessor[] getProcessors() {
         return processors;
+    }
+
+    private static class ContextPartitionResult
+    {
+        private final Collection<EventBean> events;
+        private final AgentInstanceContext context;
+
+        private ContextPartitionResult(Collection<EventBean> events, AgentInstanceContext context) {
+            this.events = events;
+            this.context = context;
+        }
+
+        public Collection<EventBean> getEvents() {
+            return events;
+        }
+
+        public AgentInstanceContext getContext() {
+            return context;
+        }
     }
 }

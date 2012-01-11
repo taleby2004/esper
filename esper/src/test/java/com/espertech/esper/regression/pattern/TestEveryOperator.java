@@ -11,18 +11,18 @@
 
 package com.espertech.esper.regression.pattern;
 
-import junit.framework.TestCase;
-import com.espertech.esper.regression.support.CaseList;
-import com.espertech.esper.regression.support.EventCollection;
-import com.espertech.esper.regression.support.EventCollectionFactory;
-import com.espertech.esper.regression.support.EventExpressionCase;
-import com.espertech.esper.regression.support.PatternTestHarness;
-import com.espertech.esper.support.bean.SupportBeanConstants;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.client.*;
+import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.EPRuntime;
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.core.service.EPStatementSPI;
+import com.espertech.esper.regression.support.*;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanConstants;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import junit.framework.TestCase;
 
 public class TestEveryOperator extends TestCase implements SupportBeanConstants
 {
@@ -91,7 +91,8 @@ public class TestEveryOperator extends TestCase implements SupportBeanConstants
             "select 'No event within 6 seconds' as alert\n" +
                     "from pattern [ every (timer:interval(6) and not " + SupportBean.class.getName() + ") ]";
 
-        EPStatement statement = engine.getEPAdministrator().createEPL(expression);
+        EPStatementSPI statement = (EPStatementSPI) engine.getEPAdministrator().createEPL(expression);
+        assertFalse(statement.getStatementContext().isStatelessSelect());
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 

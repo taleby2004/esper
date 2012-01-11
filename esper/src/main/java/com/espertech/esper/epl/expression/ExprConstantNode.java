@@ -8,10 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.client.EventBean;
-
-import java.util.Map;
-
 /**
  * Represents a constant in an expressiun tree.
  */
@@ -19,4 +15,5 @@ public interface ExprConstantNode extends ExprNode, ExprEvaluator
 {
     public Class getType();
     public Object getValue();
+    public boolean isConstantValue();
 }

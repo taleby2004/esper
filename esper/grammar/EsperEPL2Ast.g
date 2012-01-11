@@ -73,7 +73,12 @@ elementValue
 // Expression Declaration
 //----------------------------------------------------------------------------
 expressionDecl
-	:	^(e=EXPRESSIONDECL IDENT valueExpr expressionLambdaDecl? ) { leaveNode($e); }
+	:	^(e=EXPRESSIONDECL IDENT expressionDef exprCol? CLASS_IDENT? (^(COLON IDENT))? LBRACK?) { leaveNode($e); }
+	;
+	
+expressionDef
+	:	^(GOES valueExpr expressionLambdaDecl?)
+	|	^(EXPRESSIONDECL constant[false])
 	;
 
 expressionLambdaDecl
@@ -216,7 +221,7 @@ createSelectionListElement
 	;
 
 createVariableExpr
-	:	^(i=CREATE_VARIABLE_EXPR CLASS_IDENT IDENT (valueExpr)? { leaveNode($i); } )
+	:	^(i=CREATE_VARIABLE_EXPR CLASS_IDENT IDENT IDENT? valueExpr? { leaveNode($i); } )
 	;
 
 createContextExpr
@@ -224,18 +229,35 @@ createContextExpr
 	;
 
 createContextDetail
-	:	^(CREATE_CTX_FIXED crontabLimitParameterSet crontabLimitParameterSet)
+	:	^(CREATE_CTX_FIXED createContextRangePoint createContextRangePoint)
+	|	^(CREATE_CTX_INIT createContextRangePoint createContextRangePoint)
 	|	^(CREATE_CTX_PART createContextPartitionItem+)
 	|	^(CREATE_CTX_CAT createContextCategoryItem+ eventFilterExpr[false])
-	|	^(CREATE_CTX_INIT (createContextFilter | patternInclusionExpression) timePeriod)
+	|	^(CREATE_CTX_COAL createContextCoalesceItem+ IDENT number IDENT?)
+	|	^(CREATE_CTX_NESTED createContextNested createContextNested+)
+	;
+
+createContextRangePoint
+	:	createContextFilter 
+	| 	patternInclusionExpression
+	|	crontabLimitParameterSet
+	|	^(AFTER timePeriod)
 	;
 	
+createContextNested
+	:	^(s=CREATE_CTX IDENT createContextDetail)
+	;
+
 createContextFilter
-	:	^(STREAM_EXPR eventFilterExpr[false] IDENT)
+	:	^(STREAM_EXPR eventFilterExpr[false] IDENT?)
 	;
 		
 createContextPartitionItem
 	:	^(PARTITIONITEM eventFilterExpr[false] eventPropertyExpr[false]+)	
+	;	
+
+createContextCoalesceItem
+	:	^(COALESCE libFunctionWithClass eventFilterExpr[false])	
 	;	
 
 createContextCategoryItem
@@ -363,14 +385,14 @@ selectionListElement
 	;
 		
 outerJoin
-	:	outerJoinIdent
+	:	^(tl=LEFT_OUTERJOIN_EXPR ON outerJoinIdent? { leaveNode($tl); } )
+	|	^(tr=RIGHT_OUTERJOIN_EXPR ON outerJoinIdent? { leaveNode($tr); } )
+	|	^(tf=FULL_OUTERJOIN_EXPR ON outerJoinIdent? { leaveNode($tf); } )
+	|	^(i=INNERJOIN_EXPR ON outerJoinIdent? { leaveNode($i); } )
 	;
 
 outerJoinIdent
-	:	^(tl=LEFT_OUTERJOIN_EXPR eventPropertyExpr[true] eventPropertyExpr[true] (eventPropertyExpr[true] eventPropertyExpr[true])* { leaveNode($tl); } )
-	|	^(tr=RIGHT_OUTERJOIN_EXPR eventPropertyExpr[true] eventPropertyExpr[true] (eventPropertyExpr[true] eventPropertyExpr[true])* { leaveNode($tr); } )
-	|	^(tf=FULL_OUTERJOIN_EXPR eventPropertyExpr[true] eventPropertyExpr[true] (eventPropertyExpr[true] eventPropertyExpr[true])* { leaveNode($tf); } )
-	|	^(i=INNERJOIN_EXPR eventPropertyExpr[true] eventPropertyExpr[true] (eventPropertyExpr[true] eventPropertyExpr[true])* { leaveNode($i); } )
+	:	eventPropertyExpr[true] eventPropertyExpr[true] (eventPropertyExpr[true] eventPropertyExpr[true])*
 	;
 
 streamExpression
@@ -386,7 +408,7 @@ propertyExpression
 	;	
 	
 propertyExpressionAtom
-	:	^( a=EVENT_FILTER_PROPERTY_EXPR_ATOM propertySelectionListElement* eventPropertyExpr[false] IDENT? ^(WHERE_EXPR valueExpr?) { leaveNode($a); })
+	:	^( a=EVENT_FILTER_PROPERTY_EXPR_ATOM (^(SELECT propertySelectionListElement+))? valueExpr (^(ATCHAR IDENT IDENT))? IDENT? ^(WHERE_EXPR valueExpr?) { leaveNode($a); })
 	;	
 	
 propertySelectionListElement
@@ -436,12 +458,16 @@ havingClause
 	;
 
 outputLimitExpr
-	:	^(e=EVENT_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) outputLimitAfter? TERMINATED? { leaveNode($e); } ) 
-	|   	^(tp=TIMEPERIOD_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? timePeriod outputLimitAfter? TERMINATED? { leaveNode($tp); } )
-	|   	^(cron=CRONTAB_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? crontabLimitParameterSet outputLimitAfter? TERMINATED? { leaveNode($cron); } )
-	|   	^(when=WHEN_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? valueExpr onSetExpr? outputLimitAfter? TERMINATED? { leaveNode($when); } )
-	|   	^(term=TERM_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? outputLimitAfter? TERMINATED? { leaveNode($term); } )
-	|	^(after=AFTER_LIMIT_EXPR outputLimitAfter TERMINATED? { leaveNode($after); })
+	:	^(e=EVENT_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? (number|IDENT) outputLimitAfter? outputLimitAndTerm? { leaveNode($e); } ) 
+	|   	^(tp=TIMEPERIOD_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? timePeriod outputLimitAfter? outputLimitAndTerm? { leaveNode($tp); } )
+	|   	^(cron=CRONTAB_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? crontabLimitParameterSet outputLimitAfter? outputLimitAndTerm? { leaveNode($cron); } )
+	|   	^(when=WHEN_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? valueExpr onSetExpr? outputLimitAfter? outputLimitAndTerm? { leaveNode($when); } )
+	|   	^(term=TERM_LIMIT_EXPR (ALL|FIRST|LAST|SNAPSHOT)? outputLimitAndTerm onSetExpr? outputLimitAfter? outputLimitAndTerm? { leaveNode($term); } )
+	|	^(after=AFTER_LIMIT_EXPR outputLimitAfter outputLimitAndTerm? { leaveNode($after); })
+	;
+
+outputLimitAndTerm
+	: 	^(TERMINATED valueExpr? onSetExpr?)
 	;
 
 outputLimitAfter

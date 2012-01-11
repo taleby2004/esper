@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.util;
 
+import com.espertech.esper.client.ConfigurationException;
 import com.espertech.esper.client.annotation.Hook;
 import com.espertech.esper.client.annotation.HookType;
 import com.espertech.esper.epl.core.EngineImportException;
@@ -16,7 +17,6 @@ import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.type.*;
-import net.sf.cglib.reflect.FastMethod;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -1375,7 +1375,7 @@ public class JavaClassHelper
         return result;
     }
 
-    private static Class getGenericType(Type t, int index)
+    public static Class getGenericType(Type t, int index)
     {
         if (t == null)
         {
@@ -1608,5 +1608,47 @@ public class JavaClassHelper
             return false;
         }
         return true;
+    }
+
+    public static Map<String, Object> getClassObjectFromPropertyTypeNames(Properties properties)
+    {
+        Map<String, Object> propertyTypes = new HashMap<String, Object>();
+        for(Map.Entry<Object, Object> entry : properties.entrySet())
+        {
+            String className = (String) entry.getValue();
+
+            if ("string".equals(className))
+            {
+                className = String.class.getName();
+            }
+
+            // use the boxed type for primitives
+            String boxedClassName = JavaClassHelper.getBoxedClassName(className);
+
+            Class clazz;
+            try
+            {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                clazz = Class.forName(boxedClassName, true, cl);
+            }
+            catch (ClassNotFoundException ex)
+            {
+                throw new ConfigurationException("Unable to load class '" + boxedClassName + "', class not found", ex);
+            }
+
+            propertyTypes.put((String) entry.getKey(), clazz);
+        }
+        return propertyTypes;
+    }
+
+    public static Class getClassInClasspath(String classname) {
+        try {
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            Class clazz = Class.forName(classname, true, cl);
+            return clazz;
+        }
+        catch (ClassNotFoundException ex) {
+            return null;
+        }
     }
 }

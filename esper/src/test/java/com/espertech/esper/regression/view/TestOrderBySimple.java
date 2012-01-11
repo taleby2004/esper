@@ -11,6 +11,8 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
@@ -21,8 +23,6 @@ import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.util.SerializableObjectCopier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,7 +73,7 @@ public class TestOrderBySimple extends TestCase {
 
         EventBean[] received = listener.getNewDataListFlattened();
         assertEquals(2, received.length);
-        ArrayAssertionUtil.assertPropsPerRow(received, "a.string".split(","), new Object [][] {{"A2"}, {"A1"}});
+        EPAssertionUtil.assertPropsPerRow(received, "a.string".split(","), new Object[][]{{"A2"}, {"A1"}});
 
         // try pattern with output limit
         SupportUpdateListener listenerThree = new SupportUpdateListener();
@@ -89,7 +89,7 @@ public class TestOrderBySimple extends TestCase {
 
         EventBean[] receivedThree = listenerThree.getNewDataListFlattened();
         assertEquals(2, receivedThree.length);
-        ArrayAssertionUtil.assertPropsPerRow(receivedThree, "a.string".split(","), new Object [][] {{"A2"}, {"A1"}});
+        EPAssertionUtil.assertPropsPerRow(receivedThree, "a.string".split(","), new Object[][]{{"A2"}, {"A1"}});
 
         // try grouped time window
         String stmtTextTwo = "select rstream string from SupportBean.std:groupwin(string).win:time(10) order by string desc";
@@ -104,7 +104,7 @@ public class TestOrderBySimple extends TestCase {
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(11000));
         EventBean[] receivedTwo = listenerTwo.getNewDataListFlattened();
         assertEquals(2, receivedTwo.length);
-        ArrayAssertionUtil.assertPropsPerRow(receivedTwo, "string".split(","), new Object [][] {{"A2"}, {"A1"}});
+        EPAssertionUtil.assertPropsPerRow(receivedTwo, "string".split(","), new Object[][]{{"A2"}, {"A1"}});
     }
 
     public void testCollatorSortLocale()
@@ -147,7 +147,7 @@ public class TestOrderBySimple extends TestCase {
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmtText);
         epService.getEPRuntime().sendEvent(new SupportBean("péché", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("pêche", 1));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtOne.iterator(), "string".split(","), new Object[][] {{sortedFrench[0]}, {sortedFrench[1]}});
+        EPAssertionUtil.assertPropsPerRow(stmtOne.iterator(), "string".split(","), new Object[][]{{sortedFrench[0]}, {sortedFrench[1]}});
 
         // test sort view
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -176,23 +176,23 @@ public class TestOrderBySimple extends TestCase {
         sendEvent("IBM", 49);
         sendEvent("CAT", 15);
         sendEvent("IBM", 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), new String[] {"symbol", "string", "price"},
-                new Object[][] {
-                                {"CAT", "CAT", 15d},
-                                {"IBM", "IBM", 49d},
-                                {"CAT", "CAT", 50d},
-                                {"IBM", "IBM", 100d},
-                                });
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), new String[]{"symbol", "string", "price"},
+                new Object[][]{
+                        {"CAT", "CAT", 15d},
+                        {"IBM", "IBM", 49d},
+                        {"CAT", "CAT", 50d},
+                        {"IBM", "IBM", 100d},
+                });
 
         sendEvent("KGB", 75);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), new String[] {"symbol", "string", "price"},
-                new Object[][] {
-                                {"CAT", "CAT", 15d},
-                                {"IBM", "IBM", 49d},
-                                {"CAT", "CAT", 50d},
-                                {"KGB", "KGB", 75d},
-                                {"IBM", "IBM", 100d},
-                                });
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), new String[]{"symbol", "string", "price"},
+                new Object[][]{
+                        {"CAT", "CAT", 15d},
+                        {"IBM", "IBM", 49d},
+                        {"CAT", "CAT", 50d},
+                        {"KGB", "KGB", 75d},
+                        {"IBM", "IBM", 100d},
+                });
     }
 
     public void testAcrossJoin()

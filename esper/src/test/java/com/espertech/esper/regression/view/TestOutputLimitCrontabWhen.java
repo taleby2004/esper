@@ -12,14 +12,14 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.SupportSubscriber;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Calendar;
@@ -116,18 +116,18 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimeEvent(days, 17, 15, 0, 0);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"S1"}, {"S2"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"S1"}, {"S2"}});
 
         sendTimeEvent(days, 17, 18, 0, 00);
         sendEvent("S3", 0);
         assertFalse(listener.isInvoked());
 
         sendTimeEvent(days, 17, 30, 0, 0);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"S3"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"S3"}});
 
         sendTimeEvent(days, 17, 35, 0, 0);
         sendTimeEvent(days, 17, 45, 0, 0);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, null);
 
         sendEvent("S4", 0);
         sendEvent("S5", 0);
@@ -144,13 +144,13 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimeEvent(days+1, 8, 0, 0, 0);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, new Object[][] {{"S4"}, {"S5"}, {"S6"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"S4"}, {"S5"}, {"S6"}});
 
         statement.destroy();
         listener.reset();
     }
 
-    public void testOutputWhenThenExpression()
+    public void testOutputWhenThenExpression() throws Exception
     {
         sendTimeEvent(1, 8, 0, 0, 0);
         epService.getEPAdministrator().getConfiguration().addVariable("myvar", int.class, 0);
@@ -204,6 +204,56 @@ public class TestOutputLimitCrontabWhen extends TestCase
 
         stmtOne.destroy();
         stmtTwo.destroy();
+
+        // test when-then with condition triggered by output events
+        sendTimeEvent(2, 8, 0, 0, 0);
+        String eplToDeploy = "create variable boolean varOutputTriggered = false\n;" +
+                "@Audit @Name('out') select * from SupportBean.std:lastevent() output snapshot when (count_insert > 1 and varOutputTriggered = false) then set varOutputTriggered = true;";
+        epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(eplToDeploy);
+        epService.getEPAdministrator().getStatement("out").addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertFalse(listener.isInvoked());
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        assertEquals("E2", listener.assertOneGetNewAndReset().get("string"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().setVariableValue("varOutputTriggered", false); // turns true right away as triggering output
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E5", 5));
+        sendTimeEvent(2, 8, 0, 1, 0);
+        assertEquals("E5", listener.assertOneGetNewAndReset().get("string"));
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // test count_total for insert and remove
+        epService.getEPAdministrator().createEPL("create variable int var_cnt_total = 3");
+        String expressionTotal = "select string from SupportBean.win:length(2) output when count_insert_total = var_cnt_total or count_remove_total > 2";
+        EPStatement stmtTotal =  epService.getEPAdministrator().createEPL(expressionTotal);
+        stmtTotal.addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 1));
+        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "string".split(","), new Object[][] {{"E1"}, {"E2"}, {"E3"}});
+
+        epService.getEPRuntime().setVariableValue("var_cnt_total", -1);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 1));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E5", 1));
+        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "string".split(","), new Object[][] {{"E4"}, {"E5"}});
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     private void runAssertion(int days, EPStatement stmt)
@@ -219,7 +269,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(subscriber.isInvoked());
 
         sendTimeEvent(days, 8, 0, 1, 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetLastNewData(), new Object[] {"S1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S1"}, subscriber.getAndResetLastNewData());
         assertEquals(0, epService.getEPRuntime().getVariableValue("myvar"));
         assertEquals(1, epService.getEPRuntime().getVariableValue("count_insert_var"));
 
@@ -233,7 +283,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
 
         assertFalse(subscriber.isInvoked());
         sendTimeEvent(days, 8, 0, 4, 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetLastNewData(), new Object[] {"S2", "S3"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S2", "S3"}, subscriber.getAndResetLastNewData());
         assertEquals(0, epService.getEPRuntime().getVariableValue("myvar"));
 
         sendTimeEvent(days, 8, 0, 5, 0);
@@ -280,7 +330,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertEquals("F2", epService.getEPRuntime().getVariableValue("mystring"));
 
         sendEvent("S4", 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetLastNewData(), new Object[] {"S1", "S2", "S3", "S4"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S1", "S2", "S3", "S4"}, subscriber.getAndResetLastNewData());
     }
 
     public void testOutputWhenBuiltInCountInsert()
@@ -295,14 +345,14 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(subscriber.isInvoked());
 
         sendEvent("S3", 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetLastNewData(), new Object[] {"S1", "S2", "S3"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S1", "S2", "S3"}, subscriber.getAndResetLastNewData());
 
         sendEvent("S4", 0);
         sendEvent("S5", 0);
         assertFalse(subscriber.isInvoked());
 
         sendEvent("S6", 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetLastNewData(), new Object[] {"S4", "S5", "S6"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S4", "S5", "S6"}, subscriber.getAndResetLastNewData());
 
         sendEvent("S7", 0);
         assertFalse(subscriber.isInvoked());
@@ -321,13 +371,13 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(subscriber.isInvoked());
 
         sendEvent("S4", 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetLastNewData(), new Object[] {"S1", "S2", "S3", "S4"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S1", "S2", "S3", "S4"}, subscriber.getAndResetLastNewData());
 
         sendEvent("S5", 0);
         assertFalse(subscriber.isInvoked());
 
         sendEvent("S6", 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetLastNewData(), new Object[] {"S5", "S6"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S5", "S6"}, subscriber.getAndResetLastNewData());
 
         sendEvent("S7", 0);
         assertFalse(subscriber.isInvoked());
@@ -350,7 +400,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(subscriber.isInvoked());
 
         sendEvent("S3", 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetLastNewData(), new Object[] {"S1", "S2", "S3"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S1", "S2", "S3"}, subscriber.getAndResetLastNewData());
 
         sendTimeEvent(1, 8, 0, 3, 0);
         sendEvent("S4", 0);
@@ -361,7 +411,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
 
         sendTimeEvent(1, 8, 0, 4, 0);
         sendEvent("S6", 0);
-        ArrayAssertionUtil.assertEqualsExactOrder(subscriber.getAndResetLastNewData(), new Object[] {"S4", "S5", "S6"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S4", "S5", "S6"}, subscriber.getAndResetLastNewData());
     }
 
     private void sendEvent(String symbol, double price)

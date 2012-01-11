@@ -21,6 +21,7 @@ import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.OnTriggerSetAssignment;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
+import com.espertech.esper.epl.spec.OutputLimitRateType;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.view.OutputConditionExpressionFactory;
 import com.espertech.esper.util.JavaClassHelper;
@@ -94,38 +95,49 @@ public class EPStatementStartMethodHelperValidate
             catch (ExprValidationException ex)
             {
                 log.debug(".validateNodes Validation exception for filter=" + optionalFilterNode.toExpressionString(), ex);
-                throw new EPStatementException("Error validating expression: " + ex.getMessage(), statementContext.getExpression());
+                throw new EPStatementException("Error validating expression: " + ex.getMessage(), ex, statementContext.getExpression());
             }
         }
 
-        if ((statementSpec.getOutputLimitSpec() != null) && (statementSpec.getOutputLimitSpec().getWhenExpressionNode() != null))
+        if ((statementSpec.getOutputLimitSpec() != null) && ((statementSpec.getOutputLimitSpec().getWhenExpressionNode() != null) || (statementSpec.getOutputLimitSpec().getAndAfterTerminateExpr() != null)))
         {
-            ExprNode outputLimitWhenNode = statementSpec.getOutputLimitSpec().getWhenExpressionNode();
-
             // Validate where clause, initializing nodes to the stream ids used
             try
             {
                 EventType outputLimitType = OutputConditionExpressionFactory.getBuiltInEventType(statementContext.getEventAdapterService());
                 StreamTypeService typeServiceOutputWhen = new StreamTypeServiceImpl(new EventType[] {outputLimitType}, new String[]{null}, new boolean[] {true}, statementContext.getEngineURI(), false);
                 ExprValidationContext validationContext = new ExprValidationContext(typeServiceOutputWhen, methodResolutionService, null, statementContext.getSchedulingService(), statementContext.getVariableService(), evaluatorContextStmt, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
-                outputLimitWhenNode = ExprNodeUtility.getValidatedSubtree(outputLimitWhenNode, validationContext);
-                statementSpec.getOutputLimitSpec().setWhenExpressionNode(outputLimitWhenNode);
 
-                if (JavaClassHelper.getBoxedType(outputLimitWhenNode.getExprEvaluator().getType()) != Boolean.class)
-                {
-                    throw new ExprValidationException("The when-trigger expression in the OUTPUT WHEN clause must return a boolean-type value");
-                }
-                EPStatementStartMethodHelperValidate.validateNoAggregations(outputLimitWhenNode, "An aggregate function may not appear in a OUTPUT LIMIT clause");
+                ExprNode outputLimitWhenNode = statementSpec.getOutputLimitSpec().getWhenExpressionNode();
+                if (outputLimitWhenNode != null) {
+                    outputLimitWhenNode = ExprNodeUtility.getValidatedSubtree(outputLimitWhenNode, validationContext);
+                    statementSpec.getOutputLimitSpec().setWhenExpressionNode(outputLimitWhenNode);
 
-                if (statementSpec.getOutputLimitSpec().getThenExpressions() != null)
-                {
-                    for (OnTriggerSetAssignment assign : statementSpec.getOutputLimitSpec().getThenExpressions())
-                    {
-                        ExprNode node = ExprNodeUtility.getValidatedSubtree(assign.getExpression(), validationContext);
-                        assign.setExpression(node);
-                        EPStatementStartMethodHelperValidate.validateNoAggregations(node, "An aggregate function may not appear in a OUTPUT LIMIT clause");
+                    if (JavaClassHelper.getBoxedType(outputLimitWhenNode.getExprEvaluator().getType()) != Boolean.class) {
+                        throw new ExprValidationException("The when-trigger expression in the OUTPUT WHEN clause must return a boolean-type value");
                     }
+                    EPStatementStartMethodHelperValidate.validateNoAggregations(outputLimitWhenNode, "An aggregate function may not appear in a OUTPUT LIMIT clause");
                 }
+
+                // validate and-terminate expression if provided
+                if (statementSpec.getOutputLimitSpec().getAndAfterTerminateExpr() != null) {
+                    if (statementSpec.getOutputLimitSpec().getRateType() != OutputLimitRateType.WHEN_EXPRESSION && statementSpec.getOutputLimitSpec().getRateType() != OutputLimitRateType.TERM) {
+                        throw new ExprValidationException("A terminated-and expression must be used with the OUTPUT WHEN clause");
+                    }
+                    ExprNode validated = ExprNodeUtility.getValidatedSubtree(statementSpec.getOutputLimitSpec().getAndAfterTerminateExpr(), validationContext);
+                    statementSpec.getOutputLimitSpec().setAndAfterTerminateExpr(validated);
+
+                    if (JavaClassHelper.getBoxedType(validated.getExprEvaluator().getType()) != Boolean.class) {
+                        throw new ExprValidationException("The terminated-and expression must return a boolean-type value");
+                    }
+                    EPStatementStartMethodHelperValidate.validateNoAggregations(validated, "An aggregate function may not appear in a terminated-and clause");
+                }
+
+                // validate then-expression
+                validateThenSetAssignments(statementSpec.getOutputLimitSpec().getThenExpressions(), validationContext);
+
+                // validate after-terminated then-expression
+                validateThenSetAssignments(statementSpec.getOutputLimitSpec().getAndAfterTerminateThenExpressions(), validationContext);
             }
             catch (ExprValidationException ex)
             {
@@ -137,29 +149,46 @@ public class EPStatementStartMethodHelperValidate
         {
             OuterJoinDesc outerJoinDesc = statementSpec.getOuterJoinDescList().get(outerJoinCount);
 
-            UniformPair<Integer> streamIdPair = validateOuterJoinPropertyPair(statementContext, outerJoinDesc.getLeftNode(), outerJoinDesc.getRightNode(), outerJoinCount,
-                    typeService, viewResourceDelegate);
+            // validate on-expression nodes, if provided
+            if (outerJoinDesc.getOptLeftNode() != null) {
+                UniformPair<Integer> streamIdPair = validateOuterJoinPropertyPair(statementContext, outerJoinDesc.getOptLeftNode(), outerJoinDesc.getOptRightNode(), outerJoinCount,
+                        typeService, viewResourceDelegate);
 
-            if (outerJoinDesc.getAdditionalLeftNodes() != null)
-            {
-                Set<Integer> streamSet = new HashSet<Integer>();
-                streamSet.add(streamIdPair.getFirst());
-                streamSet.add(streamIdPair.getSecond());
-                for (int i = 0; i < outerJoinDesc.getAdditionalLeftNodes().length; i++)
+                if (outerJoinDesc.getAdditionalLeftNodes() != null)
                 {
-                    UniformPair<Integer> streamIdPairAdd = validateOuterJoinPropertyPair(statementContext, outerJoinDesc.getAdditionalLeftNodes()[i], outerJoinDesc.getAdditionalRightNodes()[i], outerJoinCount,
-                            typeService, viewResourceDelegate);
-
-                    // make sure all additional properties point to the same two streams
-                    if ((!streamSet.contains(streamIdPairAdd.getFirst()) || (!streamSet.contains(streamIdPairAdd.getSecond()))))
+                    Set<Integer> streamSet = new HashSet<Integer>();
+                    streamSet.add(streamIdPair.getFirst());
+                    streamSet.add(streamIdPair.getSecond());
+                    for (int i = 0; i < outerJoinDesc.getAdditionalLeftNodes().length; i++)
                     {
-                        String message = "Outer join ON-clause columns must refer to properties of the same joined streams" +
-                                " when using multiple columns in the on-clause";
-                        throw new EPStatementException("Error validating expression: " + message, statementContext.getExpression());
-                    }
+                        UniformPair<Integer> streamIdPairAdd = validateOuterJoinPropertyPair(statementContext, outerJoinDesc.getAdditionalLeftNodes()[i], outerJoinDesc.getAdditionalRightNodes()[i], outerJoinCount,
+                                typeService, viewResourceDelegate);
 
+                        // make sure all additional properties point to the same two streams
+                        if ((!streamSet.contains(streamIdPairAdd.getFirst()) || (!streamSet.contains(streamIdPairAdd.getSecond()))))
+                        {
+                            String message = "Outer join ON-clause columns must refer to properties of the same joined streams" +
+                                    " when using multiple columns in the on-clause";
+                            throw new EPStatementException("Error validating expression: " + message, statementContext.getExpression());
+                        }
+
+                    }
                 }
             }
+        }
+    }
+
+    private static void validateThenSetAssignments(List<OnTriggerSetAssignment> assignments, ExprValidationContext validationContext)
+        throws ExprValidationException
+    {
+        if (assignments == null || assignments.isEmpty()) {
+            return;
+        }
+        for (OnTriggerSetAssignment assign : assignments)
+        {
+            ExprNode node = ExprNodeUtility.getValidatedSubtree(assign.getExpression(), validationContext);
+            assign.setExpression(node);
+            EPStatementStartMethodHelperValidate.validateNoAggregations(node, "An aggregate function may not appear in a OUTPUT LIMIT clause");
         }
     }
 
@@ -249,7 +278,7 @@ public class EPStatementStartMethodHelperValidate
     // Special-case validation: When an on-merge query in the not-matched clause uses a subquery then
     // that subquery should not reference any of the stream's properties which are not-matched
     protected static void validateSubqueryExcludeOuterStream(ExprNode matchCondition) throws ExprValidationException {
-        ExprNodeSubselectVisitor visitorSubselects = new ExprNodeSubselectVisitor();
+        ExprNodeSubselectDeclaredDotVisitor visitorSubselects = new ExprNodeSubselectDeclaredDotVisitor();
         matchCondition.accept(visitorSubselects);
         if (visitorSubselects.getSubselects().isEmpty()) {
             return;

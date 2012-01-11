@@ -8,9 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.type;
 
-import java.util.Set;
 import java.util.HashSet;
-import java.io.StringWriter;
+import java.util.Set;
 
 /**
  * Parameter supplying a single int value is a set of numbers.
@@ -19,6 +18,9 @@ public class IntParameter implements NumberSetParameter
 {
     private int intValue;
     private static final long serialVersionUID = -895750000874644640L;
+
+    public IntParameter() {
+    }
 
     /**
      * Ctor.
@@ -36,6 +38,10 @@ public class IntParameter implements NumberSetParameter
     public int getIntValue()
     {
         return intValue;
+    }
+
+    public void setIntValue(int intValue) {
+        this.intValue = intValue;
     }
 
     public boolean isWildcard(int min, int max)
@@ -57,5 +63,13 @@ public class IntParameter implements NumberSetParameter
         }
 
         return values;
+    }
+
+    public boolean containsPoint(int point) {
+        return intValue == point;
+    }
+
+    public String formatted() {
+        return Integer.toString(intValue);
     }
 }

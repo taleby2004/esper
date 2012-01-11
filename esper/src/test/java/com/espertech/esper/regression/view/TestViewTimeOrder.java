@@ -11,14 +11,14 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBeanTimestamp;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestViewTimeOrder extends TestCase
 {
@@ -141,39 +141,39 @@ public class TestViewTimeOrder extends TestCase
                 "select irstream * from " + SupportBeanTimestamp.class.getName() +
                 ".ext:time_order(timestamp, 10 sec)");
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, null);
 
         sendTimer(21000);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, null);
 
         // 1st event at 21 sec
         sendEvent("E1", 21000);
         assertEquals("E1", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E1"}});
 
         // 2nd event at 22 sec
         sendTimer(22000);
         sendEvent("E2", 22000);
         assertEquals("E2", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E1"}, {"E2"}});
 
         // 3nd event at 28 sec
         sendTimer(28000);
         sendEvent("E3", 28000);
         assertEquals("E3", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E1"}, {"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E1"}, {"E2"}, {"E3"}});
 
         // 4th event at 30 sec, however is 27 sec (old 3 sec)
         sendTimer(30000);
         sendEvent("E4", 27000);
         assertEquals("E4", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E1"}, {"E2"}, {"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E1"}, {"E2"}, {"E4"}, {"E3"}});
 
         // 5th event at 30 sec, however is 22 sec (old 8 sec)
         sendEvent("E5", 22000);
         assertEquals("E5", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E1"}, {"E2"}, {"E5"}, {"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E1"}, {"E2"}, {"E5"}, {"E4"}, {"E3"}});
 
         // flush one
         sendTimer(30999);
@@ -184,7 +184,7 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E1", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E2"}, {"E5"}, {"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E2"}, {"E5"}, {"E4"}, {"E3"}});
 
         // 6th event at 31 sec, however is 21 sec (old 10 sec)
         sendEvent("E6", 21000);
@@ -194,12 +194,12 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E6", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E2"}, {"E5"}, {"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E2"}, {"E5"}, {"E4"}, {"E3"}});
 
         // 7th event at 31 sec, however is 21.3 sec (old 9.7 sec)
         sendEvent("E7", 21300);
         assertEquals("E7", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E7"}, {"E2"}, {"E5"}, {"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E7"}, {"E2"}, {"E5"}, {"E4"}, {"E3"}});
 
         // flush one
         sendTimer(31299);
@@ -210,7 +210,7 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E7", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E2"}, {"E5"}, {"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E2"}, {"E5"}, {"E4"}, {"E3"}});
 
         // flush two
         sendTimer(31999);
@@ -222,7 +222,7 @@ public class TestViewTimeOrder extends TestCase
         assertEquals("E2", listener.getLastOldData()[0].get("id"));
         assertEquals("E5", listener.getLastOldData()[1].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E4"}, {"E3"}});
 
         // flush one
         sendTimer(36999);
@@ -233,7 +233,7 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E4", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E3"}});
 
         // rather old event
         sendEvent("E8", 21000);
@@ -243,12 +243,12 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E8", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E3"}});
 
         // 9-second old event for posting at 38 sec
         sendEvent("E9", 28000);
         assertEquals("E9", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E3"}, {"E9"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E3"}, {"E9"}});
 
         // flush two
         sendTimer(37999);
@@ -260,12 +260,12 @@ public class TestViewTimeOrder extends TestCase
         assertEquals("E3", listener.getLastOldData()[0].get("id"));
         assertEquals("E9", listener.getLastOldData()[1].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, null);
 
         // new event
         sendEvent("E10", 38000);
         assertEquals("E10", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E10"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E10"}});
 
         // flush last
         sendTimer(47999);
@@ -276,12 +276,12 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E10", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, null);
 
         // last, in the future
         sendEvent("E11", 70000);
         assertEquals("E11", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E11"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E11"}});
 
         sendTimer(80000);
         assertNull(listener.getLastNewData());
@@ -289,11 +289,11 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E11", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, null);
 
         sendTimer(100000);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, null);
     }
 
     public void testGroupedWindow()
@@ -312,20 +312,20 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E1", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, null);
 
         // 2nd just fits
         sendEvent("E2", "G2", 10001);
         assertEquals("E2", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E2"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E2"}});
 
         sendEvent("E3", "G3", 20000);
         assertEquals("E3", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E2"}, {"E3"}});
 
         sendEvent("E4", "G2", 20000);
         assertEquals("E4", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E2"}, {"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E2"}, {"E4"}, {"E3"}});
 
         sendTimer(20001);
         assertNull(listener.getLastNewData());
@@ -333,12 +333,12 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E2", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E4"}, {"E3"}});
 
         sendTimer(22000);
         sendEvent("E5", "G2", 19000);
         assertEquals("E5", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E5"}, {"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E5"}, {"E4"}, {"E3"}});
 
         sendTimer(29000);
         assertNull(listener.getLastNewData());
@@ -346,7 +346,7 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(1, listener.getLastOldData().length);
         assertEquals("E5", listener.getLastOldData()[0].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E4"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E4"}, {"E3"}});
 
         sendTimer(30000);
         assertNull(listener.getLastNewData());
@@ -355,7 +355,7 @@ public class TestViewTimeOrder extends TestCase
         assertEquals("E4", listener.getLastOldData()[0].get("id"));
         assertEquals("E3", listener.getLastOldData()[1].get("id"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, null);
 
         sendTimer(100000);
         assertFalse(listener.isInvoked());
@@ -407,7 +407,7 @@ public class TestViewTimeOrder extends TestCase
         sendTimer(20000);
         sendEvent("E1", 25000);
         assertEquals("E1", listener.assertOneGetNewAndReset().get("id"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), new String[] {"id"}, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E1"}});
 
         sendEvent("E2", 21000);
         EventBean event = listener.assertOneGetNewAndReset();
@@ -418,9 +418,9 @@ public class TestViewTimeOrder extends TestCase
         assertEquals("E1", event.get("prevTailIdZero"));
         assertEquals("E2", event.get("prevTailIdOne"));
         assertEquals(2L, event.get("prevCountId"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {"E2","E1"}, (Object[]) event.get("prevWindowId"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E2", "E2", "E1", "E1", "E1", "E2", 2L}, {"E1", "E2", "E1", null, "E1", "E2", 2L}});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("prevWindowId"), new Object[]{"E2", "E1"});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E2", "E2", "E1", "E1", "E1", "E2", 2L}, {"E1", "E2", "E1", null, "E1", "E2", 2L}});
 
         sendEvent("E3", 22000);
         event = listener.assertOneGetNewAndReset();
@@ -431,9 +431,9 @@ public class TestViewTimeOrder extends TestCase
         assertEquals("E1", event.get("prevTailIdZero"));
         assertEquals("E3", event.get("prevTailIdOne"));
         assertEquals(3L, event.get("prevCountId"));
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {"E2","E3","E1"}, (Object[]) event.get("prevWindowId"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E2", "E2", "E3", "E1", "E1", "E3", 3L}, {"E3", "E2", "E3", "E2", "E1", "E3", 3L}, {"E1", "E2", "E3", null, "E1", "E3", 3L}});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("prevWindowId"), new Object[]{"E2", "E3", "E1"});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E2", "E2", "E3", "E1", "E1", "E3", 3L}, {"E3", "E2", "E3", "E2", "E1", "E3", 3L}, {"E1", "E2", "E3", null, "E1", "E3", 3L}});
 
         sendTimer(31000);
         assertNull(listener.getLastNewData());
@@ -449,8 +449,8 @@ public class TestViewTimeOrder extends TestCase
         assertEquals(null, event.get("prevCountId"));
         assertEquals(null, event.get("prevWindowId"));
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E3", "E3", "E1", "E2", "E1", "E3", 2L}, {"E1", "E3", "E1", null, "E1", "E3", 2L}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E3", "E3", "E1", "E2", "E1", "E3", 2L}, {"E1", "E3", "E1", null, "E1", "E3", 2L}});
     }
 
     private SupportBeanTimestamp sendEvent(String id, String groupId, long timestamp)

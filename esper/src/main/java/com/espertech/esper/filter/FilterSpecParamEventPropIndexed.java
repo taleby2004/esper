@@ -36,7 +36,7 @@ public final class FilterSpecParamEventPropIndexed extends FilterSpecParam
 
     /**
      * Constructor.
-     * @param propertyName is the event property name
+     * @param lookupable is the lookupable
      * @param filterOperator is the type of compare
      * @param resultEventAsName is the name of the result event from which to get a property value to compare
      * @param resultEventProperty is the name of the property to get from the named result event
@@ -46,12 +46,12 @@ public final class FilterSpecParamEventPropIndexed extends FilterSpecParam
      * @param resultEventIndex index
      * @throws IllegalArgumentException if an operator was supplied that does not take a single constant value
      */
-    public FilterSpecParamEventPropIndexed(String propertyName, FilterOperator filterOperator, String resultEventAsName,
+    public FilterSpecParamEventPropIndexed(FilterSpecLookupable lookupable, FilterOperator filterOperator, String resultEventAsName,
                                     int resultEventIndex, String resultEventProperty, boolean isMustCoerce,
                                     SimpleNumberCoercer numberCoercer, Class coercionType, String statementName)
         throws IllegalArgumentException
     {
-        super(propertyName, filterOperator);
+        super(lookupable, filterOperator);
         this.resultEventAsName = resultEventAsName;
         this.resultEventIndex = resultEventIndex;
         this.resultEventProperty = resultEventProperty;
@@ -136,11 +136,6 @@ public final class FilterSpecParamEventPropIndexed extends FilterSpecParam
     public int getResultEventIndex()
     {
         return resultEventIndex;
-    }
-
-    public int getFilterHash()
-    {
-        return resultEventProperty.hashCode();
     }
 
     public final String toString()

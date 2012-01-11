@@ -36,12 +36,12 @@ public class ExprAvgNodeFactory implements AggregationMethodFactory
         return null;
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
-        AggregationMethod method = methodResolutionService.makeAvgAggregator(agentInstanceIds, groupId, aggregationId, childType, hasFilter);
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeAvgAggregator(agentInstanceId, groupId, aggregationId, childType, hasFilter);
         if (!isDistinct) {
             return method;
         }
-        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, childType, hasFilter);
+        return methodResolutionService.makeDistinctAggregator(agentInstanceId, groupId, aggregationId, method, childType, hasFilter);
     }
 
     public AggregationMethodFactory getPrototypeAggregator() {

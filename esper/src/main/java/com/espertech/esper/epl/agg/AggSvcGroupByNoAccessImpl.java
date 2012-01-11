@@ -58,7 +58,7 @@ public class AggSvcGroupByNoAccessImpl extends AggregationServiceBaseGrouped
         // The aggregators for this group do not exist, need to create them from the prototypes
         if (groupAggregators == null)
         {
-            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
+            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceId(), groupByKey);
             aggregatorsPerGroup.put(groupByKey, groupAggregators);
         }
         currentAggregatorRow = groupAggregators;
@@ -78,7 +78,7 @@ public class AggSvcGroupByNoAccessImpl extends AggregationServiceBaseGrouped
         // The aggregators for this group do not exist, need to create them from the prototypes
         if (groupAggregators == null)
         {
-            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
+            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceId(), groupByKey);
             aggregatorsPerGroup.put(groupByKey, groupAggregators);
         }
         currentAggregatorRow = groupAggregators;
@@ -91,18 +91,18 @@ public class AggSvcGroupByNoAccessImpl extends AggregationServiceBaseGrouped
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey, int[] agentInstanceIds)
+    public void setCurrentAccess(MultiKeyUntyped groupByKey, int agentInstanceId)
     {
         currentAggregatorRow = aggregatorsPerGroup.get(groupByKey);
 
         if (currentAggregatorRow == null)
         {
-            currentAggregatorRow = methodResolutionService.newAggregators(aggregators, agentInstanceIds, groupByKey);
+            currentAggregatorRow = methodResolutionService.newAggregators(aggregators, agentInstanceId, groupByKey);
             aggregatorsPerGroup.put(groupByKey, currentAggregatorRow);
         }
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         return currentAggregatorRow[column].getValue();
     }
@@ -113,5 +113,9 @@ public class AggSvcGroupByNoAccessImpl extends AggregationServiceBaseGrouped
 
     public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         return null;
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

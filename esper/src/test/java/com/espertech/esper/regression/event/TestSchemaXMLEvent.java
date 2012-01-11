@@ -12,10 +12,10 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.event.EventTypeAssertionUtil;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.ParserTool;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -106,12 +106,12 @@ public class TestSchemaXMLEvent extends TestCase
         assertFalse(updateListener.isInvoked());
 
         EventType type = epService.getEPAdministrator().createEPL("select * from PageVisitEvent").getEventType();
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("sessionId", Node.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("customerId", Node.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("url", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("method", Node.class, null, false, false, false, false, true),
-           }, type.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("sessionId", Node.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("customerId", Node.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("url", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("method", Node.class, null, false, false, false, false, true),
+        }, type.getPropertyDescriptors());
     }
 
     public void testSchemaXMLQuery_XPathBacked() throws Exception
@@ -125,12 +125,12 @@ public class TestSchemaXMLEvent extends TestCase
         EventType type = wildStmt.getEventType();
         EventTypeAssertionUtil.assertConsistency(type);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("nested1", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("prop4", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested3", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
-           }, type.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("nested1", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("prop4", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested3", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
+        }, type.getPropertyDescriptors());
 
         String stmt =
                 "select nested1 as nodeProp," +
@@ -147,16 +147,16 @@ public class TestSchemaXMLEvent extends TestCase
         selectStmt.addListener(updateListener);
         type = selectStmt.getEventType();
         EventTypeAssertionUtil.assertConsistency(type);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("nodeProp", Node.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested1Prop", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested2Prop", Boolean.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("complexProp", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("indexedProp", Integer.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("attrOneProp", Boolean.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("attrTwoProp", String.class, null, false, false, false, false, false),
-           }, type.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("nodeProp", Node.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested1Prop", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested2Prop", Boolean.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("complexProp", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("indexedProp", Integer.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("attrOneProp", Boolean.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("attrTwoProp", String.class, null, false, false, false, false, false),
+        }, type.getPropertyDescriptors());
 
         Document eventDoc = SupportXML.sendDefaultEvent(epService.getEPRuntime(), "test");
 
@@ -196,12 +196,12 @@ public class TestSchemaXMLEvent extends TestCase
         EventType type = wildStmt.getEventType();
         EventTypeAssertionUtil.assertConsistency(type);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("nested1", Node.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("prop4", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested3", Node.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
-           }, type.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("nested1", Node.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("prop4", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested3", Node.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
+        }, type.getPropertyDescriptors());
 
         String stmt =
                 "select nested1 as nodeProp," +
@@ -218,16 +218,16 @@ public class TestSchemaXMLEvent extends TestCase
         selectStmt.addListener(updateListener);
         type = selectStmt.getEventType();
         EventTypeAssertionUtil.assertConsistency(type);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("nodeProp", Node.class, null, false, false, false, false, true),
-            new EventPropertyDescriptor("nested1Prop", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("nested2Prop", Boolean.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("complexProp", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("indexedProp", Integer.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("attrOneProp", Boolean.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("attrTwoProp", String.class, null, false, false, false, false, false),
-           }, type.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("nodeProp", Node.class, null, false, false, false, false, true),
+                new EventPropertyDescriptor("nested1Prop", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("nested2Prop", Boolean.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("complexProp", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("indexedProp", Integer.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("customProp", Double.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("attrOneProp", Boolean.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("attrTwoProp", String.class, null, false, false, false, false, false),
+        }, type.getPropertyDescriptors());
 
         Document eventDoc = SupportXML.sendDefaultEvent(epService.getEPRuntime(), "test");
 
@@ -266,7 +266,7 @@ public class TestSchemaXMLEvent extends TestCase
         // test remove type with statement used (no force)
         configOps.addEventType("MyXMLEvent", getConfigTestType("p01", false));
         EPStatement stmt = epService.getEPAdministrator().createEPL("select p01 from MyXMLEvent", "stmtOne");
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"stmtOne"}, configOps.getEventTypeNameUsedBy("MyXMLEvent").toArray());
+        EPAssertionUtil.assertEqualsExactOrder(configOps.getEventTypeNameUsedBy("MyXMLEvent").toArray(), new String[]{"stmtOne"});
 
         try {
             configOps.removeEventType("MyXMLEvent", false);
@@ -297,7 +297,7 @@ public class TestSchemaXMLEvent extends TestCase
 
         // compile
         epService.getEPAdministrator().createEPL("select p20 from MyXMLEvent", "stmtTwo");
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"stmtTwo"}, configOps.getEventTypeNameUsedBy("MyXMLEvent").toArray());
+        EPAssertionUtil.assertEqualsExactOrder(configOps.getEventTypeNameUsedBy("MyXMLEvent").toArray(), new String[]{"stmtTwo"});
         try {
             epService.getEPAdministrator().createEPL("select p01 from MyXMLEvent");
             fail();

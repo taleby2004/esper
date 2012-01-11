@@ -19,17 +19,19 @@ public class ExprNodeProxy implements java.lang.reflect.InvocationHandler {
 
     private static Method target = JavaClassHelper.getMethodByName(ExprNode.class, "getExprEvaluator");
 
+    private String engineURI;
     private String statementName;
     private ExprNode exprNode;
 
-    public static Object newInstance(String statementName, ExprNode exprNode) {
+    public static Object newInstance(String engineURI, String statementName, ExprNode exprNode) {
         return java.lang.reflect.Proxy.newProxyInstance(
                 exprNode.getClass().getClassLoader(),
                 JavaClassHelper.getSuperInterfaces(exprNode.getClass()),
-                new ExprNodeProxy(statementName, exprNode));
+                new ExprNodeProxy(engineURI, statementName, exprNode));
     }
 
-    public ExprNodeProxy(String statementName, ExprNode exprNode) {
+    public ExprNodeProxy(String engineURI, String statementName, ExprNode exprNode) {
+        this.engineURI = engineURI;
         this.statementName = statementName;
         this.exprNode = exprNode;
     }
@@ -50,7 +52,7 @@ public class ExprNodeProxy implements java.lang.reflect.InvocationHandler {
         }
 
         ExprEvaluator evaluator = (ExprEvaluator) m.invoke(exprNode, args);
-        return ExprEvaluatorProxy.newInstance(statementName, expressionToString, evaluator);
+        return ExprEvaluatorProxy.newInstance(engineURI, statementName, expressionToString, evaluator);
     }
 }
 

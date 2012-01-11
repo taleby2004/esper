@@ -15,10 +15,10 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.client.deploy.DeploymentOptions;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.client.EventBean;
 import junit.framework.TestCase;
 
@@ -77,7 +77,7 @@ public class TestNamedWindowExecuteQuery extends TestCase
                 " inner join WinCategory on WinProduct.categoryId=WinCategory.categoryId" +
                 " inner join WinProductOwnerDetails on WinProduct.productId=WinProductOwnerDetails.productId"
                 ).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][] {{"Product1"}});
+        EPAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][]{{"Product1"}});
 
         queryResults = epService.getEPRuntime().executeQuery("" +
                 "select WinProduct.productId " +
@@ -86,7 +86,7 @@ public class TestNamedWindowExecuteQuery extends TestCase
                 " inner join WinProductOwnerDetails on WinProduct.productId=WinProductOwnerDetails.productId" +
                 " where WinCategory.owner=WinProductOwnerDetails.owner"
                 ).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][] {{"Product1"}});
+        EPAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][]{{"Product1"}});
 
         queryResults = epService.getEPRuntime().executeQuery("" +
                 "select WinProduct.productId " +
@@ -95,7 +95,7 @@ public class TestNamedWindowExecuteQuery extends TestCase
                 " and WinProduct.categoryId=WinCategory.categoryId" +
                 " and WinProduct.productId=WinProductOwnerDetails.productId"
                 ).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][] {{"Product1"}});
+        EPAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][]{{"Product1"}});
 
         queryResults = epService.getEPRuntime().executeQuery("" +
                 "select WinProduct.productId " +
@@ -104,7 +104,7 @@ public class TestNamedWindowExecuteQuery extends TestCase
                 " inner join WinProductOwnerDetails on WinProduct.productId=WinProductOwnerDetails.productId" +
                 " having WinCategory.owner=WinProductOwnerDetails.owner"
                 ).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][] {{"Product1"}});
+        EPAssertionUtil.assertPropsPerRow(queryResults, fields, new Object[][]{{"Product1"}});
 
         epService.destroy();
     }
@@ -141,30 +141,30 @@ public class TestNamedWindowExecuteQuery extends TestCase
         sendWin2Event("keyJoin1", 1d);
 
         result = epService.getEPRuntime().executeQuery(queryAgg).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(result, fieldsAgg, new Object[][] {{"key1", 1d}});
+        EPAssertionUtil.assertPropsPerRow(result, fieldsAgg, new Object[][]{{"key1", 1d}});
         result = epService.getEPRuntime().executeQuery(queryNoagg).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(result, fieldsNoagg, new Object[][] {{"key1", 1d}});
+        EPAssertionUtil.assertPropsPerRow(result, fieldsNoagg, new Object[][]{{"key1", 1d}});
 
         sendWin2Event("keyJoin2", 2d);
 
         result = epService.getEPRuntime().executeQuery(queryAgg).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(result, fieldsAgg, new Object[][] {{"key1", 1d}});
+        EPAssertionUtil.assertPropsPerRow(result, fieldsAgg, new Object[][]{{"key1", 1d}});
         result = epService.getEPRuntime().executeQuery(queryNoagg).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(result, fieldsNoagg, new Object[][] {{"key1", 1d}});
+        EPAssertionUtil.assertPropsPerRow(result, fieldsNoagg, new Object[][]{{"key1", 1d}});
 
         sendWin1Event("key2", "keyJoin2");
 
         result = epService.getEPRuntime().executeQuery(queryAgg).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(result, fieldsAgg, new Object[][] {{"key1", 1d}, {"key2", 2d}});
+        EPAssertionUtil.assertPropsPerRow(result, fieldsAgg, new Object[][]{{"key1", 1d}, {"key2", 2d}});
         result = epService.getEPRuntime().executeQuery(queryNoagg).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(result, fieldsNoagg, new Object[][] {{"key1", 1d}});
+        EPAssertionUtil.assertPropsPerRow(result, fieldsNoagg, new Object[][]{{"key1", 1d}});
 
         sendWin2Event("keyJoin2", 1d);
 
         result = epService.getEPRuntime().executeQuery(queryAgg).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(result, fieldsAgg, new Object[][] {{"key1", 1d}, {"key2", 3d}});
+        EPAssertionUtil.assertPropsPerRow(result, fieldsAgg, new Object[][]{{"key1", 1d}, {"key2", 3d}});
         result = epService.getEPRuntime().executeQuery(queryNoagg).getArray();
-        ArrayAssertionUtil.assertPropsPerRow(result, fieldsNoagg, new Object[][] {{"key1", 1d}, {"key2", 1d}});
+        EPAssertionUtil.assertPropsPerRow(result, fieldsNoagg, new Object[][]{{"key1", 1d}, {"key2", 1d}});
     }
 
     private void sendWin1Event(String key, String keyJoin) {
@@ -189,18 +189,18 @@ public class TestNamedWindowExecuteQuery extends TestCase
         for (EventBean row : result.getArray()) {
             // System.out.println("name=" + row.get("name"));
         }
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, null);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{"E1", 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
-        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
     }
 
     public void testExecuteCount() throws Exception
@@ -210,21 +210,21 @@ public class TestNamedWindowExecuteQuery extends TestCase
         EPOnDemandPreparedQuery prepared = epService.getEPRuntime().prepareQuery(query);
 
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{0L}});
-        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{0L}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{0L}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{0L}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{1L}});
-        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{1L}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{1L}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{1L}});
         result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{1L}});
-        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{1L}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{1L}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{1L}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{2L}});
-        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{2L}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{2L}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{2L}});
     }
 
     public void testExecuteFilter() throws Exception
@@ -252,11 +252,11 @@ public class TestNamedWindowExecuteQuery extends TestCase
 
         String query = "select sum(intPrimitive) as total from MyWindow";
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{16}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{16}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", -2));
         result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{14}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{14}});
     }
 
     public void testAggUngroupedRowForEvent() throws Exception
@@ -268,11 +268,11 @@ public class TestNamedWindowExecuteQuery extends TestCase
 
         String query = "select string, sum(intPrimitive) as total from MyWindow";
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E1", 16}, {"E2", 16}, {"E3", 16}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 16}, {"E2", 16}, {"E3", 16}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", -2));
         result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E1", 14}, {"E2", 14}, {"E3", 14}, {"E4", 14}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 14}, {"E2", 14}, {"E3", 14}, {"E4", 14}});
     }
 
     public void testAggUngroupedRowForGroup() throws Exception
@@ -284,12 +284,12 @@ public class TestNamedWindowExecuteQuery extends TestCase
 
         String query = "select string, sum(intPrimitive) as total from MyWindow group by string order by string asc";
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E1", 6}, {"E2", 11}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 6}, {"E2", 11}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", -2));
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
         result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E1", 6}, {"E2", 9}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 6}, {"E2", 9}, {"E3", 3}});
     }
 
     public void testJoin() throws Exception
@@ -308,14 +308,14 @@ public class TestNamedWindowExecuteQuery extends TestCase
         String query = "select string, intPrimitive, id from MyWindow nw1, " +
                             "MySecondWindow nw2 where nw1.string = nw2.id";
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E2", 11, "E2"}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E2", 11, "E2"}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 2));
         epService.getEPRuntime().sendEvent(new SupportBean_A("E3"));
 
         result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E2", 11, "E2"}, {"E3", 1, "E3"}, {"E3", 2, "E3"}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E2", 11, "E2"}, {"E3", 1, "E3"}, {"E3", 2, "E3"}});
     }
 
     public void testInvalid()
@@ -371,9 +371,9 @@ public class TestNamedWindowExecuteQuery extends TestCase
     private void runAssertionFilter(String query)
     {
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(result.iterator(), fields, new Object[][] {{"E3", 5}});
+        EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E3", 5}});
 
         EPOnDemandPreparedQuery prepared = epService.getEPRuntime().prepareQuery(query);
-        ArrayAssertionUtil.assertEqualsExactOrder(prepared.execute().iterator(), fields, new Object[][] {{"E3", 5}});
+        EPAssertionUtil.assertPropsPerRow(prepared.execute().iterator(), fields, new Object[][]{{"E3", 5}});
     }
 }

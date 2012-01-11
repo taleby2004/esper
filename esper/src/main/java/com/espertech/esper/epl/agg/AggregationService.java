@@ -8,8 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
@@ -41,11 +41,13 @@ public interface AggregationService extends AggregationResultFuture
      * @param groupKey - key identify the row of aggregation states
      * @param agentInstanceIds
      */
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds);
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId);
 
     /**
      * Clear current aggregation state.
      * @param exprEvaluatorContext
      */
     public void clearResults(ExprEvaluatorContext exprEvaluatorContext);
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback);
 }

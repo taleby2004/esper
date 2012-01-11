@@ -14,19 +14,18 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.metric.EngineMetric;
 import com.espertech.esper.client.metric.StatementMetric;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.ArrayHandlingUtil;
 import com.espertech.esper.support.util.SupportSubscriber;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class TestMetricsReporting extends TestCase
 {
@@ -105,7 +104,7 @@ public class TestMetricsReporting extends TestCase
         for (EventBean event : received) {
             System.out.println(event.get("statementName") + " = " + event.get("numInput"));
         }
-        ArrayAssertionUtil.assertPropsPerRow(received, fields, new Object[][] {{"A", 2L}, {"B1", 1L}, {"B2", 1L}, {"C", 2L}, {"D", 2L}, {"M", 1L}, {"W", 1L}});
+        EPAssertionUtil.assertPropsPerRow(received, fields, new Object[][]{{"A", 2L}, {"B1", 1L}, {"B2", 1L}, {"C", 2L}, {"D", 2L}, {"M", 1L}, {"W", 1L}});
 
         /* Comment-in for printout.
         for (int i = 0; i < received.length; i++) {
@@ -136,7 +135,7 @@ public class TestMetricsReporting extends TestCase
 
         sendTimer(11000);
         EventBean event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(event, engineFields, new Object[] {"MyURI", 11000L, 1L, 1L, 1L});
+        EPAssertionUtil.assertProps(event, engineFields, new Object[]{"MyURI", 11000L, 1L, 1L, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean());
         epService.getEPRuntime().sendEvent(new SupportBean());
@@ -144,7 +143,7 @@ public class TestMetricsReporting extends TestCase
         sendTimer(20000);
         sendTimer(21000);
         event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(event, engineFields, new Object[] {"MyURI", 21000L, 4L, 3L, 0L});
+        EPAssertionUtil.assertProps(event, engineFields, new Object[]{"MyURI", 21000L, 4L, 3L, 0L});
     }
 
     public void testStatementGroups()
@@ -188,7 +187,7 @@ public class TestMetricsReporting extends TestCase
 
         sendTimer(8000);
         String[] fields = "statementName,numOutputIStream,numInput".split(",");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"GroupOne", 0L, 0L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"GroupOne", 0L, 0L});
 
         sendTimer(12000);
         sendTimer(14000);
@@ -196,7 +195,7 @@ public class TestMetricsReporting extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(16000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"GroupOne", 0L, 0L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"GroupOne", 0L, 0L});
 
         // should report as groupTwo
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
@@ -204,7 +203,7 @@ public class TestMetricsReporting extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(18000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"GroupTwo", 1L, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"GroupTwo", 1L, 1L});
 
         // should report as groupTwo
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
@@ -212,7 +211,7 @@ public class TestMetricsReporting extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(21000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"Default", 0L, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"Default", 0L, 1L});
 
         // turn off group 1
         epService.getEPAdministrator().getConfiguration().setMetricsReportingInterval("GroupOneStatements", -1);
@@ -222,7 +221,7 @@ public class TestMetricsReporting extends TestCase
         // turn on group 1
         epService.getEPAdministrator().getConfiguration().setMetricsReportingInterval("GroupOneStatements", 1000);
         sendTimer(25000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"GroupOne", 0L, 0L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"GroupOne", 0L, 0L});
     }
 
     public void testStatementMetrics()
@@ -358,19 +357,19 @@ public class TestMetricsReporting extends TestCase
         sendEvent("E2", 1, cpuGoalOneNano);
 
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][] {{"stmtone"}, {"stmttwo"}});
+        EPAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][]{{"stmtone"}, {"stmttwo"}});
         listenerStmtMetric.reset();
 
         sendEvent("E1", 1, cpuGoalOneNano);
         sendTimer(21000);
-        ArrayAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][] {{"stmtone"}, {"stmttwo"}});
+        EPAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][]{{"stmtone"}, {"stmttwo"}});
         listenerStmtMetric.reset();
 
         epService.getEPAdministrator().getConfiguration().setMetricsReportingStmtDisabled("stmtone");
 
         sendEvent("E1", 1, cpuGoalOneNano);
         sendTimer(31000);
-        ArrayAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][] {{"stmttwo"}});
+        EPAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][]{{"stmttwo"}});
         listenerStmtMetric.reset();
 
         epService.getEPAdministrator().getConfiguration().setMetricsReportingStmtEnabled("stmtone");
@@ -378,7 +377,7 @@ public class TestMetricsReporting extends TestCase
 
         sendEvent("E1", 1, cpuGoalOneNano);
         sendTimer(41000);
-        ArrayAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][] {{"stmtone"}});
+        EPAssertionUtil.assertPropsPerRow(listenerStmtMetric.getNewDataListFlattened(), fields, new Object[][]{{"stmtone"}});
         listenerStmtMetric.reset();
     }
 
@@ -389,10 +388,10 @@ public class TestMetricsReporting extends TestCase
         assertEquals(4, listener.getNewDataList().size());
         EventBean[] received = listener.getNewDataListFlattened();
 
-        ArrayAssertionUtil.assertProps(received[0], fields, new Object[] {"MyURI", "cpuStmtOne"});
-        ArrayAssertionUtil.assertProps(received[1], fields, new Object[] {"MyURI", "cpuStmtTwo"});
-        ArrayAssertionUtil.assertProps(received[2], fields, new Object[] {"MyURI", "wallStmtThree"});
-        ArrayAssertionUtil.assertProps(received[3], fields, new Object[] {"MyURI", "wallStmtFour"});
+        EPAssertionUtil.assertProps(received[0], fields, new Object[]{"MyURI", "cpuStmtOne"});
+        EPAssertionUtil.assertProps(received[1], fields, new Object[]{"MyURI", "cpuStmtTwo"});
+        EPAssertionUtil.assertProps(received[2], fields, new Object[]{"MyURI", "wallStmtThree"});
+        EPAssertionUtil.assertProps(received[3], fields, new Object[]{"MyURI", "wallStmtFour"});
 
         long cpuOne = (Long) received[0].get("cpuTime");
         long cpuTwo = (Long) received[1].get("cpuTime");

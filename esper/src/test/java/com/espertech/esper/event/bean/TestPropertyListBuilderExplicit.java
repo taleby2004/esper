@@ -13,12 +13,10 @@ package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.ConfigurationEventTypeLegacy;
 import com.espertech.esper.client.ConfigurationException;
-import com.espertech.esper.event.bean.InternalEventPropDescriptor;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.event.EventPropertyType;
-import com.espertech.esper.event.bean.PropertyListBuilderExplicit;
 import com.espertech.esper.support.bean.SupportLegacyBean;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -66,7 +64,7 @@ public class TestPropertyListBuilderExplicit extends TestCase
         expected.add(new InternalEventPropDescriptor("m_strMap", SupportLegacyBean.class.getMethod("readMap"), EventPropertyType.SIMPLE));
         expected.add(new InternalEventPropDescriptor("m_legNested", SupportLegacyBean.class.getMethod("readLegacyNested"), EventPropertyType.SIMPLE));
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(expected.toArray(), descList.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(expected.toArray(), descList.toArray());
     }
 
     public void testInvalid()

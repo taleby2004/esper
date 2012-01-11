@@ -12,10 +12,11 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
+import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
@@ -43,8 +44,9 @@ public class TestSubselectIn extends TestCase
     {
         String stmtText = "select id in (select id from S1.win:length(1000)) as value from S0";
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
+        assertFalse(stmt.getStatementContext().isStatelessSelect());
 
         runTestInSelect();
     }

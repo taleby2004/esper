@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.datetime;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportDateTime;
 import com.espertech.esper.support.bean.SupportTimeStartEndA;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestDTGet extends TestCase {
@@ -52,7 +52,7 @@ public class TestDTGet extends TestCase {
 
         String startTime = "2002-05-30T09:00:00.000";
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4, 4, 4});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4, 4, 4});
 
         // try event as input
         ConfigurationEventTypeLegacy configBean = new ConfigurationEventTypeLegacy();
@@ -66,7 +66,7 @@ public class TestDTGet extends TestCase {
         stmt.addListener(listener);
         
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("A0", startTime, 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{4});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{4});
     }
 
     public void testFields() {
@@ -88,6 +88,6 @@ public class TestDTGet extends TestCase {
 
         String startTime = "2002-05-30T09:01:02.003";
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3, 2, 1, 9, 30, 4, 2002, 22});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, 2, 1, 9, 30, 4, 2002, 22});
     }
 }

@@ -11,15 +11,14 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
  import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.util.ArrayHandlingUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
@@ -238,8 +237,8 @@ public class Test6StreamOuterJoin extends TestCase
 
         s3Events = SupportBean_S3.makeS3("D", new String[] {"D-s2-1"});
         sendEvent(s3Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, s1Events[0], null, s3Events[0], null, null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, s1Events[0], null, s3Events[0], null, null}}, getAndResetNewEvents());
 
         s0Events = SupportBean_S0.makeS0("D", new String[] {"D-s0-1"});
         sendEvent(s0Events);
@@ -255,13 +254,13 @@ public class Test6StreamOuterJoin extends TestCase
 
         s3Events = SupportBean_S3.makeS3("E", new String[] {"E-s2-1"});
         sendEvent(s3Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, s1Events[0], null, s3Events[0], null, null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, s1Events[0], null, s3Events[0], null, null}}, getAndResetNewEvents());
 
         s4Events = SupportBean_S4.makeS4("E", new String[] {"E-s2-1"});
         sendEvent(s4Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, null, null, null, s4Events[0], null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, null, null, null, s4Events[0], null}}, getAndResetNewEvents());
 
         s0Events = SupportBean_S0.makeS0("E", new String[] {"E-s0-1"});
         sendEvent(s0Events);
@@ -279,23 +278,23 @@ public class Test6StreamOuterJoin extends TestCase
 
         s3Events = SupportBean_S3.makeS3("F", new String[] {"F-s3-1"});
         sendEvent(s3Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, s1Events[0], null, s3Events[0], null, null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, s1Events[0], null, s3Events[0], null, null}}, getAndResetNewEvents());
 
         s4Events = SupportBean_S4.makeS4("F", new String[] {"F-s2-1"});
         sendEvent(s4Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, null, null, null, s4Events[0], null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, null, null, null, s4Events[0], null}}, getAndResetNewEvents());
 
         s5Events = SupportBean_S5.makeS5("F", new String[] {"F-s2-1"});
         sendEvent(s5Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, null, s2Events[0], null, s4Events[0], s5Events[0] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, null, s2Events[0], null, s4Events[0], s5Events[0]}}, getAndResetNewEvents());
 
         s0Events = SupportBean_S0.makeS0("F", new String[] {"F-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]}}, getAndResetNewEvents());
 
         // Test s0 and s1=2, s2=2, s3=1, s4=1, s5=2
         //
@@ -316,15 +315,15 @@ public class Test6StreamOuterJoin extends TestCase
 
         s0Events = SupportBean_S0.makeS0("G", new String[] {"G-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[1] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[1]}}, getAndResetNewEvents());
 
         // Test s0 and s1=2, s2=2, s3=2, s4=2, s5=2
         //
@@ -345,39 +344,39 @@ public class Test6StreamOuterJoin extends TestCase
 
         s0Events = SupportBean_S0.makeS0("H", new String[] {"H-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[1], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[1], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[1], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[1], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[1], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[1], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[1], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[1], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[1], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[1], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[1], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[1], s4Events[1], s5Events[1] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[1], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[1], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[1], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[1], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[1], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[1], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[1], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[1], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[1], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[1], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[1], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[1], s4Events[1], s5Events[1]}}, getAndResetNewEvents());
 
         // Test s0 and s1=2, s2=1, s3=1, s4=3, s5=1
         //
@@ -398,13 +397,13 @@ public class Test6StreamOuterJoin extends TestCase
 
         s0Events = SupportBean_S0.makeS0("I", new String[] {"I-s0-1"});
         sendEvent(s0Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[2], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[2], s5Events[0] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[2], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[2], s5Events[0]}}, getAndResetNewEvents());
 
         // Test s1 and s3=0
         //
@@ -422,8 +421,8 @@ public class Test6StreamOuterJoin extends TestCase
 
         s1Events = SupportBean_S1.makeS1("K", new String[] {"K-s1-1"});
         sendEvent(s1Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, s1Events[0], null, s3Events[0], null, null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, s1Events[0], null, s3Events[0], null, null}}, getAndResetNewEvents());
 
         // Test s1 and s0=1, s2=1, s3=1, s4=0, s5=1
         //
@@ -443,8 +442,8 @@ public class Test6StreamOuterJoin extends TestCase
 
         s1Events = SupportBean_S1.makeS1("L", new String[] {"L-s1-1"});
         sendEvent(s1Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, s1Events[0], null, s3Events[0], null, null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, s1Events[0], null, s3Events[0], null, null}}, getAndResetNewEvents());
 
         // Test s1 and s0=1, s2=1, s3=1, s4=2, s5=1
         //
@@ -465,9 +464,9 @@ public class Test6StreamOuterJoin extends TestCase
 
         s1Events = SupportBean_S1.makeS1("M", new String[] {"M-s1-1"});
         sendEvent(s1Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0]}}, getAndResetNewEvents());
 
         // Test s2 and s0=1, s1=0, s3=0, s4=1, s5=2
         //
@@ -482,9 +481,9 @@ public class Test6StreamOuterJoin extends TestCase
 
         s2Events = SupportBean_S2.makeS2("N", new String[] {"N-s2-1"});
         sendEvent(s2Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, null, s2Events[0], null, s4Events[0], s5Events[0] },
-            { null, null, s2Events[0], null, s4Events[0], s5Events[1] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, null, s2Events[0], null, s4Events[0], s5Events[0]},
+                {null, null, s2Events[0], null, s4Events[0], s5Events[1]}}, getAndResetNewEvents());
 
         // Test s2 and s0=1, s1=1, s3=3, s4=1, s5=2
         //
@@ -505,20 +504,20 @@ public class Test6StreamOuterJoin extends TestCase
 
         s2Events = SupportBean_S2.makeS2("O", new String[] {"O-s2-1"});
         sendEvent(s2Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[2], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[2], s4Events[0], s5Events[1] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[2], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[2], s4Events[0], s5Events[1]}}, getAndResetNewEvents());
 
         // Test s3 and s0=0, s1=0, s2=0, s4=0, s5=0
         //
         s3Events = SupportBean_S3.makeS3("P", new String[] {"P-s1-1"});
         sendEvent(s3Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, null, null, s3Events[0], null, null}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, null, null, s3Events[0], null, null}}, getAndResetNewEvents());
 
         // Test s3 and s0=0, s1=1, s2=0, s4=0, s5=0
         //
@@ -527,8 +526,8 @@ public class Test6StreamOuterJoin extends TestCase
 
         s3Events = SupportBean_S3.makeS3("Q", new String[] {"Q-s1-1"});
         sendEvent(s3Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, s1Events[0], null, s3Events[0], null, null}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, s1Events[0], null, s3Events[0], null, null}}, getAndResetNewEvents());
 
         // Test s3 and s0=1, s1=2, s2=2, s4=0, s5=0
         //
@@ -543,9 +542,9 @@ public class Test6StreamOuterJoin extends TestCase
 
         s3Events = SupportBean_S3.makeS3("R", new String[] {"R-s3-1"});
         sendEvent(s3Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, s1Events[0], null, s3Events[0], null, null},
-            { null, s1Events[1], null, s3Events[0], null, null}}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, s1Events[0], null, s3Events[0], null, null},
+                {null, s1Events[1], null, s3Events[0], null, null}}, getAndResetNewEvents());
 
         // Test s3 and s0=2, s1=2, s2=1, s4=2, s5=2
         //
@@ -566,39 +565,39 @@ public class Test6StreamOuterJoin extends TestCase
 
         s3Events = SupportBean_S3.makeS3("S", new String[] {"s-s3-1"});
         sendEvent(s3Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[1], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[1], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[1], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[1], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[1], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[1], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[1], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[1], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[1], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[1], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[1], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[1] },
-            { s0Events[1], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[1] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[1], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[1], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[1], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[1], s1Events[0], s2Events[1], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[1], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[1], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[1], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[1], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[1], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[1], s1Events[1], s2Events[0], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[1], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[1]},
+                {s0Events[1], s1Events[1], s2Events[1], s3Events[0], s4Events[1], s5Events[1]}}, getAndResetNewEvents());
 
         // Test s4 and s0=1, s1=0, s2=1, s3=0, s5=0
         //
@@ -610,8 +609,8 @@ public class Test6StreamOuterJoin extends TestCase
 
         s4Events = SupportBean_S4.makeS4("U", new String[] {"U-s4-1"});
         sendEvent(s4Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, null, null, null, s4Events[0], null }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, null, null, null, s4Events[0], null}}, getAndResetNewEvents());
 
         // Test s4 and s0=1, s1=0, s2=1, s3=0, s5=1
         //
@@ -626,8 +625,8 @@ public class Test6StreamOuterJoin extends TestCase
 
         s4Events = SupportBean_S4.makeS4("V", new String[] {"V-s4-1"});
         sendEvent(s4Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { null, null, s2Events[0], null, s4Events[0], s5Events[0] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {null, null, s2Events[0], null, s4Events[0], s5Events[0]}}, getAndResetNewEvents());
 
         // Test s4 and s0=1, s1=1, s2=1, s3=1, s5=2
         //
@@ -648,9 +647,9 @@ public class Test6StreamOuterJoin extends TestCase
 
         s4Events = SupportBean_S4.makeS4("W", new String[] {"W-s4-1"});
         sendEvent(s4Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[1]}}, getAndResetNewEvents());
 
         // Test s5 and s0=1, s1=2, s2=2, s3=1, s4=1
         //
@@ -671,11 +670,11 @@ public class Test6StreamOuterJoin extends TestCase
 
         s5Events = SupportBean_S5.makeS5("X", new String[] {"X-s5-1"});
         sendEvent(s5Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[1], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[1], s2Events[1], s3Events[0], s4Events[0], s5Events[0]}}, getAndResetNewEvents());
 
         // Test s5 and s0=2, s1=1, s2=1, s3=1, s4=1
         //
@@ -696,9 +695,9 @@ public class Test6StreamOuterJoin extends TestCase
 
         s5Events = SupportBean_S5.makeS5("Y", new String[] {"X-s5-1"});
         sendEvent(s5Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[1], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]}}, getAndResetNewEvents());
 
         // Test s5 and s0=1, s1=1, s2=1, s3=2, s4=2
         //
@@ -719,11 +718,11 @@ public class Test6StreamOuterJoin extends TestCase
 
         s5Events = SupportBean_S5.makeS5("Z", new String[] {"Z-s5-1"});
         sendEvent(s5Events);
-        ArrayAssertionUtil.assertRefAnyOrderArr(new Object[][] {
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[0] },
-            { s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[1], s5Events[0] }}, getAndResetNewEvents());
+        EPAssertionUtil.assertSameAnyOrder(new Object[][]{
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[0], s4Events[1], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[0], s5Events[0]},
+                {s0Events[0], s1Events[0], s2Events[0], s3Events[1], s4Events[1], s5Events[0]}}, getAndResetNewEvents());
     }
 
     private void sendEventsAndReset(Object[] events)

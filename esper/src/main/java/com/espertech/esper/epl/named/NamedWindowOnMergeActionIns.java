@@ -19,19 +19,22 @@ import com.espertech.esper.core.service.InternalEventRouter;
 import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.util.AuditPath;
 
 public class NamedWindowOnMergeActionIns extends NamedWindowOnMergeAction {
     private final SelectExprProcessor insertHelper;
     private final InternalEventRouter internalEventRouter;
     private final EPStatementHandle statementHandle;
     private final InternalEventRouteDest internalEventRouteDest;
+    private final boolean audit;
 
-    public NamedWindowOnMergeActionIns(ExprEvaluator optionalFilter, SelectExprProcessor insertHelper, InternalEventRouter internalEventRouter, EPStatementHandle statementHandle, InternalEventRouteDest internalEventRouteDest) {
+    public NamedWindowOnMergeActionIns(ExprEvaluator optionalFilter, SelectExprProcessor insertHelper, InternalEventRouter internalEventRouter, EPStatementHandle statementHandle, InternalEventRouteDest internalEventRouteDest, boolean audit) {
         super(optionalFilter);
         this.insertHelper = insertHelper;
         this.internalEventRouter = internalEventRouter;
         this.statementHandle = statementHandle;
         this.internalEventRouteDest = internalEventRouteDest;
+        this.audit = audit;
     }
 
     public void apply(EventBean matchingEvent, EventBean[] eventsPerStream, OneEventCollection newData, OneEventCollection oldData, ExprEvaluatorContext exprEvaluatorContext) {
@@ -41,6 +44,9 @@ public class NamedWindowOnMergeActionIns extends NamedWindowOnMergeAction {
             return;
         }
 
+        if (audit) {
+            AuditPath.auditInsertInto(internalEventRouteDest.getEngineURI(), statementHandle.getStatementName(), event);
+        }
         internalEventRouter.route(event, statementHandle, internalEventRouteDest, exprEvaluatorContext, false);
     }
 }

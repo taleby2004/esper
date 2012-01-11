@@ -321,7 +321,8 @@
 	<xs:element name="plugin-aggregation-function">
 		<xs:complexType>
 			<xs:attribute name="name" type="xs:string" use="required"/>
-			<xs:attribute name="function-class" type="xs:string" use="required"/>
+			<xs:attribute name="function-class" type="xs:string" use="optional"/>
+			<xs:attribute name="factory-class" type="xs:string" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="plugin-singlerow-function">
@@ -330,12 +331,19 @@
 			<xs:attribute name="function-class" type="xs:string" use="required"/>
 			<xs:attribute name="function-method" type="xs:string" use="required"/>
 			<xs:attribute name="value-cache" type="esper:valueCacheEnum" use="optional"/>
+			<xs:attribute name="filter-optimizable" type="esper:filterOptimizableEnum" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:simpleType name="valueCacheEnum">
 		<xs:restriction base="xs:token">
 			<xs:enumeration value="enabled"/>
 			<xs:enumeration value="configured"/>
+			<xs:enumeration value="disabled"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="filterOptimizableEnum">
+		<xs:restriction base="xs:token">
+			<xs:enumeration value="enabled"/>
 			<xs:enumeration value="disabled"/>
 		</xs:restriction>
 	</xs:simpleType>
@@ -396,6 +404,7 @@
 					<xs:element ref="esper:execution" minOccurs="0"/>
 					<xs:element ref="esper:exceptionHandling" minOccurs="0"/>
 					<xs:element ref="esper:conditionHandling" minOccurs="0"/>
+					<xs:element ref="esper:scripts" minOccurs="0"/>
 				</xs:choice>
 			</xs:sequence>
 		</xs:complexType>
@@ -507,6 +516,7 @@
 					<xs:element ref="esper:jdbc" minOccurs="0"/>
 					<xs:element ref="esper:query-plan" minOccurs="0"/>
 					<xs:element ref="esper:timer-debug" minOccurs="0"/>
+					<xs:element ref="esper:audit" minOccurs="0"/>
 				</xs:choice>
 			</xs:sequence>
 		</xs:complexType>
@@ -518,6 +528,11 @@
 					<xs:element ref="esper:msec-version-release" minOccurs="0"/>
 				</xs:sequence>
 			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="scripts">
+		<xs:complexType>
+			<xs:attribute name="default-dialect" type="xs:string" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="patterns">
@@ -567,6 +582,11 @@
 			<xs:attribute name="enabled" type="xs:boolean" use="required"/>
 		</xs:complexType>
 	</xs:element>
+	<xs:element name="audit">
+		<xs:complexType>
+			<xs:attribute name="pattern" type="xs:string" use="optional"/>
+		</xs:complexType>
+	</xs:element>
 	<xs:element name="column-change-case">
 		<xs:complexType>
 			<xs:attribute name="value" type="esper:columnChangeCaseEnum" use="required"/>
@@ -602,6 +622,7 @@
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="type" type="xs:string" use="required"/>
 			<xs:attribute name="initialization-value" type="xs:string" use="optional"/>
+			<xs:attribute name="constant" type="xs:boolean" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="msec-version-release">

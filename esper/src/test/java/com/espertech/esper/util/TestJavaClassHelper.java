@@ -887,6 +887,18 @@ public class TestJavaClassHelper extends TestCase
         }
     }
 
+    public void testGetClassObjectFromPropertyTypeNames() {
+        Properties props = new Properties();
+        props.put("p0", "string");
+        props.put("p1", "int");
+        props.put("p2", SupportBean.class.getName());
+        
+        Map<String, Object> map = JavaClassHelper.getClassObjectFromPropertyTypeNames(props);
+        assertEquals(String.class, map.get("p0"));
+        assertEquals(Integer.class, map.get("p1"));
+        assertEquals(SupportBean.class, map.get("p2"));
+    }
+
     private String tryInvalidGetCommonCoercionType(Class[] types)
     {
         try

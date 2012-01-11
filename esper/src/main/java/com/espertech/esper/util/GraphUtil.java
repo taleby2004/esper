@@ -31,7 +31,7 @@ public class GraphUtil
      */
     public static Map<String, Object> mergeNestableMap(Map<String, Object> original, Map<String, Object> additional)
     {
-        Map<String, Object> result = new HashMap<String, Object>(original);
+        Map<String, Object> result = new LinkedHashMap<String, Object>(original);
 
         for (Map.Entry<String, Object> additionalEntry : additional.entrySet())
         {

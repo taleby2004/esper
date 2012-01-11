@@ -11,14 +11,14 @@
 
 package com.espertech.esper.regression.client;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportStmtAwareUpdateListener;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -168,7 +168,7 @@ public class TestStatementAwareListener extends TestCase
         assertEquals("C", awareListener.getNewDataList().get(0)[0].get("string"));
         assertEquals("C", awareListener.getNewDataList().get(1)[0].get("string"));
         EPStatement stmts[] = awareListener.getStatementList().toArray(new EPStatement[0]);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmts, new Object[] {statementOne, statementTwo});
+        EPAssertionUtil.assertEqualsAnyOrder(stmts, new Object[]{statementOne, statementTwo});
     }
 
     public void testOrderOfInvocation()

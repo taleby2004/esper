@@ -15,7 +15,7 @@ import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.core.OrderByProcessor;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.core.ResultSetProcessorFactoryDesc;
-import com.espertech.esper.epl.expression.*;
+import com.espertech.esper.epl.expression.ExprSubselectNode;
 import com.espertech.esper.epl.spec.FilterStreamSpecCompiled;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.spec.StreamSpecCompiled;
@@ -35,7 +35,7 @@ public class EPStatementStartMethodHelperUtil
     public static Pair<ResultSetProcessor, AggregationService> startResultSetAndAggregation(ResultSetProcessorFactoryDesc resultSetProcessorPrototype, AgentInstanceContext agentInstanceContext) {
         AggregationService aggregationService = null;
         if (resultSetProcessorPrototype.getAggregationServiceFactoryDesc() != null) {
-            aggregationService = resultSetProcessorPrototype.getAggregationServiceFactoryDesc().getAggregationServiceFactory().makeService(agentInstanceContext);
+            aggregationService = resultSetProcessorPrototype.getAggregationServiceFactoryDesc().getAggregationServiceFactory().makeService(agentInstanceContext, agentInstanceContext.getStatementContext().getMethodResolutionService());
         }
 
         OrderByProcessor orderByProcessor = null;

@@ -11,11 +11,13 @@
 
 package com.espertech.esper.regression.context;
 
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.context.ContextPartitionSelector;
+import com.espertech.esper.client.context.ContextPartitionSelectorCategory;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
+
+import java.util.*;
 
 public class TestDocExamples extends TestCase {
 
@@ -38,6 +40,17 @@ public class TestDocExamples extends TestCase {
         epService.getEPAdministrator().getConfiguration().addEventType(TrainEnterEvent.class);
         epService.getEPAdministrator().getConfiguration().addEventType(TrainLeaveEvent.class);
         epService.getEPAdministrator().getConfiguration().addEventType(CumulativePrice.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(PassengerScanEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(MyStartEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(MyEndEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(MyInitEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(MyTermEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(MyEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("StartEventOne", MyStartEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("StartEventTwo", MyStartEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyOtherEvent", MyStartEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("EndEventOne", MyEndEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("EndEventTwo", MyEndEvent.class);
 
         create("create context SegmentedByCustomer partition by custId from BankTxn");
         create("context SegmentedByCustomer select custId, account, sum(amount) from BankTxn group by account");
@@ -81,6 +94,8 @@ public class TestDocExamples extends TestCase {
                 "initiated by TrainEnterEvent as te\n" +
                 "terminated after 5 minutes");
         create("context CtxTrainEnter\n" +
+                "select *, context.te.trainId, context.id, context.name from TrainLeaveEvent(trainId = context.te.trainId)");
+        create("context CtxTrainEnter\n" +
                 "select t1 from pattern [\n" +
                 "t1=TrainEnterEvent -> timer:interval(5 min) and not TrainLeaveEvent(trainId = context.te.trainId)]");
         create("create context CtxEachMinute\n" +
@@ -97,10 +112,84 @@ public class TestDocExamples extends TestCase {
                 "group by venue, ccyPair, side");
         create("create context MyContext partition by venue, ccyPair, side from CumulativePrice(side='O')");
         create("context MyContext select venue, ccyPair, side, sum(qty) from CumulativePrice");
+
+        create("create context SegmentedByCustomerHash\n" +
+                "coalesce by consistent_hash_crc32(custId) from BankTxn granularity 16 preallocate");
+        create("context SegmentedByCustomerHash\n" +
+                "select custId, account, sum(amount) from BankTxn group by custId, account");
+        create("create context HashedByCustomer as coalesce\n" +
+                "consistent_hash_crc32(custId) from BankTxn,\n" +
+                "consistent_hash_crc32(loginId) from LoginEvent,\n" +
+                "consistent_hash_crc32(loginId) from LogoutEvent\n" +
+                "granularity 32 preallocate");
+
+        epService.getEPAdministrator().destroyAllStatements();
+        create("create context HashedByCustomer\n" +
+                "coalesce consistent_hash_crc32(loginId) from LoginEvent(failed = false)\n" +
+                "granularity 1024 preallocate");
+        create("create context ByCustomerHash coalesce consistent_hash_crc32(custId) from BankTxn granularity 1024");
+        create("context ByCustomerHash\n" +
+                "select context.name, context.id from BankTxn");
+        
+        create("create context NineToFiveSegmented\n" +
+                "context NineToFive start (0, 9, *, *, *) end (0, 17, *, *, *),\n" +
+                "context SegmentedByCustomer partition by custId from BankTxn");
+        create("context NineToFiveSegmented\n" +
+                "select custId, account, sum(amount) from BankTxn group by account");
+        create("create context CtxNestedTrainEnter\n" +
+                "context InitCtx initiated by TrainEnterEvent as te terminated after 5 minutes,\n" +
+                "context HashCtx coalesce by consistent_hash_crc32(tagId) from PassengerScanEvent\n" +
+                "granularity 16 preallocate");
+        create("context CtxNestedTrainEnter\n" +
+                "select context.InitCtx.te.trainId, context.HashCtx.id,\n" +
+                "tagId, count(*) from PassengerScanEvent group by tagId");
+        create("context NineToFiveSegmented\n" +
+                "select context.NineToFive.startTime, context.SegmentedByCustomer.key1 from BankTxn");
+        create("context NineToFiveSegmented select context.name, context.id from BankTxn");
+
+        create("create context MyContext start MyStartEvent end MyEndEvent");
+        create("create context MyContext2 initiated MyEvent(level > 0) terminated after 10 seconds");
+        create("create context MyContext3 \n" +
+                "start MyEvent as myevent\n" +
+                "end MyEvent(id=myevent.id)");
+        create("create context MyContext4 \n" +
+                "initiated by MyInitEvent as e1 \n" +
+                "terminated by MyTermEvent(id=e1.id, level <> e1.level)");
+        create("create context MyContext5 start pattern [StartEventOne or StartEventTwo] end after 5 seconds");
+        create("create context MyContext6 initiated by pattern [every MyInitEvent -> MyOtherEvent where timer:within(5)] terminated by MyTermEvent");
+        create("create context MyContext7 \n" +
+                "  start pattern [a=StartEventOne or  b=StartEventTwo]\n" +
+                "  end pattern [EndEventOne(id=a.id) or EndEventTwo(id=b.id)]");
+        create("create context MyContext8 initiated (*, *, *, *, *) terminated after 10 seconds");
+        create("create context NineToFive start after 10 seconds end after 1 minute");
+        create("create context Overlap5SecFor1Min initiated after 5 seconds terminated after 1 minute");
+        create("create context CtxSample\n" +
+                "initiated by MyStartEvent as startevent\n" +
+                "terminated by MyEndEvent(id = startevent.id) as endevent");
+        create("context CtxSample select context.endevent.id, count(*) from MyEvent output snapshot when terminated");
+
+        create("create context TxnCategoryContext \n" +
+                "  group by amount < 100 as small, \n" +
+                "  group by amount between 100 and 1000 as medium, \n" +
+                "  group by amount > 1000 as large from BankTxn");
+        EPStatement stmt = create("context TxnCategoryContext select * from BankTxn.win:time(1 minute)");
+        ContextPartitionSelectorCategory categorySmall = new ContextPartitionSelectorCategory() {
+            public Set<String> getLabels() {
+                return Collections.singleton("small");
+            }
+        };
+        stmt.iterator(categorySmall);
+        ContextPartitionSelectorCategory categorySmallMed = new ContextPartitionSelectorCategory() {
+            public Set<String> getLabels() {
+                return new HashSet<String>(Arrays.asList("small", "medium"));
+            }
+        };
+        create("context TxnCategoryContext create window BankTxnWindow.win:time(1 min) as BankTxn");
+        epService.getEPRuntime().executeQuery("select count(*) from BankTxnWindow", new ContextPartitionSelector[] {categorySmallMed});
     }
 
-    private void create(String epl) {
-        epService.getEPAdministrator().createEPL(epl);
+    private EPStatement create(String epl) {
+        return epService.getEPAdministrator().createEPL(epl);
     }
 
     public static class CumulativePrice {
@@ -210,4 +299,81 @@ public class TestDocExamples extends TestCase {
         }
     }
 
+    public static class PassengerScanEvent {
+
+        private final String tagId;
+
+        public PassengerScanEvent(String tagId) {
+            this.tagId = tagId;
+        }
+
+        public String getTagId() {
+            return tagId;
+        }
+    }
+    
+    public static class MyStartEvent {
+        private int id;
+        private int level;
+
+        public int getLevel() {
+            return level;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
+
+    public static class MyEndEvent {
+        private int id;
+        private int level;
+
+        public int getLevel() {
+            return level;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
+
+    public static class MyInitEvent {
+        private int id;
+        private int level;
+
+        public int getLevel() {
+            return level;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
+
+    public static class MyTermEvent {
+        private int id;
+        private int level;
+
+        public int getLevel() {
+            return level;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
+
+    public static class MyEvent {
+        private int id;
+        private int level;
+
+        public int getLevel() {
+            return level;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
 }

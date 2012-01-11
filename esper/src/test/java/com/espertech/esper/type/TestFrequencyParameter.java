@@ -11,12 +11,10 @@
 
 package com.espertech.esper.type;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.Set;
-
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.type.FrequencyParameter;
 
 public class TestFrequencyParameter extends TestCase
 {
@@ -46,18 +44,37 @@ public class TestFrequencyParameter extends TestCase
     {
         FrequencyParameter freq = new FrequencyParameter(3);
         Set<Integer> result = freq.getValuesInRange(1, 8);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3, 6}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3, 6}, result);
 
         freq = new FrequencyParameter(4);
         result = freq.getValuesInRange(6, 16);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {8, 12, 16}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{8, 12, 16}, result);
 
         freq = new FrequencyParameter(4);
         result = freq.getValuesInRange(0, 14);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {0, 4, 8, 12}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{0, 4, 8, 12}, result);
 
         freq = new FrequencyParameter(1);
         result = freq.getValuesInRange(2, 5);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {2, 3, 4, 5}, result);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{2, 3, 4, 5}, result);
+    }
+
+    public void testContainsPoint() {
+        FrequencyParameter freqThree = new FrequencyParameter(3);
+        assertTrue(freqThree.containsPoint(0));
+        assertTrue(freqThree.containsPoint(3));
+        assertTrue(freqThree.containsPoint(6));
+        assertFalse(freqThree.containsPoint(1));
+        assertFalse(freqThree.containsPoint(2));
+        assertFalse(freqThree.containsPoint(4));
+        
+        FrequencyParameter freqOne = new FrequencyParameter(1);
+        assertTrue(freqOne.containsPoint(1));
+        assertTrue(freqOne.containsPoint(2));
+    }
+
+    public void testFormat() {
+        FrequencyParameter freqThree = new FrequencyParameter(3);
+        assertEquals("*/3", freqThree.formatted());
     }
 }

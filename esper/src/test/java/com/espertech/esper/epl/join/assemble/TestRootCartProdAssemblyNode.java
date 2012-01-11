@@ -11,9 +11,9 @@
 
 package com.espertech.esper.epl.join.assemble;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.epl.join.SupportJoinProcNode;
 import com.espertech.esper.support.epl.join.SupportJoinResultNodeFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.client.EventBean;
 
 import junit.framework.TestCase;
@@ -52,8 +52,8 @@ public class TestRootCartProdAssemblyNode extends TestCase
         assertEquals(1, parentNode.getRowsList().size());
 
         EventBean[][] rowArr = SupportJoinResultNodeFactory.convertTo2DimArr(parentNode.getRowsList());
-        ArrayAssertionUtil.assertEqualsAnyOrder( new EventBean[][] {
-                new EventBean[] {null, null, null, null, null}}, rowArr);
+        EPAssertionUtil.assertEqualsAnyOrder(new EventBean[][]{
+                new EventBean[]{null, null, null, null, null}}, rowArr);
     }
 
     public void testFlowRequired()
@@ -95,16 +95,16 @@ public class TestRootCartProdAssemblyNode extends TestCase
         assertEquals(8, parentNode.getRowsList().size());
 
         EventBean[][] rowArr = SupportJoinResultNodeFactory.convertTo2DimArr(parentNode.getRowsList());
-        ArrayAssertionUtil.assertEqualsAnyOrder( new EventBean[][] {
-                new EventBean[] {null, null, stream2Events[0], stream3Events[0], stream4Events[0]},
-                new EventBean[] {null, null, stream2Events[0], stream3Events[1], stream4Events[0]},
-                new EventBean[] {null, null, stream2Events[1], stream3Events[0], stream4Events[0]},
-                new EventBean[] {null, null, stream2Events[1], stream3Events[1], stream4Events[0]},
-                new EventBean[] {null, null, stream2Events[0], stream3Events[0], stream4Events[1]},
-                new EventBean[] {null, null, stream2Events[0], stream3Events[1], stream4Events[1]},
-                new EventBean[] {null, null, stream2Events[1], stream3Events[0], stream4Events[1]},
-                new EventBean[] {null, null, stream2Events[1], stream3Events[1], stream4Events[1]},
-                }
+        EPAssertionUtil.assertEqualsAnyOrder(new EventBean[][]{
+                new EventBean[]{null, null, stream2Events[0], stream3Events[0], stream4Events[0]},
+                new EventBean[]{null, null, stream2Events[0], stream3Events[1], stream4Events[0]},
+                new EventBean[]{null, null, stream2Events[1], stream3Events[0], stream4Events[0]},
+                new EventBean[]{null, null, stream2Events[1], stream3Events[1], stream4Events[0]},
+                new EventBean[]{null, null, stream2Events[0], stream3Events[0], stream4Events[1]},
+                new EventBean[]{null, null, stream2Events[0], stream3Events[1], stream4Events[1]},
+                new EventBean[]{null, null, stream2Events[1], stream3Events[0], stream4Events[1]},
+                new EventBean[]{null, null, stream2Events[1], stream3Events[1], stream4Events[1]},
+        }
                 , rowArr);
     }
 
@@ -116,19 +116,19 @@ public class TestRootCartProdAssemblyNode extends TestCase
         int[][] result = RootCartProdAssemblyNode.computeCombined(
                     new int[][] {  {3,4}, {2,5}, {6} });
         assertEquals(1, result.length);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3, 4, 2, 5}, result[0]);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3, 4, 2, 5}, result[0]);
 
         result = RootCartProdAssemblyNode.computeCombined(
                     new int[][] {  {3,4}, {2,5}, {6}, {0, 8, 9} });
         assertEquals(2, result.length);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3, 4, 2, 5}, result[0]);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3, 4, 2, 5, 6}, result[1]);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3, 4, 2, 5}, result[0]);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3, 4, 2, 5, 6}, result[1]);
 
         result = RootCartProdAssemblyNode.computeCombined(
                     new int[][] {  {3,4}, {2,5}, {6}, {0, 8, 9}, {1} });
         assertEquals(3, result.length);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3, 4, 2, 5}, result[0]);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3, 4, 2, 5, 6}, result[1]);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {3, 4, 2, 5, 6, 0, 8, 9}, result[2]);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3, 4, 2, 5}, result[0]);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3, 4, 2, 5, 6}, result[1]);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{3, 4, 2, 5, 6, 0, 8, 9}, result[2]);
     }
 }

@@ -13,12 +13,12 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.hook.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanRange;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.virtualdw.SupportVirtualDW;
 import com.espertech.esper.support.virtualdw.SupportVirtualDWFactory;
 import com.espertech.esper.support.virtualdw.SupportVirtualDWInvalidFactory;
@@ -70,7 +70,7 @@ public class TestVirtualDataWindow extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 200));
         assertNull(listener.getLastOldData());
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fields, new Object[] {"E1", 200});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fields, new Object[]{"E1", 200});
         stmtConsume.destroy();
 
         // test aggregated consumer - wherein the virtual data window does not return an iterator that prefills the aggregation state
@@ -79,10 +79,10 @@ public class TestVirtualDataWindow extends TestCase {
         stmtAggregate.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 100));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {100});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{100});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 50));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {150});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{150});
         stmtAggregate.destroy();
     }
 
@@ -113,19 +113,19 @@ public class TestVirtualDataWindow extends TestCase {
 
         // try yes-matched case
         epService.getEPRuntime().sendEvent(new SupportBean("key1", 2));
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fieldsMerge, new Object[] {"key1", "key2"});
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fieldsMerge, new Object[]{"key1", "xxx"});
-        ArrayAssertionUtil.assertProps(window.getLastUpdateOld()[0], fieldsMerge, new Object[]{"key1", "key2"});
-        ArrayAssertionUtil.assertProps(window.getLastUpdateNew()[0], fieldsMerge, new Object[]{"key1", "xxx"});
-        ArrayAssertionUtil.assertProps(listenerConsume.assertOneGetNewAndReset(), fieldsMerge, new Object[] {"key1", "xxx"});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fieldsMerge, new Object[]{"key1", "key2"});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fieldsMerge, new Object[]{"key1", "xxx"});
+        EPAssertionUtil.assertProps(window.getLastUpdateOld()[0], fieldsMerge, new Object[]{"key1", "key2"});
+        EPAssertionUtil.assertProps(window.getLastUpdateNew()[0], fieldsMerge, new Object[]{"key1", "xxx"});
+        EPAssertionUtil.assertProps(listenerConsume.assertOneGetNewAndReset(), fieldsMerge, new Object[]{"key1", "xxx"});
 
         // try not-matched case
         epService.getEPRuntime().sendEvent(new SupportBean("key2", 3));
         assertNull(listener.getLastOldData());
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fieldsMerge, new Object[]{"key2", "abc"});
-        ArrayAssertionUtil.assertProps(listenerConsume.assertOneGetNewAndReset(), fieldsMerge, new Object[]{"key2", "abc"});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fieldsMerge, new Object[]{"key2", "abc"});
+        EPAssertionUtil.assertProps(listenerConsume.assertOneGetNewAndReset(), fieldsMerge, new Object[]{"key2", "abc"});
         assertNull(window.getLastUpdateOld());
-        ArrayAssertionUtil.assertProps(window.getLastUpdateNew()[0], fieldsMerge, new Object[] {"key2", "abc"});
+        EPAssertionUtil.assertProps(window.getLastUpdateNew()[0], fieldsMerge, new Object[]{"key2", "abc"});
     }
 
     public void testLimitation() {
@@ -143,7 +143,7 @@ public class TestVirtualDataWindow extends TestCase {
         stmtAggregate.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 100));
-        ArrayAssertionUtil.assertEqualsExactOrder((String[]) listener.assertOneGetNewAndReset().get("val0"), new Object[]{"E1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E1"}, (String[]) listener.assertOneGetNewAndReset().get("val0"));
     }
 
     public void testJoinAndLifecyle() {
@@ -171,8 +171,8 @@ public class TestVirtualDataWindow extends TestCase {
         assertIndexSpec(window.getLastRequestedIndex(), "", "");
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "S1", 100});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "S1", 100});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{}, window.getLastAccessKeys());
         stmtJoinAll.destroy();
 
         // test single-criteria join
@@ -181,11 +181,11 @@ public class TestVirtualDataWindow extends TestCase {
         assertIndexSpec(window.getLastRequestedIndex(), "string=(String)", "");
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E1", 0));
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"E1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E1"}, window.getLastAccessKeys());
         assertFalse(listener.isInvoked());
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("S1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S1", "S1", 100});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"S1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S1", "S1", 100});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S1"}, window.getLastAccessKeys());
         stmtJoinSingle.destroy();
 
         // test multi-criteria join
@@ -195,8 +195,8 @@ public class TestVirtualDataWindow extends TestCase {
         assertIndexSpec(window.getLastRequestedIndex(), "string=(String)|longPrimitive=(Long)", "intPrimitive[,](Integer)");
 
         epService.getEPRuntime().sendEvent(SupportBeanRange.makeKeyLong("S1", 50L, 80, 120));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "vdw.string".split(","), new Object[]{"S1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"S1", 50L, new VirtualDataWindowKeyRange(80, 120)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "vdw.string".split(","), new Object[]{"S1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S1", 50L, new VirtualDataWindowKeyRange(80, 120)}, window.getLastAccessKeys());
 
         // destroy
         stmt.destroy();
@@ -214,8 +214,8 @@ public class TestVirtualDataWindow extends TestCase {
         assertIndexSpec(window.getLastRequestedIndex(), "", "");
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1".split(","), new Object[]{"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{}, window.getLastAccessKeys());
         stmtSubqueryAll.destroy();
 
         // test single-criteria subquery
@@ -224,11 +224,11 @@ public class TestVirtualDataWindow extends TestCase {
         assertIndexSpec(window.getLastRequestedIndex(), "col1=(String)", "");
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{null});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{null});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E1"}, window.getLastAccessKeys());
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("key1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"key1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"key1"}, window.getLastAccessKeys());
         stmtSubqSingleKey.destroy();
 
         // test multie-criteria subquery
@@ -239,8 +239,8 @@ public class TestVirtualDataWindow extends TestCase {
         assertIndexSpec(window.getLastRequestedIndex(), "col1=(String)|col2=(String)", "col3[,](Integer)");
 
         epService.getEPRuntime().sendEvent(new SupportBeanRange("key1", "key2", 5, 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"key1", "key2", new VirtualDataWindowKeyRange(5, 10)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"key1", "key2", new VirtualDataWindowKeyRange(5, 10)}, window.getLastAccessKeys());
         stmtSubqMultiKey.destroy();
     }
 
@@ -256,26 +256,26 @@ public class TestVirtualDataWindow extends TestCase {
         assertNull(window.getLastRequestedIndex().getStatementName());
         assertNotNull(window.getLastRequestedIndex().getStatementAnnotations());
         assertTrue(window.getLastRequestedIndex().isFireAndForget());
-        ArrayAssertionUtil.assertProps(result.getArray()[0], "col1".split(","), new Object[] {"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[0]);
+        EPAssertionUtil.assertProps(result.getArray()[0], "col1".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[0], window.getLastAccessKeys());
 
         // test single-criteria FAF
         result = epService.getEPRuntime().executeQuery("select col1 from MyVDW vdw where col1='key1'");
         assertIndexSpec(window.getLastRequestedIndex(), "col1=(String)", "");
-        ArrayAssertionUtil.assertProps(result.getArray()[0], "col1".split(","), new Object[]{"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"key1"});
+        EPAssertionUtil.assertProps(result.getArray()[0], "col1".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"key1"}, window.getLastAccessKeys());
 
         // test multi-criteria subquery
         result = epService.getEPRuntime().executeQuery("select col1 from MyVDW vdw where col1='key1' and col2='key2' and col3 between 5 and 15");
         assertIndexSpec(window.getLastRequestedIndex(), "col1=(String)|col2=(String)", "col3[,](Double)");
-        ArrayAssertionUtil.assertProps(result.getArray()[0], "col1".split(","), new Object[]{"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"key1", "key2", new VirtualDataWindowKeyRange(5d, 15d)});
+        EPAssertionUtil.assertProps(result.getArray()[0], "col1".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"key1", "key2", new VirtualDataWindowKeyRange(5d, 15d)}, window.getLastAccessKeys());
 
         // test multi-criteria subquery
         result = epService.getEPRuntime().executeQuery("select col1 from MyVDW vdw where col1='key1' and col2>'key0' and col3 between 5 and 15");
         assertIndexSpec(window.getLastRequestedIndex(), "col1=(String)", "col3[,](Double)|col2>(String)");
-        ArrayAssertionUtil.assertProps(result.getArray()[0], "col1".split(","), new Object[]{"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"key1", new VirtualDataWindowKeyRange(5d, 15d), "key0"});
+        EPAssertionUtil.assertProps(result.getArray()[0], "col1".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"key1", new VirtualDataWindowKeyRange(5d, 15d), "key0"}, window.getLastAccessKeys());
     }
 
     public void testOnDelete() {
@@ -287,8 +287,8 @@ public class TestVirtualDataWindow extends TestCase {
         assertIndexSpec(window.getLastRequestedIndex(), "", "");
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1".split(","), new Object[]{"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{}, window.getLastAccessKeys());
         stmtOnDeleteAll.destroy();
 
         // test single-criteria on-delete
@@ -297,11 +297,11 @@ public class TestVirtualDataWindow extends TestCase {
         assertIndexSpec(window.getLastRequestedIndex(), "col1=(String)", "");
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E1", 0));
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"E1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E1"}, window.getLastAccessKeys());
         assertFalse(listener.isInvoked());
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("key1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1".split(","), new Object[]{"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"key1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"key1"}, window.getLastAccessKeys());
         stmtOnDeleteSingleKey.destroy();
 
         // test multie-criteria on-delete
@@ -316,8 +316,8 @@ public class TestVirtualDataWindow extends TestCase {
         assertFalse(window.getLastRequestedIndex().isFireAndForget());
 
         epService.getEPRuntime().sendEvent(new SupportBeanRange("key1", "key2", 5, 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1".split(","), new Object[]{"key1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(window.getLastAccessKeys(), new Object[]{"key1", "key2", new VirtualDataWindowKeyRange(5, 10)});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1".split(","), new Object[]{"key1"});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"key1", "key2", new VirtualDataWindowKeyRange(5, 10)}, window.getLastAccessKeys());
         stmtOnDeleteMultiKey.destroy();
     }
 

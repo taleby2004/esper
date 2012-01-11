@@ -15,11 +15,11 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Collections;
@@ -80,13 +80,13 @@ public class TestTypeOfExpr extends TestCase
         String[] fields = new String[] {"typeof(prop?)", "typeof(key)"};
 
         sendSchemaEvent(1, "E1");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"Integer", "String"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"Integer", "String"});
 
         sendSchemaEvent("test", "E2");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"String", "String"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"String", "String"});
 
         sendSchemaEvent(null, "E3");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, "String"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, "String"});
     }
 
     private void sendSchemaEvent(Object prop, String key) {
@@ -168,16 +168,16 @@ public class TestTypeOfExpr extends TestCase
         
         Map<String, Object> event = new HashMap<String, Object>();
         epService.getEPRuntime().sendEvent(event, "MySchema");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
 
         event = new HashMap<String, Object>();
         event.put("inside", new HashMap<String, Object>());
         epService.getEPRuntime().sendEvent(event, "MySchema");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"InnerSchema", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"InnerSchema", null});
 
         event = new HashMap<String, Object>();
         event.put("insidearr", new Map[0]);
         epService.getEPRuntime().sendEvent(event, "MySchema");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, "InnerSchema[]"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, "InnerSchema[]"});
     }
 }

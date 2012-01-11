@@ -12,8 +12,8 @@
 package com.espertech.esper.support.view;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 
 public class SupportViewDataChecker
 {
@@ -28,7 +28,7 @@ public class SupportViewDataChecker
         EventBean[] newData = testChildView.getLastNewData();
         Object[] expectedUnderlying = getUnderlying(expectedValues);
         Object[] newUnderlying = getUnderlying(newData);
-        ArrayAssertionUtil.assertEqualsExactOrder(newUnderlying, expectedUnderlying);
+        EPAssertionUtil.assertEqualsExactOrder(expectedUnderlying, newUnderlying);
         testChildView.clearLastNewData();
     }
 
@@ -41,7 +41,7 @@ public class SupportViewDataChecker
     public static void checkNewData(SupportBaseView testChildView, EventBean[] expectedValues)
     {
         EventBean[] newData = testChildView.getLastNewData();
-        ArrayAssertionUtil.assertEqualsExactOrder(newData, expectedValues);
+        EPAssertionUtil.assertEqualsExactOrder(expectedValues, newData);
         testChildView.clearLastNewData();
     }
 
@@ -54,7 +54,7 @@ public class SupportViewDataChecker
     public static void checkOldData(SupportBaseView testChildView, EventBean[] expectedValues)
     {
         EventBean[] oldData = testChildView.getLastOldData();
-        ArrayAssertionUtil.assertEqualsExactOrder(oldData, expectedValues);
+        EPAssertionUtil.assertEqualsExactOrder(expectedValues, oldData);
         testChildView.clearLastOldData();
     }
 
@@ -69,7 +69,7 @@ public class SupportViewDataChecker
         EventBean[] oldData = testChildView.getLastOldData();
         Object[] expectedUnderlying = getUnderlying(expectedValues);
         Object[] oldUnderlying = getUnderlying(oldData);
-        ArrayAssertionUtil.assertEqualsExactOrder(oldUnderlying, expectedUnderlying);
+        EPAssertionUtil.assertEqualsExactOrder(expectedUnderlying, oldUnderlying);
         testChildView.clearLastOldData();
     }
 
@@ -82,7 +82,7 @@ public class SupportViewDataChecker
     public static void checkNewData(SupportUpdateListener updateListener, EventBean[] expectedValues)
     {
         EventBean[] newData = updateListener.getLastNewData();
-        ArrayAssertionUtil.assertEqualsExactOrder(newData, expectedValues);
+        EPAssertionUtil.assertEqualsExactOrder(expectedValues, newData);
         updateListener.setLastNewData(null);
     }
 
@@ -97,7 +97,7 @@ public class SupportViewDataChecker
         EventBean[] newData = updateListener.getLastNewData();
         Object[] expectedUnderlying = getUnderlying(expectedValues);
         Object[] newUnderlying = getUnderlying(newData);
-        ArrayAssertionUtil.assertEqualsExactOrder(newUnderlying, expectedUnderlying);
+        EPAssertionUtil.assertEqualsExactOrder(expectedUnderlying, newUnderlying);
         updateListener.setLastNewData(null);
     }
 
@@ -110,7 +110,7 @@ public class SupportViewDataChecker
     public static void checkOldData(SupportUpdateListener updateListener, EventBean[] expectedValues)
     {
         EventBean[] oldData = updateListener.getLastOldData();
-        ArrayAssertionUtil.assertEqualsExactOrder(oldData, expectedValues);
+        EPAssertionUtil.assertEqualsExactOrder(expectedValues, oldData);
         updateListener.setLastOldData(null);
     }
 

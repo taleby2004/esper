@@ -11,11 +11,10 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 
 public class TestVariablesTimer extends TestCase
 {

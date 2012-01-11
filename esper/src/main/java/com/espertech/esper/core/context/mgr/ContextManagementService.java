@@ -23,9 +23,11 @@ public interface ContextManagementService {
 
     public ContextDescriptor getContextDescriptor(String contextName);
 
-    public void addStatement(String contextName, ContextManagedStatementBase statement) throws ExprValidationException;
+    public void addStatement(String contextName, ContextControllerStatementBase statement) throws ExprValidationException;
     public void stoppedStatement(String contextName, String statementName, String statementId);
     public void destroyedStatement(String contextName, String statementName, String statementId);
 
     public void destroyedContext(String contextName);
+
+    public ContextManager getContextManager(String contextName);
 }

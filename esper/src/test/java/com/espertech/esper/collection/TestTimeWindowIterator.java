@@ -11,11 +11,11 @@
 
 package com.espertech.esper.collection;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import java.util.*;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.event.EventFactoryHelper;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestTimeWindowIterator extends TestCase
 {
@@ -30,7 +30,7 @@ public class TestTimeWindowIterator extends TestCase
     {
         ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
         Iterator<EventBean> it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, null);
+        EPAssertionUtil.assertEqualsExactOrder(null, it);
     }
 
     public void testOneElement()
@@ -41,7 +41,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 10L, list);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("a")} );
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{events.get("a")}, it);
     }
 
     public void testTwoInOneEntryElement()
@@ -53,7 +53,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 10L, list);
 
         Iterator<EventBean> it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new EventBean[] {events.get("a"), events.get("b")} );
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a"), events.get("b")}, it);
     }
 
     public void testTwoSeparateEntryElement()
@@ -67,7 +67,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 10L, list1);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("b"), events.get("a")} );
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{events.get("b"), events.get("a")}, it);
     }
 
     public void testTwoByTwoEntryElement()
@@ -83,7 +83,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 15L, list2);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("a"), events.get("b"), events.get("c"), events.get("d")} );
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{events.get("a"), events.get("b"), events.get("c"), events.get("d")}, it);
     }
 
     public void testMixedEntryElement()
@@ -103,8 +103,8 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 20L, list3);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("a"), events.get("c"), events.get("d"),
-            events.get("e"), events.get("f"), events.get("g")} );
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{events.get("a"), events.get("c"), events.get("d"),
+                events.get("e"), events.get("f"), events.get("g")}, it);
     }
     
     public void testEmptyList()
@@ -115,7 +115,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 10L, list1);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, (Object[]) null);
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) null, it);
     }
 
     public void testTwoEmptyList()
@@ -128,7 +128,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 20L, list2);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, (Object[]) null);
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) null, it);
     }
 
     public void testThreeEmptyList()
@@ -143,7 +143,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 30L, list3);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, (Object[]) null);
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) null, it);
     }
 
     public void testEmptyListFrontTail()
@@ -162,7 +162,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 20L, list3);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("c"), events.get("d")} );
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{events.get("c"), events.get("d")}, it);
     }
 
     public void testEmptyListSprinkle()
@@ -185,7 +185,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 40L, list4);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("a"), events.get("c"), events.get("d")} );
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{events.get("a"), events.get("c"), events.get("d")}, it);
     }
 
     public void testEmptyListFront()
@@ -209,7 +209,7 @@ public class TestTimeWindowIterator extends TestCase
         addToWindow(testWindow, 40L, list4);
 
         Iterator it = new TimeWindowIterator(testWindow);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new Object[] {events.get("a"), events.get("c"), events.get("d"), events.get("e")} );
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{events.get("a"), events.get("c"), events.get("d"), events.get("e")}, it);
     }
 
     private void addToWindow(ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow,

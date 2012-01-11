@@ -11,11 +11,11 @@
 
 package com.espertech.esper.event;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.map.MapEventType;
@@ -60,7 +60,7 @@ public class TestEventAdapterSvcMT extends TestCase
         }
         
         Object[] result = tryMT(callables);
-        ArrayAssertionUtil.assertAllBooleanTrue(result);
+        EPAssertionUtil.assertAllBooleanTrue(result);
         assertEquals(1, types.size());
     }
 
@@ -100,7 +100,7 @@ public class TestEventAdapterSvcMT extends TestCase
 
         // the result should be one exception and one type
         Object[] results = tryMT(callables);
-        ArrayAssertionUtil.assertTypeEqualsAnyOrder(new Class[] {EventAdapterException.class, MapEventType.class}, results);
+        EPAssertionUtil.assertTypeEqualsAnyOrder(new Class[]{EventAdapterException.class, MapEventType.class}, results);
     }
 
     public void testAddBeanType() throws Exception
@@ -137,7 +137,7 @@ public class TestEventAdapterSvcMT extends TestCase
 
         // the result should be one exception and one type
         Object[] results = tryMT(callables);
-        ArrayAssertionUtil.assertTypeEqualsAnyOrder(new Class[] {EventAdapterException.class, BeanEventType.class}, results);
+        EPAssertionUtil.assertTypeEqualsAnyOrder(new Class[]{EventAdapterException.class, BeanEventType.class}, results);
     }
 
     private Object[] tryMT(Callable[] callables) throws Exception

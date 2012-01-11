@@ -12,6 +12,7 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.spec.OutputLimitLimitType;
 import com.espertech.esper.epl.spec.OutputLimitSpec;
 
 /**
@@ -28,6 +29,7 @@ public class ResultSetProcessorRowPerGroupFactory implements ResultSetProcessorF
     private final boolean isSelectRStream;
     private final boolean isUnidirectional;
     private final OutputLimitSpec outputLimitSpec;
+    private final boolean noDataWindowSingleSnapshot;
 
     /**
      * Ctor.
@@ -44,7 +46,8 @@ public class ResultSetProcessorRowPerGroupFactory implements ResultSetProcessorF
                                                 boolean isSelectRStream,
                                                 boolean isUnidirectional,
                                                 OutputLimitSpec outputLimitSpec,
-                                                boolean isSorting)
+                                                boolean isSorting,
+                                                boolean noDataWindowSingleStream)
     {
         this.selectExprProcessor = selectExprProcessor;
         this.groupKeyNodes = groupKeyNodes;
@@ -53,9 +56,13 @@ public class ResultSetProcessorRowPerGroupFactory implements ResultSetProcessorF
         this.isSelectRStream = isSelectRStream;
         this.isUnidirectional = isUnidirectional;
         this.outputLimitSpec = outputLimitSpec;
+        this.noDataWindowSingleSnapshot = (outputLimitSpec != null && outputLimitSpec.getDisplayLimit() == OutputLimitLimitType.SNAPSHOT && noDataWindowSingleStream);
     }
 
     public ResultSetProcessor instantiate(OrderByProcessor orderByProcessor, AggregationService aggregationService, AgentInstanceContext agentInstanceContext) {
+        if (noDataWindowSingleSnapshot) {
+            return new ResultSetProcessorRowPerGroupSpecial(this, selectExprProcessor, orderByProcessor, aggregationService, agentInstanceContext);
+        }
         return new ResultSetProcessorRowPerGroup(this, selectExprProcessor, orderByProcessor, aggregationService, agentInstanceContext);
     }
 

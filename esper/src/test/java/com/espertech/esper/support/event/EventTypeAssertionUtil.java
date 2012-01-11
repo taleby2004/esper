@@ -12,7 +12,7 @@
 package com.espertech.esper.support.event;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.util.JavaClassHelper;
 import junit.framework.Assert;
 
@@ -431,7 +431,7 @@ public class EventTypeAssertionUtil
         }
 
         // assert same property names
-        ArrayAssertionUtil.assertEqualsAnyOrder(eventType.getPropertyNames(), propertyNames.toArray());
+        EPAssertionUtil.assertEqualsAnyOrder(eventType.getPropertyNames(), propertyNames.toArray());
     }
 
     private static void writeIndent(StringWriter writer, int indent)

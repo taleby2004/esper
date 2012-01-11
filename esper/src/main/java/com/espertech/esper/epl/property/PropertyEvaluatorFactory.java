@@ -11,16 +11,18 @@
 
 package com.espertech.esper.epl.property;
 
+import com.espertech.esper.client.EventBeanFactory;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.FragmentEventType;
-import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventAdapterServiceHelper;
 import com.espertech.esper.schedule.TimeProvider;
+import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.UuidGenerator;
 
 import java.lang.annotation.Annotation;
@@ -59,45 +61,93 @@ public class PropertyEvaluatorFactory
             throws ExprValidationException
     {
         int length = spec.getAtoms().size();
-        EventPropertyGetter[] getters = new EventPropertyGetter[length];
-        FragmentEventType types[] = new FragmentEventType[length];
+        ContainedEventEval[] containedEventEvals = new ContainedEventEval[length];
+        FragmentEventType fragmentEventTypes[] = new FragmentEventType[length];
         EventType currentEventType = sourceEventType;
         ExprEvaluator whereClauses[] = new ExprEvaluator[length];
 
         List<EventType> streamEventTypes = new ArrayList<EventType>();
         List<String> streamNames = new ArrayList<String>();
         Map<String, Integer> streamNameAndNumber = new HashMap<String,Integer>();
-        List<String> propertyNames = new ArrayList<String>();
+        List<String> expressionTexts = new ArrayList<String>();
         ExprEvaluatorContext validateContext = new ExprEvaluatorContextTimeOnly(timeProvider);
 
         streamEventTypes.add(sourceEventType);
         streamNames.add(optionalSourceStreamName);
         streamNameAndNumber.put(optionalSourceStreamName, 0);
-        propertyNames.add(sourceEventType.getName());
+        expressionTexts.add(sourceEventType.getName());
 
         List<SelectClauseElementCompiled> cumulativeSelectClause = new ArrayList<SelectClauseElementCompiled>();
         for (int i = 0; i < length; i++)
         {
             PropertyEvalAtom atom = spec.getAtoms().get(i);
+            ContainedEventEval containedEventEval = null;
+            String expressionText = null;
+            EventType streamEventType = null;
+            FragmentEventType fragmentEventType = null;
 
-            // obtain property info
-            String propertyName = atom.getPropertyName();
-            FragmentEventType fragmentEventType = currentEventType.getFragmentType(propertyName);
-            if (fragmentEventType == null)
-            {
-                throw new ExprValidationException("Property expression '" + propertyName + "' against type '" + currentEventType.getName() + "' does not return a fragmentable property value");
+            // Resolve directly as fragment event type if possible
+            if (atom.getSplitterExpression() instanceof ExprIdentNode) {
+                String propertyName = ((ExprIdentNode) atom.getSplitterExpression()).getFullUnresolvedName();
+                fragmentEventType = currentEventType.getFragmentType(propertyName);
+                if (fragmentEventType != null) {
+                    EventPropertyGetter getter = currentEventType.getGetter(propertyName);
+                    if (getter != null) {
+                        containedEventEval = new ContainedEventEvalGetter(getter);
+                        expressionText = propertyName;
+                        streamEventType = fragmentEventType.getFragmentType();
+                    }
+                }
             }
-            EventPropertyGetter getter = currentEventType.getGetter(propertyName);
-            if (getter == null)
-            {
-                throw new ExprValidationException("Property expression '" + propertyName + "' against type '" + currentEventType.getName() + "' does not return a fragmentable property value");
+
+            // evaluate splitter expression
+            if (containedEventEval == null) {
+                ExprNodeUtility.validatePlainExpression("contained-event expression", atom.getSplitterExpression());
+
+                EventType[] availableTypes = streamEventTypes.toArray(new EventType[streamEventTypes.size()]);
+                String[] availableStreamNames = streamNames.toArray(new String[streamNames.size()]);
+                boolean[] isIStreamOnly = new boolean[streamNames.size()];
+                Arrays.fill(isIStreamOnly, true);
+                StreamTypeService streamTypeService = new StreamTypeServiceImpl(availableTypes, availableStreamNames, isIStreamOnly, engineURI, false);
+                ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, methodResolutionService, null, timeProvider, variableService, validateContext, eventAdapterService, statementName, statementId, annotations, null);
+                ExprNode validatedExprNode = ExprNodeUtility.getValidatedSubtree(atom.getSplitterExpression(), validationContext);
+                ExprEvaluator evaluator = validatedExprNode.getExprEvaluator();
+
+                // determine result type
+                if (atom.getOptionalResultEventType() == null) {
+                    throw new ExprValidationException("Missing @type(name) declaration providing the event type name of the return type for expression '" + atom.getSplitterExpression().toExpressionString() + "'");
+                }
+                streamEventType = eventAdapterService.getExistsTypeByName(atom.getOptionalResultEventType());
+                if (streamEventType == null) {
+                    throw new ExprValidationException("Event type by name '" + atom.getOptionalResultEventType() + "' could not be found");
+                }
+                EventBeanFactory eventBeanFactory = EventAdapterServiceHelper.getFactoryForType(streamEventType, eventAdapterService);
+
+                // check expression result type against eventtype expected underlying type
+                Class returnType = evaluator.getType();
+                if (returnType.isArray()) {
+                    if ((!JavaClassHelper.isSubclassOrImplementsInterface(returnType.getComponentType(), streamEventType.getUnderlyingType()))) {
+                        throw new ExprValidationException("Event type '" + streamEventType.getName() + "' underlying type " + streamEventType.getUnderlyingType().getName() +
+                                " cannot be assigned a value of type " + JavaClassHelper.getClassNameFullyQualPretty(returnType));
+                    }
+                }
+                else if (JavaClassHelper.isImplementsInterface(returnType, Iterable.class)) {
+                    // fine, assumed to return the right type
+                }
+                else {
+                    throw new ExprValidationException("Return type of expression '" + atom.getSplitterExpression().toExpressionString() + "' is '" + returnType.getName() + "', expected an Iterable or array result");
+                }
+
+                containedEventEval = new ContainedEventEvalExprNode(evaluator, eventBeanFactory);
+                expressionText = validatedExprNode.toExpressionString();
+                fragmentEventType = new FragmentEventType(streamEventType, true, false);
             }
 
             // validate where clause, if any
-            streamEventTypes.add(fragmentEventType.getFragmentType());
+            streamEventTypes.add(streamEventType);
             streamNames.add(atom.getOptionalAsName());
             streamNameAndNumber.put(atom.getOptionalAsName(), i + 1);
-            propertyNames.add(atom.getPropertyName());
+            expressionTexts.add(expressionText);
 
             if (atom.getOptionalWhereClause() != null)
             {
@@ -173,24 +223,24 @@ public class PropertyEvaluatorFactory
             }
 
             currentEventType = fragmentEventType.getFragmentType();
-            types[i] = fragmentEventType;
-            getters[i] = getter;
+            fragmentEventTypes[i] = fragmentEventType;
+            containedEventEvals[i] = containedEventEval;
         }
 
         if (cumulativeSelectClause.isEmpty())
         {
             if (length == 1)
             {
-                return new PropertyEvaluatorSimple(getters[0], types[0], whereClauses[0], propertyNames.get(0));
+                return new PropertyEvaluatorSimple(containedEventEvals[0], fragmentEventTypes[0], whereClauses[0], expressionTexts.get(0));
             }
             else
             {
-                return new PropertyEvaluatorNested(getters, types, whereClauses, propertyNames);
+                return new PropertyEvaluatorNested(containedEventEvals, fragmentEventTypes, whereClauses, expressionTexts);
             }
         }
         else
         {
-            PropertyEvaluatorAccumulative accumulative = new PropertyEvaluatorAccumulative(getters, types, whereClauses, propertyNames);
+            PropertyEvaluatorAccumulative accumulative = new PropertyEvaluatorAccumulative(containedEventEvals, fragmentEventTypes, whereClauses, expressionTexts);
 
             EventType[] whereTypes = streamEventTypes.toArray(new EventType[streamEventTypes.size()]);
             String[] whereStreamNames = streamNames.toArray(new String[streamNames.size()]);

@@ -9,12 +9,15 @@
 package com.espertech.esper.epl.view;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.UpdateDispatchView;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
+import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.event.NaturalEventBean;
+import com.espertech.esper.util.AuditPath;
 
 /**
  * An output strategy that handles routing (insert-into) and stream selection.
@@ -23,10 +26,12 @@ public class OutputStrategyPostProcess
 {
     private final OutputStrategyPostProcessFactory parent;
     private final AgentInstanceContext agentInstanceContext;
+    private final boolean audit;
 
     public OutputStrategyPostProcess(OutputStrategyPostProcessFactory parent, AgentInstanceContext agentInstanceContext) {
         this.parent = parent;
         this.agentInstanceContext = agentInstanceContext;
+        this.audit = AuditEnum.INSERT.getAudit(agentInstanceContext.getStatementContext().getAnnotations()) != null;
     }
 
     public void output(boolean forceUpdate, UniformPair<EventBean[]> result, UpdateDispatchView finalView)
@@ -75,8 +80,15 @@ public class OutputStrategyPostProcess
         for (EventBean routed : events) {
             if (routed instanceof NaturalEventBean) {
                 NaturalEventBean natural = (NaturalEventBean) routed;
+                if (audit) {
+                    AuditPath.auditInsertInto(agentInstanceContext.getEngineURI(), agentInstanceContext.getStatementName(), natural.getOptionalSynthetic());
+                }
                 parent.getInternalEventRouter().route(natural.getOptionalSynthetic(), parent.getEpStatementHandle(), agentInstanceContext.getStatementContext().getInternalEventEngineRouteDest(), exprEvaluatorContext, parent.isAddToFront());
-            } else {
+            }
+            else {
+                if (audit) {
+                    AuditPath.auditInsertInto(agentInstanceContext.getEngineURI(), agentInstanceContext.getStatementName(), routed);
+                }
                 parent.getInternalEventRouter().route(routed, parent.getEpStatementHandle(), agentInstanceContext.getStatementContext().getInternalEventEngineRouteDest(), exprEvaluatorContext, parent.isAddToFront());
             }
         }

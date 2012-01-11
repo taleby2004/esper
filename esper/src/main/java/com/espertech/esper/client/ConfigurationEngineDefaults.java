@@ -37,6 +37,7 @@ public class ConfigurationEngineDefaults implements Serializable
     private AlternativeContext alternativeContext;
     private Cluster cluster;
     private Patterns patterns;
+    private Scripts scripts;
 
     /**
      * Ctor.
@@ -59,6 +60,7 @@ public class ConfigurationEngineDefaults implements Serializable
         alternativeContext = new AlternativeContext();
         cluster = new Cluster();
         patterns = new Patterns();
+        scripts = new Scripts();
     }
 
     /**
@@ -241,6 +243,14 @@ public class ConfigurationEngineDefaults implements Serializable
      */
     public void setPatterns(Patterns patterns) {
         this.patterns = patterns;
+    }
+
+    public Scripts getScripts() {
+        return scripts;
+    }
+
+    public void setScripts(Scripts scripts) {
+        this.scripts = scripts;
     }
 
     /**
@@ -863,6 +873,7 @@ public class ConfigurationEngineDefaults implements Serializable
         private boolean enableTimerDebug;
         private boolean enableQueryPlan;
         private boolean enableJDBC;
+        private String auditPattern;
         private static final long serialVersionUID = -8129836306582810327L;
 
         /**
@@ -951,6 +962,29 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setEnableJDBC(boolean enableJDBC) {
             this.enableJDBC = enableJDBC;
         }
+
+        /**
+         * Returns the pattern that formats audit logs.
+         * <p>
+         *     Available conversion characters are:
+         * </p>
+         * <p>
+         *  %m      - Used to output the audit message.
+         *  %s      - Used to output the statement name.
+         *  %u      - Used to output the engine URI.
+         * </p>
+         * @return audit formatting pattern
+         */
+        public String getAuditPattern() {
+            return auditPattern;
+        }
+
+        /**
+         * Sets the audit formatting pattern that formats audit logs, or null if using default format.
+         */
+        public void setAuditPattern(String auditPattern) {
+            this.auditPattern = auditPattern;
+        }
     }
 
     /**
@@ -995,6 +1029,19 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setMsecVersionRelease(long msecVersionRelease)
         {
             this.msecVersionRelease = msecVersionRelease;
+        }
+    }
+
+    public static class Scripts implements Serializable
+    {
+        private String defaultDialect = "js";
+
+        public String getDefaultDialect() {
+            return defaultDialect;
+        }
+
+        public void setDefaultDialect(String defaultDialect) {
+            this.defaultDialect = defaultDialect;
         }
     }
 
@@ -1660,6 +1707,8 @@ public class ConfigurationEngineDefaults implements Serializable
 
         private static final long serialVersionUID = 6289817340046435823L;
         private boolean enabled = false;
+        private String clusterConfiguratorClass;
+        private transient Object clusterConfig;
 
         /**
          * Returns true if enabled.
@@ -1675,6 +1724,22 @@ public class ConfigurationEngineDefaults implements Serializable
          */
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
+        }
+
+        public Object getClusterConfig() {
+            return clusterConfig;
+        }
+
+        public void setClusterConfig(Object clusterConfig) {
+            this.clusterConfig = clusterConfig;
+        }
+
+        public String getClusterConfiguratorClass() {
+            return clusterConfiguratorClass;
+        }
+
+        public void setClusterConfiguratorClass(String clusterConfiguratorClass) {
+            this.clusterConfiguratorClass = clusterConfiguratorClass;
         }
     }
 

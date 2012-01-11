@@ -19,7 +19,7 @@ public class ViewableActivatorSubselectNone implements ViewableActivator {
     public ViewableActivatorSubselectNone() {
     }
 
-    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext) {
+    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
         return new ViewableActivationResult(null, CollectionUtil.STOP_CALLBACK_NONE, null);
     }
 }

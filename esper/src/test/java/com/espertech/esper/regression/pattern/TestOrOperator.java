@@ -11,11 +11,11 @@
 
 package com.espertech.esper.regression.pattern;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.*;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.PrintUpdateListener;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.EventBean;

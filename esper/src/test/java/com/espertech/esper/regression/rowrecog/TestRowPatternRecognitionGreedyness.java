@@ -15,9 +15,9 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,10 +48,10 @@ public class TestRowPatternRecognitionGreedyness extends TestCase {
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E1", 1));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{null, "E1"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{null, "E1"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{null, "E1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{null, "E1"}});
     }
 
     public void testReluctantZeroToMany()
@@ -80,25 +80,25 @@ public class TestRowPatternRecognitionGreedyness extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E2", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E3", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E4", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E1", "E2", null, "E3", "E4"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E1", "E2", null, "E3", "E4"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E11", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E12", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E13", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E14", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E15", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E11", "E12", "E13", "E14", "E15"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E11", "E12", "E13", "E14", "E15"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E16", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E17", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{null, null, null, "E16", "E17"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{null, null, null, "E16", "E17"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E18", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{null, null, null, null, "E18"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{null, null, null, null, "E18"}});
     }
 
     public void testReluctantOneToMany()
@@ -127,21 +127,21 @@ public class TestRowPatternRecognitionGreedyness extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E2", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E3", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E4", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E1", "E2", null, "E3", "E4"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E1", "E2", null, "E3", "E4"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E11", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E12", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E13", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E14", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E15", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E11", "E12", "E13", "E14", "E15"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E11", "E12", "E13", "E14", "E15"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E16", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E17", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E16", null, null, null, "E17"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E16", null, null, null, "E17"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E18", 3));
         assertFalse(listener.isInvoked());

@@ -31,17 +31,23 @@ public class OuterJoinAnalyzer
     {
         for (OuterJoinDesc outerJoinDesc : outerJoinDescList)
         {
-            ExprIdentNode identNodeLeft = outerJoinDesc.getLeftNode();
-            ExprIdentNode identNodeRight = outerJoinDesc.getRightNode();
+            // add optional on-expressions
+            if (outerJoinDesc.getOptLeftNode() != null) {
+                ExprIdentNode identNodeLeft = outerJoinDesc.getOptLeftNode();
+                ExprIdentNode identNodeRight = outerJoinDesc.getOptRightNode();
 
-            add(queryGraph, identNodeLeft, identNodeRight);
+                add(queryGraph, identNodeLeft, identNodeRight);
 
-            if (outerJoinDesc.getAdditionalLeftNodes() != null)
-            {
-                for (int i = 0; i < outerJoinDesc.getAdditionalLeftNodes().length; i++)
+                if (outerJoinDesc.getAdditionalLeftNodes() != null)
                 {
-                    add(queryGraph, outerJoinDesc.getAdditionalLeftNodes()[i], outerJoinDesc.getAdditionalRightNodes()[i]);
+                    for (int i = 0; i < outerJoinDesc.getAdditionalLeftNodes().length; i++)
+                    {
+                        add(queryGraph, outerJoinDesc.getAdditionalLeftNodes()[i], outerJoinDesc.getAdditionalRightNodes()[i]);
+                    }
                 }
+            }
+            else {
+
             }
         }
 

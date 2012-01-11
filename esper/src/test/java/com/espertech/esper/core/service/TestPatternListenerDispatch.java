@@ -12,8 +12,7 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.UpdateListener;
-import com.espertech.esper.core.service.PatternListenerDispatch;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.client.EventBean;
 

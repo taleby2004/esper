@@ -30,8 +30,6 @@ public class AggSvcGroupByReclaimAgedFactory extends AggregationServiceFactoryBa
     private final int[] streams;
     private final boolean isJoin;
 
-    private MethodResolutionService methodResolutionService;
-
     private final AggSvcGroupByReclaimAgedEvalFunc evaluationFunctionMaxAge;
     private final AggSvcGroupByReclaimAgedEvalFunc evaluationFunctionFrequency;
     private volatile long currentReclaimFrequency = DEFAULT_MAX_AGE_MSEC;
@@ -41,7 +39,6 @@ public class AggSvcGroupByReclaimAgedFactory extends AggregationServiceFactoryBa
      * @param evaluators - evaluate the sub-expression within the aggregate function (ie. sum(4*myNum))
      * @param prototypes - collect the aggregation state that evaluators evaluate to, act as prototypes for new aggregations
      * aggregation states for each group
-     * @param methodResolutionService - factory for creating additional aggregation method instances per group key
      * @param reclaimGroupAged hint to reclaim
      * @param reclaimGroupFrequency hint to reclaim
      * @param variableService variables
@@ -52,7 +49,6 @@ public class AggSvcGroupByReclaimAgedFactory extends AggregationServiceFactoryBa
      */
     public AggSvcGroupByReclaimAgedFactory(ExprEvaluator evaluators[],
                                            AggregationMethodFactory prototypes[],
-                                           MethodResolutionService methodResolutionService,
                                            Hint reclaimGroupAged,
                                            Hint reclaimGroupFrequency,
                                            final VariableService variableService,
@@ -62,7 +58,6 @@ public class AggSvcGroupByReclaimAgedFactory extends AggregationServiceFactoryBa
             throws ExprValidationException
     {
         super(evaluators, prototypes);
-        this.methodResolutionService = methodResolutionService;
         this.accessors = accessors;
         this.streams = streams;
         this.isJoin = isJoin;
@@ -86,7 +81,7 @@ public class AggSvcGroupByReclaimAgedFactory extends AggregationServiceFactoryBa
         }
     }
 
-    public AggregationService makeService(AgentInstanceContext agentInstanceContext) {
+    public AggregationService makeService(AgentInstanceContext agentInstanceContext, MethodResolutionService methodResolutionService) {
         return new AggSvcGroupByReclaimAgedImpl(evaluators, aggregators, accessors, streams, isJoin, evaluationFunctionMaxAge, evaluationFunctionFrequency, methodResolutionService);
     }
 

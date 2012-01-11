@@ -10,6 +10,7 @@ package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
@@ -77,7 +78,7 @@ public class NamedWindowTailViewInstance extends ViewSupport implements Iterable
      * Adds a consuming (selecting) statement to the named window.
      * @return consumer view
      */
-    public NamedWindowConsumerView addConsumer(NamedWindowConsumerDesc consumerDesc)
+    public NamedWindowConsumerView addConsumer(NamedWindowConsumerDesc consumerDesc, boolean isSubselect)
     {
         NamedWindowConsumerCallback consumerCallback = new NamedWindowConsumerCallback() {
             public Iterator<EventBean> getIterator() {
@@ -90,7 +91,8 @@ public class NamedWindowTailViewInstance extends ViewSupport implements Iterable
         };
 
         // Construct consumer view, allow a callback to this view to remove the consumer
-        NamedWindowConsumerView consumerView = new NamedWindowConsumerView(ExprNodeUtility.getEvaluators(consumerDesc.getFilterList()), consumerDesc.getOptPropertyEvaluator(), tailView.getEventType(), consumerCallback, agentInstanceContext);
+        boolean audit = AuditEnum.STREAM.getAudit(consumerDesc.getAgentInstanceContext().getStatementContext().getAnnotations()) != null;
+        NamedWindowConsumerView consumerView = new NamedWindowConsumerView(ExprNodeUtility.getEvaluators(consumerDesc.getFilterList()), consumerDesc.getOptPropertyEvaluator(), tailView.getEventType(), consumerCallback, consumerDesc.getAgentInstanceContext(), audit);
 
         // Keep a list of consumer views per statement to accomodate joins and subqueries
         List<NamedWindowConsumerView> viewsPerStatements = consumersInContext.get(consumerDesc.getAgentInstanceContext().getEpStatementAgentInstanceHandle());
@@ -105,7 +107,12 @@ public class NamedWindowTailViewInstance extends ViewSupport implements Iterable
             newConsumers.put(consumerDesc.getAgentInstanceContext().getEpStatementAgentInstanceHandle(), viewsPerStatements);
             consumersInContext = newConsumers;
         }
-        viewsPerStatements.add(consumerView);
+        if (isSubselect) {
+            viewsPerStatements.add(0, consumerView);
+        }
+        else {
+            viewsPerStatements.add(consumerView);
+        }
 
         return consumerView;
     }
@@ -132,7 +139,7 @@ public class NamedWindowTailViewInstance extends ViewSupport implements Iterable
         }
         if (handleRemoved != null)
         {
-            Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> newConsumers = new LinkedHashMap<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>>();
+            Map<EPStatementAgentInstanceHandle, List<NamedWindowConsumerView>> newConsumers = NamedWindowUtil.createConsumerMap(tailView.isPrioritized());
             newConsumers.putAll(consumersInContext);
             newConsumers.remove(handleRemoved);
             consumersInContext = newConsumers;
@@ -210,12 +217,16 @@ public class NamedWindowTailViewInstance extends ViewSupport implements Iterable
         }
     }
 
+    public AgentInstanceContext getAgentInstanceContext() {
+        return agentInstanceContext;
+    }
+
     /**
      * Destroy the view.
      */
     public void destroy()
     {
-        consumersInContext.clear();
+        consumersInContext = NamedWindowUtil.createConsumerMap(tailView.isPrioritized());
     }
 
     /**

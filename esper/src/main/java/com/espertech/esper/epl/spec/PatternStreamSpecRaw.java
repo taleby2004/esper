@@ -76,7 +76,29 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
                                       Collection<Integer> assignedTypeNumberStack)
             throws ExprValidationException
     {
-        MatchEventSpec tags = new MatchEventSpec();
+        return compileInternal(context, eventTypeReferences, isInsertInto, assignedTypeNumberStack, null);
+    }
+
+    public PatternStreamSpecCompiled compile(StatementContext context,
+                                      Set<String> eventTypeReferences,
+                                      boolean isInsertInto,
+                                      Collection<Integer> assignedTypeNumberStack,
+                                      MatchEventSpec priorTags)
+            throws ExprValidationException
+    {
+        return compileInternal(context, eventTypeReferences, isInsertInto, assignedTypeNumberStack, priorTags);
+    }
+
+    private PatternStreamSpecCompiled compileInternal(StatementContext context,
+                                      Set<String> eventTypeReferences,
+                                      boolean isInsertInto,
+                                      Collection<Integer> assignedTypeNumberStack,
+                                      MatchEventSpec tags)
+            throws ExprValidationException
+    {
+        if (tags == null) {
+            tags = new MatchEventSpec();
+        }
         Deque<Integer> subexpressionIdStack = new ArrayDeque<Integer>(assignedTypeNumberStack);
         ExprEvaluatorContext evaluatorContextStmt = new ExprEvaluatorContextStatement(context);
         recursiveCompile(evalFactoryNode, context, evaluatorContextStmt, eventTypeReferences, isInsertInto, tags, subexpressionIdStack);
@@ -206,7 +228,9 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             StreamTypeService streamTypeService = new StreamTypeServiceImpl(filterTypes, context.getEngineURI(), true, false);
             List<ExprNode> exprNodes = filterNode.getRawFilterSpec().getFilterExpressions();
 
-            FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(resolvedEventType, eventName, exprNodes, filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec(),  filterTaggedEventTypes, arrayCompositeEventTypes, streamTypeService, context.getMethodResolutionService(), context.getSchedulingService(), context.getVariableService(), context.getEventAdapterService(), context.getEngineURI(), null, context, subexpressionIdStack, context.getContextDescriptor(), context.getConfigSnapshot());
+            FilterSpecCompiled spec = FilterSpecCompiler.makeFilterSpec(resolvedEventType, eventName, exprNodes,
+                    filterNode.getRawFilterSpec().getOptionalPropertyEvalSpec(),  filterTaggedEventTypes, arrayCompositeEventTypes, streamTypeService,
+                   null, context, subexpressionIdStack);
             filterNode.setFilterSpec(spec);
         }
         else if (evalNode instanceof EvalObserverFactoryNode)
@@ -216,11 +240,11 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             {
                 ObserverFactory observerFactory = context.getPatternResolutionService().create(observerNode.getPatternObserverSpec());
 
-                StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getStatementId(), context.getEventAdapterService(), tags.taggedEventTypes, tags.arrayEventTypes, subexpressionIdStack, "observer");
+                StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getStatementId(), context.getEventAdapterService(), tags.getTaggedEventTypes(), tags.getArrayEventTypes(), subexpressionIdStack, "observer");
                 ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), evaluatorContext, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations(), context.getContextDescriptor());
                 List<ExprNode> validated = validateExpressions(observerNode.getPatternObserverSpec().getObjectParameters(), validationContext);
 
-                MatchedEventConvertor convertor = new MatchedEventConvertorImpl(tags.taggedEventTypes, tags.arrayEventTypes, context.getEventAdapterService());
+                MatchedEventConvertor convertor = new MatchedEventConvertorImpl(tags.getTaggedEventTypes(), tags.getArrayEventTypes(), context.getEventAdapterService());
 
                 observerNode.setObserverFactory(observerFactory);
                 observerFactory.setObserverParameters(validated, convertor);
@@ -241,11 +265,11 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             {
                 GuardFactory guardFactory = context.getPatternResolutionService().create(guardNode.getPatternGuardSpec());
 
-                StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getStatementId(), context.getEventAdapterService(), tags.taggedEventTypes, tags.arrayEventTypes, subexpressionIdStack, "guard");
+                StreamTypeService streamTypeService = getStreamTypeService(context.getEngineURI(), context.getStatementId(), context.getEventAdapterService(), tags.getTaggedEventTypes(), tags.getArrayEventTypes(), subexpressionIdStack, "guard");
                 ExprValidationContext validationContext = new ExprValidationContext(streamTypeService, context.getMethodResolutionService(), null, context.getSchedulingService(), context.getVariableService(), evaluatorContext, context.getEventAdapterService(), context.getStatementName(), context.getStatementId(), context.getAnnotations(), context.getContextDescriptor());
                 List<ExprNode> validated = validateExpressions(guardNode.getPatternGuardSpec().getObjectParameters(), validationContext);
 
-                MatchedEventConvertor convertor = new MatchedEventConvertorImpl(tags.taggedEventTypes, tags.arrayEventTypes, context.getEventAdapterService());
+                MatchedEventConvertor convertor = new MatchedEventConvertorImpl(tags.getTaggedEventTypes(), tags.getArrayEventTypes(), context.getEventAdapterService());
 
                 guardNode.setGuardFactory(guardFactory);
                 guardFactory.setGuardParameters(validated, convertor);
@@ -351,10 +375,10 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             {
                 for (String arrayTag : arrayTags)
                 {
-                    if (!tags.arrayEventTypes.containsKey(arrayTag))
+                    if (!tags.getArrayEventTypes().containsKey(arrayTag))
                     {
-                        tags.arrayEventTypes.put(arrayTag, tags.taggedEventTypes.get(arrayTag));
-                        tags.taggedEventTypes.remove(arrayTag);
+                        tags.getArrayEventTypes().put(arrayTag, tags.getTaggedEventTypes().get(arrayTag));
+                        tags.getTaggedEventTypes().remove(arrayTag);
                     }
                 }
             }
@@ -516,33 +540,5 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
         }
 
         return new MatchEventSpec(taggedEventTypes, arrayEventTypes);
-    }
-
-    private static class MatchEventSpec
-    {
-        private final LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes;
-        private final LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes;
-
-        private MatchEventSpec(LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes)
-        {
-            this.taggedEventTypes = taggedEventTypes;
-            this.arrayEventTypes = arrayEventTypes;
-        }
-
-        public MatchEventSpec()
-        {
-            this.taggedEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
-            this.arrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
-        }
-
-        public LinkedHashMap<String, Pair<EventType, String>> getArrayEventTypes()
-        {
-            return arrayEventTypes;
-        }
-
-        public LinkedHashMap<String, Pair<EventType, String>> getTaggedEventTypes()
-        {
-            return taggedEventTypes;
-        }
     }
 }

@@ -38,6 +38,10 @@ public class ExprConstantNodeImpl extends ExprNodeBase implements ExprConstantNo
         }
     }
 
+    public boolean isConstantValue() {
+        return true;
+    }
+
     /**
      * Ctor.
      * @param value is the constant's value.

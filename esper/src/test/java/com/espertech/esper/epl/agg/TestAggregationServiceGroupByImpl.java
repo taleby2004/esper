@@ -53,23 +53,23 @@ public class TestAggregationServiceGroupByImpl extends TestCase
         service.applyEnter(new EventBean[1], groupOneKey, exprEvaluatorContext);
         service.applyEnter(new EventBean[1], groupTwoKey, exprEvaluatorContext);
 
-        service.setCurrentAccess(groupOneKey, null);
-        assertEquals(10, service.getValue(0, null));
-        assertEquals(4, service.getValue(1, null));
-        service.setCurrentAccess(groupTwoKey, null);
-        assertEquals(5, service.getValue(0, null));
-        assertEquals(2, service.getValue(1, null));
+        service.setCurrentAccess(groupOneKey, -1);
+        assertEquals(10, service.getValue(0, -1));
+        assertEquals(4, service.getValue(1, -1));
+        service.setCurrentAccess(groupTwoKey, -1);
+        assertEquals(5, service.getValue(0, -1));
+        assertEquals(2, service.getValue(1, -1));
 
         service.applyLeave(new EventBean[1], groupTwoKey, exprEvaluatorContext);
         service.applyLeave(new EventBean[1], groupTwoKey, exprEvaluatorContext);
         service.applyLeave(new EventBean[1], groupTwoKey, exprEvaluatorContext);
         service.applyLeave(new EventBean[1], groupOneKey, exprEvaluatorContext);
 
-        service.setCurrentAccess(groupOneKey, null);
-        assertEquals(10 - 5, service.getValue(0, null));
-        assertEquals(4 - 2, service.getValue(1, null));
-        service.setCurrentAccess(groupTwoKey, null);
-        assertEquals(5 - 15, service.getValue(0, null));
-        assertEquals(2 - 6, service.getValue(1, null));
+        service.setCurrentAccess(groupOneKey, -1);
+        assertEquals(10 - 5, service.getValue(0, -1));
+        assertEquals(4 - 2, service.getValue(1, -1));
+        service.setCurrentAccess(groupTwoKey, -1);
+        assertEquals(5 - 15, service.getValue(0, -1));
+        assertEquals(2 - 6, service.getValue(1, -1));
     }
 }

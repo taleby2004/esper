@@ -12,7 +12,8 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
@@ -109,7 +110,7 @@ public class TestViewPlugin extends TestCase
 
     private void assertReceived(Long newTrendCount, Long oldTrendCount)
     {
-        testListener.assertFieldEqualsAndReset("trendcount", new Object[] {newTrendCount}, new Object[] {oldTrendCount});
+        EPAssertionUtil.assertPropsPerRow(testListener.assertInvokedAndReset(), "trendcount", new Object[]{newTrendCount}, new Object[]{oldTrendCount});
     }
 
     private void tryInvalid(String stmtText, String expectedMsg)

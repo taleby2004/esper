@@ -12,16 +12,15 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.epl.agg.AggregationValidationContext;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportPluginAggregationMethodOne;
 import com.espertech.esper.support.epl.SupportPluginAggregationMethodThree;
 import com.espertech.esper.support.epl.SupportPluginAggregationMethodTwo;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
@@ -33,7 +32,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addPlugInAggregationFunction("concatstring", MyConcatAggregationFunction.class.getName());
-        configuration.addPlugInAggregationFunction("totalup", MyInnerAggFunction.class.getName());
+        configuration.addPlugInAggregationFunctionFactory("concatstringTwo", MyConcatTwoAggFunctionFactory.class.getName());
         configuration.getEngineDefaults().getThreading().setEngineFairlock(true);
         epService = EPServiceProviderManager.getProvider("TestAggregationFunctionPlugIn", configuration);
         epService.initialize();
@@ -44,42 +43,32 @@ public class TestAggregationFunctionPlugIn extends TestCase
         epService.initialize();
     }
 
-    public void testGrouped_OM() throws Exception
+    public void testGrouped() throws Exception
     {
-        String text = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        String textOne = "select irstream CONCATSTRING(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        tryGrouped(textOne, null);
 
-        EPStatementObjectModel model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.create().streamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
+        String textTwo = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        tryGrouped(textTwo, null);
+
+        String textThree = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(textThree);
+        SerializableObjectCopier.copy(model);
+        assertEquals(textThree, model.toEPL());
+        tryGrouped(null, model);
+
+        String textFour = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        EPStatementObjectModel modelTwo = new EPStatementObjectModel();
+        modelTwo.setSelectClause(SelectClause.create().streamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
                 .add(Expressions.plugInAggregation("concatstring", Expressions.property("string")), "val"));
-        model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", Expressions.constant(10))));
-        model.setGroupByClause(GroupByClause.create("intPrimitive"));
-        assertEquals(text, model.toEPL());
-        SerializableObjectCopier.copy(model);
+        modelTwo.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", Expressions.constant(10))));
+        modelTwo.setGroupByClause(GroupByClause.create("intPrimitive"));
+        assertEquals(textFour, modelTwo.toEPL());
+        SerializableObjectCopier.copy(modelTwo);
+        tryGrouped(null, modelTwo);
 
-        tryGrouped(null, model);
-    }
-
-    public void testGrouped_Compile() throws Exception
-    {
-        String text = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
-
-        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(text);
-        SerializableObjectCopier.copy(model);
-        assertEquals(text, model.toEPL());
-
-        tryGrouped(null, model);
-    }
-
-    public void testGroupedLowercase()
-    {
-        String text = "select irstream CONCATSTRING(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
-        tryGrouped(text, null);
-    }
-
-    public void testGroupedUppercase()
-    {
-        String text = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
-        tryGrouped(text, null);
+        String textFive = "select irstream concatstringTwo(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        tryGrouped(textFive, null);
     }
 
     private void tryGrouped(String text, EPStatementObjectModel model)
@@ -97,22 +86,22 @@ public class TestAggregationFunctionPlugIn extends TestCase
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("a", 1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a"}, new Object[] {""});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a"}, new Object[] {""});
 
         epService.getEPRuntime().sendEvent(new SupportBean("b", 2));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"b"}, new Object[] {""});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"b"}, new Object[] {""});
 
         epService.getEPRuntime().sendEvent(new SupportBean("c", 1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a c"}, new Object[] {"a"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a c"}, new Object[] {"a"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("d", 2));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"b d"}, new Object[] {"b"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"b d"}, new Object[] {"b"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("e", 1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a c e"}, new Object[] {"a c"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a c e"}, new Object[] {"a c"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("f", 2));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"b d f"}, new Object[] {"b d"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"b d f"}, new Object[] {"b d"});
 
         listener.reset();
     }
@@ -125,16 +114,16 @@ public class TestAggregationFunctionPlugIn extends TestCase
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("a", -1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a"}, new Object[] {""});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a"}, new Object[] {""});
 
         epService.getEPRuntime().sendEvent(new SupportBean("b", -1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a b"}, new Object[] {"a"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a b"}, new Object[] {"a"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("c", -1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"b c"}, new Object[] {"a b"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"b c"}, new Object[] {"a b"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("d", -1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"c d"}, new Object[] {"b c"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"c d"}, new Object[] {"b c"});
     }
 
     public void testDistinct()
@@ -145,19 +134,19 @@ public class TestAggregationFunctionPlugIn extends TestCase
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("a", -1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a"}, new Object[] {""});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a"}, new Object[] {""});
 
         epService.getEPRuntime().sendEvent(new SupportBean("b", -1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a b"}, new Object[] {"a"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a b"}, new Object[] {"a"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("b", -1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a b"}, new Object[] {"a b"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a b"}, new Object[] {"a b"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("c", -1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a b c"}, new Object[] {"a b"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a b c"}, new Object[] {"a b"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("a", -1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a b c"}, new Object[] {"a b c"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a b c"}, new Object[] {"a b c"});
     }
 
     public void testArrayParams()
@@ -170,7 +159,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        listener.assertFieldEqualsAndReset("val", new Object[] {-1}, new Object[] {0});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {-1}, new Object[] {0});
     }
 
     public void testMultipleParams()
@@ -196,21 +185,21 @@ public class TestAggregationFunctionPlugIn extends TestCase
     private void runAssertion(SupportUpdateListener listener) {
 
         AggregationValidationContext validContext = SupportPluginAggregationMethodThree.getContexts().get(0);
-        ArrayAssertionUtil.assertEqualsExactOrder(validContext.getParameterTypes(), new Class[] {Integer.class, Integer.class, int.class});
-        ArrayAssertionUtil.assertEqualsExactOrder(validContext.getConstantValues(), new Object[] {1, 10, null});
-        ArrayAssertionUtil.assertEqualsExactOrder(validContext.getIsConstantValue(), new boolean[] {true, true, false});
+        EPAssertionUtil.assertEqualsExactOrder(new Class[]{Integer.class, Integer.class, int.class}, validContext.getParameterTypes());
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{1, 10, null}, validContext.getConstantValues());
+        EPAssertionUtil.assertEqualsExactOrder(new boolean[]{true, true, false}, validContext.getIsConstantValue());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
-        listener.assertFieldEqualsAndReset("val", new Object[] {1}, new Object[] {0});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {1}, new Object[] {0});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
-        listener.assertFieldEqualsAndReset("val", new Object[] {1}, new Object[] {1});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {1}, new Object[] {1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 11));
-        listener.assertFieldEqualsAndReset("val", new Object[] {1}, new Object[] {1});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {1}, new Object[] {1});
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        listener.assertFieldEqualsAndReset("val", new Object[] {2}, new Object[] {1});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {2}, new Object[] {1});
     }
 
     public void testNoSubnodesRuntimeAdd()
@@ -223,10 +212,10 @@ public class TestAggregationFunctionPlugIn extends TestCase
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        listener.assertFieldEqualsAndReset("val", new Object[] {-1}, new Object[] {0});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {-1}, new Object[] {0});
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        listener.assertFieldEqualsAndReset("val", new Object[] {-2}, new Object[] {-1});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {-2}, new Object[] {-1});
     }
 
     public void testMappedPropertyLookAlike()
@@ -238,13 +227,13 @@ public class TestAggregationFunctionPlugIn extends TestCase
         assertEquals(String.class, statement.getEventType().getPropertyType("val"));
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a"}, new Object[] {""});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a"}, new Object[] {""});
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a a"}, new Object[] {"a"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a a"}, new Object[] {"a"});
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        listener.assertFieldEqualsAndReset("val", new Object[] {"a a a"}, new Object[] {"a a"});
+        EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a a a"}, new Object[] {"a a"});
     }
 
     public void testFailedValidation()
@@ -350,40 +339,6 @@ public class TestAggregationFunctionPlugIn extends TestCase
         catch (EPStatementException ex)
         {
             assertEquals(expectedMsg, ex.getMessage());
-        }
-    }
-
-    public class MyInnerAggFunction extends AggregationSupport
-    {
-        private int total;
-
-        @Override
-        public void validate(AggregationValidationContext validationContext)
-        {
-        }
-
-        public void enter(Object value)
-        {
-            total += ((Number)value).intValue();
-        }
-
-        public void leave(Object value)
-        {
-            total -= ((Number)value).intValue();
-        }
-
-        public Object getValue()
-        {
-            return total;
-        }
-
-        public Class getValueType()
-        {
-            return Integer.class;
-        }
-
-        public void clear()
-        {
         }
     }
 }

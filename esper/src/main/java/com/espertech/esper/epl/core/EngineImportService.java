@@ -9,7 +9,9 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.ConfigurationMethodRef;
+import com.espertech.esper.client.ConfigurationPlugInAggregationFunction;
 import com.espertech.esper.client.ConfigurationPlugInSingleRowFunction;
+import com.espertech.esper.client.hook.AggregationFunctionFactory;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationSupport;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -41,10 +43,10 @@ public interface EngineImportService
     /**
      * Add an aggregation function.
      * @param functionName is the name of the function to make known.
-     * @param aggregationClass is the class that provides the aggregator
+     * @param aggregationDesc is the descriptor for the aggregation function
      * @throws EngineImportException throw if format or information is invalid
      */
-    public void addAggregation(String functionName, String aggregationClass) throws EngineImportException;
+    public void addAggregation(String functionName, ConfigurationPlugInAggregationFunction aggregationDesc) throws EngineImportException;
 
     /**
      * Add an single-row function.
@@ -54,7 +56,7 @@ public interface EngineImportService
      * @param valueCache setting to control value cache behavior which may cache a result value when constant parameters are passed
      * @throws EngineImportException throw if format or information is invalid
      */
-    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws EngineImportException;
+    public void addSingleRow(String functionName, String singleRowFuncClass, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws EngineImportException;
 
     /**
      * Used at statement compile-time to try and resolve a given function name into an
@@ -65,6 +67,16 @@ public interface EngineImportService
      * @throws EngineImportException if the aggregation providing class could not be loaded or doesn't match
      */
     public AggregationSupport resolveAggregation(String functionName) throws EngineImportUndefinedException, EngineImportException;
+
+    /**
+     * Used at statement compile-time to try and resolve a given function name into an
+     * aggregation method. Matches function name case-neutral.
+     * @param functionName is the function name
+     * @return aggregation provider
+     * @throws EngineImportUndefinedException if the function is not a configured aggregation function
+     * @throws EngineImportException if the aggregation providing class could not be loaded or doesn't match
+     */
+    public AggregationFunctionFactory resolveAggregationFactory(String functionName) throws EngineImportUndefinedException, EngineImportException;
 
     /**
      * Used at statement compile-time to try and resolve a given function name into an
@@ -102,6 +114,14 @@ public interface EngineImportService
      * @throws EngineImportException if there was an error resolving the class
      */
     public Class resolveClass(String className) throws EngineImportException;
+
+    /**
+     * Resolves a given class name, either fully qualified and simple and imported to a annotation.
+     * @param className is the class name to use
+     * @return annotation class this resolves to
+     * @throws EngineImportException if there was an error resolving the class
+     */
+    public Class resolveAnnotation(String className) throws EngineImportException;
 
     /**
      * Resolves a given class and method name to a static method, expecting the method to exist

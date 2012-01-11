@@ -42,7 +42,7 @@ public class ViewableActivatorStreamReuseView implements ViewableActivator, Stop
         this.filterSubselectSameStream = filterSubselectSameStream;
     }
 
-    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext) {
+    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
         Pair<EventStream, StatementAgentInstanceLock> pair = services.getStreamService().createStream(statementContext.getStatementId(), filterStreamSpec.getFilterSpec(),
                 statementContext.getFilterService(), agentInstanceContext.getEpStatementAgentInstanceHandle(), join, false, evaluatorContextStmt, !statementSpec.getOrderByList().isEmpty(), filterSubselectSameStream, statementContext.getAnnotations());
         return new ViewableActivationResult(pair.getFirst(), this, pair.getSecond());

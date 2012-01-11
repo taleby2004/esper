@@ -14,6 +14,7 @@ package com.espertech.esper.core.context.stmt;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.core.context.stmt.AIRegistryAggregation;
+import com.espertech.esper.epl.agg.AggregationRowRemovedCallback;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
@@ -45,16 +46,16 @@ public class AIRegistryAggregationSingle implements AIRegistryAggregation, Aggre
         service.applyLeave(eventsPerStream, optionalGroupKeyPerRow, exprEvaluatorContext);
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds) {
-        service.setCurrentAccess(groupKey, agentInstanceIds);
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId) {
+        service.setCurrentAccess(groupKey, agentInstanceId);
     }
 
     public void clearResults(ExprEvaluatorContext exprEvaluatorContext) {
         service.clearResults(exprEvaluatorContext);
     }
 
-    public Object getValue(int column, int[] agentInstanceIds) {
-        return service.getValue(column, agentInstanceIds);
+    public Object getValue(int column, int agentInstanceId) {
+        return service.getValue(column, agentInstanceId);
     }
 
     public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context) {
@@ -63,5 +64,9 @@ public class AIRegistryAggregationSingle implements AIRegistryAggregation, Aggre
 
     public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         return service.getEventBean(column, context);
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

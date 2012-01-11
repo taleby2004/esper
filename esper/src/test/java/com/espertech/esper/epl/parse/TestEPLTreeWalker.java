@@ -11,6 +11,8 @@
 
 package com.espertech.esper.epl.parse;
 
+import com.espertech.esper.client.ConfigurationPlugInAggregationFunction;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineImportServiceImpl;
@@ -26,7 +28,6 @@ import com.espertech.esper.support.epl.SupportPluginAggregationMethodOne;
 import com.espertech.esper.support.epl.parse.SupportEPLTreeWalkerFactory;
 import com.espertech.esper.support.epl.parse.SupportParserHelper;
 import com.espertech.esper.support.event.SupportEventAdapterService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.timer.TimeSourceServiceImpl;
 import com.espertech.esper.type.OuterJoinType;
 import junit.framework.TestCase;
@@ -50,7 +51,7 @@ public class TestEPLTreeWalker extends TestCase
         EPLTreeWalker walker = parseAndWalkEPL(expression);
         CreateSchemaDesc schema = walker.getStatementSpec().getCreateSchemaDesc();
         assertEquals("MyName", schema.getSchemaName());
-        ArrayAssertionUtil.assertEqualsExactOrder(schema.getTypes().toArray(), "com.company.SupportBean".split(","));
+        EPAssertionUtil.assertEqualsExactOrder("com.company.SupportBean".split(","), schema.getTypes().toArray());
         assertTrue(schema.getInherits().isEmpty());
         assertTrue(schema.getColumns().isEmpty());
         assertFalse(schema.isVariant());
@@ -60,7 +61,7 @@ public class TestEPLTreeWalker extends TestCase
         schema = walker.getStatementSpec().getCreateSchemaDesc();
         assertEquals("MyName", schema.getSchemaName());
         assertTrue(schema.getTypes().isEmpty());
-        ArrayAssertionUtil.assertEqualsExactOrder(schema.getInherits().toArray(), "InheritedType".split(","));
+        EPAssertionUtil.assertEqualsExactOrder("InheritedType".split(","), schema.getInherits().toArray());
         assertSchema(schema.getColumns().get(0), "col1", "string", false);
         assertSchema(schema.getColumns().get(1), "col2", "int", false);
         assertSchema(schema.getColumns().get(2), "col3", "Type", true);
@@ -69,7 +70,7 @@ public class TestEPLTreeWalker extends TestCase
         walker = parseAndWalkEPL(expression);
         schema = walker.getStatementSpec().getCreateSchemaDesc();
         assertEquals("MyName", schema.getSchemaName());
-        ArrayAssertionUtil.assertEqualsExactOrder(schema.getTypes().toArray(), "MyNameTwo,MyNameThree".split(","));
+        EPAssertionUtil.assertEqualsExactOrder("MyNameTwo,MyNameThree".split(","), schema.getTypes().toArray());
         assertTrue(schema.getInherits().isEmpty());
         assertTrue(schema.getColumns().isEmpty());
         assertTrue(schema.isVariant());
@@ -152,7 +153,7 @@ public class TestEPLTreeWalker extends TestCase
 
     public void testWalkCreateVariable() throws Exception
     {
-        String expression = "create variable sometype var1 = 1";
+        String expression = "create constant variable sometype var1 = 1";
         EPLTreeWalker walker = parseAndWalkEPL(expression);
         StatementSpecRaw raw = walker.getStatementSpec();
 
@@ -160,12 +161,13 @@ public class TestEPLTreeWalker extends TestCase
         assertEquals("sometype", createVarDesc.getVariableType());
         assertEquals("var1", createVarDesc.getVariableName());
         assertTrue(createVarDesc.getAssignment() instanceof ExprConstantNode);
+        assertTrue(createVarDesc.isConstant());
     }
 
     public void testWalkOnSet() throws Exception
     {
         VariableService variableService = new VariableServiceImpl(0, new SchedulingServiceImpl(new TimeSourceServiceImpl()), SupportEventAdapterService.getService(), null);
-        variableService.createNewVariable("var1", Long.class.getName(), 100L, null);
+        variableService.createNewVariable("var1", Long.class.getName(), 100L, false, null);
 
         String expression = "on com.MyClass as myevent set var1 = 'a', var2 = 2*3, var3 = var1";
         EPLTreeWalker walker = parseAndWalkEPL(expression, null, variableService);
@@ -677,11 +679,11 @@ public class TestEPLTreeWalker extends TestCase
         EPLTreeWalker walker = parseAndWalkEPL(text);
         FilterSpecRaw filterSpec = ((FilterStreamSpecRaw) walker.getStatementSpec().getStreamSpecs().get(0)).getRawFilterSpec();
         assertEquals(2, filterSpec.getOptionalPropertyEvalSpec().getAtoms().size());
-        assertEquals("a.b", filterSpec.getOptionalPropertyEvalSpec().getAtoms().get(0).getPropertyName());
+        assertEquals("a.b", filterSpec.getOptionalPropertyEvalSpec().getAtoms().get(0).getSplitterExpression().toExpressionString());
         assertEquals(0, filterSpec.getOptionalPropertyEvalSpec().getAtoms().get(0).getOptionalSelectClause().getSelectExprList().size());
 
         PropertyEvalAtom atomTwo = filterSpec.getOptionalPropertyEvalSpec().getAtoms().get(1);
-        assertEquals("e", atomTwo.getPropertyName());
+        assertEquals("e", atomTwo.getSplitterExpression().toExpressionString());
         assertEquals("f", atomTwo.getOptionalAsName());
         assertNotNull(atomTwo.getOptionalWhereClause());
         List<SelectClauseElementRaw> list = atomTwo.getOptionalSelectClause().getSelectExprList();
@@ -977,10 +979,10 @@ public class TestEPLTreeWalker extends TestCase
         assertEquals(1, descList.size());
         OuterJoinDesc desc = descList.get(0);
         assertEquals(typeExpected, desc.getOuterJoinType());
-        assertEquals("f1", desc.getLeftNode().getUnresolvedPropertyName());
-        assertEquals("win1", desc.getLeftNode().getStreamOrPropertyName());
-        assertEquals("f2[1]", desc.getRightNode().getUnresolvedPropertyName());
-        assertEquals("win2", desc.getRightNode().getStreamOrPropertyName());
+        assertEquals("f1", desc.getOptLeftNode().getUnresolvedPropertyName());
+        assertEquals("win1", desc.getOptLeftNode().getStreamOrPropertyName());
+        assertEquals("f2[1]", desc.getOptRightNode().getUnresolvedPropertyName());
+        assertEquals("win2", desc.getOptRightNode().getStreamOrPropertyName());
 
         text = "select intPrimitive from " +
                         SupportBean_A.class.getName() + "().win:lenght(10) as win1 " +
@@ -997,17 +999,17 @@ public class TestEPLTreeWalker extends TestCase
 
         desc = descList.get(0);
         assertEquals(typeExpected, desc.getOuterJoinType());
-        assertEquals("f1", desc.getLeftNode().getUnresolvedPropertyName());
-        assertEquals("win1", desc.getLeftNode().getStreamOrPropertyName());
-        assertEquals("f2", desc.getRightNode().getUnresolvedPropertyName());
-        assertEquals("win2", desc.getRightNode().getStreamOrPropertyName());
+        assertEquals("f1", desc.getOptLeftNode().getUnresolvedPropertyName());
+        assertEquals("win1", desc.getOptLeftNode().getStreamOrPropertyName());
+        assertEquals("f2", desc.getOptRightNode().getUnresolvedPropertyName());
+        assertEquals("win2", desc.getOptRightNode().getStreamOrPropertyName());
 
         desc = descList.get(1);
         assertEquals(typeExpected, desc.getOuterJoinType());
-        assertEquals("f1", desc.getLeftNode().getUnresolvedPropertyName());
-        assertEquals("win1", desc.getLeftNode().getStreamOrPropertyName());
-        assertEquals("f3", desc.getRightNode().getUnresolvedPropertyName());
-        assertEquals("win3", desc.getRightNode().getStreamOrPropertyName());
+        assertEquals("f1", desc.getOptLeftNode().getUnresolvedPropertyName());
+        assertEquals("win1", desc.getOptLeftNode().getStreamOrPropertyName());
+        assertEquals("f3", desc.getOptRightNode().getUnresolvedPropertyName());
+        assertEquals("win3", desc.getOptRightNode().getStreamOrPropertyName());
 
         assertEquals(1, desc.getAdditionalLeftNodes().length);
         assertEquals("f11", desc.getAdditionalLeftNodes()[0].getUnresolvedPropertyName());
@@ -1139,7 +1141,7 @@ public class TestEPLTreeWalker extends TestCase
     public void testWalkPluginAggregationFunction() throws Exception
     {
         EngineImportService engineImportService = new EngineImportServiceImpl(true, true, true);
-        engineImportService.addAggregation("concat", SupportPluginAggregationMethodOne.class.getName());
+        engineImportService.addAggregation("concat", new ConfigurationPlugInAggregationFunction("concat", SupportPluginAggregationMethodOne.class.getName(), null));
 
         String text = "select * from " + SupportBean.class.getName() + " group by concat(1)";
         EPLTreeWalker walker = parseAndWalkEPL(text, engineImportService, null);

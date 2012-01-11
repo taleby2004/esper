@@ -14,12 +14,12 @@ package com.espertech.esper.regression.epl;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.bean.SupportBean_S2;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class Test3StreamOuterInnerJoin extends TestCase
@@ -114,30 +114,30 @@ public class Test3StreamOuterInnerJoin extends TestCase
         assertFalse(updateListener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S2(200, "A_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {null, null, 100, "A_1", 200, "A_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{null, null, 100, "A_1", 200, "A_1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "A_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {0, "A_1", 100, "A_1", 200, "A_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{0, "A_1", 100, "A_1", 200, "A_1"});
 
         // s1, s0, s2
         epService.getEPRuntime().sendEvent(new SupportBean_S1(103, "D_1"));
         assertFalse(updateListener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S2(203, "D_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {null, null, 103, "D_1", 203, "D_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{null, null, 103, "D_1", 203, "D_1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3, "D_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {3, "D_1", 103, "D_1", 203, "D_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{3, "D_1", 103, "D_1", 203, "D_1"});
 
         // s2, s1, s0
         epService.getEPRuntime().sendEvent(new SupportBean_S2(201, "B_1"));
         assertFalse(updateListener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(101, "B_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {null, null, 101, "B_1", 201, "B_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{null, null, 101, "B_1", 201, "B_1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "B_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {1, "B_1", 101, "B_1", 201, "B_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{1, "B_1", 101, "B_1", 201, "B_1"});
 
         // s2, s0, s1
         epService.getEPRuntime().sendEvent(new SupportBean_S2(202, "C_1"));
@@ -147,7 +147,7 @@ public class Test3StreamOuterInnerJoin extends TestCase
         assertFalse(updateListener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(102, "C_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {2, "C_1", 102, "C_1", 202, "C_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{2, "C_1", 102, "C_1", 202, "C_1"});
 
         // s0, s1, s2
         epService.getEPRuntime().sendEvent(new SupportBean_S0(4, "E_1"));
@@ -157,7 +157,7 @@ public class Test3StreamOuterInnerJoin extends TestCase
         assertFalse(updateListener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S2(204, "E_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {4, "E_1", 104, "E_1", 204, "E_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{4, "E_1", 104, "E_1", 204, "E_1"});
 
         // s0, s2, s1
         epService.getEPRuntime().sendEvent(new SupportBean_S0(5, "F_1"));
@@ -167,6 +167,6 @@ public class Test3StreamOuterInnerJoin extends TestCase
         assertFalse(updateListener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(105, "F_1"));
-        ArrayAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[] {5, "F_1", 105, "F_1", 205, "F_1"});
+        EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{5, "F_1", 105, "F_1", 205, "F_1"});
     }
 }

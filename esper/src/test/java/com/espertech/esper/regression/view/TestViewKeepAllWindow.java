@@ -15,10 +15,10 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Iterator;
@@ -86,23 +86,23 @@ public class TestViewKeepAllWindow extends TestCase
 
         sendEvent("S1", 100);
         String[] fields = new String[] {"symbol", "cnt", "mysum"};
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"S1", 1L, 100d});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"S1", 0L, null});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{"S1", 1L, 100d});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"S1", 0L, null});
         listener.reset();
 
         sendEvent("S2", 50);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"S2", 1L, 50d});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"S2", 0L, null});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{"S2", 1L, 50d});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"S2", 0L, null});
         listener.reset();
 
         sendEvent("S1", 5);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"S1", 2L, 105d});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"S1", 1L, 100d});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{"S1", 2L, 105d});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"S1", 1L, 100d});
         listener.reset();
 
         sendEvent("S2", -1);
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"S2", 2L, 49d});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"S2", 1L, 50d});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{"S2", 2L, 49d});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"S2", 1L, 50d});
         listener.reset();
     }
 

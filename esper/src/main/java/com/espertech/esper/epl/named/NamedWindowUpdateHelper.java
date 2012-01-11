@@ -46,7 +46,8 @@ public class NamedWindowUpdateHelper
         this.wideners = wideners;
     }
 
-    public static NamedWindowUpdateHelper make(EventTypeSPI eventTypeSPI,
+    public static NamedWindowUpdateHelper make(String namedWindowName,
+                                               EventTypeSPI eventTypeSPI,
                                         List<OnTriggerSetAssignment> assignments,
                                         String namedWindowAlias)
             throws ExprValidationException
@@ -73,6 +74,14 @@ public class NamedWindowUpdateHelper
                     String prefix = propertyName.substring(0, indexDot);
                     String name = propertyName.substring(indexDot + 1);
                     if (prefix.equals(namedWindowAlias)) {
+                        writableProperty = eventTypeSPI.getWritableProperty(name);
+                        propertyName = name;
+                    }
+                }
+                if (writableProperty == null && indexDot != -1) {
+                    String prefix = propertyName.substring(0, indexDot);
+                    String name = propertyName.substring(indexDot + 1);
+                    if (prefix.equals(namedWindowName)) {
                         writableProperty = eventTypeSPI.getWritableProperty(name);
                         propertyName = name;
                     }

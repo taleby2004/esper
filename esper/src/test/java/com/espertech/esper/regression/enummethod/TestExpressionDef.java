@@ -12,16 +12,19 @@
 package com.espertech.esper.regression.enummethod;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementFormatter;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class TestExpressionDef extends TestCase {
 
@@ -97,16 +100,16 @@ public class TestExpressionDef extends TestCase {
         String[] fieldsConsume = "c1,c2".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {null, null});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), fieldsConsume, new Object[] {null, null});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{null, null});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), fieldsConsume, new Object[]{null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 2));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {"X", 10});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), fieldsConsume, new Object[] {"X", 10});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{"X", 10});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), fieldsConsume, new Object[]{"X", 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B", 3));
-        ArrayAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[] {"Y", 20});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), fieldsConsume, new Object[] {"Y", 20});
+        EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{"Y", 20});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), fieldsConsume, new Object[]{"Y", 20});
     }
 
     public void testAnnotationOrder() {
@@ -125,7 +128,7 @@ public class TestExpressionDef extends TestCase {
         assertEquals("test", stmt.getName());
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "scalar()".split(","), new Object[] {1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "scalar()".split(","), new Object[]{1});
 
         stmt.destroy();
     }
@@ -160,12 +163,12 @@ public class TestExpressionDef extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 5));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2/10d, 2/5d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2 / 10d, 2 / 5d});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 20));
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 2));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4/20d, 4/2d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4 / 20d, 4 / 2d});
 
         stmt.destroy();
     }
@@ -185,12 +188,12 @@ public class TestExpressionDef extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 0));
         epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("ST0", 20));
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST1("x", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"ST0"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"ST0"});
     }
 
     public void testSubqueryJoinSameField() {
@@ -208,14 +211,14 @@ public class TestExpressionDef extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 0));
         epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E0", 10));
         epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1", 0, "E0"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 0, "E0"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, 10});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{10, 10});
     }
 
     public void testSubqueryCorrelated() {
@@ -231,18 +234,18 @@ public class TestExpressionDef extends TestCase {
         LambdaAssertionUtil.assertTypes(stmt.getEventType(), fields, new Class[]{String.class, String.class});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E0", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E0", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E0", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 100));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 99));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 100));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "ST0"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "ST0"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST1", 100));
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 100));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", null});
     }
 
     public void testSubqueryUncorrelated() {
@@ -258,15 +261,15 @@ public class TestExpressionDef extends TestCase {
         LambdaAssertionUtil.assertTypes(stmt.getEventType(), fields, new Class[]{String.class, String.class});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E0", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E0", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E0", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 0));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 99));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "ST0"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "ST0"});
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST1", 0));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 100));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "ST1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "ST1"});
     }
 
     public void testSubqueryNamedWindowUncorrelated() {
@@ -286,20 +289,20 @@ public class TestExpressionDef extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("E0", 0));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID0", 0));
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldsInside, null);
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c1")), fieldsInside, null);
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldsInside, null);
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c1")), fieldsInside, null);
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 11));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID1", 0));
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection)listener.assertOneGetNew().get("c0")), fieldsInside, new Object[][] {{"E1"}});
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection)listener.assertOneGetNew().get("c1")), fieldsInside, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldsInside, new Object[][]{{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c1")), fieldsInside, new Object[][]{{"E1"}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 500));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID2", 0));
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldsInside, new Object[][]{{"E1"}, {"E2"}});
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c1")), fieldsInside, new Object[][]{{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldsInside, new Object[][]{{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c1")), fieldsInside, new Object[][]{{"E1"}});
         listener.reset();
     }
 
@@ -347,22 +350,22 @@ public class TestExpressionDef extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("E0", 0));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID0", "x", 0));
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldInside, null);
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldInside, null);
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 11));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID1", "x", 0));
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldInside, null);
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldInside, null);
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 12));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID2", "E2", 0));
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldInside, new Object[][]{{"E2"}});
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldInside, new Object[][]{{"E2"}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 13));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E3", "E3", 0));
-        ArrayAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldInside, new Object[][]{{"E3"}});
+        EPAssertionUtil.assertPropsPerRow(toArrayMap((Collection) listener.assertOneGetNew().get("c0")), fieldInside, new Object[][]{{"E3"}});
         listener.reset();
 
         epService.getEPAdministrator().destroyAllStatements();
@@ -387,10 +390,22 @@ public class TestExpressionDef extends TestCase {
         LambdaAssertionUtil.assertTypes(stmt.getEventType(), fields, new Class[]{Integer.class, Integer.class, Double.class, Long.class});
 
         epService.getEPRuntime().sendEvent(getSupportBean(5, 6));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5, 6, 5/6d, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5, 6, 5 / 6d, 1L});
 
         epService.getEPRuntime().sendEvent(getSupportBean(8, 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5+8, 6+10, (5+8)/(6d + 10d), 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5 + 8, 6 + 10, (5 + 8) / (6d + 10d), 2L});
+    }
+
+    public void testSplitStream() {
+        String epl =  "expression myLittleExpression { event => false }" +
+                      "on SupportBean as myEvent " +
+                      " insert into ABC select * where myLittleExpression(myEvent)" +
+                      " insert into DEF select * where not myLittleExpression(myEvent)";
+        epService.getEPAdministrator().createEPL(epl);
+        
+        epService.getEPAdministrator().createEPL("select * from DEF").addListener(listener);
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        assertTrue(listener.isInvoked());
     }
 
     public void testAggregationAccess() {
@@ -463,7 +478,7 @@ public class TestExpressionDef extends TestCase {
 
     private void runAssertionTwoParameterArithmetic(EPStatement stmt, String[] fields) {
         String[] props = stmt.getEventType().getPropertyNames();
-        ArrayAssertionUtil.assertEqualsAnyOrder(props, fields);
+        EPAssertionUtil.assertEqualsAnyOrder(props, fields);
         assertEquals(Integer.class, stmt.getEventType().getPropertyType("fZero()"));
         assertEquals(int.class, stmt.getEventType().getPropertyType("fOne(t)"));
         assertEquals(Integer.class, stmt.getEventType().getPropertyType("fTwo(t, t)"));
@@ -471,7 +486,7 @@ public class TestExpressionDef extends TestCase {
         EventPropertyGetter getter = stmt.getEventType().getGetter("fThree(t, t)");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{10, 11, 22, 111});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{10, 11, 22, 111});
         assertEquals(111, getter.get(listener.assertOneGetNewAndReset()));
     }
 
@@ -488,11 +503,11 @@ public class TestExpressionDef extends TestCase {
         SupportBean_ST0_Container event = SupportBean_ST0_Container.make3Value("E1,K1,1", "E2,K2,2", "E20,K20,20");
         epService.getEPRuntime().sendEvent(event);
         Object[] resultVal1 = ((Collection) listener.getLastNewData()[0].get("val1")).toArray();
-        ArrayAssertionUtil.assertEqualsExactOrder(resultVal1,
-                new Object[]{event.getContained().get(0), event.getContained().get(1)});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{event.getContained().get(0), event.getContained().get(1)}, resultVal1
+        );
         Object[] resultVal2 = ((Collection) listener.getLastNewData()[0].get("val2")).toArray();
-        ArrayAssertionUtil.assertEqualsExactOrder(resultVal2,
-                new Object[]{event.getContained().get(1)});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{event.getContained().get(1)}, resultVal2
+        );
     }
 
     public void testNoParameterArithmetic() {
@@ -506,7 +521,7 @@ public class TestExpressionDef extends TestCase {
         LambdaAssertionUtil.assertTypes(stmt.getEventType(), fields, new Class[]{Integer.class, Integer.class});
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, 5});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, 5});
     }
 
     public void testNoParameterVariable() {
@@ -523,11 +538,11 @@ public class TestExpressionDef extends TestCase {
         LambdaAssertionUtil.assertTypes(stmt.getEventType(), fields, new Class[]{Integer.class, Integer.class, Integer.class});
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2, 20, 40});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{2, 20, 40});
 
         epService.getEPRuntime().setVariableValue("myvar", 3);
         epService.getEPRuntime().sendEvent(new SupportBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, 30, 90});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, 30, 90});
     }
 
     public void testWhereClauseExpression() {

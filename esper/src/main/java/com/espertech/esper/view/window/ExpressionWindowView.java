@@ -9,21 +9,14 @@
 package com.espertech.esper.view.window;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.collection.ViewUpdatedCollection;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
-import com.espertech.esper.core.service.EPStatementHandleCallback;
-import com.espertech.esper.core.service.ExtensionServicesContext;
+import com.espertech.esper.epl.agg.AggregationServiceAggExpressionDesc;
+import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.variable.VariableChangeCallback;
-import com.espertech.esper.epl.variable.VariableReader;
-import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.schedule.ScheduleHandleCallback;
-import com.espertech.esper.schedule.ScheduleSlot;
-import com.espertech.esper.util.StopCallback;
-import com.espertech.esper.view.*;
+import com.espertech.esper.view.View;
 
 import java.util.ArrayDeque;
 import java.util.Iterator;
@@ -32,23 +25,11 @@ import java.util.Set;
 /**
  * This view is a moving window extending the into the past until the expression passed to it returns false.
  */
-public final class ExpressionWindowView extends ViewSupport implements DataWindowView, CloneableView, StoppableView, VariableChangeCallback, StopCallback {
-    public final static String CURRENT_COUNT = "current_count";
-    public final static String OLDEST_TIMESTAMP = "oldest_timestamp";
-    public final static String NEWEST_TIMESTAMP = "newest_timestamp";
-    public final static String EXPIRED_COUNT = "expired_count";
-    public final static String VIEW_REFERENCE = "view_reference";
+public final class ExpressionWindowView extends ExpressionViewBase {
 
     private final ExpressionWindowViewFactory dataWindowViewFactory;
-    private final ViewUpdatedCollection viewUpdatedCollection;
     private final ArrayDeque<TimestampEventPair> window = new ArrayDeque<TimestampEventPair>();
-    private final ExprEvaluator expiryExpression;
-    private final MapEventBean builtinEventProps;
-    private final EventBean[] eventsPerStream;
-    private final Set<String> variableNames;
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
-    private final ScheduleSlot scheduleSlot;
-    private final EPStatementHandleCallback scheduleHandle;
+    private final EventBean[] removedEvents = new EventBean[1];
 
     /**
      * Constructor creates a moving window extending the specified number of elements into the past.
@@ -59,44 +40,13 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
     public ExpressionWindowView(ExpressionWindowViewFactory dataWindowViewFactory,
                                 ViewUpdatedCollection viewUpdatedCollection,
                                 ExprEvaluator expiryExpression,
+                                AggregationServiceFactoryDesc aggregationServiceFactoryDesc,
                                 MapEventBean builtinEventProps,
                                 Set<String> variableNames,
                                 AgentInstanceViewFactoryChainContext agentInstanceContext)
     {
+        super(viewUpdatedCollection, expiryExpression, aggregationServiceFactoryDesc, builtinEventProps, variableNames, agentInstanceContext);
         this.dataWindowViewFactory = dataWindowViewFactory;
-        this.viewUpdatedCollection = viewUpdatedCollection;
-        this.expiryExpression = expiryExpression;
-        this.builtinEventProps = builtinEventProps;
-        this.eventsPerStream = new EventBean[] {null, builtinEventProps};
-        this.variableNames = variableNames;
-        this.agentInstanceContext = agentInstanceContext;
-
-        if (variableNames != null && !variableNames.isEmpty()) {
-            for (String variable : variableNames) {
-                final VariableService variableService = agentInstanceContext.getStatementContext().getVariableService();
-                final VariableReader reader = variableService.getReader(variable);
-                agentInstanceContext.getStatementContext().getVariableService().registerCallback(reader.getVariableNumber(), this);
-                agentInstanceContext.getTerminationCallbacks().add(new StopCallback() {
-                    public void stop() {
-                        variableService.unregisterCallback(reader.getVariableNumber(), ExpressionWindowView.this);
-                    }
-                });
-            }
-
-            ScheduleHandleCallback callback = new ScheduleHandleCallback() {
-                public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
-                {
-                    ExpressionWindowView.this.expire(null, null);
-                }
-            };
-            scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
-            scheduleHandle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
-            agentInstanceContext.getTerminationCallbacks().add(this);
-        }
-        else {
-            scheduleSlot = null;
-            scheduleHandle = null;
-        }
     }
 
     public View cloneView()
@@ -113,19 +63,8 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
         return window.isEmpty();
     }
 
-    /**
-     * Returns the (optional) collection handling random access to window contents for prior or previous events.
-     * @return buffer for events
-     */
-    public ViewUpdatedCollection getViewUpdatedCollection()
-    {
-        return viewUpdatedCollection;
-    }
-
-    public final EventType getEventType()
-    {
-        // The event type is the parent view's event type
-        return parent.getEventType();
+    public void scheduleCallback() {
+        expire(null, null);
     }
 
     public final void update(EventBean[] newData, EventBean[] oldData)
@@ -135,6 +74,10 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
         {
             for (EventBean newEvent : newData) {
                 window.add(new TimestampEventPair(agentInstanceContext.getTimeProvider().getTime(), newEvent));
+            }
+
+            if (aggregationService != null) {
+                aggregationService.applyEnter(newData, null, agentInstanceContext);
             }
         }
 
@@ -148,6 +91,9 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
                         break;
                     }
                 }
+            }
+            if (aggregationService != null) {
+                aggregationService.applyLeave(oldData, null, agentInstanceContext);
             }
         }
 
@@ -176,7 +122,12 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
                     if (expired == null) {
                          expired = new OneEventCollection();
                     }
-                    expired.add(window.removeFirst().getEvent());
+                    EventBean removed = window.removeFirst().getEvent();
+                    expired.add(removed);
+                    if (aggregationService != null) {
+                        removedEvents[0] = removed;
+                        aggregationService.applyLeave(removedEvents, null, agentInstanceContext);
+                    }
                     expiredCount++;
                 }
                 else {
@@ -184,6 +135,9 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
                 }
 
                 if (window.isEmpty()) {
+                    if (aggregationService != null) {
+                        aggregationService.clearResults(agentInstanceContext);
+                    }
                     break;
                 }
             }
@@ -211,12 +165,16 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
 
     private boolean checkEvent(TimestampEventPair pair, TimestampEventPair newest, int numExpired) {
 
-        builtinEventProps.getProperties().put(CURRENT_COUNT, window.size());
-        builtinEventProps.getProperties().put(OLDEST_TIMESTAMP, pair.getTimestamp());
-        builtinEventProps.getProperties().put(NEWEST_TIMESTAMP, newest.getTimestamp());
-        builtinEventProps.getProperties().put(VIEW_REFERENCE, this);
-        builtinEventProps.getProperties().put(EXPIRED_COUNT, numExpired);
+        builtinEventProps.getProperties().put(ExpressionViewUtil.CURRENT_COUNT, window.size());
+        builtinEventProps.getProperties().put(ExpressionViewUtil.OLDEST_TIMESTAMP, pair.getTimestamp());
+        builtinEventProps.getProperties().put(ExpressionViewUtil.NEWEST_TIMESTAMP, newest.getTimestamp());
+        builtinEventProps.getProperties().put(ExpressionViewUtil.VIEW_REFERENCE, this);
+        builtinEventProps.getProperties().put(ExpressionViewUtil.EXPIRED_COUNT, numExpired);
         eventsPerStream[0] = pair.getEvent();
+
+        for (AggregationServiceAggExpressionDesc aggregateNode : aggregateNodes) {
+            aggregateNode.assignFuture(aggregationService);
+        }
 
         Boolean result = (Boolean) expiryExpression.evaluate(eventsPerStream, true, agentInstanceContext);
         if (result == null) {
@@ -229,36 +187,6 @@ public final class ExpressionWindowView extends ViewSupport implements DataWindo
     {
         return new TimestampEventPairIterator(window.iterator());
     }
-
-    public final String toString()
-    {
-        return this.getClass().getName();
-    }
-
-    public void stopView() {
-        stopScheduleAndVar();
-        agentInstanceContext.getTerminationCallbacks().remove(this);
-    }
-
-    public void stop() {
-        stopScheduleAndVar();
-    }
-
-    public void stopScheduleAndVar() {
-        if (variableNames != null && !variableNames.isEmpty()) {
-            for (String variable : variableNames) {
-                VariableReader reader = agentInstanceContext.getStatementContext().getVariableService().getReader(variable);
-                if (reader != null) {
-                    agentInstanceContext.getStatementContext().getVariableService().unregisterCallback(reader.getVariableNumber(), this);
-                }
-            }
-
-            if (agentInstanceContext.getStatementContext().getSchedulingService().isScheduled(scheduleHandle)) {
-                agentInstanceContext.getStatementContext().getSchedulingService().remove(scheduleHandle, scheduleSlot);
-            }
-        }
-    }
-
 
     // Handle variable updates by scheduling a re-evaluation with timers
     public void update(Object newValue, Object oldValue) {

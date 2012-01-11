@@ -62,4 +62,6 @@ public interface EventTypeSPI extends EventType
      * @return reader
      */
     public EventBeanReader getReader();
+
+    public boolean equalsCompareType(EventType eventType);
 }

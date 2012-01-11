@@ -12,9 +12,9 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.event.EventTypeSPI;
@@ -92,15 +92,15 @@ public class TestRevisionDeclared extends TestCase
         assertEquals(1, valueAddTypes.length);
         assertSame(type, valueAddTypes[0]);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("k0", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("p0", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("p1", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("p2", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("p3", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("p4", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("p5", String.class, null, false, false, false, false, false)
-           }, type.getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("k0", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("p0", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("p1", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("p2", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("p3", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("p4", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("p5", String.class, null, false, false, false, false, false)
+        }, type.getPropertyDescriptors());
     }
 
     protected void tearDown() throws Exception {
@@ -120,59 +120,59 @@ public class TestRevisionDeclared extends TestCase
         String[] agg = "k0,count,sum".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("k00", "01", "p10", "20", "p30", "40", "50"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"k00", "01", "p10", "20", "p30", "40", "50"});
-        ArrayAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[] {"k00", "01", "p10", "20", "p30", "40", "50"});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[] {"k00", 1L, 1L});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"k00", "01", "p10", "20", "p30", "40", "50"});
+        EPAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[]{"k00", "01", "p10", "20", "p30", "40", "50"});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[]{"k00", 1L, 1L});
         assertFalse(listenerThree.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportDeltaThree("k00", "03", "41"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"k00", "03", "p10", "20", "p30", "41", "50"});
-        ArrayAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[] {"k00", "03", "p10", "20", "p30", "41", "50"});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[] {"k00", 1L, 3L});
-        ArrayAssertionUtil.assertProps(listenerThree.getLastNewData()[0], fields, new Object[] {"k00", "01", "p10", "20", "p30", "40", "50"});
-        ArrayAssertionUtil.assertProps(listenerThree.getLastNewData()[1], fields, new Object[] {"k00", "03", "p10", "20", "p30", "41", "50"});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"k00", "03", "p10", "20", "p30", "41", "50"});
+        EPAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[]{"k00", "03", "p10", "20", "p30", "41", "50"});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[]{"k00", 1L, 3L});
+        EPAssertionUtil.assertProps(listenerThree.getLastNewData()[0], fields, new Object[]{"k00", "01", "p10", "20", "p30", "40", "50"});
+        EPAssertionUtil.assertProps(listenerThree.getLastNewData()[1], fields, new Object[]{"k00", "03", "p10", "20", "p30", "41", "50"});
         listenerThree.reset();
 
         epService.getEPRuntime().sendEvent(new SupportDeltaOne("k00", "p11", "51"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"k00", "03", "p11", "20", "p30", "41", "51"});
-        ArrayAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[] {"k00", "03", "p11", "20", "p30", "41", "51"});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[] {"k00", 1L, 3L});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"k00", "03", "p11", "20", "p30", "41", "51"});
+        EPAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[]{"k00", "03", "p11", "20", "p30", "41", "51"});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[]{"k00", 1L, 3L});
         assertFalse(listenerThree.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportDeltaTwo("k00", "04", "21", "p31"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"k00", "04", "p11", "21", "p31", "41", "51"});
-        ArrayAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[] {"k00", "04", "p11", "21", "p31", "41", "51"});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[] {"k00", 1L, 4L});
-        ArrayAssertionUtil.assertProps(listenerThree.getLastNewData()[0], fields, new Object[] {"k00", "03", "p11", "20", "p30", "41", "51"});
-        ArrayAssertionUtil.assertProps(listenerThree.getLastNewData()[1], fields, new Object[] {"k00", "04", "p11", "21", "p31", "41", "51"});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"k00", "04", "p11", "21", "p31", "41", "51"});
+        EPAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[]{"k00", "04", "p11", "21", "p31", "41", "51"});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[]{"k00", 1L, 4L});
+        EPAssertionUtil.assertProps(listenerThree.getLastNewData()[0], fields, new Object[]{"k00", "03", "p11", "20", "p30", "41", "51"});
+        EPAssertionUtil.assertProps(listenerThree.getLastNewData()[1], fields, new Object[]{"k00", "04", "p11", "21", "p31", "41", "51"});
         listenerThree.reset();
 
         epService.getEPRuntime().sendEvent(new SupportDeltaFour("k00", "05", "22", "52"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"k00", "05", "p11", "22", "p31", "41", "52"});
-        ArrayAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[] {"k00", "05", "p11", "22", "p31", "41", "52"});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[] {"k00", 1L, 5L});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"k00", "05", "p11", "22", "p31", "41", "52"});
+        EPAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[]{"k00", "05", "p11", "22", "p31", "41", "52"});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[]{"k00", 1L, 5L});
         assertFalse(listenerThree.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportDeltaFive("k00", "p12", "53"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"k00", "05", "p12", "22", "p31", "41", "53"});
-        ArrayAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[] {"k00", "05", "p12", "22", "p31", "41", "53"});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[] {"k00", 1L, 5L});
-        ArrayAssertionUtil.assertProps(listenerThree.getLastNewData()[0], fields, new Object[] {"k00", "05", "p11", "22", "p31", "41", "52"});
-        ArrayAssertionUtil.assertProps(listenerThree.getLastNewData()[1], fields, new Object[] {"k00", "05", "p12", "22", "p31", "41", "53"});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"k00", "05", "p12", "22", "p31", "41", "53"});
+        EPAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[]{"k00", "05", "p12", "22", "p31", "41", "53"});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[]{"k00", 1L, 5L});
+        EPAssertionUtil.assertProps(listenerThree.getLastNewData()[0], fields, new Object[]{"k00", "05", "p11", "22", "p31", "41", "52"});
+        EPAssertionUtil.assertProps(listenerThree.getLastNewData()[1], fields, new Object[]{"k00", "05", "p12", "22", "p31", "41", "53"});
         listenerThree.reset();
 
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("k00", "06", "p13", "23", "p32", "42", "54"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"k00", "06", "p13", "23", "p32", "42", "54"});
-        ArrayAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[] {"k00", "06", "p13", "23", "p32", "42", "54"});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[] {"k00", 1L, 6L});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"k00", "06", "p13", "23", "p32", "42", "54"});
+        EPAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[]{"k00", "06", "p13", "23", "p32", "42", "54"});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[]{"k00", 1L, 6L});
         assertFalse(listenerThree.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportDeltaOne("k00", "p14", "55"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"k00", "06", "p14", "23", "p32", "42", "55"});
-        ArrayAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[] {"k00", "06", "p14", "23", "p32", "42", "55"});
-        ArrayAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[] {"k00", 1L, 6L});
-        ArrayAssertionUtil.assertProps(listenerThree.getLastNewData()[0], fields, new Object[] {"k00", "06", "p13", "23", "p32", "42", "54"});
-        ArrayAssertionUtil.assertProps(listenerThree.getLastNewData()[1], fields, new Object[] {"k00", "06", "p14", "23", "p32", "42", "55"});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"k00", "06", "p14", "23", "p32", "42", "55"});
+        EPAssertionUtil.assertProps(stmtCreateWin.iterator().next(), fields, new Object[]{"k00", "06", "p14", "23", "p32", "42", "55"});
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), agg, new Object[]{"k00", 1L, 6L});
+        EPAssertionUtil.assertProps(listenerThree.getLastNewData()[0], fields, new Object[]{"k00", "06", "p13", "23", "p32", "42", "54"});
+        EPAssertionUtil.assertProps(listenerThree.getLastNewData()[1], fields, new Object[]{"k00", "06", "p14", "23", "p32", "42", "55"});
         listenerThree.reset();
     }
 
@@ -185,7 +185,7 @@ public class TestRevisionDeclared extends TestCase
 
         log("a00");
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("a", "a00", "a10", "a20", "a30", "a40", "a50"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"a", "a00", "a10", "a20", "a30", "a40", "a50"});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"a", "a00", "a10", "a20", "a30", "a40", "a50"});
 
         epService.getEPRuntime().sendEvent(new SupportDeltaThree("x", "03", "41"));
         assertFalse(listenerOne.isInvoked());
@@ -194,41 +194,41 @@ public class TestRevisionDeclared extends TestCase
 
         log("b00");
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("b", "b00", "b10", "b20", "b30", "b40", "b50"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"b", "b00", "b10", "b20", "b30", "b40", "b50"});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"b", "b00", "b10", "b20", "b30", "b40", "b50"});
 
         log("a01");
         epService.getEPRuntime().sendEvent(new SupportDeltaThree("a", "a01", "a41"));
-        ArrayAssertionUtil.assertProps(listenerOne.getLastNewData()[0], fields, new Object[] {"a", "a01", "a10", "a20", "a30", "a41", "a50"});
-        ArrayAssertionUtil.assertProps(listenerOne.getLastOldData()[0], fields, new Object[] {"a", "a00", "a10", "a20", "a30", "a40", "a50"});
+        EPAssertionUtil.assertProps(listenerOne.getLastNewData()[0], fields, new Object[]{"a", "a01", "a10", "a20", "a30", "a41", "a50"});
+        EPAssertionUtil.assertProps(listenerOne.getLastOldData()[0], fields, new Object[]{"a", "a00", "a10", "a20", "a30", "a40", "a50"});
         listenerOne.reset();
 
         log("c00");
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("c", "c00", "c10", "c20", "c30", "c40", "c50"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"c", "c00", "c10", "c20", "c30", "c40", "c50"});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"c", "c00", "c10", "c20", "c30", "c40", "c50"});
 
         epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=0) as sb delete from RevQuote where string = p0");
 
         log("c11");
         epService.getEPRuntime().sendEvent(new SupportDeltaFive("c", "c11", "c51"));
-        ArrayAssertionUtil.assertProps(listenerOne.getLastNewData()[0], fields, new Object[] {"c", "c00", "c11", "c20", "c30", "c40", "c51"});
-        ArrayAssertionUtil.assertProps(listenerOne.getLastOldData()[0], fields, new Object[] {"c", "c00", "c10", "c20", "c30", "c40", "c50"});
+        EPAssertionUtil.assertProps(listenerOne.getLastNewData()[0], fields, new Object[]{"c", "c00", "c11", "c20", "c30", "c40", "c51"});
+        EPAssertionUtil.assertProps(listenerOne.getLastOldData()[0], fields, new Object[]{"c", "c00", "c10", "c20", "c30", "c40", "c50"});
         listenerOne.reset();
 
         epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=1) as sb delete from RevQuote where string = p1");
 
         log("d00");
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("d", "d00", "d10", "d20", "d30", "d40", "d50"));
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[] {"d", "d00", "d10", "d20", "d30", "d40", "d50"});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"d", "d00", "d10", "d20", "d30", "d40", "d50"});
 
         log("d01");
         epService.getEPRuntime().sendEvent(new SupportDeltaFour("d", "d01", "d21", "d51"));
-        ArrayAssertionUtil.assertProps(listenerOne.getLastNewData()[0], fields, new Object[] {"d", "d01", "d10", "d21", "d30", "d40", "d51"});
-        ArrayAssertionUtil.assertProps(listenerOne.getLastOldData()[0], fields, new Object[] {"d", "d00", "d10", "d20", "d30", "d40", "d50"});
+        EPAssertionUtil.assertProps(listenerOne.getLastNewData()[0], fields, new Object[]{"d", "d01", "d10", "d21", "d30", "d40", "d51"});
+        EPAssertionUtil.assertProps(listenerOne.getLastOldData()[0], fields, new Object[]{"d", "d00", "d10", "d20", "d30", "d40", "d50"});
         listenerOne.reset();
 
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateWin.iterator(), fields,
-                new Object[][] {{"b", "b00", "b10", "b20", "b30", "b40", "b50"}, {"a", "a01", "a10", "a20", "a30", "a41", "a50"}, 
-                                {"c", "c00", "c11", "c20", "c30", "c40", "c51"}, {"d", "d01", "d10", "d21", "d30", "d40", "d51"}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateWin.iterator(), fields,
+                new Object[][]{{"b", "b00", "b10", "b20", "b30", "b40", "b50"}, {"a", "a01", "a10", "a20", "a30", "a41", "a50"},
+                        {"c", "c00", "c11", "c20", "c30", "c40", "c51"}, {"d", "d01", "d10", "d21", "d30", "d40", "d51"}});
 
         epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=4) as sb delete from RevQuote where string = p4");
 
@@ -237,25 +237,25 @@ public class TestRevisionDeclared extends TestCase
 
         log("delete b");
         epService.getEPRuntime().sendEvent(new SupportBean("b40", 4));  // delete b
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetOldAndReset(), fields, new Object[] {"b", "b00", "b10", "b20", "b30", "b40", "b50"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateWin.iterator(), fields,
-                new Object[][] {{"a", "a01", "a10", "a20", "a30", "a41", "a50"}, {"c", "c00", "c11", "c20", "c30", "c40", "c51"}, {"d", "d01", "d10", "d21", "d30", "d40", "d51"}});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetOldAndReset(), fields, new Object[]{"b", "b00", "b10", "b20", "b30", "b40", "b50"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateWin.iterator(), fields,
+                new Object[][]{{"a", "a01", "a10", "a20", "a30", "a41", "a50"}, {"c", "c00", "c11", "c20", "c30", "c40", "c51"}, {"d", "d01", "d10", "d21", "d30", "d40", "d51"}});
 
         log("delete d");
         epService.getEPRuntime().sendEvent(new SupportBean("d21", 2)); // delete d
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetOldAndReset(), fields, new Object[] {"d", "d01", "d10", "d21", "d30", "d40", "d51"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateWin.iterator(), fields,
-                new Object[][] {{"a", "a01", "a10", "a20", "a30", "a41", "a50"}, {"c", "c00", "c11", "c20", "c30", "c40", "c51"}});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetOldAndReset(), fields, new Object[]{"d", "d01", "d10", "d21", "d30", "d40", "d51"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateWin.iterator(), fields,
+                new Object[][]{{"a", "a01", "a10", "a20", "a30", "a41", "a50"}, {"c", "c00", "c11", "c20", "c30", "c40", "c51"}});
 
         log("delete a");
         epService.getEPRuntime().sendEvent(new SupportBean("a30", 3)); // delete a
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetOldAndReset(), fields, new Object[] {"a", "a01", "a10", "a20", "a30", "a41", "a50"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateWin.iterator(), fields, new Object[][] {{"c", "c00", "c11", "c20", "c30", "c40", "c51"}});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetOldAndReset(), fields, new Object[]{"a", "a01", "a10", "a20", "a30", "a41", "a50"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateWin.iterator(), fields, new Object[][]{{"c", "c00", "c11", "c20", "c30", "c40", "c51"}});
 
         log("delete c");
         epService.getEPRuntime().sendEvent(new SupportBean("c11", 1)); // delete c
-        ArrayAssertionUtil.assertProps(listenerOne.assertOneGetOldAndReset(), fields, new Object[] {"c", "c00", "c11", "c20", "c30", "c40", "c51"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateWin.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetOldAndReset(), fields, new Object[]{"c", "c00", "c11", "c20", "c30", "c40", "c51"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateWin.iterator(), fields, null);
 
         epService.getEPRuntime().sendEvent(new SupportBean("c11", 1));
         assertFalse(listenerOne.isInvoked());

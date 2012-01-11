@@ -14,26 +14,24 @@ import com.espertech.esper.util.AuditPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Map;
-
 public class ExprIdentNodeEvaluatorLogging extends ExprIdentNodeEvaluatorImpl
 {
-    private static final Log auditLog = LogFactory.getLog(AuditPath.AUDIT_LOG);
-
+    private final String engineURI;
     private final String propertyName;
     private final String statementName;
 
-    public ExprIdentNodeEvaluatorLogging(int streamNum, EventPropertyGetter propertyGetter, Class propertyType, String propertyName, String statementName) {
+    public ExprIdentNodeEvaluatorLogging(int streamNum, EventPropertyGetter propertyGetter, Class propertyType, String propertyName, String statementName, String engineURI) {
         super(streamNum, propertyGetter, propertyType);
         this.propertyName = propertyName;
         this.statementName = statementName;
+        this.engineURI = engineURI;
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         Object result = super.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
-        if (auditLog.isInfoEnabled()) {
-            auditLog.info("Statement " + statementName + " property " + propertyName + " value " + result);
+        if (AuditPath.isInfoEnabled()) {
+            AuditPath.auditLog(engineURI, statementName, "property " + propertyName + " value " + result);
         }
         return result;
     }

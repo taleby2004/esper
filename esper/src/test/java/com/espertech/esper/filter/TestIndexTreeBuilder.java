@@ -188,7 +188,7 @@ public class TestIndexTreeBuilder extends TestCase
         matches.clear();
 
         // Remove filter
-        builder.remove(testFilterCallback[0], pathAddedTo, top);
+        builder.remove(eventType, testFilterCallback[0], pathAddedTo, top);
 
         // Match should not be found
         top.matchEvent(eventBean, matches);
@@ -226,35 +226,35 @@ public class TestIndexTreeBuilder extends TestCase
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(testFilterCallback[2], pathAddedToTwo, top);
+        builder.remove(eventType, testFilterCallback[2], pathAddedToTwo, top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 4);
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(testFilterCallback[4], pathAddedToFour, top);
+        builder.remove(eventType, testFilterCallback[4], pathAddedToFour, top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 3);
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(testFilterCallback[5], pathAddedToFive, top);
+        builder.remove(eventType, testFilterCallback[5], pathAddedToFive, top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 2);
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(testFilterCallback[1], pathAddedToOne, top);
+        builder.remove(eventType, testFilterCallback[1], pathAddedToOne, top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 1);
         matches.clear();
 
         // Remove some of the nodes
-        builder.remove(testFilterCallback[3], pathAddedToThree, top);
+        builder.remove(eventType, testFilterCallback[3], pathAddedToThree, top);
 
         top.matchEvent(eventBean, matches);
         assertTrue(matches.size() == 0);

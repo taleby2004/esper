@@ -88,7 +88,7 @@ public class ResultSetRowPerGroupIterator implements Iterator<EventBean>
             eventsPerStream[0] = candidate;
 
             MultiKeyUntyped groupKey = resultSetProcessor.generateGroupKey(eventsPerStream, true);
-            aggregationService.setCurrentAccess(groupKey, exprEvaluatorContext.getAgentInstanceIds());
+            aggregationService.setCurrentAccess(groupKey, exprEvaluatorContext.getAgentInstanceId());
 
             Boolean pass = true;
             if (resultSetProcessor.getOptionalHavingNode() != null)

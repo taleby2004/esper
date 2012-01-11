@@ -26,11 +26,4 @@ public interface FilterSpecParamRangeValue extends MetaDefItem, Serializable
      * @return filter value
      */
     public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext);
-
-    /**
-     * Returns a hash code for use in computing a filter range hash code that matches
-     * when a same-values filter range is provided.
-     * @return hash code or zero if no recomputable value can be computed
-     */
-    public int getFilterHash();
 }

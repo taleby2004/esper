@@ -15,12 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST0_Container;
 import com.espertech.esper.support.bean.lrreport.LocationReportFactory;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -68,6 +68,6 @@ public class TestEnumNestedPerformance extends TestCase {
         assertTrue("delta=" + delta, delta < 100);
 
         Collection<SupportBean_ST0> result = (Collection<SupportBean_ST0>) listener.assertOneGetNewAndReset().get("val");
-        ArrayAssertionUtil.assertEqualsExactOrder(result.toArray(), new Object[] {minEvent});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{minEvent}, result.toArray());
     }
 }

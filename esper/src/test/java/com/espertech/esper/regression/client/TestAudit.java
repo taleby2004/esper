@@ -15,13 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.core.service.EPRuntimeImpl;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST1;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.AuditPath;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
@@ -31,7 +30,7 @@ import java.util.Collections;
 
 public class TestAudit extends TestCase {
 
-    private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);
+    private static final Log log = LogFactory.getLog(TestAudit.class);
     private static final Log auditLog = LogFactory.getLog(AuditPath.AUDIT_LOG);
 
     private EPServiceProvider epService;
@@ -45,6 +44,7 @@ public class TestAudit extends TestCase {
         configuration.addEventType("SupportBean", SupportBean.class);
         configuration.addEventType("SupportBean_ST0", SupportBean_ST0.class);
         configuration.addEventType("SupportBean_ST1", SupportBean_ST1.class);
+        configuration.getEngineDefaults().getLogging().setAuditPattern("[%u] [%s] %m");
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
     }
@@ -64,15 +64,20 @@ public class TestAudit extends TestCase {
         EPStatement stmtInput = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('stream') select * from SupportBean(string = 'E1')");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         stmtInput.destroy();
-        
-        // named window stream: this is not yet enabled
-        EPStatement stmtNW = epService.getEPAdministrator().createEPL("create window WinOne.win:keepall() as SupportBean");
-        EPStatement stmtInsert = epService.getEPAdministrator().createEPL("insert into WinOne select * from SupportBean");
-        EPStatement stmtConsume = epService.getEPAdministrator().createEPL("@Audit select * from WinOne");
+
+        auditLog.info("*** Named Window And Insert-Into: ");
+        EPStatement stmtNW = epService.getEPAdministrator().createEPL("@Name('create') @Audit create window WinOne.win:keepall() as SupportBean");
+        EPStatement stmtInsert = epService.getEPAdministrator().createEPL("@Name('insert') @Audit insert into WinOne select * from SupportBean");
+        EPStatement stmtConsume = epService.getEPAdministrator().createEPL("@Name('select') @Audit select * from WinOne");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         stmtNW.destroy();
         stmtInsert.destroy();
         stmtConsume.destroy();
+
+        auditLog.info("*** Insert-Into: ");
+        EPStatement stmtInsertInto = epService.getEPAdministrator().createEPL("@Name('insert') @Audit insert into ABC select * from SupportBean");
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        stmtInsertInto.destroy();
 
         auditLog.info("*** Schedule: ");
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
@@ -157,5 +162,11 @@ public class TestAudit extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 50));
         assertEquals(50, listener.assertOneGetNewAndReset().get("intPrimitive"));
         stmtProp.destroy();
+        
+        // with aggregation
+        epService.getEPAdministrator().createEPL("@Audit @Name ('create') create window MyWindow.win:keepall() as SupportBean");
+        String epl = "@Audit @Name('S0') on SupportBean as sel select count(*) from MyWindow as win having count(*)=3 order by win.intPrimitive";
+        epService.getEPAdministrator().createEPL(epl);
+
     }
 }

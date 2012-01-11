@@ -198,8 +198,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             }
             AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
             resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                    statementSpec, agentInstanceContext, typeService, null, new boolean[0], true, contextPropertyRegistry);
-
+                    statementSpec, statementContext, typeService, null, new boolean[0], true, contextPropertyRegistry);
 
             InternalEventRouter routerService = null;
             boolean addToFront = false;
@@ -272,7 +271,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             ResultSetProcessorFactoryDesc[] processorFactories = new ResultSetProcessorFactoryDesc[desc.getSplitStreams().size() + 1];
             ExprNode[] whereClauses = new ExprNode[desc.getSplitStreams().size() + 1];
             processorFactories[0] = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                    statementSpec, agentInstanceContext, typeService, null, new boolean[0], false, contextPropertyRegistry);
+                    statementSpec, statementContext, typeService, null, new boolean[0], false, contextPropertyRegistry);
             whereClauses[0] = statementSpec.getFilterRootNode();
             boolean[] isNamedWindowInsert = new boolean[desc.getSplitStreams().size() + 1];
             isNamedWindowInsert[0] = false;
@@ -287,7 +286,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
                 EPStatementStartMethodHelperValidate.validateNodes(splitSpec, statementContext, typeService, null);
 
                 processorFactories[index] = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                        splitSpec, agentInstanceContext, typeService, null, new boolean[0], false, contextPropertyRegistry);
+                        splitSpec, statementContext, typeService, null, new boolean[0], false, contextPropertyRegistry);
                 whereClauses[index] = splitSpec.getFilterRootNode();
                 isNamedWindowInsert[index] = statementContext.getNamedWindowService().isNamedWindow(splits.getInsertInto().getEventTypeName());
 
@@ -307,7 +306,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             defaultSelectAllSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
 
             StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {outputEventType}, new String[] {"trigger_stream"}, new boolean[] {true}, services.getEngineURI(), false);
-            outputResultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(defaultSelectAllSpec, getDefaultAgentInstanceContext(), streamTypeService, null, new boolean[0], true, contextPropertyRegistry);
+            outputResultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(defaultSelectAllSpec, statementContext, streamTypeService, null, new boolean[0], true, contextPropertyRegistry);
         }
 
         EventType resultEventType = resultSetProcessorPrototype == null ? null : resultSetProcessorPrototype.getResultSetProcessorFactory().getResultEventType();

@@ -33,6 +33,10 @@
         </para>
         
         <para>
+           Esper's API provides test framework classes to simplify automated testing of EPL statements. Please see <xref linkend="api-testing"/> for more information.
+        </para>
+        
+        <para>
 			We recommend performing latency and throughput tests early in the development lifecycle. Please consider the performance tips in <xref linkend="performance"/> for optimal performance.
         </para>
         
@@ -60,7 +64,7 @@
 			<title>@Audit Annotation</title>
 			
 			<para>
-				Use the <literal>@Audit</literal> annotation to have the engine output detailed information about statement processing. The engine reports, at INFO level, the information under log name <literal>com.espertech.esper.audit</literal>.
+				Use the <literal>@Audit</literal> annotation to have the engine output detailed information about statement processing. The engine reports, at INFO level, the information under log name <literal>com.espertech.esper.audit</literal>. You may define an output format for audit information via configuration.
 			</para>
 			
 			<para>
@@ -116,6 +120,10 @@ INFO  [audit] Statement All-Order-Events property price value 100.0]]></programl
 							<entry>Each expression including child or nested expressions and their return value.</entry>
 						</row>
 						<row>
+							<entry>Insert</entry>
+							<entry>Each event inserted via insert-into.</entry>
+						</row>
+						<row>
 							<entry>Pattern</entry>
 							<entry>Each pattern sub-expression and its change in truth-value.</entry>
 						</row>
@@ -128,16 +136,16 @@ INFO  [audit] Statement All-Order-Events property price value 100.0]]></programl
 							<entry>Each property name and the event's property value.</entry>
 						</row>
 						<row>
-							<entry>View</entry>
-							<entry>Each view name and its insert and remove stream.</entry>
-						</row>
-						<row>
 							<entry>Schedule</entry>
 							<entry>Each schedule modification and trigger received by a statement.</entry>
 						</row>
 						<row>
 							<entry>Stream</entry>
 							<entry>Each new event received by a statement.</entry>
+						</row>
+						<row>
+							<entry>View</entry>
+							<entry>Each view name and its insert and remove stream.</entry>
 						</row>
 					</tbody>
 				</tgroup>				

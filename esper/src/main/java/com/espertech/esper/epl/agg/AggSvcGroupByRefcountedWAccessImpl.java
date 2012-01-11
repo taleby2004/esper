@@ -86,8 +86,8 @@ public class AggSvcGroupByRefcountedWAccessImpl extends AggregationServiceBaseGr
         AggregationAccess[] groupAccesses;
         if (row == null)
         {
-            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
-            groupAccesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceIds(), isJoin, streams, methodResolutionService, groupByKey);
+            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceId(), groupByKey);
+            groupAccesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceId(), isJoin, streams, methodResolutionService, groupByKey);
             row = new AggregationMethodPairRow(methodResolutionService.getCurrentRowCount(groupAggregators, groupAccesses) + 1, groupAggregators, groupAccesses);
             aggregatorsPerGroup.put(groupByKey, row);
         }
@@ -126,8 +126,8 @@ public class AggSvcGroupByRefcountedWAccessImpl extends AggregationServiceBaseGr
         }
         else
         {
-            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceIds(), groupByKey);
-            groupAccesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceIds(), isJoin,  streams, methodResolutionService, groupByKey);
+            groupAggregators = methodResolutionService.newAggregators(aggregators, exprEvaluatorContext.getAgentInstanceId(), groupByKey);
+            groupAccesses = AggregationAccessUtil.getNewAccesses(exprEvaluatorContext.getAgentInstanceId(), isJoin,  streams, methodResolutionService, groupByKey);
             row = new AggregationMethodPairRow(methodResolutionService.getCurrentRowCount(groupAggregators, groupAccesses) + 1, groupAggregators, groupAccesses);
             aggregatorsPerGroup.put(groupByKey, row);
         }
@@ -149,11 +149,11 @@ public class AggSvcGroupByRefcountedWAccessImpl extends AggregationServiceBaseGr
         if (row.getRefcount() <= 0)
         {
             removedKeys.add(groupByKey);
-            methodResolutionService.removeAggregators(exprEvaluatorContext.getAgentInstanceIds(), groupByKey);  // allow persistence to remove keys already
+            methodResolutionService.removeAggregators(exprEvaluatorContext.getAgentInstanceId(), groupByKey);  // allow persistence to remove keys already
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey, int[] agentInstanceIds)
+    public void setCurrentAccess(MultiKeyUntyped groupByKey, int agentInstanceId)
     {
         AggregationMethodPairRow row = aggregatorsPerGroup.get(groupByKey);
 
@@ -169,12 +169,12 @@ public class AggSvcGroupByRefcountedWAccessImpl extends AggregationServiceBaseGr
 
         if (currentAggregatorMethods == null)
         {
-            currentAggregatorMethods = methodResolutionService.newAggregators(aggregators, agentInstanceIds, groupByKey);
-            currentAggregatorAccesses = AggregationAccessUtil.getNewAccesses(agentInstanceIds, isJoin, streams, methodResolutionService, groupByKey);
+            currentAggregatorMethods = methodResolutionService.newAggregators(aggregators, agentInstanceId, groupByKey);
+            currentAggregatorAccesses = AggregationAccessUtil.getNewAccesses(agentInstanceId, isJoin, streams, methodResolutionService, groupByKey);
         }
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         if (column < aggregators.length) {
             return currentAggregatorMethods[column].getValue();
@@ -203,5 +203,9 @@ public class AggSvcGroupByRefcountedWAccessImpl extends AggregationServiceBaseGr
             AggregationAccessorSlotPair pair = accessors[column - aggregators.length];
             return pair.getAccessor().getEventBean(currentAggregatorAccesses[pair.getSlot()]);
         }
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

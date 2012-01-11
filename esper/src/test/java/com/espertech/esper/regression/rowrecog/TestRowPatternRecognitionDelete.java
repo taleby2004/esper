@@ -15,10 +15,10 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -93,10 +93,10 @@ public class TestRowPatternRecognitionDelete extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportRecogBean("xx", 4));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E2", -4));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E3", 12));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E2", "E3"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E2", "E3"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E2", "E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E2", "E3"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("P4", 21));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("P3", 22));
@@ -104,20 +104,20 @@ public class TestRowPatternRecognitionDelete extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportRecogBean("xx", -2));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E5", -1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E6", -2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E5", "E6"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E2", "E3"}, {"E5", "E6"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E5", "E6"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E2", "E3"}, {"E5", "E6"}});
 
         // delete an PREV-referenced event: no effect as PREV is an order-of-arrival operator
         epService.getEPRuntime().sendEvent(new SupportBean("D1", 21));      // delete P4 of second batch
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E2", "E3"}, {"E5", "E6"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E2", "E3"}, {"E5", "E6"}});
 
         // delete an partial-match event
         epService.getEPRuntime().sendEvent(new SupportBean("D2", -1));      // delete E5 of second batch
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E2", "E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E2", "E3"}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("D3", 12));      // delete P3 and E3 of first batch
         assertFalse(stmt.iterator().hasNext());
@@ -154,10 +154,10 @@ public class TestRowPatternRecognitionDelete extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E2", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 0));       // deletes E2
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E3", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E1", null, null, null, "E3"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E1", null, null, null, "E3"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E1", null, null, null, "E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E1", null, null, null, "E3"}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));       // deletes E1
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 0));       // deletes E4
@@ -166,10 +166,10 @@ public class TestRowPatternRecognitionDelete extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E5", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 0));       // deletes E4
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E6", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E5", null, null, null, "E6"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E5", null, null, null, "E6"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E5", null, null, null, "E6"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E5", null, null, null, "E6"}});
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E7", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E8", 1));
@@ -178,10 +178,10 @@ public class TestRowPatternRecognitionDelete extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E11", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("E9", 0));       // deletes E9
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E12", 3));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E7", "E8", "E10", "E11", "E12"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E5", null, null, null, "E6"}, {"E7", "E8", "E10", "E11", "E12"}});    // note interranking among per-event result
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E7", "E8", "E10", "E11", "E12"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E5", null, null, null, "E6"}, {"E7", "E8", "E10", "E11", "E12"}});    // note interranking among per-event result
 
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E13", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E14", 1));
@@ -193,8 +193,8 @@ public class TestRowPatternRecognitionDelete extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E13", 0));       // deletes E17
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E18", 3));
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E5", null, null, null, "E6"}, {"E7", "E8", "E10", "E11", "E12"}});    // note interranking among per-event result
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E5", null, null, null, "E6"}, {"E7", "E8", "E10", "E11", "E12"}});    // note interranking among per-event result
     }
 
     public void testNamedWindowInSequenceDelete()
@@ -236,9 +236,9 @@ public class TestRowPatternRecognitionDelete extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 0));       // deletes E4
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E6", 1));
         epService.getEPRuntime().sendEvent(new SupportRecogBean("E7", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
-                new Object[][] {{"E5", "E6", "E7"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields,
-                new Object[][] {{"E5", "E6", "E7"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields,
+                new Object[][]{{"E5", "E6", "E7"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
+                new Object[][]{{"E5", "E6", "E7"}});
     }
 }

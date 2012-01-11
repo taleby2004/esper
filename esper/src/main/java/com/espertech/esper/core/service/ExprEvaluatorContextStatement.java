@@ -10,6 +10,7 @@ package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.schedule.TimeProvider;
 
 /**
@@ -35,11 +36,31 @@ public class ExprEvaluatorContextStatement implements ExprEvaluatorContext
         return statementContext.getExpressionResultCacheService();
     }
 
-    public int[] getAgentInstanceIds() {
-        return null;
+    public int getAgentInstanceId() {
+        return -1;
     }
 
     public EventBean getContextProperties() {
         return null;
+    }
+
+    public AgentInstanceScriptContext getAgentInstanceScriptContext() {
+        return statementContext.getDefaultAgentInstanceScriptContext();
+    }
+
+    public String getStatementName() {
+        return statementContext.getStatementName();
+    }
+
+    public String getEngineURI() {
+        return statementContext.getEngineURI();
+    }
+
+    public String getStatementId() {
+        return statementContext.getStatementId();
+    }
+
+    public StatementAgentInstanceLock getAgentInstanceLock() {
+        return statementContext.getDefaultAgentInstanceLock();
     }
 }

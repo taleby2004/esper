@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.client.ConfigurationInformation;
+import com.espertech.esper.client.soda.ScriptExpression;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.named.NamedWindowService;
@@ -39,6 +40,7 @@ public class StatementSpecMapContext
     private boolean hasVariables;
     private Set<String> variableNames;
     private Map<String, ExpressionDeclItem> expressionDeclarations;
+    private Map<String, ExpressionScriptProvided> scripts;
     private String contextName;
 
     /**
@@ -140,6 +142,17 @@ public class StatementSpecMapContext
             expressionDeclarations = new HashMap<String, ExpressionDeclItem>();
         }
         expressionDeclarations.put(item.getName(), item);
+    }
+
+    public Map<String, ExpressionScriptProvided> getScripts() {
+        return scripts;
+    }
+
+    public void addScript(ExpressionScriptProvided item) {
+        if (scripts == null) {
+            scripts = new HashMap<String, ExpressionScriptProvided>();
+        }
+        scripts.put(item.getName(), item);
     }
 
     public ContextManagementService getContextManagementService() {

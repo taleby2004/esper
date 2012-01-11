@@ -15,7 +15,7 @@ import com.espertech.esper.epl.core.MethodResolutionService;
  */
 public interface AggregationMethodFactory
 {
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId);
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId);
 
     public Class getResultType();
 

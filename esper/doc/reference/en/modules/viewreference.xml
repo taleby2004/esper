@@ -44,57 +44,57 @@
 				</thead>
 				<tbody>
 					<row>
-						<entry>Length window</entry>
+						<entry>Length Window</entry>
 						<entry>win:length(<emphasis>size</emphasis>)</entry>
 						<entry>Sliding length window extending the specified number of elements into the past.</entry>
 					</row>
 					<row>
-						<entry>Length batch window</entry>
+						<entry>Length Batch Window</entry>
 						<entry>win:length_batch(<emphasis>size</emphasis>)</entry>
 						<entry>Tumbling window that batches events and releases them when a given minimum number of events has been collected.</entry>
 					</row>
 					<row>
-						<entry>Time window</entry>
+						<entry>Time Window</entry>
 						<entry>win:time(<emphasis>time period</emphasis>)</entry>
 						<entry>Sliding time window extending the specified time interval into the past.</entry>
 					</row>
 					<row>
-						<entry>Externally-timed window</entry>
+						<entry>Externally-timed Window</entry>
 						<entry>win:ext_timed(<emphasis>timestamp expression</emphasis>, <emphasis>time period</emphasis>)</entry>
 						<entry>Sliding time window, based on the millisecond time value supplied by an expression.</entry>
 					</row>
 					<row>
-						<entry>Time batch window</entry>
+						<entry>Time Batch Window</entry>
 						<entry>win:time_batch(<emphasis>time period</emphasis>[,<emphasis>optional reference point</emphasis>] [, <emphasis>flow control</emphasis>])</entry>
 						<entry>Tumbling window that batches events and releases them every specified time interval, with flow control options.</entry>
 					</row>
 					<row>
-						<entry>Time-Length combination batch window</entry>
+						<entry>Time-Length Combination Batch Window</entry>
 						<entry>win:time_length_batch(<emphasis>time period, size [, flow control]</emphasis>)</entry>
 						<entry>Tumbling multi-policy time and length batch window with flow control options.</entry>
 					</row>
 					<row>
-						<entry>Time-Accumulating window</entry>
+						<entry>Time-Accumulating Window</entry>
 						<entry>win:time_accum(<emphasis>time period</emphasis>)</entry>
 						<entry>Sliding time window accumulates events until no more events arrive within a given time interval.</entry>
 					</row>
 					<row>
-						<entry>Keep-All window</entry>
+						<entry>Keep-All Window</entry>
 						<entry>win:keepall()</entry>
 						<entry>The keep-all data window view simply retains all events.</entry>
 					</row>
 					<row>
-						<entry>Sorted window</entry>
+						<entry>Sorted Window</entry>
 						<entry>ext:sort(<emphasis>size, sort criteria</emphasis>)</entry>
 						<entry>Sorts by values returned by sort criteria expressions and keeps only the top events up to the given size.</entry>
 					</row>
 					<row>
-						<entry>Time-Order View</entry>
+						<entry>Time-Order Window</entry>
 						<entry>ext:time_order(<emphasis>timestamp expression, time period</emphasis>)</entry>
 						<entry>Orders events that arrive out-of-order, using an expression providing timestamps to be ordered.</entry>
 					</row>
 					<row>
-						<entry>Unique</entry>
+						<entry>Unique Window</entry>
 						<entry>std:unique(<emphasis>unique criteria(s)</emphasis>)</entry>
 						<entry>Retains only the most recent among events having the same value for the criteria expression(s). Acts as a length window of size 1 for each distinct expression value.</entry>
 					</row>
@@ -104,34 +104,39 @@
 						<entry>Groups events into sub-views by the value of the specified expression(s), generally used to provide a separate data window per group.</entry>
 					</row>
 					<row>
-						<entry>Last Event</entry>
+						<entry>Last Event Window</entry>
 						<entry>std:lastevent()</entry>
 						<entry>Retains the last event, acts as a length window of size 1.</entry>
 					</row>
 					<row>
-						<entry>First Event</entry>
+						<entry>First Event Window</entry>
 						<entry>std:firstevent()</entry>
 						<entry>Retains the very first arriving event, disregarding all subsequent events.</entry>
 					</row>
 					<row>
-						<entry>First Unique</entry>
+						<entry>First Unique Window</entry>
 						<entry>std:firstunique(<emphasis>unique criteria(s)</emphasis>)</entry>
 						<entry>Retains only the very first among events having the same value for the criteria expression(s), disregarding all subsequent events for same value(s).</entry>
 					</row>
 					<row>
-						<entry>First Length</entry>
+						<entry>First Length Window</entry>
 						<entry>win:firstlength(<emphasis>size</emphasis>)</entry>
 						<entry>Retains the first <emphasis>size</emphasis> events, disregarding all subsequent events.</entry>
 					</row>
 					<row>
-						<entry>First Time</entry>
+						<entry>First Time Window</entry>
 						<entry>win:firsttime(<emphasis>time period</emphasis>)</entry>
 						<entry>Retains the events arriving until the time interval has passed, disregarding all subsequent events.</entry>
 					</row>
 					<row>
-						<entry>Expiry Expression</entry>
+						<entry>Expiry Expression Window</entry>
 						<entry>win:expr(<emphasis>expiry expression</emphasis>)</entry>
 						<entry>Expire events based on the result of an expiry expression passed as a parameter.</entry>
+					</row>
+					<row>
+						<entry>Expiry Expression Batch Window</entry>
+						<entry>win:expr_batch(<emphasis>expiry expression</emphasis>)</entry>
+						<entry>Tumbling window that batches events and releases them based on the result of an expiry expression passed as a parameter.</entry>
 					</row>
 				</tbody>
 			</tgroup>
@@ -200,7 +205,7 @@
 			<programlisting><![CDATA[select * from StockTickEvent.win:time(5 sec)]]></programlisting>
 
 		   <para>
-			   All expressions are allowed as parameters to views, including expressions that contain variables or substitution parameters for prepared statements.
+			   All expressions are allowed as parameters to views, including expressions that contain variables or substitution parameters for prepared statements. Subqueries, the special <literal>prior</literal> and <literal>prev</literal> functions and aggregations (with the exception of the expression window and expression batch window) are not allowed as view parameters.
 		   </para>
 
 		   <para>
@@ -209,7 +214,8 @@
 			<programlisting><![CDATA[select * from StockTickEvent.win:time(VAR_WINDOW_SIZE)]]></programlisting>
 
 		   <para>
-			   Expression parameters for views are evaluated at the time the view is first created. They are not continuously re-evaluated by built-in views. For applications that provide a custom plug-in view, such custom views may re-evaluate parameter expressions.
+			   Expression parameters for views are evaluated at the time the view is first created with the exception of the expression window (<literal>win:expr</literal>) and expression batch window (<literal>win:expr_batch</literal>). 
+			   Also consider multiple data windows in intersection or union (keywords <literal>retain-intersection</literal> and <literal>retain-union</literal>). Consider writing a custom plug-in view if your application requires behavior that is not yet provided by any of the built-in views.
 		   </para>
 
 		   <para>
@@ -586,30 +592,30 @@ following conditions occurs, whichever occurs first: the data window has collect
 				</para>
 				
 				<para>
-				  Use this view to implement dynamically shrinking or expanding time and/or length windows by defining an expiry expression with one or more variables.
-				</para>
+				   Use this view to implement rolling and dynamically shrinking or expanding time, length or other windows. Rolling can, for example, be controlled based on event properties of arriving events, based on aggregation values or based on the return result of user-defined functions.
+				 </para>
 				
-				<para>
-				  Use this view to expire events based on a custom expiry policy. For example, the view can consider locale-specific work day or time information when used with a user-defined function.
-				</para>
-
 				<para>
 					The synopsis is:
 				</para>
 				<synopsis>win:expr(<emphasis>expiry_expression</emphasis>)</synopsis>
 
 				<para>
-					The expiry expression can be any expression including expressions on event properties, variables or user-defined functions. The view applies this expression only to the oldest event(s) currently in the view, as described next.
+					The expiry expression can be any expression including expressions on event properties, variables, aggregation functions or user-defined functions. The view applies this expression to the oldest event(s) currently in the view, as described next.
 				</para>
 
 				<para>
-					When a new event arrives, or when a variable value referenced by the expiry expression changes, the view applies the expiry expression starting from the oldest event in the data window.
+					When a new event arrives or when a variable value referenced by the expiry expression changes then the view applies the expiry expression starting from the oldest event in the data window.
 					If the expiry expression returns false for the oldest event, the view removes the event from the data window. The view then applies the expression to the next oldest event.
 					If the expiry expression returns true for the oldest event, no further evaluation takes place and the view indicates any new and expired events through insert and remove stream.
 				</para>
 
 				<para>
 					By using variables in the expiry expression it is possible to change the behavior of the view dynamically at runtime. When one or more variables used in the expression are updated the view evaluates the expiry expression starting from the oldest event.
+				</para>
+
+				<para>
+					Aggregation functions, if present in the expiry expression, are continuously updated as events enter and leave the data window. Use the grouped data window with this window to compute aggregations per group.
 				</para>
 
 				<para>
@@ -689,11 +695,135 @@ following conditions occurs, whichever occurs first: the data window has collect
 				<programlisting><![CDATA[create variable boolean KEEP = true]]></programlisting>
 				<programlisting><![CDATA[select * from MyEvent.win:expr(KEEP)]]></programlisting>
 
+				<para>
+					The next example specifies a rolling window that removes the oldest events from the window until the total price of all events in the window is less then 1000:
+				</para>
+				<programlisting><![CDATA[select * from MyEvent.win:expr(sum(price) < 1000)]]></programlisting>
+
 				<sect4 id="view-win-expr-limit" >
 				   <title>Limitations</title>
 
 					<para>
-						You may not use subqueries, aggregation functions or the <literal>prev</literal> and <literal>prior</literal> functions as part of the expiry expression. Consider using a named window and <literal>on-delete</literal> or <literal>on-merge</literal> instead.
+						You may not use subqueries or the <literal>prev</literal> and <literal>prior</literal> functions as part of the expiry expression. Consider using a named window and <literal>on-delete</literal> or <literal>on-merge</literal> instead.
+					</para>
+					
+					<para>
+					  When using variables in the expiry expression, the thread that updates the variable does not evaluate the view. The thread that updates the variable instead schedules a reevaluation and view evaluates by timer execution.
+					</para>					
+				</sect4>
+			</sect2>
+
+			<sect2 id="view-win-exprbatch" >
+			   <title>Expiry Expression Batch (<literal>win:expr_batch</literal>)</title>
+		
+				<indexterm><primary>expression batch window</primary></indexterm>
+				<indexterm><primary>views</primary><secondary>expiry expression batch window</secondary></indexterm>
+
+				<para>					
+					The <literal>expr_batch</literal> view buffers events (tumbling window) and releases them when a given expiry expression returns true.
+				</para>
+				
+				<para>
+				  Use this view to implement dynamic or custom batching behavior, such as for dynamically shrinking or growing time, length or other batches, for batching based on event properties of arriving events, aggregation values or for batching based on a user-defined function.
+				</para>
+			
+				<para>
+					The synopsis is:
+				</para>
+				<synopsis>win:expr_batch(<emphasis>expiry_expression</emphasis>)</synopsis>
+
+				<para>
+					The expiry expression can be any expression including expressions on event properties, variables, aggregation functions or user-defined functions. The view applies this expression to arriving event(s), as described next.
+				</para>
+
+				<para>
+					When a new event arrives or when a variable value referenced by the expiry expression changes or when events get removed from the data window then the view applies the expiry expression. 
+					If the expiry expression returns true the data window posts the collected events as the insert stream and the last batch of events as remove stream.
+				</para>
+
+				<para>
+					By using variables in the expiry expression it is possible to change the behavior of the view dynamically at runtime. When one or more variables used in the expression are updated the view evaluates the expiry expression as well.
+				</para>
+
+				<para>
+					Aggregation functions, if present in the expiry expression, are continuously updated as events enter the data window and reset when the engine posts a batch of events. Use the grouped data window with this window to compute aggregations per group.
+				</para>
+
+				<para>
+					The engine makes the following built-in properties available to the expiry expression:
+				</para>
+				
+			   <table frame="topbot">
+					<title>Built-in Properties of the Expiry Expression Data Window View</title>
+					<tgroup cols="3">
+						<colspec colwidth="1.0*"/>
+						<colspec colwidth="1.0*"/>
+						<colspec colwidth="3*"/>
+						<thead>
+							<row>
+								<entry>Name</entry>
+								<entry>Type</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+								<entry>current_count</entry>
+								<entry>int</entry>
+								<entry>The number of events in the data window including the currently-arriving event.</entry>
+							</row>
+							<row>
+								<entry>newest_timestamp</entry>
+								<entry>long</entry>
+								<entry>The engine timestamp associated with the last-arriving event.</entry>
+							</row>
+							<row>
+								<entry>oldest_timestamp</entry>
+								<entry>long</entry>
+								<entry>The engine timestamp associated with the currently-evaluated event.</entry>
+							</row>
+							<row>
+								<entry>view_reference</entry>
+								<entry>Object</entry>
+								<entry>The object handle to this view.</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table> 
+				
+				<para>
+					This EPL declares an expiry expression that posts event batches consisting of 2 events:
+				</para>
+				<programlisting><![CDATA[select * from MyEvent.win:expr_batch(current_count >= 2)]]></programlisting>
+				
+				<para>
+					The following example implements a dynamically-sized length batch window by means of a SIZE variable. As the SIZE variable value changes 
+					the view accomulates and posts the number of events according to the current value of SIZE:
+				</para>
+				<programlisting><![CDATA[create variable int SIZE = 1000]]></programlisting>
+				<programlisting><![CDATA[select * from MyEvent.win:expr_batch(current_count >= SIZE)]]></programlisting>
+
+				<para>
+					The following example accumulates events until an event arrives that has a value of <literal>postme</literal> for property <literal>myvalue</literal>:
+				</para>
+				<programlisting><![CDATA[select * from MyEvent.win:expr_batch(myvalue = 'postme')]]></programlisting>
+
+				<para>
+					The following example declares a POST variable and posts a batch of events when the variable turns true:
+				</para>
+				<programlisting><![CDATA[create variable boolean POST = false]]></programlisting>
+				<programlisting><![CDATA[select * from MyEvent.win:expr_batch(POST)]]></programlisting>
+
+				<para>
+					The next example specifies a tumbling window that posts a batch of events when the total price of all events in the window is greater then 1000:
+				</para>
+				<programlisting><![CDATA[select * from MyEvent.win:expr_batch(sum(price) > 1000)]]></programlisting>
+
+				<sect4 id="view-win-exprbatch-limit" >
+				   <title>Limitations</title>
+
+					<para>
+						You may not use subqueries or the <literal>prev</literal> and <literal>prior</literal> functions as part of the expiry expression. Consider using a named window and <literal>on-delete</literal> or <literal>on-merge</literal> instead.
 					</para>
 					
 					<para>

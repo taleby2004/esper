@@ -19,7 +19,7 @@ import java.util.*;
 public class OuterInnerDirectionalGraph
 {
     private final Map<Integer, Set<Integer>> streamToInnerMap;
-
+    private final Map<Integer, Set<Integer>> unqualifiedNavigableStreams;
     private final int numStreams;
 
     /**
@@ -30,6 +30,7 @@ public class OuterInnerDirectionalGraph
     {
         this.numStreams = numStreams;
         this.streamToInnerMap = new HashMap<Integer, Set<Integer>>();
+        this.unqualifiedNavigableStreams = new HashMap<Integer, Set<Integer>>();
     }
 
     /**
@@ -154,6 +155,24 @@ public class OuterInnerDirectionalGraph
             delimiter = ", ";
         }
         return buffer.toString();
+    }
+
+    public Map<Integer, Set<Integer>> getUnqualifiedNavigableStreams() {
+        return unqualifiedNavigableStreams;
+    }
+
+    public void addUnqualifiedNavigable(int streamOne, int streamTwo) {
+        addUnqualifiedInternal(streamOne, streamTwo);
+        addUnqualifiedInternal(streamTwo, streamOne);
+    }
+
+    private void addUnqualifiedInternal(int streamOne, int streamTwo) {
+        Set<Integer> set = unqualifiedNavigableStreams.get(streamOne);
+        if (set == null) {
+            set = new HashSet<Integer>();
+            unqualifiedNavigableStreams.put(streamOne, set);
+        }
+        set.add(streamTwo);
     }
 
     private void checkArgs(int stream)

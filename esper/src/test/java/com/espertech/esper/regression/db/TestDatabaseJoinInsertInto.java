@@ -11,13 +11,13 @@
 
 package com.espertech.esper.regression.db;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportDatabaseService;
-import com.espertech.esper.support.util.SupportUpdateListener;
 
 import java.util.Properties;
 

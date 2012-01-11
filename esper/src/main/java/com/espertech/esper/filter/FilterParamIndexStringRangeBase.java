@@ -12,31 +12,23 @@
 
 package com.espertech.esper.filter;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.client.EventPropertyGetter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.IdentityHashMap;
+import java.util.TreeMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public abstract class FilterParamIndexStringRangeBase extends FilterParamIndexPropBase
+public abstract class FilterParamIndexStringRangeBase extends FilterParamIndexLookupableBase
 {
     protected final TreeMap<StringRange, EventEvaluator> ranges;
     private final IdentityHashMap<StringRange, EventEvaluator> rangesNullEndpoints;
     private final ReadWriteLock rangesRWLock;
 
-   /**
-     * Constructs the index for matching ranges.
-     * @param attributeName is the name of the event attribute field
-    * @param filterOperator is the type of range
-    * @param eventType is type of events handled
-    */
-    public FilterParamIndexStringRangeBase(String attributeName, FilterOperator filterOperator, EventType eventType)
-    {
-        super(attributeName, filterOperator, eventType);
+    protected FilterParamIndexStringRangeBase(FilterSpecLookupable lookupable, FilterOperator filterOperator) {
+        super(filterOperator, lookupable);
 
         ranges = new TreeMap<StringRange, EventEvaluator>(new StringRangeComparator());
         rangesNullEndpoints = new IdentityHashMap<StringRange, EventEvaluator>();

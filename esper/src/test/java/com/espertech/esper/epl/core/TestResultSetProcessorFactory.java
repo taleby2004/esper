@@ -13,6 +13,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.core.context.mgr.ContextPropertyRegistryImpl;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprIdentNodeImpl;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprValidationException;
@@ -36,6 +37,7 @@ public class TestResultSetProcessorFactory extends TestCase
     private List<ExprNode> groupByList;
     private List<OrderByItem> orderByList;
     private AgentInstanceContext agentInstanceContext;
+    private StatementContext stmtContext;
 
     public void setUp()
     {
@@ -44,6 +46,7 @@ public class TestResultSetProcessorFactory extends TestCase
         groupByList = new LinkedList<ExprNode>();
         orderByList = new LinkedList<OrderByItem>();
         agentInstanceContext = SupportStatementContextFactory.makeAgentInstanceContext();
+        stmtContext = agentInstanceContext.getStatementContext();
     }
 
     public void testGetProcessorNoProcessorRequired() throws Exception
@@ -52,7 +55,7 @@ public class TestResultSetProcessorFactory extends TestCase
         List<SelectClauseElementCompiled> wildcardSelect = new LinkedList<SelectClauseElementCompiled>();
         wildcardSelect.add(new SelectClauseElementWildcard());
         StatementSpecCompiled spec = makeSpec(new SelectClauseSpecCompiled(wildcardSelect, false), null, groupByList, null, null, orderByList);
-        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         assertTrue(processor.getResultSetProcessorFactory() instanceof ResultSetProcessorHandThrougFactory);
     }
 
@@ -62,19 +65,19 @@ public class TestResultSetProcessorFactory extends TestCase
         List<SelectClauseElementCompiled> wildcardSelect = new LinkedList<SelectClauseElementCompiled>();
         wildcardSelect.add(new SelectClauseElementWildcard());
         StatementSpecCompiled spec = makeSpec(new SelectClauseSpecCompiled(wildcardSelect, false), null, groupByList, null, null, orderByList);
-        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService3Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService3Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         assertTrue(processor.getResultSetProcessorFactory() instanceof ResultSetProcessorHandThrougFactory);
 
         // empty group-by with select clause elements
         List<SelectClauseElementCompiled> selectList = SupportSelectExprFactory.makeNoAggregateSelectListUnnamed();
         spec = makeSpec(new SelectClauseSpecCompiled(selectList, false), null, groupByList, null, null, orderByList);
-        processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         assertTrue(processor.getResultSetProcessorFactory() instanceof ResultSetProcessorHandThrougFactory);
 
         // non-empty group-by and wildcard select, group by ignored
         groupByList.add(SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0"));
         spec = makeSpec(new SelectClauseSpecCompiled(wildcardSelect, false), null, groupByList, null, null, orderByList);
-        processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         assertTrue(processor.getResultSetProcessorFactory() instanceof ResultSetProcessorSimpleFactory);
     }
 
@@ -84,13 +87,13 @@ public class TestResultSetProcessorFactory extends TestCase
         // and one or more properties in the select clause is not aggregated
         List<SelectClauseElementCompiled> selectList = SupportSelectExprFactory.makeAggregateMixed();
         StatementSpecCompiled spec = makeSpec(new SelectClauseSpecCompiled(selectList, false), null, groupByList, null, null, orderByList);
-        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         assertTrue(processor.getResultSetProcessorFactory() instanceof ResultSetProcessorAggregateAllFactory);
 
         // test a case where a property is both aggregated and non-aggregated: select volume, sum(volume)
         selectList = SupportSelectExprFactory.makeAggregatePlusNoAggregate();
         spec = makeSpec(new SelectClauseSpecCompiled(selectList, false), null, groupByList, null, null, orderByList);
-        processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         assertTrue(processor.getResultSetProcessorFactory() instanceof ResultSetProcessorAggregateAllFactory);
     }
 
@@ -100,7 +103,7 @@ public class TestResultSetProcessorFactory extends TestCase
         // and all properties in the select clause are aggregated
         List<SelectClauseElementCompiled> selectList = SupportSelectExprFactory.makeAggregateSelectListWithProps();
         StatementSpecCompiled spec = makeSpec(new SelectClauseSpecCompiled(selectList, false), null, groupByList, null, null, orderByList);
-        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         assertTrue(processor.getResultSetProcessorFactory() instanceof ResultSetProcessorRowForAllFactory);
     }
 
@@ -111,7 +114,7 @@ public class TestResultSetProcessorFactory extends TestCase
         List<SelectClauseElementCompiled> selectList = SupportSelectExprFactory.makeAggregateMixed();
         groupByList.add(SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0"));
         StatementSpecCompiled spec = makeSpec(new SelectClauseSpecCompiled(selectList, false), null, groupByList, null, null, orderByList);
-        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         assertTrue(processor.getResultSetProcessorFactory() instanceof ResultSetProcessorRowPerGroupFactory);
     }
 
@@ -126,7 +129,7 @@ public class TestResultSetProcessorFactory extends TestCase
 
         groupByList.add(SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0"));
         StatementSpecCompiled spec = makeSpec(new SelectClauseSpecCompiled(selectList, false), null, groupByList, null, null, orderByList);
-        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+        ResultSetProcessorFactoryDesc processor = ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService1Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
         assertTrue(processor.getResultSetProcessorFactory() instanceof ResultSetProcessorAggregateGroupedFactory);
     }
 
@@ -136,7 +139,7 @@ public class TestResultSetProcessorFactory extends TestCase
         // invalid select clause
         try
         {
-            ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService3Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+            ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService3Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
             fail();
         }
         catch (ExprValidationException ex)
@@ -149,7 +152,7 @@ public class TestResultSetProcessorFactory extends TestCase
         try
         {
             spec = makeSpec(new SelectClauseSpecCompiled(SupportSelectExprFactory.makeNoAggregateSelectListUnnamed(), false), null, groupByList, null, null, orderByList);
-            ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService3Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+            ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService3Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
             fail();
         }
         catch (ExprValidationException ex)
@@ -167,7 +170,7 @@ public class TestResultSetProcessorFactory extends TestCase
         try
         {
             spec = makeSpec(new SelectClauseSpecCompiled(selectList, false), null, groupByList, null, null, orderByList);
-            ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, agentInstanceContext, typeService3Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
+            ResultSetProcessorFactoryFactory.getProcessorPrototype(spec, stmtContext, typeService3Stream, null, new boolean[0], true, ContextPropertyRegistryImpl.EMPTY_REGISTRY);
             fail();
         }
         catch (ExprValidationException ex)

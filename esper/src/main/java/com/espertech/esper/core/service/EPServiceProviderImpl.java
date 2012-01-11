@@ -29,6 +29,7 @@ import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.timer.TimerCallback;
 import com.espertech.esper.timer.TimerService;
+import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.util.SerializableObjectCopier;
 import com.espertech.esper.util.Version;
@@ -399,6 +400,9 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         MetricReportingPath.setMetricsEnabled(configSnapshot.getEngineDefaults().getMetricsReporting().isEnableMetricsReporting());
 
         // This setting applies to all engines in a given VM
+        AuditPath.setAuditPattern(configSnapshot.getEngineDefaults().getLogging().getAuditPattern());
+
+        // This setting applies to all engines in a given VM
         ThreadingOption.setThreadingEnabled(ThreadingOption.isThreadingEnabled() ||
                 configSnapshot.getEngineDefaults().getThreading().isThreadPoolTimerExec() ||
                 configSnapshot.getEngineDefaults().getThreading().isThreadPoolInbound() ||
@@ -544,7 +548,7 @@ public class EPServiceProviderImpl implements EPServiceProviderSPI
         SelectClauseStreamSelectorEnum defaultStreamSelector = SelectClauseStreamSelectorEnum.mapFromSODA(configSnapshot.getEngineDefaults().getStreamSelection().getDefaultStreamSelector());
         EPAdministratorSPI adminSPI;
         String adminClassName = configSnapshot.getEngineDefaults().getAlternativeContext().getAdmin();
-        EPAdministratorContext adminContext = new EPAdministratorContext(services, configOps, defaultStreamSelector);
+        EPAdministratorContext adminContext = new EPAdministratorContext(runtimeSPI, services, configOps, defaultStreamSelector);
         if (adminClassName == null)
         {
             // Check system properties

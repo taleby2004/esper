@@ -11,13 +11,13 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
@@ -58,17 +58,17 @@ public class TestInsertIntoTransposePattern extends TestCase
                 " from pattern [every quote=SupportBean(string='B')] as stream0");
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 10));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"alertId", "this.intPrimitive"}, new Object[][] {{"1", 10}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"alertId", "this.intPrimitive"}, new Object[][]{{"1", 10}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B", 20));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"alertId", "this.intPrimitive"}, new Object[][] {{"1", 10}, {"2", 20}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"alertId", "this.intPrimitive"}, new Object[][]{{"1", 10}, {"2", 20}});
 
         stmt = epService.getEPAdministrator().createEPL("create window TwoWindow.win:time(1 day) as select string as alertId, * from SupportBean");
         epService.getEPAdministrator().createEPL("insert into TwoWindow select '3' as alertId, quote.* " +
                 " from pattern [every quote=SupportBean(string='C')] as stream0");
 
         epService.getEPRuntime().sendEvent(new SupportBean("C", 30));
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"alertId", "intPrimitive"}, new Object[][] {{"3", 30}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"alertId", "intPrimitive"}, new Object[][]{{"3", 30}});
     }
 
     public void testTransposePOJOEventPattern()
@@ -85,7 +85,7 @@ public class TestInsertIntoTransposePattern extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.id,b.id".split(","), new Object[] {"A1", "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.id,b.id".split(","), new Object[]{"A1", "B1"});
     }
 
     public void testTransposeMapEventPattern()
@@ -114,10 +114,10 @@ public class TestInsertIntoTransposePattern extends TestCase
         epService.getEPRuntime().sendEvent(eventTwo, "BEvent");
 
         EventBean event = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(event, "a.id,b.id".split(","), new Object[] {"A1", "B1"});
+        EPAssertionUtil.assertProps(event, "a.id,b.id".split(","), new Object[]{"A1", "B1"});
 
         event = listenerInsertInto.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(event, "a,b".split(","), new Object[] {eventOne, eventTwo});
+        EPAssertionUtil.assertProps(event, "a,b".split(","), new Object[]{eventOne, eventTwo});
     }
 
     private Map<String, Object> makeMap(Object[][] entries)

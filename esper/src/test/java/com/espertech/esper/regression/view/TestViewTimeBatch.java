@@ -11,11 +11,11 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportBean;
 
@@ -61,10 +61,10 @@ public class TestViewTimeBatch extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(4000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "string".split(",") , new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E1"});
 
         sendTimer(5000);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), "string".split(",") , new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), "string".split(","), new Object[]{"E1"});
 
         sendTimer(5999);
         assertFalse(listener.getAndClearIsInvoked());

@@ -9,10 +9,6 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.core.DuplicatePropertyException;
-import com.espertech.esper.epl.core.PropertyNotFoundException;
-import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
-import com.espertech.esper.epl.core.StreamNotFoundException;
 
 /**
  * Service supplying stream number and property type information.
@@ -34,6 +30,19 @@ public interface StreamTypeService
 
     /**
      * Returns the offset of the stream and the type of the property for the given property name,
+     * by looking through the types offered considering only explicitly listed properties and matching up.
+     * <p>
+     * This method considers only a property name and looks at all streams to resolve the property name.
+     * @param propertyName - property name in event
+     * @return descriptor with stream number, property type and property name
+     * @throws DuplicatePropertyException to indicate property was found twice
+     * @throws PropertyNotFoundException to indicate property could not be resolved
+     */
+    public PropertyResolutionDescriptor resolveByPropertyNameExplicitProps(String propertyName)
+            throws PropertyNotFoundException, DuplicatePropertyException;
+
+    /**
+     * Returns the offset of the stream and the type of the property for the given property name,
      * by using the specified stream name to resolve the property.
      * <p>
      * This method considers and explicit stream name and property name, both parameters are required.
@@ -44,6 +53,20 @@ public interface StreamTypeService
      * @throws StreamNotFoundException to indicate stream name could not be resolved
      */
     public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamName, String propertyName)
+            throws PropertyNotFoundException, StreamNotFoundException;
+
+    /**
+     * Returns the offset of the stream and the type of the property for the given property name,
+     * by using the specified stream name to resolve the property and considering only explicitly listed properties.
+     * <p>
+     * This method considers and explicit stream name and property name, both parameters are required.
+     * @param streamName - name of stream, required
+     * @param propertyName - property name in event, , required
+     * @return descriptor with stream number, property type and property name
+     * @throws PropertyNotFoundException to indicate property could not be resolved
+     * @throws StreamNotFoundException to indicate stream name could not be resolved
+     */
+    public PropertyResolutionDescriptor resolveByStreamAndPropNameExplicitProps(String streamName, String propertyName)
             throws PropertyNotFoundException, StreamNotFoundException;
 
     /**
@@ -86,4 +109,6 @@ public interface StreamTypeService
     public String getEngineURIQualifier();
 
     public boolean hasPropertyAgnosticType();
+
+
 }

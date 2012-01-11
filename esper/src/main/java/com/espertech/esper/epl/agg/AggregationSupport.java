@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.epl.core.MethodResolutionService;
-
 /**
  * Base class for use with plug-in aggregation functions.
  */

@@ -11,6 +11,7 @@
 
 package com.espertech.esper.view.window;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.support.view.SupportBeanClassView;
 import com.espertech.esper.support.view.SupportStreamImpl;
@@ -18,7 +19,6 @@ import com.espertech.esper.support.view.SupportViewDataChecker;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.event.EventFactoryHelper;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.client.EventBean;
 
 import java.util.Map;
@@ -64,51 +64,51 @@ public class TestLengthBatchView extends TestCase
         stream.insert(makeArray(events, new String[]{"a0"}));
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),makeArray(events, new String[]{ "a0"}));
+        EPAssertionUtil.assertEqualsExactOrder(makeArray(events, new String[]{"a0"}), myView.iterator());
 
         stream.insert(makeArray(events, new String[]{"b0", "b1"}));
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),makeArray(events, new String[]{ "a0", "b0", "b1" }));
+        EPAssertionUtil.assertEqualsExactOrder(makeArray(events, new String[]{"a0", "b0", "b1"}), myView.iterator());
 
         stream.insert(makeArray(events, new String[]{"c0", "c1"}));
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, makeArray(events, new String[]{ "a0", "b0", "b1", "c0", "c1" }));
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
 
         // Send further events, expect to get events back that fall out of the window, i.e. prior batch
         stream.insert(makeArray(events, new String[]{"d0"}));
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),makeArray(events, new String[]{ "d0" }));
+        EPAssertionUtil.assertEqualsExactOrder(makeArray(events, new String[]{"d0"}), myView.iterator());
 
         stream.insert(makeArray(events, new String[]{"e0", "e1", "e2"}));
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),makeArray(events, new String[]{ "d0", "e0", "e1", "e2" }));
+        EPAssertionUtil.assertEqualsExactOrder(makeArray(events, new String[]{"d0", "e0", "e1", "e2"}), myView.iterator());
 
         stream.insert(makeArray(events, new String[]{"f0", "f1"}));
         SupportViewDataChecker.checkOldData(childView, makeArray(events, new String[]{ "a0", "b0", "b1", "c0", "c1" }));
         SupportViewDataChecker.checkNewData(childView, makeArray(events, new String[]{ "d0", "e0", "e1", "e2", "f0", "f1" }));
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
 
         // Push as many events as the window takes
         stream.insert(makeArray(events, new String[]{"g0", "g1", "g2", "g3", "g4"}));
         SupportViewDataChecker.checkOldData(childView, makeArray(events, new String[]{ "d0", "e0", "e1", "e2", "f0", "f1" }));
         SupportViewDataChecker.checkNewData(childView, makeArray(events, new String[]{ "g0", "g1", "g2", "g3", "g4" }));
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
 
         // Push 2 more events then the window takes
         stream.insert(makeArray(events, new String[]{"h0", "h1", "h2", "h3", "h4", "h5", "h6"}));
         SupportViewDataChecker.checkOldData(childView, makeArray(events, new String[]{ "g0", "g1", "g2", "g3", "g4"}));
         SupportViewDataChecker.checkNewData(childView,makeArray(events, new String[]{ "h0", "h1", "h2", "h3", "h4", "h5", "h6" }));
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(), null);
+        EPAssertionUtil.assertEqualsExactOrder(null, myView.iterator());
 
         // Push 1 last event 
         stream.insert(makeArray(events, new String[]{"i0"}));
         SupportViewDataChecker.checkOldData(childView, null);
         SupportViewDataChecker.checkNewData(childView, null);
-        ArrayAssertionUtil.assertEqualsExactOrder(myView.iterator(),makeArray(events, new String[]{ "i0" }));
+        EPAssertionUtil.assertEqualsExactOrder(makeArray(events, new String[]{"i0"}), myView.iterator());
     }
 
     private EventBean[] makeArray(Map<String, EventBean> events, String[] ids)

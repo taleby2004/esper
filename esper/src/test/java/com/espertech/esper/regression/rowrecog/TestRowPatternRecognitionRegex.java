@@ -12,9 +12,9 @@
 package com.espertech.esper.regression.rowrecog;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -184,7 +184,7 @@ public class TestRowPatternRecognitionRegex extends TestCase {
                 epService.getEPRuntime().sendEvent(new SupportRecogBean(testchar, count++));
             }
 
-            EventBean[] iteratorData = ArrayAssertionUtil.iteratorToArray(stmt.iterator());
+            EventBean[] iteratorData = EPAssertionUtil.iteratorToArray(stmt.iterator());
             compare(testcase.getTestdata(), iteratorData, testDesc.getMeasures(), testcase);
 
             EventBean[] listenerData = listener.getNewDataListFlattened();
@@ -243,6 +243,6 @@ public class TestRowPatternRecognitionRegex extends TestCase {
         }
 
         log.debug("comparing: " + message);
-        ArrayAssertionUtil.assertEqualsAnyOrder(testDesc.getExpected(), receivedText);
+        EPAssertionUtil.assertEqualsAnyOrder(testDesc.getExpected(), receivedText);
     }
 }

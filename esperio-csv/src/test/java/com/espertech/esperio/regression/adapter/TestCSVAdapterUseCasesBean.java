@@ -12,9 +12,9 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.csv.CSVInputAdapter;
-import com.espertech.esperio.support.util.SupportUpdateListener;
 import com.espertech.esperio.support.util.ExampleMarketDataBeanReadWrite;
 
 /**

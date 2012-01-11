@@ -14,14 +14,14 @@ package com.espertech.esper.regression.epl;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.core.service.StatementType;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.LinkedList;
@@ -69,13 +69,13 @@ public class TestNamedWindowDelete extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("A", 2));
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A"));
-        ArrayAssertionUtil.assertProps(listenerDelete.assertOneGetNewAndReset(), fields, new Object[] {"A", 1});
+        EPAssertionUtil.assertProps(listenerDelete.assertOneGetNewAndReset(), fields, new Object[]{"A", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 3));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"A", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"A", 3}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
     }
 
     public void testStaggeredNamedWindow() throws Exception
@@ -108,28 +108,28 @@ public class TestNamedWindowDelete extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         sendSupportBean("E1", -10);
-        ArrayAssertionUtil.assertProps(listenerWindowTwo.assertOneGetNewAndReset(), fieldsTwo, new Object[] {"E1", -10});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateTwo.iterator(), fieldsTwo, new Object[][] {{"E1", -10}});
+        EPAssertionUtil.assertProps(listenerWindowTwo.assertOneGetNewAndReset(), fieldsTwo, new Object[]{"E1", -10});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateTwo.iterator(), fieldsTwo, new Object[][]{{"E1", -10}});
         assertFalse(listenerWindow.isInvoked());
         assertEquals(1, getCount("MyWindowTwo"));
 
         sendSupportBean("E2", 5);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsOne, new Object[] {"E2", 5});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateOne.iterator(), fieldsOne, new Object[][] {{"E2", 5}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsOne, new Object[]{"E2", 5});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateOne.iterator(), fieldsOne, new Object[][]{{"E2", 5}});
         assertFalse(listenerWindowTwo.isInvoked());
         assertEquals(1, getCount("MyWindowOne"));
 
         sendSupportBean("E3", -1);
-        ArrayAssertionUtil.assertProps(listenerWindowTwo.assertOneGetNewAndReset(), fieldsTwo, new Object[] {"E3", -1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateTwo.iterator(), fieldsTwo, new Object[][] {{"E1", -10}, {"E3", -1}});
+        EPAssertionUtil.assertProps(listenerWindowTwo.assertOneGetNewAndReset(), fieldsTwo, new Object[]{"E3", -1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateTwo.iterator(), fieldsTwo, new Object[][]{{"E1", -10}, {"E3", -1}});
         assertFalse(listenerWindow.isInvoked());
         assertEquals(2, getCount("MyWindowTwo"));
 
         sendSupportBean("E3", 1);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsOne, new Object[] {"E3", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateOne.iterator(), fieldsOne, new Object[][] {{"E2", 5}, {"E3", 1}});
-        ArrayAssertionUtil.assertProps(listenerWindowTwo.assertOneGetOldAndReset(), fieldsTwo, new Object[] {"E3", -1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateTwo.iterator(), fieldsTwo, new Object[][] {{"E1", -10}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fieldsOne, new Object[]{"E3", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateOne.iterator(), fieldsOne, new Object[][]{{"E2", 5}, {"E3", 1}});
+        EPAssertionUtil.assertProps(listenerWindowTwo.assertOneGetOldAndReset(), fieldsTwo, new Object[]{"E3", -1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateTwo.iterator(), fieldsTwo, new Object[][]{{"E1", -10}});
         assertEquals(2, getCount("MyWindowOne"));
         assertEquals(1, getCount("MyWindowTwo"));
 
@@ -157,31 +157,31 @@ public class TestNamedWindowDelete extends TestCase
         // send 1 event
         String[] fields = new String[] {"a", "b"};
         sendSupportBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtDelete.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(stmtDelete.iterator(), fields, null);
         assertEquals(1, getCount("MyWindow"));
 
         // Delete all events using A, 1 row expected
         sendSupportBean_A("A1");
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, null);
-        ArrayAssertionUtil.assertProps(listenerDelete.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtDelete.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerDelete.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtDelete.iterator(), fields, new Object[][]{{"E1", 1}});
         assertEquals(0, getCount("MyWindow"));
 
         // send 1 event
         sendSupportBean("E2", 2);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2", 2}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2", 2}});
         assertEquals(1, getCount("MyWindow"));
 
         // Delete all events using B, 1 row expected
         sendSupportBean_B("B1");
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, null);
-        ArrayAssertionUtil.assertProps(listenerDelete.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtDelete.iterator(), fields, new Object[][] {{"E2", 2}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerDelete.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtDelete.iterator(), fields, new Object[][]{{"E2", 2}});
         assertEquals(0, getCount("MyWindow"));
 
         stmtDelete.destroy();
@@ -199,7 +199,7 @@ public class TestNamedWindowDelete extends TestCase
         String stmtTextDelete = "on " + SupportBean_A.class.getName() + " delete from MyWindow";
         EPStatement stmtDelete = epService.getEPAdministrator().createEPL(stmtTextDelete);
         stmtDelete.addListener(listenerDelete);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmtDelete.getEventType().getPropertyNames(), new String[] {"a", "b"});
+        EPAssertionUtil.assertEqualsAnyOrder(stmtDelete.getEventType().getPropertyNames(), new String[]{"a", "b"});
 
         // create insert into
         String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
@@ -220,38 +220,38 @@ public class TestNamedWindowDelete extends TestCase
 
         // send 1 event
         sendSupportBean("E1", 1);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtDelete.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(stmtDelete.iterator(), fields, null);
         assertEquals(1, getCount("MyWindow"));
 
         // Delete all events, 1 row expected
         sendSupportBean_A("A2");
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetOldAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, null);
-        ArrayAssertionUtil.assertProps(listenerDelete.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtDelete.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetOldAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerDelete.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtDelete.iterator(), fields, new Object[][]{{"E1", 1}});
         assertEquals(0, getCount("MyWindow"));
 
         // send 2 events
         sendSupportBean("E2", 2);
         sendSupportBean("E3", 3);
         listenerWindow.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2", 2}, {"E3", 3}});
         assertFalse(listenerDelete.isInvoked());
         assertEquals(2, getCount("MyWindow"));
 
         // Delete all events, 2 rows expected
         sendSupportBean_A("A2");
-        ArrayAssertionUtil.assertProps(listenerWindow.getLastOldData()[0], fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertProps(listenerWindow.getLastOldData()[1], fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerWindow.getLastOldData()[0], fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertProps(listenerWindow.getLastOldData()[1], fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
         assertEquals(2, listenerDelete.getLastNewData().length);
-        ArrayAssertionUtil.assertProps(listenerDelete.getLastNewData()[0], fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertProps(listenerDelete.getLastNewData()[1], fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtDelete.iterator(), fields, new Object[][] {{"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertProps(listenerDelete.getLastNewData()[0], fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertProps(listenerDelete.getLastNewData()[1], fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertPropsPerRow(stmtDelete.iterator(), fields, new Object[][]{{"E2", 2}, {"E3", 3}});
         assertEquals(0, getCount("MyWindow"));
     }
 
@@ -281,26 +281,26 @@ public class TestNamedWindowDelete extends TestCase
         assertEquals(3, getCount("MyWindow"));
         listenerWindow.reset();
         String[] fields = new String[] {"a", "b"};
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
 
         // delete E2
         sendSupportBean_A("XE2X");
         assertEquals(1, listenerWindow.getLastOldData().length);
-        ArrayAssertionUtil.assertProps(listenerWindow.getLastOldData()[0], fields, new Object[] {"E2", 2});
+        EPAssertionUtil.assertProps(listenerWindow.getLastOldData()[0], fields, new Object[]{"E2", 2});
         listenerWindow.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 3}});
         assertEquals(2, getCount("MyWindow"));
 
         sendSupportBean("E7", 7);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}, {"E7", 7}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 3}, {"E7", 7}});
         assertEquals(3, getCount("MyWindow"));
 
         // delete all under 5
         sendSupportBean_B("B1");
         assertEquals(2, listenerWindow.getLastOldData().length);
-        ArrayAssertionUtil.assertProps(listenerWindow.getLastOldData()[0], fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerWindow.getLastOldData()[1], fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E7", 7}});
+        EPAssertionUtil.assertProps(listenerWindow.getLastOldData()[0], fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerWindow.getLastOldData()[1], fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E7", 7}});
         assertEquals(1, getCount("MyWindow"));
     }
 
@@ -353,25 +353,25 @@ public class TestNamedWindowDelete extends TestCase
         listenerWindow.reset();
 
         String[] fields = new String[] {"string"};
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1"}, {"E2"}, {"E3"}, {"E4"}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1"}, {"E2"}, {"E3"}, {"E4"}});
 
         sendSupportBean("DB", 0, 0, 0d, null);
         assertFalse(listenerWindow.isInvoked());
         sendSupportBean("DB", 0, 0, 0d, 3d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E3"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1"}, {"E2"}, {"E4"}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E3"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1"}, {"E2"}, {"E4"}});
 
         sendSupportBean("DP", 0, 0, 5d, null);
         assertFalse(listenerWindow.isInvoked());
         sendSupportBean("DP", 0, 0, 4d, null);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E4"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1"}, {"E2"}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E4"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1"}, {"E2"}});
 
         sendSupportBean("IB", 0, -1, 0d, null);
         assertFalse(listenerWindow.isInvoked());
         sendSupportBean("IB", 0, 1, 0d, null);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2"}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2"}});
 
         sendSupportBean("E5", 5, 50, 500d, 5000d);
         sendSupportBean("E6", 6, 60, 600d, 6000d);
@@ -379,26 +379,26 @@ public class TestNamedWindowDelete extends TestCase
         listenerWindow.reset();
 
         sendSupportBean("IPDP", 5, 0, 500d, null);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E5"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2"}, {"E6"}, {"E7"}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E5"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2"}, {"E6"}, {"E7"}});
 
         sendSupportBean("IPDP2", 6, 0, 600d, null);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E6"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2"}, {"E7"}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E6"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2"}, {"E7"}});
 
         sendSupportBean("IPDPIB", 7, 70, 0d, null);
         assertFalse(listenerWindow.isInvoked());
         sendSupportBean("IPDPIB", 7, 70, 700d, null);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E7"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2"}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E7"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2"}});
 
         sendSupportBean("E8", 8, 80, 800d, 8000d);
         listenerWindow.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2"}, {"E8"}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2"}, {"E8"}});
 
         sendSupportBean("CAST", 80, 8, 0, 800d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E8"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2"}});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E8"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2"}});
 
         for (EPStatement stmt : deleteStatements)
         {
@@ -410,8 +410,8 @@ public class TestNamedWindowDelete extends TestCase
         stmtTextDelete = "on " + SupportBean.class.getName() + "(string='LAST') as s0 delete from MyWindow as win where win.intPrimitive = s0.intPrimitive and win.doublePrimitive = s0.doublePrimitive";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
         sendSupportBean("LAST", 2, 20, 200, 2000d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E2"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, null);
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E2"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
 
         for (EPStatement stmt : deleteStatements)
         {
@@ -459,14 +459,14 @@ public class TestNamedWindowDelete extends TestCase
         sendSupportBeanTwo("T", 0, 0, 0d, null);
         assertFalse(listenerWindow.isInvoked());
         sendSupportBeanTwo("T", 0, 0, -1d, 1d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E1"});
 
         stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win where win.intPrimitive between s2.intPrimitiveTwo and s2.intBoxedTwo";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
         assertEquals(2, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         sendSupportBeanTwo("T", -2, 2, 0d, 0d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E2"});
 
         stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win " +
                 "where win.intPrimitive between s2.intPrimitiveTwo and s2.intBoxedTwo and win.doublePrimitive between s2.intPrimitiveTwo and s2.intBoxedTwo";
@@ -474,7 +474,7 @@ public class TestNamedWindowDelete extends TestCase
         assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         sendSupportBeanTwo("T", -3, 3, -3d, 3d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E3"});
 
         stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win " +
                 "where win.doublePrimitive between s2.intPrimitiveTwo and s2.intPrimitiveTwo and win.intPrimitive between s2.intPrimitiveTwo and s2.intPrimitiveTwo";
@@ -482,21 +482,21 @@ public class TestNamedWindowDelete extends TestCase
         assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         sendSupportBeanTwo("T", -4, 4, -4, 4d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E4"});
 
         stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win where win.intPrimitive <= doublePrimitiveTwo";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
         assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         sendSupportBeanTwo("T", 0, 0, 5, 1d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E5"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E5"});
 
         stmtTextDelete = "on SupportBeanTwo as s2 delete from MyWindow as win where win.intPrimitive not between s2.intPrimitiveTwo and s2.intBoxedTwo";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
         assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         sendSupportBeanTwo("T", 100, 200, 0, 0d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E6"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E6"});
 
         // delete
         for (EPStatement stmt : deleteStatements) {
@@ -534,28 +534,28 @@ public class TestNamedWindowDelete extends TestCase
         sendSupportBeanTwo("T", 0, 0, 1d, 200d);
         assertFalse(listenerWindow.isInvoked());
         sendSupportBeanTwo("E1", 0, 0, 1d, 200d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E1"});
 
         stmtTextDelete = "on SupportBeanTwo delete from MyWindow where string = stringTwo and intPrimitive = intPrimitiveTwo and intBoxed between doublePrimitiveTwo and doubleBoxedTwo";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
         assertEquals(2, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         sendSupportBeanTwo("E2", 2, 0, 19d, 21d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E2"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E2"});
 
         stmtTextDelete = "on SupportBeanTwo delete from MyWindow where intBoxed between doubleBoxedTwo and doublePrimitiveTwo and intPrimitive = intPrimitiveTwo and string = stringTwo ";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
         assertEquals(2, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         sendSupportBeanTwo("E3", 3, 0, 29d, 34d);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E3"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E3"});
 
         stmtTextDelete = "on SupportBeanTwo delete from MyWindow where intBoxed between intBoxedTwo and intBoxedTwo and intPrimitive = intPrimitiveTwo and string = stringTwo ";
         deleteStatements.add(epService.getEPAdministrator().createEPL(stmtTextDelete));
         assertEquals(3, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         sendSupportBeanTwo("E4", 4, 40, 0d, null);
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[] {"E4"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetOldAndReset(), fields, new Object[]{"E4"});
 
         // delete
         for (EPStatement stmt : deleteStatements) {

@@ -11,13 +11,15 @@
 
 package com.espertech.esper.filter;
 
-import java.util.*;
-
-import junit.framework.TestCase;
-import com.espertech.esper.collection.Pair;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
+import junit.framework.TestCase;
+
+import java.util.ArrayDeque;
+import java.util.LinkedList;
+import java.util.List;
 
 public class TestIndexHelper extends TestCase
 {
@@ -33,11 +35,11 @@ public class TestIndexHelper extends TestCase
         parameters = new ArrayDeque<FilterValueSetParam>();
 
         // Create parameter test list
-        parameterOne = new FilterValueSetParamImpl("intPrimitive", FilterOperator.GREATER, 10);
+        parameterOne = new FilterValueSetParamImpl(makeLookupable("intPrimitive"), FilterOperator.GREATER, 10);
         parameters.add(parameterOne);
-        parameterTwo = new FilterValueSetParamImpl("doubleBoxed", FilterOperator.GREATER, 20d);
+        parameterTwo = new FilterValueSetParamImpl(makeLookupable("doubleBoxed"), FilterOperator.GREATER, 20d);
         parameters.add(parameterTwo);
-        parameterThree = new FilterValueSetParamImpl("string", FilterOperator.EQUAL, "sometext");
+        parameterThree = new FilterValueSetParamImpl(makeLookupable("string"), FilterOperator.EQUAL, "sometext");
         parameters.add(parameterThree);
     }
 
@@ -46,18 +48,18 @@ public class TestIndexHelper extends TestCase
         List<FilterParamIndexBase> indexes = new LinkedList<FilterParamIndexBase>();
 
         // Create index list wity index that doesn't match
-        FilterParamIndexBase indexOne = IndexFactory.createIndex(eventType, "boolPrimitive", FilterOperator.EQUAL);
+        FilterParamIndexBase indexOne = IndexFactory.createIndex(makeLookupable("boolPrimitive"), FilterOperator.EQUAL);
         indexes.add(indexOne);
         assertTrue(IndexHelper.findIndex(parameters, indexes) == null);
 
         // Create index list wity index that doesn't match
-        indexOne = IndexFactory.createIndex(eventType, "doubleBoxed", FilterOperator.GREATER_OR_EQUAL);
+        indexOne = IndexFactory.createIndex(makeLookupable("doubleBoxed"), FilterOperator.GREATER_OR_EQUAL);
         indexes.clear();
         indexes.add(indexOne);
         assertTrue(IndexHelper.findIndex(parameters, indexes) == null);
 
         // Add an index that does match a parameter
-        FilterParamIndexBase indexTwo = IndexFactory.createIndex(eventType, "doubleBoxed", FilterOperator.GREATER);
+        FilterParamIndexBase indexTwo = IndexFactory.createIndex(makeLookupable("doubleBoxed"), FilterOperator.GREATER);
         indexes.add(indexTwo);
         Pair<FilterValueSetParam, FilterParamIndexBase> pair = IndexHelper.findIndex(parameters, indexes);
         assertTrue(pair != null);
@@ -65,7 +67,7 @@ public class TestIndexHelper extends TestCase
         assertEquals(indexTwo, pair.getSecond());
 
         // Add another index that does match a parameter, should return first match however which is doubleBoxed
-        FilterParamIndexBase indexThree = IndexFactory.createIndex(eventType, "intPrimitive", FilterOperator.GREATER);
+        FilterParamIndexBase indexThree = IndexFactory.createIndex(makeLookupable("intPrimitive"), FilterOperator.GREATER);
         indexes.add(indexThree);
         pair = IndexHelper.findIndex(parameters, indexes);
         assertEquals(parameterOne, pair.getFirst());
@@ -80,13 +82,17 @@ public class TestIndexHelper extends TestCase
 
     public void testFindParameter()
     {
-        FilterParamIndexBase indexOne = IndexFactory.createIndex(eventType, "boolPrimitive", FilterOperator.EQUAL);
+        FilterParamIndexBase indexOne = IndexFactory.createIndex(makeLookupable("boolPrimitive"), FilterOperator.EQUAL);
         assertNull(IndexHelper.findParameter(parameters, indexOne));
 
-        FilterParamIndexBase indexTwo = IndexFactory.createIndex(eventType, "string", FilterOperator.EQUAL);
+        FilterParamIndexBase indexTwo = IndexFactory.createIndex(makeLookupable("string"), FilterOperator.EQUAL);
         assertEquals(parameterThree, IndexHelper.findParameter(parameters, indexTwo));
 
-        FilterParamIndexBase indexThree = IndexFactory.createIndex(eventType, "intPrimitive", FilterOperator.GREATER);
+        FilterParamIndexBase indexThree = IndexFactory.createIndex(makeLookupable("intPrimitive"), FilterOperator.GREATER);
         assertEquals(parameterOne, IndexHelper.findParameter(parameters, indexThree));
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, eventType.getGetter(fieldName), eventType.getPropertyType(fieldName));
     }
 }

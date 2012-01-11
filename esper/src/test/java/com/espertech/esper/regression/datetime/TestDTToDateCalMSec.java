@@ -15,12 +15,13 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.support.bean.SupportDateTime;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Calendar;
@@ -47,7 +48,7 @@ public class TestDTToDateCalMSec extends TestCase {
     public void testToDateCalMilli() {
 
         String startTime = "2002-05-30T9:00:00.000";
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(SupportDateTime.make(startTime).getMsecdate()));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(startTime)));
 
         String[] fields = "val0,val1,val2,val3,val4,val5,val6,val7,val8,val9,val10,val11".split(",");
         String eplFragment = "select " +
@@ -73,11 +74,11 @@ public class TestDTToDateCalMSec extends TestCase {
         Object[] expectedUtil = SupportDateTime.getArrayCoerced(startTime, "util", "util", "util", "util");
         Object[] expectedCal = SupportDateTime.getArrayCoerced(startTime, "cal", "cal", "cal", "cal");
         Object[] expectedMsec = SupportDateTime.getArrayCoerced(startTime, "msec", "msec", "msec", "msec");
-        Object[] expected = ArrayAssertionUtil.addArrayObjectArr(expectedUtil, expectedCal, expectedMsec);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, expected);
+        Object[] expected = EPAssertionUtil.concatenateArray(expectedUtil, expectedCal, expectedMsec);
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, expected);
 
         epService.getEPRuntime().sendEvent(SupportDateTime.make(null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{
                 SupportDateTime.getValueCoerced(startTime, "util"), null, null, null,
                 SupportDateTime.getValueCoerced(startTime, "cal"), null, null, null,
                 SupportDateTime.getValueCoerced(startTime, "msec"), null, null, null});

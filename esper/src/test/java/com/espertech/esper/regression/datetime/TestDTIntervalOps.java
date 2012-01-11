@@ -12,15 +12,16 @@
 package com.espertech.esper.regression.datetime;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportDateTime;
 import com.espertech.esper.support.bean.SupportTimeStartEndA;
 import com.espertech.esper.support.bean.SupportTimeStartEndB;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import javax.xml.xpath.XPathConstants;
@@ -59,8 +60,8 @@ public class TestDTIntervalOps extends TestCase {
         EPStatement stmt = epService.getEPAdministrator().createEPL("select a.includes(b) as val0 from TypeA.std:lastevent() as a, TypeB.std:lastevent() as b");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(makeEvent(SupportDateTime.parseGetMSec("2002-05-30T9:00:00.000"), SupportDateTime.parseGetMSec("2002-05-30T9:00:01.000")), "TypeA");
-        epService.getEPRuntime().sendEvent(makeEvent(SupportDateTime.parseGetMSec("2002-05-30T9:00:00.500"), SupportDateTime.parseGetMSec("2002-05-30T9:00:00.700")), "TypeB");
+        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultMSec("2002-05-30T9:00:00.000"), DateTime.parseDefaultMSec("2002-05-30T9:00:01.000")), "TypeA");
+        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultMSec("2002-05-30T9:00:00.500"), DateTime.parseDefaultMSec("2002-05-30T9:00:00.700")), "TypeB");
         assertEquals(true, listener.assertOneGetNewAndReset().get("val0"));
 
         epService.getEPAdministrator().destroyAllStatements();
@@ -74,8 +75,8 @@ public class TestDTIntervalOps extends TestCase {
         stmt = epService.getEPAdministrator().createEPL("select a.includes(b) as val0 from TypeA.std:lastevent() as a, TypeB.std:lastevent() as b");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(makeEvent(SupportDateTime.parseGetCal("2002-05-30T9:00:00.000"), SupportDateTime.parseGetCal("2002-05-30T9:00:01.000")), "TypeA");
-        epService.getEPRuntime().sendEvent(makeEvent(SupportDateTime.parseGetCal("2002-05-30T9:00:00.500"), SupportDateTime.parseGetCal("2002-05-30T9:00:00.700")), "TypeB");
+        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultCal("2002-05-30T9:00:00.000"), DateTime.parseDefaultCal("2002-05-30T9:00:01.000")), "TypeA");
+        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultCal("2002-05-30T9:00:00.500"), DateTime.parseDefaultCal("2002-05-30T9:00:00.700")), "TypeB");
         assertEquals(true, listener.assertOneGetNewAndReset().get("val0"));
 
         epService.getEPAdministrator().destroyAllStatements();
@@ -89,8 +90,8 @@ public class TestDTIntervalOps extends TestCase {
         stmt = epService.getEPAdministrator().createEPL("select a.includes(b) as val0 from TypeA.std:lastevent() as a, TypeB.std:lastevent() as b");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(makeEvent(SupportDateTime.parseGetDate("2002-05-30T9:00:00.000"), SupportDateTime.parseGetDate("2002-05-30T9:00:01.000")), "TypeA");
-        epService.getEPRuntime().sendEvent(makeEvent(SupportDateTime.parseGetDate("2002-05-30T9:00:00.500"), SupportDateTime.parseGetDate("2002-05-30T9:00:00.700")), "TypeB");
+        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultDate("2002-05-30T9:00:00.000"), DateTime.parseDefaultDate("2002-05-30T9:00:01.000")), "TypeA");
+        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultDate("2002-05-30T9:00:00.500"), DateTime.parseDefaultDate("2002-05-30T9:00:00.700")), "TypeB");
         assertEquals(true, listener.assertOneGetNewAndReset().get("val0"));
         epService.getEPAdministrator().destroyAllStatements();
 
@@ -102,7 +103,7 @@ public class TestDTIntervalOps extends TestCase {
         stmt.addListener(listener);
 
         SupportBean event = new SupportBean();
-        event.setLongPrimitive(SupportDateTime.parseGetMSec("2002-05-30T9:00:00.000"));
+        event.setLongPrimitive(DateTime.parseDefaultMSec("2002-05-30T9:00:00.000"));
         epService.getEPRuntime().sendEvent(event);
         assertEquals(4, listener.assertOneGetNewAndReset().get("val0"));
 
@@ -306,10 +307,10 @@ public class TestDTIntervalOps extends TestCase {
         epService.getEPRuntime().sendEvent(SupportTimeStartEndB.make("B1", "2002-05-30T9:00:00.000", 0));
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("A1", "2002-05-30T8:59:59.000", 0));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fields, true);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fields, true);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("A2", "2002-05-30T8:59:59.950", 0));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fields, true);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fields, true);
     }
 
     public void testBeforeWhereClause() {
@@ -1098,9 +1099,9 @@ public class TestDTIntervalOps extends TestCase {
             Long testduration = ((Number) test[1]).longValue();
             boolean expected = (Boolean) test[2];
 
-            long rightStart = SupportDateTime.parse(seedTime).getTime();
+            long rightStart = DateTime.parseDefaultMSec(seedTime);
             long rightEnd = rightStart + seedDuration;
-            long leftStart = SupportDateTime.parse(testtime).getTime();
+            long leftStart = DateTime.parseDefaultMSec(testtime);
             long leftEnd = leftStart + testduration;
             String message = "time " + testtime + " duration " + testduration + " for '" + whereClause + "'";
 

@@ -250,4 +250,8 @@ public class AxiomXMLEventType implements EventTypeSPI
     public EventPropertyGetterIndexed getGetterIndexed(String indexedPropertyName) {
         return null;
     }
+
+    public boolean equalsCompareType(EventType eventType) {
+        return this == eventType;
+    }
 }

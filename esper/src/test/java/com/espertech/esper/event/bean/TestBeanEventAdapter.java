@@ -13,13 +13,13 @@ package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.event.EventTypeIdGeneratorImpl;
 import com.espertech.esper.support.bean.ISupportD;
 import com.espertech.esper.support.bean.ISupportDImpl;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.bean.SupportBeanSimple;
 import com.espertech.esper.support.event.SupportEventAdapterService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.Map;
@@ -60,13 +60,13 @@ public class TestBeanEventAdapter extends TestCase
         assertEquals("BaseD", bean.get("baseD"));
         assertEquals("BaseDBase", bean.get("baseDBase"));
         assertEquals(3, bean.getEventType().getPropertyNames().length);
-        ArrayAssertionUtil.assertEqualsAnyOrder(bean.getEventType().getPropertyNames(),
-                new String[] {"d", "baseD", "baseDBase"});
+        EPAssertionUtil.assertEqualsAnyOrder(bean.getEventType().getPropertyNames(),
+                new String[]{"d", "baseD", "baseDBase"});
 
         // Assert intermediate interfaces have full set of fields
         EventType interfaceType = beanEventTypeFactory.createBeanType("d", ISupportD.class, true, true, true);
-        ArrayAssertionUtil.assertEqualsAnyOrder(interfaceType.getPropertyNames(),
-                new String[] {"d", "baseD", "baseDBase"});
+        EPAssertionUtil.assertEqualsAnyOrder(interfaceType.getPropertyNames(),
+                new String[]{"d", "baseD", "baseDBase"});
     }
 
     public void testMappedIndexedNestedProperty() throws Exception

@@ -11,9 +11,9 @@
 
 package com.espertech.esper.epl.join.assemble;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.epl.join.SupportJoinProcNode;
 import com.espertech.esper.support.epl.join.SupportJoinResultNodeFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.epl.join.rep.Node;
 import com.espertech.esper.client.EventBean;
 
@@ -78,13 +78,13 @@ public class TestCartesianProdAssemblyNode extends TestCase
         assertEquals(5, parentNode.getRowsList().size());
 
         EventBean[][] rowArr = SupportJoinResultNodeFactory.convertTo2DimArr(parentNode.getRowsList());
-        ArrayAssertionUtil.assertEqualsAnyOrder( new EventBean[][] {
-                new EventBean[] {null, eventOneStreamOne, stream2Events[0], stream3Events[0]},
-                new EventBean[] {null, eventOneStreamOne, stream2Events[0], stream3Events[1]},
-                new EventBean[] {null, eventOneStreamOne, stream2Events[1], stream3Events[0]},
-                new EventBean[] {null, eventOneStreamOne, stream2Events[1], stream3Events[1]},
-                new EventBean[] {null, eventTwoStreamOne, null, null},
-                }
+        EPAssertionUtil.assertEqualsAnyOrder(new EventBean[][]{
+                new EventBean[]{null, eventOneStreamOne, stream2Events[0], stream3Events[0]},
+                new EventBean[]{null, eventOneStreamOne, stream2Events[0], stream3Events[1]},
+                new EventBean[]{null, eventOneStreamOne, stream2Events[1], stream3Events[0]},
+                new EventBean[]{null, eventOneStreamOne, stream2Events[1], stream3Events[1]},
+                new EventBean[]{null, eventTwoStreamOne, null, null},
+        }
                 , rowArr);
     }
 

@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestSingleRowFunctionPlugIn extends TestCase
@@ -49,7 +49,7 @@ public class TestSingleRowFunctionPlugIn extends TestCase
 
         String fields[] = new String[] {"val"};
         epService.getEPRuntime().sendEvent(new SupportBean("a", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(),fields, new Object[] {"XtestX"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"XtestX"});
     }
 
     public void testChainMethod() throws Exception
@@ -102,7 +102,7 @@ public class TestSingleRowFunctionPlugIn extends TestCase
     {
         String fields[] = new String[] {"val"};
         epService.getEPRuntime().sendEvent(new SupportBean("a", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(),fields, new Object[] {36});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{36});
 
         listener.reset();
     }
@@ -111,7 +111,7 @@ public class TestSingleRowFunctionPlugIn extends TestCase
     {
         String fields[] = new String[] {"val"};
         epService.getEPRuntime().sendEvent(new SupportBean("a", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(),fields, new Object[] {8});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{8});
 
         listener.reset();
     }

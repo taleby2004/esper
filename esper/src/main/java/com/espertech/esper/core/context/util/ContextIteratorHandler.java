@@ -13,10 +13,13 @@ package com.espertech.esper.core.context.util;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.SafeIterator;
+import com.espertech.esper.client.context.ContextPartitionSelector;
 
 import java.util.Iterator;
 
 public interface ContextIteratorHandler {
     public Iterator<EventBean> iterator(String statementId);
     public SafeIterator<EventBean> safeIterator(String statementId);
+    public Iterator<EventBean> iterator(String statementId, ContextPartitionSelector selector);
+    public SafeIterator<EventBean> safeIterator(String statementId, ContextPartitionSelector selector);
 }

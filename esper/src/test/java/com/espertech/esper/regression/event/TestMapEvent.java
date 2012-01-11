@@ -12,13 +12,15 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeMetadata;
 import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,6 +54,35 @@ public class TestMapEvent extends TestCase
         epService.initialize();
     }
 
+    public void testMapNestedEventType() {
+        EventAdapterService eventAdapterService = ((EPServiceProviderSPI) epService).getEventAdapterService();
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        EventType supportBeanType = epService.getEPAdministrator().getConfiguration().getEventType("SupportBean");
+
+        Map<String, Object> lev2def = new HashMap<String, Object>();
+        lev2def.put("sb", "SupportBean");
+        Map<String, Object> lev1def = new HashMap<String, Object>();
+        lev1def.put("lev1name", lev2def);
+        Map<String, Object> lev0def = new HashMap<String, Object>();
+        lev0def.put("lev0name", lev1def);
+
+        epService.getEPAdministrator().getConfiguration().addEventType("MyMap", lev0def);
+        EventType mapType = epService.getEPAdministrator().getConfiguration().getEventType("MyMap");
+
+        SupportUpdateListener listener = new SupportUpdateListener();
+        epService.getEPAdministrator().createEPL("select lev0name.lev1name.sb.string as val from MyMap").addListener(listener);
+
+        Map<String, Object> lev2data = new HashMap<String, Object>();
+        lev2data.put("sb", eventAdapterService.adapterForTypedBean(new SupportBean("E1", 0), supportBeanType));
+        Map<String, Object> lev1data = new HashMap<String, Object>();
+        lev1data.put("lev1name", lev2data);
+        Map<String, Object> lev0data = new HashMap<String, Object>();
+        lev0data.put("lev0name", lev1data);
+        
+        epService.getEPRuntime().sendEvent(lev0data, "MyMap");
+        assertEquals("E1", listener.assertOneGetNewAndReset().get("val"));
+    }
+
     public void testMetadata()
     {
         EventTypeSPI type = (EventTypeSPI) ((EPServiceProviderSPI)epService).getEventAdapterService().getExistsTypeByName("myMapEvent");
@@ -68,11 +99,11 @@ public class TestMapEvent extends TestCase
         EventType[] types = ((EPServiceProviderSPI)epService).getEventAdapterService().getAllTypes();
         assertEquals(1, types.length);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("myInt", Integer.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("myString", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("beanA", SupportBeanComplexProps.class, null, false, false, false, false, true),
-           }, type.getPropertyDescriptors());        
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("myInt", Integer.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("myString", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("beanA", SupportBeanComplexProps.class, null, false, false, false, false, true),
+        }, type.getPropertyDescriptors());
     }
 
     public void testAddRemoveType()
@@ -80,7 +111,7 @@ public class TestMapEvent extends TestCase
         // test remove type with statement used (no force)
         ConfigurationOperations configOps = epService.getEPAdministrator().getConfiguration();
         EPStatement stmt = epService.getEPAdministrator().createEPL("select myInt from myMapEvent", "stmtOne");
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"stmtOne"}, configOps.getEventTypeNameUsedBy("myMapEvent").toArray());
+        EPAssertionUtil.assertEqualsExactOrder(configOps.getEventTypeNameUsedBy("myMapEvent").toArray(), new String[]{"stmtOne"});
         
         assertEquals(1, epService.getEPAdministrator().getConfiguration().getEventTypes().length);
         assertEquals("myMapEvent", epService.getEPAdministrator().getConfiguration().getEventType("myMapEvent").getName());
@@ -120,7 +151,7 @@ public class TestMapEvent extends TestCase
 
         // compile
         epService.getEPAdministrator().createEPL("select p01 from myMapEvent", "stmtTwo");
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"stmtTwo"}, configOps.getEventTypeNameUsedBy("myMapEvent").toArray());
+        EPAssertionUtil.assertEqualsExactOrder(configOps.getEventTypeNameUsedBy("myMapEvent").toArray(), new String[]{"stmtTwo"});
         try {
             epService.getEPAdministrator().createEPL("select myInt from myMapEvent");
             fail();

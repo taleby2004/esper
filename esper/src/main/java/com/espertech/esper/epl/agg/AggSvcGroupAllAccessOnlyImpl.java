@@ -44,12 +44,12 @@ public class AggSvcGroupAllAccessOnlyImpl implements AggregationService, Aggrega
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId)
     {
         // no implementation required
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         AggregationAccessorSlotPair pair = accessors[column];
         return pair.getAccessor().getValue(accesses[pair.getSlot()]);
@@ -71,5 +71,9 @@ public class AggSvcGroupAllAccessOnlyImpl implements AggregationService, Aggrega
         for (AggregationAccess access : accesses) {
             access.clear();
         }
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

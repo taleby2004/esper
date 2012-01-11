@@ -15,12 +15,13 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPStatementException;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.support.bean.bookexample.OrderBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestFilterPropertyNested extends TestCase
@@ -52,11 +53,11 @@ public class TestFilterPropertyNested extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{1}, {2}, {10}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{1}, {2}, {10}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventFour());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{201}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{201}});
         listener.reset();
     }
 
@@ -75,12 +76,12 @@ public class TestFilterPropertyNested extends TestCase
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1", 24d+35d+27d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1", 24d + 35d + 27d}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventFour());
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E2", 15d+13d}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E2", 15d + 13d}});
         listener.reset();
     }
 
@@ -105,7 +106,7 @@ public class TestFilterPropertyNested extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("Foundation 2", 2));
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventFour());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"Foundation 2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"Foundation 2", 2}});
     }
 
     public void testSimple()
@@ -114,15 +115,16 @@ public class TestFilterPropertyNested extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("OrderEvent", OrderBean.class);
 
         String stmtText = "select reviewId from OrderEvent[books][reviews] bookReviews order by reviewId asc";
-        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(stmtText);
+        assertTrue(stmt.getStatementContext().isStatelessSelect());
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{1}, {2}, {10}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{1}, {2}, {10}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventFour());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{201}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{201}});
         listener.reset();
     }
 
@@ -137,7 +139,7 @@ public class TestFilterPropertyNested extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{1}, {2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{1}, {2}});
         listener.reset();
 
         // try where in different levels
@@ -147,7 +149,7 @@ public class TestFilterPropertyNested extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{1}});
         listener.reset();
 
         // try where in combination
@@ -157,7 +159,7 @@ public class TestFilterPropertyNested extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{1}});
         listener.reset();
         assertFalse(listener.isInvoked());
     }
@@ -279,12 +281,12 @@ public class TestFilterPropertyNested extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{
                 {"PO200901", "10020", 1}, {"PO200901", "10020", 2}, {"PO200901", "10021", 10}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventFour());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"PO200904", "10031", 201}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"PO200904", "10031", 201}});
         listener.reset();
     }
 
@@ -317,7 +319,7 @@ public class TestFilterPropertyNested extends TestCase
                    "Property named 'abc' is not valid in any stream [select * from OrderEvent[books where abc=1]]");
 
         tryInvalid("select * from OrderEvent[abc]",
-                   "Property expression 'abc' against type 'OrderEvent' does not return a fragmentable property value [select * from OrderEvent[abc]]");
+                   "Property named 'abc' is not valid in any stream [select * from OrderEvent[abc]]");
     }
 
     private void runAssertion()
@@ -325,12 +327,12 @@ public class TestFilterPropertyNested extends TestCase
         String[] fields = "orderId,bookId,reviewId".split(",");
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{
                 {"PO200901", "10020", 1}, {"PO200901", "10020", 2}, {"PO200901", "10021", 10}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventFour());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"PO200904", "10031", 201}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"PO200904", "10031", 201}});
         listener.reset();
     }
 

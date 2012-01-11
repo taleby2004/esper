@@ -11,6 +11,7 @@
 
 package com.espertech.esper.regression.pattern;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
@@ -23,7 +24,6 @@ import com.espertech.esper.regression.support.EventDescriptor;
 import com.espertech.esper.regression.support.EventExpressionCase;
 import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.bean.SupportBean_A;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

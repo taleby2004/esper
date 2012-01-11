@@ -14,8 +14,8 @@ package com.espertech.esper.multithread;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.SafeIterator;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.client.EventBean;
 
 import java.util.concurrent.Callable;
@@ -53,7 +53,7 @@ public class StmtNamedWindowIterateCallable implements Callable
 
                 // iterate over private statement
                 SafeIterator safeIter = statement.safeIterator();
-                EventBean[] received = ArrayAssertionUtil.iteratorToArray(safeIter);
+                EventBean[] received = EPAssertionUtil.iteratorToArray(safeIter);
                 safeIter.close();
 
                 for (int i = 0; i < received.length; i++)

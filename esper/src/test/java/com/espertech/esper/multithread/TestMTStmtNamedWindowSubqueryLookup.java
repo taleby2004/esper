@@ -12,9 +12,9 @@
 package com.espertech.esper.multithread;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,7 +78,7 @@ public class TestMTStmtNamedWindowSubqueryLookup extends TestCase
             assertTrue(result);
         }
         
-        EventBean[] events = ArrayAssertionUtil.iteratorToArray(namedWindow.iterator());
+        EventBean[] events = EPAssertionUtil.iteratorToArray(namedWindow.iterator());
         assertEquals(0, events.length);
     }
 }

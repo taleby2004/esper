@@ -42,6 +42,8 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
     // ongoing builtin properties
     private int totalNewEventsCount;
     private int totalOldEventsCount;
+    private int totalNewEventsSum;
+    private int totalOldEventsSum;
     private Long lastOutputTimestamp;
 
     /**
@@ -98,6 +100,8 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
     {
         this.totalNewEventsCount += newEventsCount;
         this.totalOldEventsCount += oldEventsCount;
+        this.totalNewEventsSum += newEventsCount;
+        this.totalOldEventsSum += oldEventsCount;
 
         boolean isOutput = evaluate();
         if (isOutput)
@@ -109,9 +113,7 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
             {
                 if (builtinProperties != null)
                 {
-                    builtinProperties.put("count_insert", totalNewEventsCount);
-                    builtinProperties.put("count_remove", totalOldEventsCount);
-                    builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
+                    populateBuiltinProperties();
                     eventsPerStream[0] = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(builtinProperties, builtinPropertiesEventType);
                 }
 
@@ -125,13 +127,19 @@ public class OutputConditionPolledExpression implements OutputConditionPolled
         return isOutput;
     }
 
+    private void populateBuiltinProperties() {
+        builtinProperties.put("count_insert", totalNewEventsCount);
+        builtinProperties.put("count_remove", totalOldEventsCount);
+        builtinProperties.put("count_insert_total", totalNewEventsSum);
+        builtinProperties.put("count_remove_total", totalOldEventsSum);
+        builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
+    }
+
     private boolean evaluate()
     {
         if (builtinProperties != null)
         {
-            builtinProperties.put("count_insert", totalNewEventsCount);
-            builtinProperties.put("count_remove", totalOldEventsCount);
-            builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
+            populateBuiltinProperties();
             eventsPerStream[0] = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(builtinProperties, builtinPropertiesEventType);
         }
 

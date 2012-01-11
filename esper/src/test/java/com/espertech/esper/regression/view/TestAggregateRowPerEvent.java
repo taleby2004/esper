@@ -14,8 +14,8 @@ package com.espertech.esper.regression.view;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
@@ -136,35 +136,35 @@ public class TestAggregateRowPerEvent extends TestCase
 
         // assert select result type
         assertEquals(Long.class, selectTestView.getEventType().getPropertyType("mySum"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, null);
 
         sendEvent(10);
         assertEquals(10L, testListener.getAndResetLastNewData()[0].get("mySum"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {{1L, 10L}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{{1L, 10L}});
 
         sendEvent(15);
         assertEquals(25L, testListener.getAndResetLastNewData()[0].get("mySum"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {{1L, 25L}, {2L, 25L}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{{1L, 25L}, {2L, 25L}});
 
         sendEvent(-5);
         assertEquals(20L, testListener.getAndResetLastNewData()[0].get("mySum"));
         assertNull(testListener.getLastOldData());
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {{1L, 20L}, {2L, 20L}, {3L, 20L}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{{1L, 20L}, {2L, 20L}, {3L, 20L}});
 
         sendEvent(-2);
         assertEquals(8L, testListener.getLastOldData()[0].get("mySum"));
         assertEquals(8L, testListener.getAndResetLastNewData()[0].get("mySum"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {{4L, 8L}, {2L, 8L}, {3L, 8L}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{{4L, 8L}, {2L, 8L}, {3L, 8L}});
 
         sendEvent(100);
         assertEquals(93L, testListener.getLastOldData()[0].get("mySum"));
         assertEquals(93L, testListener.getAndResetLastNewData()[0].get("mySum"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {{4L, 93L}, {5L, 93L}, {3L, 93L}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{{4L, 93L}, {5L, 93L}, {3L, 93L}});
 
         sendEvent(1000);
         assertEquals(1098L, testListener.getLastOldData()[0].get("mySum"));
         assertEquals(1098L, testListener.getAndResetLastNewData()[0].get("mySum"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(selectTestView.iterator(), fields, new Object[][] {{4L, 1098L}, {5L, 1098L}, {6L, 1098L}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(selectTestView.iterator(), fields, new Object[][]{{4L, 1098L}, {5L, 1098L}, {6L, 1098L}});
     }
 
     private void sendEvent(long longBoxed, int intBoxed, short shortBoxed)

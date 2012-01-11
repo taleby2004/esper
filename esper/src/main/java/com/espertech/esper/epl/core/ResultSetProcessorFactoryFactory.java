@@ -10,7 +10,6 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.context.util.ContextPropertyRegistry;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.StatementContext;
@@ -56,7 +55,7 @@ public class ResultSetProcessorFactoryFactory
      * Returns the result set process for the given select expression, group-by clause and
      * having clause given a set of types describing each stream in the from-clause.
      * @param statementSpecCompiled - the statement specification
-     * @param agentInstanceContext - engine and statement and agent-instance level services
+     * @param stmtContext - engine and statement and agent-instance level services
      * @param typeService - for information about the streams in the from clause
      * @param viewResourceDelegate - delegates views resource factory to expression resources requirements
      * @param isUnidirectionalStream - true if unidirectional join for any of the streams
@@ -65,7 +64,7 @@ public class ResultSetProcessorFactoryFactory
      * @throws ExprValidationException when any of the expressions is invalid
      */
     public static ResultSetProcessorFactoryDesc getProcessorPrototype(StatementSpecCompiled statementSpecCompiled,
-                                                           AgentInstanceContext agentInstanceContext,
+                                                           StatementContext stmtContext,
                                                            StreamTypeService typeService,
                                                            ViewResourceDelegateUnverified viewResourceDelegate,
                                                            boolean[] isUnidirectionalStream,
@@ -101,7 +100,6 @@ public class ResultSetProcessorFactoryFactory
 
         // Validate selection expressions, if any (could be wildcard i.e. empty list)
         List<SelectClauseExprCompiledSpec> namedSelectionList = new LinkedList<SelectClauseExprCompiledSpec>();
-        StatementContext stmtContext = agentInstanceContext.getStatementContext();
         ExprEvaluatorContextStatement evaluatorContextStmt = new ExprEvaluatorContextStatement(stmtContext);
         ExprValidationContext validationContext = new ExprValidationContext(typeService, stmtContext.getMethodResolutionService(), viewResourceDelegate, stmtContext.getSchedulingService(), stmtContext.getVariableService(),evaluatorContextStmt, stmtContext.getEventAdapterService(), stmtContext.getStatementName(), stmtContext.getStatementId(), stmtContext.getAnnotations(), stmtContext.getContextDescriptor());
 
@@ -195,7 +193,7 @@ public class ResultSetProcessorFactoryFactory
         for (int i = 0; i < groupByNodes.size(); i++)
         {
             // Ensure there is no subselects
-            ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+            ExprNodeSubselectDeclaredDotVisitor visitor = new ExprNodeSubselectDeclaredDotVisitor();
             groupByNodes.get(i).accept(visitor);
             if (visitor.getSubselects().size() > 0)
             {
@@ -212,7 +210,7 @@ public class ResultSetProcessorFactoryFactory
         if (optionalHavingNode != null)
         {
             // Ensure there is no subselects
-            ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+            ExprNodeSubselectDeclaredDotVisitor visitor = new ExprNodeSubselectDeclaredDotVisitor();
             optionalHavingNode.accept(visitor);
             if (visitor.getSubselects().size() > 0)
             {
@@ -228,7 +226,7 @@ public class ResultSetProcessorFactoryFactory
         	ExprNode orderByNode = orderByList.get(i).getExprNode();
 
             // Ensure there is no subselects
-            ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+            ExprNodeSubselectDeclaredDotVisitor visitor = new ExprNodeSubselectDeclaredDotVisitor();
             orderByNode.accept(visitor);
             if (visitor.getSubselects().size() > 0)
             {
@@ -294,7 +292,7 @@ public class ResultSetProcessorFactoryFactory
 
         // Construct the appropriate aggregation service
         boolean hasGroupBy = !groupByNodes.isEmpty();
-        AggregationServiceFactoryDesc aggregationServiceFactory = AggregationServiceFactoryFactory.getService(selectAggregateExprNodes, havingAggregateExprNodes, orderByAggregateExprNodes, hasGroupBy, stmtContext.getMethodResolutionService(), evaluatorContextStmt, statementSpecCompiled.getAnnotations(), stmtContext.getVariableService(), typeService.getEventTypes().length > 1,
+        AggregationServiceFactoryDesc aggregationServiceFactory = AggregationServiceFactoryFactory.getService(selectAggregateExprNodes, havingAggregateExprNodes, orderByAggregateExprNodes, hasGroupBy, evaluatorContextStmt, statementSpecCompiled.getAnnotations(), stmtContext.getVariableService(), typeService.getEventTypes().length > 1,
                 statementSpecCompiled.getFilterRootNode(), statementSpecCompiled.getHavingExprRootNode());
 
         boolean useCollatorSort = false;
@@ -452,7 +450,8 @@ public class ResultSetProcessorFactoryFactory
         if (allInGroupBy && allInSelect)
         {
             log.debug(".getProcessor Using ResultSetProcessorRowPerGroup");
-            ResultSetProcessorRowPerGroupFactory factory = new ResultSetProcessorRowPerGroupFactory(selectExprProcessor, groupByEval, optionHavingEval, isSelectRStream, isUnidirectional, outputLimitSpec, orderByProcessorFactory != null);
+            boolean noDataWindowSingleStream = typeService.getIStreamOnly()[0] && typeService.getEventTypes().length < 2;
+            ResultSetProcessorRowPerGroupFactory factory = new ResultSetProcessorRowPerGroupFactory(selectExprProcessor, groupByEval, optionHavingEval, isSelectRStream, isUnidirectional, outputLimitSpec, orderByProcessorFactory != null, noDataWindowSingleStream);
             return new ResultSetProcessorFactoryDesc(factory, orderByProcessorFactory, aggregationServiceFactory);
         }
 

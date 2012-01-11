@@ -12,22 +12,27 @@
 package com.espertech.esper.regression.context;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.context.ContextPartitionSelectorSegmented;
+import com.espertech.esper.client.context.InvalidContextPartitionSelector;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.filter.FilterServiceSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
-import com.espertech.esper.support.bean.SupportDateTime;
+import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.support.util.AgentInstanceAssertionUtil;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 public class TestContextTemporalFixed extends TestCase {
@@ -44,10 +49,267 @@ public class TestContextTemporalFixed extends TestCase {
         configuration.addDatabaseReference("MyDB", configDB);
         configuration.addEventType("SupportBean", SupportBean.class);
         configuration.addEventType("SupportBean_S0", SupportBean_S0.class);
+        configuration.addEventType("SupportBean_S1", SupportBean_S1.class);
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
         spi = (EPServiceProviderSPI) epService;
+    }
+
+    public void testContextPartitionSelection() {
+        String[] fields = "c0,c1,c2,c3".split(",");
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        epService.getEPAdministrator().createEPL("create context MyCtx as start SupportBean_S0 s0 end SupportBean_S1(id=s0.id)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, context.s0.p00 as c1, string as c2, sum(intPrimitive) as c3 from SupportBean.win:keepall() group by string");
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "S0_1"));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 100));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 101));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
+        Object[][] expected = new Object[][] {{0, "S0_1", "E1", 6}, {0, "S0_1", "E2", 10}, {0, "S0_1", "E3", 201}};
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), stmt.safeIterator(), fields, expected);
+
+        // test iterator targeted by context partition id
+        SupportSelectorById selectorById = new SupportSelectorById(Collections.singleton(0));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(selectorById), stmt.safeIterator(selectorById), fields, expected);
+
+        // test iterator targeted by property on triggering event
+        SupportSelectorFilteredInitTerm filtered = new SupportSelectorFilteredInitTerm("S0_1");
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(filtered), stmt.safeIterator(filtered), fields, expected);
+        filtered = new SupportSelectorFilteredInitTerm("S0_2");
+        assertFalse(stmt.iterator(filtered).hasNext());
+
+        // test always-false filter - compare context partition info
+        filtered = new SupportSelectorFilteredInitTerm(null);
+        assertFalse(stmt.iterator(filtered).hasNext());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{1000L}, filtered.getContextsStartTimes());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{"S0_1"}, filtered.getP00PropertyValues());
+
+        try {
+            stmt.iterator(new ContextPartitionSelectorSegmented() {
+                public List<Object[]> getPartitionKeys() {
+                    return null;
+                }
+            });
+            fail();
+        }
+        catch (InvalidContextPartitionSelector ex) {
+            assertTrue("message: " + ex.getMessage(), ex.getMessage().startsWith("Invalid context partition selector, expected an implementation class of any of [ContextPartitionSelectorAll, ContextPartitionSelectorFiltered, ContextPartitionSelectorById] interfaces but received com."));
+        }
+    }
+
+    public void testFilterStartedFilterEndedCorrelatedOutputSnapshot() {
+        epService.getEPAdministrator().createEPL("create context EveryNowAndThen as " +
+                "start SupportBean_S0 as s0 " +
+                "end SupportBean_S1(p10 = s0.p00) as s1");
+
+        String[] fields = "c1,c2,c3".split(",");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        EPStatement statement = epService.getEPAdministrator().createEPL("context EveryNowAndThen select context.s0.id as c1, context.s1.id as c2, sum(intPrimitive) as c3 " +
+                "from SupportBean.win:keepall() output snapshot when terminated");
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(100, "G1"));    // starts it
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(200, "GX"));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(200, "G1"));  // terminate
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{100, 200, 5});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(101, "G2"));    // starts new one
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(102, "G3"));    // ignored
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
+        epService.getEPRuntime().sendEvent(new SupportBean("E5", 5));
+        epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(201, "G2"));  // terminate
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{101, 201, 15});
+    }
+
+    public void testFilterStartedPatternEndedCorrelated() {
+        epService.getEPAdministrator().createEPL("create context EveryNowAndThen as " +
+                "start SupportBean_S0 as s0 " +
+                "end pattern [SupportBean_S1(p10 = s0.p00)]");
+
+        String[] fields = "c1,c2".split(",");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        EPStatement statement = epService.getEPAdministrator().createEPL("context EveryNowAndThen select context.s0.p00 as c1, sum(intPrimitive) as c2 " +
+                "from SupportBean.win:keepall()");
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(100, "G1"));    // starts it
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 2});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(200, "GX"));  // false terminate
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 5});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(200, "G1"));  // actual terminate
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(101, "G2"));    // starts second
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 6});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(101, null));    // false terminate
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(101, "GY"));    // false terminate
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E7", 7));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G2", 13});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(300, "G2"));  // actual terminate
+        epService.getEPRuntime().sendEvent(new SupportBean("E8", 8));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(102, "G3"));    // starts third
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(0, "G3"));    // terminate third
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E9", 9));
+        assertFalse(listener.isInvoked());
+    }
+
+    public void testStartAfterEndAfter() {
+        sendTimeEvent("2002-05-1T8:00:00.000");
+        epService.getEPAdministrator().createEPL("create context EveryNowAndThen as start after 5 sec end after 10 sec");
+
+        String[] fields = "c1,c2,c3".split(",");
+        String[] fieldsShort = "c3".split(",");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        EPStatement statement = epService.getEPAdministrator().createEPL("context EveryNowAndThen select context.startTime as c1, context.endTime as c2, sum(intPrimitive) as c3 " +
+                "from SupportBean.win:keepall()");
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        sendTimeEvent("2002-05-1T8:00:05.000");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{DateTime.parseDefaultMSec("2002-05-1T8:00:05.000"), DateTime.parseDefaultMSec("2002-05-1T8:00:15.000"), 2});
+
+        sendTimeEvent("2002-05-1T8:00:14.999");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsShort, new Object[]{5});
+
+        sendTimeEvent("2002-05-1T8:00:15.000");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
+        assertFalse(listener.isInvoked());
+
+        sendTimeEvent("2002-05-1T8:00:20.000");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E5", 5));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{DateTime.parseDefaultMSec("2002-05-1T8:00:20.000"), DateTime.parseDefaultMSec("2002-05-1T8:00:30.000"), 5});
+
+        sendTimeEvent("2002-05-1T8:00:30.000");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
+        assertFalse(listener.isInvoked());
+    }
+
+    public void testFilterStartedFilterEndedOutputSnapshot() {
+        epService.getEPAdministrator().createEPL("create context EveryNowAndThen as start SupportBean_S0 as s0 end SupportBean_S1 as s1");
+
+        String[] fields = "c1,c2".split(",");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        EPStatement statement = epService.getEPAdministrator().createEPL("context EveryNowAndThen select context.s0.p00 as c1, sum(intPrimitive) as c2 " +
+                "from SupportBean.win:keepall() output snapshot when terminated");
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(100, "S0_1"));    // starts it
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        // terminate
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(200, "S1_1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_1", 5});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(201, "S1_2"));
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(102, "S0_2"));    // starts it
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(201, "S1_3"));    // ends it
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_2", null});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(103, "S0_3"));    // starts it
+        epService.getEPRuntime().sendEvent(new SupportBean("E5", 6));           // some more data
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(104, "S0_4"));    // ignored
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(201, "S1_3"));    // ends it
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_3", 6});
+
+        statement.destroy();
+    }
+
+    public void testPatternStartedPatternEnded() {
+        sendTimeEvent("2002-05-1T8:00:00.000");
+        epService.getEPAdministrator().createEPL("create context EveryNowAndThen as " +
+                "start pattern [s0=SupportBean_S0 -> timer:interval(1 sec)] " +
+                "end pattern [s1=SupportBean_S1 -> timer:interval(1 sec)]");
+
+        String[] fields = "c1,c2".split(",");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        EPStatement statement = epService.getEPAdministrator().createEPL("context EveryNowAndThen select context.s0.p00 as c1, sum(intPrimitive) as c2 " +
+                "from SupportBean.win:keepall()");
+        statement.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(100, "S0_1"));    // starts it
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        sendTimeEvent("2002-05-1T8:00:01.000"); // 1 second passes
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_1", 4});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E5", 5));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_1", 9});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(101, "S0_2"));    // ignored
+        sendTimeEvent("2002-05-1T8:00:03.000");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_1", 15});
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(101, "S1_1"));    // ignored
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E7", 7));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_1", 22});
+
+        sendTimeEvent("2002-05-1T8:00:04.000"); // terminates
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E8", 8));
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(102, "S1_2"));    // ignored
+        sendTimeEvent("2002-05-1T8:00:10.000");
+        epService.getEPRuntime().sendEvent(new SupportBean("E9", 9));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(103, "S0_3"));    // new instance
+        sendTimeEvent("2002-05-1T8:00:11.000");
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E10", 10));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"S0_3", 10});
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testContextCreateDestroy() {
@@ -69,7 +331,7 @@ public class TestContextTemporalFixed extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean());
         assertFalse(listener.getAndClearIsInvoked());
 
-        long start = SupportDateTime.parseGetMSec("2002-05-1T8:00:01.999");
+        long start = DateTime.parseDefaultMSec("2002-05-1T8:00:01.999");
         for (int i = 0; i < 10; i++) {
             sendTimeEvent(start);
 
@@ -110,7 +372,7 @@ public class TestContextTemporalFixed extends TestCase {
         // now started
         sendTimeEvent("2002-05-1T9:00:00.000");
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"Y"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"Y"});
 
         // now gone
         sendTimeEvent("2002-05-1T17:00:00.000");
@@ -122,7 +384,7 @@ public class TestContextTemporalFixed extends TestCase {
         sendTimeEvent("2002-05-2T9:00:00.000");
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"X"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"X"});
     }
 
     public void testPrevPriorAndAggregation() {
@@ -144,16 +406,16 @@ public class TestContextTemporalFixed extends TestCase {
         SupportBean event1 = new SupportBean("E1", 1);
         epService.getEPRuntime().sendEvent(event1);
         Object[][] expected = new Object[][]{{null, new SupportBean[]{event1}, "E1", null, 1}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, expected);
-        ArrayAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, expected);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, expected);
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, expected);
 
         SupportBean event2 = new SupportBean("E2", 2);
         epService.getEPRuntime().sendEvent(event2);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", new SupportBean[]{event2, event1}, "E1", "E1", 3});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", new SupportBean[]{event2, event1}, "E1", "E1", 3});
 
         // now gone
         sendTimeEvent("2002-05-1T17:00:00.000");
-        ArrayAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, null);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
         assertFalse(listener.isInvoked());
@@ -165,8 +427,8 @@ public class TestContextTemporalFixed extends TestCase {
         SupportBean event3 = new SupportBean("E3", 9);
         epService.getEPRuntime().sendEvent(event3);
         expected = new Object[][] {{null, new SupportBean[]{event3}, "E3", null, 9}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, expected);
-        ArrayAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, expected);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, expected);
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), statement.safeIterator(), fields, expected);
         AgentInstanceAssertionUtil.assertInstanceCounts(statement.getStatementContext(), 1, 0, 3, 1);
     }
 
@@ -188,10 +450,10 @@ public class TestContextTemporalFixed extends TestCase {
         // now started
         sendTimeEvent("2002-05-1T9:00:00.000");
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, 1, "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, 1, "E1"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 5, 1, "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 5, 1, "E1"});
 
         // now gone
         sendTimeEvent("2002-05-1T17:00:00.000");
@@ -205,10 +467,10 @@ public class TestContextTemporalFixed extends TestCase {
 
         sendTimeEvent("2002-05-1T9:00:00.000");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 4, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 4, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 4, 2, "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 4, 2, "E1"});
     }
 
     public void testPatternWithTime() {
@@ -259,11 +521,11 @@ public class TestContextTemporalFixed extends TestCase {
         assertEquals(2, filterSPI.getFilterCountApprox());   // from the context
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(11, "S01"));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "S01"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", "S01"});
 
         // now gone
         sendTimeEvent("2002-05-1T17:00:00.000");
@@ -278,11 +540,11 @@ public class TestContextTemporalFixed extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E3", null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(12, "S02"));
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4", "S02"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E4", "S02"});
         AgentInstanceAssertionUtil.assertInstanceCounts(statement.getStatementContext(), 1, 1, 0, 0);
 
         // now gone
@@ -319,14 +581,14 @@ public class TestContextTemporalFixed extends TestCase {
         sendTimeEvent("2002-05-1T9:00:00.000");
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "E2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3, "E1"));
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {"E1", 3});
-        ArrayAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{"E1", 3});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"E1", 1});
         listener.reset();
 
         // now gone
@@ -340,7 +602,7 @@ public class TestContextTemporalFixed extends TestCase {
         sendTimeEvent("2002-05-2T9:00:00.000");
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
     }
 
     public void testNWFireAndForget() {
@@ -385,7 +647,7 @@ public class TestContextTemporalFixed extends TestCase {
             epService.getEPRuntime().executeQuery("select * from MyWindow");
         }
         catch (EPException ex) {
-            String expected = "Error executing statement: Named window 'MyWindow' is associated to context 'NineToFive' that is not available for querying [select * from MyWindow]";
+            String expected = "Error executing statement: Named window 'MyWindow' is associated to context 'NineToFive' that is not available for querying without context partition selector, use the executeQuery(epl, selector) method instead [select * from MyWindow]";
             assertEquals(expected, ex.getMessage());
         }
     }
@@ -446,8 +708,8 @@ public class TestContextTemporalFixed extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         EventBean event = listener.assertOneGetNewAndReset();
         assertEquals("NineToFive", event.get("c1"));
-        assertEquals("2002-05-03T16:59:59.000", SupportDateTime.print(event.get("c2")));
-        assertEquals("2002-05-03T17:00:00.000", SupportDateTime.print(event.get("c3")));
+        assertEquals("2002-05-03T16:59:59.000", DateTime.print(event.get("c2")));
+        assertEquals("2002-05-03T17:00:00.000", DateTime.print(event.get("c3")));
         assertEquals("E1", event.get("c4"));
     }
 
@@ -488,7 +750,7 @@ public class TestContextTemporalFixed extends TestCase {
 
     private void assertContextEventType(EventType eventType) {
         assertEquals(0, eventType.getPropertyNames().length);
-        assertEquals("EventType_Context_NineToFive", eventType.getName());
+        assertEquals("anonymous_EventType_Context_NineToFive", eventType.getName());
     }
 
     private void sendTimeAndAssert(String time, boolean isInvoked, int countStatements) {
@@ -509,7 +771,7 @@ public class TestContextTemporalFixed extends TestCase {
     }
 
     private void sendTimeEvent(String time) {
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(SupportDateTime.parseGetMSec(time)));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(time)));
     }
 
     private void sendTimeEvent(long time) {

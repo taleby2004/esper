@@ -15,6 +15,8 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST0_Container;
 import com.espertech.esper.support.bean.lrreport.LocationReportFactory;
@@ -22,8 +24,6 @@ import com.espertech.esper.support.bean.lrreport.LocationReport;
 import com.espertech.esper.support.bean.sales.PersonSales;
 import com.espertech.esper.support.bean.sales.Sale;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Collection;
@@ -58,7 +58,7 @@ public class TestEnumNested extends TestCase {
         SupportBean_ST0_Container bean = SupportBean_ST0_Container.make2Value("E1,2", "E2,1", "E3,2");
         epService.getEPRuntime().sendEvent(bean);
         Collection<SupportBean_ST0> result = (Collection<SupportBean_ST0>) listener.assertOneGetNewAndReset().get("val");
-        ArrayAssertionUtil.assertEqualsExactOrder(result.toArray(), new Object[] {bean.getContained().get(1)});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{bean.getContained().get(1)}, result.toArray());
     }
 
     public void testMinByWhere() {
@@ -71,7 +71,7 @@ public class TestEnumNested extends TestCase {
         epService.getEPRuntime().sendEvent(bean);
 
         Collection<Sale> sales = (Collection<Sale>) listener.assertOneGetNewAndReset().get("val");
-        ArrayAssertionUtil.assertEqualsExactOrder(sales.toArray(), new Object[] {bean.getSales().get(0)});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{bean.getSales().get(0)}, sales.toArray());
     }
 
     public void testCorrelated() {

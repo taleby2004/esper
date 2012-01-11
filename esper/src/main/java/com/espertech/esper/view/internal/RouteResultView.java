@@ -13,7 +13,6 @@ package com.espertech.esper.view.internal;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.collection.NullIterator;
 import com.espertech.esper.core.service.EPStatementHandle;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.InternalEventRouter;
@@ -22,6 +21,7 @@ import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
+import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.view.ViewSupport;
 
 import java.util.Iterator;
@@ -31,7 +31,6 @@ import java.util.Iterator;
  */
 public class RouteResultView extends ViewSupport
 {
-    private final static NullIterator nullIterator = new NullIterator();
     private final EventType eventType;
     private RouteResultViewHandler handler;
     private ExprEvaluatorContext exprEvaluatorContext;
@@ -90,6 +89,6 @@ public class RouteResultView extends ViewSupport
 
     public Iterator<EventBean> iterator()
     {
-        return nullIterator;
+        return CollectionUtil.NULL_EVENT_ITERATOR;
     }
 }

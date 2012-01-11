@@ -15,10 +15,10 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,10 +49,10 @@ public class TestOrderByRowForAll extends TestCase
         sendEvent("IBM", 49);
         sendEvent("CAT", 15);
         sendEvent("IBM", 100);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{214d}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{214d}});
 
         sendEvent("KGB", 75);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{289d}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{289d}});
     }
 
     private void sendEvent(String symbol, double price)

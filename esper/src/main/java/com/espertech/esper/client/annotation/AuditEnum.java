@@ -62,9 +62,14 @@ public enum AuditEnum
     STREAM("STREAM"),
 
     /**
-     * For use with stream-audit.
+     * For use with schedule-audit.
      */
-    SCHEDULE("SCHEDULE");
+    SCHEDULE("SCHEDULE"),
+
+    /**
+     * For use with insert-into audit.
+     */
+    INSERT("INSERT");
 
     private final String value;
 

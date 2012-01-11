@@ -29,7 +29,7 @@ public class AggSvcGroupByRefcountedNoAccessFactory extends AggregationServiceFa
         super(evaluators, prototypes);
     }
 
-    public AggregationService makeService(AgentInstanceContext agentInstanceContext) {
-        return new AggSvcGroupByRefcountedNoAccessImpl(evaluators, aggregators, agentInstanceContext.getMethodResolutionService());
+    public AggregationService makeService(AgentInstanceContext agentInstanceContext, MethodResolutionService methodResolutionService) {
+        return new AggSvcGroupByRefcountedNoAccessImpl(evaluators, aggregators, methodResolutionService);
     }
 }

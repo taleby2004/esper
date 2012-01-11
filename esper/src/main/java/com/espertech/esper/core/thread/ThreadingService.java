@@ -129,4 +129,6 @@ public interface ThreadingService
      * @return thread pool
      */
     public ThreadPoolExecutor getInboundThreadPool();
+
+    public Thread makeEventSourceThread(String engineURI, String sourceName, Runnable runnable);
 }

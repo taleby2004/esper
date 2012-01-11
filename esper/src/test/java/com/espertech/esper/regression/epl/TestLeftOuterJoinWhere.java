@@ -11,13 +11,13 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
 public class TestLeftOuterJoinWhere extends TestCase
@@ -102,7 +102,7 @@ public class TestLeftOuterJoinWhere extends TestCase
             assertSame(s0, updateListener.getLastNewData()[i].get("s0"));
             received[i] = updateListener.getLastNewData()[i].get("s1");
         }
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {s1_1, s1_3, s1_4}, received );
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{s1_1, s1_3, s1_4}, received);
     }
 
     public void testWhereJoin()

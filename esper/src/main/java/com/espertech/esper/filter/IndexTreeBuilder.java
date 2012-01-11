@@ -79,6 +79,7 @@ public final class IndexTreeBuilder
      * @param topNode The top tree node beneath which the filterCallback was added
      */
     public final void remove(
+                       EventType eventType,
                        FilterHandle filterCallback,
                        IndexTreePath treePathInfo,
                        FilterHandleSetNode topNode)
@@ -90,6 +91,7 @@ public final class IndexTreeBuilder
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
             log.debug(".remove (" + currentThreadId + ") Removing filterCallback " +
+                      " type " + eventType.getName() + 
                       " from treepath=" + treePathInfo.toString() +
                       "  topNode=" + topNode +
                       "  filterCallback=" + filterCallback);
@@ -172,8 +174,7 @@ public final class IndexTreeBuilder
             // Pick the next parameter for an index
             FilterValueSetParam parameterPickedForIndex = remainingParameters.removeFirst();
 
-            FilterParamIndexBase index = IndexFactory.createIndex(eventType, parameterPickedForIndex.getPropertyName(),
-                    parameterPickedForIndex.getFilterOperator());
+            FilterParamIndexBase index = IndexFactory.createIndex(parameterPickedForIndex.getLookupable(), parameterPickedForIndex.getFilterOperator());
 
             currentNode.getIndizes().add(index);
             treePathInfo.add(index, parameterPickedForIndex.getFilterForValue());
@@ -397,8 +398,7 @@ public final class IndexTreeBuilder
             // If there are remaining parameters, create a new index for the next parameter
             FilterValueSetParam parameterPickedForIndex = remainingParameters.removeFirst();
 
-            FilterParamIndexBase nextIndex = IndexFactory.createIndex(eventType, parameterPickedForIndex.getPropertyName(),
-                    parameterPickedForIndex.getFilterOperator());
+            FilterParamIndexBase nextIndex = IndexFactory.createIndex(parameterPickedForIndex.getLookupable(), parameterPickedForIndex.getFilterOperator());
 
             index.put(filterForValue, nextIndex);
             treePathInfo.add(nextIndex, parameterPickedForIndex.getFilterForValue());
@@ -450,7 +450,7 @@ public final class IndexTreeBuilder
         for (FilterValueSetParam parameter : remainingParameters)
         {
             buffer.append("  param(").append(count).append(')');
-            buffer.append(" property=").append(parameter.getPropertyName());
+            buffer.append(" property=").append(parameter.getLookupable());
             buffer.append(" operator=").append(parameter.getFilterOperator());
             buffer.append(" value=").append(parameter.getFilterForValue());
             count++;

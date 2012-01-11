@@ -16,6 +16,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
+import com.espertech.esper.filter.FilterSpecLookupable;
 
 import java.util.Map;
 
@@ -134,6 +135,14 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
         }
     }
 
+    public boolean getFilterLookupEligible() {
+        return evaluator.getStreamNum() == 0;
+    }
+
+    public FilterSpecLookupable getFilterLookupable() {
+        return new FilterSpecLookupable(resolvedPropertyName, evaluator.getGetter(), evaluator.getType());
+    }
+
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
         Pair<PropertyResolutionDescriptor, String> propertyInfoPair = ExprIdentNodeUtil.getTypeFromStream(validationContext.getStreamTypeService(), unresolvedPropertyName, streamOrPropertyName);
@@ -150,7 +159,7 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
 
         Audit audit = AuditEnum.PROPERTY.getAudit(validationContext.getAnnotations());
         if (audit != null) {
-            evaluator = new ExprIdentNodeEvaluatorLogging(streamNum, propertyGetter, propertyType, resolvedPropertyName, validationContext.getStatementName());
+            evaluator = new ExprIdentNodeEvaluatorLogging(streamNum, propertyGetter, propertyType, resolvedPropertyName, validationContext.getStatementName(), validationContext.getStreamTypeService().getEngineURIQualifier());
         }
         else {
             evaluator = new ExprIdentNodeEvaluatorImpl(streamNum, propertyGetter, propertyType);
@@ -273,13 +282,16 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
         return true;
     }
 
-    public static Pair<PropertyResolutionDescriptor, String> getTypeFromStream(StreamTypeService streamTypeService, String propertyNameNestable)
+    public static Pair<PropertyResolutionDescriptor, String> getTypeFromStream(StreamTypeService streamTypeService, String propertyNameNestable, boolean explicitPropertiesOnly)
                     throws ExprValidationPropertyException {
         String streamOrProp = null;
         String prop = propertyNameNestable;
         if (propertyNameNestable.indexOf('.') != -1) {
             prop = propertyNameNestable.substring(propertyNameNestable.indexOf('.') + 1);
             streamOrProp = propertyNameNestable.substring(0, propertyNameNestable.indexOf('.'));
+        }
+        if (explicitPropertiesOnly) {
+            return ExprIdentNodeUtil.getTypeFromStreamExplicitProperties(streamTypeService, prop, streamOrProp);
         }
         return ExprIdentNodeUtil.getTypeFromStream(streamTypeService, prop, streamOrProp);
     }

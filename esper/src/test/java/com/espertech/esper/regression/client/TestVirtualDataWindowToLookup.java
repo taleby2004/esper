@@ -13,6 +13,7 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.hook.VirtualDataWindow;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.epl.lookup.SubordTableLookupStrategy;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
@@ -21,7 +22,6 @@ import com.espertech.esper.epl.virtualdw.VirtualDataWindowLookupContextSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.virtualdw.SupportVirtualDW;
 import com.espertech.esper.support.virtualdw.SupportVirtualDWFactory;
 import junit.framework.TestCase;

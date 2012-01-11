@@ -63,14 +63,16 @@ public class StreamFactorySvcImpl implements StreamFactoryService
     // Using a reference-counted map for non-join statements
     private final RefCountedMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>> eventStreamsRefCounted;
 
-    private boolean isReuseViews;
+    private final String engineURI;
+    private final boolean isReuseViews;
 
     /**
      * Ctor.
      * @param isReuseViews indicator on whether stream and view resources are to be reused between statements
      */
-    public StreamFactorySvcImpl(boolean isReuseViews)
+    public StreamFactorySvcImpl(String engineURI, boolean isReuseViews)
     {
+        this.engineURI = engineURI;
         this.eventStreamsRefCounted = new RefCountedMap<FilterSpecCompiled, Pair<EventStream, EPStatementHandleCallback>>();
         this.eventStreamsIdentity = new IdentityHashMap<Object, Pair<EventStream, EPStatementHandleCallback>>();
         this.isReuseViews = isReuseViews;
@@ -124,7 +126,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
                 eventStreamsRefCounted.reference(filterSpec);
 
                 // audit proxy
-                EventStream eventStream = EventStreamProxy.getAuditProxy(epStatementAgentInstanceHandle.getStatementHandle().getStatementName(), annotations, filterSpec, pair.getFirst());
+                EventStream eventStream = EventStreamProxy.getAuditProxy(engineURI, epStatementAgentInstanceHandle.getStatementHandle().getStatementName(), annotations, filterSpec, pair.getFirst());
 
                 // We return the lock of the statement first establishing the stream to use that as the new statement's lock
                 return new Pair<EventStream, StatementAgentInstanceLock>(eventStream, pair.getSecond().getAgentInstanceHandle().getStatementAgentInstanceLock());
@@ -136,7 +138,7 @@ public class StreamFactorySvcImpl implements StreamFactoryService
         EventStream zeroDepthStream = new ZeroDepthStream(resultEventType);
 
         // audit proxy
-        EventStream inputStream = EventStreamProxy.getAuditProxy(epStatementAgentInstanceHandle.getStatementHandle().getStatementName(), annotations, filterSpec, zeroDepthStream);
+        EventStream inputStream = EventStreamProxy.getAuditProxy(engineURI, epStatementAgentInstanceHandle.getStatementHandle().getStatementName(), annotations, filterSpec, zeroDepthStream);
 
         final EventStream eventStream = inputStream;
         FilterHandleCallback filterCallback;

@@ -1402,8 +1402,23 @@ group by symbol</programlisting>
 		 </para>
 
 		<para>
-			You may register your own single-row function name for the user-defined function so that your EPL statements are less cluttered. This is described in detail in <xref linkend="custom-singlerow-function"/>. 
+			You may register your own function name for the user-defined function. Please see the instructions in <xref linkend="custom-singlerow-function"/> for registering a function name for a user-defined single-row function.
 		</para>
+		
+		<para>
+			A single-row function that has been registered with a function name can simply be referenced as <emphasis>function_name</emphasis><literal>(</literal><emphasis>parameters</emphasis><literal>)</literal> thus EPL statements can be less cluttered as no class name is required. 
+			The engine also optimizes evaluation of such registered single-row functions when used in filter predicate expressions as described in <xref linkend="custom-single-filter-optimizable"/>.
+		</para>
+
+		<para>
+			An example EPL statement that utilizes the <literal>discount</literal> function is shown next (assuming that function has been registered).
+		</para>
+		<programlisting><![CDATA[select discount(quantity, price) from OrderEvent]]></programlisting>
+
+		<para>
+			When selecting from a single stream, use the wildcard <literal>(*)</literal> character to pass the underlying event:
+		</para>
+		<programlisting><![CDATA[select discount(*) from OrderEvent]]></programlisting>
 
 		 <para>
 			 User-defined functions can be also be invoked on instances of an event: Please see <xref linkend="epl-from-clause-stream-name"/> to invoke event instance methods on a named stream.

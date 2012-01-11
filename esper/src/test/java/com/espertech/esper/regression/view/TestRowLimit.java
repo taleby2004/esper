@@ -12,13 +12,13 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanNumeric;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestRowLimit extends TestCase {
@@ -81,104 +81,104 @@ public class TestRowLimit extends TestCase {
 
         String[] fields = "string".split(",");
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("E1", 90);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("E2", 5);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("E3", 60);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}});
 
         sendEvent("E4", 99);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E1"}, {"E4"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E4"}});
         assertFalse(listener.isInvoked());
 
         sendEvent("E5", 6);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E3"}, {"E1"}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E3"}, {"E1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E3"}, {"E1"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E3"}, {"E1"}});
     }
 
     private void runAssertionVariable(EPStatement stmt)
     {
         String[] fields = "string".split(",");
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("E1", 1);
         sendEvent("E2", 2);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E2"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E2"}});
 
         sendEvent("E3", 3);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E2"}, {"E3"}});
 
         sendEvent("E4", 4);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E2"}, {"E3"}});
         assertFalse(listener.isInvoked());
 
         sendEvent("E5", 5);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E2"}, {"E3"}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E2"}, {"E3"}});
 
         sendEvent("E6", 6);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E3"}, {"E4"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E3"}, {"E4"}});
         assertFalse(listener.isInvoked());
 
         // change variable values
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(2, 3));
         sendEvent("E7", 7);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E6"}, {"E7"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E6"}, {"E7"}});
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(-1, 0));
         sendEvent("E8", 8);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E4"}, {"E5"}, {"E6"}, {"E7"}, {"E8"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E4"}, {"E5"}, {"E6"}, {"E7"}, {"E8"}});
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(10, 0));
         sendEvent("E9", 9);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E5"}, {"E6"}, {"E7"}, {"E8"}, {"E9"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E5"}, {"E6"}, {"E7"}, {"E8"}, {"E9"}});
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(6, 3));
         sendEvent("E10", 10);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E9"}, {"E10"}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E9"}, {"E10"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E9"}, {"E10"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E9"}, {"E10"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(1, 1));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E7"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E7"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(2, 1));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E7"}, {"E8"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E7"}, {"E8"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(1, 2));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E8"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E8"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(6, 6));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(1, 4));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E10"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E10"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric((Integer) null, null));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E6"}, {"E7"}, {"E8"}, {"E9"}, {"E10"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E6"}, {"E7"}, {"E8"}, {"E9"}, {"E10"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(null, 2));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E8"}, {"E9"}, {"E10"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E8"}, {"E9"}, {"E10"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(2, null));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E6"}, {"E7"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E6"}, {"E7"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(-1, 4));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E10"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E10"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(-1, 0));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E6"}, {"E7"}, {"E8"}, {"E9"}, {"E10"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E6"}, {"E7"}, {"E8"}, {"E9"}, {"E10"}});
 
         epService.getEPRuntime().sendEvent(new SupportBeanNumeric(0, 0));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
     }
 
     public void testBatchOffsetNoOrderOM()
@@ -209,22 +209,22 @@ public class TestRowLimit extends TestCase {
 
         String[] fields = "string,mysum".split(",");
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("E1", 90);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E1", 90}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1", 90}});
 
         sendEvent("E2", 5);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E2", 5}, {"E1", 90}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E2", 5}, {"E1", 90}});
 
         sendEvent("E3", 60);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E2", 5}, {"E3", 60}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E2", 5}, {"E3", 60}});
 
         sendEvent("E3", 40);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E2", 5}, {"E1", 90}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E2", 5}, {"E1", 90}});
 
         sendEvent("E2", 1000);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E1", 90}, {"E3", 100}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1", 90}, {"E3", 100}});
     }
 
     public void testEventPerRowUnGrouped()
@@ -235,7 +235,7 @@ public class TestRowLimit extends TestCase {
 
         String[] fields = "string,mysum".split(",");
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("E1", 10);
         sendEvent("E2", 5);
@@ -243,7 +243,7 @@ public class TestRowLimit extends TestCase {
         sendEvent("E4", 30);
 
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E4", 65}, {"E3", 35}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E4", 65}, {"E3", 35}});
     }
 
     public void testGroupedSnapshot()
@@ -254,7 +254,7 @@ public class TestRowLimit extends TestCase {
 
         String[] fields = "string,mysum".split(",");
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("E1", 10);
         sendEvent("E2", 5);
@@ -262,7 +262,7 @@ public class TestRowLimit extends TestCase {
         sendEvent("E1", 30);
 
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E1", 40}, {"E3", 20}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E1", 40}, {"E3", 20}});
     }
 
     public void testGroupedSnapshotNegativeRowcount()
@@ -273,7 +273,7 @@ public class TestRowLimit extends TestCase {
 
         String[] fields = "string,mysum".split(",");
         stmt.addListener(listener);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("E1", 10);
         sendEvent("E2", 5);
@@ -281,7 +281,7 @@ public class TestRowLimit extends TestCase {
         sendEvent("E1", 30);
 
         sendTimer(11000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E3", 20}, {"E2", 5}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E3", 20}, {"E2", 5}});
     }
 
     public void testInvalid()
@@ -309,26 +309,26 @@ public class TestRowLimit extends TestCase {
         String[] fields = "string".split(",");
         stmt.addListener(listener);
         sendEvent("E1", 1);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}});
 
         sendEvent("E2", 2);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}});
 
         sendEvent("E3", 3);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"E1"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
         sendEvent("E4", 4);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E4"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E4"}});
 
         sendEvent("E5", 5);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"E4"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E4"}});
 
         sendEvent("E6", 6);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"E4"}});
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastOldData(), fields, new Object[][] {{"E1"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"E4"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastOldData(), fields, new Object[][]{{"E1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
     }
 
     private void tryInvalid(String expression, String expected)

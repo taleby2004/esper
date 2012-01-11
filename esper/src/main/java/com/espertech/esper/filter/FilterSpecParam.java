@@ -23,14 +23,14 @@ public abstract class FilterSpecParam implements MetaDefItem, Serializable
     /**
      * The property name of the filter parameter.
      */
-    protected final String propertyName;
+    protected final FilterSpecLookupable lookupable;
     
     private final FilterOperator filterOperator;
     private static final long serialVersionUID = -677137265660114030L;
 
-    FilterSpecParam(String propertyName, FilterOperator filterOperator)
+    FilterSpecParam(FilterSpecLookupable lookupable, FilterOperator filterOperator)
     {
-        this.propertyName = propertyName;
+        this.lookupable = lookupable;
         this.filterOperator = filterOperator;
     }
 
@@ -41,20 +41,8 @@ public abstract class FilterSpecParam implements MetaDefItem, Serializable
      */
     public abstract Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext);
 
-    /**
-     * Returns a hash code for use in computing a filter expression hash code that matches
-     * when a same-values filter expression is provided.
-     * @return hash code or zero if no recomputable value can be computed
-     */
-    public abstract int getFilterHash();
-
-    /**
-     * Returns the property name for the filter parameter.
-     * @return property name
-     */
-    public String getPropertyName()
-    {
-        return propertyName;
+    public FilterSpecLookupable getLookupable() {
+        return lookupable;
     }
 
     /**
@@ -70,25 +58,22 @@ public abstract class FilterSpecParam implements MetaDefItem, Serializable
     public String toString()
     {
         return "FilterSpecParam" +
-               " property=" + propertyName +
+               " lookupable=" + lookupable +
                " filterOp=" + filterOperator;
     }
 
     public boolean equals(Object obj)
     {
-        if (this == obj)
-        {
+        if (this == obj) {
             return true;
         }
 
-        if (!(obj instanceof FilterSpecParam))
-        {
+        if (!(obj instanceof FilterSpecParam)) {
             return false;
         }
 
         FilterSpecParam other = (FilterSpecParam) obj;
-
-        if (!(this.propertyName.equals(other.propertyName)))
+        if (!(this.lookupable.equals(other.lookupable)))
         {
             return false;
         }
@@ -102,7 +87,7 @@ public abstract class FilterSpecParam implements MetaDefItem, Serializable
     public int hashCode()
     {
         int result;
-        result = propertyName.hashCode();
+        result = lookupable.hashCode();
         result = 31 * result + filterOperator.hashCode();
         return result;
     }

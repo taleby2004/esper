@@ -22,8 +22,9 @@ public class ContainedEventSelect implements Serializable
     private static final long serialVersionUID = 0L;
 
     private SelectClause selectClause;
-    private String propertyName;
-    private String propertyAsName;
+    private Expression splitExpression;
+    private String optionalSplitExpressionTypeName;
+    private String optionalAsName;
     private Expression whereClause;
 
     /**
@@ -34,53 +35,28 @@ public class ContainedEventSelect implements Serializable
 
     /**
      * Ctor.
-     * @param propertyName property expression
-     * @param propertyAsName optional alias
-     * @param selectClause select clause, also optional
-     * @param whereClause where clause, also optional
+     * @param splitExpression the property expression or other expression for splitting the event
      */
-    public ContainedEventSelect(String propertyName, String propertyAsName, SelectClause selectClause, Expression whereClause)
-    {
-        this.propertyName = propertyName;
-        this.propertyAsName = propertyAsName;
-        this.selectClause = selectClause;
-        this.whereClause = whereClause;
+    public ContainedEventSelect(Expression splitExpression) {
+        this.splitExpression = splitExpression;
     }
 
     /**
      * Returns the property alias.
      * @return alias
      */
-    public String getPropertyAsName()
+    public String getOptionalAsName()
     {
-        return propertyAsName;
+        return optionalAsName;
     }
 
     /**
      * Sets the property alias
-     * @param propertyAsName alias 
+     * @param optionalAsName alias
      */
-    public void setPropertyAsName(String propertyAsName)
+    public void setOptionalAsName(String optionalAsName)
     {
-        this.propertyAsName = propertyAsName;
-    }
-
-    /**
-     * Returns the property expression.
-     * @return property expression
-     */
-    public String getPropertyName()
-    {
-        return propertyName;
-    }
-
-    /**
-     * Sets the property expression.
-     * @param propertyName expression
-     */
-    public void setPropertyName(String propertyName)
-    {
-        this.propertyName = propertyName;
+        this.optionalAsName = optionalAsName;
     }
 
     /**
@@ -119,6 +95,23 @@ public class ContainedEventSelect implements Serializable
         this.whereClause = whereClause;
     }
 
+
+    public String getOptionalSplitExpressionTypeName() {
+        return optionalSplitExpressionTypeName;
+    }
+
+    public void setOptionalSplitExpressionTypeName(String optionalSplitExpressionTypeName) {
+        this.optionalSplitExpressionTypeName = optionalSplitExpressionTypeName;
+    }
+
+    public Expression getSplitExpression() {
+        return splitExpression;
+    }
+
+    public void setSplitExpression(Expression splitExpression) {
+        this.splitExpression = splitExpression;
+    }
+
     /**
      * Returns the EPL.
      * @param writer to write to
@@ -131,11 +124,16 @@ public class ContainedEventSelect implements Serializable
             selectClause.toEPL(writer, formatter, false);
             writer.write(" from ");
         }
-        writer.write(propertyName);
-        if (propertyAsName != null)
+        splitExpression.toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+        if (optionalSplitExpressionTypeName != null) {
+            writer.write("@type(");
+            writer.write(optionalSplitExpressionTypeName);
+            writer.write(")");
+        }
+        if (optionalAsName != null)
         {
             writer.write(" as ");
-            writer.write(propertyAsName);
+            writer.write(optionalAsName);
         }
         if (whereClause != null)
         {

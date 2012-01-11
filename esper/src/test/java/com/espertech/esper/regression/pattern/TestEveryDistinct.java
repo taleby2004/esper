@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.pattern;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
@@ -19,8 +21,6 @@ import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 public class TestEveryDistinct extends TestCase implements SupportBeanConstants
@@ -38,13 +38,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         statement.addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A3"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
@@ -53,9 +53,9 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A4"});
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A5"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A6", 1));
         engine.getEPRuntime().sendEvent(new CurrentTimeEvent(1999));
@@ -64,7 +64,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         
         engine.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
         engine.getEPRuntime().sendEvent(new SupportBean("A7", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A7"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A7"});
     }
 
     public void testEveryDistinctOverFilter() throws Exception
@@ -313,7 +313,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
         assertFalse(listener.isInvoked());
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A1", "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 10));
@@ -321,11 +321,11 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B3", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A3", "B3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A3", "B3"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A4", "B4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A4", "B4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 10));
@@ -333,7 +333,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A6", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B6", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A6", "B6"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A6", "B6"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A7", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B7", 20));
@@ -361,10 +361,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         statement.addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", null});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {null, "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{null, "B1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 2));
@@ -373,10 +373,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {null, "B4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{null, "B4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {null, "B5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{null, "B5"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B6", 3));
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 3));
@@ -405,19 +405,19 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         statement.addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A3"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[] {"A4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 1));
         assertFalse(listener.isInvoked());
@@ -445,7 +445,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
         assertFalse(listener.isInvoked());
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A1", "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 1));
@@ -457,7 +457,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A4", "B4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A4", "B4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 3));
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 0));
@@ -487,7 +487,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 0));
         assertFalse(listener.isInvoked());
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A1", "B2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B2"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 3));
@@ -495,13 +495,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("B3", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A3", "B3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A3", "B3"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A2", "B5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A2", "B5"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B6", 2));
@@ -509,7 +509,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A6", 4));
         engine.getEPRuntime().sendEvent(new SupportBean("B7", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A6", "B7"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A6", "B7"});
     }
 
     public void testFollowedByWithDistinct() throws Exception
@@ -533,26 +533,26 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A1", "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B1"});
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A1", "B2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B2"});
         engine.getEPRuntime().sendEvent(new SupportBean("B3", 0));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A1", "B4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[] {"A3", "B5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A3", "B5"});
         engine.getEPRuntime().sendEvent(new SupportBean("B6", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("B7", 3));
-        EventBean[] events = listener.getLastNewDataAndReset();
-        ArrayAssertionUtil.assertProps(events[0], "a.string,b.string".split(","), new Object[] {"A1", "B7"});
-        ArrayAssertionUtil.assertProps(events[1], "a.string,b.string".split(","), new Object[] {"A3", "B7"});
+        EventBean[] events = listener.getAndResetLastNewData();
+        EPAssertionUtil.assertProps(events[0], "a.string,b.string".split(","), new Object[]{"A1", "B7"});
+        EPAssertionUtil.assertProps(events[1], "a.string,b.string".split(","), new Object[]{"A3", "B7"});
     }
 
     public void testInvalid() throws Exception

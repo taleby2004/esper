@@ -54,7 +54,8 @@ public class EPStatementStartMethodCreateSchema extends EPStatementStartMethodBa
                     }
                     config.setStartTimestampPropertyName(spec.getStartTimestampProperty());
                     config.setEndTimestampPropertyName(spec.getEndTimestampProperty());
-                    eventType = services.getEventAdapterService().addNestableMapType(spec.getSchemaName(), typing, config, false, false, true, false, false);
+                    Map<String, Object> compiledTyping = EventTypeUtility.compileMapTypeProperties(typing, services.getEventAdapterService());
+                    eventType = services.getEventAdapterService().addNestableMapType(spec.getSchemaName(), compiledTyping, config, false, false, true, false, false);
                 }
                 else {
                     // Java Object/Bean/POJO type definition

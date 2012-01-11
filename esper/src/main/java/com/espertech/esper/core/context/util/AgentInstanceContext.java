@@ -11,39 +11,44 @@
 
 package com.espertech.esper.core.context.util;
 
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.context.mgr.AgentInstanceFilterProxy;
 import com.espertech.esper.core.service.ExpressionResultCacheService;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.script.AgentInstanceScriptContext;
+import com.espertech.esper.event.MappedEventBean;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.util.StopCallback;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class AgentInstanceContext implements ExprEvaluatorContext {
 
     private final StatementContext statementContext;
     private final EPStatementAgentInstanceHandle epStatementAgentInstanceHandle;
-    private final int[] agentInstanceIds;
+    private final int agentInstanceId;
     private final AgentInstanceFilterProxy agentInstanceFilterProxy;
-    private final EventBean agentInstanceProperties;
+    private final MappedEventBean agentInstanceProperties;
     private final Set<StopCallback> terminationCallbacks = new HashSet<StopCallback>();
+    private final AgentInstanceScriptContext agentInstanceScriptContext;
 
-    public AgentInstanceContext(StatementContext statementContext, EPStatementAgentInstanceHandle epStatementAgentInstanceHandle, int[] agentInstanceIds, AgentInstanceFilterProxy agentInstanceFilterProxy, EventBean agentInstanceProperties) {
+    public AgentInstanceContext(StatementContext statementContext, EPStatementAgentInstanceHandle epStatementAgentInstanceHandle, int agentInstanceId, AgentInstanceFilterProxy agentInstanceFilterProxy, MappedEventBean agentInstanceProperties, AgentInstanceScriptContext agentInstanceScriptContext) {
         this.statementContext = statementContext;
         this.epStatementAgentInstanceHandle = epStatementAgentInstanceHandle;
-        this.agentInstanceIds = agentInstanceIds;
+        this.agentInstanceId = agentInstanceId;
         this.agentInstanceFilterProxy = agentInstanceFilterProxy;
         this.agentInstanceProperties = agentInstanceProperties;
+        this.agentInstanceScriptContext = agentInstanceScriptContext;
     }
 
     public AgentInstanceFilterProxy getAgentInstanceFilterProxy() {
         return agentInstanceFilterProxy;
+    }
+
+    public AgentInstanceScriptContext getAgentInstanceScriptContext() {
+        return agentInstanceScriptContext;
     }
 
     public TimeProvider getTimeProvider() {
@@ -54,8 +59,8 @@ public class AgentInstanceContext implements ExprEvaluatorContext {
         return statementContext.getExpressionResultCacheService();
     }
 
-    public int[] getAgentInstanceIds() {
-        return agentInstanceIds;
+    public int getAgentInstanceId() {
+        return agentInstanceId;
     }
 
     public StatementContext getStatementContext() {
@@ -66,15 +71,27 @@ public class AgentInstanceContext implements ExprEvaluatorContext {
         return epStatementAgentInstanceHandle;
     }
 
-    public MethodResolutionService getMethodResolutionService() {
-        return statementContext.getMethodResolutionService();
-    }
-
-    public EventBean getContextProperties() {
+    public MappedEventBean getContextProperties() {
         return agentInstanceProperties;
     }
 
     public Set<StopCallback> getTerminationCallbacks() {
         return terminationCallbacks;
+    }
+
+    public String getStatementName() {
+        return statementContext.getStatementName();
+    }
+
+    public String getEngineURI() {
+        return statementContext.getEngineURI();
+    }
+
+    public String getStatementId() {
+        return statementContext.getStatementId();
+    }
+
+    public StatementAgentInstanceLock getAgentInstanceLock() {
+        return epStatementAgentInstanceHandle.getStatementAgentInstanceLock();
     }
 }

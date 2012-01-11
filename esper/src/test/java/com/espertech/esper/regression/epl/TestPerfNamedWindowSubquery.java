@@ -15,11 +15,11 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanRange;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,7 +84,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBeanRange("R", "", -1, -1));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {9734});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{9734});
         }
         long delta = System.currentTimeMillis() - startTime;
         assertTrue("delta=" + delta, delta < 500);
@@ -98,7 +98,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         startTime = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBeanRange("R", "", -1, -1));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {9736});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{9736});
         }
         delta = System.currentTimeMillis() - startTime;
         assertTrue("delta=" + delta, delta < 500);
@@ -115,7 +115,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         startTime = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBeanRange("R", "", -1, -1));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {9735});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{9735});
         }
         delta = System.currentTimeMillis() - startTime;
         assertTrue("delta=" + delta, delta < 500);
@@ -129,7 +129,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         startTime = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBeanRange("R", "", -1, -1));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {9738});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{9738});
         }
         delta = System.currentTimeMillis() - startTime;
         assertTrue("delta=" + delta, delta < 500);
@@ -174,7 +174,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBeanRange("R1", "A", 300, 312));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {300, 312});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{300, 312});
         }
         long delta = System.currentTimeMillis() - startTime;
         assertTrue("delta=" + delta, delta < 500);
@@ -217,7 +217,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBeanRange("R1", "K", 300, 312));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {300, 312});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{300, 312});
         }
         long delta = System.currentTimeMillis() - startTime;
         assertTrue("delta=" + delta, delta < 500);
@@ -249,10 +249,10 @@ public class TestPerfNamedWindowSubquery extends TestCase
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 500; i++) {
             epService.getEPRuntime().sendEvent(new SupportBeanRange("R1", "A", 299, 313));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {299, 313});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{299, 313});
 
             epService.getEPRuntime().sendEvent(new SupportBeanRange("R2", "B", 7500, 7510));
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {7500, 7510});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{7500, 7510});
         }
         long delta = System.currentTimeMillis() - startTime;
         assertTrue("delta=" + delta, delta < 500);
@@ -305,7 +305,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         // test once
         epService.getEPRuntime().sendEvent(new SupportBean("WX", 10));
         sendEvent("E1", 10, "WX");
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", "WX"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "WX"});
 
         // preload
         for (int i = 0; i < 10000; i++) {
@@ -315,7 +315,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 5000; i++) {
             sendEvent("E" + i, i, "W" + i);
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E" + i, "W" + i});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E" + i, "W" + i});
         }
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;

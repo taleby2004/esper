@@ -10,8 +10,8 @@ package com.espertech.esper.epl.variable;
 
 import com.espertech.esper.core.service.StatementExtensionSvcContext;
 
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
 
 /**
  * Variables service for reading and writing variables, and for setting a version number for the current thread to
@@ -41,7 +41,7 @@ public interface VariableService
      * @throws VariableExistsException if the variable name is already in use
      * @throws VariableTypeException if the variable type cannot be recognized
      */
-    public void createNewVariable(String variableName, String type, Object value, StatementExtensionSvcContext extensionServicesContext)
+    public void createNewVariable(String variableName, String type, Object value, boolean constant, StatementExtensionSvcContext extensionServicesContext)
             throws VariableExistsException, VariableTypeException;
 
     /**

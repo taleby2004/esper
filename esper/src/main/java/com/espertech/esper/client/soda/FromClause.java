@@ -187,19 +187,21 @@ public class FromClause implements Serializable
                 if (i > 0)
                 {
                     OuterJoinQualifier qualCond = outerJoinQualifiers.get(i - 1);
-                    writer.write(" on ");
-                    qualCond.getLeft().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
-                    writer.write(" = ");
-                    qualCond.getRight().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+                    if (qualCond.getLeft() != null) {
+                        writer.write(" on ");
+                        qualCond.getLeft().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+                        writer.write(" = ");
+                        qualCond.getRight().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
 
-                    if (qualCond.getAdditionalProperties().size() > 0)
-                    {
-                        for (PropertyValueExpressionPair pair : qualCond.getAdditionalProperties())
+                        if (qualCond.getAdditionalProperties().size() > 0)
                         {
-                            writer.write(" and ");
-                            pair.getLeft().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
-                            writer.write(" = ");
-                            pair.getRight().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+                            for (PropertyValueExpressionPair pair : qualCond.getAdditionalProperties())
+                            {
+                                writer.write(" and ");
+                                pair.getLeft().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+                                writer.write(" = ");
+                                pair.getRight().toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
+                            }
                         }
                     }
                 }

@@ -11,6 +11,7 @@ package com.espertech.esper.epl.core;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.*;
+import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.util.CollectionUtil;
@@ -32,13 +33,17 @@ public class ResultSetProcessorSimple extends ResultSetProcessorBaseSimple
     private final ResultSetProcessorSimpleFactory prototype;
     private final SelectExprProcessor selectExprProcessor;
     private final OrderByProcessor orderByProcessor;
-    private final ExprEvaluatorContext exprEvaluatorContext;
+    private ExprEvaluatorContext exprEvaluatorContext;
 
     public ResultSetProcessorSimple(ResultSetProcessorSimpleFactory prototype, SelectExprProcessor selectExprProcessor, OrderByProcessor orderByProcessor, ExprEvaluatorContext exprEvaluatorContext) {
         this.prototype = prototype;
         this.selectExprProcessor = selectExprProcessor;
         this.orderByProcessor = orderByProcessor;
         this.exprEvaluatorContext = exprEvaluatorContext;
+    }
+
+    public void setAgentInstanceContext(AgentInstanceContext context) {
+        exprEvaluatorContext = context;
     }
 
     public EventType getResultEventType()

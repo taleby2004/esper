@@ -50,14 +50,14 @@ public class EvalAuditFactoryNode extends EvalNodeFactoryBase
         if (!auditPatternInstance) {
             return;
         }
-        instanceCount.decreaseRefCount(this.getChildNodes().get(0), current, patternExpr, patternContext.getStatementName());
+        instanceCount.decreaseRefCount(this.getChildNodes().get(0), current, patternExpr, patternContext.getStatementName(), patternContext.getEngineURI());
     }
 
     public void increaseRefCount(EvalAuditStateNode current, PatternContext patternContext) {
         if (!auditPatternInstance) {
             return;
         }
-        instanceCount.increaseRefCount(this.getChildNodes().get(0), current, patternExpr, patternContext.getStatementName());
+        instanceCount.increaseRefCount(this.getChildNodes().get(0), current, patternExpr, patternContext.getStatementName(), patternContext.getEngineURI());
     }
 
     public boolean isFilterChildNonQuitting() {

@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
@@ -61,11 +61,11 @@ public class TestModifiedWildcardSelect extends TestCase
         statement.addListener(listener);
         assertSimple();
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(new Object[] {
-            new EventPropertyDescriptor("myString", String.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("myInt", int.class, null, false, false, false, false, false),
-            new EventPropertyDescriptor("concat", String.class, null, false, false, false, false, false),
-           }, statement.getEventType().getPropertyDescriptors());
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
+                new EventPropertyDescriptor("myString", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("myInt", int.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("concat", String.class, null, false, false, false, false, false),
+        }, statement.getEventType().getPropertyDescriptors());
     }
 
 	public void testSingle() throws Exception

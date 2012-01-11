@@ -39,12 +39,12 @@ public class ExprNthAggNodeFactory implements AggregationMethodFactory
         throw new UnsupportedOperationException();
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
-        AggregationMethod method = methodResolutionService.makeNthAggregator(agentInstanceIds, groupId, aggregationId, childType, size + 1);
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeNthAggregator(agentInstanceId, groupId, aggregationId, childType, size + 1);
         if (!isDistinct) {
             return method;
         }
-        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, childType, false);
+        return methodResolutionService.makeDistinctAggregator(agentInstanceId, groupId, aggregationId, method, childType, false);
     }
 
     public AggregationMethodFactory getPrototypeAggregator() {

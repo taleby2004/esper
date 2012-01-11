@@ -38,6 +38,23 @@ public class EvalRootNode extends EvalNodeBase implements PatternStarter
                                            PatternContext context)
     {
         MatchedEventMap beginState = new MatchedEventMapImpl();
+        return startInternal(callback, context, beginState);
+    }
+
+    public final PatternStopCallback start(PatternMatchCallback callback,
+                                           PatternContext context,
+                                           MatchedEventMap beginState)
+    {
+        return startInternal(callback, context, beginState);
+    }
+
+    private final PatternStopCallback startInternal(PatternMatchCallback callback,
+                                           PatternContext context,
+                                           MatchedEventMap beginState)
+    {
+        if (beginState == null) {
+            throw new IllegalArgumentException("No pattern begin-state has been provided");
+        }
         EvalStateNode rootStateNode = newState(null, beginState, null);
         EvalRootState rootState = (EvalRootState) rootStateNode;
         rootState.setCallback(callback);

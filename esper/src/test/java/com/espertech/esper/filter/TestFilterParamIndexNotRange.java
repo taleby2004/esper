@@ -11,15 +11,15 @@
 
 package com.espertech.esper.filter;
 
-import junit.framework.TestCase;
-import com.espertech.esper.support.filter.SupportEventEvaluator;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.filter.SupportEventEvaluator;
+import junit.framework.TestCase;
 
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 public class TestFilterParamIndexNotRange extends TestCase
 {
@@ -45,7 +45,7 @@ public class TestFilterParamIndexNotRange extends TestCase
 
     public void testClosedRange()
     {
-        FilterParamIndexDoubleRangeInverted index = new FilterParamIndexDoubleRangeInverted("longBoxed", FilterOperator.NOT_RANGE_CLOSED, testEventType);
+        FilterParamIndexDoubleRangeInverted index = makeOne("longBoxed", FilterOperator.NOT_RANGE_CLOSED, testEventType);
         assertEquals(FilterOperator.NOT_RANGE_CLOSED, index.getFilterOperator());
 
         index.put(new DoubleRange(2d, 4d), testEvaluators[0]);
@@ -64,7 +64,7 @@ public class TestFilterParamIndexNotRange extends TestCase
 
     public void testOpenRange()
     {
-        FilterParamIndexDoubleRangeInverted index = new FilterParamIndexDoubleRangeInverted("longBoxed", FilterOperator.NOT_RANGE_OPEN, testEventType);
+        FilterParamIndexDoubleRangeInverted index = makeOne("longBoxed", FilterOperator.NOT_RANGE_OPEN, testEventType);
 
         index.put(new DoubleRange(2d, 4d), testEvaluators[0]);
         index.put(new DoubleRange(2d, 5d), testEvaluators[1]);
@@ -82,7 +82,7 @@ public class TestFilterParamIndexNotRange extends TestCase
 
     public void testHalfOpenRange()
     {
-        FilterParamIndexDoubleRangeInverted index = new FilterParamIndexDoubleRangeInverted("longBoxed", FilterOperator.NOT_RANGE_HALF_OPEN, testEventType);
+        FilterParamIndexDoubleRangeInverted index = makeOne("longBoxed", FilterOperator.NOT_RANGE_HALF_OPEN, testEventType);
 
         index.put(new DoubleRange(2d, 4d), testEvaluators[0]);
         index.put(new DoubleRange(2d, 5d), testEvaluators[1]);
@@ -100,7 +100,7 @@ public class TestFilterParamIndexNotRange extends TestCase
 
     public void testHalfClosedRange()
     {
-        FilterParamIndexDoubleRangeInverted index = new FilterParamIndexDoubleRangeInverted("longBoxed", FilterOperator.NOT_RANGE_HALF_CLOSED, testEventType);
+        FilterParamIndexDoubleRangeInverted index = makeOne("longBoxed", FilterOperator.NOT_RANGE_HALF_CLOSED, testEventType);
 
         index.put(new DoubleRange(2d, 4d), testEvaluators[0]);
         index.put(new DoubleRange(2d, 5d), testEvaluators[1]);
@@ -116,6 +116,10 @@ public class TestFilterParamIndexNotRange extends TestCase
         verify(index, 6L, new boolean[] {true, true, true, true});
     }
 
+    private FilterParamIndexDoubleRangeInverted makeOne(String field, FilterOperator notRangeHalfClosed, EventType testEventType) {
+        return new FilterParamIndexDoubleRangeInverted(makeLookupable(field), notRangeHalfClosed);
+    }
+
     private void verify(FilterParamIndexBase index, Long testValue, boolean[] expected)
     {
         testBean.setLongBoxed(testValue);
@@ -126,16 +130,7 @@ public class TestFilterParamIndexNotRange extends TestCase
         }
     }
 
-    public void testInvalid()
-    {
-        try
-        {
-            new FilterParamIndexDoubleRangeInverted("doublePrimitive", FilterOperator.EQUAL, testEventType);
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected exception
-        }
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, testEventType.getGetter(fieldName), testEventType.getPropertyType(fieldName));
     }
 }

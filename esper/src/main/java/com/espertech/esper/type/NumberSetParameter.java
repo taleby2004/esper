@@ -10,8 +10,8 @@ package com.espertech.esper.type;
 
 import com.espertech.esper.util.MetaDefItem;
 
-import java.util.Set;
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Interface to generate a set of integers from parameters that include ranges, lists and frequencies.
@@ -33,4 +33,8 @@ public interface NumberSetParameter extends MetaDefItem, Serializable
      * @return set of integer
      */
     public Set<Integer> getValuesInRange(int min, int max);
+
+    public boolean containsPoint(int point);
+
+    public String formatted();
 }

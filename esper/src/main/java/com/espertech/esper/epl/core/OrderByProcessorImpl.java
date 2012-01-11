@@ -144,7 +144,7 @@ public class OrderByProcessorImpl implements OrderByProcessor {
 			// Make a new multikey that contains the sort-by values.
 			if (factory.isNeedsGroupByKeys())
 			{
-				aggregationService.setCurrentAccess(groupByKeys[count], exprEvaluatorContext.getAgentInstanceIds());
+				aggregationService.setCurrentAccess(groupByKeys[count], exprEvaluatorContext.getAgentInstanceId());
 			}
 
 			Object[] values = new Object[factory.getOrderBy().length];

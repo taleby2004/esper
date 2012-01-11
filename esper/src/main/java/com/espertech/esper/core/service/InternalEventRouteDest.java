@@ -9,11 +9,6 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.spec.UpdateDesc;
-import com.espertech.esper.epl.expression.ExprValidationException;
-
-import java.lang.annotation.Annotation;
 
 /**
  * Interface for a service that routes events within the engine for further processing.
@@ -32,4 +27,6 @@ public interface InternalEventRouteDest
     public void processThreadWorkQueue();
 
     public void dispatch();
+
+    public String getEngineURI();
 }

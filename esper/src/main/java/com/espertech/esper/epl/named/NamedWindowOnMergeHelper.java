@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.InternalEventRouter;
 import com.espertech.esper.core.service.StatementContext;
@@ -57,7 +58,7 @@ public class NamedWindowOnMergeHelper
                     }
                     else if (item instanceof OnTriggerMergeActionUpdate) {
                         OnTriggerMergeActionUpdate updateDesc = (OnTriggerMergeActionUpdate) item;
-                        NamedWindowUpdateHelper updateHelper = NamedWindowUpdateHelper.make(namedWindowType, updateDesc.getAssignments(), onTriggerDesc.getOptionalAsName());
+                        NamedWindowUpdateHelper updateHelper = NamedWindowUpdateHelper.make(namedWindowName, namedWindowType, updateDesc.getAssignments(), onTriggerDesc.getOptionalAsName());
                         ExprEvaluator filterEval = updateDesc.getOptionalWhereClause() == null ? null : updateDesc.getOptionalWhereClause().getExprEvaluator();
                         actions.add(new NamedWindowOnMergeActionUpd(filterEval, updateHelper));
                     }
@@ -130,7 +131,8 @@ public class NamedWindowOnMergeHelper
         ExprEvaluator filterEval = desc.getOptionalWhereClause() == null ? null : desc.getOptionalWhereClause().getExprEvaluator();
 
         InternalEventRouter routerToUser = streamName.equals(namedWindowName) ? null : internalEventRouter;
-        return new NamedWindowOnMergeActionIns(filterEval, insertHelper, routerToUser, statementContext.getEpStatementHandle(), statementContext.getInternalEventEngineRouteDest());
+        boolean audit = AuditEnum.INSERT.getAudit(statementContext.getAnnotations()) != null;
+        return new NamedWindowOnMergeActionIns(filterEval, insertHelper, routerToUser, statementContext.getEpStatementHandle(), statementContext.getInternalEventEngineRouteDest(), audit);
     }
 
     public List<NamedWindowOnMergeMatch> getMatched() {

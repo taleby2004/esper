@@ -11,6 +11,8 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
@@ -19,8 +21,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
 public class TestPreviousFunction extends TestCase
@@ -100,19 +100,19 @@ public class TestPreviousFunction extends TestCase
         SupportBean_S0 e1 = new SupportBean_S0(1);
         epService.getEPRuntime().sendEvent(e1);
 
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {null, e1, new Object[] {e1}, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{null, e1, new Object[]{e1}, 1L});
 
         SupportBean_S0 e2 = new SupportBean_S0(2);
         epService.getEPRuntime().sendEvent(e2);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {e1, e1, new Object[] {e2, e1}, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{e1, e1, new Object[]{e2, e1}, 2L});
         assertEquals(SupportBean_S0.class, stmt.getEventType().getPropertyType("result"));
 
         SupportBean_S0 e3 = new SupportBean_S0(3);
         epService.getEPRuntime().sendEvent(e3);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {e2, e2, new Object[] {e3, e2}, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{e2, e2, new Object[]{e3, e2}, 2L});
     }
 
     public void testPrevCountStarWithStaticMethod()
@@ -210,25 +210,25 @@ public class TestPreviousFunction extends TestCase
         String[] fields = "symbol,feed,prevPrice,tailPrice,countPrice,windowPrice".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 10, 0L, "F1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"IBM", "F1", null, 10d, 1L, splitDoubles("10d")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"IBM", "F1", null, 10d, 1L, splitDoubles("10d")});
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 11, 0L, "F1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"IBM", "F1", 10d, 10d, 2L, splitDoubles("11d,10d")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"IBM", "F1", 10d, 10d, 2L, splitDoubles("11d,10d")});
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("MSFT", 100, 0L, "F2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"MSFT", "F2", null, 100d, 1L, splitDoubles("100d")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"MSFT", "F2", null, 100d, 1L, splitDoubles("100d")});
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 12, 0L, "F2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"IBM", "F2", null, 12d, 1L, splitDoubles("12d")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"IBM", "F2", null, 12d, 1L, splitDoubles("12d")});
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 13, 0L, "F1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"IBM", "F1", 11d, 11d, 2L, splitDoubles("13d,11d")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"IBM", "F1", 11d, 11d, 2L, splitDoubles("13d,11d")});
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("MSFT", 101, 0L, "F2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"MSFT", "F2", 100d, 100d, 2L, splitDoubles("101d,100d")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"MSFT", "F2", 100d, 100d, 2L, splitDoubles("101d,100d")});
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("IBM", 17, 0L, "F2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"IBM", "F2", 12d, 12d, 2L, splitDoubles("17d,12d")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"IBM", "F2", 12d, 12d, 2L, splitDoubles("17d,12d")});
 
         // test length window overflow
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
@@ -966,7 +966,7 @@ public class TestPreviousFunction extends TestCase
         assertEquals(prevTail1Symbol, eventBean.get("prevTail1Symbol"));
         assertEquals(prevTail1Price, eventBean.get("prevTail1Price"));
         assertEquals(prevcount, eventBean.get("prevCountPrice"));
-        ArrayAssertionUtil.assertEqualsExactOrder(prevwindow, (Object[]) eventBean.get("prevWindowPrice"));
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) eventBean.get("prevWindowPrice"), prevwindow);
     }
 
     private void assertNewEvents(String currSymbol,
@@ -1021,7 +1021,7 @@ public class TestPreviousFunction extends TestCase
         assertEquals(prevTail1Symbol, eventBean.get("prevTail1Symbol"));
         assertEquals(prevTail1Price, eventBean.get("prevTail1Price"));
         assertEquals(prevCount, eventBean.get("prevCountPrice"));
-        ArrayAssertionUtil.assertEqualsExactOrder(prevWindow, (Object[]) eventBean.get("prevWindowPrice"));
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) eventBean.get("prevWindowPrice"), prevWindow);
 
         listener.reset();
     }
@@ -1164,7 +1164,7 @@ public class TestPreviousFunction extends TestCase
         assertEquals(prevTail0Price, event.get("prevTail0Price"));
         assertEquals(prevTail1Price, event.get("prevTail1Price"));
         assertEquals(countPrice, event.get("countPrice"));
-        ArrayAssertionUtil.assertEqualsExactOrder((Object[]) event.get("windowPrice"), windowPrice);
+        EPAssertionUtil.assertEqualsExactOrder(windowPrice, (Object[]) event.get("windowPrice"));
     }
 
     private void assertCountAndPrice(EventBean event, Long total, Double price)

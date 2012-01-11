@@ -21,15 +21,13 @@ import java.util.Map;
 
 public class EvalAuditInstanceCount {
 
-    private static final Log auditLog = LogFactory.getLog(AuditPath.AUDIT_LOG);
-
     private final Map<EvalFactoryNode, Integer> counts;
 
     public EvalAuditInstanceCount() {
         counts = new HashMap<EvalFactoryNode, Integer>();
     }
 
-    public void decreaseRefCount(EvalFactoryNode evalNode, EvalAuditStateNode current, String patternExpr, String statementName) {
+    public void decreaseRefCount(EvalFactoryNode evalNode, EvalAuditStateNode current, String patternExpr, String statementName, String engineURI) {
         Integer count = counts.get(evalNode);
         if (count == null) {
             return;
@@ -37,16 +35,16 @@ public class EvalAuditInstanceCount {
         count--;
         if (count <= 0) {
             counts.remove(evalNode);
-            print(current, patternExpr, statementName, false, 0);
+            print(current, patternExpr, engineURI, statementName, false, 0);
             return;
         }
         counts.put(evalNode, count);
-        print(current, patternExpr, statementName, false, count);
+        print(current, patternExpr, engineURI, statementName, false, count);
 
 
     }
 
-    public void increaseRefCount(EvalFactoryNode evalNode, EvalAuditStateNode current, String patternExpr, String statementName) {
+    public void increaseRefCount(EvalFactoryNode evalNode, EvalAuditStateNode current, String patternExpr, String statementName, String engineURI) {
         Integer count = counts.get(evalNode);
         if (count == null) {
             count = 1;
@@ -55,19 +53,17 @@ public class EvalAuditInstanceCount {
             count++;
         }
         counts.put(evalNode, count);
-        print(current, patternExpr, statementName, true, count);
+        print(current, patternExpr, engineURI, statementName, true, count);
     }
 
-    private static void print(EvalAuditStateNode current, String patternExpression, String statementName, boolean added, int count) {
-        if (!auditLog.isInfoEnabled()) {
+    private static void print(EvalAuditStateNode current, String patternExpression, String engineURI, String statementName, boolean added, int count) {
+        if (!AuditPath.isInfoEnabled()) {
             return;
         }
 
         StringWriter writer = new StringWriter();
 
-        writer.write("Statement ");
-        writer.write(statementName);
-        writer.write(" pattern-instance ");
+        writer.write("pattern-instance ");
         EvalAuditStateNode.writePatternExpr(current, patternExpression, writer);
 
         if (added) {
@@ -77,6 +73,6 @@ public class EvalAuditInstanceCount {
             writer.write(" decreased to " + count);
         }
 
-        auditLog.info(writer.toString());
+        AuditPath.auditLog(engineURI, statementName, writer.toString());
     }
 }

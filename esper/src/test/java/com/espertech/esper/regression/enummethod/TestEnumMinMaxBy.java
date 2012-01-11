@@ -12,13 +12,13 @@
 package com.espertech.esper.regression.enummethod;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST0_Container;
 import com.espertech.esper.support.bean.SupportCollection;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestEnumMinMaxBy extends TestCase {
@@ -55,20 +55,20 @@ public class TestEnumMinMaxBy extends TestCase {
 
         SupportBean_ST0_Container bean = SupportBean_ST0_Container.make2Value("E1,12", "E2,11", "E2,2");
         epService.getEPRuntime().sendEvent(bean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
                 new Object[]{bean.getContained().get(2), bean.getContained().get(0), "E2", 12});
 
         bean = SupportBean_ST0_Container.make2Value("E1,12");
         epService.getEPRuntime().sendEvent(bean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
                 new Object[]{bean.getContained().get(0), bean.getContained().get(0), "E1", 12});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value(null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
                 new Object[]{null, null, null, null});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
                 new Object[]{null, null, null, null});
     }
 

@@ -58,6 +58,13 @@ public class IntersectViewFactory implements ViewFactory, DataWindowViewFactory
     public void setViewFactories(List<ViewFactory> viewFactories)
     {
         this.viewFactories = viewFactories;
+        int batchCount = 0;
+        for (ViewFactory viewFactory : viewFactories) {
+            batchCount += viewFactory instanceof DataWindowBatchingViewFactory ? 1 : 0;
+        }
+        if (batchCount > 1) {
+            throw new ViewProcessingException("Cannot combined multiple batch data windows into an intersection");
+        }
     }
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> viewParameters) throws ViewParameterException
@@ -72,13 +79,18 @@ public class IntersectViewFactory implements ViewFactory, DataWindowViewFactory
     {
         List<View> views = new ArrayList<View>();
         boolean hasAsymetric = false;
+        boolean hasBatch = false;
         for (ViewFactory viewFactory : viewFactories)
         {
             agentInstanceViewFactoryContext.setRemoveStream(true);
             views.add(viewFactory.makeView(agentInstanceViewFactoryContext));
             hasAsymetric |= viewFactory instanceof AsymetricDataWindowViewFactory;
+            hasBatch |= viewFactory instanceof DataWindowBatchingViewFactory;
         }
-        if (hasAsymetric) {
+        if (hasBatch) {
+            return new IntersectBatchView(agentInstanceViewFactoryContext, this, parentEventType, views, viewFactories, hasAsymetric);
+        }
+        else if (hasAsymetric) {
             return new IntersectAsymetricView(agentInstanceViewFactoryContext, this, parentEventType, views);
         }
         return new IntersectView(agentInstanceViewFactoryContext, this, parentEventType, views);

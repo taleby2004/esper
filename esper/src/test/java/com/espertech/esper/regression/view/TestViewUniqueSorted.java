@@ -11,17 +11,18 @@
 
 package com.espertech.esper.regression.view;
 
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportSensorEvent;
-import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.client.EventBean;
+import junit.framework.TestCase;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This test uses unique and sort views to obtain from a set of market data events the 3 currently most expensive stocks
@@ -60,7 +61,7 @@ public class TestViewUniqueSorted extends TestCase
         sendEvent("E2", -10);
         sendEvent("E3", -5);
         sendEvent("E4", 5);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), "string".split(","), new Object[][] {{"E2"}, {"E4"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "string".split(","), new Object[][]{{"E2"}, {"E4"}});
     }
 
     public void testWindowStats()
@@ -79,11 +80,11 @@ public class TestViewUniqueSorted extends TestCase
         epService.getEPRuntime().sendEvent(beans[0]);
 
         Object[] result = toObjectArray(top3Prices.iterator());
-        ArrayAssertionUtil.assertEqualsExactOrder(result, new Object[] {beans[0]});
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{beans[0]}, result);
         assertTrue(testListener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(testListener.getLastOldData(), null);
-        ArrayAssertionUtil.assertEqualsExactOrder(new Object[] {testListener.getLastNewData()[0].getUnderlying()},
-                new Object[] {beans[0]});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) null, testListener.getLastOldData());
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{beans[0]}, new Object[]{testListener.getLastNewData()[0].getUnderlying()}
+        );
         testListener.reset();
 
         beans[1] = makeEvent(SYMBOL_CSCO, 20);
@@ -99,7 +100,7 @@ public class TestViewUniqueSorted extends TestCase
         epService.getEPRuntime().sendEvent(beans[5]);
 
         result = toObjectArray(top3Prices.iterator());
-        ArrayAssertionUtil.assertEqualsExactOrder(result, new Object[] { beans[4], beans[3], beans[5] });
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{beans[4], beans[3], beans[5]}, result);
 
         beans[6] = makeEvent(SYMBOL_CSCO, 110);
         beans[7] = makeEvent(SYMBOL_C, 30);
@@ -110,7 +111,7 @@ public class TestViewUniqueSorted extends TestCase
         epService.getEPRuntime().sendEvent(beans[8]);
 
         result = toObjectArray(top3Prices.iterator());
-        ArrayAssertionUtil.assertEqualsExactOrder(result, new Object[] { beans[3], beans[8], beans[7] });
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{beans[3], beans[8], beans[7]}, result);
     }
 
     public void testSensorPerEvent() throws Exception {
@@ -126,15 +127,15 @@ public class TestViewUniqueSorted extends TestCase
 
         SupportSensorEvent eventOne = new SupportSensorEvent(1, "Temperature", "Device1", 5.0, 96.5);
         runtime.sendEvent(eventOne);
-        testListener.assertUnderlyingAndReset(new Object[] {eventOne}, null);
+        EPAssertionUtil.assertUnderlyingPerRow(testListener.assertInvokedAndReset(), new Object[] {eventOne}, null);
 
         SupportSensorEvent eventTwo = new SupportSensorEvent(2, "Temperature", "Device2", 7.0, 98.5);
         runtime.sendEvent(eventTwo);
-        testListener.assertUnderlyingAndReset(new Object[] {eventTwo}, new Object[] {eventOne});
+        EPAssertionUtil.assertUnderlyingPerRow(testListener.assertInvokedAndReset(), new Object[] {eventTwo}, new Object[] {eventOne});
 
         SupportSensorEvent eventThree = new SupportSensorEvent(3, "Temperature", "Device2", 4.0, 99.5);
         runtime.sendEvent(eventThree);
-        testListener.assertUnderlyingAndReset(new Object[] {eventThree}, new Object[] {eventTwo});
+        EPAssertionUtil.assertUnderlyingPerRow(testListener.assertInvokedAndReset(), new Object[] {eventThree}, new Object[] {eventTwo});
 
         Iterator<EventBean> it = stmt.iterator();
         SupportSensorEvent event = (SupportSensorEvent) it.next().getUnderlying();

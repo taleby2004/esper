@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestDotExpression extends TestCase
@@ -54,7 +54,7 @@ public class TestDotExpression extends TestCase
                 "from LevelZero").addListener(listener);
         
         epService.getEPRuntime().sendEvent(new LevelZero(new LevelOne(new LevelTwo(new LevelThree()))));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1,val2".split(","), new Object[] {"level1:10", "level2:20", "level3:30"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1,val2".split(","), new Object[]{"level1:10", "level2:20", "level3:30"});
     }
 
     public void testChainedUnparameterized() {
@@ -78,7 +78,7 @@ public class TestDotExpression extends TestCase
         }
 
         epService.getEPRuntime().sendEvent(bean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), "(nested).getNestedValue()".split(","), new Object[] {bean.getNested().getNestedValue()});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), "(nested).getNestedValue()".split(","), new Object[]{bean.getNested().getNestedValue()});
     }
 
     public void testChainedParameterized() {
@@ -131,8 +131,8 @@ public class TestDotExpression extends TestCase
         }
 
         epService.getEPRuntime().sendEvent(bean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), "size,get0,get1,get2,get3".split(","),
-                new Object[] {bean.getArrayProperty().length, bean.getArrayProperty()[0], bean.getArrayProperty()[1], bean.getArrayProperty()[2], null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), "size,get0,get1,get2,get3".split(","),
+                new Object[]{bean.getArrayProperty().length, bean.getArrayProperty()[0], bean.getArrayProperty()[1], bean.getArrayProperty()[2], null});
     }
     
     public void testArrayPropertySizeAndGetChained() {
@@ -157,8 +157,8 @@ public class TestDotExpression extends TestCase
         }
 
         epService.getEPRuntime().sendEvent(bean);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNew(), "size,get0".split(","),
-                new Object[] {bean.getArray().length, bean.getArray()[0].getNestLevOneVal()});
+        EPAssertionUtil.assertProps(listener.assertOneGetNew(), "size,get0".split(","),
+                new Object[]{bean.getArray().length, bean.getArray()[0].getNestLevOneVal()});
     }
 
     private void runAssertionChainedParam(EPStatement stmt, String subexpr) {

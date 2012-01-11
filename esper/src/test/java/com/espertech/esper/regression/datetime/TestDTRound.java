@@ -15,11 +15,11 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportDateTime;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Calendar;
@@ -54,7 +54,7 @@ public class TestDTRound extends TestCase {
         String startTime = "2002-05-30T09:01:02.003";
         String expectedTime = "2002-5-30T10:00:00.000";
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expectedTime, "util", "msec", "cal"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expectedTime, "util", "msec", "cal"));
     }
 
     public void testRoundCeil() {
@@ -84,7 +84,7 @@ public class TestDTRound extends TestCase {
         };
         String startTime = "2002-05-30T09:01:02.003";
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expected, "util"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expected, "util"));
     }
 
     public void testRoundFloor() {
@@ -114,7 +114,7 @@ public class TestDTRound extends TestCase {
         };
         String startTime = "2002-05-30T09:01:02.003";
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expected, "util"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expected, "util"));
     }
 
     public void testRoundHalf() {
@@ -144,7 +144,7 @@ public class TestDTRound extends TestCase {
         };
         String startTime = "2002-05-30T15:30:02.550";
         epService.getEPRuntime().sendEvent(SupportDateTime.make(startTime));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expected, "util"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, SupportDateTime.getArrayCoerced(expected, "util"));
 
         // test rounding up/down
         stmtFragment.destroy();
@@ -154,12 +154,12 @@ public class TestDTRound extends TestCase {
         stmtFragment.addListener(listener);
 
         epService.getEPRuntime().sendEvent(SupportDateTime.make("2002-05-30T15:30:29.999"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {SupportDateTime.getValueCoerced("2002-05-30T15:30:00.000", "util")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{SupportDateTime.getValueCoerced("2002-05-30T15:30:00.000", "util")});
 
         epService.getEPRuntime().sendEvent(SupportDateTime.make("2002-05-30T15:30:30.000"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {SupportDateTime.getValueCoerced("2002-05-30T15:31:00.000", "util")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{SupportDateTime.getValueCoerced("2002-05-30T15:31:00.000", "util")});
 
         epService.getEPRuntime().sendEvent(SupportDateTime.make("2002-05-30T15:30:30.001"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {SupportDateTime.getValueCoerced("2002-05-30T15:31:00.000", "util")});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{SupportDateTime.getValueCoerced("2002-05-30T15:31:00.000", "util")});
     }
 }

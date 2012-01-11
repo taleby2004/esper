@@ -8,9 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.epl.parse;
 
-import com.espertech.esper.type.*;
 import com.espertech.esper.epl.generated.EsperEPL2GrammarParser;
+import com.espertech.esper.type.*;
+import com.espertech.esper.type.StringValue;
 import org.antlr.runtime.tree.Tree;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parses constant strings and returns the constant Object.

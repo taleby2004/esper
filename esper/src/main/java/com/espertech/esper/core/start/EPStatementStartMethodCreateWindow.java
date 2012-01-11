@@ -109,7 +109,7 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
         // obtain result set processor factory
         StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {processor.getNamedWindowType()}, new String[] {windowName}, new boolean[] {true}, services.getEngineURI(), false);
         ResultSetProcessorFactoryDesc resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                statementSpec, getDefaultAgentInstanceContext(), typeService, null, new boolean[0], true, null);
+                statementSpec, statementContext, typeService, null, new boolean[0], true, null);
 
         // obtain factory for output limiting
         OutputProcessViewFactory outputViewFactory = OutputProcessViewFactoryFactory.make(statementSpec, services.getInternalEventRouter(), statementContext, resultSetProcessorPrototype.getResultSetProcessorFactory().getResultEventType());

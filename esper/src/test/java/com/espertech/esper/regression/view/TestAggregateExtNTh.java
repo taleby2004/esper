@@ -12,15 +12,12 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
-import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
-
-import java.util.TimerTask;
 
 public class TestAggregateExtNTh extends TestCase {
 
@@ -72,21 +69,21 @@ public class TestAggregateExtNTh extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 12));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"G1", 12, 10}, {"G2", 11, null}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"G1", 12, 10}, {"G2", 11, null}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 30));
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 25));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"G2", 25, 20}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"G2", 25, 20}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", -1));
         epService.getEPRuntime().sendEvent(new SupportBean("G1", -2));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 8));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][] {{"G1", -2, -1}, {"G2", 8, 25}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"G1", -2, -1}, {"G2", 8, 25}});
     }
 
     private void tryInvalid(String epl, String message) {

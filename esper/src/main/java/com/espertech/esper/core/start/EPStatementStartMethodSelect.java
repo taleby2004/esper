@@ -15,6 +15,7 @@ import com.espertech.esper.client.hook.SQLOutputRowConversion;
 import com.espertech.esper.core.context.activator.*;
 import com.espertech.esper.core.context.factory.StatementAgentInstanceFactorySelect;
 import com.espertech.esper.core.context.factory.StatementAgentInstanceFactorySelectResult;
+import com.espertech.esper.core.context.factory.StatementAgentInstancePreload;
 import com.espertech.esper.core.context.mgr.ContextManagedStatementSelectDesc;
 import com.espertech.esper.core.context.stmt.AIRegistryExpr;
 import com.espertech.esper.core.context.stmt.AIRegistryPrevious;
@@ -53,10 +54,7 @@ import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Starts and provides the stop method for EPL statements.
@@ -161,7 +159,7 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
                 historicalEventViewables[i] = historicalEventViewable;
                 unmaterializedViewChain[i] = new ViewFactoryChain(historicalEventViewable.getEventType(), new LinkedList<ViewFactory>());
                 eventStreamParentViewableActivators[i] = new ViewableActivator() {
-                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext) {
+                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
                         return new ViewableActivationResult(historicalEventViewable, CollectionUtil.STOP_CALLBACK_NONE, null);
                     }
                 };
@@ -181,7 +179,7 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
                 historicalEventViewables[i] = historicalEventViewable;
                 unmaterializedViewChain[i] = new ViewFactoryChain(historicalEventViewable.getEventType(), new LinkedList<ViewFactory>());
                 eventStreamParentViewableActivators[i] = new ViewableActivator() {
-                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext) {
+                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
                         return new ViewableActivationResult(historicalEventViewable, CollectionUtil.STOP_CALLBACK_NONE, null);
                     }
                 };
@@ -268,7 +266,7 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
         // May return null if we don't need to post-process results posted by views or joins.
         AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
         ResultSetProcessorFactoryDesc resultSetProcessorPrototypeDesc = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                statementSpec, agentInstanceContext, typeService, viewResourceDelegateUnverified, joinAnalysisResult.getUnidirectionalInd(), true, contextPropertyRegistry);
+                statementSpec, statementContext, typeService, viewResourceDelegateUnverified, joinAnalysisResult.getUnidirectionalInd(), true, contextPropertyRegistry);
 
         // Validate where-clause filter tree, outer join clause and output limit expression
         EPStatementStartMethodHelperValidate.validateNodes(statementSpec, statementContext, typeService, viewResourceDelegateUnverified);
@@ -303,6 +301,7 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
         Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategyInstances;
         Map<ExprPriorNode, ExprPriorEvalStrategy> priorStrategyInstances;
         Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousStrategyInstances;
+        List<StatementAgentInstancePreload> preloadList = Collections.emptyList();
 
         // With context - delegate instantiation to context
         if (statementSpec.getOptionalContextName() != null) {
@@ -382,6 +381,7 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
             subselectStrategyInstances = resultOfStart.getSubselectStrategies();
             priorStrategyInstances = resultOfStart.getPriorNodeStrategies();
             previousStrategyInstances = resultOfStart.getPreviousNodeStrategies();
+            preloadList = resultOfStart.getPreloadList();
         }
 
         // initialize aggregation expression nodes
@@ -397,6 +397,11 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
 
         // assign previous nodes
         EPStatementStartMethodHelperAssignExpr.assignPreviousStrategies(previousStrategyInstances);
+        
+        // execute preload if any
+        for (StatementAgentInstancePreload preload : preloadList) {
+            preload.executePreload();
+        }
 
         return new EPStatementStartResult(finalViewable, stopStatementMethod, destroyStatementMethod);
     }

@@ -36,10 +36,6 @@
 		</layout>
 	</appender>
 
-	<logger name="com.espertech.esper.pattern.pool.PatternSubexpressionPoolSvc">
-		<level value="DEBUG"/>
-	</logger>
-
 	<logger name="com.espertech.esper">
 		<level value="INFO"/>
 	</logger>

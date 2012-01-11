@@ -8,8 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.parse;
 
-import com.espertech.esper.epl.expression.ExprConstantNode;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
 
 /**
  * Helper for walking a pattern match-until clause.
@@ -29,7 +29,7 @@ public class ASTMatchUntilHelper
         boolean isConstants = true;
         Object constantLower = null;
         String numericMessage = "Match-until bounds expect a numeric or expression value";
-        if (lowerBounds instanceof ExprConstantNode) {
+        if (ExprNodeUtility.isConstantValueExpr(lowerBounds)) {
             constantLower = lowerBounds.getExprEvaluator().evaluate(null, true, null);
             if (constantLower == null || !(constantLower instanceof Number)) {
                 throw new ASTWalkException(numericMessage);
@@ -40,7 +40,7 @@ public class ASTMatchUntilHelper
         }
 
         Object constantUpper = null;
-        if (upperBounds instanceof ExprConstantNode) {
+        if (ExprNodeUtility.isConstantValueExpr(upperBounds)) {
             constantUpper = upperBounds.getExprEvaluator().evaluate(null, true, null);
             if (constantUpper == null || !(constantUpper instanceof Number)) {
                 throw new ASTWalkException(numericMessage);

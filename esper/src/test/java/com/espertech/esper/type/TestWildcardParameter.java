@@ -15,8 +15,6 @@ import junit.framework.TestCase;
 
 import java.util.Set;
 
-import com.espertech.esper.type.WildcardParameter;
-
 public class TestWildcardParameter extends TestCase
 {
     private WildcardParameter wildcard;
@@ -39,5 +37,14 @@ public class TestWildcardParameter extends TestCase
             assertTrue(result.contains(i));
         }
         assertEquals(10, result.size());
+    }
+
+    public void testContainsPoint() {
+        assertTrue(wildcard.containsPoint(3));
+        assertTrue(wildcard.containsPoint(2));
+    }
+
+    public void testFormat() {
+        assertEquals("*", wildcard.formatted());
     }
 }

@@ -11,11 +11,11 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.client.EventBean;
@@ -85,7 +85,7 @@ public class TestViewTimeAccum extends TestCase
         assertNull(listener.getLastNewData());
         assertEquals(1, listener.getOldDataList().size());
         assertEquals(4, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[0], events[1], events[2], events[3]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[0], events[1], events[2], events[3]}, listener.getOldDataListFlattened());
         listener.reset();
 
         // no events till 50 sec
@@ -107,7 +107,7 @@ public class TestViewTimeAccum extends TestCase
         assertNull(listener.getLastNewData());
         assertEquals(1, listener.getOldDataList().size());
         assertEquals(2, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[4], events[5]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[4], events[5]}, listener.getOldDataListFlattened());
         listener.reset();
 
         // next window
@@ -122,7 +122,7 @@ public class TestViewTimeAccum extends TestCase
         assertNull(listener.getLastNewData());
         assertEquals(1, listener.getOldDataList().size());
         assertEquals(2, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[6], events[7]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[6], events[7]}, listener.getOldDataListFlattened());
         listener.reset();
     }
 
@@ -148,7 +148,7 @@ public class TestViewTimeAccum extends TestCase
         // flush out of the window
         sendTimer(startTime + 20000);
         assertEquals(1, listener.getNewDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[0], events[1], events[2]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[0], events[1], events[2]}, listener.getNewDataListFlattened());
         listener.reset();
     }
 
@@ -262,7 +262,7 @@ public class TestViewTimeAccum extends TestCase
         assertNull(listener.getLastNewData());
         assertEquals(1, listener.getOldDataList().size());
         assertEquals(2, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[2], events[12]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[2], events[12]}, listener.getOldDataListFlattened());
         listener.reset();
 
         // 3rd S2 event
@@ -274,13 +274,13 @@ public class TestViewTimeAccum extends TestCase
         assertNull(listener.getLastNewData());
         assertEquals(1, listener.getOldDataList().size());
         assertEquals(3, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[1], events[11], events[21]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[1], events[11], events[21]}, listener.getOldDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 39000);
         assertNull(listener.getLastNewData());
         assertEquals(1, listener.getLastOldData().length);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[32]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[32]}, listener.getOldDataListFlattened());
         listener.reset();
     }
 

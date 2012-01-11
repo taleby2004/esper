@@ -8,24 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.client.annotation.Audit;
-import com.espertech.esper.client.annotation.AuditEnum;
-import com.espertech.esper.collection.Pair;
-import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.StreamTypesException;
-import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
-import com.espertech.esper.util.LevenshteinDistance;
-
-import java.util.Map;
-
 /**
  * Represents an stream property identifier in a filter expressiun tree.
  */
-public interface ExprIdentNode extends ExprNode
+public interface ExprIdentNode extends ExprNode, ExprFilterOptimizableNode
 {
     public String getUnresolvedPropertyName();
     public String getFullUnresolvedName();

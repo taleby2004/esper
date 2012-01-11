@@ -15,12 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean_ST0_Container;
 import com.espertech.esper.support.bean.SupportCollection;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestEnumAggregate extends TestCase {
@@ -55,19 +55,19 @@ public class TestEnumAggregate extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), fields, new Class[] {Integer.class, String.class, String.class});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value("E1,12", "E2,11", "E2,2"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {25, ", E1, E2, E2", "E1,E2,E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{25, ", E1, E2, E2", "E1,E2,E2"});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value(null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {null, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{null, null, null});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value(new String[0]));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
-                new Object[] {0, "", ""});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[]{0, "", ""});
 
         epService.getEPRuntime().sendEvent(SupportBean_ST0_Container.make2Value("E1,12"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
                 new Object[]{12, ", E1", "E1"});
     }
 
@@ -82,16 +82,16 @@ public class TestEnumAggregate extends TestCase {
         LambdaAssertionUtil.assertTypes(stmtFragment.getEventType(), fields, new Class[]{String.class});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2,E3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"+E1+E2+E3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"+E1+E2+E3"});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"+E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"+E1"});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString(""));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {""});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{""});
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString(null));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null});
         stmtFragment.destroy();
     }
 }

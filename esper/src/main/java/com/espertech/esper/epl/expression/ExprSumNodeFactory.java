@@ -44,12 +44,12 @@ public class ExprSumNodeFactory implements AggregationMethodFactory
         throw new UnsupportedOperationException();
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
-        AggregationMethod method = methodResolutionService.makeSumAggregator(agentInstanceIds, groupId, aggregationId, inputValueType, hasFilter);
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeSumAggregator(agentInstanceId, groupId, aggregationId, inputValueType, hasFilter);
         if (!isDistinct) {
             return method;
         }
-        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, inputValueType, hasFilter);
+        return methodResolutionService.makeDistinctAggregator(agentInstanceId, groupId, aggregationId, method, inputValueType, hasFilter);
     }
 
     public AggregationMethodFactory getPrototypeAggregator() {

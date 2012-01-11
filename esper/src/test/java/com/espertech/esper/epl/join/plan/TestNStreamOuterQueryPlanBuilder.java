@@ -11,9 +11,9 @@
 
 package com.espertech.esper.epl.join.plan;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.support.epl.SupportOuterJoinDescFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.type.OuterJoinType;
 import com.espertech.esper.collection.InterchangeablePair;
 import com.espertech.esper.util.DependencyGraph;
@@ -90,16 +90,16 @@ public class TestNStreamOuterQueryPlanBuilder extends TestCase
                 substreamsPerStream, requiredPerStream, new DependencyGraph(6));
 
         assertEquals(6, substreamsPerStream.size());
-        ArrayAssertionUtil.assertEqualsExactOrder(new int[] {3, 1}, substreamsPerStream.get(2));
-        ArrayAssertionUtil.assertEqualsExactOrder(new int[] {4, 5}, substreamsPerStream.get(3));
-        ArrayAssertionUtil.assertEqualsExactOrder(new int[] {0}, substreamsPerStream.get(1));
-        ArrayAssertionUtil.assertEqualsExactOrder(new int[] {}, substreamsPerStream.get(4));
-        ArrayAssertionUtil.assertEqualsExactOrder(new int[] {}, substreamsPerStream.get(5));
-        ArrayAssertionUtil.assertEqualsExactOrder(new int[] {}, substreamsPerStream.get(0));
+        EPAssertionUtil.assertEqualsExactOrder(substreamsPerStream.get(2), new int[]{3, 1});
+        EPAssertionUtil.assertEqualsExactOrder(substreamsPerStream.get(3), new int[]{4, 5});
+        EPAssertionUtil.assertEqualsExactOrder(substreamsPerStream.get(1), new int[]{0});
+        EPAssertionUtil.assertEqualsExactOrder(substreamsPerStream.get(4), new int[]{});
+        EPAssertionUtil.assertEqualsExactOrder(substreamsPerStream.get(5), new int[]{});
+        EPAssertionUtil.assertEqualsExactOrder(substreamsPerStream.get(0), new int[]{});
 
         NStreamOuterQueryPlanBuilder.verifyJoinedPerStream(2, substreamsPerStream);
-        ArrayAssertionUtil.assertEqualsExactOrder(new boolean[] {false, false, false, true, true, false},
-                                                  requiredPerStream);
+        EPAssertionUtil.assertEqualsExactOrder(requiredPerStream, new boolean[]{false, false, false, true, true, false}
+        );
 
     }
 
@@ -136,14 +136,14 @@ public class TestNStreamOuterQueryPlanBuilder extends TestCase
     {
         for (int i = 0; i < innersPerStream.length; i++)
         {
-            ArrayAssertionUtil.assertEqualsAnyOrder(innersPerStream[i], graph.getInner(i));
+            EPAssertionUtil.assertEqualsAnyOrder(innersPerStream[i], graph.getInner(i));
         }
     }
     private void assertOuters(int[][] outersPerStream, OuterInnerDirectionalGraph graph)
     {
         for (int i = 0; i < outersPerStream.length; i++)
         {
-            ArrayAssertionUtil.assertEqualsAnyOrder(outersPerStream[i], graph.getOuter(i));
+            EPAssertionUtil.assertEqualsAnyOrder(outersPerStream[i], graph.getOuter(i));
         }
     }
 

@@ -10,6 +10,7 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.hook.AggregationFunctionFactory;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.ContextPropertyRegistry;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
@@ -22,10 +23,13 @@ import com.espertech.esper.schedule.ScheduleParameterException;
 import com.espertech.esper.schedule.ScheduleSpec;
 import com.espertech.esper.schedule.ScheduleSpecUtil;
 import com.espertech.esper.util.JavaClassHelper;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.util.*;
 
 public class ExprNodeUtility {
@@ -41,6 +45,14 @@ public class ExprNodeUtility {
         ExprNodeIdentifierVisitor visitor = new ExprNodeIdentifierVisitor(visitAggregateNodes);
         exprNode.accept(visitor);
         return visitor.getExprProperties();
+    }
+
+    public static boolean isConstantValueExpr(ExprNode exprNode) {
+        if (!(exprNode instanceof ExprConstantNode)) {
+            return false;
+        }
+        ExprConstantNode constantNode = (ExprConstantNode) exprNode;
+        return constantNode.isConstantValue();
     }
 
     /**
@@ -105,12 +117,12 @@ public class ExprNodeUtility {
         // For top-level expressions check if we perform audit
         if (isTopLevel) {
             if (validationContext.isExpressionAudit()) {
-                return (ExprNode) ExprNodeProxy.newInstance(validationContext.getStatementName(), result);
+                return (ExprNode) ExprNodeProxy.newInstance(validationContext.getStreamTypeService().getEngineURIQualifier(), validationContext.getStatementName(), result);
             }
         }
         else {
-            if (validationContext.isExpressionNestedAudit() && !(result instanceof ExprIdentNode) && !(result instanceof ExprConstantNode)) {
-                return (ExprNode) ExprNodeProxy.newInstance(validationContext.getStatementName(), result);
+            if (validationContext.isExpressionNestedAudit() && !(result instanceof ExprIdentNode) && !(ExprNodeUtility.isConstantValueExpr(result))) {
+                return (ExprNode) ExprNodeProxy.newInstance(validationContext.getStreamTypeService().getEngineURIQualifier(), validationContext.getStatementName(), result);
             }
         }
         
@@ -192,7 +204,7 @@ public class ExprNodeUtility {
             Pair<Class, EngineImportSingleRowDesc> classMethodPair = validationContext.getMethodResolutionService().resolveSingleRow(functionName);
             List<ExprNode> params = Collections.singletonList((ExprNode) new ExprConstantNodeImpl(parse.getArgString()));
             List<ExprChainedSpec> chain = Collections.singletonList(new ExprChainedSpec(classMethodPair.getSecond().getMethodName(), params, false));
-            ExprNode result = new ExprPlugInSingleRowNode(functionName, classMethodPair.getFirst(), chain, classMethodPair.getSecond().getValueCache());
+            ExprNode result = new ExprPlugInSingleRowNode(functionName, classMethodPair.getFirst(), chain, classMethodPair.getSecond());
 
             // Validate
             try
@@ -215,7 +227,35 @@ public class ExprNodeUtility {
             throw new IllegalStateException("Error resolving single-row function: " + e.getMessage(), e);
         }
 
-        // There is no class name, try an aggregation function
+        // Try an aggregation function factory
+        try
+        {
+            AggregationFunctionFactory aggregationFactory = validationContext.getMethodResolutionService().resolveAggregationFactory(parse.getMethodName());
+            ExprNode result = new ExprPlugInAggFunctionFactoryNode(false, aggregationFactory, parse.getMethodName());
+            result.addChildNode(new ExprConstantNodeImpl(parse.getArgString()));
+
+            // Validate
+            try
+            {
+                result.validate(validationContext);
+            }
+            catch (RuntimeException e)
+            {
+                throw new ExprValidationException("Plug-in aggregation function '" + parse.getMethodName() + "' failed validation: " + e.getMessage());
+            }
+
+            return result;
+        }
+        catch (EngineImportUndefinedException e)
+        {
+            // Not an aggregation function
+        }
+        catch (EngineImportException e)
+        {
+            throw new IllegalStateException("Error resolving aggregation: " + e.getMessage(), e);
+        }
+
+        // There is no class name, try an aggregation function (AggregationSupport version, deprecated)
         try
         {
             AggregationSupport aggregation = validationContext.getMethodResolutionService().resolveAggregation(parse.getMethodName());
@@ -384,6 +424,81 @@ public class ExprNodeUtility {
 
     public static ExprIdentNode getExprIdentNode(EventType[] typesPerStream, int streamId, String property) {
         return new ExprIdentNodeImpl(typesPerStream[streamId], property, streamId);
+    }
+
+    public static ExprNodeUtilSingleRowMethodDesc resolveSingleRowPluginFunc(String className, String methodName, List<ExprNode> parameters, MethodResolutionService methodResolutionService, boolean allowWildcard, final EventType wildcardType, String resolvedExpression, boolean configuredAsSingleRow) throws ExprValidationException {
+        Class[] paramTypes = new Class[parameters.size()];
+        ExprEvaluator[] childEvals = new ExprEvaluator[parameters.size()];
+        int count = 0;
+
+        boolean allConstants = true;
+        for(ExprNode childNode : parameters)
+        {
+            if (childNode instanceof ExprLambdaGoesNode) {
+                throw new ExprValidationException("Unexpected lambda-expression encountered as parameter to UDF or static method '" + methodName + "'");
+            }
+            if (childNode instanceof ExprNumberSetWildcardMarker) {
+                if (wildcardType == null || !allowWildcard) {
+                    throw new ExprValidationException("Failed to resolve wildcard parameter to a given event type");
+                }
+                childEvals[count] = new ExprEvaluator() {
+                    public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
+                        return eventsPerStream[0].getUnderlying();
+                    }
+
+                    public Class getType() {
+                        return wildcardType.getUnderlyingType();
+                    }
+
+                    public Map<String, Object> getEventType() throws ExprValidationException {
+                        return null;
+                    }
+                };
+                paramTypes[count] = wildcardType.getUnderlyingType();
+                allConstants = false;
+                count++;
+                continue;
+            }
+            ExprEvaluator eval = childNode.getExprEvaluator();
+            childEvals[count] = eval;
+            paramTypes[count] = eval.getType();
+            count++;
+            if (!(childNode.isConstantResult()))
+            {
+                allConstants = false;
+            }
+        }
+
+        // Try to resolve the method
+        final FastMethod staticMethod;
+        Method method;
+        try
+        {
+            method = methodResolutionService.resolveMethod(className, methodName, paramTypes);
+            FastClass declaringClass = FastClass.create(Thread.currentThread().getContextClassLoader(), method.getDeclaringClass());
+            staticMethod = declaringClass.getMethod(method);
+        }
+        catch(Exception e)
+        {
+            String message;
+            if (configuredAsSingleRow) {
+                message = e.getMessage();
+            }
+            else {
+                message = "Failed to resolve '" + resolvedExpression + "' to a property, single-row function, script, stream or class name";
+            }
+            throw new ExprValidationException(message, e);
+        }
+
+        return new ExprNodeUtilSingleRowMethodDesc(allConstants, paramTypes, childEvals, method, staticMethod);
+    }
+
+    public static void validatePlainExpression(String expressionTextualName, ExprNode expression) throws ExprValidationException {
+        ExprNodeSummaryVisitor summaryVisitor = new ExprNodeSummaryVisitor();
+        expression.accept(summaryVisitor);
+        if (summaryVisitor.isHasAggregation() || summaryVisitor.isHasSubselect() || summaryVisitor.isHasStreamSelect() || summaryVisitor.isHasPreviousPrior()) {
+            throw new ExprValidationException("Invalid " + expressionTextualName + ": Aggregation, sub-select, previous or prior functions are not supported in this context");
+        }
     }
 
     /**
@@ -729,7 +844,7 @@ public class ExprNodeUtility {
      */
     public static String isMinimalExpression(ExprNode expression)
     {
-        ExprNodeSubselectVisitor subselectVisitor = new ExprNodeSubselectVisitor();
+        ExprNodeSubselectDeclaredDotVisitor subselectVisitor = new ExprNodeSubselectDeclaredDotVisitor();
         expression.accept(subselectVisitor);
         if (subselectVisitor.getSubselects().size() > 0)
         {
@@ -752,7 +867,7 @@ public class ExprNodeUtility {
         return null;
     }
 
-    protected static void toExpressionString(List<ExprChainedSpec> chainSpec, StringBuilder buffer, boolean prefixDot)
+    protected static void toExpressionString(List<ExprChainedSpec> chainSpec, StringBuilder buffer, boolean prefixDot, String functionName)
     {
         String delimiterOuter = "";
         if (prefixDot) {
@@ -761,19 +876,16 @@ public class ExprNodeUtility {
         boolean isFirst = true;
         for (ExprChainedSpec element : chainSpec) {
             buffer.append(delimiterOuter);
-            buffer.append(element.getName());
+            if (functionName != null) {
+                buffer.append(functionName);
+            }
+            else {
+                buffer.append(element.getName());
+            }
 
             // the first item without dot-prefix and empty parameters should not be appended with parenthesis
             if (!isFirst || prefixDot || !element.getParameters().isEmpty()) {
-                buffer.append("(");
-
-                String delimiter = "";
-                for (ExprNode param : element.getParameters()) {
-                    buffer.append(delimiter);
-                    delimiter = ", ";
-                    buffer.append(param.toExpressionString());
-                }
-                buffer.append(")");
+                toExpressionStringIncludeParen(element.getParameters(), buffer);
             }
 
             delimiterOuter = ".";
@@ -781,6 +893,20 @@ public class ExprNodeUtility {
         }
     }
 
+    public static void toExpressionString(List<ExprNode> parameters, StringBuilder buffer) {
+        String delimiter = "";
+        for (ExprNode param : parameters) {
+            buffer.append(delimiter);
+            delimiter = ", ";
+            buffer.append(param.toExpressionString());
+        }
+    }
+
+    public static void toExpressionStringIncludeParen(List<ExprNode> parameters, StringBuilder buffer) {
+        buffer.append("(");
+        toExpressionString(parameters, buffer);
+        buffer.append(")");
+    }
 
     public static void validate(List<ExprChainedSpec> chainSpec, ExprValidationContext validationContext) throws ExprValidationException {
 

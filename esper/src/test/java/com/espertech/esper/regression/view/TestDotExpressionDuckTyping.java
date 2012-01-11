@@ -12,10 +12,10 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestDotExpressionDuckTyping extends TestCase
@@ -64,9 +64,9 @@ public class TestDotExpressionDuckTyping extends TestCase
         String[] fields = "strval,intval,commonstrval,commonintval,commondoubleval".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBeanDuckTypeOne("x"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"x", null, null, -1, 12.9876d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"x", null, null, -1, 12.9876d});
 
         epService.getEPRuntime().sendEvent(new SupportBeanDuckTypeTwo(-10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {null, -10, "mytext", null, 11.1234d});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, -10, "mytext", null, 11.1234d});
     }
 }

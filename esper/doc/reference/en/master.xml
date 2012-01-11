@@ -17,6 +17,7 @@
 	<!ENTITY viewreference SYSTEM "modules/viewreference.xml">
 	<!ENTITY processingmodel SYSTEM "modules/processingmodel.xml">
 	<!ENTITY extension SYSTEM "modules/extension.xml">
+	<!ENTITY script SYSTEM "modules/script.xml">
     <!ENTITY performance SYSTEM "modules/performance.xml">
     <!ENTITY appendix_outputspec SYSTEM "modules/appendix_outputspec.xml">
     <!ENTITY appendix_keywords SYSTEM "modules/appendix_keywords.xml">
@@ -27,7 +28,7 @@
 	<bookinfo>
 		<title>Esper - Event Stream and Complex Event Processing for Java</title>
 		<subtitle>Reference Documentation</subtitle>
-		<releaseinfo>4.4.1</releaseinfo>
+		<releaseinfo>4.5.0</releaseinfo>
 		<copyright>
 			<year>2011</year>
 			<holder>EsperTech Inc.</holder>
@@ -141,6 +142,8 @@
     &devlifecycle;
 
     &extension;
+
+    &script;
 
     &examples;
 

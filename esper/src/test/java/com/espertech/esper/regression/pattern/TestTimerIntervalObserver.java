@@ -12,14 +12,14 @@
 package com.espertech.esper.regression.pattern;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanConstants;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
@@ -309,7 +309,7 @@ public class TestTimerIntervalObserver extends TestCase implements SupportBeanCo
         sendTimer(14999, epService);
         assertFalse(testListener.isInvoked());
         sendTimer(15000, epService);
-        ArrayAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "a0id,a1id".split(","), "E1,E2".split(","));
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), "a0id,a1id".split(","), "E1,E2".split(","));
     }
 
     public void testIntervalSpecPreparedStmt()

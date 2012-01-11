@@ -45,7 +45,7 @@ public class AggregationServiceMatchRecognizeImpl implements AggregationServiceM
         }
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         return aggregatorsAll[column].getValue();
     }

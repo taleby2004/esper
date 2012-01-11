@@ -11,14 +11,18 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementFormatter;
-import junit.framework.TestCase;
-import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.bean.bookexample.*;
+import com.espertech.esper.support.bean.word.SentenceEvent;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import junit.framework.TestCase;
 
 public class TestFilterPropertySimple extends TestCase
 {
@@ -56,7 +60,7 @@ public class TestFilterPropertySimple extends TestCase
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from BookStream bs where not exists (select * from MyWindow mw where mw.price > bs.price)");
 
         epService.getEPRuntime().sendEvent(TestFilterPropertySimple.makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"10020"}, {"10021"}, {"10022"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"10020"}, {"10021"}, {"10022"}});
         listener.reset();
 
         // higest price (27 is the last value)
@@ -100,17 +104,17 @@ public class TestFilterPropertySimple extends TestCase
         String[] fields = "orderEvent.orderdetail.orderId,book.bookId,book.title,item.amount".split(",");
         epService.getEPRuntime().sendEvent(makeEventOne());
         assertEquals(3, listener.getLastNewData().length);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"PO200901", "10020", "Enders Game", 10}, {"PO200901", "10020", "Enders Game", 30}, {"PO200901", "10021", "Foundation 1", 25}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"PO200901", "10020", "Enders Game", 10}, {"PO200901", "10020", "Enders Game", 30}, {"PO200901", "10021", "Foundation 1", 25}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(makeEventTwo());
         assertEquals(1, listener.getLastNewData().length);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"PO200902", "10022", "Stranger in a Strange Land", 5}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"PO200902", "10022", "Stranger in a Strange Land", 5}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(makeEventThree());
         assertEquals(1, listener.getLastNewData().length);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"PO200903", "10021", "Foundation 1", 50}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"PO200903", "10021", "Foundation 1", 50}});
     }
 
     public void testUnidirectionalJoinCount()
@@ -126,13 +130,13 @@ public class TestFilterPropertySimple extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(makeEventOne());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[] {3L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[]{3L});
 
         epService.getEPRuntime().sendEvent(makeEventTwo());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[] {1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[]{1L});
 
         epService.getEPRuntime().sendEvent(makeEventThree());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[] {1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[]{1L});
 
         epService.getEPRuntime().sendEvent(makeEventFour());
         assertFalse(listener.isInvoked());
@@ -151,23 +155,23 @@ public class TestFilterPropertySimple extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(makeEventOne());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3L});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{3L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3L});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{3L}});
 
         epService.getEPRuntime().sendEvent(makeEventTwo());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[] {4L});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{4L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[]{4L});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{4L}});
 
         epService.getEPRuntime().sendEvent(makeEventThree());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[] {5L});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{5L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[]{5L});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{5L}});
 
         epService.getEPRuntime().sendEvent(makeEventFour());
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(makeEventOne());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[] {8L});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{8L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "count(*)".split(","), new Object[]{8L});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{8L}});
     }
 
     public void testJoin()
@@ -184,18 +188,18 @@ public class TestFilterPropertySimple extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"10020","A001",10}, {"10020","A003", 30}, {"10021","A002", 25}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"10020","A001",10}, {"10020","A003", 30}, {"10021","A002", 25}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"10020", "A001", 10}, {"10020", "A003", 30}, {"10021", "A002", 25}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"10020", "A001", 10}, {"10020", "A003", 30}, {"10021", "A002", 25}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(makeEventTwo());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"10022","B001", 5}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"10020","A001",10}, {"10020","A003", 30}, {"10021","A002", 25}, {"10022","B001", 5}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"10022", "B001", 5}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"10020", "A001", 10}, {"10020", "A003", 30}, {"10021", "A002", 25}, {"10022", "B001", 5}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(makeEventThree());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"10021","C001",50}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{"10020","A001",10}, {"10020","A003", 30}, {"10021","A002", 25}, {"10021","C001", 50}, {"10022","B001", 5}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"10021", "C001", 50}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"10020", "A001", 10}, {"10020", "A003", 30}, {"10021", "A002", 25}, {"10021", "C001", 50}, {"10022", "B001", 5}});
         listener.reset();
 
         epService.getEPRuntime().sendEvent(makeEventFour());
@@ -212,12 +216,12 @@ public class TestFilterPropertySimple extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(makeEventOne());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3L});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{3L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3L});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{3L}});
 
         epService.getEPRuntime().sendEvent(makeEventFour());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {5L});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), fields, new Object[][] {{5L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5L});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{5L}});
     }
 
     public void testPropertyAccess()
@@ -229,16 +233,16 @@ public class TestFilterPropertySimple extends TestCase
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL("select books[0].author as val from OrderEvent(books[0].bookId = '10020')");
 
         epService.getEPRuntime().sendEvent(makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][] {{"10020"}, {"10021"}, {"10022"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][]{{"10020"}, {"10021"}, {"10022"}});
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtOne.iterator(), "bookId".split(","), new Object[][] {{"10020"}, {"10021"}, {"10022"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtTwo.iterator(), "val".split(","), new Object[][] {{"Orson Scott Card"}});
+        EPAssertionUtil.assertPropsPerRow(stmtOne.iterator(), "bookId".split(","), new Object[][]{{"10020"}, {"10021"}, {"10022"}});
+        EPAssertionUtil.assertPropsPerRow(stmtTwo.iterator(), "val".split(","), new Object[][]{{"Orson Scott Card"}});
 
         epService.getEPRuntime().sendEvent(makeEventFour());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][] {{"10031"}, {"10032"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][]{{"10031"}, {"10032"}});
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtOne.iterator(), "bookId".split(","), new Object[][] {{"10031"}, {"10032"}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtTwo.iterator(), "val".split(","), new Object[][] {{"Orson Scott Card"}});
+        EPAssertionUtil.assertPropsPerRow(stmtOne.iterator(), "bookId".split(","), new Object[][]{{"10031"}, {"10032"}});
+        EPAssertionUtil.assertPropsPerRow(stmtTwo.iterator(), "val".split(","), new Object[][]{{"Orson Scott Card"}});
 
         // add where clause
         stmtOne.destroy();
@@ -246,7 +250,7 @@ public class TestFilterPropertySimple extends TestCase
         stmtOne = epService.getEPAdministrator().createEPL("select bookId from OrderEvent[books where author='Orson Scott Card']");
         stmtOne.addListener(listener);
         epService.getEPRuntime().sendEvent(makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][] {{"10020"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][]{{"10020"}});
         listener.reset();
     }
 
@@ -259,16 +263,28 @@ public class TestFilterPropertySimple extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(makeEventOne());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][] {{"10020"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][]{{"10020"}});
         assertNull(listener.getLastOldData());
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), "bookId".split(","), new Object[][] {{"10020"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "bookId".split(","), new Object[][]{{"10020"}});
 
         epService.getEPRuntime().sendEvent(makeEventFour());
         assertNull(listener.getLastOldData());
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][] {{"10031"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), "bookId".split(","), new Object[][]{{"10031"}});
         listener.reset();
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), "bookId".split(","), new Object[][] {{"10031"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "bookId".split(","), new Object[][]{{"10031"}});
+    }
+
+    public void testSplitWords() {
+        epService.getEPAdministrator().getConfiguration().addEventType(SentenceEvent.class);
+        String stmtText = "insert into WordStream select * from SentenceEvent[words]";
+
+        String[] fields = "word".split(",");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        stmt.addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SentenceEvent("I am testing this"));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"I"}, {"am"}, {"testing"}, {"this"}});
     }
 
     public static OrderBean makeEventOne()

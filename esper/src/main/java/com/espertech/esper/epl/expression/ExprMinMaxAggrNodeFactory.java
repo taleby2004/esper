@@ -50,11 +50,11 @@ public class ExprMinMaxAggrNodeFactory implements AggregationMethodFactory
         return this;
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
-        AggregationMethod method = methodResolutionService.makeMinMaxAggregator(agentInstanceIds, groupId, aggregationId, minMaxTypeEnum, type, hasDataWindows, hasFilter);
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
+        AggregationMethod method = methodResolutionService.makeMinMaxAggregator(agentInstanceId, groupId, aggregationId, minMaxTypeEnum, type, hasDataWindows, hasFilter);
         if (!distinct) {
             return method;
         }
-        return methodResolutionService.makeDistinctAggregator(agentInstanceIds, groupId, aggregationId, method, type, hasFilter);
+        return methodResolutionService.makeDistinctAggregator(agentInstanceId, groupId, aggregationId, method, type, hasFilter);
     }
 }

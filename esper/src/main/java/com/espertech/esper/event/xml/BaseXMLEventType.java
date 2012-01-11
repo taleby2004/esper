@@ -189,6 +189,20 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
         return configurationEventTypeXMLDOM;
     }
 
+    public boolean equalsCompareType(EventType eventType) {
+        if (!(eventType instanceof BaseXMLEventType))
+        {
+            return false;
+        }
+        BaseXMLEventType other = (BaseXMLEventType) eventType;
+        return (configurationEventTypeXMLDOM.equals(other.configurationEventTypeXMLDOM));
+    }
+
+    /**
+     * Same-Root XML types are actually equivalent.
+     * @param otherObj to compare to
+     * @return indicator
+     */
     public boolean equals(Object otherObj)
     {
         if (!(otherObj instanceof BaseXMLEventType))
@@ -197,6 +211,11 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
         }
         BaseXMLEventType other = (BaseXMLEventType) otherObj;
         return (configurationEventTypeXMLDOM.equals(other.configurationEventTypeXMLDOM));
+    }
+
+    public int hashCode()
+    {
+        return configurationEventTypeXMLDOM.hashCode();
     }
 
     public EventPropertyWriter getWriter(String propertyName)
@@ -223,11 +242,6 @@ public abstract class BaseXMLEventType extends BaseConfigurableEventType {
     {
         return null;
     }    
-
-    public int hashCode()
-    {
-        return configurationEventTypeXMLDOM.hashCode();
-    }
 
     public EventBeanReader getReader()
     {

@@ -17,6 +17,7 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.ColumnDesc;
+import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.Array;
@@ -142,5 +143,63 @@ public class EventTypeUtility {
             }
         }
         return false;
+    }
+
+    /**
+     * Determine among the Map-type properties which properties are Bean-type event type names,
+     * rewrites these as Class-type instead so that they are configured as native property and do not require wrapping,
+     * but may require unwrapping.
+     * @param typing properties of map type
+     * @param eventAdapterService event adapter service
+     * @return compiled properties, same as original unless Bean-type event type names were specified.
+     */
+    public static Map<String, Object> compileMapTypeProperties(Map<String, Object> typing, EventAdapterService eventAdapterService) {
+        Map<String, Object> compiled = new LinkedHashMap<String, Object>(typing);
+        for (Map.Entry<String, Object> specifiedEntry : typing.entrySet()) {
+            Object typeSpec = specifiedEntry.getValue();
+            String nameSpec = specifiedEntry.getKey();
+            if (!(typeSpec instanceof String)) {
+                continue;
+            }
+
+            String typeNameSpec = (String) typeSpec;
+            boolean isArray = EventTypeUtility.isPropertyArray(typeNameSpec);
+            if (isArray) {
+                typeNameSpec = EventTypeUtility.getPropertyRemoveArray(typeNameSpec);
+            }
+
+            EventType eventType = eventAdapterService.getExistsTypeByName(typeNameSpec);
+            if (eventType == null || !(eventType instanceof BeanEventType)) {
+                continue;
+            }
+
+            BeanEventType beanEventType = (BeanEventType) eventType;
+            Class underlyingType = beanEventType.getUnderlyingType();
+            if (isArray) {
+                underlyingType = JavaClassHelper.getArrayType(underlyingType);
+            }
+            compiled.put(nameSpec, underlyingType);
+        }
+        return compiled;
+    }
+
+    /**
+     * Returns true if the name indicates that the type is an array type.
+     * @param name the property name
+     * @return true if array type
+     */
+    public static boolean isPropertyArray(String name)
+    {
+        return name.trim().endsWith("[]");
+    }
+
+    /**
+     * Returns the property name without the array type extension, if present.
+     * @param name property name
+     * @return property name with removed array extension name
+     */
+    public static String getPropertyRemoveArray(String name)
+    {
+        return name.replaceAll("\\[", "").replaceAll("\\]", "");
     }
 }

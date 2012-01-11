@@ -109,7 +109,7 @@ public final class EPServiceProviderManager
     private static EPServiceProviderSPI getProviderInternal(Configuration configuration, String providerURINonNull) {
         // cluster-wide configuration
         if (configuration != null && configuration.getEngineDefaults().getCluster() != null && configuration.getEngineDefaults().getCluster().isEnabled()) {
-            String className = "com.espertech.ehc.cn.cepproxy.EPServiceClusterConfigurator";
+            String className = configuration.getEngineDefaults().getCluster().getClusterConfiguratorClass();
             Configurator configurator = (Configurator) JavaClassHelper.instantiate(Configurator.class, className);
             return configurator.configure(new ConfiguratorContext(providerURINonNull, runtimes), configuration);
         }

@@ -15,12 +15,12 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.regression.client.MyConcatAggregationFunction;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Collection;
@@ -60,16 +60,16 @@ public class TestContextPartitionedAggregate extends TestCase {
         epService.getEPAdministrator().getStatement("S2").addListener(listener);
 
         epService.getEPRuntime().sendEvent(makeEvent("G1", 1, 10L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsGrouped, new Object[]{"G1", 1, new Object[] {10L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsGrouped, new Object[]{"G1", 1, new Object[]{10L}});
 
         epService.getEPRuntime().sendEvent(makeEvent("G1", 2, 100L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsGrouped, new Object[]{"G1", 2, new Object[] {100L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsGrouped, new Object[]{"G1", 2, new Object[]{100L}});
 
         epService.getEPRuntime().sendEvent(makeEvent("G2", 1, 200L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsGrouped, new Object[]{"G2", 1, new Object[] {200L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsGrouped, new Object[]{"G2", 1, new Object[]{200L}});
 
         epService.getEPRuntime().sendEvent(makeEvent("G1", 1, 11L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsGrouped, new Object[]{"G1", 1, new Object[] {10L, 11L}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsGrouped, new Object[]{"G1", 1, new Object[]{10L, 11L}});
     }
 
     public void testSegmentedSubqueryWithAggregation() {
@@ -83,7 +83,7 @@ public class TestContextPartitionedAggregate extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "s1"));
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"G1", 10, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10, null});
     }
 
     public void testGroupByEventPerGroupStream() {
@@ -94,22 +94,22 @@ public class TestContextPartitionedAggregate extends TestCase {
         stmtOne.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {10, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 200));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {200, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{200, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {10, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {11, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{11, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 200));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {200, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{200, 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {10, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 1L});
 
         stmtOne.destroy();
 
@@ -119,22 +119,22 @@ public class TestContextPartitionedAggregate extends TestCase {
         stmtTwo.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[] {"G1", 10, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{"G1", 10, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 200));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[] {"G2", 200, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{"G2", 200, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[] {"G1", 10, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{"G1", 10, 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[] {"G1", 11, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{"G1", 11, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 200));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[] {"G2", 200, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{"G2", 200, 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[] {"G2", 10, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{"G2", 10, 1L});
     }
 
     public void testGroupByEventPerGroupBatchContextProp() {
@@ -149,23 +149,23 @@ public class TestContextPartitionedAggregate extends TestCase {
         assertFalse(listener.isInvoked());
         
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsOne, new Object[] {10, 1L});
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsOne, new Object[] {11, 1L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsOne, new Object[]{10, 1L});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsOne, new Object[]{11, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 200));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {200, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{200, 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsOne, new Object[] {10, 2L});
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsOne, new Object[] {11, 0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsOne, new Object[]{10, 2L});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsOne, new Object[]{11, 0L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 10));
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 10));
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsOne, new Object[] {10, 2L});
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsOne, new Object[] {200, 0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsOne, new Object[]{10, 2L});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsOne, new Object[]{200, 0L});
 
         stmtOne.destroy();
 
@@ -179,23 +179,23 @@ public class TestContextPartitionedAggregate extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsTwo, new Object[] {"G1", 10, 1L});
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsTwo, new Object[] {"G1", 11, 1L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsTwo, new Object[]{"G1", 10, 1L});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsTwo, new Object[]{"G1", 11, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 200));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[] {"G2", 200, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{"G2", 200, 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsTwo, new Object[] {"G1", 10, 2L});
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsTwo, new Object[] {"G1", 11, 0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsTwo, new Object[]{"G1", 10, 2L});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsTwo, new Object[]{"G1", 11, 0L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 10));
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 10));
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsTwo, new Object[] {"G2", 10, 2L});
-        ArrayAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsTwo, new Object[] {"G2", 200, 0L});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fieldsTwo, new Object[]{"G2", 10, 2L});
+        EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[1], fieldsTwo, new Object[]{"G2", 200, 0L});
     }
 
     public void testGroupByEventPerGroupWithAccess() {
@@ -209,16 +209,16 @@ public class TestContextPartitionedAggregate extends TestCase {
         stmtOne.addListener(listener);
 
         epService.getEPRuntime().sendEvent(makeEvent("G1", 10, 200L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 1L, new Object[] {200L}, 200L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 1L, new Object[]{200L}, 200L});
 
         epService.getEPRuntime().sendEvent(makeEvent("G1", 10, 300L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 2L, new Object[] {200L, 300L}, 200L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 2L, new Object[]{200L, 300L}, 200L});
 
         epService.getEPRuntime().sendEvent(makeEvent("G2", 10, 1000L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 1L, new Object[] {1000L}, 1000L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 1L, new Object[]{1000L}, 1000L});
 
         epService.getEPRuntime().sendEvent(makeEvent("G2", 10, 1010L));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 2L, new Object[] {1000L, 1010L}, 1000L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 2L, new Object[]{1000L, 1010L}, 1000L});
 
         stmtOne.destroy();
     }
@@ -234,19 +234,19 @@ public class TestContextPartitionedAggregate extends TestCase {
         stmtOne.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{3});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{3});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{2});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{7});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{7});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{3});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{3});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G3", -1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{-1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{-1});
 
         stmtOne.destroy();
 
@@ -258,16 +258,16 @@ public class TestContextPartitionedAggregate extends TestCase {
         stmtTwo.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 8));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{8, new Object[] {8}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{8, new Object[]{8}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{5, new Object[] {5}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{5, new Object[]{5}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{9, new Object[] {8, 1}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{9, new Object[]{8, 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{7, new Object[] {5, 2}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsTwo, new Object[]{7, new Object[]{5, 2}});
 
         stmtTwo.destroy();
 
@@ -279,16 +279,16 @@ public class TestContextPartitionedAggregate extends TestCase {
         stmtThree.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 8));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsThree, new Object[]{new Object[] {8}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsThree, new Object[]{new Object[]{8}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsThree, new Object[]{new Object[] {5}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsThree, new Object[]{new Object[]{5}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsThree, new Object[]{new Object[] {8, 1}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsThree, new Object[]{new Object[]{8, 1}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 2));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsThree, new Object[]{new Object[] {5, 2}});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsThree, new Object[]{new Object[]{5, 2}});
 
         stmtThree.destroy();
     }
@@ -309,27 +309,27 @@ public class TestContextPartitionedAggregate extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3));
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 3L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 3L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(4));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{20, 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{20, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(5));
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{20, 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{20, 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 5L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[]{10, 5L});
 
         stmtOne.destroy();
     }

@@ -24,8 +24,6 @@ import java.util.Map;
  */
 public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
 {
-    private static final Log auditLog = LogFactory.getLog(AuditPath.AUDIT_LOG);
-
     private final EvalAuditNode evalAuditNode;
     private EvalStateNode childState;
 
@@ -60,8 +58,9 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
 
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
     {
-        if (evalAuditNode.getFactoryNode().isAuditPattern() && auditLog.isInfoEnabled()) {
-            auditLog.info(toStringEvaluateTrue(this, evalAuditNode.getFactoryNode().getPatternExpr(), evalAuditNode.getContext().getPatternContext().getStatementName(), matchEvent, fromNode, isQuitted));
+        if (evalAuditNode.getFactoryNode().isAuditPattern() && AuditPath.isInfoEnabled()) {
+            String message = toStringEvaluateTrue(this, evalAuditNode.getFactoryNode().getPatternExpr(), matchEvent, fromNode, isQuitted);
+            AuditPath.auditLog(evalAuditNode.getContext().getStatementContext().getEngineURI(), evalAuditNode.getContext().getPatternContext().getStatementName(), message);
         }
 
         if (isQuitted)
@@ -75,8 +74,9 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
-        if (evalAuditNode.getFactoryNode().isAuditPattern() && auditLog.isInfoEnabled()) {
-            auditLog.info(toStringEvaluateFalse(this, evalAuditNode.getFactoryNode().getPatternExpr(), evalAuditNode.getContext().getPatternContext().getStatementName(), fromNode));
+        if (evalAuditNode.getFactoryNode().isAuditPattern() && AuditPath.isInfoEnabled()) {
+            String message = toStringEvaluateFalse(this, evalAuditNode.getFactoryNode().getPatternExpr(), fromNode);
+            AuditPath.auditLog(evalAuditNode.getContext().getStatementContext().getEngineURI(), evalAuditNode.getContext().getPatternContext().getStatementName(), message);
         }
 
         this.getParentEvaluator().evaluateFalse(this);
@@ -122,13 +122,11 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
         return evalAuditNode.getChildNode() instanceof EvalFilterNode;
     }
 
-    private static String toStringEvaluateTrue(EvalAuditStateNode current, String patternExpression, String statementName, MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted) {
+    private static String toStringEvaluateTrue(EvalAuditStateNode current, String patternExpression, MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted) {
 
         StringWriter writer = new StringWriter();
 
-        writer.write("Statement ");
-        writer.write(statementName);
-        writer.write(" pattern ");
+        writer.write("pattern ");
         writePatternExpr(current, patternExpression, writer);
         writer.write(" evaluate-true {");
 
@@ -158,12 +156,10 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
         return writer.toString();
     }
 
-    private String toStringEvaluateFalse(EvalAuditStateNode current, String patternExpression, String statementName, EvalStateNode fromNode) {
+    private String toStringEvaluateFalse(EvalAuditStateNode current, String patternExpression, EvalStateNode fromNode) {
 
         StringWriter writer = new StringWriter();
-        writer.write("Statement ");
-        writer.write(statementName);
-        writer.write(" pattern ");
+        writer.write("pattern ");
         writePatternExpr(current, patternExpression, writer);
         writer.write(" evaluate-false {");
 

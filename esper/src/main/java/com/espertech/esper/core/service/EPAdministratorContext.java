@@ -16,21 +16,28 @@ import com.espertech.esper.epl.spec.SelectClauseStreamSelectorEnum;
  */
 public class EPAdministratorContext
 {
+    private final EPRuntimeSPI runtimeSPI;
     private final EPServicesContext services;
     private final ConfigurationOperations configurationOperations;
     private final SelectClauseStreamSelectorEnum defaultStreamSelector;
 
     /**
      * Ctor.
+     * @param runtimeSPI
      * @param services engine services
      * @param configurationOperations configuration snapshot
      * @param defaultStreamSelector default stream selection
      */
-    public EPAdministratorContext(EPServicesContext services, ConfigurationOperations configurationOperations, SelectClauseStreamSelectorEnum defaultStreamSelector)
+    public EPAdministratorContext(EPRuntimeSPI runtimeSPI, EPServicesContext services, ConfigurationOperations configurationOperations, SelectClauseStreamSelectorEnum defaultStreamSelector)
     {
+        this.runtimeSPI = runtimeSPI;
         this.configurationOperations = configurationOperations;
         this.defaultStreamSelector = defaultStreamSelector;
         this.services = services;
+    }
+
+    public EPRuntimeSPI getRuntimeSPI() {
+        return runtimeSPI;
     }
 
     /**

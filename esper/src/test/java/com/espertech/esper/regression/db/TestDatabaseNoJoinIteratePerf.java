@@ -11,10 +11,9 @@
 
 package com.espertech.esper.regression.db;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.epl.SupportDatabaseService;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportBean;
@@ -60,7 +59,7 @@ public class TestDatabaseNoJoinIteratePerf extends TestCase
         long start = System.currentTimeMillis();
         for (int i = 0; i < 10000; i ++)
         {
-            ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{4L, true}});
+            EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{4L, true}});
         }
         long end = System.currentTimeMillis();
         long delta = end - start;

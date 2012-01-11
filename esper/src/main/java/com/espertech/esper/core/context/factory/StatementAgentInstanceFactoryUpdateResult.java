@@ -26,6 +26,6 @@ public class StatementAgentInstanceFactoryUpdateResult extends StatementAgentIns
         super(finalView, stopCallback, agentInstanceContext, null,
                 subselectStrategies,
                 Collections.<ExprPriorNode, ExprPriorEvalStrategy>emptyMap(),
-                Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap());
+                Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap(), Collections.<StatementAgentInstancePreload>emptyList());
     }
 }

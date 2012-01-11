@@ -13,11 +13,13 @@ import com.espertech.esper.client.annotation.Audit;
 import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.client.annotation.Drop;
 import com.espertech.esper.client.annotation.Priority;
+import com.espertech.esper.core.context.mgr.ContextControllerFactoryServiceImpl;
 import com.espertech.esper.core.context.stmt.StatementAIResourceRegistry;
 import com.espertech.esper.core.context.util.ContextDescriptor;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
+import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.filter.FilterServiceSPI;
 import com.espertech.esper.pattern.*;
@@ -61,16 +63,13 @@ public class StatementContextFactoryDefault implements StatementContextFactory
     public StatementContext makeContext(String statementId,
                                     String statementName,
                                     String expression,
-                                    boolean hasVariables,
                                     EPServicesContext engineServices,
                                     Map<String, Object> optAdditionalContext,
-                                    OnTriggerDesc optOnTriggerDesc,
-                                    CreateWindowDesc optCreateWindowDesc,
                                     boolean isFireAndForget,
                                     Annotation[] annotations,
                                     EPIsolationUnitServices isolationUnitServices,
-                                    String optionalCreateNamedWindowName,
-                                    String optionalContextName)
+                                    boolean stateless,
+                                    StatementSpecRaw statementSpecRaw)
     {
         // Allocate the statement's schedule bucket which stays constant over it's lifetime.
         // The bucket allows callbacks for the same time to be ordered (within and across statements) and thus deterministic.
@@ -80,6 +79,8 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         StatementAgentInstanceLock defaultStatementAgentInstanceLock;
 
         // For on-delete statements, use the create-named-window statement lock
+        CreateWindowDesc optCreateWindowDesc = statementSpecRaw.getCreateWindowDesc();
+        OnTriggerDesc optOnTriggerDesc = statementSpecRaw.getOnTriggerDesc();
         if ((optOnTriggerDesc != null) && (optOnTriggerDesc instanceof OnTriggerWindowDesc))
         {
             String windowName = ((OnTriggerWindowDesc) optOnTriggerDesc).getWindowName();
@@ -95,13 +96,13 @@ public class StatementContextFactoryDefault implements StatementContextFactory
             defaultStatementAgentInstanceLock = engineServices.getNamedWindowService().getNamedWindowLock(optCreateWindowDesc.getWindowName());
             if (defaultStatementAgentInstanceLock == null)
             {
-                defaultStatementAgentInstanceLock = engineServices.getStatementLockFactory().getStatementLock(statementName, expression, annotations);
+                defaultStatementAgentInstanceLock = engineServices.getStatementLockFactory().getStatementLock(statementName, expression, annotations, false);
                 engineServices.getNamedWindowService().addNamedWindowLock(optCreateWindowDesc.getWindowName(), defaultStatementAgentInstanceLock, statementName);
             }
         }
         else
         {
-            defaultStatementAgentInstanceLock = engineServices.getStatementLockFactory().getStatementLock(statementName, expression, annotations);
+            defaultStatementAgentInstanceLock = engineServices.getStatementLockFactory().getStatementLock(statementName, expression, annotations, stateless);
         }
 
         StatementMetricHandle stmtMetric = null;
@@ -111,12 +112,14 @@ public class StatementContextFactoryDefault implements StatementContextFactory
         }
 
         AnnotationAnalysisResult annotationData = AnnotationAnalysisResult.analyzeAnnotations(annotations);
+        boolean hasVariables = statementSpecRaw.isHasVariables() || (statementSpecRaw.getCreateContextDesc() != null);
         EPStatementHandle epStatementHandle = new EPStatementHandle(statementId, statementName, expression, expression, hasVariables, stmtMetric, annotationData.getPriority(), annotationData.isPremptive());
 
         MethodResolutionService methodResolutionService = new MethodResolutionServiceImpl(engineServices.getEngineImportService(), engineServices.getSchedulingService());
 
         PatternContextFactory patternContextFactory = new PatternContextFactoryDefault();
 
+        String optionalCreateNamedWindowName = statementSpecRaw.getCreateWindowDesc() != null ? statementSpecRaw.getCreateWindowDesc().getWindowName() : null;
         ViewResolutionService viewResolutionService = new ViewResolutionServiceImpl(viewRegistry, optionalCreateNamedWindowName, systemVirtualDWViewFactory);
         PatternObjectResolutionService patternResolutionService = new PatternObjectResolutionServiceImpl(patternObjectClasses);
 
@@ -130,11 +133,12 @@ public class StatementContextFactoryDefault implements StatementContextFactory
 
         Audit scheduleAudit = AuditEnum.SCHEDULE.getAudit(annotations);
         if (scheduleAudit != null) {
-            schedulingService = new SchedulingServiceAudit(statementName, schedulingService);
+            schedulingService = new SchedulingServiceAudit(engineServices.getEngineURI(), statementName, schedulingService);
         }
 
         StatementAIResourceRegistry statementAgentInstanceRegistry = null;
         ContextDescriptor contextDescriptor = null;
+        String optionalContextName = statementSpecRaw.getOptionalContextName();
         if (optionalContextName != null) {
             contextDescriptor = engineServices.getContextManagementService().getContextDescriptor(optionalContextName);
 
@@ -151,7 +155,12 @@ public class StatementContextFactoryDefault implements StatementContextFactory
             patternSubexpressionPoolStmtSvc = new PatternSubexpressionPoolStmtSvc(engineServices.getPatternSubexpressionPoolSvc(), stmtCounter);
             engineServices.getPatternSubexpressionPoolSvc().addPatternContext(statementName, stmtCounter);
         }
-        
+
+        AgentInstanceScriptContext defaultAgentInstanceScriptContext = null;
+        if (statementSpecRaw.getScriptExpressions() != null && !statementSpecRaw.getScriptExpressions().isEmpty()) {
+            defaultAgentInstanceScriptContext = new AgentInstanceScriptContext();
+        }
+
         // Create statement context
         return new StatementContext(engineServices.getEngineURI(),
                 engineServices.getEngineInstanceId(),
@@ -186,8 +195,10 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 statementAgentInstanceRegistry,
                 defaultStatementAgentInstanceLock,
                 contextDescriptor,
-                patternSubexpressionPoolStmtSvc
-                );
+                patternSubexpressionPoolStmtSvc,
+                stateless,
+                ContextControllerFactoryServiceImpl.DEFAULT_FACTORY,
+                defaultAgentInstanceScriptContext);
     }
 
     /**

@@ -9,6 +9,7 @@
 package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.collection.SafeIteratorImpl;
 import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.dispatch.DispatchService;
@@ -203,6 +204,40 @@ public class EPStatementImpl implements EPStatementSPI
     public String getName()
     {
         return statementName;
+    }
+
+    public Iterator<EventBean> iterator(ContextPartitionSelector selector) {
+        if (statementContext.getContextDescriptor() == null) {
+            throw getUnsupportedNonContextIterator();
+        }
+        if (selector == null) {
+            throw new IllegalArgumentException("No selector provided");
+        }
+
+        // Return null if not started
+        statementContext.getVariableService().setLocalVersion();
+        if (parentView == null)
+        {
+            return null;
+        }
+        return statementContext.getContextDescriptor().iterator(statementContext.getStatementId(), selector);
+    }
+
+    public SafeIterator<EventBean> safeIterator(ContextPartitionSelector selector) {
+        if (statementContext.getContextDescriptor() == null) {
+            throw getUnsupportedNonContextIterator();
+        }
+        if (selector == null) {
+            throw new IllegalArgumentException("No selector provided");
+        }
+
+        // Return null if not started
+        if (parentView == null) {
+            return null;
+        }
+
+        statementContext.getVariableService().setLocalVersion();
+        return statementContext.getContextDescriptor().safeIterator(statementContext.getStatementId(), selector);
     }
 
     public Iterator<EventBean> iterator()
@@ -530,5 +565,9 @@ public class EPStatementImpl implements EPStatementSPI
     public boolean isNameProvided()
     {
         return nameProvided;
+    }
+
+    private UnsupportedOperationException getUnsupportedNonContextIterator() {
+        return new UnsupportedOperationException("Iterator with context selector is only supported for statements under context");
     }
 }

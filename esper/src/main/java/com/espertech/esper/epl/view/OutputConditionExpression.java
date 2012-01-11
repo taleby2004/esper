@@ -12,6 +12,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
+import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.variable.VariableChangeCallback;
 import com.espertech.esper.epl.variable.VariableReader;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
@@ -42,6 +43,8 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
     // ongoing builtin properties
     private int totalNewEventsCount;
     private int totalOldEventsCount;
+    private int totalNewEventsSum;
+    private int totalOldEventsSum;
     private Long lastOutputTimestamp;
     private EPStatementHandleCallback scheduleHandle;
 
@@ -79,10 +82,13 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
     {
         this.totalNewEventsCount += newEventsCount;
         this.totalOldEventsCount += oldEventsCount;
+        this.totalNewEventsSum += newEventsCount;
+        this.totalOldEventsSum += oldEventsCount;
 
-        boolean isOutput = evaluate();
+        boolean isOutput = evaluate(parent.getWhenExpressionNodeEval());
         if (isOutput)
         {
+            executeThenAssignments();
             outputCallback.continueOutputProcessing(true, true);
             resetBuiltinProperties();
         }
@@ -97,7 +103,7 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
         }
 
         agentInstanceContext.getStatementContext().getVariableService().setLocalVersion();
-        boolean isOutput = evaluate();
+        boolean isOutput = evaluate(parent.getWhenExpressionNodeEval());
         if ((isOutput) && (!isCallbackScheduled))
         {
             scheduleCallback();
@@ -111,18 +117,42 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
         }
     }
 
-    private boolean evaluate()
+    @Override
+    public void terminated() {
+        boolean output = true;
+        if (parent.getAndWhenTerminatedExpressionNodeEval() != null) {
+            output = evaluate(parent.getAndWhenTerminatedExpressionNodeEval());
+        }
+        if (parent.getVariableReadWritePackageAfterTerminated() != null) {
+            if (builtinProperties != null)
+            {
+                populateBuiltinProps();
+                eventsPerStream[0] = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(builtinProperties, parent.getBuiltinPropertiesEventType());
+            }
+
+            ignoreVariableCallbacks = true;
+            try {
+                parent.getVariableReadWritePackageAfterTerminated().writeVariables(agentInstanceContext.getStatementContext().getVariableService(), eventsPerStream, null, agentInstanceContext);
+            }
+            finally {
+                ignoreVariableCallbacks = false;
+            }
+        }
+        if (output) {
+            super.terminated();
+        }
+    }
+
+    private boolean evaluate(ExprEvaluator evaluator)
     {
         if (builtinProperties != null)
         {
-            builtinProperties.put("count_insert", totalNewEventsCount);
-            builtinProperties.put("count_remove", totalOldEventsCount);
-            builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
+            populateBuiltinProps();
             eventsPerStream[0] = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(builtinProperties, parent.getBuiltinPropertiesEventType());
         }
 
         boolean result = false;
-        Boolean output = (Boolean) parent.getWhenExpressionNodeEval().evaluate(eventsPerStream, true, agentInstanceContext);
+        Boolean output = (Boolean) evaluator.evaluate(eventsPerStream, true, agentInstanceContext);
         if ((output != null) && (output))
         {
             result = true;
@@ -156,13 +186,15 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
         agentInstanceContext.getTerminationCallbacks().add(this);
 
         // execute assignments
+        executeThenAssignments();
+    }
+
+    private void executeThenAssignments() {
         if (parent.getVariableReadWritePackage() != null)
         {
             if (builtinProperties != null)
             {
-                builtinProperties.put("count_insert", totalNewEventsCount);
-                builtinProperties.put("count_remove", totalOldEventsCount);
-                builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
+                populateBuiltinProps();
                 eventsPerStream[0] = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(builtinProperties, parent.getBuiltinPropertiesEventType());
             }
 
@@ -178,11 +210,19 @@ public class OutputConditionExpression extends OutputConditionBase implements Ou
 
     private void resetBuiltinProperties()
     {
-        if (builtinProperties  != null)
+        if (builtinProperties != null)
         {
             totalNewEventsCount = 0;
             totalOldEventsCount = 0;
             lastOutputTimestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         }
+    }
+
+    private void populateBuiltinProps() {
+        builtinProperties.put("count_insert", totalNewEventsCount);
+        builtinProperties.put("count_remove", totalOldEventsCount);
+        builtinProperties.put("count_insert_total", totalNewEventsSum);
+        builtinProperties.put("count_remove_total", totalOldEventsSum);
+        builtinProperties.put("last_output_timestamp", lastOutputTimestamp);
     }
 }

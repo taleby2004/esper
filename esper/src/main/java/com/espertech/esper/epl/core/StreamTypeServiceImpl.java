@@ -155,6 +155,19 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return desc;
     }
 
+    public PropertyResolutionDescriptor resolveByPropertyNameExplicitProps(String propertyName) throws PropertyNotFoundException, DuplicatePropertyException {
+        if (propertyName == null)
+        {
+            throw new IllegalArgumentException("Null property name");
+        }
+        PropertyResolutionDescriptor desc = findByPropertyNameExplicitProps(propertyName);
+        if ((requireStreamNames) && (desc.getStreamNum() != 0))
+        {
+            throw new PropertyNotFoundException("Property named '" + propertyName + "' must be prefixed by a stream name, use the stream name itself or use the as-clause to name the stream with the property in the format \"stream.property\"", null);
+        }
+        return desc;
+    }
+
     public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamName, String propertyName)
         throws PropertyNotFoundException, StreamNotFoundException
     {
@@ -166,7 +179,19 @@ public class StreamTypeServiceImpl implements StreamTypeService
         {
             throw new IllegalArgumentException("Null property name");
         }
-        return findByStreamAndEngineName(propertyName, streamName);
+        return findByStreamAndEngineName(propertyName, streamName, false);
+    }
+
+    public PropertyResolutionDescriptor resolveByStreamAndPropNameExplicitProps(String streamName, String propertyName) throws PropertyNotFoundException, StreamNotFoundException {
+        if (streamName == null)
+        {
+            throw new IllegalArgumentException("Null property name");
+        }
+        if (propertyName == null)
+        {
+            throw new IllegalArgumentException("Null property name");
+        }
+        return findByStreamAndEngineName(propertyName, streamName, true);
     }
 
     public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamAndPropertyName) throws DuplicatePropertyException, PropertyNotFoundException
@@ -195,7 +220,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
             try
             {
                 // try to resolve a stream and property name
-                desc = findByStreamAndEngineName(propertyName, streamName);
+                desc = findByStreamAndEngineName(propertyName, streamName, false);
             }
             catch (StreamNotFoundException e)
             {
@@ -207,7 +232,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
                 }
                 try
                 {
-                    return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond());
+                    return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond(), false);
                 }
                 catch (StreamNotFoundException e1)
                 {
@@ -263,6 +288,53 @@ public class StreamTypeServiceImpl implements StreamTypeService
             index++;
         }
 
+        handleFindExceptions(propertyName, foundCount, streamType);
+        return new PropertyResolutionDescriptor(streamNames[foundIndex], eventTypes[foundIndex], propertyName, foundIndex, streamType.getPropertyType(propertyName));
+    }
+
+    private PropertyResolutionDescriptor findByPropertyNameExplicitProps(String propertyName)
+        throws DuplicatePropertyException, PropertyNotFoundException
+    {
+        int index = 0;
+        int foundIndex = 0;
+        int foundCount = 0;
+        EventType streamType = null;
+
+        for (int i = 0; i < eventTypes.length; i++)
+        {
+            if (eventTypes[i] != null)
+            {
+                EventPropertyDescriptor[] descriptors  = eventTypes[i].getPropertyDescriptors();
+                Class propertyType = null;
+                boolean found = false;
+
+                for (EventPropertyDescriptor desc : descriptors) {
+                    if (desc.getPropertyName().equals(propertyName)) {
+                        propertyType = desc.getPropertyType();
+                        found = true;
+                    }
+                }
+
+                if (found) {
+                    streamType = eventTypes[i];
+                    foundCount++;
+                    foundIndex = index;
+
+                    // If the property could be resolved from stream 0 then we don't need to look further
+                    if ((i == 0) && isStreamZeroUnambigous)
+                    {
+                        return new PropertyResolutionDescriptor(streamNames[0], eventTypes[0], propertyName, 0, propertyType);
+                    }
+                }
+            }
+            index++;
+        }
+
+        handleFindExceptions(propertyName, foundCount, streamType);
+        return new PropertyResolutionDescriptor(streamNames[foundIndex], eventTypes[foundIndex], propertyName, foundIndex, streamType.getPropertyType(propertyName));
+    }
+
+    private void handleFindExceptions(String propertyName, int foundCount, EventType streamType) throws DuplicatePropertyException, PropertyNotFoundException {
         if (foundCount > 1)
         {
             throw new DuplicatePropertyException("Property named '" + propertyName + "' is ambigous as is valid for more then one stream");
@@ -274,8 +346,6 @@ public class StreamTypeServiceImpl implements StreamTypeService
             String message = "Property named '" + propertyName + "' is not valid in any stream";
             throw new PropertyNotFoundException(message, possibleMatch);
         }
-
-        return new PropertyResolutionDescriptor(streamNames[foundIndex], eventTypes[foundIndex], propertyName, foundIndex, streamType.getPropertyType(propertyName));
     }
 
     private Pair<Integer, String> findLevMatch(String propertyName)
@@ -329,13 +399,13 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return null;
     }
 
-    private PropertyResolutionDescriptor findByStreamAndEngineName(String propertyName, String streamName)
+    private PropertyResolutionDescriptor findByStreamAndEngineName(String propertyName, String streamName, boolean explicitPropertiesOnly)
         throws PropertyNotFoundException, StreamNotFoundException
     {
         PropertyResolutionDescriptor desc;
         try
         {
-            desc = findByStreamNameOnly(propertyName, streamName);
+            desc = findByStreamNameOnly(propertyName, streamName, explicitPropertiesOnly);
         }
         catch (PropertyNotFoundException ex)
         {
@@ -344,7 +414,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
             {
                 throw ex;
             }
-            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond());
+            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond(), explicitPropertiesOnly);
         }
         catch (StreamNotFoundException ex)
         {
@@ -353,7 +423,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
             {
                 throw ex;
             }
-            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond());
+            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond(), explicitPropertiesOnly);
         }
         return desc;
     }
@@ -377,7 +447,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return new Pair<String, String>(propertyNameNoEngine, streamNameNoEngine);
     }
 
-    private PropertyResolutionDescriptor findByStreamNameOnly(String propertyName, String streamName)
+    private PropertyResolutionDescriptor findByStreamNameOnly(String propertyName, String streamName, boolean explicitPropertiesOnly)
         throws PropertyNotFoundException, StreamNotFoundException
     {
         int index = 0;
@@ -453,19 +523,40 @@ public class StreamTypeServiceImpl implements StreamTypeService
             throw new StreamNotFoundException("Failed to find a stream named '" + streamName + "'", suggestion);
         }
 
-        Class propertyType = streamType.getPropertyType(propertyName);
-        if (propertyType == null)
-        {
-            EventPropertyDescriptor desc = streamType.getPropertyDescriptor(propertyName);
-            if (desc == null) {
-                Pair<Integer, String> possibleMatch = findLevMatch(propertyName, streamType);
-                String message = "Property named '" + propertyName + "' is not valid in stream '" + streamName + "'";
-                throw new PropertyNotFoundException(message, possibleMatch);
+        Class propertyType = null;
+        if (!explicitPropertiesOnly) {
+            propertyType = streamType.getPropertyType(propertyName);
+            if (propertyType == null)
+            {
+                EventPropertyDescriptor desc = streamType.getPropertyDescriptor(propertyName);
+                if (desc == null) {
+                    throw handlePropertyNotFound(propertyName, streamName, streamType);
+                }
+                propertyType = desc.getPropertyType();
             }
-            propertyType = desc.getPropertyType();
+        }
+        else {
+            EventPropertyDescriptor[] explicitProps = streamType.getPropertyDescriptors();
+            boolean found = false;
+            for (EventPropertyDescriptor prop : explicitProps) {
+                if (prop.getPropertyName().equals(propertyName)) {
+                    propertyType = prop.getPropertyType();
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                throw handlePropertyNotFound(propertyName, streamName, streamType);
+            }
         }
 
         return new PropertyResolutionDescriptor(streamName, streamType, propertyName, index, propertyType);
+    }
+
+    private PropertyNotFoundException handlePropertyNotFound(String propertyName, String streamName, EventType streamType) {
+        Pair<Integer, String> possibleMatch = findLevMatch(propertyName, streamType);
+        String message = "Property named '" + propertyName + "' is not valid in stream '" + streamName + "'";
+        return new PropertyNotFoundException(message, possibleMatch);
     }
 
     public String getEngineURIQualifier() {

@@ -289,9 +289,11 @@ tokens
    	CREATE_CTX;
    	CREATE_CTX_FIXED;
    	CREATE_CTX_PART;
+   	CREATE_CTX_COAL;
    	CREATE_CTX_CAT;
    	CREATE_CTX_INIT;
    	CREATE_CTX_CATITEM;
+   	CREATE_CTX_NESTED;
    	PARTITIONITEM;
 	
    	INT_TYPE;
@@ -356,6 +358,7 @@ tokens
   private static Map<Integer, String> lexerTokenParaphases = new HashMap<Integer, String>();
   private static Map<Integer, String> parserTokenParaphases = new HashMap<Integer, String>();
   private static java.util.Set<String> parserKeywordSet = new java.util.HashSet<String>();
+  private static java.util.Set<Integer> afterScriptTokens = new java.util.HashSet<Integer>();
     
   public Stack getParaphrases() {
     return paraphrases;
@@ -370,7 +373,7 @@ tokens
   	return com.espertech.esper.epl.parse.ASTConstantHelper.removeTicks(tickedString);
   }
   
-  public Map<Integer, String> getLexerTokenParaphrases() {
+  public synchronized static Map<Integer, String> getLexerTokenParaphrases() {
     if (lexerTokenParaphases.size() == 0) {
       	lexerTokenParaphases.put(IDENT, "an identifier");
       	lexerTokenParaphases.put(NUM_INT, "a numeric literal");
@@ -426,7 +429,7 @@ tokens
     return lexerTokenParaphases;
   }
   
-  public Map<Integer, String> getParserTokenParaphrases() {
+  public synchronized static Map<Integer, String> getParserTokenParaphrases() {
     if (parserTokenParaphases.size() == 0) {
 	parserTokenParaphases.put(CREATE, "'create'");
 	parserTokenParaphases.put(WINDOW, "'window'");
@@ -557,6 +560,20 @@ tokens
     return parserTokenParaphases;
   }
 
+  public synchronized static java.util.Set<Integer> getAfterScriptTokens() {
+    if (afterScriptTokens.size() == 0) {
+	afterScriptTokens.add(CREATE);
+	afterScriptTokens.add(EXPRESSIONDECL);
+	afterScriptTokens.add(SELECT);
+	afterScriptTokens.add(INSERT);
+	afterScriptTokens.add(ON);
+	afterScriptTokens.add(DELETE);
+	afterScriptTokens.add(UPDATE);
+	afterScriptTokens.add(ATCHAR);
+    }
+    return afterScriptTokens;
+  }
+
   protected void mismatch(IntStream input, int ttype, BitSet follow) throws RecognitionException {
     throw new MismatchedTokenException(ttype, input);  
   }
@@ -572,6 +589,7 @@ tokens
   protected boolean recoverFromMismatchedElement(IntStream intStream, RecognitionException recognitionException, BitSet bitSet) {
     throw new RuntimeException("Error recovering from mismatched element: " + recognitionException.getMessage(), recognitionException);
   }
+  
   public void displayRecognitionError(String[] tokenNames,
                                         RecognitionException e) {
     throw new RuntimeException(e);
@@ -605,9 +623,18 @@ startEventPropertyRule
 // Expression Declaration
 //----------------------------------------------------------------------------
 expressionDecl
-    	:	EXPRESSIONDECL i=IDENT LCURLY expressionLambdaDecl? expression RCURLY
-		-> ^(EXPRESSIONDECL $i expression expressionLambdaDecl?)
+    	:	EXPRESSIONDECL classIdentifier? (array=LBRACK RBRACK)? expressionDialect? name=IDENT (LPAREN columnList? RPAREN)? expressionDef
+		-> ^(EXPRESSIONDECL $name expressionDef columnList? classIdentifier? expressionDialect? $array?)
     	;
+
+expressionDialect
+	:	d=IDENT COLON -> ^(COLON $d)	
+	;
+	
+expressionDef
+	:	LCURLY expressionLambdaDecl? expression RCURLY -> ^(GOES expression expressionLambdaDecl?)
+	|	LBRACK stringconstant RBRACK  -> ^(EXPRESSIONDECL stringconstant)
+	;
 
 expressionLambdaDecl
 	:	(i=IDENT | (LPAREN columnList RPAREN)) GOES
@@ -857,8 +884,8 @@ createIndexColumn
 	;	
 
 createVariableExpr
-	:	CREATE VARIABLE classIdentifier n=IDENT (EQUALS expression)?
-		-> ^(CREATE_VARIABLE_EXPR classIdentifier $n expression?)
+	:	CREATE c=IDENT? VARIABLE classIdentifier n=IDENT (EQUALS expression)?
+		-> ^(CREATE_VARIABLE_EXPR classIdentifier $n $c? expression?)
 	;
 
 createColumnList 	
@@ -905,19 +932,39 @@ createContextExpr
 	;
 
 createContextDetail
-	:	START crontabLimitParameterSet END crontabLimitParameterSet
-		-> ^(CREATE_CTX_FIXED crontabLimitParameterSet crontabLimitParameterSet)
+	:	createContextChoice
+	|	contextContextNested COMMA contextContextNested (COMMA contextContextNested)*
+		-> ^(CREATE_CTX_NESTED contextContextNested+)	
+	;
+	
+contextContextNested
+	:	CONTEXT name=IDENT AS? createContextChoice
+		-> ^(CREATE_CTX $name createContextChoice)
+	;
+	
+createContextChoice
+	:	START createContextRangePoint END createContextRangePoint
+		-> ^(CREATE_CTX_FIXED createContextRangePoint createContextRangePoint)
+	|	INITIATED (BY)? createContextRangePoint TERMINATED (BY)? createContextRangePoint
+		-> ^(CREATE_CTX_INIT createContextRangePoint createContextRangePoint)
 	|	PARTITION (BY)? createContextPartitionItem (COMMA createContextPartitionItem)* 
 		-> ^(CREATE_CTX_PART createContextPartitionItem+)
 	|	createContextGroupItem (COMMA createContextGroupItem)* FROM eventFilterExpression
 		-> ^(CREATE_CTX_CAT createContextGroupItem+ eventFilterExpression)
-	|	INITIATED (BY)? (createContextFilter | patternInclusionExpression) TERMINATED AFTER timePeriod
-		-> ^(CREATE_CTX_INIT createContextFilter? patternInclusionExpression? timePeriod)
+	|	COALESCE (BY)? createContextCoalesceItem (COMMA createContextCoalesceItem)* g=IDENT number (p=IDENT)?
+		-> ^(CREATE_CTX_COAL createContextCoalesceItem+ $g number $p?)
+	;
+	
+createContextRangePoint
+	:	createContextFilter 
+	| 	patternInclusionExpression
+	|	crontabLimitParameterSet
+	|	AFTER timePeriod -> ^(AFTER timePeriod)
 	;
 	
 createContextFilter
-	:	eventFilterExpression AS? i=IDENT
-		-> ^(STREAM_EXPR eventFilterExpression $i)
+	:	eventFilterExpression (AS? i=IDENT)?
+		-> ^(STREAM_EXPR eventFilterExpression $i?)
 	;
 
 createContextPartitionItem
@@ -925,6 +972,11 @@ createContextPartitionItem
 		-> ^(PARTITIONITEM eventFilterExpression eventProperty*)	
 	;
 	
+createContextCoalesceItem
+	:	libFunctionNoClass FROM eventFilterExpression
+		-> ^(COALESCE libFunctionNoClass eventFilterExpression)	
+	;
+
 createContextGroupItem
 	:	GROUP BY? expression AS i=IDENT
 		-> ^(CREATE_CTX_CATITEM expression $i?)		
@@ -977,11 +1029,11 @@ outerJoin
 	:	(
 	            ((tl=LEFT|tr=RIGHT|tf=FULL) OUTER)? 
 	          | (i=INNER)
-	        ) JOIN streamExpression outerJoinIdent
-		-> {$i != null}? streamExpression ^(INNERJOIN_EXPR outerJoinIdent)
-		-> {$tl != null}? streamExpression ^(LEFT_OUTERJOIN_EXPR outerJoinIdent)
-		-> {$tr != null}? streamExpression ^(RIGHT_OUTERJOIN_EXPR outerJoinIdent)
-		-> streamExpression ^(FULL_OUTERJOIN_EXPR outerJoinIdent)
+	        ) JOIN streamExpression outerJoinIdent?
+		-> {$i != null}? streamExpression ^(INNERJOIN_EXPR ON outerJoinIdent?)
+		-> {$tl != null}? streamExpression ^(LEFT_OUTERJOIN_EXPR ON outerJoinIdent?)
+		-> {$tr != null}? streamExpression ^(RIGHT_OUTERJOIN_EXPR ON outerJoinIdent?)
+		-> streamExpression ^(FULL_OUTERJOIN_EXPR ON outerJoinIdent?)
 	;
 
 outerJoinIdent
@@ -1202,17 +1254,22 @@ outputLimit
 		  |
 		  ( wh=WHEN expression (THEN onSetExpr)? )
 		  |
-		  ( t=WHEN TERMINATED )
+		  ( t=WHEN TERMINATED (AND_EXPR expression)? (THEN onSetExpr)? )
 		  |
 	        ) 
-	       (AND_EXPR WHEN t1=TERMINATED)?
-	    -> {$ev != null && $e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i? outputLimitAfter? $t1?)
-	    -> {$ev != null}? ^(TIMEPERIOD_LIMIT_EXPR $k? timePeriod outputLimitAfter? $t1?)		
-	    -> {$at != null}? ^(CRONTAB_LIMIT_EXPR $k? crontabLimitParameterSet outputLimitAfter? $t1?)		
-	    -> {$wh != null}? ^(WHEN_LIMIT_EXPR $k? expression onSetExpr? outputLimitAfter? $t1?)
-	    -> {$t != null}? ^(TERM_LIMIT_EXPR $k? outputLimitAfter? $t1?)
-	    -> ^(AFTER_LIMIT_EXPR outputLimitAfter $t1?)
-	;	
+	        outputLimitAndTerm?
+	    -> {$ev != null && $e != null}? ^(EVENT_LIMIT_EXPR $k? number? $i? outputLimitAfter? outputLimitAndTerm?)
+	    -> {$ev != null}? ^(TIMEPERIOD_LIMIT_EXPR $k? timePeriod outputLimitAfter? outputLimitAndTerm?)		
+	    -> {$at != null}? ^(CRONTAB_LIMIT_EXPR $k? crontabLimitParameterSet outputLimitAfter? outputLimitAndTerm?)		
+	    -> {$wh != null}? ^(WHEN_LIMIT_EXPR $k? expression onSetExpr? outputLimitAfter? outputLimitAndTerm?)
+	    -> {$t != null}? ^(TERM_LIMIT_EXPR $k? ^(TERMINATED expression? onSetExpr?) outputLimitAfter? outputLimitAndTerm?)
+	    -> ^(AFTER_LIMIT_EXPR outputLimitAfter outputLimitAndTerm?)
+	;
+	
+outputLimitAndTerm
+	: AND_EXPR WHEN TERMINATED (AND_EXPR expression)? (THEN onSetExpr)?
+	-> ^(TERMINATED expression? onSetExpr?)
+	;
 
 outputLimitAfter
 	:   a=AFTER (timePeriod | number EVENTS)
@@ -1500,9 +1557,9 @@ eventPropertyOrLibFunction
 	
 libFunction
 	: libFunctionWithClass (DOT libFunctionNoClass)*
-	  -> ^(LIB_FUNC_CHAIN libFunctionWithClass libFunctionNoClass*)
+	  -> ^(LIB_FUNC_CHAIN libFunctionWithClass libFunctionNoClass*) 
 	;
-		
+				
 libFunctionWithClass
 	: (classIdentifierNonGreedy DOT)? funcIdent l=LPAREN (libFunctionArgs)? RPAREN
 	  -> ^(LIB_FUNCTION classIdentifierNonGreedy? funcIdent libFunctionArgs? $l?)
@@ -1660,9 +1717,19 @@ propertyExpression
 	;
 
 propertyExpressionAtomic
-	:	LBRACK (SELECT propertySelectionList FROM)? eventProperty (AS IDENT)? (WHERE expression)? RBRACK
-       	-> ^(EVENT_FILTER_PROPERTY_EXPR_ATOM propertySelectionList? eventProperty IDENT? ^(WHERE_EXPR expression?))
+	:	LBRACK propertyExpressionSelect? expression propertyExpressionAnnotation? (AS IDENT)? (WHERE expression)? RBRACK
+       	-> ^(EVENT_FILTER_PROPERTY_EXPR_ATOM propertyExpressionSelect? expression propertyExpressionAnnotation? IDENT? ^(WHERE_EXPR expression?))
        	;
+       	
+propertyExpressionSelect
+	:	SELECT propertySelectionList FROM
+		-> ^(SELECT propertySelectionList)
+	;
+		
+propertyExpressionAnnotation
+	: ATCHAR n=IDENT (LPAREN v=IDENT RPAREN)
+	  -> ^(ATCHAR $n $v)
+	;
 	
 propertySelectionList 	
 	:	propertySelectionListElement (COMMA! propertySelectionListElement)*

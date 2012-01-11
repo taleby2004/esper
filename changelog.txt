@@ -1,7 +1,27 @@
 Esper Changelog
 ===================
 
-Changes in version 4.4.1
+Changes in version 4.5.0
+------------------------
+Major API or EPL changes
+  - We have made a change to the behavior of intersection data windows (multiple data windows in intersection) when one of the data windows is a batch window.
+    The engine now provides batching behavior, when one of the data windows is a batch window, and not continuous stream behavior.
+  - Support for hashed context to provide consistent hashing and declarative parallelism
+  - Support for nested contexts allowing combined context policies
+  - Support for context partition targeting for on-demand queries and for statement iteration
+  - Support for context initiation by event or patterns and termination by a correlated event or pattern
+  - Support for MVEL and JSR-223 scripting engine i.e. JavaScript and others
+  - Support for contained-event syntax; one can now specify any expression for returning contained events
+  - Support for constants: Variables that are constant values and cannot be assigned. Useful for the engine to perform optimizations knowing variable values can't change.
+  - Support for aggregation functions in the expiry expression of the expression data window
+  - Support for the new expression batch window that also allows aggregation functions as part of the expiry expression
+  - Support for iterating statements that have unbound streams (no data window) and have fully-grouped aggregation
+  - Support for defining an output pattern for audit logs
+  - Added the test framework API for event processing testing
+  - For plug-in aggregation functions we added support for a AggregationFunctionFactory and deprecated AggregationSupport
+  - Optimization to detect when a statement is stateless and thereby operate lock-free
+
+Changes in version 4.4.0
 ------------------------
 Major API or EPL changes
   - Support for context declarations: Temporal context for interval-based context partitions; Keyed and category segmented contexts; Initiated contexts

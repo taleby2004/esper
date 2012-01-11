@@ -11,18 +11,17 @@
 
 package com.espertech.esper.regression.client;
 
-import com.espertech.esper.core.service.EPStatementSPI;
-import com.espertech.esper.util.StopCallback;
-import com.espertech.esper.view.StatementStopCallback;
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.util.SupportStmtAwareUpdateListener;
 import com.espertech.esper.support.util.SupportSubscriber;
+import com.espertech.esper.view.StatementStopCallback;
+import junit.framework.TestCase;
 
 public class TestEPStatement extends TestCase
 {
@@ -44,7 +43,8 @@ public class TestEPStatement extends TestCase
     public void testListenerWithReplay()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.win:length(2)");
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("select * from SupportBean.win:length(2)");
+        assertFalse(stmt.getStatementContext().isStatelessSelect());
 
         // test empty statement
         stmt.addListenerWithReplay(listener);
@@ -59,7 +59,7 @@ public class TestEPStatement extends TestCase
         listener.reset();
 
         // test 1 event
-        stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.win:length(2)");
+        stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("select * from SupportBean.win:length(2)");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         stmt.addListenerWithReplay(listener);
         assertEquals("E1", listener.assertOneGetNewAndReset().get("string"));
@@ -67,11 +67,11 @@ public class TestEPStatement extends TestCase
         listener.reset();
 
         // test 2 events
-        stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.win:length(2)");
+        stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("select * from SupportBean.win:length(2)");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
         stmt.addListenerWithReplay(listener);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"E1"}, {"E2"}});
 
         // test stopped statement and destroyed statement
         listener.reset();
@@ -131,7 +131,8 @@ public class TestEPStatement extends TestCase
         sendTimer(1000);
 
         String text = "select * from " + SupportBean.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEPL(text, "s1");
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(text, "s1");
+        assertTrue(stmt.getStatementContext().isStatelessSelect());
         assertEquals(1000l, stmt.getTimeLastStateChange());
         assertEquals(false, stmt.isDestroyed());
         assertEquals(false, stmt.isStopped());
@@ -208,7 +209,7 @@ public class TestEPStatement extends TestCase
         assertEquals(text, stmt.getText());
         assertEquals("s1", stmt.getName());
         assertNull(epService.getEPAdministrator().getStatement("s1"));
-        ArrayAssertionUtil.assertEqualsAnyOrder(new String[0], epService.getEPAdministrator().getStatementNames());
+        EPAssertionUtil.assertEqualsAnyOrder(new String[0], epService.getEPAdministrator().getStatementNames());
 
         try
         {

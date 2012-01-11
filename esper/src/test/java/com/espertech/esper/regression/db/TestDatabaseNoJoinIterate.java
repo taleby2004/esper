@@ -12,13 +12,12 @@
 package com.espertech.esper.regression.db;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.annotation.Hook;
-import com.espertech.esper.client.annotation.HookType;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportDatabaseService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.Properties;
@@ -61,22 +60,23 @@ public class TestDatabaseNoJoinIterate extends TestCase
 
         // Test int and singlerow
         String stmtText = "select myint from sql:MyDB ['select myint from mytesttable where ${queryvar_int -2} = mytesttable.mybigint']";
-        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(stmtText);
+        assertFalse(stmt.getStatementContext().isStatelessSelect());
         listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"myint"}, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"myint"}, null);
 
         sendSupportBeanEvent(5);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"myint"}, new Object[][] {{30}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"myint"}, new Object[][]{{30}});
 
         stmt.destroy();
         assertFalse(listener.isInvoked());
 
         // Test multi-parameter and multi-row
         stmtText = "select myint from sql:MyDB ['select myint from mytesttable where mytesttable.mybigint between ${queryvar_int-2} and ${queryvar_int+2}'] order by myint";
-        stmt = epService.getEPAdministrator().createEPL(stmtText);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"myint"}, new Object[][] {{30}, {40}, {50}, {60}, {70}});
+        stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(stmtText);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"myint"}, new Object[][]{{30}, {40}, {50}, {60}, {70}});
         stmt.destroy();
 
         // Test substitution parameters
@@ -105,10 +105,10 @@ public class TestDatabaseNoJoinIterate extends TestCase
         listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"myint"}, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"myint"}, null);
 
         sendSupportBeanEvent(5);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), new String[] {"myint"}, new Object[][] {{50}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), new String[]{"myint"}, new Object[][]{{50}});
 
         stmt.destroy();
         assertFalse(listener.isInvoked());
@@ -119,19 +119,19 @@ public class TestDatabaseNoJoinIterate extends TestCase
         stmt.addListener(listener);
 
         String[] fields = new String[] {"mybigint", "mybool"};
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendSupportBeanEvent(true, 10, 40);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{1L, true}, {4L, true}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{1L, true}, {4L, true}});
 
         sendSupportBeanEvent(false, 30, 80);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{3L, false}, {5L, false}, {6L, false}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{3L, false}, {5L, false}, {6L, false}});
 
         sendSupportBeanEvent(true, 20, 30);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendSupportBeanEvent(true, 20, 60);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, new Object[][] {{4L, true}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{4L, true}});
     }
 
     private void sendSupportBeanEvent(int intPrimitive)

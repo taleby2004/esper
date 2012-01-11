@@ -11,20 +11,20 @@
 
 package com.espertech.esper.support.epl;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.spec.OutputLimitLimitType;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKey;
-import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventTypeFactory;
 import com.espertech.esper.view.Viewable;
 
-import java.util.Set;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class SupportResultSetProcessor implements ResultSetProcessor
 {
@@ -75,5 +75,8 @@ public class SupportResultSetProcessor implements ResultSetProcessor
     @Override
     public boolean hasAggregation() {
         return false;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public void setAgentInstanceContext(AgentInstanceContext context) {
     }
 }

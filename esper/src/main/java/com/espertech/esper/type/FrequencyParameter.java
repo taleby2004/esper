@@ -69,4 +69,12 @@ public class FrequencyParameter implements NumberSetParameter
 
         return values;
     }
+
+    public boolean containsPoint(int point) {
+        return point % frequency == 0;
+    }
+
+    public String formatted() {
+        return "*/" + frequency;
+    }
 }

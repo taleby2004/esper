@@ -11,6 +11,7 @@
 
 package com.espertech.esper.event.map;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,12 +21,9 @@ import java.util.*;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.event.map.MapEventType;
-import com.espertech.esper.event.map.MapEventBean;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeMetadata;
 
@@ -53,7 +51,7 @@ public class TestMapEventType extends TestCase
     public void testGetPropertyNames()
     {
         String[] properties = eventType.getPropertyNames();
-        ArrayAssertionUtil.assertEqualsAnyOrder(properties, new String[] {"myInt", "myString", "myNullableString", "mySupportBean", "myComplexBean", "myNullableSupportBean", "myNullType"});
+        EPAssertionUtil.assertEqualsAnyOrder(properties, new String[]{"myInt", "myString", "myNullableString", "mySupportBean", "myComplexBean", "myNullableSupportBean", "myNullType"});
     }
 
     public void testGetPropertyType()
@@ -166,27 +164,27 @@ public class TestMapEventType extends TestCase
         mapTwo.put("myNullType", null);
 
         // compare, should equal
-        assertEquals(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null), eventType);
-        assertFalse((new MapEventType(metadata, "google", 1, eventAdapterService, mapTwo, null, null, null)).equals(eventType));
+        assertTrue(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null).equalsCompareType(eventType));
+        assertFalse((new MapEventType(metadata, "google", 1, eventAdapterService, mapTwo, null, null, null)).equalsCompareType(eventType));
 
         mapTwo.put("xx", int.class);
-        assertFalse(eventType.equals(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
+        assertFalse(eventType.equalsCompareType(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
         mapTwo.remove("xx");
-        assertTrue(eventType.equals(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
+        assertTrue(eventType.equalsCompareType(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
 
         mapTwo.put("myInt", Integer.class);
-        assertTrue(eventType.equals(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
+        assertTrue(eventType.equalsCompareType(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
         mapTwo.remove("myInt");
-        assertFalse(eventType.equals(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
+        assertFalse(eventType.equalsCompareType(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
         mapTwo.put("myInt", int.class);
-        assertTrue(eventType.equals(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
+        assertTrue(eventType.equalsCompareType(new MapEventType(metadata, "", 1, eventAdapterService, mapTwo, null, null, null)));
 
         // Test boxed and primitive compatible
         Map<String, Object> mapOne = new LinkedHashMap<String, Object>();
         mapOne.put("myInt", int.class);
         mapTwo = new LinkedHashMap<String, Object>();
         mapTwo.put("myInt", Integer.class);
-        assertEquals(new MapEventType(metadata, "T1", 1, eventAdapterService, mapOne, null, null, null), new MapEventType(metadata, "T1", 1, eventAdapterService, mapTwo, null, null, null));
+        assertTrue(new MapEventType(metadata, "T1", 1, eventAdapterService, mapOne, null, null, null).equalsCompareType(new MapEventType(metadata, "T1", 1, eventAdapterService, mapTwo, null, null, null)));
     }
 
     public void testGetFromMap()
@@ -271,7 +269,7 @@ public class TestMapEventType extends TestCase
         // assert property names
         String[] expectedPropNames = new String[] {"simple", "obj", "map", "nodefmap"};
         String[] receivedPropNames = mapType.getPropertyNames();
-        ArrayAssertionUtil.assertEqualsAnyOrder(expectedPropNames, receivedPropNames);
+        EPAssertionUtil.assertEqualsAnyOrder(expectedPropNames, receivedPropNames);
 
         // assert get value through (1) type getter  (2) event-get
         for (int i = 0; i < expected.length; i++)

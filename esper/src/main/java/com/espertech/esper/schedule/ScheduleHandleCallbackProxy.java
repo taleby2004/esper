@@ -21,20 +21,21 @@ import java.lang.reflect.Method;
 
 public class ScheduleHandleCallbackProxy implements java.lang.reflect.InvocationHandler {
 
-    private static final Log auditLog = LogFactory.getLog(AuditPath.AUDIT_LOG);
     private static Method target = JavaClassHelper.getMethodByName(ScheduleHandleCallback.class, "scheduledTrigger");
 
+    private final String engineURI;
     private final String statementName;
     private final ScheduleHandleCallback scheduleHandleCallback;
 
-    public static Object newInstance(String statementName, ScheduleHandleCallback scheduleHandleCallback) {
+    public static Object newInstance(String engineURI, String statementName, ScheduleHandleCallback scheduleHandleCallback) {
         return java.lang.reflect.Proxy.newProxyInstance(
                 scheduleHandleCallback.getClass().getClassLoader(),
                 JavaClassHelper.getSuperInterfaces(scheduleHandleCallback.getClass()),
-                new ScheduleHandleCallbackProxy(statementName, scheduleHandleCallback));
+                new ScheduleHandleCallbackProxy(engineURI, statementName, scheduleHandleCallback));
     }
 
-    public ScheduleHandleCallbackProxy(String statementName, ScheduleHandleCallback scheduleHandleCallback) {
+    public ScheduleHandleCallbackProxy(String engineURI, String statementName, ScheduleHandleCallback scheduleHandleCallback) {
+        this.engineURI = engineURI;
         this.statementName = statementName;
         this.scheduleHandleCallback = scheduleHandleCallback;
     }
@@ -43,13 +44,11 @@ public class ScheduleHandleCallbackProxy implements java.lang.reflect.Invocation
             throws Throwable {
 
         if (m.getName().equals(target.getName())) {
-            if (auditLog.isInfoEnabled()) {
+            if (AuditPath.isInfoEnabled()) {
                 StringWriter message = new StringWriter();
-                message.write("Statement ");
-                message.write(statementName);
-                message.write(" schedule trigger handle ");
+                message.write("schedule trigger handle ");
                 JavaClassHelper.writeInstance(message, scheduleHandleCallback, true);
-                auditLog.info(message);
+                AuditPath.auditLog(engineURI, statementName, message.toString());
             }
         }
 

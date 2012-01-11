@@ -12,14 +12,14 @@
 package com.espertech.esper.regression.pattern;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.core.service.StatementType;
 import com.espertech.esper.regression.support.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -403,8 +403,8 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         epService.getEPRuntime().sendEvent(events[4]);
         assertEquals(2, listener.getLastNewData().length);
         String fields[] = new String[] {"a", "b", "c", "d"};
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[] {events[0], events[2], events[3], events[4]});
-        ArrayAssertionUtil.assertProps(listener.getLastNewData()[1], fields, new Object[] {events[1], events[2], events[3], events[4]});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[0], fields, new Object[]{events[0], events[2], events[3], events[4]});
+        EPAssertionUtil.assertProps(listener.getLastNewData()[1], fields, new Object[]{events[1], events[2], events[3], events[4]});
     }
 
     public void testFilterGreaterThen()

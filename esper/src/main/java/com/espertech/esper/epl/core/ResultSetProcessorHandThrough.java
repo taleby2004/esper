@@ -30,11 +30,15 @@ public class ResultSetProcessorHandThrough extends ResultSetProcessorBaseSimple
 {
     private final ResultSetProcessorHandThrougFactory prototype;
     private final SelectExprProcessor selectExprProcessor;
-    private final AgentInstanceContext agentInstanceContext;
+    private AgentInstanceContext agentInstanceContext;
 
     public ResultSetProcessorHandThrough(ResultSetProcessorHandThrougFactory prototype, SelectExprProcessor selectExprProcessor, AgentInstanceContext agentInstanceContext) {
         this.prototype = prototype;
         this.selectExprProcessor = selectExprProcessor;
+        this.agentInstanceContext = agentInstanceContext;
+    }
+
+    public void setAgentInstanceContext(AgentInstanceContext agentInstanceContext) {
         this.agentInstanceContext = agentInstanceContext;
     }
 

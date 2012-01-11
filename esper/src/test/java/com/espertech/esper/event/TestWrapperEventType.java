@@ -13,11 +13,11 @@ package com.espertech.esper.event;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.support.bean.SupportBeanSimple;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.event.SupportEventAdapterService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -27,7 +27,7 @@ public class TestWrapperEventType extends TestCase
 {
 	private EventType underlyingEventTypeOne;
 	private EventType underlyingEventTypeTwo;
-	private EventType eventType;
+	private EventTypeSPI eventType;
 	private Map<String, Object> properties;
 	private EventAdapterService eventAdapterService;
 	
@@ -63,7 +63,7 @@ public class TestWrapperEventType extends TestCase
 	public void testGetPropertyNames()
 	{
 		String[] expected = new String[] { "myInt", "myString", "additionalInt", "additionalString" };
-		ArrayAssertionUtil.assertEqualsAnyOrder(expected, eventType.getPropertyNames());
+		EPAssertionUtil.assertEqualsAnyOrder(expected, eventType.getPropertyNames());
 	}
 	
 	public void testGetPropertyType()
@@ -88,21 +88,21 @@ public class TestWrapperEventType extends TestCase
 	{
 		Map<String, Object> otherProperties = new HashMap<String, Object>(properties);
         EventTypeMetadata meta = EventTypeMetadata.createWrapper("test", true, false, false);
-		EventType otherType = new WrapperEventType(meta, "mytype", 1, underlyingEventTypeOne, otherProperties, eventAdapterService);
-		assertTrue(eventType.equals(otherType));
-		assertTrue(otherType.equals(eventType));
+		EventTypeSPI otherType = new WrapperEventType(meta, "mytype", 1, underlyingEventTypeOne, otherProperties, eventAdapterService);
+		assertTrue(eventType.equalsCompareType(otherType));
+		assertTrue(otherType.equalsCompareType(eventType));
 		
 		otherType = new WrapperEventType(meta, "mytype", 1, underlyingEventTypeTwo, otherProperties, eventAdapterService);
-		assertFalse(eventType.equals(otherType));
-		assertFalse(otherType.equals(eventType));
+		assertFalse(eventType.equalsCompareType(otherType));
+		assertFalse(otherType.equalsCompareType(eventType));
 		
 		otherProperties.put("anotherProperty", Integer.class);
 		otherType = new WrapperEventType(meta, "mytype", 1, underlyingEventTypeOne, otherProperties, eventAdapterService);
-		assertFalse(eventType.equals(otherType));
-		assertFalse(otherType.equals(eventType));
+		assertFalse(eventType.equalsCompareType(otherType));
+		assertFalse(otherType.equalsCompareType(eventType));
 		
-		otherType = underlyingEventTypeOne;
-		assertFalse(eventType.equals(otherType));
-		assertFalse(otherType.equals(eventType));
+		otherType = (EventTypeSPI) underlyingEventTypeOne;
+		assertFalse(eventType.equalsCompareType(otherType));
+		assertFalse(otherType.equalsCompareType(eventType));
 	}
 }

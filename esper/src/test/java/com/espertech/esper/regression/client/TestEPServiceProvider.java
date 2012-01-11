@@ -11,7 +11,7 @@
 
 package com.espertech.esper.regression.client;
 
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -78,7 +78,7 @@ public class TestEPServiceProvider extends TestCase
         catch (EPServiceDestroyedException ex) {
             // expected
         }
-        ArrayAssertionUtil.assertNotContains(EPServiceProviderManager.getProviderURIs(), "default");
+        EPAssertionUtil.assertNotContains(EPServiceProviderManager.getProviderURIs(), "default");
 
         // test destroy
         Configuration config = SupportConfigFactory.getConfiguration();
@@ -86,14 +86,14 @@ public class TestEPServiceProvider extends TestCase
         EPServiceProvider engineOne = EPServiceProviderManager.getProvider(uriOne, config);
         String uriTwo = this.getClass().getName() + "_2";
         EPServiceProvider engineTwo = EPServiceProviderManager.getProvider(uriTwo, config);
-        ArrayAssertionUtil.assertContains(EPServiceProviderManager.getProviderURIs(), uriOne, uriTwo);
+        EPAssertionUtil.assertContains(EPServiceProviderManager.getProviderURIs(), uriOne, uriTwo);
 
         engineOne.destroy();
-        ArrayAssertionUtil.assertNotContains(EPServiceProviderManager.getProviderURIs(), uriOne);
-        ArrayAssertionUtil.assertContains(EPServiceProviderManager.getProviderURIs(), uriTwo);
+        EPAssertionUtil.assertNotContains(EPServiceProviderManager.getProviderURIs(), uriOne);
+        EPAssertionUtil.assertContains(EPServiceProviderManager.getProviderURIs(), uriTwo);
 
         engineTwo.destroy();
-        ArrayAssertionUtil.assertNotContains(EPServiceProviderManager.getProviderURIs(), uriOne, uriTwo);
+        EPAssertionUtil.assertNotContains(EPServiceProviderManager.getProviderURIs(), uriOne, uriTwo);
     }
 
     public void testListenerStateChange()

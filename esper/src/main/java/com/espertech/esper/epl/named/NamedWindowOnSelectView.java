@@ -16,6 +16,7 @@ import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.event.EventBeanUtility;
+import com.espertech.esper.util.AuditPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -35,11 +36,13 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
     private final ResultSetProcessor resultSetProcessor;
     private EventBean[] lastResult;
     private Set<MultiKey<EventBean>> oldEvents = new HashSet<MultiKey<EventBean>>();
+    private final boolean audit;
 
-    public NamedWindowOnSelectView(NamedWindowLookupStrategy lookupStrategy, NamedWindowRootViewInstance rootView, ExprEvaluatorContext exprEvaluatorContext, NamedWindowOnSelectViewFactory parent, ResultSetProcessor resultSetProcessor) {
+    public NamedWindowOnSelectView(NamedWindowLookupStrategy lookupStrategy, NamedWindowRootViewInstance rootView, ExprEvaluatorContext exprEvaluatorContext, NamedWindowOnSelectViewFactory parent, ResultSetProcessor resultSetProcessor, boolean audit) {
         super(lookupStrategy, rootView, exprEvaluatorContext);
         this.parent = parent;
         this.resultSetProcessor = resultSetProcessor;
+        this.audit = audit;
     }
 
     public void handleMatching(EventBean[] triggerEvents, EventBean[] matchingEvents)
@@ -82,6 +85,9 @@ public class NamedWindowOnSelectView extends NamedWindowOnExprBaseView
             {
                 for (int i = 0; i < newData.length; i++)
                 {
+                    if (audit) {
+                        AuditPath.auditInsertInto(getExprEvaluatorContext().getEngineURI(), getExprEvaluatorContext().getStatementName(), newData[i]);
+                    }
                     parent.getInternalEventRouter().route(newData[i], parent.getStatementHandle(), parent.getInternalEventRouteDest(), getExprEvaluatorContext(), parent.isAddToFront());
                 }
             }

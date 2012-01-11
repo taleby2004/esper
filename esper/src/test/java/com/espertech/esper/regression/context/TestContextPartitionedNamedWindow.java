@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.context;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestContextPartitionedNamedWindow extends TestCase {
@@ -57,7 +57,7 @@ public class TestContextPartitionedNamedWindow extends TestCase {
             epService.getEPRuntime().executeQuery("select * from MyWindow");
         }
         catch (EPException ex) {
-            String expected = "Error executing statement: Named window 'MyWindow' is associated to context 'SegmentedByString' that is not available for querying [select * from MyWindow]";
+            String expected = "Error executing statement: Named window 'MyWindow' is associated to context 'SegmentedByString' that is not available for querying without context partition selector, use the executeQuery(epl, selector) method instead [select * from MyWindow]";
             assertEquals(expected, ex.getMessage());
         }
     }
@@ -74,19 +74,19 @@ public class TestContextPartitionedNamedWindow extends TestCase {
 
         String[] fields = new String[] {"string", "intPrimitive"};
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"G1", 10});
+        EPAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"G1", 10});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fields, new Object[]{"G2", 20});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"G2", 20});
+        EPAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fields, new Object[]{"G2", 20});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"G2", 20});
 
         stmtSelect.destroy();
 
         // Out-of-context consumer not initialized
         EPStatement stmtSelectCount = epService.getEPAdministrator().createEPL("@Name('select') select count(*) as cnt from MyWindow");
         stmtSelectCount.addListener(listenerSelect);
-        ArrayAssertionUtil.assertProps(stmtSelectCount.iterator().next(), "cnt".split(","), new Object[] {0L});
+        EPAssertionUtil.assertProps(stmtSelectCount.iterator().next(), "cnt".split(","), new Object[]{0L});
     }
 
     public void testSegmentedNWConsumeSameContext() {
@@ -102,20 +102,20 @@ public class TestContextPartitionedNamedWindow extends TestCase {
         stmtSelect.addListener(listenerSelect);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G1", 10});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsCnt, new Object[] {"G1", 1L});
+        EPAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G1", 10});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsCnt, new Object[]{"G1", 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 20});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsCnt, new Object[] {"G2", 1L});
+        EPAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 20});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsCnt, new Object[]{"G2", 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 11));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G1", 11});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsCnt, new Object[] {"G1", 2L});
+        EPAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G1", 11});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsCnt, new Object[]{"G1", 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 21));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 21});
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsCnt, new Object[] {"G2", 2L});
+        EPAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 21});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsCnt, new Object[]{"G2", 2L});
 
         stmtSelect.destroy();
 
@@ -123,7 +123,7 @@ public class TestContextPartitionedNamedWindow extends TestCase {
         EPStatement stmtSelectCount = epService.getEPAdministrator().createEPL("@Name('select') context SegmentedByString select count(*) as cnt from MyWindow");
         stmtSelectCount.addListener(listenerSelect);
         try {
-            // ArrayAssertionUtil.assertProps(stmtSelectCount.iterator().next(), "cnt".split(","), new Object[] {0L});
+            // EPAssertionUtil.assertProps(stmtSelectCount.iterator().next(), "cnt".split(","), new Object[] {0L});
             stmtSelectCount.iterator();
         }
         catch (UnsupportedOperationException ex) {
@@ -145,26 +145,26 @@ public class TestContextPartitionedNamedWindow extends TestCase {
         EPStatement stmtDelete = epService.getEPAdministrator().createEPL("@Name('on-merge') context SegmentedByString on SupportBean_S0 delete from MyWindow");
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 1));
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G0"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G2"));
         assertFalse(listenerSelect.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G1"));
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetOldAndReset(), fieldsNW, new Object[]{"G1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetOldAndReset(), fieldsNW, new Object[]{"G1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 20));
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 20});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 20});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G3", 3));
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G3", 3});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G3", 3});
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 21));
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 21});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 21});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G2"));
-        ArrayAssertionUtil.assertPropsPerRow(listenerSelect.getLastOldData(), fieldsNW, new Object[][]{{"G2", 20}, {"G2", 21}});
+        EPAssertionUtil.assertPropsPerRow(listenerSelect.getLastOldData(), fieldsNW, new Object[][]{{"G2", 20}, {"G2", 21}});
         listenerSelect.reset();
 
         stmtDelete.destroy();
@@ -173,7 +173,7 @@ public class TestContextPartitionedNamedWindow extends TestCase {
         EPStatement stmtUpdate = epService.getEPAdministrator().createEPL("@Name('on-merge') context SegmentedByString on SupportBean_S0 update MyWindow set intPrimitive = intPrimitive + 1");
 
         epService.getEPRuntime().sendEvent(new SupportBean("G4", 4));
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G4", 4});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G4", 4});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G0"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G1"));
@@ -181,16 +181,16 @@ public class TestContextPartitionedNamedWindow extends TestCase {
         assertFalse(listenerSelect.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G4"));
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fieldsNW, new Object[]{"G4", 5});
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastOldData()[0], fieldsNW, new Object[]{"G4", 4});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fieldsNW, new Object[]{"G4", 5});
+        EPAssertionUtil.assertProps(listenerSelect.getLastOldData()[0], fieldsNW, new Object[]{"G4", 4});
         listenerSelect.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("G5", 5));
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G5", 5});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G5", 5});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G5"));
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fieldsNW, new Object[]{"G5", 6});
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastOldData()[0], fieldsNW, new Object[]{"G5", 5});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fieldsNW, new Object[]{"G5", 6});
+        EPAssertionUtil.assertProps(listenerSelect.getLastOldData()[0], fieldsNW, new Object[]{"G5", 5});
         listenerSelect.reset();
 
         stmtUpdate.destroy();
@@ -213,25 +213,25 @@ public class TestContextPartitionedNamedWindow extends TestCase {
         stmtSelect.addListener(listenerSelect);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 1));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G1", 1});
+        EPAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(99, "G1"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G1"));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.getLastNewData()[0], fieldsNW, new Object[]{"G1", 99});
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.getLastOldData()[0], fieldsNW, new Object[]{"G1", 1});
+        EPAssertionUtil.assertProps(listenerNamedWindow.getLastNewData()[0], fieldsNW, new Object[]{"G1", 99});
+        EPAssertionUtil.assertProps(listenerNamedWindow.getLastOldData()[0], fieldsNW, new Object[]{"G1", 1});
         listenerNamedWindow.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 2));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 2});
+        EPAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G2", 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(98, "Gx"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "G2"));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.getLastNewData()[0], fieldsNW, new Object[]{"G2", 2});
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.getLastOldData()[0], fieldsNW, new Object[]{"G2", 2});
+        EPAssertionUtil.assertProps(listenerNamedWindow.getLastNewData()[0], fieldsNW, new Object[]{"G2", 2});
+        EPAssertionUtil.assertProps(listenerNamedWindow.getLastOldData()[0], fieldsNW, new Object[]{"G2", 2});
         listenerNamedWindow.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("G3", 3));
-        ArrayAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G3", 3});
+        EPAssertionUtil.assertProps(listenerNamedWindow.assertOneGetNewAndReset(), fieldsNW, new Object[]{"G3", 3});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "Gx"));
         assertFalse(listenerNamedWindow.isInvoked());

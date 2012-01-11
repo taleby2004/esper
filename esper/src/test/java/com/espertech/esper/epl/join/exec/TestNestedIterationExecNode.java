@@ -14,6 +14,7 @@ package com.espertech.esper.epl.join.exec;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.epl.join.exec.base.FullTableScanLookupStrategy;
 import com.espertech.esper.epl.join.exec.base.NestedIterationExecNode;
 import com.espertech.esper.epl.join.exec.base.TableLookupExecNode;
@@ -21,7 +22,6 @@ import junit.framework.TestCase;
 import com.espertech.esper.epl.join.table.UnindexedEventTable;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 
 public class TestNestedIterationExecNode extends TestCase
 {
@@ -66,7 +66,7 @@ public class TestNestedIterationExecNode extends TestCase
 
         EventBean[][] received = makeArray(result);
         EventBean[][] expected = makeExpected();
-        ArrayAssertionUtil.assertEqualsAnyOrder(expected, received);
+        EPAssertionUtil.assertEqualsAnyOrder(expected, received);
     }
 
     private EventBean[][] makeExpected()

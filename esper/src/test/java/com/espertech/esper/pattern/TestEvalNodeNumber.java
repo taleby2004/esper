@@ -11,7 +11,7 @@
 
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 public class TestEvalNodeNumber extends TestCase
@@ -21,20 +21,20 @@ public class TestEvalNodeNumber extends TestCase
         EvalNodeNumber parent = new EvalNodeNumber();
         
         EvalNodeNumber child1 = parent.newChildNumber();
-        ArrayAssertionUtil.assertEqualsExactOrder(child1.getNumber(), new short[] {0});
+        EPAssertionUtil.assertEqualsExactOrder(new short[]{0}, child1.getNumber());
 
         EvalNodeNumber child1_1 = child1.newChildNumber();
-        ArrayAssertionUtil.assertEqualsExactOrder(child1_1.getNumber(), new short[] {0, 0});
+        EPAssertionUtil.assertEqualsExactOrder(new short[]{0, 0}, child1_1.getNumber());
 
         EvalNodeNumber child1_2 = child1_1.newSiblingNumber();
-        ArrayAssertionUtil.assertEqualsExactOrder(child1_2.getNumber(), new short[] {0, 1});
+        EPAssertionUtil.assertEqualsExactOrder(new short[]{0, 1}, child1_2.getNumber());
 
         EvalNodeNumber child1_2_1 = child1_2.newChildNumber();
-        ArrayAssertionUtil.assertEqualsExactOrder(child1_2_1.getNumber(), new short[] {0, 1, 0});
+        EPAssertionUtil.assertEqualsExactOrder(new short[]{0, 1, 0}, child1_2_1.getNumber());
 
         EvalNodeNumber child1_2_2 = child1_2_1.newSiblingNumber();
-        ArrayAssertionUtil.assertEqualsExactOrder(child1_2_2.getNumber(), new short[] {0, 1, 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(child1_2_2.getParentNumber().getNumber(), new short[] {0, 1});
+        EPAssertionUtil.assertEqualsExactOrder(new short[]{0, 1, 1}, child1_2_2.getNumber());
+        EPAssertionUtil.assertEqualsExactOrder(new short[]{0, 1}, child1_2_2.getParentNumber().getNumber());
     }
 
     public void testHashCode()

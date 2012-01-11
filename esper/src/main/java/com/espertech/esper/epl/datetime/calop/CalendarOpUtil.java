@@ -27,7 +27,7 @@ public class CalendarOpUtil {
     public static CalendarFieldEnum getEnum(String methodName, ExprNode exprNode) throws ExprValidationException {
         String message = "Date-time enumeration method '" + methodName + "'";
         String validFieldNames = "valid field names are '" + CalendarFieldEnum.getValidList() + "'";
-        if (!(exprNode instanceof ExprConstantNode)) {
+        if (!ExprNodeUtility.isConstantValueExpr(exprNode)) {
             throw new ExprValidationException(message + " requires a constant string-type parameter as its first parameter, " + validFieldNames);
         }
         String fieldname = (String) exprNode.getExprEvaluator().evaluate(null, true, null);

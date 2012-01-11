@@ -28,6 +28,7 @@ import java.util.Map;
  */
 public final class FilterSpecParamExprNode extends FilterSpecParam
 {
+    private final String statementName;
     private final ExprNode exprNode;
     private final LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes;
     private final LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes;
@@ -35,11 +36,12 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
     private final transient VariableService variableService;
     private final boolean hasVariable;
     private final boolean useLargeThreadingProfile;
+    private final boolean hasFilterStreamSubquery;
     private static final long serialVersionUID = 2298436088557677833L;
 
     /**
      * Ctor.
-     * @param propertyName is the event property name
+     * @param lookupable is the lookup-able
      * @param filterOperator is expected to be the BOOLEAN_EXPR operator
      * @param exprNode represents the boolean expression
      * @param taggedEventTypes is null if the expression doesn't need other streams, or is filled with a ordered list of stream names and types
@@ -48,17 +50,19 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
      * @param eventAdapterService for creating event types and event beans
      * @throws IllegalArgumentException for illegal args
      */
-    public FilterSpecParamExprNode(String propertyName,
+    public FilterSpecParamExprNode(FilterSpecLookupable lookupable,
                              FilterOperator filterOperator,
                              ExprNode exprNode,
                              LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes,
                              LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes,
                              VariableService variableService,
                              EventAdapterService eventAdapterService,
-                             ConfigurationInformation configurationInformation)
+                             ConfigurationInformation configurationInformation,
+                             String statementName,
+                             boolean hasSubquery)
         throws IllegalArgumentException
     {
-        super(propertyName, filterOperator);
+        super(lookupable, filterOperator);
         if (filterOperator != FilterOperator.BOOLEAN_EXPRESSION)
         {
             throw new IllegalArgumentException("Invalid filter operator for filter expression node");
@@ -69,6 +73,8 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
         this.variableService = variableService;
         this.eventAdapterService = eventAdapterService;
         this.useLargeThreadingProfile = configurationInformation.getEngineDefaults().getExecution().getThreadingProfile() == ConfigurationEngineDefaults.ThreadingProfile.LARGE;
+        this.statementName = statementName;
+        this.hasFilterStreamSubquery = hasSubquery;
 
         ExprNodeVariableVisitor visitor = new ExprNodeVariableVisitor();
         exprNode.accept(visitor);
@@ -125,34 +131,42 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
             }
         }
 
-        if (!hasVariable && events == null) {
+        // non-pattern case
+        if (events == null) {
+            // if a subquery is present in a filter stream acquire the agent instance lock
+            if (hasFilterStreamSubquery) {
+                return new ExprNodeAdapterBaseStmtLock(statementName, exprNode, exprEvaluatorContext, variableService);
+            }
             // no-variable no-prior event evaluation
-            return new ExprNodeAdapterBase(exprNode, exprEvaluatorContext);
-        }
-        else if (events == null) {
+            if (!hasVariable) {
+                return new ExprNodeAdapterBase(statementName, exprNode, exprEvaluatorContext);
+            }
             // with-variable no-prior event evaluation
-            return new ExprNodeAdapterBaseVariables(exprNode, exprEvaluatorContext, variableService);
+            return new ExprNodeAdapterBaseVariables(statementName, exprNode, exprEvaluatorContext, variableService);
         }
 
+        // pattern cases
         VariableService variableServiceToUse = hasVariable == false ? null : variableService;
         if (useLargeThreadingProfile) {
             // no-threadlocal evaluation
-            return new ExprNodeAdapterMultiStreamNoTL(exprNode, exprEvaluatorContext, variableServiceToUse, events);
+            // if a subquery is present in a pattern filter acquire the agent instance lock
+            if (hasFilterStreamSubquery) {
+                return new ExprNodeAdapterMultiStreamNoTLStmtLock(statementName, exprNode, exprEvaluatorContext, variableServiceToUse, events);
+            }
+            return new ExprNodeAdapterMultiStreamNoTL(statementName, exprNode, exprEvaluatorContext, variableServiceToUse, events);
         }
         else {
+            if (hasFilterStreamSubquery) {
+                return new ExprNodeAdapterMultiStreamStmtLock(statementName, exprNode, exprEvaluatorContext, variableServiceToUse, events);
+            }
             // evaluation with threadlocal cache
-            return new ExprNodeAdapterMultiStream(exprNode, exprEvaluatorContext, variableServiceToUse, events);
+            return new ExprNodeAdapterMultiStream(statementName, exprNode, exprEvaluatorContext, variableServiceToUse, events);
         }
     }
 
     public final String toString()
     {
         return super.toString() + "  exprNode=" + exprNode.toString();
-    }
-
-    public int getFilterHash()
-    {
-        return 0;
     }
 
     public boolean equals(Object obj)

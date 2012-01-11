@@ -11,10 +11,10 @@
 
 package com.espertech.esper.regression.event;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.event.EventTypeAssertionUtil;
 
@@ -30,7 +30,7 @@ public class TestPropertyResolutionFragment extends TestCase
     {
         epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
         epService.initialize();
-        listener = new SupportUpdateListener();        
+        listener = new SupportUpdateListener();
     }
 
     protected void tearDown() throws Exception {

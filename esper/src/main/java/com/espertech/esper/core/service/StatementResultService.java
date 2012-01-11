@@ -81,4 +81,6 @@ public interface StatementResultService
      * Execution of result indication.
      */
     public void execute();
+
+    public String getStatementName();
 }

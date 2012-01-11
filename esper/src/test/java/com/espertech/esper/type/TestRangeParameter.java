@@ -11,12 +11,10 @@
 
 package com.espertech.esper.type;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.Set;
-
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.type.RangeParameter;
 
 public class TestRangeParameter extends TestCase
 {
@@ -36,18 +34,32 @@ public class TestRangeParameter extends TestCase
     {
         RangeParameter rangeParameter = new RangeParameter(0, 5);
         Set<Integer> values = rangeParameter.getValuesInRange(1, 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {1, 2, 3}, values);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{1, 2, 3}, values);
 
         values = rangeParameter.getValuesInRange(-2, 3);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {0, 1, 2, 3}, values);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{0, 1, 2, 3}, values);
         
         values = rangeParameter.getValuesInRange(4, 6);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {4, 5}, values);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{4, 5}, values);
 
         values = rangeParameter.getValuesInRange(10, 20);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {}, values);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{}, values);
 
         values = rangeParameter.getValuesInRange(-7, -1);
-        ArrayAssertionUtil.assertEqualsAnyOrder(new int[] {}, values);
+        EPAssertionUtil.assertEqualsAnyOrder(new int[]{}, values);
+    }
+
+    public void testContainsPoint() {
+        RangeParameter rangeParameter = new RangeParameter(10, 20);
+        assertTrue(rangeParameter.containsPoint(10));
+        assertTrue(rangeParameter.containsPoint(11));
+        assertTrue(rangeParameter.containsPoint(20));
+        assertFalse(rangeParameter.containsPoint(9));
+        assertFalse(rangeParameter.containsPoint(21));
+    }
+
+    public void testFormat() {
+        RangeParameter rangeParameter = new RangeParameter(10, 20);
+        assertEquals("10-20", rangeParameter.formatted());
     }
 }

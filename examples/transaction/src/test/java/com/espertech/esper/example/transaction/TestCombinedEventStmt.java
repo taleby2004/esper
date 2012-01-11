@@ -1,6 +1,7 @@
 package com.espertech.esper.example.transaction;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 
 public class TestCombinedEventStmt extends TestStmtBase
 {

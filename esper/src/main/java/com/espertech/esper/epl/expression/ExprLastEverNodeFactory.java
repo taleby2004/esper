@@ -36,8 +36,8 @@ public class ExprLastEverNodeFactory implements AggregationMethodFactory
         throw new UnsupportedOperationException();
     }
 
-    public AggregationMethod make(MethodResolutionService methodResolutionService, int[] agentInstanceIds, int groupId, int aggregationId) {
-        return methodResolutionService.makeLastEverValueAggregator(agentInstanceIds, groupId, aggregationId, childType, hasFilter);
+    public AggregationMethod make(MethodResolutionService methodResolutionService, int agentInstanceId, int groupId, int aggregationId) {
+        return methodResolutionService.makeLastEverValueAggregator(agentInstanceId, groupId, aggregationId, childType, hasFilter);
     }
 
     public AggregationMethodFactory getPrototypeAggregator() {

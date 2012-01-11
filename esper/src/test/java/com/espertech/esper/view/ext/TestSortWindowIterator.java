@@ -11,13 +11,13 @@
 
 package com.espertech.esper.view.ext;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 import java.util.*;
 
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.event.EventFactoryHelper;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.util.MultiKeyComparator;
 
 public class TestSortWindowIterator extends TestCase
@@ -36,7 +36,7 @@ public class TestSortWindowIterator extends TestCase
     public void testEmpty()
     {
         Iterator<EventBean> it = new SortWindowIterator(testMap);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, null);
+        EPAssertionUtil.assertEqualsExactOrder(null, it);
     }
 
     public void testOneElement()
@@ -47,7 +47,7 @@ public class TestSortWindowIterator extends TestCase
         testMap.put(key, list);
 
         Iterator<EventBean> it = new SortWindowIterator(testMap);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new EventBean[] {events.get("a")} );
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a")}, it);
     }
 
     public void testTwoInOneEntryElement()
@@ -59,7 +59,7 @@ public class TestSortWindowIterator extends TestCase
         testMap.put(key, list);
 
         Iterator<EventBean> it = new SortWindowIterator(testMap);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new EventBean[] {events.get("a"), events.get("b")} );
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a"), events.get("b")}, it);
     }
 
     public void testTwoSeparateEntryElement()
@@ -74,7 +74,7 @@ public class TestSortWindowIterator extends TestCase
         testMap.put(keyA, list2); // Actually before list1
 
         Iterator<EventBean> it = new SortWindowIterator(testMap);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new EventBean[] {events.get("b"), events.get("a")} );
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("b"), events.get("a")}, it);
     }
 
     public void testTwoByTwoEntryElement()
@@ -91,7 +91,7 @@ public class TestSortWindowIterator extends TestCase
         testMap.put(keyC, list2);
 
         Iterator<EventBean> it = new SortWindowIterator(testMap);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new EventBean[] {events.get("a"), events.get("b"), events.get("c"), events.get("d")} );
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a"), events.get("b"), events.get("c"), events.get("d")}, it);
     }
 
     public void testMixedEntryElement()
@@ -113,8 +113,8 @@ public class TestSortWindowIterator extends TestCase
         testMap.put(keyC, list3);
 
         Iterator<EventBean> it = new SortWindowIterator(testMap);
-        ArrayAssertionUtil.assertEqualsExactOrder(it, new EventBean[] {events.get("a"), events.get("c"), events.get("d"),
-                events.get("e"), events.get("f"), events.get("g")} );
+        EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{events.get("a"), events.get("c"), events.get("d"),
+                events.get("e"), events.get("f"), events.get("g")}, it);
     }
 }
 

@@ -15,14 +15,14 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.support.bean.SupportDateTime;
 import com.espertech.esper.support.bean.SupportTimeStartEndA;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestDTBetween extends TestCase {
@@ -47,7 +47,7 @@ public class TestDTBetween extends TestCase {
     public void testIncludeEndpoints() {
 
         String startTime = "2002-05-30T9:00:00.000";
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(SupportDateTime.make(startTime).getMsecdate()));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(startTime)));
 
         String[] fieldsCurrentTs = "val0,val1,val2,val3,val4,val5,val6".split(",");
         String eplCurrentTS = "select " +
@@ -64,22 +64,22 @@ public class TestDTBetween extends TestCase {
         LambdaAssertionUtil.assertTypesAllSame(stmtCurrentTs.getEventType(), fieldsCurrentTs, Boolean.class);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T8:59:59.999", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, false, false, false, false, false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, false, false, false, false, false, false});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T8:59:59.999", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, true, true, true, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, true, true, true, true, true, true});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T8:59:59.999", 100));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, true, true, true, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, true, true, true, true, true, true});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T9:00:00.000", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{false, true, true, true, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{false, true, true, true, true, true, true});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T9:00:00.000", 100));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{false, true, true, true, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{false, true, true, true, true, true, true});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T9:00:00.001", 100));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{false, false, false, false, false, false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{false, false, false, false, false, false, false});
         stmtCurrentTs.destroy();
 
         // test calendar field and constants
@@ -96,22 +96,22 @@ public class TestDTBetween extends TestCase {
         LambdaAssertionUtil.assertTypesAllSame(stmtConstants.getEventType(), fieldsConstants, Boolean.class);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T8:59:59.999", 0));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, false);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, false);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:00:00.000", 0));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, true);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, true);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:00:05.000", 0));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, true);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, true);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:00:59.999", 0));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, true);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, true);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:01:00.000", 0));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, true);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, true);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:01:00.001", 0));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, false);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fieldsConstants, false);
 
         stmtConstants.destroy();
     }
@@ -119,7 +119,7 @@ public class TestDTBetween extends TestCase {
     public void testExcludeEndpoints() {
 
         String startTime = "2002-05-30T9:00:00.000";
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(SupportDateTime.make(startTime).getMsecdate()));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(startTime)));
         epService.getEPAdministrator().createEPL("create variable boolean VAR_TRUE = true");
         epService.getEPAdministrator().createEPL("create variable boolean VAR_FALSE = false");
 
@@ -139,16 +139,16 @@ public class TestDTBetween extends TestCase {
         LambdaAssertionUtil.assertTypesAllSame(stmtCurrentTs.getEventType(), fieldsCurrentTs, Boolean.class);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T8:59:59.999", 0));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fieldsCurrentTs, false);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fieldsCurrentTs, false);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T8:59:59.999", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, false, true, false, true, false, true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, false, true, false, true, false, true, false});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T8:59:59.999", 2));
-        ArrayAssertionUtil.assertAllValuesSame(listener.assertOneGetNewAndReset(), fieldsCurrentTs, true);
+        EPAssertionUtil.assertPropsAllValuesSame(listener.assertOneGetNewAndReset(), fieldsCurrentTs, true);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T9:00:00.000", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, true, false, false, true, true, false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsCurrentTs, new Object[]{true, true, false, false, true, true, false, false});
 
         stmtCurrentTs.destroy();
 
@@ -166,22 +166,22 @@ public class TestDTBetween extends TestCase {
         LambdaAssertionUtil.assertTypesAllSame(stmtConstants.getEventType(), fieldsConstants, Boolean.class);
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", "2002-05-30T8:59:59.999", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{false, false, false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{false, false, false, false});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:00:00.000", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{true, true, false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{true, true, false, false});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:00:05.000", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{true, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{true, true, true, true});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:00:59.999", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{true, true, true, true});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{true, true, true, true});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:01:00.000", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{true, false, true, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{true, false, true, false});
 
         epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E2", "2002-05-30T9:01:00.001", 0));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{false, false, false, false});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsConstants, new Object[]{false, false, false, false});
 
         stmtConstants.destroy();
     }

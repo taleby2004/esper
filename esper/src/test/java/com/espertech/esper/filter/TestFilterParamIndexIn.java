@@ -11,16 +11,16 @@
 
 package com.espertech.esper.filter;
 
-import junit.framework.TestCase;
-import com.espertech.esper.support.filter.SupportEventEvaluator;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.filter.SupportEventEvaluator;
+import junit.framework.TestCase;
 
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 public class TestFilterParamIndexIn extends TestCase
 {
@@ -41,7 +41,7 @@ public class TestFilterParamIndexIn extends TestCase
 
     public void testIndex()
     {
-        FilterParamIndexIn index = new FilterParamIndexIn("longBoxed", testEventType);
+        FilterParamIndexIn index = new FilterParamIndexIn(makeLookupable("longBoxed"));
         assertEquals(FilterOperator.IN_LIST_OF_VALUES, index.getFilterOperator());
 
         MultiKeyUntyped inList = new MultiKeyUntyped(new Object[] {2L, 5L});
@@ -78,5 +78,9 @@ public class TestFilterParamIndexIn extends TestCase
         testBean.setLongBoxed(testValue);
         index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, testEventType.getGetter(fieldName), testEventType.getPropertyType(fieldName));
     }
 }

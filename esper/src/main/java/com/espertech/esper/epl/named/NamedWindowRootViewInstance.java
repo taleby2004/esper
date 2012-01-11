@@ -193,15 +193,15 @@ public class NamedWindowRootViewInstance extends ViewSupport
                 continue;
             }
             if (param.getFilterOperator() == FilterOperator.EQUAL || param.getFilterOperator() == FilterOperator.IS) {
-                keysAvailable.add(param.getPropertyName());
+                keysAvailable.add(param.getLookupable().getExpression());
             }
             else if (param.getFilterOperator().isRangeOperator() ||
                      param.getFilterOperator().isInvertedRangeOperator() ||
                      param.getFilterOperator().isComparisonOperator()) {
-                rangesAvailable.add(param.getPropertyName());
+                rangesAvailable.add(param.getLookupable().getExpression());
             }
             else if (param.getFilterOperator().isRangeOperator()) {
-                rangesAvailable.add(param.getPropertyName());
+                rangesAvailable.add(param.getLookupable().getExpression());
             }
         }
 
@@ -226,7 +226,7 @@ public class NamedWindowRootViewInstance extends ViewSupport
         Object[] keyValues = new Object[keyIndexProps.length];
         for (int keyIndex = 0; keyIndex < keyIndexProps.length; keyIndex++) {
             for (FilterSpecParam param : optionalFilter.getParameters()) {
-                if (param.getPropertyName().equals(keyIndexProps[keyIndex])) {
+                if (param.getLookupable().getExpression().equals(keyIndexProps[keyIndex])) {
                     keyValues[keyIndex] = param.getFilterValue(null, agentInstanceContext);
                     break;
                 }
@@ -281,7 +281,7 @@ public class NamedWindowRootViewInstance extends ViewSupport
 
         for (int rangeIndex = 0; rangeIndex < rangeIndexProps.length; rangeIndex++) {
             for (FilterSpecParam param : parameters) {
-                if (!param.getPropertyName().equals(rangeIndexProps[rangeIndex])) {
+                if (!(param.getLookupable().getExpression().equals(rangeIndexProps[rangeIndex]))) {
                     continue;
                 }
 

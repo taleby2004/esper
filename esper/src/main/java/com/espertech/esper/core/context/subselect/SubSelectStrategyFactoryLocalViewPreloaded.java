@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.core.context.subselect;
 
+import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
@@ -103,7 +104,7 @@ public class SubSelectStrategyFactoryLocalViewPreloaded implements SubSelectStra
 
         AggregationService aggregationService = null;
         if (aggregationServiceFactory != null) {
-            aggregationService = aggregationServiceFactory.getAggregationServiceFactory().makeService(agentInstanceContext);
+            aggregationService = aggregationServiceFactory.getAggregationServiceFactory().makeService(agentInstanceContext, agentInstanceContext.getStatementContext().getMethodResolutionService());
 
             if (!correlatedSubquery) {
                 SubselectAggregatorView aggregatorView = new SubselectAggregatorView(aggregationService, filterExprEval, agentInstanceContext);
@@ -138,6 +139,9 @@ public class SubSelectStrategyFactoryLocalViewPreloaded implements SubSelectStra
             }
 
             NamedWindowProcessorInstance processorInstance = processor.getProcessorInstance(agentInstanceContext);
+            if (processorInstance == null) {
+                throw new EPException("Named window '" + namedSpec.getWindowName() + "' is associated to context '" + processor.getContextName() + "' that is not available for querying");
+            }
             NamedWindowTailViewInstance consumerView = processorInstance.getTailViewInstance();
 
             // preload view for stream

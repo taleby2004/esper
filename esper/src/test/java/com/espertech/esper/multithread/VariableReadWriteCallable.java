@@ -12,7 +12,7 @@
 package com.espertech.esper.multithread;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.support.util.SupportUpdateListener;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;

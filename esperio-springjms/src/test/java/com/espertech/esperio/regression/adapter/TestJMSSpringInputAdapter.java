@@ -8,12 +8,12 @@
  **************************************************************************************/
 package com.espertech.esperio.regression.adapter;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esperio.SpringContext;
 import com.espertech.esperio.SpringContextLoader;
 import com.espertech.esper.adapter.InputAdapter;
 import com.espertech.esperio.support.util.SupportSerializableBean;
-import com.espertech.esperio.support.util.SupportUpdateListener;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;

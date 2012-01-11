@@ -11,13 +11,13 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.client.EventBean;
 
 public class TestViewTimeLengthBatch extends TestCase
@@ -64,7 +64,7 @@ public class TestViewTimeLengthBatch extends TestCase
 
         engine.sendEvent(events[2]);
         assertEquals(1, listener.getNewDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[0], events[1], events[2]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[0], events[1], events[2]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Send another 3 events in batch
@@ -75,8 +75,8 @@ public class TestViewTimeLengthBatch extends TestCase
         engine.sendEvent(events[5]);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[0], events[1], events[2]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[3], events[4], events[5]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[0], events[1], events[2]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[3], events[4], events[5]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Expire the last 3 events by moving time
@@ -86,8 +86,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 10000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[3], events[4], events[5]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[3], events[4], events[5]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 10001);
@@ -104,8 +104,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 20000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[6]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[6]}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 20001);
@@ -123,8 +123,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 30000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[6]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[7], events[8]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[6]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[7], events[8]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Send three events, the the 3 events batch
@@ -141,8 +141,8 @@ public class TestViewTimeLengthBatch extends TestCase
         engine.sendEvent(events[11]);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[7], events[8]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[9], events[10], events[11]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[7], events[8]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[9], events[10], events[11]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Send 1 event, let the timer to do the batch
@@ -155,8 +155,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 39000 + 10000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[9], events[10], events[11]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[12]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[9], events[10], events[11]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[12]}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 39000 + 10001);
@@ -169,8 +169,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 39000 + 20000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[12]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[12]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 39000 + 20001);
@@ -199,8 +199,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 100000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[13]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[13]}, listener.getNewDataListFlattened());
         listener.reset();
     }
 
@@ -224,7 +224,7 @@ public class TestViewTimeLengthBatch extends TestCase
 
         engine.sendEvent(events[2]);
         assertEquals(1, listener.getNewDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[0], events[1], events[2]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[0], events[1], events[2]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Send another 3 events in batch
@@ -235,8 +235,8 @@ public class TestViewTimeLengthBatch extends TestCase
         engine.sendEvent(events[5]);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[0], events[1], events[2]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[3], events[4], events[5]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[0], events[1], events[2]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[3], events[4], events[5]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Expire the last 3 events by moving time
@@ -246,8 +246,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 10000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[3], events[4], events[5]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[3], events[4], events[5]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 10001);
@@ -264,8 +264,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 20000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[6]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[6]}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 20001);
@@ -283,8 +283,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 30000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[6]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[7], events[8]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[6]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[7], events[8]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Send three events, the the 3 events batch
@@ -301,8 +301,8 @@ public class TestViewTimeLengthBatch extends TestCase
         engine.sendEvent(events[11]);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[7], events[8]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[9], events[10], events[11]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[7], events[8]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[9], events[10], events[11]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Send 1 event, let the timer to do the batch
@@ -315,8 +315,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 39000 + 10000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[9], events[10], events[11]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[12]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[9], events[10], events[11]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[12]}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 39000 + 10001);
@@ -329,8 +329,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 39000 + 20000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[12]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[12]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 39000 + 20001);
@@ -343,8 +343,8 @@ public class TestViewTimeLengthBatch extends TestCase
         sendTimer(startTime + 39000 + 30000);
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(1, listener.getOldDataList().size());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 39000 + 30001);
@@ -355,8 +355,8 @@ public class TestViewTimeLengthBatch extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(startTime + 39000 + 40000);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getNewDataListFlattened());
         listener.reset();
 
         sendTimer(startTime + 39000 + 40001);
@@ -373,8 +373,8 @@ public class TestViewTimeLengthBatch extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(startTime + 89000);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[13]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[13]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Send 3 more events
@@ -385,8 +385,8 @@ public class TestViewTimeLengthBatch extends TestCase
 
         sendTimer(startTime + 92000);
         engine.sendEvent(events[16]);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[13]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {events[14], events[15], events[16]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[13]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[14], events[15], events[16]}, listener.getNewDataListFlattened());
         listener.reset();
 
         // Send no events, let the timer do a batch
@@ -394,8 +394,8 @@ public class TestViewTimeLengthBatch extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(startTime + 102000);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getOldDataListFlattened(), new Object[] {events[14], events[15], events[16]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(listener.getNewDataListFlattened(), new Object[] {});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{events[14], events[15], events[16]}, listener.getOldDataListFlattened());
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new Object[]{}, listener.getNewDataListFlattened());
         listener.reset();
     }
 

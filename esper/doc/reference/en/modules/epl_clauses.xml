@@ -804,6 +804,19 @@ from MarketDataEvent mdstream]]></programlisting>
 			</orderedlist>
 		</sect2>
 
+		<sect2 id="epl-syntax-script-decl">
+			<title>Script Declaration</title>
+			<indexterm><primary>script declaration</primary></indexterm>
+			
+			<para>
+				Esper allows the use of scripting languages within EPL. Any scripting language that supports JSR 223 and also the MVEL scripting language can be specified in EPL.
+			</para>
+						
+			<para>
+				Please see <xref linkend="script"/> for more information.
+			</para>
+		</sect2>
+
 		<sect2 id="epl-syntax-context-decl">
 			<title>Referring to a Context</title>
 			
@@ -1529,10 +1542,6 @@ group by carId, expressway, direction, segment]]></programlisting>
 		   </para>
 
 		   <para>
-				As you can see, it is the remove stream that the combined multiple data windows provide which differs when retaining an intersection and retaining a union, the insert stream is the same to all data windows and their staggered views. Therefore, when combining batching data windows with further data windows, the insert stream still remains the insert stream of the set overall (not batched). Consider using <literal>output snapshot</literal> to obtain regular updates instead of combining batch and other data windows.
-		   </para>
-
-		   <para>
 			   The next example statement totals the price of OrderEvent events in a union of the last 30 seconds and unique by product name:
 		   </para>
             <programlisting><![CDATA[select sum(price) from OrderEvent.win:time(30 sec).std:unique(productName) retain-union]]></programlisting>		   
@@ -1545,8 +1554,60 @@ group by carId, expressway, direction, segment]]></programlisting>
 		   </para>
             <programlisting><![CDATA[select sum(price) from OrderEvent.win:time(30 sec).std:unique(productName) retain-intersection]]></programlisting>		   
 		   <para>
-			   In the above statement, only those OrderEvent events that are both less then 30 seconds old and are the last event for the product name are considered.
+			   In the above statement, only those OrderEvent events that are both less then 30 seconds old and are the last event for the product name are considered. The number of events that the engine retains is the number of unique events per product name in the last 30 seconds (and not the number of events in the last 30 seconds).
 		   </para>		   
+		   
+		   <para>
+		     For an intersection the engine retains the minimal number of events representing that intersection. Thus when combining a time window of 30 seconds and a last-event window, for example, the number of events retained at any time is zero or one event (and not 30 seconds of events).
+		   </para>
+
+		   <para>
+		     When combining a batch window into an intersection with another data window the combined data window gains batching semantics: Only when the batch criteria is fulfilled does the engine provide the batch of intersecting insert stream events. Multiple batch data windows may not be combined into an intersection.
+		   </para>
+		   
+		   <para>
+		     In below table we provide additional examples for data window intersections:
+		   </para>
+		   
+			<table frame="topbot">
+				<title>Intersection Data Window Examples</title>
+				<tgroup cols="2">
+					<colspec colwidth="1*"/>
+					<colspec colwidth="1*"/>
+					<thead>
+						<row>
+							<entry>Example</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody>
+						<row>
+							<entry><literal>win:time(30).std:firstunique(keys)</literal></entry>
+							<entry>Retains 30 seconds of events unique per <literal>keys</literal> value (first event per value).</entry>
+						</row>
+						<row>
+							<entry><literal>win:firstlength(3).std:firstunique(keys)</literal></entry>
+							<entry>Retains the first 3 events that are also unique per <literal>keys</literal> value.</entry>
+						</row>
+						<row>
+							<entry><literal>win:time_batch(N seconds).std:unique(keys)</literal></entry>
+							<entry>Posts a batch every N seconds that contains the last of each unique event per <literal>keys</literal> value.</entry>
+						</row>
+						<row>
+							<entry><literal>win:time_batch(N seconds).std:firstunique(keys)</literal></entry>
+							<entry>Posts a batch every N seconds that contains the first of each unique event per <literal>keys</literal> value.</entry>
+						</row>
+						<row>
+							<entry><literal>win:length_batch(N).std:unique(keys)</literal></entry>
+							<entry>Posts a batch of unique events (last event per value) when N unique events per <literal>keys</literal> value are encountered.</entry>
+						</row>
+						<row>
+							<entry><literal>win:length_batch(N).std:firstunique(keys)</literal></entry>
+							<entry>Posts a batch of unique events (first event per value) when N unique events per <literal>keys</literal> value are encountered.</entry>
+						</row>
+					</tbody>
+				</tgroup>				
+			</table>
 
 		   <para>
 			   For advanced users and for backward compatibility, it is possible to configure Esper to allow multiple data window views without either of the <literal>retain</literal> keywords, as described in <xref linkend="config-engine-viewresources-multipolicy"/>.
@@ -2057,7 +2118,10 @@ select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10
 					For use with contexts, in order to trigger output only when a context partition terminates, specify <literal>when terminated</literal> as further described in <xref linkend="context_outputterminated"/>:
 				</para>
 				<synopsis>output [after <emphasis>suppression_def</emphasis>] 
-  [[all | first | last | snapshot] when terminated]</synopsis>
+  [[all | first | last | snapshot] when terminated 
+  [and <emphasis>termination_expression</emphasis>]
+  [then set variable_name = assign_expression [, variable_name = assign_expression [,...]]]
+  ]</synopsis>
 
 				<para>
 					Last, output can be controlled by an expression that may contain variables, user-defined functions and information about the number of collected events. Output that is controlled by an expression is discussed in detail below.
@@ -2140,11 +2204,21 @@ select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10
 					</para>
 					<synopsis>output [after <emphasis>suppression_def</emphasis>] 
   [[all | first | last | snapshot] when <emphasis>trigger_expression</emphasis> 
-    [then set <emphasis>variable_name</emphasis> = <emphasis>assign_expression</emphasis> [, <emphasis>variable_name</emphasis> = <emphasis>assign_expression</emphasis> [,...]]]</synopsis>
+    [then set <emphasis>variable_name</emphasis> = <emphasis>assign_expression</emphasis> [, <emphasis>variable_name</emphasis> = <emphasis>assign_expression</emphasis> [,...]]]
+  [and when terminated 
+    [and <emphasis>termination_expression</emphasis>]
+    [then set variable_name = assign_expression [, variable_name = assign_expression [,...]]]
+  ]</synopsis>
 
 					<para>
 						The <literal>when</literal> keyword must be followed by a trigger expression returning a boolean value of true or false, indicating whether to output.
 						Use the optional <literal>then</literal> keyword to change variable values after the trigger expression evaluates to true. An assignment expression assigns a new value to variable(s).
+					</para>
+					
+					<para>
+					  For use with contexts you may append the keywords <literal>and when terminated</literal> to also trigger output when the context partition terminates. Please see <xref linkend="context_outputterminated"/> for details. You may optionally specify a termination expression. If that expression is provided the 
+					  engine evaluates the expression when the context partition terminates: The evaluation result of <literal>true</literal> means output occurs when the context partition terminates, <literal>false</literal> means no output occurs when the context partition terminates.
+					  You may specify <literal>then set</literal> followed by a list of assignments to assign variables. Assignments are executed on context partition termination regardless of the termination expression, if present.
 					</para>
 
 					<para>
@@ -2204,8 +2278,16 @@ select symbol, sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10
 									<entry>Number of insert stream events</entry>
 								</row>
 								<row>
+									<entry><literal>count_insert_total</literal></entry>
+									<entry>Number of insert stream events in total (not reset when output occurs).</entry>
+								</row>
+								<row>
 									<entry><literal>count_remove</literal></entry>
 									<entry>Number of remove stream events</entry>
+								</row>
+								<row>
+									<entry><literal>count_remove_total</literal></entry>
+									<entry>Number of remove stream events in total (not reset when output occurs).</entry>
 								</row>
 							</tbody>
 						</tgroup>
@@ -3353,13 +3435,13 @@ where t.symbol = n.symbol group by symbol]]></programlisting>
 			</para>
 	
 			<para>
-				The keywords <literal>left, right, full</literal> and <literal>inner</literal> control the type of the join between two streams. The <literal>on</literal> clause specifies one or more properties that join each stream. The synopsis is as follows:
+				The keywords <literal>left, right, full</literal> and <literal>inner</literal> control the type of the join between two streams. The optional <literal>on</literal> clause specifies one or more properties that join each stream. The synopsis is as follows:
 			</para>
 
 <synopsis>...from <emphasis>stream_def</emphasis> [as name] 
   ((left|right|full outer) | inner) join <emphasis>stream_def</emphasis> 
-  on <emphasis>property</emphasis> = <emphasis>property</emphasis> [and <emphasis>property</emphasis> = <emphasis>property</emphasis> ...]
-  [ ((left|right|full outer) | inner) join <emphasis>stream_def</emphasis> on ...]...
+  [on <emphasis>property</emphasis> = <emphasis>property</emphasis> [and <emphasis>property</emphasis> = <emphasis>property</emphasis> ...] ]
+  [ ((left|right|full outer) | inner) join <emphasis>stream_def</emphasis> [on ...]]...
 </synopsis>
 
 			<para>
@@ -3407,7 +3489,7 @@ where t.symbol = n.symbol group by symbol]]></programlisting>
 			</para>
 	
 			<para>
-				Finally, this example outer joins multiple streams. Here the RfidEvent stream is outer joined to both ProductName and LocationDescription via left outer join:
+				This example outer joins multiple streams. Here the RfidEvent stream is outer joined to both ProductName and LocationDescription via left outer join:
 			</para>
 
 <programlisting><![CDATA[select * from RfidEvent.win:time(30 sec) as rfid
@@ -3416,7 +3498,23 @@ where t.symbol = n.symbol group by symbol]]></programlisting>
       left outer join LocationDescription.win:keepall() as refdesc
         on rfid.location = refdesc.locId]]></programlisting>
         
-			<para>The <literal>on</literal> clause may only employ the <literal>=</literal> equals operator and property names. Any other operators must be placed in the <literal>where</literal>-clause.</para>
+			<para>
+			  If the optional <literal>on</literal> clause is specified, it may only employ the <literal>=</literal> equals operator and property names. Any other operators must be placed in the <literal>where</literal>-clause.
+			  The stream names that appear in the <literal>on</literal> clause may refer to any stream in the <literal>from</literal>-clause.
+			</para>
+			
+			<para>
+			  Your EPL may also provide no <literal>on</literal> clause. This is useful when the streams that are joined do not provide any properties to join on, for example when joining with a time-based pattern. 
+			</para>
+
+			<para>
+				The next example employs a unidirectional left outer join such that the engine, every 10 seconds, outputs a count of the number of RfidEvent events in the 60-second time window.
+			</para>
+<programlisting><![CDATA[select count(*) from
+  pattern[every timer:interval(1)] unidirectional 
+  left outer join
+  RfidEvent.win:time(60 sec)]]></programlisting>			
+			
 		</sect2>
 
 		<sect2 id="epl-unidirectional">
@@ -5381,7 +5479,11 @@ create variant schema AnyEvent as *]]></programlisting>
 		<title>Splitting and Duplicating Streams</title>
 		
 		<para>
-			EPL offers a convenient syntax to splitting and duplicating events into multiple streams, and for receiving unmatched events among a set of filter criteria.
+			EPL offers a convenient syntax to splitting, routing or duplicating events into multiple streams, and for receiving unmatched events among a set of filter criteria.
+		</para>
+		
+		<para>
+		  For splitting a single event that acts as a container and expose child events as a property of itself consider the contained-event syntax as described in <xref linkend="epl-containedeventselect"/>.
 		</para>
 
 		<para>
@@ -5473,7 +5575,7 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 	</sect1>
 
 	<sect1 id="variables_overview" revision="1">
-		<title>Variables</title>
+		<title>Variables and Constants</title>
 		
 		<indexterm><primary>variable</primary></indexterm>
 		<indexterm><primary>EPL</primary><secondary>variable</secondary></indexterm>
@@ -5485,7 +5587,12 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 		<para>
 			Variables must first be declared or configured before use, by defining each variable's type and name. Variables can be created via the <literal>create variable</literal> syntax or declared by runtime or static configuration. Variables can be assigned new values by using the <literal>on set</literal> syntax or via the <literal>setVariableValue</literal> methods on <literal>EPRuntime</literal>. The <literal>EPRuntime</literal> also provides method to read variable values.
 		</para>
-			
+		
+		<para>
+		  A variable can be declared constant. A constant variable always has the initial value and cannot be assigned a new value. A constant variable can be used like any other variable and can be used wherever a constant is required. By declaring a variable constant you enable the Esper engine to 
+		  optimize and perform query planning knowing that the variable value cannot change.
+		</para>
+
 		<para>
 			When declaring a class-type or an event type variable you may read or set individual properties within the same variable.
 		</para>
@@ -5508,8 +5615,12 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 			<para>
 				The synopsis for creating a variable is as follows: 
 			</para>
-			<synopsis>create variable <emphasis>variable_type</emphasis> <emphasis>variable_name</emphasis> [ = <emphasis>assignment_expression</emphasis> ]</synopsis>
-				
+			<synopsis>create [constant] variable <emphasis>variable_type</emphasis> <emphasis>variable_name</emphasis> [ = <emphasis>assignment_expression</emphasis> ]</synopsis>
+			
+			<para>
+			  Specify the optional <literal>constant</literal> keyword when the variable is a constant whose associated value cannot be altered. Your EPL design should prefer constant variables over non-constant variables.
+			</para>
+			
 			<para>
 				The <emphasis>variable_type</emphasis> can be any of the following:
 			</para>
@@ -5556,6 +5667,11 @@ can be used to assign a stream name. Patterns and named windows can also be spec
 				This statement creates an integer-type variable named <literal>var_output_rate</literal> and initializes it to the value ten (10):
 			</para>
 			<programlisting><![CDATA[create variable integer var_output_rate = 10]]></programlisting>
+
+			<para>
+				The next statement declares a constant string-type variable:
+			</para>
+			<programlisting><![CDATA[create constant variable string const_filter_symbol = 'GE']]></programlisting>
 
 			<para>
 				In addition to creating a variable via the <literal>create variable</literal> syntax, the runtime and engine configuration API also allows adding variables. The next code snippet illustrates the
@@ -5709,7 +5825,7 @@ on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero.userId = pagehit.userId
 	   <title>Contained-Event Selection</title>
 	   
 		<para>
-			Contained-event selection is for use when an event contains properties that are themselves events. For example when application events are coarse-grained structures and you need to perform bulk operations on the rows of the property graph in an event.
+			Contained-event selection is for use when an event contains properties that are themselves events, or more generally when your application needs to split an event into multiple events. One example is when application events are coarse-grained structures and you need to perform bulk operations on the rows of the property graph in an event.
 		</para>
 
 		<para>
@@ -5723,18 +5839,24 @@ on PageHitEvent(ip='0.0.0.0') pagehit set varPageHitZero.userId = pagehit.userId
 		<para>
 			The synopsis for <emphasis>contained_selection</emphasis> is as follows:
 		</para>
-		<synopsis>[select <emphasis>select_expressions</emphasis> from] <emphasis>property_expression</emphasis> [as <emphasis>property_alias</emphasis>] [where <emphasis>filter_expression</emphasis>]</synopsis>
+		<synopsis>[select <emphasis>select_expressions</emphasis> from] 
+  <emphasis>contained_expression</emphasis> [@type(<emphasis>eventtype_name</emphasis>)] [as <emphasis>alias_name</emphasis>]
+  [where <emphasis>filter_expression</emphasis>]</synopsis>
 
 		<para>
-			The <literal>select</literal> clause and <emphasis>select_expressions</emphasis> are optional and may be used to select specific properties.
+			The <literal>select</literal> clause and <emphasis>select_expressions</emphasis> are optional and may be used to select specific properties of contained events.
 		</para>
 
 		<para>
-			The <emphasis>property_expression</emphasis> is required and must be a valid property name that returns an event fragment, i.e. a property that can itself be represented as an event by the underlying event representation. Simple values such as integer or string are not fragments.
+			The <emphasis>contained_expression</emphasis> is required and returns individual events. The expression can, for example, be an event property name that returns an event fragment, i.e. a property that can itself be represented as an event by the underlying event representation. Simple values such as integer or string are not fragments. The expression can also be any other expression such as a single-row function or a script that returns either an array or a <literal>java.util.Collection</literal> of events.
 		</para>
 		
 		<para>
-			The <emphasis>property_alias</emphasis> can be provided to assign a name to the property expression.
+		    Provide the <literal>@type(name)</literal> annotation after the contained expression to name the event type of events returned by the expression. The annotation is optional and not needed when the contained-expression is an event property that returns a class or other event fragment.
+		</para>
+		
+		<para>
+			The <emphasis>alias_name</emphasis> can be provided to assign a name to the expression result value rows.
 		</para>
 
 		<para>
@@ -5871,7 +5993,7 @@ select * from MediaOrder[books.book.review]]]></programlisting>
 				</listitem>
 				<listitem>
 					<para>
-						Use the <emphasis>property_alias</emphasis><literal>.*</literal> syntax to provide all properties that exist under a property in the <literal>from</literal> clause.
+						Use the <emphasis>alias_name</emphasis><literal>.*</literal> syntax to provide all properties that exist under a property in the <literal>from</literal> clause.
 					</para>
 				</listitem>
 			</orderedlist>
@@ -6093,6 +6215,107 @@ from MediaOrder[books.book] as book unidirectional,
 where productId = bookId]]></programlisting>
 
 		</sect2>
+
+		<sect2 id="epl-containedeventselect-pojoexample" revision="1">
+			<title>Sentence and Word Example</title>
+
+			<para>
+				The next example splits an event representing a sentence into multiple events in which each event represents a word. It represents all events and the logic to split events into contained events as Java code. 
+				The next chapter has additional examples that use Map-type events and put contained-event logic into a separate expression or script.
+			</para>
+
+			<para>
+				The sentence event in this example is represented by a class declared as follows:
+			</para>
+			
+			<programlisting><![CDATA[public class SentenceEvent {
+  private final String sentence;
+
+  public SentenceEvent(String sentence) {
+    this.sentence = sentence;
+  }
+
+  public WordEvent[] getWords() {
+    String[] split = sentence.split(" ");
+    WordEvent[] words = new WordEvent[split.length];
+    for (int i = 0; i < split.length; i++) {
+      words[i] = new WordEvent(split[i]);
+    }
+    return words;
+  }
+}]]></programlisting>
+
+			<para>
+				The sentence event as above provides an event property <literal>words</literal> that returns each word event.
+			</para>
+
+			<para>
+				The declaration of word event is also a class:
+			</para>
+
+			<programlisting><![CDATA[public class WordEvent {
+  private final String word;
+
+  public WordEvent(String word) {
+    this.word = word;
+  }
+
+  public String getWord() {
+    return word;
+  }
+}]]></programlisting>
+
+			<para>
+				The EPL statement to populate a stream of words from a sentence event is:
+			</para>
+			<programlisting><![CDATA[insert into WordStream select * from SentenceEvent[words]]]></programlisting>
+
+			<para>
+				Finally, the API call to send a sentence event to the engine is shown here:
+			</para>
+			<programlisting><![CDATA[epService.getEPRuntime().sendEvent(new SentenceEvent("Hello Word Contained Events"));]]></programlisting>
+		</sect2>		
+		
+		<sect2 id="epl-containedeventselect-type" revision="1">
+			<title>More Examples</title>
+			
+			<para>
+			  The examples herein are not based on the POJO events of the prior example. They are meant to demonstrate different types of contained-event expressions and the use of <literal>@type(<emphasis>type_name</emphasis>)</literal> to identify the event type of the return values of the contained-event expression.
+			</para>
+			
+			<para>
+			   The example first defines a few sample event types:
+			</para>
+			<programlisting><![CDATA[create schema SentenceEvent(sentence String)]]></programlisting>
+			<programlisting><![CDATA[create schema WordEvent(word String)]]></programlisting>
+			<programlisting><![CDATA[create schema CharacterEvent(char String)]]></programlisting>
+
+			<para>
+			   The following EPL assumes that your application defined a plug-in single-row function by name <literal>splitSentence</literal> that returns an array of Map, producting output events that are <literal>WordEvent</literal> events:
+			</para>
+			<programlisting><![CDATA[insert into WordStream select * from SentenceEvent[splitSentence(sentence)@type(WordEvent)]]]></programlisting>
+			
+			<para>
+			   The example EPL shown next invokes a JavaScript function which returns some events of type <literal>WordEvent</literal>:
+			</para>
+			<programlisting><![CDATA[expression Collection js:splitSentenceJS(sentence) [
+importPackage(java.util);
+var words = new ArrayList();
+words.add(Collections.singletonMap('word', 'wordOne'));
+words.add(Collections.singletonMap('word', 'wordTwo'));
+words;
+]
+select * from SentenceEvent[splitSentenceJS(sentence)@type(WordEvent)]]]></programlisting>
+
+			<para>
+			   In the next example the sentence event first gets split into words and then each word event gets split into character events via an additional <literal>splitWord</literal> single-row function,
+			   producing events of type <literal>CharacterEvent</literal>:
+			</para>
+			<programlisting><![CDATA[select * from SentenceEvent
+  [splitSentence(sentence)@type(WordEvent)]
+  [splitWord(word)@type(CharacterEvent)]]]></programlisting>
+		</sect2>		
+		
 	</sect1>
 	
 	<sect1 id="epl-update">

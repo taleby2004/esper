@@ -11,15 +11,27 @@
 
 package com.espertech.esper.core.context.mgr;
 
+import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.core.context.util.ContextDescriptor;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.filter.FilterSpecLookupable;
+import com.espertech.esper.type.NumberSetParameter;
+
+import java.util.Collection;
+import java.util.List;
 
 public interface ContextManager {
     public ContextDescriptor getContextDescriptor();
 
-    public void addStatement(ContextManagedStatementBase statement) throws ExprValidationException;
+    public void addStatement(ContextControllerStatementBase statement) throws ExprValidationException;
     public void stopStatement(String statementName, String statementId);
     public void destroyStatement(String statementName, String statementId);
 
     public void safeDestroy();
+
+    public void setContextPartitionRange(List<NumberSetParameter> partitionRanges);
+    public FilterSpecLookupable getFilterLookupable(EventType eventType);
+
+    public Collection<Integer> getAgentInstanceIds(ContextPartitionSelector contextPartitionSelector);
 }

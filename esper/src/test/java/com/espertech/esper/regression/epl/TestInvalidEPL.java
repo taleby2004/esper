@@ -11,12 +11,12 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -127,7 +127,6 @@ public class TestInvalidEPL extends TestCase
                 SupportBean.class.getName() + ".win:length(3) as sa " +
                 "left outer join " +
                 SupportBean.class.getName() + ".win:length(3) as sb ";
-        tryInvalid(outerJoinDef + "");
         tryValid(outerJoinDef + "on sa.intPrimitive = sb.intBoxed");
         tryInvalid(outerJoinDef + "on sa.intPrimitive = sb.XX");
         tryInvalid(outerJoinDef + "on sa.XX = sb.XX");

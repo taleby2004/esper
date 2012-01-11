@@ -29,8 +29,8 @@ public class StatementAIResourceRegistry {
         return agentInstanceAggregationService;
     }
 
-    public void deassign(int[] agentInstanceIds) {
-        agentInstanceAggregationService.deassignService(agentInstanceIds[0]);
-        agentInstanceExprService.deassignService(agentInstanceIds[0]);
+    public void deassign(int agentInstanceId) {
+        agentInstanceAggregationService.deassignService(agentInstanceId);
+        agentInstanceExprService.deassignService(agentInstanceId);
     }
 }

@@ -17,8 +17,7 @@ import com.espertech.esper.epl.metric.MetricReportingService;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An instance of this class is associated with a specific named window. The processor
@@ -67,7 +66,7 @@ public class NamedWindowProcessor
         tailView = new NamedWindowTailView(eventType, namedWindowService, statementResultService, revisionProcessor, isPrioritized, isBatchingDataWindow);
     }
 
-    public NamedWindowProcessorInstance addInstance(AgentInstanceContext agentInstanceContext) {
+    public synchronized NamedWindowProcessorInstance addInstance(AgentInstanceContext agentInstanceContext) {
 
         if (contextName == null) {
             if (instanceNoContext != null) {
@@ -77,18 +76,27 @@ public class NamedWindowProcessor
             return instanceNoContext;
         }
 
-        int instanceId = agentInstanceContext.getAgentInstanceIds()[0];
+        int instanceId = agentInstanceContext.getAgentInstanceId();
         NamedWindowProcessorInstance instance = new NamedWindowProcessorInstance(instanceId, this, agentInstanceContext);
         instances.put(instanceId, instance);
         return instance;
     }
 
-    public void removeProcessorInstance(NamedWindowProcessorInstance instance) {
+    public synchronized void removeProcessorInstance(NamedWindowProcessorInstance instance) {
         if (contextName == null) {
             instanceNoContext = null;
             return;
         }
         instances.remove(instance.getAgentInstanceId());
+    }
+
+    public synchronized Collection<Integer> getProcessorInstancesAll() {
+        Set<Integer> keyset = instances.keySet();
+        return new ArrayDeque<Integer>(keyset);
+    }
+
+    public NamedWindowProcessorInstance getProcessorInstance(int agentInstanceId) {
+        return instances.get(agentInstanceId);
     }
 
     public long getProcessorRowCountDefaultInstance() {
@@ -104,7 +112,10 @@ public class NamedWindowProcessor
         }
 
         if (singleInstanceContext) {
-            return instances.get(0);
+            if (instances.isEmpty()) {
+                return null;
+            }
+            return instances.values().iterator().next();
         }
 
         if (agentInstanceContext.getStatementContext().getContextDescriptor() == null) {
@@ -112,7 +123,7 @@ public class NamedWindowProcessor
         }
         
         if (this.contextName.equals(agentInstanceContext.getStatementContext().getContextDescriptor().getContextName())) {
-            return instances.get(agentInstanceContext.getAgentInstanceIds()[0]);
+            return instances.get(agentInstanceContext.getAgentInstanceId());
         }
         return null;
     }
@@ -133,13 +144,13 @@ public class NamedWindowProcessor
         return contextName;
     }
 
-    public NamedWindowConsumerView addConsumer(NamedWindowConsumerDesc consumerDesc) {
+    public NamedWindowConsumerView addConsumer(NamedWindowConsumerDesc consumerDesc, boolean isSubselect) {
         // handle same-context consumer
         if (this.contextName != null) {
             ContextDescriptor contextDescriptor = consumerDesc.getAgentInstanceContext().getStatementContext().getContextDescriptor();
             if (contextDescriptor != null && contextName.equals(contextDescriptor.getContextName())) {
-                NamedWindowProcessorInstance instance = instances.get(consumerDesc.getAgentInstanceContext().getAgentInstanceIds()[0]);
-                return instance.getTailViewInstance().addConsumer(consumerDesc);
+                NamedWindowProcessorInstance instance = instances.get(consumerDesc.getAgentInstanceContext().getAgentInstanceId());
+                return instance.getTailViewInstance().addConsumer(consumerDesc, isSubselect);
             }
             else {
                 // consumer is out-of-context
@@ -148,7 +159,7 @@ public class NamedWindowProcessor
         }
 
         // handle no context associated
-        return instanceNoContext.getTailViewInstance().addConsumer(consumerDesc);
+        return instanceNoContext.getTailViewInstance().addConsumer(consumerDesc, isSubselect);
     }
 
     public boolean isVirtualDataWindow() {
@@ -215,5 +226,9 @@ public class NamedWindowProcessor
 
     public StatementMetricHandle getCreateNamedWindowMetricsHandle() {
         return statementMetricHandle;
+    }
+
+    public String getNamedWindowName() {
+        return namedWindowName;
     }
 }

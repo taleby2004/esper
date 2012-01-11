@@ -28,9 +28,7 @@ public class AIRegistryPreviousMultiPerm implements AIRegistryPrevious, ExprPrev
     }
 
     public void assignService(int num, ExprPreviousEvalStrategy value) {
-        if (num > strategies.getArray().length - 1) {
-            strategies.expand(100);
-        }
+        AIRegistryUtil.checkExpand(num, strategies);
         strategies.getArray()[num] = value;
         count++;
     }
@@ -45,25 +43,25 @@ public class AIRegistryPreviousMultiPerm implements AIRegistryPrevious, ExprPrev
     }
 
     public Object evaluate(EventBean[] eventsPerStream, ExprEvaluatorContext exprEvaluatorContext) {
-        int agentInstanceId = exprEvaluatorContext.getAgentInstanceIds()[0];
+        int agentInstanceId = exprEvaluatorContext.getAgentInstanceId();
         ExprPreviousEvalStrategy strategy = strategies.getArray()[agentInstanceId];
         return strategy.evaluate(eventsPerStream, exprEvaluatorContext);
     }
 
     public Collection<EventBean> evaluateGetCollEvents(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
-        int agentInstanceId = context.getAgentInstanceIds()[0];
+        int agentInstanceId = context.getAgentInstanceId();
         ExprPreviousEvalStrategy strategy = strategies.getArray()[agentInstanceId];
         return strategy.evaluateGetCollEvents(eventsPerStream, context);
     }
 
     public Collection evaluateGetCollScalar(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
-        int agentInstanceId = context.getAgentInstanceIds()[0];
+        int agentInstanceId = context.getAgentInstanceId();
         ExprPreviousEvalStrategy strategy = strategies.getArray()[agentInstanceId];
         return strategy.evaluateGetCollScalar(eventsPerStream, context);
     }
 
     public EventBean evaluateGetEventBean(EventBean[] eventsPerStream, ExprEvaluatorContext context) {
-        int agentInstanceId = context.getAgentInstanceIds()[0];
+        int agentInstanceId = context.getAgentInstanceId();
         ExprPreviousEvalStrategy strategy = strategies.getArray()[agentInstanceId];
         return strategy.evaluateGetEventBean(eventsPerStream, context);
     }

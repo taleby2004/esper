@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.epl.core.MethodResolutionService;
 
 /**
  * A null object implementation of the AggregationService
@@ -20,7 +21,7 @@ public class AggregationServiceNullFactory implements AggregationServiceFactory 
 
     private final static AggregationServiceNull AGGREGATION_SERVICE_NULL = new AggregationServiceNull();
 
-    public AggregationService makeService(AgentInstanceContext agentInstanceContext) {
+    public AggregationService makeService(AgentInstanceContext agentInstanceContext, MethodResolutionService methodResolutionService) {
         return AGGREGATION_SERVICE_NULL;
     }
 }

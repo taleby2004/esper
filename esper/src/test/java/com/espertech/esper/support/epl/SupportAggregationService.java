@@ -11,15 +11,16 @@
 
 package com.espertech.esper.support.epl;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.collection.Pair;
+import com.espertech.esper.epl.agg.AggregationRowRemovedCallback;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.Pair;
-import com.espertech.esper.collection.MultiKeyUntyped;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 public class SupportAggregationService implements AggregationService
 {
@@ -46,11 +47,11 @@ public class SupportAggregationService implements AggregationService
         return enterList;
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId)
     {
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         return null;
     }
@@ -65,5 +66,9 @@ public class SupportAggregationService implements AggregationService
 
     public EventBean getEventBean(int column, ExprEvaluatorContext context) {
         return null;
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

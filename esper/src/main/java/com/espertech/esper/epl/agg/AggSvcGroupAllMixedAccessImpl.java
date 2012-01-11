@@ -55,12 +55,12 @@ public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBaseUngroup
         }        
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int[] agentInstanceIds)
+    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId)
     {
         // no action needed - this implementation does not group and the current row is the single group
     }
 
-    public Object getValue(int column, int[] agentInstanceIds)
+    public Object getValue(int column, int agentInstanceId)
     {
         if (column < aggregators.length) {
             return aggregators[column].getValue();
@@ -100,5 +100,9 @@ public class AggSvcGroupAllMixedAccessImpl extends AggregationServiceBaseUngroup
         {
             aggregator.clear();
         }
+    }
+
+    public void setRemovedCallback(AggregationRowRemovedCallback callback) {
+        // not applicable
     }
 }

@@ -14,8 +14,8 @@ package com.espertech.esper.regression.client;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.deploy.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -190,7 +190,7 @@ public class TestDeployOrder extends TestCase
 
     private void assertOrder(Module[] ordered, DeploymentOrder order)
     {
-        ArrayAssertionUtil.assertEqualsExactOrder(order.getOrdered().toArray(), ordered);
+        EPAssertionUtil.assertEqualsExactOrder(ordered, order.getOrdered().toArray());
     }
 
     private Module getModule(String name, String... uses) {

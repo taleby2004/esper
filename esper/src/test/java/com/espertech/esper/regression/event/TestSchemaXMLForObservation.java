@@ -12,9 +12,9 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.event.EventTypeAssertionUtil;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.w3c.dom.Document;
 
@@ -75,8 +75,8 @@ public class TestSchemaXMLForObservation extends TestCase
         EventTypeAssertionUtil.assertConsistency(stmtExampleThree_0.iterator().next());
         EventTypeAssertionUtil.assertConsistency(stmtExampleThree_1.iterator().next());
 
-        ArrayAssertionUtil.assertProps(stmtExampleTwo_1.iterator().next(), "Observation.Command,Observation.Tag[0].ID".split(","), new Object[] {"READ_PALLET_TAGS_ONLY","urn:epc:1:2.24.400"});
-        ArrayAssertionUtil.assertProps(stmtExampleThree_1.iterator().next(), "sensorId,Command,Tag[0].ID".split(","), new Object[] {"urn:epc:1:4.16.36", "READ_PALLET_TAGS_ONLY","urn:epc:1:2.24.400"});
+        EPAssertionUtil.assertProps(stmtExampleTwo_1.iterator().next(), "Observation.Command,Observation.Tag[0].ID".split(","), new Object[]{"READ_PALLET_TAGS_ONLY", "urn:epc:1:2.24.400"});
+        EPAssertionUtil.assertProps(stmtExampleThree_1.iterator().next(), "sensorId,Command,Tag[0].ID".split(","), new Object[]{"urn:epc:1:4.16.36", "READ_PALLET_TAGS_ONLY", "urn:epc:1:2.24.400"});
 
         try
         {
@@ -130,8 +130,8 @@ public class TestSchemaXMLForObservation extends TestCase
         EventTypeAssertionUtil.assertConsistency(stmtExampleTwo_3.iterator().next());
 
         Object resultArray = stmtExampleOne.iterator().next().get("idarray");
-        ArrayAssertionUtil.assertEqualsExactOrder(new String[] {"urn:epc:1:2.24.400", "urn:epc:1:2.24.401"}, (Object[]) resultArray);
-        ArrayAssertionUtil.assertProps(stmtExampleOne.iterator().next(), "countTags,countTagsInt".split(","), new Object[] {2d, 2});
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) resultArray, new String[]{"urn:epc:1:2.24.400", "urn:epc:1:2.24.401"});
+        EPAssertionUtil.assertProps(stmtExampleOne.iterator().next(), "countTags,countTagsInt".split(","), new Object[]{2d, 2});
         assertEquals("urn:epc:1:2.24.400", stmtExampleTwo_1.iterator().next().get("ID"));
         assertEquals("urn:epc:1:2.24.401", stmtExampleTwo_3.iterator().next().get("mytags[1].ID"));
     }

@@ -10,6 +10,7 @@ package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.hook.AggregationFunctionFactory;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
@@ -27,6 +28,7 @@ import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
 import com.espertech.esper.epl.parse.ASTWalkException;
+import com.espertech.esper.epl.script.ExprNodeScript;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.pattern.*;
 import com.espertech.esper.rowregex.*;
@@ -110,6 +112,7 @@ public class StatementSpecMapper
         List<AnnotationDesc> annotations = mapAnnotations(sodaStatement.getAnnotations());
         raw.setAnnotations(annotations);
         mapExpressionDeclaration(sodaStatement.getExpressionDeclarations(), raw, mapContext);
+        mapScriptExpressions(sodaStatement.getScriptExpressions(), raw, mapContext);
         mapContextName(sodaStatement.getContextName(), raw, mapContext);
         mapUpdateClause(sodaStatement.getUpdateClause(), raw, mapContext);
         mapCreateContext(sodaStatement.getCreateContext(), raw, mapContext);
@@ -154,6 +157,8 @@ public class StatementSpecMapper
         model.setAnnotations(annotations);
         List<ExpressionDeclaration> expressionDeclarations = unmapExpressionDeclarations(statementSpec.getExpressionDeclDesc(), unmapContext);
         model.setExpressionDeclarations(expressionDeclarations);
+        List<ScriptExpression> scripts = unmapScriptExpressions(statementSpec.getScriptExpressions(), unmapContext);
+        model.setScriptExpressions(scripts);
         unmapContextName(statementSpec.getOptionalContextName(), model);
         unmapCreateContext(statementSpec.getCreateContextDesc(), model, unmapContext);
         unmapCreateWindow(statementSpec.getCreateWindowDesc(), model, unmapContext);
@@ -330,18 +335,21 @@ public class StatementSpecMapper
             return;
         }
 
+        ContextDescriptor desc = unmapCreateContextDetail(createContextDesc.getContextDetail(), unmapContext);
+        CreateContextClause clause = new CreateContextClause(createContextDesc.getContextName(), desc);
+        model.setCreateContext(clause);
+    }
+
+    private static ContextDescriptor unmapCreateContextDetail(ContextDetail contextDetail, StatementSpecUnMapContext unmapContext) {
         ContextDescriptor desc;
-        if (createContextDesc.getContextDetail() instanceof ContextDetailTemporalFixed) {
-            ContextDetailTemporalFixed single = (ContextDetailTemporalFixed) createContextDesc.getContextDetail();
-            List<Expression> start = unmapExpressionDeep(single.getCrontabStart(), unmapContext);
-            List<Expression> end = unmapExpressionDeep(single.getCrontabEnd(), unmapContext);
-            ContextDescriptorTemporalCrontabSingle detail = new ContextDescriptorTemporalCrontabSingle();
-            desc = detail;
-            detail.setCrontabEndExpressions(end);
-            detail.setCrontabStartExpressions(start);
+        if (contextDetail instanceof ContextDetailInitiatedTerminated) {
+            ContextDetailInitiatedTerminated spec = (ContextDetailInitiatedTerminated) contextDetail;
+            ContextDescriptorCondition startCondition = unmapCreateContextRangeCondition(spec.getStart(), unmapContext);
+            ContextDescriptorCondition endCondition = unmapCreateContextRangeCondition(spec.getEnd(), unmapContext);
+            desc = new ContextDescriptorInitiatedTerminated(startCondition, endCondition, spec.isOverlapping());
         }
-        else if (createContextDesc.getContextDetail() instanceof ContextDetailPartitioned) {
-            ContextDetailPartitioned seg = (ContextDetailPartitioned) createContextDesc.getContextDetail();
+        else if (contextDetail instanceof ContextDetailPartitioned) {
+            ContextDetailPartitioned seg = (ContextDetailPartitioned) contextDetail;
             List<ContextDescriptorKeyedSegmentedItem> segmentedItems = new ArrayList<ContextDescriptorKeyedSegmentedItem>();
             for (ContextDetailPartitionItem item : seg.getItems()) {
                 Filter filter = unmapFilter(item.getFilterSpecRaw(), unmapContext);
@@ -349,8 +357,8 @@ public class StatementSpecMapper
             }
             desc = new ContextDescriptorKeyedSegmented(segmentedItems);
         }
-        else if (createContextDesc.getContextDetail() instanceof ContextDetailCategory) {
-            ContextDetailCategory category = (ContextDetailCategory) createContextDesc.getContextDetail();
+        else if (contextDetail instanceof ContextDetailCategory) {
+            ContextDetailCategory category = (ContextDetailCategory) contextDetail;
             List<ContextDescriptorCategoryItem> categoryItems = new ArrayList<ContextDescriptorCategoryItem>();
             Filter filter = unmapFilter(category.getFilterSpecRaw(), unmapContext);
             for (ContextDetailCategoryItem item : category.getItems()) {
@@ -359,21 +367,51 @@ public class StatementSpecMapper
             }
             desc = new ContextDescriptorCategory(categoryItems, filter);
         }
-        else {
-            ContextDetailInitiatedTerminated init = (ContextDetailInitiatedTerminated) createContextDesc.getContextDetail();
-            TimePeriodExpression expr = (TimePeriodExpression) unmapExpressionDeep(init.getTerminatedTimePeriod(), unmapContext);
-            if (init.getInitiatedFilter() != null) {
-                Filter filter = unmapFilter(init.getInitiatedFilter(), unmapContext);
-                desc = new ContextDescriptorInitiatedTerminated(filter, init.getInitiatedFilterAsName(), expr);
+        else if (contextDetail instanceof ContextDetailHash) {
+            ContextDetailHash init = (ContextDetailHash) contextDetail;
+            List<ContextDescriptorHashSegmentedItem> hashes = new ArrayList<ContextDescriptorHashSegmentedItem>();
+            for (ContextDetailHashItem item : init.getItems()) {
+                DotExpressionItem dot = unmapChains(Collections.singletonList(item.getFunction()), unmapContext, false).get(0);
+                SingleRowMethodExpression dotExpression = new SingleRowMethodExpression(Collections.singletonList(dot));
+                Filter filter = unmapFilter(item.getFilterSpecRaw(), unmapContext);
+                hashes.add(new ContextDescriptorHashSegmentedItem(dotExpression, filter));
             }
-            else {
-                PatternExpr pattern = unmapPatternEvalDeep(init.getInitiatedPattern(), unmapContext);
-                desc = new ContextDescriptorInitiatedTerminated(pattern, expr);
-            }
+            desc = new ContextDescriptorHashSegmented(hashes, init.getGranularity(), init.isPreallocate());
         }
+        else {
+            ContextDetailNested nested = (ContextDetailNested) contextDetail;
+            List<CreateContextClause> contexts = new ArrayList<CreateContextClause>();
+            for (CreateContextDesc item : nested.getContexts()) {
+                ContextDescriptor detail = unmapCreateContextDetail(item.getContextDetail(), unmapContext);
+                contexts.add(new CreateContextClause(item.getContextName(), detail));
+            }
+            desc = new ContextDescriptorNested(contexts);
+        }
+        return desc;
+    }
 
-        CreateContextClause clause = new CreateContextClause(createContextDesc.getContextName(), desc);
-        model.setCreateContext(clause);
+    private static ContextDescriptorCondition unmapCreateContextRangeCondition(ContextDetailCondition endpoint, StatementSpecUnMapContext unmapContext) {
+        if (endpoint instanceof ContextDetailConditionCrontab) {
+            ContextDetailConditionCrontab crontab = (ContextDetailConditionCrontab) endpoint;
+            List<Expression> crontabExpr = unmapExpressionDeep(crontab.getCrontab(), unmapContext);
+            return new ContextDescriptorConditionCrontab(crontabExpr);
+        }
+        else if (endpoint instanceof ContextDetailConditionPattern) {
+            ContextDetailConditionPattern pattern = (ContextDetailConditionPattern) endpoint;
+            PatternExpr patternExpr = unmapPatternEvalDeep(pattern.getPatternRaw(), unmapContext);
+            return new ContextDescriptorConditionPattern(patternExpr);
+        }
+        else if (endpoint instanceof ContextDetailConditionFilter) {
+            ContextDetailConditionFilter filter = (ContextDetailConditionFilter) endpoint;
+            Filter filterExpr = unmapFilter(filter.getFilterSpecRaw(), unmapContext);
+            return new ContextDescriptorConditionFilter(filterExpr, filter.getOptionalFilterAsName());
+        }
+        else if (endpoint instanceof ContextDetailConditionTimePeriod) {
+            ContextDetailConditionTimePeriod period = (ContextDetailConditionTimePeriod) endpoint;
+            TimePeriodExpression expression = (TimePeriodExpression) unmapExpressionDeep(period.getTimePeriod(), unmapContext);
+            return new ContextDescriptorConditionTimePeriod(expression);
+        }
+        throw new IllegalStateException("Unrecognized endpoint " + endpoint);
     }
 
     private static void unmapCreateWindow(CreateWindowDesc createWindowDesc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
@@ -419,7 +457,7 @@ public class StatementSpecMapper
         {
             assignment = unmapExpressionDeep(createVariableDesc.getAssignment(), unmapContext);
         }
-        model.setCreateVariable(new CreateVariableClause(createVariableDesc.getVariableType(), createVariableDesc.getVariableName(), assignment));
+        model.setCreateVariable(new CreateVariableClause(createVariableDesc.getVariableType(), createVariableDesc.getVariableName(), assignment, createVariableDesc.isConstant()));
     }
 
     private static void unmapCreateSchema(CreateSchemaDesc desc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
@@ -531,9 +569,20 @@ public class StatementSpecMapper
 
         clause.setAfterNumberOfEvents(outputLimitSpec.getAfterNumberOfEvents());
         if (outputLimitSpec.getAfterTimePeriodExpr() != null) {
-            clause.setAfterTimePeriodExpression((TimePeriodExpression) unmapExpressionDeep(outputLimitSpec.getAfterTimePeriodExpr(), unmapContext));
+            clause.setAfterTimePeriodExpression(unmapExpressionDeep(outputLimitSpec.getAfterTimePeriodExpr(), unmapContext));
         }
         clause.setAndAfterTerminate(outputLimitSpec.isAndAfterTerminate());
+        if (outputLimitSpec.getAndAfterTerminateExpr() != null) {
+            clause.setAndAfterTerminateAndExpr(unmapExpressionDeep(outputLimitSpec.getAndAfterTerminateExpr(), unmapContext));
+        }
+        if (outputLimitSpec.getAndAfterTerminateThenExpressions() != null) {
+            List<AssignmentPair> thenAssignments = new ArrayList<AssignmentPair>();
+            for (OnTriggerSetAssignment assignment : outputLimitSpec.getAndAfterTerminateThenExpressions()) {
+                Expression expr = unmapExpressionDeep(assignment.getExpression(), unmapContext);
+                thenAssignments.add(new AssignmentPair(assignment.getVariableName(), expr));
+            }
+            clause.setAndAfterTerminateThenAssignments(thenAssignments);
+        }
         model.setOutputLimitClause(clause);
     }
 
@@ -686,7 +735,22 @@ public class StatementSpecMapper
             afterTimePeriod = (ExprTimePeriod) mapExpressionDeep(outputLimitClause.getAfterTimePeriodExpression(), mapContext);
         }
 
-        OutputLimitSpec spec = new OutputLimitSpec(frequency, frequencyVariable, rateType, displayLimit, whenExpression, assignments, timerAtExprList, timePeriod, afterTimePeriod, outputLimitClause.getAfterNumberOfEvents(), outputLimitClause.isAndAfterTerminate());
+        ExprNode andAfterTerminateAndExpr = null;
+        if (outputLimitClause.getAndAfterTerminateAndExpr() != null) {
+            andAfterTerminateAndExpr = mapExpressionDeep(outputLimitClause.getAndAfterTerminateAndExpr(), mapContext);
+        }
+
+        List<OnTriggerSetAssignment> afterTerminateAssignments = null;
+        if (outputLimitClause.getAndAfterTerminateThenAssignments() != null) {
+            afterTerminateAssignments = new ArrayList<OnTriggerSetAssignment>();
+            for (AssignmentPair pair : outputLimitClause.getAndAfterTerminateThenAssignments())
+            {
+                ExprNode expr = mapExpressionDeep(pair.getValue(), mapContext);
+                afterTerminateAssignments.add(new OnTriggerSetAssignment(pair.getName(), expr));
+            }
+        }
+
+        OutputLimitSpec spec = new OutputLimitSpec(frequency, frequencyVariable, rateType, displayLimit, whenExpression, assignments, timerAtExprList, timePeriod, afterTimePeriod, outputLimitClause.getAfterNumberOfEvents(), outputLimitClause.isAndAfterTerminate(), andAfterTerminateAndExpr, afterTerminateAssignments);
         raw.setOutputLimitSpec(spec);
     }
 
@@ -996,19 +1060,24 @@ public class StatementSpecMapper
 
         for (OuterJoinDesc desc : outerJoinDescList)
         {
-            PropertyValueExpression left = (PropertyValueExpression) unmapExpressionFlat(desc.getLeftNode(), unmapContext);
-            PropertyValueExpression right = (PropertyValueExpression) unmapExpressionFlat(desc.getRightNode(), unmapContext);
-
+            PropertyValueExpression left = null;
+            PropertyValueExpression right = null;
             ArrayList<PropertyValueExpressionPair> additionalProperties = new ArrayList<PropertyValueExpressionPair>();
-            if (desc.getAdditionalLeftNodes() != null)
-            {
-                for (int i = 0; i < desc.getAdditionalLeftNodes().length; i++)
+
+            if (desc.getOptLeftNode() != null) {
+                left = (PropertyValueExpression) unmapExpressionFlat(desc.getOptLeftNode(), unmapContext);
+                right = (PropertyValueExpression) unmapExpressionFlat(desc.getOptRightNode(), unmapContext);
+
+                if (desc.getAdditionalLeftNodes() != null)
                 {
-                    ExprIdentNode leftNode = desc.getAdditionalLeftNodes()[i];
-                    ExprIdentNode rightNode = desc.getAdditionalRightNodes()[i];
-                    PropertyValueExpression propLeft = (PropertyValueExpression) unmapExpressionFlat(leftNode, unmapContext);
-                    PropertyValueExpression propRight = (PropertyValueExpression) unmapExpressionFlat(rightNode, unmapContext);
-                    additionalProperties.add(new PropertyValueExpressionPair(propLeft, propRight));
+                    for (int i = 0; i < desc.getAdditionalLeftNodes().length; i++)
+                    {
+                        ExprIdentNode leftNode = desc.getAdditionalLeftNodes()[i];
+                        ExprIdentNode rightNode = desc.getAdditionalRightNodes()[i];
+                        PropertyValueExpression propLeft = (PropertyValueExpression) unmapExpressionFlat(leftNode, unmapContext);
+                        PropertyValueExpression propRight = (PropertyValueExpression) unmapExpressionFlat(rightNode, unmapContext);
+                        additionalProperties.add(new PropertyValueExpressionPair(propLeft, propRight));
+                    }
                 }
             }
             from.add(new OuterJoinQualifier(desc.getOuterJoinType(), left, right, additionalProperties));
@@ -1083,15 +1152,22 @@ public class StatementSpecMapper
             return;
         }
 
+        ContextDetail detail = mapCreateContextDetail(createContext.getDescriptor(), mapContext);
+
+        CreateContextDesc desc = new CreateContextDesc(createContext.getContextName(), detail);
+        raw.setCreateContextDesc(desc);
+    }
+
+    private static ContextDetail mapCreateContextDetail(ContextDescriptor descriptor, StatementSpecMapContext mapContext) {
         ContextDetail detail;
-        if (createContext.getDescriptor() instanceof ContextDescriptorTemporalCrontabSingle) {
-            ContextDescriptorTemporalCrontabSingle single = (ContextDescriptorTemporalCrontabSingle) createContext.getDescriptor();
-            List<ExprNode> start = mapExpressionDeep(single.getCrontabStartExpressions(), mapContext);
-            List<ExprNode> end = mapExpressionDeep(single.getCrontabEndExpressions(), mapContext);
-            detail = new ContextDetailTemporalFixed(start, end);
+        if (descriptor instanceof ContextDescriptorInitiatedTerminated) {
+            ContextDescriptorInitiatedTerminated desc = (ContextDescriptorInitiatedTerminated) descriptor;
+            ContextDetailCondition start = mapCreateContextRangeCondition(desc.getStartCondition(), mapContext);
+            ContextDetailCondition end = mapCreateContextRangeCondition(desc.getEndCondition(), mapContext);
+            detail = new ContextDetailInitiatedTerminated(start, end, desc.isOverlapping());
         }
-        else if (createContext.getDescriptor() instanceof ContextDescriptorKeyedSegmented) {
-            ContextDescriptorKeyedSegmented seg = (ContextDescriptorKeyedSegmented) createContext.getDescriptor();
+        else if (descriptor instanceof ContextDescriptorKeyedSegmented) {
+            ContextDescriptorKeyedSegmented seg = (ContextDescriptorKeyedSegmented) descriptor;
             List<ContextDetailPartitionItem> itemsdesc = new ArrayList<ContextDetailPartitionItem>();
             for (ContextDescriptorKeyedSegmentedItem item : seg.getItems()) {
                 FilterSpecRaw rawSpec = mapFilter(item.getFilter(), mapContext);
@@ -1099,8 +1175,8 @@ public class StatementSpecMapper
             }
             detail = new ContextDetailPartitioned(itemsdesc);
         }
-        else if (createContext.getDescriptor() instanceof ContextDescriptorCategory) {
-            ContextDescriptorCategory cat = (ContextDescriptorCategory) createContext.getDescriptor();
+        else if (descriptor instanceof ContextDescriptorCategory) {
+            ContextDescriptorCategory cat = (ContextDescriptorCategory) descriptor;
             FilterSpecRaw rawSpec = mapFilter(cat.getFilter(), mapContext);
             List<ContextDetailCategoryItem> itemsdesc = new ArrayList<ContextDetailCategoryItem>();
             for (ContextDescriptorCategoryItem item : cat.getItems()) {
@@ -1109,24 +1185,50 @@ public class StatementSpecMapper
             }
             detail = new ContextDetailCategory(itemsdesc, rawSpec);
         }
-        else {
-            ContextDescriptorInitiatedTerminated term = (ContextDescriptorInitiatedTerminated) createContext.getDescriptor();
-            FilterSpecRaw filter = null;
-            EvalFactoryNode pattern = null;
-            String filterAsName = null;
-            if (term.getInitiatedFilter() != null) {
-                filter = mapFilter(term.getInitiatedFilter(), mapContext);
-                filterAsName = term.getInitiatedFilterAsName();
+        else if (descriptor instanceof ContextDescriptorHashSegmented) {
+            ContextDescriptorHashSegmented hash = (ContextDescriptorHashSegmented) descriptor;
+            List<ContextDetailHashItem> itemsdesc = new ArrayList<ContextDetailHashItem>();
+            for (ContextDescriptorHashSegmentedItem item : hash.getItems()) {
+                FilterSpecRaw rawSpec = mapFilter(item.getFilter(), mapContext);
+                SingleRowMethodExpression singleRowMethodExpression = (SingleRowMethodExpression) item.getHashFunction();
+                ExprChainedSpec func = mapChains(Collections.singletonList(singleRowMethodExpression.getChain().get(0)), mapContext).get(0);
+                itemsdesc.add(new ContextDetailHashItem(func, rawSpec));
             }
-            else {
-                pattern = mapPatternEvalDeep(term.getInitiatedPattern(), mapContext);
-            }
-            ExprTimePeriod after = (ExprTimePeriod) mapExpressionDeep(term.getTerminatedTimePeriod(), mapContext);
-            detail = new ContextDetailInitiatedTerminated(pattern, filter, filterAsName, after);
+            detail = new ContextDetailHash(itemsdesc, hash.getGranularity(), hash.isPreallocate());
         }
+        else {
+            ContextDescriptorNested nested = (ContextDescriptorNested) descriptor;
+            List<CreateContextDesc> itemsdesc = new ArrayList<CreateContextDesc>();
+            for (CreateContextClause item : nested.getContexts()) {
+                itemsdesc.add(new CreateContextDesc(item.getContextName(), mapCreateContextDetail(item.getDescriptor(), mapContext)));
+            }
+            detail = new ContextDetailNested(itemsdesc);
+        }
+        return detail;
+    }
 
-        CreateContextDesc desc = new CreateContextDesc(createContext.getContextName(), detail);
-        raw.setCreateContextDesc(desc);
+    private static ContextDetailCondition mapCreateContextRangeCondition(ContextDescriptorCondition condition, StatementSpecMapContext mapContext) {
+        if (condition instanceof ContextDescriptorConditionCrontab) {
+            ContextDescriptorConditionCrontab crontab = (ContextDescriptorConditionCrontab) condition;
+            List<ExprNode> expr = mapExpressionDeep(crontab.getCrontabExpressions(), mapContext);
+            return new ContextDetailConditionCrontab(expr);
+        }
+        else if (condition instanceof ContextDescriptorConditionFilter) {
+            ContextDescriptorConditionFilter filter = (ContextDescriptorConditionFilter) condition;
+            FilterSpecRaw filterExpr = mapFilter(filter.getFilter(), mapContext);
+            return new ContextDetailConditionFilter(filterExpr, filter.getOptionalAsName());
+        }
+        if (condition instanceof ContextDescriptorConditionPattern) {
+            ContextDescriptorConditionPattern pattern = (ContextDescriptorConditionPattern) condition;
+            EvalFactoryNode patternExpr = mapPatternEvalDeep(pattern.getPattern(), mapContext);
+            return new ContextDetailConditionPattern(patternExpr);
+        }
+        if (condition instanceof ContextDescriptorConditionTimePeriod) {
+            ContextDescriptorConditionTimePeriod timePeriod = (ContextDescriptorConditionTimePeriod) condition;
+            ExprNode expr = mapExpressionDeep(timePeriod.getTimePeriod(), mapContext);
+            return new ContextDetailConditionTimePeriod((ExprTimePeriod) expr);
+        }
+        throw new IllegalStateException("Unrecognized condition " + condition);
     }
 
     private static void mapCreateWindow(CreateWindowClause createWindow, FromClause fromClause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -1202,7 +1304,7 @@ public class StatementSpecMapper
             assignment = mapExpressionDeep(createVariable.getOptionalAssignment(), mapContext);
         }
 
-        raw.setCreateVariableDesc(new CreateVariableDesc(createVariable.getVariableType(), createVariable.getVariableName(), assignment));
+        raw.setCreateVariableDesc(new CreateVariableDesc(createVariable.getVariableType(), createVariable.getVariableName(), assignment, createVariable.isConstant()));
     }
 
     private static void mapCreateSchema(CreateSchemaClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
@@ -1370,7 +1472,7 @@ public class StatementSpecMapper
                 if (mapContext.getVariableService().getReader(stream) != null)
                 {
                     mapContext.setHasVariables(true);
-                    return new ExprVariableNode(prop.getPropertyName());
+                    return new ExprVariableNodeImpl(prop.getPropertyName(), mapContext.getVariableService());
                 }
 
                 if (mapContext.getContextName() != null) {
@@ -1386,7 +1488,7 @@ public class StatementSpecMapper
             if (mapContext.getVariableService().getReader(prop.getPropertyName()) != null)
             {
                 mapContext.setHasVariables(true);
-                return new ExprVariableNode(prop.getPropertyName());
+                return new ExprVariableNodeImpl(prop.getPropertyName(), mapContext.getVariableService());
             }
 
             return new ExprIdentNodeImpl(prop.getPropertyName());
@@ -1676,13 +1778,28 @@ public class StatementSpecMapper
                 throw new IllegalArgumentException("Function name '" + functionName + "' cannot be resolved to a single-row function: " + e.getMessage(), e);
             }
             chain.get(0).setName(pair.getSecond().getMethodName());
-            return new ExprPlugInSingleRowNode(functionName, pair.getFirst(), chain, pair.getSecond().getValueCache());
+            return new ExprPlugInSingleRowNode(functionName, pair.getFirst(), chain, pair.getSecond());
         }
         else if (expr instanceof PlugInProjectionExpression)
         {
             PlugInProjectionExpression node = (PlugInProjectionExpression) expr;
 
             // first try the configured aggregation
+            try
+            {
+                AggregationFunctionFactory aggregationFactory = mapContext.getEngineImportService().resolveAggregationFactory(node.getFunctionName());
+                return new ExprPlugInAggFunctionFactoryNode(node.isDistinct(), aggregationFactory, node.getFunctionName());
+            }
+            catch (Exception e)
+            {
+                // then try the builtin aggregation
+                ExprNode exprNode = mapContext.getEngineImportService().resolveAggExtendedBuiltin(node.getFunctionName(), node.isDistinct());
+                if (exprNode != null) {
+                    return exprNode;
+                }
+            }
+
+            // first try the configured aggregation (AggregationSupport, deprecated)
             try
             {
                 AggregationSupport aggregation = mapContext.getEngineImportService().resolveAggregation(node.getFunctionName());
@@ -1763,6 +1880,9 @@ public class StatementSpecMapper
                 String name = chain.get(0).getName();
                 if (mapContext.getExpressionDeclarations() != null && mapContext.getExpressionDeclarations().containsKey(name)) {
                     return new ExprDeclaredNodeImpl(mapContext.getExpressionDeclarations().get(name), chain.get(0).getParameters());
+                }
+                if (mapContext.getScripts() != null && mapContext.getScripts().containsKey(name)) {
+                    return new ExprNodeScript(mapContext.getConfiguration().getEngineDefaults().getScripts().getDefaultDialect(), mapContext.getScripts().get(name), chain.get(0).getParameters());
                 }
             }
             return new ExprDotNode(chain,
@@ -2085,6 +2205,11 @@ public class StatementSpecMapper
             ExprPlugInAggFunctionNode node = (ExprPlugInAggFunctionNode) expr;
             return new PlugInProjectionExpression(node.getAggregationFunctionName(), node.isDistinct());
         }
+        else if (expr instanceof ExprPlugInAggFunctionFactoryNode)
+        {
+            ExprPlugInAggFunctionFactoryNode node = (ExprPlugInAggFunctionFactoryNode) expr;
+            return new PlugInProjectionExpression(node.getAggregationFunctionName(), node.isDistinct());
+        }
         else if (expr instanceof ExprPlugInSingleRowNode)
         {
             ExprPlugInSingleRowNode node = (ExprPlugInSingleRowNode) expr;
@@ -2224,6 +2349,12 @@ public class StatementSpecMapper
             LambdaExpression lambdaExpr = new LambdaExpression(new ArrayList<String>(lambdaNode.getGoesToNames()));
             return lambdaExpr;
         }
+        else if (expr instanceof ExprNodeScript) {
+            ExprNodeScript scriptNode = (ExprNodeScript) expr;
+            DotExpression dotExpr = new DotExpression();
+            dotExpr.add(scriptNode.getScript().getName(), unmapExpressionDeep(scriptNode.getParameters(), unmapContext));
+            return dotExpr;
+        }
         throw new IllegalArgumentException("Could not map expression node of type " + expr.getClass().getSimpleName());
     }
 
@@ -2327,23 +2458,30 @@ public class StatementSpecMapper
 
         for (OuterJoinQualifier qualifier : fromClause.getOuterJoinQualifiers())
         {
-            ExprIdentNode left = (ExprIdentNode) mapExpressionFlat(qualifier.getLeft(), mapContext);
-            ExprIdentNode right = (ExprIdentNode) mapExpressionFlat(qualifier.getRight(), mapContext);
-
+            ExprIdentNode left = null;
+            ExprIdentNode right = null;
             ExprIdentNode[] additionalLeft = null;
             ExprIdentNode[] additionalRight = null;
-            if (qualifier.getAdditionalProperties().size() != 0)
-            {
-                additionalLeft = new ExprIdentNode[qualifier.getAdditionalProperties().size()];
-                additionalRight = new ExprIdentNode[qualifier.getAdditionalProperties().size()];
-                int count = 0;
-                for (PropertyValueExpressionPair pair : qualifier.getAdditionalProperties())
+
+            if (qualifier.getLeft() != null) {
+
+                left = (ExprIdentNode) mapExpressionFlat(qualifier.getLeft(), mapContext);
+                right = (ExprIdentNode) mapExpressionFlat(qualifier.getRight(), mapContext);
+
+                if (qualifier.getAdditionalProperties().size() != 0)
                 {
-                    additionalLeft[count] = (ExprIdentNode) mapExpressionFlat(pair.getLeft(), mapContext);
-                    additionalRight[count] = (ExprIdentNode) mapExpressionFlat(pair.getRight(), mapContext);
-                    count++;
+                    additionalLeft = new ExprIdentNode[qualifier.getAdditionalProperties().size()];
+                    additionalRight = new ExprIdentNode[qualifier.getAdditionalProperties().size()];
+                    int count = 0;
+                    for (PropertyValueExpressionPair pair : qualifier.getAdditionalProperties())
+                    {
+                        additionalLeft[count] = (ExprIdentNode) mapExpressionFlat(pair.getLeft(), mapContext);
+                        additionalRight[count] = (ExprIdentNode) mapExpressionFlat(pair.getRight(), mapContext);
+                        count++;
+                    }
                 }
             }
+
             raw.getOuterJoinDescList().add(new OuterJoinDesc(qualifier.getType(), left, right, additionalLeft, additionalRight));
         }
     }
@@ -2556,18 +2694,21 @@ public class StatementSpecMapper
             for (ContainedEventSelect propertySelect : filter.getOptionalPropertySelects())
             {
                 SelectClauseSpecRaw selectSpec = null;
-                if (propertySelect.getSelectClause() != null)
-                {
+                if (propertySelect.getSelectClause() != null) {
                     selectSpec = mapSelectRaw(propertySelect.getSelectClause(), mapContext);
                 }
 
                 ExprNode exprNodeWhere = null;
-                if (propertySelect.getWhereClause() != null)
-                {
+                if (propertySelect.getWhereClause() != null) {
                     exprNodeWhere = mapExpressionDeep(propertySelect.getWhereClause(), mapContext);
                 }
 
-                evalSpec.add(new PropertyEvalAtom(propertySelect.getPropertyName(), propertySelect.getPropertyAsName(), selectSpec, exprNodeWhere));
+                ExprNode splitterExpr = null;
+                if (propertySelect.getSplitExpression() != null) {
+                    splitterExpr = mapExpressionDeep(propertySelect.getSplitExpression(), mapContext);
+                }
+
+                evalSpec.add(new PropertyEvalAtom(splitterExpr, propertySelect.getOptionalSplitExpressionTypeName(), propertySelect.getOptionalAsName(), selectSpec, exprNodeWhere));
             }
         }
 
@@ -2599,24 +2740,27 @@ public class StatementSpecMapper
             for (PropertyEvalAtom atom : filter.getOptionalPropertyEvalSpec().getAtoms())
             {
                 SelectClause selectClause = null;
-                if (atom.getOptionalSelectClause() != null)
-                {
+                if (atom.getOptionalSelectClause() != null && !atom.getOptionalSelectClause().getSelectExprList().isEmpty()) {
                     selectClause = unmapSelect(atom.getOptionalSelectClause(), SelectClauseStreamSelectorEnum.ISTREAM_ONLY, unmapContext);
-                }
-                else {
-                    selectClause = new SelectClause();
-                }
-                if (selectClause.getSelectList().isEmpty()) {
-                    selectClause.getSelectList().add(new SelectClauseWildcard());
                 }
 
                 Expression filterExpression = null;
-                if (atom.getOptionalWhereClause() != null)
-                {
+                if (atom.getOptionalWhereClause() != null) {
                     filterExpression = unmapExpressionDeep(atom.getOptionalWhereClause(), unmapContext);
                 }
 
-                propertySelects.add(new ContainedEventSelect(atom.getPropertyName(), atom.getOptionalAsName(), selectClause, filterExpression));
+                Expression splitExpression = unmapExpressionDeep(atom.getSplitterExpression(), unmapContext);
+
+                ContainedEventSelect contained = new ContainedEventSelect(splitExpression);
+                contained.setOptionalSplitExpressionTypeName(atom.getOptionalResultEventType());
+                contained.setSelectClause(selectClause);
+                contained.setWhereClause(filterExpression);
+                contained.setOptionalAsName(atom.getOptionalAsName());
+
+                if (atom.getSplitterExpression() != null) {
+                    contained.setSplitExpression(unmapExpressionDeep(atom.getSplitterExpression(), unmapContext));
+                }
+                propertySelects.add(contained);
             }
             filterDef.setOptionalPropertySelects(propertySelects);
         }
@@ -2638,6 +2782,21 @@ public class StatementSpecMapper
         List<ExpressionDeclaration> result = new ArrayList<ExpressionDeclaration>();
         for (ExpressionDeclItem desc : expr.getExpressions()) {
             result.add(new ExpressionDeclaration(desc.getName(), desc.getParametersNames(), unmapExpressionDeep(desc.getInner(), unmapContext)));
+        }
+        return result;
+    }
+
+    private static List<ScriptExpression> unmapScriptExpressions(List<ExpressionScriptProvided> scripts, StatementSpecUnMapContext unmapContext) {
+        if (scripts == null || scripts.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<ScriptExpression> result = new ArrayList<ScriptExpression>();
+        for (ExpressionScriptProvided script : scripts) {
+            String returnType = script.getOptionalReturnTypeName();
+            if (returnType != null && script.isOptionalReturnTypeIsArray()) {
+                returnType = returnType + "[]";
+            }
+            result.add(new ScriptExpression(script.getName(), script.getParameterNames(), script.getExpression(), returnType, script.getOptionalDialect()));
         }
         return result;
     }
@@ -2690,6 +2849,23 @@ public class StatementSpecMapper
             ExpressionDeclItem item = new ExpressionDeclItem(decl.getName(), decl.getParameterNames(), mapExpressionDeep(decl.getExpression(), mapContext));
             desc.getExpressions().add(item);
             mapContext.addExpressionDeclarations(item);
+        }
+    }
+
+    private static void mapScriptExpressions(List<ScriptExpression> scriptExpressions, StatementSpecRaw raw, StatementSpecMapContext mapContext) {
+        if (scriptExpressions == null || scriptExpressions.isEmpty()) {
+            return;
+        }
+
+        List<ExpressionScriptProvided> scripts = new ArrayList<ExpressionScriptProvided>();
+        raw.setScriptExpressions(scripts);
+
+        for (ScriptExpression decl : scriptExpressions) {
+            String returnType = decl.getOptionalReturnType() != null ? decl.getOptionalReturnType().replace("[]", "") : null;
+            boolean isArray = decl.getOptionalReturnType() != null ? decl.getOptionalReturnType().contains("[]") : false;
+            ExpressionScriptProvided scriptProvided = new ExpressionScriptProvided(decl.getName(), decl.getExpressionText(), decl.getParameterNames(), returnType, isArray, decl.getOptionalDialect());
+            scripts.add(scriptProvided);
+            mapContext.addScript(scriptProvided);
         }
     }
 

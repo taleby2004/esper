@@ -28,4 +28,8 @@ public class ExpressionDeclDesc implements Serializable {
     public void setExpressions(List<ExpressionDeclItem> expressions) {
         this.expressions = expressions;
     }
+
+    public void add(ExpressionDeclItem declNode) {
+        expressions.add(declNode);
+    }
 }

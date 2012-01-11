@@ -12,9 +12,9 @@
 package com.espertech.esper.collection;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -166,7 +166,7 @@ public class TestTimeWindow extends TestCase
 
         try
         {
-            ArrayAssertionUtil.assertEqualsExactOrder(it, new EventBean[] {beans[0], beans[1]});
+            EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{beans[0], beans[1]}, it);
             fail();
         }
         catch (ConcurrentModificationException ex)

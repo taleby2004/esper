@@ -15,10 +15,10 @@ import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.property.PropertyEvaluator;
+import com.espertech.esper.event.EventBeanUtility;
+import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.ViewSupport;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.Iterator;
 
@@ -29,13 +29,13 @@ import java.util.Iterator;
  */
 public class NamedWindowConsumerView extends ViewSupport implements StopCallback
 {
-    private static final Log log = LogFactory.getLog(NamedWindowConsumerView.class);
     private final ExprEvaluator[] filterList;
     private final EventType eventType;
     private final NamedWindowConsumerCallback consumerCallback;
     private final ExprEvaluatorContext exprEvaluatorContext;
     private final PropertyEvaluator optPropertyEvaluator;
     private final FlushedEventBuffer optPropertyContainedBuffer;
+    private final boolean audit;
 
     /**
      * Ctor.
@@ -47,7 +47,8 @@ public class NamedWindowConsumerView extends ViewSupport implements StopCallback
                                    PropertyEvaluator optPropertyEvaluator,
                                    EventType eventType,
                                    NamedWindowConsumerCallback consumerCallback,
-                                   ExprEvaluatorContext exprEvaluatorContext)
+                                   ExprEvaluatorContext exprEvaluatorContext,
+                                   boolean audit)
     {
         this.filterList = filterList;
         this.optPropertyEvaluator = optPropertyEvaluator;
@@ -60,10 +61,17 @@ public class NamedWindowConsumerView extends ViewSupport implements StopCallback
         this.eventType = eventType;
         this.consumerCallback = consumerCallback;
         this.exprEvaluatorContext = exprEvaluatorContext;
+        this.audit = audit;
     }
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
+        if (audit) {
+            if (AuditPath.isInfoEnabled()) {
+                AuditPath.auditLog(exprEvaluatorContext.getEngineURI(), exprEvaluatorContext.getStatementName(), "consume-window " + eventType.getName() + " insert {" + EventBeanUtility.summarize(newData) + "} remove {" + EventBeanUtility.summarize(oldData) + "}");
+            }
+        }
+
         // if we have a filter for the named window,
         if (filterList.length != 0)
         {

@@ -11,8 +11,6 @@
 
 package com.espertech.esper.core.deploy;
 
-import com.espertech.esper.collection.Pair;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

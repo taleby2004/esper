@@ -12,11 +12,11 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import com.espertech.esper.util.SerializableObjectCopier;
 import junit.framework.TestCase;
 
@@ -102,7 +102,7 @@ public class TestCastExpr extends TestCase
         assertEquals(Integer.class, selectTestCase.getEventType().getPropertyType("t0"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("12", 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "t0".split(","), new Object[] {12});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "t0".split(","), new Object[]{12});
     }
 
     public void testCastDoubleAndNull_OM() throws Exception

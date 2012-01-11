@@ -65,7 +65,7 @@ public class NamedWindowOnExprFactoryFactory
         else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_UPDATE)
         {
             OnTriggerWindowUpdateDesc updateDesc = (OnTriggerWindowUpdateDesc) onTriggerDesc;
-            NamedWindowUpdateHelper updateHelper = NamedWindowUpdateHelper.make((EventTypeSPI) namedWindowEventType, updateDesc.getAssignments(), namedWindowAlias);
+            NamedWindowUpdateHelper updateHelper = NamedWindowUpdateHelper.make(namedWindowName, (EventTypeSPI) namedWindowEventType, updateDesc.getAssignments(), namedWindowAlias);
             return new NamedWindowOnUpdateViewFactory(namedWindowEventType, statementContext.getStatementResultService(), updateHelper);
         }
         else if (onTriggerDesc.getOnTriggerType() == OnTriggerType.ON_MERGE)

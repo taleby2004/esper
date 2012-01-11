@@ -9,6 +9,7 @@
 package com.espertech.esperio.regression.adapter;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.client.EventBean;
@@ -17,7 +18,6 @@ import com.espertech.esper.adapter.AdapterState;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.csv.CSVInputAdapter;
 import com.espertech.esperio.csv.CSVInputAdapterSpec;
-import com.espertech.esperio.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.io.EOFException;

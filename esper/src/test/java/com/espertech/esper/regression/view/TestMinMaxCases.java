@@ -11,6 +11,8 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
@@ -19,8 +21,6 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,16 +53,16 @@ public class TestMinMaxCases extends TestCase
         stmt.addListener(listener);
         
         epService.getEPRuntime().sendEvent(new SupportBean(null, 1));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {1, 5});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, 5});
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3, 5});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, 5});
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 6));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3, 6});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, 6});
     }
 
     public void testMinMaxNoDataWindowSubquery() {
@@ -74,18 +74,18 @@ public class TestMinMaxCases extends TestCase
         epService.getEPAdministrator().createEPL(epl).addListener(listener);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {3, 3, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3, 3, null, null});
         
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {4, 3, null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4, 3, null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2));
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 4));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {4, 3, 2, 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{4, 3, 2, 2});
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 5));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {5, 3, 1, 1});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5, 3, 1, 1});
 
         /**
          * Comment out here for sending many more events.

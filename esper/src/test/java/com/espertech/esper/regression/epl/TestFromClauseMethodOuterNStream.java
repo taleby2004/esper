@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBeanInt;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportJoinMethods;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestFromClauseMethodOuterNStream extends TestCase
@@ -145,32 +145,32 @@ public class TestFromClauseMethodOuterNStream extends TestCase
         stmt.addListener(listener);
 
         String[] fields = "id,valh0,valh1".split(",");
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendBeanInt("E1", 0, 0, 1);
         Object[][] result = new Object[][] {{"E1", null, null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E2", 0, 1, 1);
         result = new Object[][] {{"E2", null, null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E3", 1, 0, 1);
         result = new Object[][] {{"E3", "H01", null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E4", 1, 1, 1);
         result = new Object[][] {{"E4", "H01", "H11"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E5", 4, 4, 2);
         result = new Object[][] {{"E5", "H02", "H12"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
     }
 
     public void test1Stream3HistForwardSubordinate()
@@ -213,32 +213,32 @@ public class TestFromClauseMethodOuterNStream extends TestCase
         stmt.addListener(listener);
 
         String[] fields = "id,valh0,valh1,valh2".split(",");
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendBeanInt("E1", 0, 0, 0, 1);
         Object[][] result = new Object[][] {{"E1", null, null, null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E2", 0, 1, 1, 1);
         result = new Object[][] {{"E2", null, null, null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E3", 1, 1, 1, 1);
         result = new Object[][] {{"E3", "H01", "H11", "H21"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E4", 1, 0, 1, 1);
         result = new Object[][] {{"E4", "H01", null, null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E5", 4, 4, 4, 2);
         result = new Object[][] {{"E5", "H02", "H12", "H22"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
     }
 
     public void test1Stream3HistForwardSubordinateChain()
@@ -267,32 +267,32 @@ public class TestFromClauseMethodOuterNStream extends TestCase
         stmt.addListener(listener);
 
         String[] fields = "id,valh0,valh1,valh2".split(",");
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendBeanInt("E1", 0, 0, 0, 1);
         Object[][] result = new Object[][] {{"E1", null, null, null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E2", 0, 1, 1, 1);
         result = new Object[][] {{"E2", null, null, null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E3", 1, 1, 1, 1);
         result = new Object[][] {{"E3", "E3-H01", "E3-H01-H11", "E3-H01-H11-H21"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E4", 1, 0, 1, 1);
         result = new Object[][] {{"E4", "E4-H01", null, null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
 
         sendBeanInt("E5", 4, 4, 4, 2);
         result = new Object[][] {{"E5", "E5-H02", "E5-H02-H12", "E5-H02-H12-H22"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, result);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, result);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, result);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, result);
     }
 
     private void runAssertionOne(String expression)
@@ -302,43 +302,43 @@ public class TestFromClauseMethodOuterNStream extends TestCase
         stmt.addListener(listener);
 
         String[] fields = "id,valh0,valh1".split(",");
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendBeanInt("E1", 0, 0, 0, 0,  1, 1);
         Object[][] resultOne = new Object[][] {{"E1", null, null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultOne);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, resultOne);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultOne);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, resultOne);
 
         sendBeanInt("E2", 1, 1, 1, 1,  1, 1);
         Object[][] resultTwo = new Object[][] {{"E2", "H01_0", "H11_0"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultTwo);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultTwo));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultTwo);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultTwo));
 
         sendBeanInt("E3", 5, 5, 3, 4,  1, 1);
         Object[][] resultThree = new Object[][] {{"E3", "H03_0", "H14_0"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultThree);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultTwo, resultThree));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultThree);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultTwo, resultThree));
 
         sendBeanInt("E4", 0, 5, 3, 4,  1, 1);
         Object[][] resultFour = new Object[][] {{"E4", null, "H14_0"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultFour);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultTwo, resultThree, resultFour));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultFour);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultTwo, resultThree, resultFour));
 
         sendBeanInt("E5", 2, 0, 2, 1,  1, 1);
         Object[][] resultFive = new Object[][] {{"E5", "H02_0", null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultFive);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultTwo, resultThree, resultFour, resultFive));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultFive);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultTwo, resultThree, resultFour, resultFive));
 
         // set 2 rows for H0
         sendBeanInt("E6", 2, 2, 2, 2,  2, 1);
         Object[][] resultSix = new Object[][] {{"E6", "H02_0", "H12_0"}, {"E6", "H02_1", "H12_0"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultSix);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultTwo, resultThree, resultFour, resultFive, resultSix));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultSix);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultTwo, resultThree, resultFour, resultFive, resultSix));
 
         sendBeanInt("E7", 10, 10, 4, 5,  1, 2);
         Object[][] resultSeven = new Object[][] {{"E7", "H04_0", "H15_0"}, {"E7", "H04_0", "H15_1"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultSeven);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultTwo, resultThree, resultFour, resultFive, resultSix, resultSeven));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultSeven);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultTwo, resultThree, resultFour, resultFive, resultSix, resultSeven));
     }
 
     private void runAssertionTwo(String expression)
@@ -348,40 +348,40 @@ public class TestFromClauseMethodOuterNStream extends TestCase
         stmt.addListener(listener);
 
         String[] fields = "id,valh0,valh1".split(",");
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendBeanInt("E1", 0, 0, 0, 0,  1, 1);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendBeanInt("E2", 1, 1, 1, 1,  1, 1);
         Object[][] resultTwo = new Object[][] {{"E2", "H01_0", "H11_0"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultTwo);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultTwo));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultTwo);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultTwo));
 
         sendBeanInt("E3", 5, 5, 3, 4,  1, 1);
         Object[][] resultThree = new Object[][] {{"E3", "H03_0", "H14_0"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultThree);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultTwo, resultThree));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultThree);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultTwo, resultThree));
 
         sendBeanInt("E4", 0, 5, 3, 4,  1, 1);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultTwo, resultThree));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultTwo, resultThree));
 
         sendBeanInt("E5", 2, 0, 2, 1,  1, 1);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultTwo, resultThree));
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultTwo, resultThree));
 
         // set 2 rows for H0
         sendBeanInt("E6", 2, 2, 2, 2,  2, 1);
         Object[][] resultSix = new Object[][] {{"E6", "H02_0", "H12_0"}, {"E6", "H02_1", "H12_0"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultSix);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultTwo, resultThree, resultSix));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultSix);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultTwo, resultThree, resultSix));
 
         sendBeanInt("E7", 10, 10, 4, 5,  1, 2);
         Object[][] resultSeven = new Object[][] {{"E7", "H04_0", "H15_0"}, {"E7", "H04_0", "H15_1"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultSeven);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultTwo, resultThree, resultSix, resultSeven));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultSeven);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultTwo, resultThree, resultSix, resultSeven));
     }
 
     public void testInvalid()
@@ -459,36 +459,36 @@ public class TestFromClauseMethodOuterNStream extends TestCase
         stmt.addListener(listener);
 
         String[] fields = "s0id,s1id,valh0".split(",");
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendBeanInt("E1", 1, 1);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, null);
 
         sendBeanInt("F1", 1, 1);
         Object[][] resultOne = new Object[][] {{"E1", "F1", "E1H01"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultOne);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, resultOne);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultOne);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, resultOne);
 
         sendBeanInt("F2", 2, 2);
         Object[][] resultTwo = new Object[][] {{null, "F2", null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultTwo);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultTwo));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultTwo);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultTwo));
 
         sendBeanInt("E2", 2, 2);
         Object[][] resultThree = new Object[][] {{"E2", "F2", "E2H02"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultThree);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultThree));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultThree);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultThree));
 
         sendBeanInt("F3", 3, 3);
         Object[][] resultFour = new Object[][] {{null, "F3", null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultFour);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultThree, resultFour));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultFour);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultThree, resultFour));
 
         sendBeanInt("E3", 0, 3);
         Object[][] resultFive = new Object[][] {{"E3", "F3", null}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultFive);
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, ArrayAssertionUtil.addArray(resultOne, resultThree, resultFive));
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultFive);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, EPAssertionUtil.concatenateArray2Dim(resultOne, resultThree, resultFive));
     }
 
     public void test1Stream2HistStarNoSubordinateLeftRight()
@@ -524,29 +524,29 @@ public class TestFromClauseMethodOuterNStream extends TestCase
 
         String[] fields = "s0id,valh0,valh1".split(",");
         Object[][] resultOne = new Object[][] {{null, "H01", null}, {null, "H02", null}, {null, null, "H11"}, {null, null, "H12"}};
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, resultOne);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, resultOne);
 
         sendBeanInt("E1", 0);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, resultOne);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, resultOne);
 
         sendBeanInt("E2", 2);
         Object[][] resultTwo = new Object[][] {{"E2", "H02", "H12"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultTwo);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultTwo);
         Object[][] resultIt = new Object[][] {{null, "H01", null}, {null, null, "H11"}, {"E2", "H02", "H12"}};
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, resultIt);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, resultIt);
 
         sendBeanInt("E3", 1);
         resultTwo = new Object[][] {{"E3", "H01", "H11"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultTwo);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultTwo);
         resultIt = new Object[][] {{"E3", "H01", "H11"}, {"E2", "H02", "H12"}};
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, resultIt);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, resultIt);
 
         sendBeanInt("E4", 1);
         resultTwo = new Object[][] {{"E4", "H01", "H11"}};
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewDataAndReset(), fields, resultTwo);
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, resultTwo);
         resultIt = new Object[][] {{"E3", "H01", "H11"}, {"E4", "H01", "H11"}, {"E2", "H02", "H12"}};
-        ArrayAssertionUtil.assertEqualsAnyOrder(stmt.iterator(), fields, resultIt);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, resultIt);
     }
 
     private void tryInvalid(String expression, String text)

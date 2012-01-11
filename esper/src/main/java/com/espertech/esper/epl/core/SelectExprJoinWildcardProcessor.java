@@ -31,7 +31,6 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
     private final EventAdapterService eventAdapterService;
     private boolean isPopulateUnderlying;
     private SelectExprInsertEventBean selectExprInsertEventBean;
-    private ExprEvaluatorContext exprEvaluatorContext;
 
     /**
      * Ctor.
@@ -41,8 +40,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
      * @param insertIntoDesc - describes the insert-into clause
      * @param selectExprEventTypeRegistry - registry for event type to statements
      * @param methodResolutionService - for resolving writable properties
-     * @param exprEvaluatorContext context for expression evalauation
-     * @throws ExprValidationException if the expression validation failed 
+     * @throws ExprValidationException if the expression validation failed
      */
     public SelectExprJoinWildcardProcessor(Collection<Integer> assignedTypeNumberStack,
                                            String statementId,
@@ -51,8 +49,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
                                            EventAdapterService eventAdapterService,
                                            InsertIntoDesc insertIntoDesc,
                                            SelectExprEventTypeRegistry selectExprEventTypeRegistry,
-                                           MethodResolutionService methodResolutionService,
-                                           ExprEvaluatorContext exprEvaluatorContext) throws ExprValidationException
+                                           MethodResolutionService methodResolutionService) throws ExprValidationException
     {
         if ((streamNames.length < 2) || (streamTypes.length < 2) || (streamNames.length != streamTypes.length))
         {
@@ -61,7 +58,6 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
 
         this.streamNames = streamNames;
         this.eventAdapterService = eventAdapterService;
-        this.exprEvaluatorContext = exprEvaluatorContext;
 
         // Create EventType of result join events
         Map<String, Object> eventTypeMap = new HashMap<String, Object>();
@@ -107,7 +103,7 @@ public class SelectExprJoinWildcardProcessor implements SelectExprProcessor
     {
         if (isPopulateUnderlying)
         {
-            return selectExprInsertEventBean.manufacture(eventsPerStream, isNewData, this.exprEvaluatorContext);
+            return selectExprInsertEventBean.manufacture(eventsPerStream, isNewData, exprEvaluatorContext);
         }
 
         Map<String, Object> tuple = new HashMap<String, Object>();

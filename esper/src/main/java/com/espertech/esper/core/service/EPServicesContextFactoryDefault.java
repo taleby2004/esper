@@ -12,8 +12,6 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.hook.*;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.core.context.mgr.ContextManagementServiceImpl;
-import com.espertech.esper.core.context.mgr.ContextStateService;
-import com.espertech.esper.core.context.mgr.ContextStateServiceNull;
 import com.espertech.esper.core.context.schedule.SchedulableAgentInstanceDirectory;
 import com.espertech.esper.core.deploy.DeploymentStateService;
 import com.espertech.esper.core.deploy.DeploymentStateServiceImpl;
@@ -131,7 +129,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         initVariables(variableService, configSnapshot.getVariables());
 
         StatementLockFactory statementLockFactory = new StatementLockFactoryImpl(configSnapshot.getEngineDefaults().getExecution().isFairlock(), configSnapshot.getEngineDefaults().getExecution().isDisableLocking());
-        StreamFactoryService streamFactoryService = StreamFactoryServiceProvider.newService(configSnapshot.getEngineDefaults().getViewResources().isShareViews());
+        StreamFactoryService streamFactoryService = StreamFactoryServiceProvider.newService(epServiceProvider.getURI(), configSnapshot.getEngineDefaults().getViewResources().isShareViews());
         FilterServiceSPI filterService = FilterServiceProvider.newService();
         MetricReportingServiceImpl metricsReporting = new MetricReportingServiceImpl(configSnapshot.getEngineDefaults().getMetricsReporting(), epServiceProvider.getURI());
         NamedWindowService namedWindowService = new NamedWindowServiceImpl(statementLockFactory, variableService, engineSettingsService.getEngineSettings().getExecution().isPrioritized(), eventProcessingRWLock, exceptionHandlingService, configSnapshot.getEngineDefaults().getLogging().isEnableQueryPlan(), metricsReporting);
@@ -158,8 +156,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
             stmtMetadataFactory = (StatementMetadataFactory) JavaClassHelper.instantiate(StatementMetadataFactory.class, configSnapshot.getEngineDefaults().getAlternativeContext().getStatementMetadataFactory());
         }
 
-        ContextStateService contextStateService = new ContextStateServiceNull();
-        ContextManagementService contextManagementService = new ContextManagementServiceImpl(contextStateService);
+        ContextManagementService contextManagementService = new ContextManagementServiceImpl();
 
         SchedulableAgentInstanceDirectory schedulableAgentInstanceDirectory = null;     // not required for Non-HA.
 
@@ -270,7 +267,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         {
             try
             {
-                variableService.createNewVariable(entry.getKey(), entry.getValue().getType(), entry.getValue().getInitializationValue(), null);
+                variableService.createNewVariable(entry.getKey(), entry.getValue().getType(), entry.getValue().getInitializationValue(), entry.getValue().isConstant(), null);
             }
             catch (VariableExistsException e)
             {
@@ -383,13 +380,15 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
                 if (propertiesUnnested != null)
                 {
                     Map<String, Object> propertyTypes = createPropertyTypes(propertiesUnnested);
-                    eventAdapterService.addNestableMapType(mapName, propertyTypes, mapConfig, true, true, true, false, false);
+                    Map<String, Object> propertyTypesCompiled = EventTypeUtility.compileMapTypeProperties(propertyTypes, eventAdapterService);
+                    eventAdapterService.addNestableMapType(mapName, propertyTypesCompiled, mapConfig, true, true, true, false, false);
                 }
 
                 Map<String, Object> propertiesNestable = nestableMapNames.get(mapName);
                 if (propertiesNestable != null)
                 {
-                    eventAdapterService.addNestableMapType(mapName, propertiesNestable, mapConfig, true, true, true, false, false);
+                    Map<String, Object> propertiesNestableCompiled = EventTypeUtility.compileMapTypeProperties(propertiesNestable, eventAdapterService);
+                    eventAdapterService.addNestableMapType(mapName, propertiesNestableCompiled, mapConfig, true, true, true, false, false);
                 }
             }
         }
@@ -482,12 +481,12 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
 
             for (ConfigurationPlugInAggregationFunction config : configSnapshot.getPlugInAggregationFunctions())
             {
-                engineImportService.addAggregation(config.getName(), config.getFunctionClassName());
+                engineImportService.addAggregation(config.getName(), config);
             }
 
             for (ConfigurationPlugInSingleRowFunction config : configSnapshot.getPlugInSingleRowFunctions())
             {
-                engineImportService.addSingleRow(config.getName(), config.getFunctionClassName(), config.getFunctionMethodName(), config.getValueCache());
+                engineImportService.addSingleRow(config.getName(), config.getFunctionClassName(), config.getFunctionMethodName(), config.getValueCache(), config.getFilterOptimizable());
             }
         }
         catch (EngineImportException ex)

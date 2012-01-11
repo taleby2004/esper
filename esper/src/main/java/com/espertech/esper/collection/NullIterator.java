@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.collection;
 
+import com.espertech.esper.client.EventBean;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 

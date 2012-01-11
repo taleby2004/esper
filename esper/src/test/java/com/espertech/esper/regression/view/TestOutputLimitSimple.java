@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.EventBean;
@@ -22,8 +24,6 @@ import com.espertech.esper.support.bean.SupportBeanString;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestOutputLimitSimple extends TestCase
@@ -434,7 +434,7 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendMDEvent("IBM", 0);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"S0", 20L}, {"YAH", 10L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"S0", 20L}, {"YAH", 10L}});
         listener.reset();
     }
 
@@ -463,7 +463,7 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendMDEvent("IBM", 0);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][] {{"S0", 20L}, {"YAH", 10L}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), fields, new Object[][]{{"S0", 20L}, {"YAH", 10L}});
         listener.reset();
     }
 
@@ -481,16 +481,16 @@ public class TestOutputLimitSimple extends TestCase
 
         // Output limit clause ignored when iterating, for both joins and no-join
         sendEvent("CAT", 50);
-        ArrayAssertionUtil.assertEqualsExactOrder(statement.iterator(), fields, new Object[][] {{"CAT", 50d}});
+        EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{"CAT", 50d}});
 
         sendEvent("CAT", 60);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields, new Object[][] {{"CAT", 50d}, {"CAT", 60d}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields, new Object[][]{{"CAT", 50d}, {"CAT", 60d}});
 
         sendEvent("IBM", 70);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields, new Object[][] {{"CAT", 50d}, {"CAT", 60d}, {"IBM", 70d}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields, new Object[][]{{"CAT", 50d}, {"CAT", 60d}, {"IBM", 70d}});
 
         sendEvent("IBM", 90);
-        ArrayAssertionUtil.assertEqualsAnyOrder(statement.iterator(), fields, new Object[][] {{"CAT", 50d}, {"CAT", 60d}, {"IBM", 70d}, {"IBM", 90d}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(statement.iterator(), fields, new Object[][]{{"CAT", 50d}, {"CAT", 60d}, {"IBM", 70d}, {"IBM", 90d}});
     }
 
     public void testLimitEventJoin()
@@ -801,7 +801,7 @@ public class TestOutputLimitSimple extends TestCase
 
         sendTimer(2000);
         sendEvent("YAH");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"IBM"}, {"MSFT"}, {"YAH"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"IBM"}, {"MSFT"}, {"YAH"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -812,7 +812,7 @@ public class TestOutputLimitSimple extends TestCase
 
         sendTimer(10000);
         sendEvent("s6");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"IBM"}, {"MSFT"}, {"YAH"}, {"s4"}, {"s5"}, {"s6"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"IBM"}, {"MSFT"}, {"YAH"}, {"s4"}, {"s5"}, {"s6"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -824,12 +824,12 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendEvent("s9");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"YAH"}, {"s4"}, {"s5"}, {"s6"}, {"s7"}, {"s8"}, {"s9"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"YAH"}, {"s4"}, {"s5"}, {"s6"}, {"s7"}, {"s8"}, {"s9"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendTimer(14000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"s6"}, {"s7"}, {"s8"}, {"s9"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s6"}, {"s7"}, {"s8"}, {"s9"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -838,7 +838,7 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(23000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"s10"}, {"s11"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s10"}, {"s11"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -869,7 +869,7 @@ public class TestOutputLimitSimple extends TestCase
 
         sendTimer(2000);
         sendEvent("s2");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"s0"}, {"s1"}, {"s2"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s0"}, {"s1"}, {"s2"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -880,7 +880,7 @@ public class TestOutputLimitSimple extends TestCase
 
         sendTimer(10000);
         sendEvent("s6");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"s0"}, {"s1"}, {"s2"}, {"s4"}, {"s5"}, {"s6"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s0"}, {"s1"}, {"s2"}, {"s4"}, {"s5"}, {"s6"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -892,12 +892,12 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendEvent("s9");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"s2"}, {"s4"}, {"s5"}, {"s6"}, {"s7"}, {"s8"}, {"s9"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s2"}, {"s4"}, {"s5"}, {"s6"}, {"s7"}, {"s8"}, {"s9"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendTimer(14000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"s6"}, {"s7"}, {"s8"}, {"s9"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s6"}, {"s7"}, {"s8"}, {"s9"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -906,7 +906,7 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(23000);
-        ArrayAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[] {"string"}, new Object[][] {{"s10"}, {"s11"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s10"}, {"s11"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 

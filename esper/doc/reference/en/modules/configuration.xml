@@ -355,11 +355,15 @@ config.addEventType("MyLegacyEvent", MyLegacyEventClass.class.getName(), legacyD
 					The <literal>update</literal> clause can change event properties on an event object. For the purpose of maintaining consistency, the engine may have to copy your event object via serialization (implement the <literal>java.io.Serializable</literal> interface). If instead you do not want any copy operations to occur, or your application needs to control the copy operation, you may configure a copy method. The copy method is the name of a method on the event object that copies the event object.
 				</para>
 				<para>
-					The sample below shows this option in XML configuration, however the setting can also be changed via API:
+					The sample below shows this option in XML configuration, however the setting can also be changed via <literal>ConfigurationEventTypeLegacy</literal>:
 				</para>
 				<programlisting><![CDATA[<event-type name="MyLegacyEvent" class="com.mycompany.package.MyLegacyEventClass">
   <legacy-type factory-method="com.mycompany.myapp.MySampleEventFactory.createMyLegacyTypeEvent" copy-method="myCopyMethod"/>
 </event-type>]]></programlisting>
+
+				<para>
+				  The copy method should be a public method that takes no parameters and returns a new event object. The copy method may not be a static method and may not take parameters.
+				</para>
 			</sect3>
 
 			<sect3 id="config-java-startendtimestamp" revision="1">
@@ -1635,6 +1639,65 @@ config.getEngineDefaults().getLogging().setEnableJDBC(true);]]></programlisting>
   </engine-settings>
 </esper-configuration>]]></programlisting>
 			</sect3>
+
+			<sect3 id="config-engine-logging-audit" revision="1">
+				<title>Audit Logging</title>
+
+				<para>
+				   The settings herein control the output format of <literal>@Audit</literal> logs.
+				</para>
+
+				<para>
+					This setting applies to all engine instances in the same JVM. Please also see the API documentation for information on pattern conversion characters.
+				</para>
+
+				<table frame="topbot">
+					<title>Audit Log Conversion Characters</title>
+					<tgroup cols="2">
+						<colspec colwidth="1.5*"/>
+						<colspec colwidth="2*"/>
+						<thead>
+							<row>
+								<entry>Character</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody>
+							<row>
+								<entry><literal>m</literal></entry>
+								<entry>Audit message.</entry>
+							</row>
+							<row>
+								<entry><literal>s</literal></entry>
+								<entry>Statement name.</entry>
+							</row>
+							<row>
+								<entry><literal>u</literal></entry>
+								<entry>Engine URI.</entry>
+							</row>
+						</tbody>
+					</tgroup>
+				</table>
+
+				<para>
+					The API to use to set am audit log format is shown here:
+				</para>
+				<programlisting><![CDATA[Configuration config = new Configuration();
+config.getEngineDefaults().getLogging().setAuditPattern("[%u] [%s] %m");]]></programlisting>
+
+				<para>
+					The XML snippet is:
+				</para>
+				<programlisting><![CDATA[<esper-configuration>
+  <engine-settings>
+    <defaults>
+      <logging>
+        <audit pattern="[%u] [%s]%m"/>
+    </logging>
+    </defaults>
+  </engine-settings>
+</esper-configuration>]]></programlisting>
+			</sect3>
 		</sect2>
 
 		<sect2 id="config-engine-variables" revision="1">
@@ -1704,6 +1767,28 @@ config.getEngineDefaults().getLogging().setEnableJDBC(true);]]></programlisting>
 				</para>
 				<programlisting><![CDATA[epService.getEPAdministrator().getConfiguration().setPatternMaxSubexpressions(100L);]]></programlisting>				
 			</sect3>
+		</sect2>
+
+		<sect2 id="config-engine-scripts" revision="1">
+			<title>Engine Settings related to Scripts</title>
+			
+			<para>
+			   You may configure a default script dialect as described herein. The default script dialect is <literal>js</literal> which stands for JavaScript, since most JVM ship with an integrated JavaScript engine.
+			</para>
+						
+			<para>
+				A sample XML configuration for this setting is shown below:
+			</para>
+				<programlisting><![CDATA[<engine-settings>
+<defaults>
+  <scripts default-dialect="js"/>
+</defaults>
+</engine-settings>]]></programlisting>
+
+			<para>
+			  A sample code snippet that sets a new script dialect is:
+			</para>
+			<programlisting><![CDATA[config.getEngineDefaults().getScripts().setDefaultDialect("js");]]></programlisting>				
 		</sect2>
 
 		<sect2 id="config-engine-stream-selection" revision="1">

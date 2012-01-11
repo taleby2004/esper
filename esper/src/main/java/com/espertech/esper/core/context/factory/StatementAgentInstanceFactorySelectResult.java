@@ -18,11 +18,12 @@ import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.Viewable;
 
+import java.util.List;
 import java.util.Map;
 
 public class StatementAgentInstanceFactorySelectResult extends StatementAgentInstanceFactoryResult {
 
-    public StatementAgentInstanceFactorySelectResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext, AggregationService optionalAggegationService, Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies, Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies, Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies) {
-        super(finalView, stopCallback, agentInstanceContext, optionalAggegationService, subselectStrategies, priorNodeStrategies, previousNodeStrategies);
+    public StatementAgentInstanceFactorySelectResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext, AggregationService optionalAggegationService, Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies, Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies, Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies, List<StatementAgentInstancePreload> preloadList) {
+        super(finalView, stopCallback, agentInstanceContext, optionalAggegationService, subselectStrategies, priorNodeStrategies, previousNodeStrategies, preloadList);
     }
 }

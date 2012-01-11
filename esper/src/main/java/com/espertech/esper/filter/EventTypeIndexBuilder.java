@@ -129,11 +129,12 @@ public class EventTypeIndexBuilder
             return;
         }
 
-        FilterHandleSetNode rootNode = eventTypeIndex.get(pair.getFirst().getEventType());
+        EventType eventType = pair.getFirst().getEventType();
+        FilterHandleSetNode rootNode = eventTypeIndex.get(eventType);
 
         // Now remove from tree
         IndexTreeBuilder treeBuilder = new IndexTreeBuilder();
-        treeBuilder.remove(filterCallback, pair.getSecond(), rootNode);
+        treeBuilder.remove(eventType, filterCallback, pair.getSecond(), rootNode);
 
         // Remove from callbacks list
         callbacksLock.lock();
@@ -165,11 +166,12 @@ public class EventTypeIndexBuilder
                 {
                     list.add(new FilterSetEntry(entry.getKey(), pair.getFirst()));
 
-                    FilterHandleSetNode rootNode = eventTypeIndex.get(pair.getFirst().getEventType());
+                    EventType eventType = pair.getFirst().getEventType();
+                    FilterHandleSetNode rootNode = eventTypeIndex.get(eventType);
 
                     // Now remove from tree
                     IndexTreeBuilder treeBuilder = new IndexTreeBuilder();
-                    treeBuilder.remove(entry.getKey(), pair.getSecond(), rootNode);
+                    treeBuilder.remove(eventType, entry.getKey(), pair.getSecond(), rootNode);
                 }
             }
             

@@ -11,15 +11,15 @@
 
 package com.espertech.esper.filter;
 
-import junit.framework.TestCase;
-import com.espertech.esper.support.filter.SupportEventEvaluator;
-import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.filter.SupportEventEvaluator;
+import junit.framework.TestCase;
 
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 public class TestFilterParamIndexNotEquals extends TestCase
 {
@@ -40,9 +40,9 @@ public class TestFilterParamIndexNotEquals extends TestCase
 
     public void testBoolean()
     {
-        FilterParamIndexNotEquals index = new FilterParamIndexNotEquals("boolPrimitive", testEventType);
+        FilterParamIndexNotEquals index = new FilterParamIndexNotEquals(makeLookupable("boolPrimitive"));
         assertEquals(FilterOperator.NOT_EQUAL, index.getFilterOperator());
-        assertEquals("boolPrimitive", index.getPropertyName());
+        assertEquals("boolPrimitive", index.getLookupable().getExpression());
 
         index.put(false, testEvaluator);
 
@@ -52,7 +52,7 @@ public class TestFilterParamIndexNotEquals extends TestCase
 
     public void testString()
     {
-        FilterParamIndexNotEquals index = new FilterParamIndexNotEquals("string", testEventType);
+        FilterParamIndexNotEquals index = new FilterParamIndexNotEquals(makeLookupable("string"));
 
         index.put("hello", testEvaluator);
         index.put("test", testEvaluator);
@@ -61,16 +61,6 @@ public class TestFilterParamIndexNotEquals extends TestCase
         verifyString(index, "dudu", 2);
         verifyString(index, "hello", 1);
         verifyString(index, "test", 1);
-
-        try
-        {
-            index.put(10, testEvaluator);
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected
-        }
     }
 
     private void verifyBooleanPrimitive(FilterParamIndexBase index, boolean testValue, int numExpected)
@@ -85,5 +75,9 @@ public class TestFilterParamIndexNotEquals extends TestCase
         testBean.setString(testValue);
         index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, testEventType.getGetter(fieldName), testEventType.getPropertyType(fieldName));
     }
 }

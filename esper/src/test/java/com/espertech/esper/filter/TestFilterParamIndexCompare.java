@@ -11,15 +11,15 @@
 
 package com.espertech.esper.filter;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.filter.SupportEventEvaluator;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.filter.SupportEventEvaluator;
+import junit.framework.TestCase;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class TestFilterParamIndexCompare extends TestCase
 {
@@ -38,32 +38,9 @@ public class TestFilterParamIndexCompare extends TestCase
         matchesList = new LinkedList<FilterHandle>();
     }
 
-    public void testInvalid()
-    {
-        try
-        {
-            new FilterParamIndexCompare("doublePrimitive", FilterOperator.EQUAL, testEventType);
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected exception
-        }
-
-        try
-        {
-            new FilterParamIndexCompare("doublePrimitive", FilterOperator.RANGE_CLOSED, testEventType);
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected exception
-        }
-    }
-
     public void testMatchDoubleAndGreater()
     {
-        FilterParamIndexCompare index = new FilterParamIndexCompare("doublePrimitive", FilterOperator.GREATER, testEventType);
+        FilterParamIndexCompare index = makeOne("doublePrimitive", FilterOperator.GREATER);
 
         index.put(Double.valueOf(1.5), testEvaluator);
         index.put(Double.valueOf(2.1), testEvaluator);
@@ -87,7 +64,7 @@ public class TestFilterParamIndexCompare extends TestCase
             index.put("a", testEvaluator);
             assertTrue(false);
         }
-        catch (IllegalArgumentException ex)
+        catch (ClassCastException ex)
         {
             // Expected
         }
@@ -95,7 +72,7 @@ public class TestFilterParamIndexCompare extends TestCase
 
     public void testMatchLongAndGreaterEquals()
     {
-        FilterParamIndexCompare index = new FilterParamIndexCompare("longBoxed", FilterOperator.GREATER_OR_EQUAL, testEventType);
+        FilterParamIndexCompare index = makeOne("longBoxed", FilterOperator.GREATER_OR_EQUAL);
 
         index.put(Long.valueOf(1), testEvaluator);
         index.put(Long.valueOf(2), testEvaluator);
@@ -118,7 +95,7 @@ public class TestFilterParamIndexCompare extends TestCase
             index.put(10, testEvaluator);
             assertTrue(false);
         }
-        catch (IllegalArgumentException ex)
+        catch (ClassCastException ex)
         {
             // Expected
         }
@@ -126,7 +103,7 @@ public class TestFilterParamIndexCompare extends TestCase
 
     public void testMatchLongAndLessThan()
     {
-        FilterParamIndexCompare index = new FilterParamIndexCompare("longPrimitive", FilterOperator.LESS, testEventType);
+        FilterParamIndexCompare index = makeOne("longPrimitive", FilterOperator.LESS);
 
         index.put(Long.valueOf(1), testEvaluator);
         index.put(Long.valueOf(10), testEvaluator);
@@ -145,7 +122,7 @@ public class TestFilterParamIndexCompare extends TestCase
 
     public void testMatchDoubleAndLessOrEqualThan()
     {
-        FilterParamIndexCompare index = new FilterParamIndexCompare("doubleBoxed", FilterOperator.LESS_OR_EQUAL, testEventType);
+        FilterParamIndexCompare index = makeOne("doubleBoxed", FilterOperator.LESS_OR_EQUAL);
 
         index.put(7.4D, testEvaluator);
         index.put(7.5D, testEvaluator);
@@ -158,6 +135,10 @@ public class TestFilterParamIndexCompare extends TestCase
         verifyDoubleBoxed(index, 7.51, 1);
         verifyDoubleBoxed(index, 7.6, 1);
         verifyDoubleBoxed(index, 7.61, 0);
+    }
+
+    private FilterParamIndexCompare makeOne(String field, FilterOperator op) {
+        return new FilterParamIndexCompare(makeLookupable(field), op);
     }
 
     private void verifyDoublePrimitive(FilterParamIndexBase index, double testValue, int numExpected)
@@ -186,5 +167,9 @@ public class TestFilterParamIndexCompare extends TestCase
         testBean.setLongPrimitive(testValue);
         index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, testEventType.getGetter(fieldName), testEventType.getPropertyType(fieldName));
     }
 }

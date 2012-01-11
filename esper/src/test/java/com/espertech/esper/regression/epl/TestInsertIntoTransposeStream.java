@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -57,7 +57,7 @@ public class TestInsertIntoTransposeStream extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("I1", 1));
         EventBean result = listener.assertOneGetNewAndReset();
         Pair underlying = (Pair) result.getUnderlying();
-        ArrayAssertionUtil.assertProps(result, "dummy,string,intPrimitive".split(","), new Object[] {1, "OI1", 10});
+        EPAssertionUtil.assertProps(result, "dummy,string,intPrimitive".split(","), new Object[]{1, "OI1", 10});
         assertEquals("OI1", ((SupportBean) underlying.getFirst()).getString());
     }
 
@@ -77,7 +77,7 @@ public class TestInsertIntoTransposeStream extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("I1", 1));
         EventBean result = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(result, "string,intPrimitive".split(","), new Object[] {"OI1", 10});
+        EPAssertionUtil.assertProps(result, "string,intPrimitive".split(","), new Object[]{"OI1", 10});
         assertEquals("OI1", ((SupportBean) result.getUnderlying()).getString());
     }
 
@@ -96,7 +96,7 @@ public class TestInsertIntoTransposeStream extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("I1", 1));
         EventBean resultOne = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(resultOne, "string,intPrimitive".split(","), new Object[] {"OI1", 10});
+        EPAssertionUtil.assertProps(resultOne, "string,intPrimitive".split(","), new Object[]{"OI1", 10});
         assertEquals("OI1", ((SupportBean) resultOne.getUnderlying()).getString());
         stmtOne.destroy();
 
@@ -108,7 +108,7 @@ public class TestInsertIntoTransposeStream extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("I2", 10));
         EventBean resultTwo = listener.assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(resultTwo, "intOne,intTwo".split(","), new Object[]{10, 11});
+        EPAssertionUtil.assertProps(resultTwo, "intOne,intTwo".split(","), new Object[]{10, 11});
         assertEquals(11, (int) ((SupportBeanNumeric) resultTwo.getUnderlying()).getIntTwo());
         stmtTwo.destroy();
 
@@ -181,7 +181,7 @@ public class TestInsertIntoTransposeStream extends TestCase
         epService.getEPRuntime().sendEvent(eventOne, "AEvent");
         epService.getEPRuntime().sendEvent(eventTwo, "BEvent");
 
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.id,b.id".split(","), new Object[] {"A1", "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.id,b.id".split(","), new Object[]{"A1", "B1"});
     }
 
     public void testTransposeEventJoinPOJO()
@@ -198,7 +198,7 @@ public class TestInsertIntoTransposeStream extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.id,b.id".split(","), new Object[] {"A1", "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.id,b.id".split(","), new Object[]{"A1", "B1"});
     }
 
     public void testTransposePOJOPropertyStream()
@@ -213,7 +213,7 @@ public class TestInsertIntoTransposeStream extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(SupportBeanComplexProps.makeDefaultBean());
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "result".split(","), new Object[] {"nestedValue"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "result".split(","), new Object[]{"nestedValue"});
     }
 
     public void testInvalidTransposeMapPropertyStream()

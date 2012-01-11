@@ -11,15 +11,15 @@
 
 package com.espertech.esper.filter;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.bean.SupportBean;
-import com.espertech.esper.support.filter.SupportEventEvaluator;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.support.filter.SupportEventEvaluator;
+import junit.framework.TestCase;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class TestFilterParamIndexEquals extends TestCase
 {
@@ -40,7 +40,7 @@ public class TestFilterParamIndexEquals extends TestCase
 
     public void testLong()
     {
-        FilterParamIndexEquals index = new FilterParamIndexEquals("shortBoxed", testEventType);
+        FilterParamIndexEquals index = makeOne("shortBoxed", testEventType);
 
         index.put(Short.valueOf((short) 1), testEvaluator);
         index.put(Short.valueOf((short) 20), testEvaluator);
@@ -55,21 +55,11 @@ public class TestFilterParamIndexEquals extends TestCase
         assertTrue(index.remove((short) 1));
         assertFalse(index.remove((short) 1));
         assertEquals(null, index.get((short) 1));
-
-        try
-        {
-            index.put("a", testEvaluator);
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected
-        }
     }
 
     public void testBoolean()
     {
-        FilterParamIndexEquals index = new FilterParamIndexEquals("boolPrimitive", testEventType);
+        FilterParamIndexEquals index = makeOne("boolPrimitive", testEventType);
 
         index.put(false, testEvaluator);
 
@@ -79,7 +69,7 @@ public class TestFilterParamIndexEquals extends TestCase
 
     public void testString()
     {
-        FilterParamIndexEquals index = new FilterParamIndexEquals("string", testEventType);
+        FilterParamIndexEquals index = makeOne("string", testEventType);
 
         index.put("hello", testEvaluator);
         index.put("test", testEvaluator);
@@ -88,37 +78,17 @@ public class TestFilterParamIndexEquals extends TestCase
         verifyString(index, "dudu", 0);
         verifyString(index, "hello", 1);
         verifyString(index, "test", 1);
-
-        try
-        {
-            index.put(10, testEvaluator);
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected
-        }
     }
 
     public void testFloatPrimitive()
     {
-        FilterParamIndexEquals index = new FilterParamIndexEquals("floatPrimitive", testEventType);
+        FilterParamIndexEquals index = makeOne("floatPrimitive", testEventType);
 
         index.put(1.5f, testEvaluator);
 
         verifyFloatPrimitive(index, 1.5f, 1);
         verifyFloatPrimitive(index, 2.2f, 0);
         verifyFloatPrimitive(index, 0, 0);
-
-        try
-        {
-            index.put(new Double(20), testEvaluator);
-            assertTrue(false);
-        }
-        catch (IllegalArgumentException ex)
-        {
-            // Expected
-        }
     }
 
     private void verifyShortBoxed(FilterParamIndexBase index, Short testValue, int numExpected)
@@ -147,5 +117,13 @@ public class TestFilterParamIndexEquals extends TestCase
         testBean.setFloatPrimitive(testValue);
         index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
+    }
+
+    private FilterParamIndexEquals makeOne(String property, EventType testEventType) {
+        return new FilterParamIndexEquals(makeLookupable(property));
+    }
+
+    private FilterSpecLookupable makeLookupable(String fieldName) {
+        return new FilterSpecLookupable(fieldName, testEventType.getGetter(fieldName), testEventType.getPropertyType(fieldName));
     }
 }

@@ -39,8 +39,8 @@ public class TestAggregationServiceGroupAllImpl extends TestCase
         // apply two rows, all aggregators evaluated their sub-expressions(constants 5 and 2) twice
         service.applyEnter(new EventBean[1], null, null);
         service.applyEnter(new EventBean[1], null, null);
-        assertEquals(10, service.getValue(0, null));
-        assertEquals(4, service.getValue(1, null));
+        assertEquals(10, service.getValue(0, -1));
+        assertEquals(4, service.getValue(1, -1));
     }
 
     public void testApplyLeave()
@@ -49,8 +49,8 @@ public class TestAggregationServiceGroupAllImpl extends TestCase
         service.applyLeave(new EventBean[1], null, null);
         service.applyLeave(new EventBean[1], null, null);
         service.applyLeave(new EventBean[1], null, null);
-        assertEquals(-15, service.getValue(0, null));
-        assertEquals(-6, service.getValue(1, null));
+        assertEquals(-15, service.getValue(0, -1));
+        assertEquals(-6, service.getValue(1, -1));
     }
 
     private static EventBean[][] makeEvents(int countRows)

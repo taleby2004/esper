@@ -43,7 +43,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -139,7 +138,7 @@ public class StatementAgentInstanceFactoryOnTrigger implements StatementAgentIns
             }
 
             // attach stream to view
-            final ViewableActivationResult activationResult = activator.activate(agentInstanceContext);
+            final ViewableActivationResult activationResult = activator.activate(agentInstanceContext, false);
             activationResult.getViewable().addView(onExprView);
             stopCallbacks.add(activationResult.getStopCallback());
 

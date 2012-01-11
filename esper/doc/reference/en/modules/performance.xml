@@ -762,6 +762,36 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 					Generally context partitions require more memory then the more fine-grained grouping that can be achieved by <literal>group by</literal> or <literal>std:groupwin</literal>.
 				</para>
 		</sect2>
+		<sect2 id="perf-tips-21">
+			<title>Prefer Constant Variables over Non-Constant Variables</title>
+			<para>
+				The create-variable syntax as well as the APIs can identify a variable as a constant value. When a variable's value is not intended to change it is best to declare the variable as constant.
+			</para>
+			
+			<para>
+				For example, consider the following two EPL statements that each declares a variable. The first statement declares a constant variable and the second statement declares a non-constant variable:
+			</para>
+			<programlisting><![CDATA[// declare a constant variable
+create constant variable CONST_DEPARTMENT = 'PURCHASING']]></programlisting>
+			<programlisting><![CDATA[// declare a non-constant variable
+create variable VAR_DEPARTMENT = 'SALES']]></programlisting>
+
+			<para>
+				When your application creates a statement that has filters for events according to variable values, the engine internally inspects such expressions and performs filter optimizations for constant variables that are more effective in evaluation.
+			</para>
+			
+			<para>
+				For example, consider the following two EPL statements that each look for events related to persons that belong to a given department:
+			</para>
+			<programlisting><![CDATA[// perfer the constant
+select * from PersonEvent(department=CONST_DEPARTMENT)]]></programlisting>
+			<programlisting><![CDATA[// less efficient
+select * from PersonEvent(department=VAR_DEPARTMENT)]]></programlisting>
+
+			<para>
+				The engine can more efficiently evaluate the expression using a variable declared as constant. The same observation can be made for subquery and join query planning.
+			</para>
+		</sect2>
     </sect1>
 
     <sect1 id="performance-kit" revision="1">
@@ -839,10 +869,10 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
                         1.7.0)
                         and its dependencies as in the sample below (with Esper 2.1) :
                         <programlisting><![CDATA[# classpath on Unix/Linux (on one single line)
-etc:build:lib/esper-4.4.1.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
+etc:build:lib/esper-4.5.0.jar:lib/commons-logging-1.1.1.jar:lib/cglib-nodep-2.2.jar
    :lib/antlr-runtime-3.2.jar:lib/log4j-1.2.16.jar
 @rem  classpath on Windows (on one single line)
-etc;build;lib\esper-4.4.1.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
+etc;build;lib\esper-4.5.0.jar;lib\commons-logging-1.1.1.jar;lib\cglib-nodep-2.2.jar
    ;lib\antlr-runtime-3.2.jar;lib\log4j-1.2.16.jar]]></programlisting>
                         Note that <literal>./etc</literal> and <literal>./build</literal> have to be in the classpath.
                         At that stage you should also start to set min and max JVM heap. A good start is 1GB as in

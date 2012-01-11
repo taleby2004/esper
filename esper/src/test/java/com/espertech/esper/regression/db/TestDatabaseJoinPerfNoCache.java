@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.db;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportDatabaseService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -149,7 +149,7 @@ public class TestDatabaseJoinPerfNoCache extends TestCase
             String col2 = Integer.toString(Math.round((float)num / 10));
             SupportBean_S0 bean = new SupportBean_S0(num);
             epServiceRetained.getEPRuntime().sendEvent(bean);
-            ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[] {"id", "mycol3", "mycol2"}, new Object[] {num, num, col2});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"id", "mycol3", "mycol2"}, new Object[]{num, num, col2});
         }
     }
 

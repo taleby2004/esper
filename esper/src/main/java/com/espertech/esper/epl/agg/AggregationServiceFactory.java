@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.core.context.util.AgentInstanceContext;
+import com.espertech.esper.epl.core.MethodResolutionService;
 
 /**
  * Factory for aggregation service instances.
@@ -18,5 +19,5 @@ import com.espertech.esper.core.context.util.AgentInstanceContext;
  */
 public interface AggregationServiceFactory
 {
-    public AggregationService makeService(AgentInstanceContext agentInstanceContext);
+    public AggregationService makeService(AgentInstanceContext agentInstanceContext, MethodResolutionService methodResolutionService);
 }

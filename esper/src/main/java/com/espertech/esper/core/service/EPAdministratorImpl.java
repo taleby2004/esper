@@ -10,8 +10,10 @@ package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
+import com.espertech.esper.client.epn.EPNetworkAdmin;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.core.deploy.EPDeploymentAdminImpl;
+import com.espertech.esper.core.epn.EPNetworkAdminImpl;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.pattern.EvalFactoryNode;
@@ -29,6 +31,7 @@ public class EPAdministratorImpl implements EPAdministratorSPI
     private ConfigurationOperations configurationOperations;
     private SelectClauseStreamSelectorEnum defaultStreamSelector;
     private EPDeploymentAdmin deploymentAdminService;
+    private EPNetworkAdmin networkAdminService;
 
     /**
      * Constructor - takes the services context as argument.
@@ -40,6 +43,11 @@ public class EPAdministratorImpl implements EPAdministratorSPI
         this.configurationOperations = adminContext.getConfigurationOperations();
         this.defaultStreamSelector = adminContext.getDefaultStreamSelector();
         this.deploymentAdminService = new EPDeploymentAdminImpl(this, adminContext.getServices().getDeploymentStateService(), adminContext.getServices().getStatementEventTypeRefService(), adminContext.getServices().getEventAdapterService(), adminContext.getServices().getStatementIsolationService(), null, adminContext.getServices().getFilterService());
+        this.networkAdminService = new EPNetworkAdminImpl(adminContext.getServices().getEngineURI(), adminContext.getRuntimeSPI(), adminContext.getServices().getThreadingService());
+    }
+
+    public EPNetworkAdmin getNetworkAdmin() {
+        return networkAdminService;
     }
 
     public EPDeploymentAdmin getDeploymentAdmin()
@@ -217,6 +225,10 @@ public class EPAdministratorImpl implements EPAdministratorSPI
         return services.getStatementLifecycleSvc().getStatementByName(name);
     }
 
+    public String getStatementNameForId(String statementId) {
+        return services.getStatementLifecycleSvc().getStatementNameById(statementId);
+    }
+
     public String[] getStatementNames()
     {
         return services.getStatementLifecycleSvc().getStatementNames();
@@ -272,6 +284,11 @@ public class EPAdministratorImpl implements EPAdministratorSPI
     {
         StatementSpecRaw raw = EPAdministratorHelper.compilePattern(pattern, pattern, false, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
         return ((PatternStreamSpecRaw) raw.getStreamSpecs().get(0)).getEvalFactoryNode();
+    }
+
+    public EPStatementObjectModel compilePatternToSODAModel(String expression) throws EPException {
+        StatementSpecRaw rawPattern = EPAdministratorHelper.compilePattern(expression, expression, true, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
+        return mapRawToSODA(rawPattern);
     }
 
     public ExprNode compileExpression(String expression) throws EPException

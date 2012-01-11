@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.core.service.EPStatementSPI;
@@ -21,8 +23,6 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -74,8 +74,8 @@ public class TestNamedWindowInsertFrom extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         String[] fields = new String[] {"string"};
-        ArrayAssertionUtil.assertProps(listeners[0].assertOneGetNewAndReset(), fields, new Object[] {"E1"});
-        ArrayAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listeners[0].assertOneGetNewAndReset(), fields, new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[]{"E1"});
     }
 
     public void testInsertWhereTypeAndFilter() throws Exception
@@ -109,7 +109,7 @@ public class TestNamedWindowInsertFrom extends TestCase
         String stmtTextCreateTwo = "create window MyWindowTwo.win:keepall() as MyWindow insert";
         EPStatement stmtCreateTwo = epService.getEPAdministrator().createEPL(stmtTextCreateTwo);
         stmtCreateTwo.addListener(listeners[2]);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateTwo.iterator(), fields, new Object[][] {{"A1"}, {"B2"}, {"C3"}, {"A4"}, {"C5"}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateTwo.iterator(), fields, new Object[][]{{"A1"}, {"B2"}, {"C3"}, {"A4"}, {"C5"}});
         EventType eventTypeTwo = stmtCreateTwo.iterator().next().getEventType();
         assertFalse(listeners[2].isInvoked());
         assertEquals(5, getCount("MyWindowTwo"));
@@ -119,7 +119,7 @@ public class TestNamedWindowInsertFrom extends TestCase
         String stmtTextCreateThree = "create window MyWindowThree.win:keepall() as MyWindow insert where string like 'A%'";
         EPStatement stmtCreateThree = epService.getEPAdministrator().createEPL(stmtTextCreateThree);
         stmtCreateThree.addListener(listeners[3]);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateThree.iterator(), fields, new Object[][] {{"A1"}, {"A4"}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateThree.iterator(), fields, new Object[][]{{"A1"}, {"A4"}});
         EventType eventTypeThree = stmtCreateThree.iterator().next().getEventType();
         assertFalse(listeners[3].isInvoked());
         assertEquals(2, getCount("MyWindowThree"));
@@ -128,7 +128,7 @@ public class TestNamedWindowInsertFrom extends TestCase
         String stmtTextCreateFour = "create window MyWindowFour.std:unique(intPrimitive) as MyWindow insert";
         EPStatement stmtCreateFour = epService.getEPAdministrator().createEPL(stmtTextCreateFour);
         stmtCreateFour.addListener(listeners[4]);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreateFour.iterator(), fields, new Object[][] {{"C3"}, {"C5"}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreateFour.iterator(), fields, new Object[][]{{"C3"}, {"C5"}});
         EventType eventTypeFour = stmtCreateFour.iterator().next().getEventType();
         assertFalse(listeners[4].isInvoked());
         assertEquals(2, getCount("MyWindowFour"));
@@ -141,26 +141,26 @@ public class TestNamedWindowInsertFrom extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("B9", -9));
         EventBean received = listeners[2].assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields, new Object[] {"B9"});
+        EPAssertionUtil.assertProps(received, fields, new Object[]{"B9"});
         assertSame(eventTypeTwo, received.getEventType());
         assertFalse(listeners[0].isInvoked() || listeners[3].isInvoked() || listeners[4].isInvoked());
         assertEquals(6, getCount("MyWindowTwo"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("A8", -8));
         received = listeners[0].assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields, new Object[] {"A8"});
+        EPAssertionUtil.assertProps(received, fields, new Object[]{"A8"});
         assertSame(eventTypeOne, received.getEventType());
         assertFalse(listeners[2].isInvoked() || listeners[3].isInvoked() || listeners[4].isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("C7", -7));
         received = listeners[3].assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields, new Object[] {"C7"});
+        EPAssertionUtil.assertProps(received, fields, new Object[]{"C7"});
         assertSame(eventTypeThree, received.getEventType());
         assertFalse(listeners[2].isInvoked() || listeners[0].isInvoked() || listeners[4].isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("D6", -6));
         received = listeners[4].assertOneGetNewAndReset();
-        ArrayAssertionUtil.assertProps(received, fields, new Object[] {"D6"});
+        EPAssertionUtil.assertProps(received, fields, new Object[]{"D6"});
         assertSame(eventTypeFour, received.getEventType());
         assertFalse(listeners[2].isInvoked() || listeners[0].isInvoked() || listeners[3].isInvoked());
     }
@@ -196,11 +196,11 @@ public class TestNamedWindowInsertFrom extends TestCase
         assertEquals(text, modelTwo.toEPL());
         
         EPStatement stmt = epService.getEPAdministrator().create(modelTwo);
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), "a,b".split(","), new Object[][] {{"E2", 10}, {"E3", 10}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "a,b".split(","), new Object[][]{{"E2", 10}, {"E3", 10}});
 
         // test select individual fields and from an insert-from named window
         stmt = epService.getEPAdministrator().createEPL("create window MyWindowThree.win:keepall() as select a from MyWindowTwo insert where a = 'E2'");
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), "a".split(","), new Object[][] {{"E2"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "a".split(","), new Object[][]{{"E2"}});
     }
 
     public void testVariantStream()
@@ -221,9 +221,9 @@ public class TestNamedWindowInsertFrom extends TestCase
         epService.getEPAdministrator().createEPL("insert into MyWindowTwo select * from VarStream");
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
-        EventBean[] events = ArrayAssertionUtil.iteratorToArray(stmt.iterator());
+        EventBean[] events = EPAssertionUtil.iteratorToArray(stmt.iterator());
         assertEquals("A1", events[0].get("id?"));
-        ArrayAssertionUtil.assertEqualsExactOrder(stmt.iterator(), "id?".split(","), new Object[][] {{"A1"}, {"B1"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "id?".split(","), new Object[][]{{"A1"}, {"B1"}});
     }
 
     public void testInvalid()

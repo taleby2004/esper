@@ -13,6 +13,8 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.service.ExpressionResultCacheService;
+import com.espertech.esper.epl.script.AgentInstanceScriptContext;
+import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.schedule.TimeProvider;
 import com.espertech.esper.support.epl.SupportExprNode;
 import junit.framework.TestCase;
@@ -65,11 +67,31 @@ public class TestExprTimestampNode extends TestCase
                 return null;
             }
 
-            public int[] getAgentInstanceIds() {
-                return new int[0];
+            public int getAgentInstanceId() {
+                return -1;
             }
 
             public EventBean getContextProperties() {
+                return null;
+            }
+
+            public AgentInstanceScriptContext getAgentInstanceScriptContext() {
+                return null;
+            }
+
+            public String getStatementName() {
+                return null;
+            }
+
+            public String getEngineURI() {
+                return null;
+            }
+
+            public String getStatementId() {
+                return null;
+            }
+
+            public StatementAgentInstanceLock getAgentInstanceLock() {
                 return null;
             }
         };

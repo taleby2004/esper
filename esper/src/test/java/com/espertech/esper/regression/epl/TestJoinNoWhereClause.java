@@ -11,6 +11,8 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
@@ -18,8 +20,6 @@ import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
 
 public class TestJoinNoWhereClause extends TestCase
@@ -69,27 +69,27 @@ public class TestJoinNoWhereClause extends TestCase
 
         // Send 2 events, should join on second one
         sendEvent(setOne[0]);
-        ArrayAssertionUtil.assertEqualsAnyOrder(joinView.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRowAnyOrder(joinView.iterator(), fields, null);
 
         sendEvent(setTwo[0]);
         assertEquals(1, updateListener.getLastNewData().length);
         assertEquals(setOne[0], updateListener.getLastNewData()[0].get("stream_0"));
         assertEquals(setTwo[0], updateListener.getLastNewData()[0].get("stream_1"));
         updateListener.reset();
-        ArrayAssertionUtil.assertEqualsAnyOrder(joinView.iterator(), fields,
-                new Object[][] {{0L, 0L}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(joinView.iterator(), fields,
+                new Object[][]{{0L, 0L}});
 
         sendEvent(setOne[1]);
         sendEvent(setOne[2]);
         sendEvent(setTwo[1]);
         assertEquals(3, updateListener.getLastNewData().length);
-        ArrayAssertionUtil.assertEqualsAnyOrder(joinView.iterator(), fields,
-                new Object[][] {{0L, 0L},
-                                {1L, 0L},
-                                {2L, 0L},
-                                {0L, 1L},
-                                {1L, 1L},
-                                {2L, 1L}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(joinView.iterator(), fields,
+                new Object[][]{{0L, 0L},
+                        {1L, 0L},
+                        {2L, 0L},
+                        {0L, 1L},
+                        {1L, 1L},
+                        {2L, 1L}});
     }
 
     private void sendEvent(Object event)

@@ -11,16 +11,16 @@
 
 package com.espertech.esper.regression.view;
 
-import junit.framework.TestCase;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.Configuration;
-import com.espertech.esper.support.util.SupportUpdateListener;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import junit.framework.TestCase;
 
 public class TestViewLengthBatch extends TestCase
 {
@@ -55,27 +55,27 @@ public class TestViewLengthBatch extends TestCase
 
         sendEvent(events[0]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new SupportBean[] {events[0] });
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new SupportBean[]{events[0]}, stmt.iterator());
 
         sendEvent(events[1]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[0], events[1]}, null);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[0], events[1]}, null);
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[2]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new SupportBean[] {events[2] });
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new SupportBean[]{events[2]}, stmt.iterator());
 
         sendEvent(events[3]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[2], events[3]}, new SupportBean[] {events[0], events[1]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[2], events[3]}, new SupportBean[]{events[0], events[1]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[4]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new SupportBean[] {events[4] });
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new SupportBean[]{events[4]}, stmt.iterator());
 
         sendEvent(events[5]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[4], events[5]}, new SupportBean[] {events[2], events[3]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[4], events[5]}, new SupportBean[]{events[2], events[3]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
     }
 
     public void testLengthBatchSize1()
@@ -85,16 +85,16 @@ public class TestViewLengthBatch extends TestCase
         stmt.addListener(listener);
 
         sendEvent(events[0]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[0]}, null);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[0]}, null);
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[1]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[1]}, new SupportBean[] {events[0]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[1]}, new SupportBean[]{events[0]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[2]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[2]}, new SupportBean[] {events[1]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[2]}, new SupportBean[]{events[1]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
     }
 
     public void testLengthBatchSize3()
@@ -105,27 +105,27 @@ public class TestViewLengthBatch extends TestCase
 
         sendEvent(events[0]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new SupportBean[] {events[0] });
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new SupportBean[]{events[0]}, stmt.iterator());
 
         sendEvent(events[1]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new SupportBean[] {events[0], events[1]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new SupportBean[]{events[0], events[1]}, stmt.iterator());
 
         sendEvent(events[2]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[0], events[1], events[2]}, null);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[0], events[1], events[2]}, null);
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[3]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new SupportBean[] {events[3]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new SupportBean[]{events[3]}, stmt.iterator());
 
         sendEvent(events[4]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), new SupportBean[] {events[3], events[4]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(new SupportBean[]{events[3], events[4]}, stmt.iterator());
 
         sendEvent(events[5]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[3], events[4], events[5]}, new SupportBean[] {events[0], events[1], events[2]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[3], events[4], events[5]}, new SupportBean[]{events[0], events[1], events[2]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
     }
 
     public void testLengthBatchSize3And2Staggered()
@@ -136,27 +136,27 @@ public class TestViewLengthBatch extends TestCase
 
         sendEvent(events[0]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[1]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[2]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[0], events[1], events[2]}, null);
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[0], events[1], events[2]}, null);
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[3]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[4]);
         assertFalse(listener.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
 
         sendEvent(events[5]);
-        listener.assertUnderlyingAndReset(new SupportBean[] {events[3], events[4], events[5]}, new SupportBean[] {events[0], events[1], events[2]});
-        ArrayAssertionUtil.assertEqualsExactOrderUnderlying(stmt.iterator(), null);
+        EPAssertionUtil.assertUnderlyingPerRow(listener.assertInvokedAndReset(), new SupportBean[]{events[3], events[4], events[5]}, new SupportBean[]{events[0], events[1], events[2]});
+        EPAssertionUtil.assertEqualsExactOrderUnderlying(null, stmt.iterator());
     }
 
     public void testInvalid()

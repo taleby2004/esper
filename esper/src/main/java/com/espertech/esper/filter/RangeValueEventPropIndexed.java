@@ -43,11 +43,6 @@ public class RangeValueEventPropIndexed implements FilterSpecParamRangeValue
         this.statementName = statementName;
     }
 
-    public int getFilterHash()
-    {
-        return resultEventProperty.hashCode();
-    }
-
     /**
      * Returns the index.
      * @return index

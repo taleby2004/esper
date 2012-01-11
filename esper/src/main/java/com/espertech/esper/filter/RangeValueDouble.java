@@ -33,11 +33,6 @@ public class RangeValueDouble implements FilterSpecParamRangeValue
         return doubleValue;
     }
 
-    public int getFilterHash()
-    {
-        return Double.valueOf(doubleValue).hashCode();
-    }
-
     /**
      * Returns the constant value.
      * @return constant

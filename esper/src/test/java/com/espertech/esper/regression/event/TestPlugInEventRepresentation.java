@@ -12,12 +12,12 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.plugin.PlugInEventBeanReflectorContext;
 import com.espertech.esper.plugin.PlugInEventRepresentationContext;
 import com.espertech.esper.plugin.PlugInEventTypeHandlerContext;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 import java.net.URI;
@@ -170,12 +170,12 @@ public class TestPlugInEventRepresentation extends TestCase
         // static senders
         EventSender sender = epService.getEPRuntime().getEventSender("TestTypeOne");
         sender.sendEvent(makeProperties(new String[][] {{"r2", "A"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[0].assertOneGetNewAndReset(), new Object[] {"A"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[0].assertOneGetNewAndReset(), new Object[]{"A"});
         assertFalse(listeners[0].isInvoked());
 
         sender = epService.getEPRuntime().getEventSender("TestTypeTwo");
         sender.sendEvent(makeProperties(new String[][] {{"r2", "B"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[1].assertOneGetNewAndReset(), new Object[] {"B"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[1].assertOneGetNewAndReset(), new Object[]{"B"});
     }
 
     private Configuration getConfiguration() throws URISyntaxException
@@ -201,35 +201,35 @@ public class TestPlugInEventRepresentation extends TestCase
         // static senders
         EventSender sender = epService.getEPRuntime().getEventSender("TestTypeOne");
         sender.sendEvent(makeProperties(new String[][] {{"r1", "A"}, {"t1", "B"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[0].assertOneGetNewAndReset(), new Object[] {"A", "B"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[0].assertOneGetNewAndReset(), new Object[]{"A", "B"});
         assertFalse(listeners[3].isInvoked() || listeners[1].isInvoked() || listeners[2].isInvoked());
 
         sender = epService.getEPRuntime().getEventSender("TestTypeTwo");
         sender.sendEvent(makeProperties(new String[][] {{"r2", "C"}, {"t2", "D"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[1].assertOneGetNewAndReset(), new Object[] {"C", "D"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[1].assertOneGetNewAndReset(), new Object[]{"C", "D"});
         assertFalse(listeners[3].isInvoked() || listeners[0].isInvoked() || listeners[2].isInvoked());
 
         sender = epService.getEPRuntime().getEventSender("TestTypeThree");
         sender.sendEvent(makeProperties(new String[][] {{"r3", "E"}, {"t3", "F"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[2].assertOneGetNewAndReset(), new Object[] {"E", "F"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[2].assertOneGetNewAndReset(), new Object[]{"E", "F"});
         assertFalse(listeners[3].isInvoked() || listeners[1].isInvoked() || listeners[0].isInvoked());
 
         sender = epService.getEPRuntime().getEventSender("TestTypeFour");
         sender.sendEvent(makeProperties(new String[][] {{"r2", "G"}, {"t4", "H"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[3].assertOneGetNewAndReset(), new Object[] {"G", "H"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[3].assertOneGetNewAndReset(), new Object[]{"G", "H"});
         assertFalse(listeners[0].isInvoked() || listeners[1].isInvoked() || listeners[2].isInvoked());
 
         // dynamic sender - decides on event type thus a particular update listener should see the event
         URI[] uriList = new URI[] {new URI("type://properties/test1"), new URI("type://properties/test2")};
         EventSender dynamicSender = epService.getEPRuntime().getEventSender(uriList);
         dynamicSender.sendEvent(makeProperties(new String[][] {{"r3", "I"}, {"t3", "J"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[2].assertOneGetNewAndReset(), new Object[] {"I", "J"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[2].assertOneGetNewAndReset(), new Object[]{"I", "J"});
         dynamicSender.sendEvent(makeProperties(new String[][] {{"r1", "K"}, {"t1", "L"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[0].assertOneGetNewAndReset(), new Object[] {"K", "L"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[0].assertOneGetNewAndReset(), new Object[]{"K", "L"});
         dynamicSender.sendEvent(makeProperties(new String[][] {{"r2", "M"}, {"t2", "N"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[1].assertOneGetNewAndReset(), new Object[] {"M", "N"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[1].assertOneGetNewAndReset(), new Object[]{"M", "N"});
         dynamicSender.sendEvent(makeProperties(new String[][] {{"r2", "O"}, {"t4", "P"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[3].assertOneGetNewAndReset(), new Object[] {"O", "P"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[3].assertOneGetNewAndReset(), new Object[]{"O", "P"});
         dynamicSender.sendEvent(makeProperties(new String[][] {{"r2", "O"}, {"t3", "P"}}));
         assertNoneReceived();
 
@@ -238,7 +238,7 @@ public class TestPlugInEventRepresentation extends TestCase
         dynamicSender.sendEvent(makeProperties(new String[][] {{"r1", "I"}, {"t1", "J"}}));
         assertNoneReceived();
         dynamicSender.sendEvent(makeProperties(new String[][] {{"r2", "Q"}, {"t2", "R"}}));
-        ArrayAssertionUtil.assertAllProps(listeners[1].assertOneGetNewAndReset(), new Object[] {"Q", "R"});
+        EPAssertionUtil.assertAllPropsSortedByName(listeners[1].assertOneGetNewAndReset(), new Object[]{"Q", "R"});
     }
 
     private void assertNoneReceived()

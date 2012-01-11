@@ -21,6 +21,7 @@ import com.espertech.esper.epl.variable.VariableTypeException;
 import com.espertech.esper.event.EventAdapterException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeIdGenerator;
+import com.espertech.esper.event.EventTypeUtility;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
 import com.espertech.esper.event.vaevent.ValueAddEventService;
 import com.espertech.esper.event.vaevent.VariantEventType;
@@ -108,7 +109,8 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     {
         try
         {
-            engineImportService.addAggregation(functionName, aggregationClassName);
+            ConfigurationPlugInAggregationFunction desc = new ConfigurationPlugInAggregationFunction(functionName, aggregationClassName, null);
+            engineImportService.addAggregation(functionName, desc);
         }
         catch (EngineImportException e)
         {
@@ -116,21 +118,41 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    public void addPlugInSingleRowFunction(String functionName, String className, String methodName) throws ConfigurationException
-    {
-        addPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED);
-    }
-
-    public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws ConfigurationException
+    public void addPlugInAggregationFunctionFactory(String functionName, String aggregationFactoryClassName)
     {
         try
         {
-            engineImportService.addSingleRow(functionName, className, methodName, valueCache);
+            ConfigurationPlugInAggregationFunction desc = new ConfigurationPlugInAggregationFunction(functionName, null, aggregationFactoryClassName);
+            engineImportService.addAggregation(functionName, desc);
         }
         catch (EngineImportException e)
         {
             throw new ConfigurationException(e.getMessage(), e);
         }
+    }
+
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName) throws ConfigurationException {
+        addPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
+    }
+
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache) throws ConfigurationException {
+        addPlugInSingleRowFunction(functionName, className, methodName, valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
+    }
+
+    public void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws ConfigurationException {
+        addPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, filterOptimizable);
+    }
+
+    private void addPlugInSingleRowFunction(String functionName, String className, String methodName, ConfigurationPlugInSingleRowFunction.ValueCache valueCache, ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws ConfigurationException {
+        try
+        {
+            engineImportService.addSingleRow(functionName, className, methodName, valueCache, filterOptimizable);
+        }
+        catch (EngineImportException e)
+        {
+            throw new ConfigurationException(e.getMessage(), e);
+        }
+
     }
 
     public void addImport(String importName)
@@ -192,7 +214,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
 
     public void addEventType(String eventTypeName, Properties typeMap)
     {
-        Map<String, Object> types = createPropertyTypes(typeMap);
+        Map<String, Object> types = JavaClassHelper.getClassObjectFromPropertyTypeNames(typeMap);
         try
         {
             eventAdapterService.addNestableMapType(eventTypeName, types, null, false, true, true, false, false);
@@ -207,7 +229,8 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
     {
         try
         {
-            eventAdapterService.addNestableMapType(eventTypeName, typeMap, null, false, true, true, false, false);
+            Map<String, Object> compiledProperties = EventTypeUtility.compileMapTypeProperties(typeMap, eventAdapterService);
+            eventAdapterService.addNestableMapType(eventTypeName, compiledProperties, null, false, true, true, false, false);
         }
         catch (EventAdapterException t)
         {
@@ -271,59 +294,20 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
-    private static Map<String, Object> createPropertyTypes(Properties properties)
-    {
-        Map<String, Object> propertyTypes = new HashMap<String, Object>();
-        for(Map.Entry<Object, Object> entry : properties.entrySet())
-        {
-            String className = (String) entry.getValue();
-
-            if ("string".equals(className))
-            {
-                className = String.class.getName();
-            }
-
-            // use the boxed type for primitives
-            String boxedClassName = JavaClassHelper.getBoxedClassName(className);
-
-            Class clazz;
-            try
-            {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                clazz = Class.forName(boxedClassName, true, cl);
-            }
-            catch (ClassNotFoundException ex)
-            {
-                throw new ConfigurationException("Unable to load class '" + boxedClassName + "', class not found", ex);
-            }
-
-            propertyTypes.put((String) entry.getKey(), clazz);
-        }
-        return propertyTypes;
-    }
-
     public void addVariable(String variableName, Class type, Object initializationValue) throws ConfigurationException
     {
-        try
-        {
-            variableService.createNewVariable(variableName, type.getName(), initializationValue, null);
-            statementVariableRef.addConfiguredVariable(variableName);
-        }
-        catch (VariableExistsException e)
-        {
-            throw new ConfigurationException("Error creating variable: " + e.getMessage(), e);
-        }
-        catch (VariableTypeException e)
-        {
-            throw new ConfigurationException("Error creating variable: " + e.getMessage(), e);
-        }
+        addVariable(variableName, type.getName(), initializationValue, false);
     }
 
     public void addVariable(String variableName, String eventTypeName, Object initializationValue) throws ConfigurationException
     {
+        addVariable(variableName, eventTypeName, initializationValue, false);
+    }
+
+    public void addVariable(String variableName, String type, Object initializationValue, boolean constant) throws ConfigurationException {
         try
         {
-            variableService.createNewVariable(variableName, eventTypeName, initializationValue, null);
+            variableService.createNewVariable(variableName, type, initializationValue, constant, null);
             statementVariableRef.addConfiguredVariable(variableName);
         }
         catch (VariableExistsException e)

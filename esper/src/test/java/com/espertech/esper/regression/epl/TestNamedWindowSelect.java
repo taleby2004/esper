@@ -12,6 +12,8 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.core.service.StatementType;
@@ -19,8 +21,6 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestNamedWindowSelect extends TestCase
@@ -59,7 +59,8 @@ public class TestNamedWindowSelect extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         String stmtTextSelect = "on SupportBean_A select mwc.* as mwcwin from MyWindow mwc where id = a group by a having sum(b) = 20";
-        EPStatement select = epService.getEPAdministrator().createEPL(stmtTextSelect);
+        EPStatementSPI select = (EPStatementSPI) epService.getEPAdministrator().createEPL(stmtTextSelect);
+        assertFalse(select.getStatementContext().isStatelessSelect());
         select.addListener(listenerSelect);
 
         // send 3 event
@@ -135,32 +136,32 @@ public class TestNamedWindowSelect extends TestCase
         sendSupportBean("E1", 1);
         assertFalse(listenerSelect.isInvoked());
         assertFalse(listenerConsumer.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
 
         // fire trigger
         sendSupportBean_A("A1");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerConsumer.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerConsumer.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
 
         // insert via 2nd insert into
         sendSupportBean("I2", 2);
         assertFalse(listenerSelect.isInvoked());
-        ArrayAssertionUtil.assertProps(listenerConsumer.assertOneGetNewAndReset(), fields, new Object[] {"I2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerConsumer.assertOneGetNewAndReset(), fields, new Object[]{"I2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}});
 
         // send event
         sendSupportBean("E3", 3);
         assertFalse(listenerSelect.isInvoked());
         assertFalse(listenerConsumer.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E3", 3}});
 
         // fire trigger
         sendSupportBean_A("A2");
         assertEquals(1, listenerSelect.getNewDataList().size());
-        ArrayAssertionUtil.assertPropsPerRow(listenerSelect.getLastNewData(), fields, new Object[][] {{"E1", 1}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(listenerSelect.getLastNewData(), fields, new Object[][]{{"E1", 1}, {"E3", 3}});
         listenerSelect.reset();
         assertEquals(2, listenerConsumer.getNewDataList().size());
-        ArrayAssertionUtil.assertPropsPerRow(listenerConsumer.getNewDataListFlattened(), fields, new Object[][] {{"E1", 1}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(listenerConsumer.getNewDataListFlattened(), fields, new Object[][]{{"E1", 1}, {"E3", 3}});
         listenerConsumer.reset();
 
         // check type
@@ -245,19 +246,19 @@ public class TestNamedWindowSelect extends TestCase
         // fire trigger
         sendSupportBean_A("A1");
         assertEquals(2, listenerSelect.getLastNewData().length);
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fieldsCreate, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[1], fieldsCreate, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fieldsCreate, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fieldsOnSelect, new Object[][] {{"E1", 1, "A1"}, {"E2", 2, "A1"}});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fieldsCreate, new Object[]{"E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[1], fieldsCreate, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fieldsCreate, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fieldsOnSelect, new Object[][]{{"E1", 1, "A1"}, {"E2", 2, "A1"}});
 
         sendSupportBean("E4", 0);
         sendSupportBean_A("A2");
         assertEquals(3, listenerSelect.getLastNewData().length);
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fieldsOnSelect, new Object[] {"E1", 1, "A2"});
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[1], fieldsOnSelect, new Object[] {"E2", 2, "A2"});
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[2], fieldsOnSelect, new Object[] {"E4", 0, "A2"});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fieldsCreate, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}, {"E4", 0}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fieldsCreate, new Object[][] {{"E1", 1}, {"E2", 2}, {"E4", 0}});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fieldsOnSelect, new Object[]{"E1", 1, "A2"});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[1], fieldsOnSelect, new Object[]{"E2", 2, "A2"});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[2], fieldsOnSelect, new Object[]{"E4", 0, "A2"});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fieldsCreate, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}, {"E4", 0}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fieldsCreate, new Object[][]{{"E1", 1}, {"E2", 2}, {"E4", 0}});
 
         stmtSelect.destroy();
         stmtCreate.destroy();
@@ -288,9 +289,9 @@ public class TestNamedWindowSelect extends TestCase
         // fire trigger
         sendSupportBean_A("A1");
         assertEquals(2, listenerSelect.getLastNewData().length);
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fields, new Object[] {"A1", "E1", 1});
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[1], fields, new Object[] {"A1", "E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"A1", "E1", 1}, {"A1", "E2", 2}});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fields, new Object[]{"A1", "E1", 1});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[1], fields, new Object[]{"A1", "E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"A1", "E1", 1}, {"A1", "E2", 2}});
 
         // try limit clause
         stmtSelect.destroy();
@@ -300,8 +301,8 @@ public class TestNamedWindowSelect extends TestCase
 
         sendSupportBean_A("A1");
         assertEquals(1, listenerSelect.getLastNewData().length);
-        ArrayAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fields, new Object[] {"A1", "E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"A1", "E1", 1}});
+        EPAssertionUtil.assertProps(listenerSelect.getLastNewData()[0], fields, new Object[]{"A1", "E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"A1", "E1", 1}});
 
         stmtCreate.destroy();
     }
@@ -331,8 +332,8 @@ public class TestNamedWindowSelect extends TestCase
 
         // fire trigger
         sendSupportBean_A("A1");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {6});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{6}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{6});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{6}});
 
         // create delete stmt
         String stmtTextDelete = "on " + SupportBean_B.class.getName() + " delete from MyWindow where id = a";
@@ -343,13 +344,13 @@ public class TestNamedWindowSelect extends TestCase
 
         // fire trigger
         sendSupportBean_A("A2");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {4});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{4}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{4});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{4}});
 
         sendSupportBean("E4", 10);
         sendSupportBean_A("A3");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {14});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{14}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{14});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{14}});
 
         EventType resultType = stmtSelect.getEventType();
         assertEquals(1, resultType.getPropertyNames().length);
@@ -384,18 +385,18 @@ public class TestNamedWindowSelect extends TestCase
 
         // fire trigger
         sendSupportBean_A("A1");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {null});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{null}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{null});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{null}});
 
         // fire trigger
         sendSupportBean_A("E2");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{2}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{2});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{2}});
 
         sendSupportBean("E2", 10);
         sendSupportBean_A("E2");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {12});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{12}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{12});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{12}});
 
         EventType resultType = stmtSelect.getEventType();
         assertEquals(1, resultType.getPropertyNames().length);
@@ -441,10 +442,10 @@ public class TestNamedWindowSelect extends TestCase
 
         // fire trigger
         sendSupportBean_A("A1");
-        ArrayAssertionUtil.assertPropsPerRow(listenerSelect.getLastNewData(), fields, new Object[][] {{"E2", 2}, {"E1", 6}});
+        EPAssertionUtil.assertPropsPerRow(listenerSelect.getLastNewData(), fields, new Object[][]{{"E2", 2}, {"E1", 6}});
         assertNull(listenerSelect.getLastOldData());
         listenerSelect.reset();
-        ArrayAssertionUtil.assertPropsPerRow(listenerSelectTwo.getLastNewData(), fields, new Object[][] {{"E1", 6}});
+        EPAssertionUtil.assertPropsPerRow(listenerSelectTwo.getLastNewData(), fields, new Object[][]{{"E1", 6}});
         assertNull(listenerSelect.getLastOldData());
         listenerSelect.reset();
 
@@ -455,7 +456,7 @@ public class TestNamedWindowSelect extends TestCase
         assertFalse(listenerSelect.isInvoked());
 
         sendSupportBean_A("A2");
-        ArrayAssertionUtil.assertPropsPerRow(listenerSelect.getLastNewData(), fields, new Object[][] {{"E4", -1}, {"E2", 12}, {"E1", 106}});
+        EPAssertionUtil.assertPropsPerRow(listenerSelect.getLastNewData(), fields, new Object[][]{{"E4", -1}, {"E2", 12}, {"E1", 106}});
 
         // create delete stmt, delete E2
         String stmtTextDelete = "on " + SupportBean_B.class.getName() + " delete from MyWindow where id = a";
@@ -463,10 +464,10 @@ public class TestNamedWindowSelect extends TestCase
         sendSupportBean_B("E2");
 
         sendSupportBean_A("A3");
-        ArrayAssertionUtil.assertPropsPerRow(listenerSelect.getLastNewData(), fields, new Object[][] {{"E4", -1}, {"E1", 106}});
+        EPAssertionUtil.assertPropsPerRow(listenerSelect.getLastNewData(), fields, new Object[][]{{"E4", -1}, {"E1", 106}});
         assertNull(listenerSelect.getLastOldData());
         listenerSelect.reset();
-        ArrayAssertionUtil.assertPropsPerRow(listenerSelectTwo.getLastNewData(), fields, new Object[][] {{"E1", 106}});
+        EPAssertionUtil.assertPropsPerRow(listenerSelectTwo.getLastNewData(), fields, new Object[][]{{"E1", 106}});
         assertNull(listenerSelectTwo.getLastOldData());
         listenerSelectTwo.reset();
 
@@ -510,18 +511,18 @@ public class TestNamedWindowSelect extends TestCase
         // fire trigger
         sendSupportBean_A("X1");
         assertFalse(listenerSelect.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, null);
 
         sendSupportBean_A("E2");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E2", 2}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
 
         sendSupportBean_A("E1");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
 
         // delete event
         sendSupportBean_B("E1");
@@ -529,12 +530,12 @@ public class TestNamedWindowSelect extends TestCase
 
         sendSupportBean_A("E1");
         assertFalse(listenerSelect.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E2", 2}, {"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, null);
 
         sendSupportBean_A("E2");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E2", 2}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E2", 2}});
 
         stmtSelect.destroy();
         stmtDelete.destroy();
@@ -568,21 +569,21 @@ public class TestNamedWindowSelect extends TestCase
         // fire trigger
         sendSupportBean_A("X1");
         assertFalse(listenerSelect.isInvoked());
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, null);
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, null);
 
         sendSupportBean_B("E2");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E2", 2}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E2", 2});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E2", 2}});
 
         sendSupportBean_A("E1");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E1", 1}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E1", 1}});
 
         sendSupportBean_B("E3");
-        ArrayAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[] {"E3", 3});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtSelect.iterator(), fields, new Object[][] {{"E3", 3}});
-        ArrayAssertionUtil.assertEqualsExactOrder(stmtCreate.iterator(), fields, new Object[][] {{"E1", 1}, {"E2", 2}, {"E3", 3}});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), fields, new Object[]{"E3", 3});
+        EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E3", 3}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, new Object[][]{{"E1", 1}, {"E2", 2}, {"E3", 3}});
 
         stmtCreate.destroy();
         stmtSelect.destroy();

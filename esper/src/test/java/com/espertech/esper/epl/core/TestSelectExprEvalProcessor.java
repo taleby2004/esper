@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.HashSet;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.epl.core.eval.SelectExprStreamDesc;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
@@ -26,7 +27,6 @@ import com.espertech.esper.support.epl.SupportStreamTypeSvc1Stream;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.event.SupportValueAddEventService;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
 import com.espertech.esper.epl.spec.InsertIntoDesc;
 import com.espertech.esper.epl.spec.SelectClauseExprCompiledSpec;
 
@@ -55,12 +55,12 @@ public class TestSelectExprEvalProcessor extends TestCase
     public void testGetResultEventType() throws Exception
     {
         EventType type = methodOne.getEvaluator().getResultEventType();
-        ArrayAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[] {"resultOne", "resultTwo"});
+        EPAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[]{"resultOne", "resultTwo"});
         assertEquals(Double.class, type.getPropertyType("resultOne"));
         assertEquals(Integer.class, type.getPropertyType("resultTwo"));
 
         type = methodTwo.getEvaluator().getResultEventType();
-        ArrayAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[] {"a", "b"});
+        EPAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[]{"a", "b"});
         assertEquals(Double.class, type.getPropertyType("a"));
         assertEquals(Integer.class, type.getPropertyType("b"));
     }

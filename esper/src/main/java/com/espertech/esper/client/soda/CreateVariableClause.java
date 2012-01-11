@@ -21,6 +21,7 @@ public class CreateVariableClause implements Serializable
     private String variableType;
     private String variableName;
     private Expression optionalAssignment;
+    private boolean constant;
 
     /**
      * Ctor.
@@ -36,7 +37,7 @@ public class CreateVariableClause implements Serializable
      */
     public static CreateVariableClause create(String variableType, String variableName)
     {
-        return new CreateVariableClause(variableType, variableName, null);
+        return new CreateVariableClause(variableType, variableName, null, false);
     }
 
     /**
@@ -48,7 +49,7 @@ public class CreateVariableClause implements Serializable
      */
     public static CreateVariableClause create(String variableType, String variableName, Expression expression)
     {
-        return new CreateVariableClause(variableType, variableName, expression);
+        return new CreateVariableClause(variableType, variableName, expression, false);
     }
 
     /**
@@ -58,11 +59,12 @@ public class CreateVariableClause implements Serializable
      * @param optionalAssignment is the optional assignment expression supplying the initial value, or null if the
      * initial value is null
      */
-    public CreateVariableClause(String variableType, String variableName, Expression optionalAssignment)
+    public CreateVariableClause(String variableType, String variableName, Expression optionalAssignment, boolean constant)
     {
         this.variableType = variableType;
         this.variableName = variableName;
         this.optionalAssignment = optionalAssignment;
+        this.constant = constant;
     }
 
     /**
@@ -119,13 +121,25 @@ public class CreateVariableClause implements Serializable
         this.optionalAssignment = optionalAssignment;
     }
 
+    public boolean isConstant() {
+        return constant;
+    }
+
+    public void setConstant(boolean constant) {
+        this.constant = constant;
+    }
+
     /**
      * Render as EPL.
      * @param writer to output to
      */
     public void toEPL(StringWriter writer)
     {
-        writer.append("create variable ");
+        writer.append("create");
+        if (constant) {
+            writer.append(" constant");
+        }
+        writer.append(" variable ");
         writer.append(variableType);
         writer.append(" ");
         writer.append(variableName);

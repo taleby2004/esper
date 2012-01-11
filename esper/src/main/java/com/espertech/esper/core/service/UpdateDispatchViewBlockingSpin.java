@@ -46,7 +46,7 @@ public class UpdateDispatchViewBlockingSpin extends UpdateDispatchViewBase
 
     public void newResult(UniformPair<EventBean[]> result)
     {
-        statementResultServiceImpl.indicate(result);
+        statementResultService.indicate(result);
 
         if (!isDispatchWaiting.get())
         {

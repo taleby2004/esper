@@ -27,7 +27,7 @@ public interface AggregationResultFuture
      * @param agentInstanceIds
      * @return current aggragation state
      */
-    public Object getValue(int column, int[] agentInstanceIds);
+    public Object getValue(int column, int agentInstanceId);
 
     public Collection<EventBean> getCollection(int column, ExprEvaluatorContext context);
 

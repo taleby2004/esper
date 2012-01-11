@@ -12,15 +12,11 @@
 package com.espertech.esper.multithread;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.ArrayAssertionUtil;
-import com.espertech.esper.support.util.SupportMTUpdateListener;
 import junit.framework.TestCase;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -71,7 +67,7 @@ public class TestMTStmtNamedWindowPriority extends TestCase
         threadPool.shutdown();
         threadPool.awaitTermination(10, TimeUnit.SECONDS);
 
-        EventBean[] events = ArrayAssertionUtil.iteratorToArray(stmtWindow.iterator());
+        EventBean[] events = EPAssertionUtil.iteratorToArray(stmtWindow.iterator());
         assertEquals(numThreads * numRepeats, events.length);
         for (int i = 0; i < events.length; i++) {
             String valueC1 = (String) events[i].get("c1");

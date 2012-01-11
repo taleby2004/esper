@@ -11,6 +11,7 @@ package com.espertech.esperio.db;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esperio.db.core.ExecutorServices;
 import junit.framework.TestCase;
 
@@ -60,11 +61,11 @@ public class TestDBAdapterDML extends TestCase
         provider.getEPRuntime().sendEvent(new SupportBean("a", 10));
 
         Object[][] rows = SupportDatabaseService.readAll(TABLE_NAME);
-        ArrayAssertionUtil.assertEqualsExactOrder(rows, new Object[][] {{"A", 10, "a", 10.0d}});
+        EPAssertionUtil.assertEqualsExactOrder(rows, new Object[][]{{"A", 10, "a", 10.0d}});
 
         provider.getEPRuntime().sendEvent(new SupportBean("b", 15));
         rows = SupportDatabaseService.readAll(TABLE_NAME);
-        ArrayAssertionUtil.assertEqualsExactOrder(rows, new Object[][] {{"A", 10, "a", 10.0d}, {"A", 15, "b", 15.0d}});
+        EPAssertionUtil.assertEqualsExactOrder(rows, new Object[][] {{"A", 10, "a", 10.0d}, {"A", 15, "b", 15.0d}});
         
         // look up executor services
         Context context = provider.getContext();

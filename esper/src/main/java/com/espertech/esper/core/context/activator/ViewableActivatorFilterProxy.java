@@ -42,14 +42,14 @@ public class ViewableActivatorFilterProxy implements ViewableActivator {
         isSubSelect = subSelect;
     }
 
-    public ViewableActivationResult activate(final AgentInstanceContext agentInstanceContext) {
+    public ViewableActivationResult activate(final AgentInstanceContext agentInstanceContext, boolean isSubselect) {
 
         // New event stream
         EventType resultEventType = filterSpec.getResultEventType();
         EventStream zeroDepthStream = new ZeroDepthStream(resultEventType);
 
         // audit proxy
-        EventStream inputStream = EventStreamProxy.getAuditProxy(agentInstanceContext.getEpStatementAgentInstanceHandle().getStatementHandle().getStatementName(), annotations, filterSpec, zeroDepthStream);
+        EventStream inputStream = EventStreamProxy.getAuditProxy(agentInstanceContext.getStatementContext().getEngineURI(), agentInstanceContext.getEpStatementAgentInstanceHandle().getStatementHandle().getStatementName(), annotations, filterSpec, zeroDepthStream);
 
         final EventStream eventStream = inputStream;
         final String statementId = agentInstanceContext.getStatementContext().getStatementId();

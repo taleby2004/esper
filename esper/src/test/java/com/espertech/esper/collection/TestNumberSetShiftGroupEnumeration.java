@@ -11,7 +11,7 @@
 
 package com.espertech.esper.collection;
 
-import com.espertech.esper.support.util.ArrayAssertionUtil;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.TreeSet;
@@ -123,7 +123,7 @@ public class TestNumberSetShiftGroupEnumeration extends TestCase {
     {
         TreeSet<Integer> treeExp = getTreeSet(expected);
         TreeSet<Integer> treeRes = getTreeSet(result);
-        ArrayAssertionUtil.assertEqualsExactOrder(getArr(treeExp), getArr(treeRes));
+        EPAssertionUtil.assertEqualsExactOrder(getArr(treeRes), getArr(treeExp));
     }
 
     private int[] getArr(TreeSet<Integer> set)
