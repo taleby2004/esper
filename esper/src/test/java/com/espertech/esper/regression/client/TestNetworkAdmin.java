@@ -34,6 +34,13 @@ public class TestNetworkAdmin extends TestCase {
         epService.initialize();
         networkAdmin = ((EPAdministratorSPI) epService.getEPAdministrator()).getNetworkAdmin();
         listener = new SupportUpdateListener();
+        SupportEventProducerPolled.throwException = false;
+    }
+    
+    public void tearDown() {
+        listener = null;
+        networkAdmin = null;
+        SupportEventProducerPolled.throwException = true;
     }
 
     public void testAddProducer() throws Exception {
@@ -70,7 +77,7 @@ public class TestNetworkAdmin extends TestCase {
         assertNull(networkAdmin.getSource("p1"));
     }
 
-    public void testSendEvents() {
+    public void testSendEvents() throws Exception {
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
         epService.getEPAdministrator().createEPL("select * from SupportBean").addListener(listener);
         networkAdmin.addSource("p1", new SupportEventProducerPolled(), null);
@@ -83,7 +90,7 @@ public class TestNetworkAdmin extends TestCase {
         networkAdmin.closeRemoveSource("p1");
     }
 
-    public void testInvalid() {
+    public void testInvalid() throws Exception {
         networkAdmin.addSource("p1", new SupportEventProducerPolled(), null);
 
         try {
@@ -108,6 +115,7 @@ public class TestNetworkAdmin extends TestCase {
         // already open, is fine
         networkAdmin.openSource("p1");
         networkAdmin.openSource("p1");
+        networkAdmin.closeSource("p1");
     }
 
     private static <T> T getResetSupportProducerLastActions(EPNetworkAdmin networkAdmin, String name) {
@@ -123,6 +131,8 @@ public class TestNetworkAdmin extends TestCase {
 
     public static class SupportEventProducerPolled implements EventSourcePolled {
 
+        private static boolean throwException;
+
         private List<Object> actions = new ArrayList<Object>();
         private EventCollector collector;
 
@@ -137,7 +147,16 @@ public class TestNetworkAdmin extends TestCase {
             actions.add(new OpenAction(context, collector));
         }
 
+        public static void setThrowException(boolean throwException) {
+            SupportEventProducerPolled.throwException = throwException;
+        }
+
         public void nextEvent(EventSourceNextEventContext nextEventContext) {
+
+            if (throwException) {
+                throw new RuntimeException("Triggered exception by throw-exception flag");
+            }
+
             actions.add(new NextEventAction(nextEventContext));
             collector.sendEvent(new SupportBean("E1", 1));
         }

@@ -123,7 +123,7 @@ public class NamedWindowOnMergeHelper
         StreamTypeService streamTypeService = new StreamTypeServiceImpl(eventTypes, streamNames, new boolean[1], statementContext.getEngineURI(), false);
 
         // Get select expr processor
-        SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
+        SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(statementContext.getDynamicReferenceEventTypes());
         ExprEvaluatorContextStatement exprEvaluatorContext = new ExprEvaluatorContextStatement(statementContext);
         SelectExprProcessor insertHelper = SelectExprProcessorFactory.getProcessor(Collections.singleton(selectClauseNumber), selectNoWildcard, false, insertIntoDesc, null, streamTypeService,
                 statementContext.getEventAdapterService(), statementContext.getStatementResultService(), statementContext.getValueAddEventService(), selectExprEventTypeRegistry,

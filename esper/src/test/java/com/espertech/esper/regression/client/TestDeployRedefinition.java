@@ -15,9 +15,11 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.deploy.DeploymentResult;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
+import com.espertech.esper.client.deploy.Module;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.filter.FilterServiceSPI;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
@@ -31,8 +33,6 @@ public class TestDeployRedefinition extends TestCase
         epService.initialize();
         deploySvc = epService.getEPAdministrator().getDeploymentAdmin();
     }
-
-    // Test EPL keyword in import and uses or module text
 
     public void testCreateSchemaNamedWindowInsert() throws Exception {
 
@@ -57,6 +57,17 @@ public class TestDeployRedefinition extends TestCase
         FilterService filterService = ((EPServiceProviderSPI) epService).getFilterService();
         FilterServiceSPI filterSPI = (FilterServiceSPI) filterService;
         assertEquals(0, filterSPI.getCountTypes());
+
+        // test on-merge
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        String moduleString =
+            "@Name('S0') create window MyWindow.std:unique(intPrimitive) as SupportBean;\n" +
+            "@Name('S1') on MyWindow insert into SecondStream select *;\n" +
+            "@Name('S2') on SecondStream merge MyWindow when matched then insert into ThirdStream select * then delete\n";
+        Module module = epService.getEPAdministrator().getDeploymentAdmin().parse(moduleString);
+        epService.getEPAdministrator().getDeploymentAdmin().deploy(module, null, "myid_101");
+        epService.getEPAdministrator().getDeploymentAdmin().undeployRemove("myid_101");
+        epService.getEPAdministrator().getDeploymentAdmin().deploy(module, null, "myid_101");
     }
 
     public void testRedefDeployOrder() throws Exception {
