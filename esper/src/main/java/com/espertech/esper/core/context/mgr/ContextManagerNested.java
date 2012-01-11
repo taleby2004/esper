@@ -397,7 +397,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
                     if (!instance.getAgentInstanceContext().getStatementContext().getStatementId().equals(statementId)) {
                         continue;
                     }
-                    StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext);
+                    StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext, true);
                     instanceIt.remove();
                 }
             }

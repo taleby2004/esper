@@ -92,7 +92,7 @@ public class TestNamedWindowViews extends TestCase
         epService.getEPAdministrator().createEPL("insert into MyWindowTwo select bean.* as bean from " + SupportBean_S0.class.getName() + " as bean");
         
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
-        ArrayAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), "bean.p00".split(","), new Object[] {"E1"});
+        EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), "bean.p00".split(","), new Object[] {"E1"});
     }
 
     public void testBeanSchemaBacked() {

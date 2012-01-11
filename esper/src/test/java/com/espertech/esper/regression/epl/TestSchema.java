@@ -24,7 +24,6 @@ import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
-import java.beans.PropertyDescriptor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,9 +44,6 @@ public class TestSchema extends TestCase
         listener = null;
     }
 
-    // TODO
-    // test configured Map type
-
     public void testSchemaWithEventType() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_S0", SupportBean_S0.class);
@@ -62,7 +58,7 @@ public class TestSchema extends TestCase
         EPStatement stmtSchemaInsert = epService.getEPAdministrator().createEPL("insert into MySchema select sb as bean, s0Arr as beanarray from BeanSourceEvent");
         stmtSchemaInsert.addListener(listener);
         epService.getEPRuntime().sendEvent(event);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
         stmtSchemaInsert.destroy();
 
         // test named window
@@ -73,7 +69,7 @@ public class TestSchema extends TestCase
 
         EPStatement stmtWindowInsert = epService.getEPAdministrator().createEPL("insert into MyWindow select sb as bean, s0Arr as beanarray from BeanSourceEvent");
         epService.getEPRuntime().sendEvent(event);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
         stmtWindowInsert.destroy();
 
         // insert pattern to named window
@@ -82,7 +78,7 @@ public class TestSchema extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "S0_1"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(20, "S0_2"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "S0_3"));
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id,beanarray[1].id".split(","), new Object[] {"E2", 10, 20});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id,beanarray[1].id".split(","), new Object[] {"E2", 10, 20});
         stmtWindowPattern.destroy();
 
         // test configured Map type
@@ -94,7 +90,7 @@ public class TestSchema extends TestCase
         EPStatement stmtMapInsert = epService.getEPAdministrator().createEPL("insert into MyConfiguredMap select sb as bean, s0Arr as beanarray from BeanSourceEvent");
         stmtMapInsert.addListener(listener);
         epService.getEPRuntime().sendEvent(event);
-        ArrayAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
         stmtMapInsert.destroy();
     }
 

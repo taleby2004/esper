@@ -14,10 +14,10 @@ package com.espertech.esper.regression.context;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
-import com.espertech.esper.support.bean.SupportDateTime;
+import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportUpdateListener;
 import junit.framework.TestCase;
 
 public class TestPrioritizedExec extends TestCase {
@@ -51,7 +51,7 @@ public class TestPrioritizedExec extends TestCase {
     }
     
     private void sendTimeEvent(String time) {
-        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(SupportDateTime.parseGetMSec(time)));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(time)));
     }
 
     public static class Event {

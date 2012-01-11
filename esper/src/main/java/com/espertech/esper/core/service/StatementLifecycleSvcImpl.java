@@ -216,7 +216,6 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             }
         }
 
-<<<<<<< .working
         // walk subselects, declared expressions, dot-expressions
         ExprNodeSubselectDeclaredDotVisitor visitor;
         try {
@@ -239,14 +238,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         boolean stateless = determineStatelessSelect(statementSpec, !subselectNodes.isEmpty(), isPattern);
 
         // Make context
-        String optionalCreateNamedWindowName = statementSpec.getCreateWindowDesc() != null ? statementSpec.getCreateWindowDesc().getWindowName() : null;
-        boolean hasScripts = statementSpec.getScriptExpressions() != null && !statementSpec.getScriptExpressions().isEmpty();
-        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, statementSpec.isHasVariables(), services, optAdditionalContext, statementSpec.getOnTriggerDesc(), statementSpec.getCreateWindowDesc(), false, annotations, isolationUnitServices, optionalCreateNamedWindowName, statementSpec.getOptionalContextName(), stateless, hasScripts);
+        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, services, optAdditionalContext, false, annotations, isolationUnitServices, stateless, statementSpec);
 
-        // Compile
-=======
-        StatementContext statementContext =  services.getStatementContextFactory().makeContext(statementId, statementName, expression, services, optAdditionalContext, false, annotations, isolationUnitServices, statementSpec);
->>>>>>> .merge-right.r2821
         StatementSpecCompiled compiledSpec;
         try
         {
@@ -1009,10 +1002,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             }
         }
 
-<<<<<<< .working
-=======
         // Determine subselects in filter streams, these may need special handling for locking
-        ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+        ExprNodeSubselectDeclaredDotVisitor visitor = new ExprNodeSubselectDeclaredDotVisitor();
         StatementLifecycleSvcUtil.walkStreamSpecs(spec, visitor);
         for (ExprSubselectNode subselectNode : visitor.getSubselects()) {
             subselectNode.setFilterStreamSubselect(true);
@@ -1031,7 +1022,6 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             rewriteNamedWindowSubselect(visitor.getChainedExpressionsDot(), subselects, statementContext.getNamedWindowService());
         }
 
->>>>>>> .merge-right.r2821
         // Compile subselects found
         int subselectNumber = 0;
         for (ExprSubselectNode subselect : subselectNodes)

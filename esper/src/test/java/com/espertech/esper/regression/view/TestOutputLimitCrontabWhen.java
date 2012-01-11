@@ -244,7 +244,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 1));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "string".split(","), new Object[][] {{"E1"}, {"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "string".split(","), new Object[][] {{"E1"}, {"E2"}, {"E3"}});
 
         epService.getEPRuntime().setVariableValue("var_cnt_total", -1);
 
@@ -252,7 +252,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 1));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "string".split(","), new Object[][] {{"E4"}, {"E5"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "string".split(","), new Object[][] {{"E4"}, {"E5"}});
         epService.getEPAdministrator().destroyAllStatements();
     }
 

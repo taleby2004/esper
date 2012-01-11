@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.parse;
 
-import com.espertech.esper.antlr.ASTUtil;
 import com.espertech.esper.epl.expression.ExprChainedSpec;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprTimePeriod;
@@ -51,7 +50,7 @@ public class ASTContextHelper
                 String name = categoryParent.getChild(1).getText();
                 items.add(new ContextDetailCategoryItem(exprNode, name));
             }
-            filterSpec = ASTUtil.walkFilterSpec(detailParent.getChild(detailParent.getChildCount() - 1), propertyEvalSpec, astExprNodeMap);
+            filterSpec = ASTExprHelper.walkFilterSpec(detailParent.getChild(detailParent.getChildCount() - 1), propertyEvalSpec, astExprNodeMap);
             contextDetail = new ContextDetailCategory(items, filterSpec);
         }
         // partitioned
@@ -60,7 +59,7 @@ public class ASTContextHelper
             for (int i = 0; i < detailParent.getChildCount(); i++) {
 
                 Tree partitionParent = detailParent.getChild(i);
-                filterSpec = ASTUtil.walkFilterSpec(partitionParent.getChild(0), propertyEvalSpec, astExprNodeMap);
+                filterSpec = ASTExprHelper.walkFilterSpec(partitionParent.getChild(0), propertyEvalSpec, astExprNodeMap);
                 propertyEvalSpec = null;
 
                 List<String> propertyNames = new ArrayList<String>();
@@ -82,7 +81,7 @@ public class ASTContextHelper
                 if (hashItemParent.getType() == EsperEPL2Ast.COALESCE) {
                     count++;
                     ExprChainedSpec func = ASTLibHelper.getLibFunctionChainSpec(hashItemParent.getChild(0), astExprNodeMap);
-                    filterSpec = ASTUtil.walkFilterSpec(hashItemParent.getChild(1), propertyEvalSpec, astExprNodeMap);
+                    filterSpec = ASTExprHelper.walkFilterSpec(hashItemParent.getChild(1), propertyEvalSpec, astExprNodeMap);
                     propertyEvalSpec = null;
                     rawSpecs.add(new ContextDetailHashItem(func, filterSpec));
                 }
@@ -123,7 +122,7 @@ public class ASTContextHelper
 
     private static ContextDetailCondition getContextCondition(Tree parent, Map<Tree, ExprNode> astExprNodeMap, Map<Tree, EvalFactoryNode> astPatternNodeMap, PropertyEvalSpec propertyEvalSpec) {
         if (parent.getType() == EsperEPL2Ast.CRONTAB_LIMIT_EXPR_PARAM) {
-            List<ExprNode> crontab = ASTUtil.getRemoveAllChildExpr(parent, astExprNodeMap);
+            List<ExprNode> crontab = ASTExprHelper.getRemoveAllChildExpr(parent, astExprNodeMap);
             return new ContextDetailConditionCrontab(crontab);
         }
         else if (parent.getType() == EsperEPL2Ast.PATTERN_INCL_EXPR) {
@@ -131,7 +130,7 @@ public class ASTContextHelper
             return new ContextDetailConditionPattern(evalNode);
         }
         else if (parent.getType() == EsperEPL2Ast.STREAM_EXPR) {
-            FilterSpecRaw filterSpecRaw = ASTUtil.walkFilterSpec(parent.getChild(0), propertyEvalSpec, astExprNodeMap);
+            FilterSpecRaw filterSpecRaw = ASTExprHelper.walkFilterSpec(parent.getChild(0), propertyEvalSpec, astExprNodeMap);
             String asName = parent.getChildCount() > 1 ? parent.getChild(1).getText() : null;
             return new ContextDetailConditionFilter(filterSpecRaw, asName);
         }

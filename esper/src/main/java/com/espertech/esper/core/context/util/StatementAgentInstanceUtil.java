@@ -13,8 +13,8 @@ package com.espertech.esper.core.context.util;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.context.factory.StatementAgentInstanceFactoryResult;
-import com.espertech.esper.core.context.mgr.AgentInstance;
 import com.espertech.esper.core.context.factory.StatementAgentInstancePreload;
+import com.espertech.esper.core.context.mgr.AgentInstance;
 import com.espertech.esper.core.context.mgr.AgentInstanceFilterProxy;
 import com.espertech.esper.core.context.mgr.ContextControllerStatementBase;
 import com.espertech.esper.core.context.stmt.AIRegistryAggregation;
@@ -49,7 +49,7 @@ public class StatementAgentInstanceUtil {
             if (terminationProperties != null) {
                 instance.getAgentInstanceContext().getContextProperties().getProperties().putAll(terminationProperties);
             }
-            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext);
+            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext, false);
         }
     }
 

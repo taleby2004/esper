@@ -1450,8 +1450,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         {
             StatementSpecRaw spec = EPAdministratorHelper.compileEPL(epl, epl, true, stmtName, services, SelectClauseStreamSelectorEnum.ISTREAM_ONLY);
             Annotation[] annotations = AnnotationUtil.compileAnnotations(spec.getAnnotations(), services.getEngineImportService(), epl);
-<<<<<<< .working
-            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, false, services, null, null, null, true, annotations, null, null, spec.getOptionalContextName(), true, false);
+            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, services, null, true, annotations, null, true, spec);
 
             // walk subselects, declared expressions, dot-expressions
             ExprNodeSubselectDeclaredDotVisitor visitor;
@@ -1463,10 +1462,6 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
 
             StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations, visitor.getSubselects(), Collections.<ExprDotNode>emptyList(), Collections.<ExprDeclaredNode>emptyList());
-=======
-            StatementContext statementContext =  services.getStatementContextFactory().makeContext(stmtId, stmtName, epl, services, null, true, annotations, null, spec);
-            StatementSpecCompiled compiledSpec = StatementLifecycleSvcImpl.compile(spec, epl, statementContext, true, annotations);
->>>>>>> .merge-right.r2821
             return new EPPreparedExecuteMethod(compiledSpec, services, statementContext);
         }
         catch (EPStatementException ex)

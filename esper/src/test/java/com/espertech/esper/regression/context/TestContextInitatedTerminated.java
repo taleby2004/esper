@@ -603,7 +603,7 @@ public class TestContextInitatedTerminated extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E1"}, {"E2"}});
 
         sendTimeEvent("2002-05-1T8:01:59.999");
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
@@ -611,14 +611,14 @@ public class TestContextInitatedTerminated extends TestCase {
 
         // terminate, new context partition
         sendTimeEvent("2002-05-1T8:02:00.000");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E3"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E3"}});
 
         sendTimeEvent("2002-05-1T8:02:10.000");
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 5));
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E4"}, {"E5"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E4"}, {"E5"}});
 
         sendTimeEvent("2002-05-1T8:03:00.000");
         assertFalse(listener.isInvoked());
@@ -647,7 +647,7 @@ public class TestContextInitatedTerminated extends TestCase {
 
         // terminate, new context partition
         sendTimeEvent("2002-05-1T8:02:00.000");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E1"}, {"E2"}});
 
         // terminate, new context partition
         sendTimeEvent("2002-05-1T8:03:00.000");
@@ -707,7 +707,7 @@ public class TestContextInitatedTerminated extends TestCase {
 
         // terminate, new context partition
         sendTimeEvent("2002-05-1T8:01:00.000");
-        ArrayAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E4"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"E4"}});
         assertEquals(10, epService.getEPRuntime().getVariableValue("myvar"));
 
         assertSODA(eplTwo);

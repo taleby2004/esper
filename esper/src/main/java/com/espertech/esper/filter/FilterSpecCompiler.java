@@ -178,13 +178,9 @@ public final class FilterSpecCompiler
         // if there are boolean expressions, add
         if (exprNode != null)
         {
-<<<<<<< .working
-            FilterSpecLookupable lookupable = new FilterSpecLookupable(PROPERTY_NAME_BOOLEAN_EXPRESSION, null, exprNode.getExprEvaluator().getType());
-            FilterSpecParamExprNode param = new FilterSpecParamExprNode(lookupable, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService, configurationInformation);
-=======
             boolean hasSubselectFilterStream = determineSubselectFilterStream(exprNode);
-            FilterSpecParamExprNode param = new FilterSpecParamExprNode(PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService, configurationInformation, statementName, hasSubselectFilterStream);
->>>>>>> .merge-right.r2821
+            FilterSpecLookupable lookupable = new FilterSpecLookupable(PROPERTY_NAME_BOOLEAN_EXPRESSION, null, exprNode.getExprEvaluator().getType());
+            FilterSpecParamExprNode param = new FilterSpecParamExprNode(lookupable, FilterOperator.BOOLEAN_EXPRESSION, exprNode, taggedEventTypes, arrayEventTypes, variableService, eventAdapterService, configurationInformation, statementName, hasSubselectFilterStream);
             filterParams.add(param);
         }
 
@@ -205,7 +201,7 @@ public final class FilterSpecCompiler
     }
 
     private static boolean determineSubselectFilterStream(ExprNode exprNode) {
-        ExprNodeSubselectVisitor visitor = new ExprNodeSubselectVisitor();
+        ExprNodeSubselectDeclaredDotVisitor visitor = new ExprNodeSubselectDeclaredDotVisitor();
         exprNode.accept(visitor);
         if (visitor.getSubselects().isEmpty()) {
             return false;
