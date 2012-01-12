@@ -13,21 +13,39 @@ package com.espertech.esper.client.soda;
 
 import java.io.StringWriter;
 
+/**
+ * Context condition that start/initiated or ends/terminates context partitions based on a pattern.
+ */
 public class ContextDescriptorConditionPattern implements ContextDescriptorCondition {
 
     private PatternExpr pattern;
 
+    /**
+     * Ctor.
+     */
     public ContextDescriptorConditionPattern() {
     }
 
+    /**
+     * Ctor.
+     * @param pattern pattern expression
+     */
     public ContextDescriptorConditionPattern(PatternExpr pattern) {
         this.pattern = pattern;
     }
 
+    /**
+     * Returns the pattern expression.
+     * @return pattern
+     */
     public PatternExpr getPattern() {
         return pattern;
     }
 
+    /**
+     * Sets the pattern expression.
+     * @param pattern to set
+     */
     public void setPattern(PatternExpr pattern) {
         this.pattern = pattern;
     }

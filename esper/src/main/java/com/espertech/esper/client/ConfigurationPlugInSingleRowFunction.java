@@ -99,10 +99,18 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
         this.valueCache = valueCache;
     }
 
+    /**
+     * Returns filter optimization settings.
+     * @return filter optimization settings
+     */
     public FilterOptimizable getFilterOptimizable() {
         return filterOptimizable;
     }
 
+    /**
+     * Sets filter optimization settings.
+     * @param filterOptimizable filter optimization settings
+     */
     public void setFilterOptimizable(FilterOptimizable filterOptimizable) {
         this.filterOptimizable = filterOptimizable;
     }
@@ -128,8 +136,18 @@ public class ConfigurationPlugInSingleRowFunction implements Serializable
         CONFIGURED
     }
 
+    /**
+     * Controls whether a single-row function is eligible for optimization if it occurs in a filter expression.
+     */
     public enum FilterOptimizable {
+        /**
+         * The engine does not consider the single-row function for optimizing evaluation: The function gets evaluated for each event possibly multiple times.
+         */
         DISABLED,
+
+        /**
+         * The engine considers the single-row function for optimizing evaluation: The function gets evaluated only once per event.
+         */
         ENABLED
     }
 }

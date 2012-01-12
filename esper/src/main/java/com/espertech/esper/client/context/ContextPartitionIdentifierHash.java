@@ -11,13 +11,24 @@
 
 package com.espertech.esper.client.context;
 
+/**
+ * Context partition identifier for hash context.
+ */
 public class ContextPartitionIdentifierHash extends ContextPartitionIdentifier {
     private int hash;
 
+    /**
+     * Returns the hash code.
+     * @return hash code
+     */
     public int getHash() {
         return hash;
     }
 
+    /**
+     * Sets the hash code.
+     * @param hash hash code
+     */
     public void setHash(int hash) {
         this.hash = hash;
     }

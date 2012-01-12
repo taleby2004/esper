@@ -569,18 +569,34 @@ public class OutputLimitClause implements Serializable
         return this;
     }
 
+    /**
+     * Returns the optional expression evaluated when a context partition terminates before triggering output.
+     * @return expression
+     */
     public Expression getAndAfterTerminateAndExpr() {
         return andAfterTerminateAndExpr;
     }
 
+    /**
+     * Sets an optional expression evaluated when a context partition terminates before triggering output.
+     * @param andAfterTerminateAndExpr expression
+     */
     public void setAndAfterTerminateAndExpr(Expression andAfterTerminateAndExpr) {
         this.andAfterTerminateAndExpr = andAfterTerminateAndExpr;
     }
 
+    /**
+     * Returns the set-assignments to execute when a context partition terminates.
+     * @return set-assignments
+     */
     public List<AssignmentPair> getAndAfterTerminateThenAssignments() {
         return andAfterTerminateThenAssignments;
     }
 
+    /**
+     * Sets the set-assignments to execute when a context partition terminates.
+     * @param andAfterTerminateThenAssignments set-assignments
+     */
     public void setAndAfterTerminateThenAssignments(List<AssignmentPair> andAfterTerminateThenAssignments) {
         this.andAfterTerminateThenAssignments = andAfterTerminateThenAssignments;
     }

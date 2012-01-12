@@ -29,14 +29,26 @@ public class ContextDescriptorNested implements ContextDescriptor {
         contexts = new ArrayList<CreateContextClause>();
     }
 
+    /**
+     * Ctor.
+     * @param contexts the nested contexts
+     */
     public ContextDescriptorNested(List<CreateContextClause> contexts) {
         this.contexts = contexts;
     }
 
+    /**
+     * Returns the list of nested contexts
+     * @return contexts
+     */
     public List<CreateContextClause> getContexts() {
         return contexts;
     }
 
+    /**
+     * Sets the list of nested contexts
+     * @param contexts nested contexts to set
+     */
     public void setContexts(List<CreateContextClause> contexts) {
         this.contexts = contexts;
     }

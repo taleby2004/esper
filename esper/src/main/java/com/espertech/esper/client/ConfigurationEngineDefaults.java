@@ -245,10 +245,18 @@ public class ConfigurationEngineDefaults implements Serializable
         this.patterns = patterns;
     }
 
+    /**
+     * Returns script engine settings.
+     * @return script engine settings
+     */
     public Scripts getScripts() {
         return scripts;
     }
 
+    /**
+     * Sets script engine settings.
+     * @param scripts script engine settings
+     */
     public void setScripts(Scripts scripts) {
         this.scripts = scripts;
     }
@@ -981,6 +989,7 @@ public class ConfigurationEngineDefaults implements Serializable
 
         /**
          * Sets the audit formatting pattern that formats audit logs, or null if using default format.
+         * @param auditPattern pattern to use
          */
         public void setAuditPattern(String auditPattern) {
             this.auditPattern = auditPattern;
@@ -1032,14 +1041,25 @@ public class ConfigurationEngineDefaults implements Serializable
         }
     }
 
+    /**
+     * Holder for script settings.
+     */
     public static class Scripts implements Serializable
     {
         private String defaultDialect = "js";
 
+        /**
+         * Returns the default script dialect.
+         * @return dialect
+         */
         public String getDefaultDialect() {
             return defaultDialect;
         }
 
+        /**
+         * Sets the default script dialect.
+         * @param defaultDialect dialect
+         */
         public void setDefaultDialect(String defaultDialect) {
             this.defaultDialect = defaultDialect;
         }
@@ -1726,18 +1746,34 @@ public class ConfigurationEngineDefaults implements Serializable
             this.enabled = enabled;
         }
 
+        /**
+         * Returns the cluster configuration object.
+         * @return cluster configuration object
+         */
         public Object getClusterConfig() {
             return clusterConfig;
         }
 
+        /**
+         * Sets the cluster configuration object.
+         * @param clusterConfig cluster configuration object
+         */
         public void setClusterConfig(Object clusterConfig) {
             this.clusterConfig = clusterConfig;
         }
 
+        /**
+         * Returns the cluster configurator class.
+         * @return class
+         */
         public String getClusterConfiguratorClass() {
             return clusterConfiguratorClass;
         }
 
+        /**
+         * Sets the cluster configurator class.
+         * @param clusterConfiguratorClass class
+         */
         public void setClusterConfiguratorClass(String clusterConfiguratorClass) {
             this.clusterConfiguratorClass = clusterConfiguratorClass;
         }

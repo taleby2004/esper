@@ -13,6 +13,14 @@ package com.espertech.esper.client.context;
 
 import java.util.Set;
 
+/**
+ * Selects a context partition by providing the context partition id(s).
+ */
 public interface ContextPartitionSelectorById extends ContextPartitionSelector {
+
+    /**
+     * Return the context partition ids to select.
+     * @return id set
+     */
     public Set<Integer> getContextPartitionIds();
 }

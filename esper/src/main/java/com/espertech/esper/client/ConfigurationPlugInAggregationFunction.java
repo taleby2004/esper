@@ -28,6 +28,12 @@ public class ConfigurationPlugInAggregationFunction implements Serializable
     {
     }
 
+    /**
+     * Ctor.
+     * @param name of the aggregation function
+     * @param functionClassName (deprecated) name of the class providing the aggregation function
+     * @param factoryClassName the name of the aggregation function factory class
+     */
     public ConfigurationPlugInAggregationFunction(String name, String functionClassName, String factoryClassName) {
         this.name = name;
         this.functionClassName = functionClassName;

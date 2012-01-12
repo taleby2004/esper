@@ -58,6 +58,7 @@ public class CreateVariableClause implements Serializable
      * @param variableName is the name of the variable
      * @param optionalAssignment is the optional assignment expression supplying the initial value, or null if the
      * initial value is null
+     * @param constant true for constant, false for regular variable
      */
     public CreateVariableClause(String variableType, String variableName, Expression optionalAssignment, boolean constant)
     {
@@ -121,10 +122,18 @@ public class CreateVariableClause implements Serializable
         this.optionalAssignment = optionalAssignment;
     }
 
+    /**
+     * Returns indicator whether the variable is a constant.
+     * @return constant false
+     */
     public boolean isConstant() {
         return constant;
     }
 
+    /**
+     * Sets the indicator whether the variable is a constant.
+     * @param constant constant false
+     */
     public void setConstant(boolean constant) {
         this.constant = constant;
     }

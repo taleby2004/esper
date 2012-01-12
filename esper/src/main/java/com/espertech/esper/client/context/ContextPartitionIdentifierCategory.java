@@ -11,13 +11,24 @@
 
 package com.espertech.esper.client.context;
 
+/**
+ * Context partition identifier for category context.
+ */
 public class ContextPartitionIdentifierCategory extends ContextPartitionIdentifier {
     private String label;
 
+    /**
+     * Returns the category label.
+     * @return label
+     */
     public String getLabel() {
         return label;
     }
 
+    /**
+     * Sets the category label.
+     * @param label to set
+     */
     public void setLabel(String label) {
         this.label = label;
     }

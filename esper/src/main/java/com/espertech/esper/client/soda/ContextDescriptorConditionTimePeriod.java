@@ -13,21 +13,39 @@ package com.espertech.esper.client.soda;
 
 import java.io.StringWriter;
 
+/**
+ * Context condition that start/initiated or ends/terminates context partitions based on a time period.
+ */
 public class ContextDescriptorConditionTimePeriod implements ContextDescriptorCondition {
 
     private Expression timePeriod;
 
+    /**
+     * Ctor.
+     */
     public ContextDescriptorConditionTimePeriod() {
     }
 
+    /**
+     * Ctor.
+     * @param timePeriod time period expression
+     */
     public ContextDescriptorConditionTimePeriod(Expression timePeriod) {
         this.timePeriod = timePeriod;
     }
 
+    /**
+     * Returns the time period expression
+     * @return time period expression
+     */
     public Expression getTimePeriod() {
         return timePeriod;
     }
 
+    /**
+     * Sets the time period expression
+     * @param timePeriod time period expression
+     */
     public void setTimePeriod(Expression timePeriod) {
         this.timePeriod = timePeriod;
     }

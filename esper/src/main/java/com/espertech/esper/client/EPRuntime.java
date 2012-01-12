@@ -215,11 +215,18 @@ public interface EPRuntime
      * Execute an on-demand query.
      * <p>
      * On-demand queries are EPL queries that execute non-continuous fire-and-forget queries against named windows.
-     * @param epl is the EPL to execute
+     * @param epl is the EPL query to execute
      * @return query result
      */
     public EPOnDemandQueryResult executeQuery(String epl);
 
+    /**
+     * For use with named windows that have a context declared and that may therefore have multiple context partitions,
+     * allows to target context partitions for query execution selectively.
+     * @param epl is the EPL query to execute
+     * @param contextPartitionSelectors selects context partitions to consider
+     * @return result
+     */
     public EPOnDemandQueryResult executeQuery(String epl, ContextPartitionSelector[] contextPartitionSelectors);
 
     /**

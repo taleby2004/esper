@@ -13,6 +13,13 @@ package com.espertech.esper.client.context;
 
 import java.util.Set;
 
+/**
+ * Selects context partitions for use with a category context by providing a set of labels.
+ */
 public interface ContextPartitionSelectorCategory extends ContextPartitionSelector {
+    /**
+     * Returns a set of category label names.
+     * @return label names
+     */
     public Set<String> getLabels();
 }

@@ -29,6 +29,14 @@ public class ScriptExpression implements Serializable
     public ScriptExpression() {
     }
 
+    /**
+     * Ctor.
+     * @param name script name
+     * @param parameterNames parameter list
+     * @param expressionText script text
+     * @param optionalReturnType return type
+     * @param optionalDialect dialect
+     */
     public ScriptExpression(String name, List<String> parameterNames, String expressionText, String optionalReturnType, String optionalDialect) {
         this.name = name;
         this.parameterNames = parameterNames;
@@ -37,34 +45,66 @@ public class ScriptExpression implements Serializable
         this.optionalDialect = optionalDialect;
     }
 
+    /**
+     * Returns the script name.
+     * @return script name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets the script name.
+     * @param name script name to set
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Returns the return type, if any is specified.
+     * @return return type
+     */
     public String getOptionalReturnType() {
         return optionalReturnType;
     }
 
+    /**
+     * Sets the return type, if any is specified.
+     * @param optionalReturnType return type
+     */
     public void setOptionalReturnType(String optionalReturnType) {
         this.optionalReturnType = optionalReturnType;
     }
 
+    /**
+     * Returns a dialect name, or null if none is defined and the configured default applies
+     * @return dialect name
+     */
     public String getOptionalDialect() {
         return optionalDialect;
     }
 
+    /**
+     * Sets a dialect name, or null if none is defined and the configured default applies
+     * @param optionalDialect dialect name
+     */
     public void setOptionalDialect(String optionalDialect) {
         this.optionalDialect = optionalDialect;
     }
 
+    /**
+     * Returns the script body.
+     * @return script body
+     */
     public String getExpressionText() {
         return expressionText;
     }
 
+    /**
+     * Sets the script body.
+     * @param expressionText script body
+     */
     public void setExpressionText(String expressionText) {
         this.expressionText = expressionText;
     }
@@ -83,10 +123,6 @@ public class ScriptExpression implements Serializable
      */
     public void setParameterNames(List<String> parameterNames) {
         this.parameterNames = parameterNames;
-    }
-
-    public ExpressionPrecedenceEnum getPrecedence() {
-        return ExpressionPrecedenceEnum.MINIMUM;
     }
 
     /**

@@ -13,6 +13,13 @@ package com.espertech.esper.client.context;
 
 import java.util.List;
 
+/**
+ * Selects context partitions of a nested context by providing selector according to the nested contexts.
+ */
 public interface ContextPartitionSelectorNested extends ContextPartitionSelector {
+    /**
+     * Selectors for each level of the nested context.
+     * @return selectors
+     */
     public List<ContextPartitionSelector[]> getSelectors();
 }

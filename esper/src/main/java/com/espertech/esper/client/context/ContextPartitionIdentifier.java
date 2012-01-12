@@ -11,16 +11,30 @@
 
 package com.espertech.esper.client.context;
 
+/**
+ * Context partition identifiers are provided by the API when interrogating context partitions for a given statement.
+ */
 public abstract class ContextPartitionIdentifier {
     private Integer contextPartitionId;
 
-    protected ContextPartitionIdentifier() {
+    /**
+     * Ctor.
+     */
+    public ContextPartitionIdentifier() {
     }
 
+    /**
+     * Returns the context partition id.
+     * @return context partition id
+     */
     public Integer getContextPartitionId() {
         return contextPartitionId;
     }
 
+    /**
+     * Sets the context partition id - this set method is for engine-internal use.
+     * @param contextPartitionId context partition id
+     */
     public void setContextPartitionId(Integer contextPartitionId) {
         this.contextPartitionId = contextPartitionId;
     }

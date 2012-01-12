@@ -68,7 +68,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         }
     }
 
-    private ContextControllerCondition makeEndpoint(ContextDetailCondition endpoint) {
+    protected ContextControllerCondition makeEndpoint(ContextDetailCondition endpoint) {
         return ContextControllerConditionFactory.getEndpoint(factory.getFactoryContext().getContextName(), factory.getFactoryContext().getServicesContext(), factory.getFactoryContext().getAgentInstanceContextCreate(),
                 endpoint, this);
     }
@@ -179,7 +179,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         endConditions.clear();
     }
 
-    private static Map<String, Object> getBuiltinProperties(ContextControllerInitTermFactory factory, long startTime, Long endTime, Map<String, Object> startEndpointData) {
+    protected static Map<String, Object> getBuiltinProperties(ContextControllerInitTermFactory factory, long startTime, Long endTime, Map<String, Object> startEndpointData) {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(ContextPropertyEventType.PROP_CTX_NAME, factory.getFactoryContext().getContextName());
         props.put(ContextPropertyEventType.PROP_CTX_STARTTIME, startTime);

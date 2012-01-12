@@ -734,10 +734,18 @@ public class EPStatementObjectModel implements Serializable
         this.contextName = contextName;
     }
 
+    /**
+     * Returns the scripts defined.
+     * @return scripts
+     */
     public List<ScriptExpression> getScriptExpressions() {
         return scriptExpressions;
     }
 
+    /**
+     * Sets the scripts.
+     * @param scriptExpressions to set
+     */
     public void setScriptExpressions(List<ScriptExpression> scriptExpressions) {
         this.scriptExpressions = scriptExpressions;
     }

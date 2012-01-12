@@ -24,6 +24,9 @@ import java.util.Date;
  */
 public class DateTime {
 
+    /**
+     * The default date-time format.
+     */
     public static final String DEFAULT_XMLLIKE_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 
     private static final Log log = LogFactory.getLog(DateTime.class);

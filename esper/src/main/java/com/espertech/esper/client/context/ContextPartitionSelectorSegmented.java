@@ -13,6 +13,13 @@ package com.espertech.esper.client.context;
 
 import java.util.List;
 
+/**
+ * Selector of context partitions for use with segmented contexts, provides a set of partition keys to select.
+ */
 public interface ContextPartitionSelectorSegmented extends ContextPartitionSelector {
+    /**
+     * Returns the partition keys.
+     * @return key set
+     */
     public List<Object[]> getPartitionKeys();
 }

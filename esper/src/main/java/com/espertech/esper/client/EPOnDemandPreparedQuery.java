@@ -22,7 +22,9 @@ public interface EPOnDemandPreparedQuery
     public EPOnDemandQueryResult execute();
 
     /**
-     * Execute the prepared query returning query results.
+     * For use with named windows that have a context declared and that may therefore have multiple context partitions,
+     * allows to target context partitions for query execution selectively.
+     * @param contextPartitionSelectors selects context partitions to consider
      * @return query result
      */
     public EPOnDemandQueryResult execute(ContextPartitionSelector[] contextPartitionSelectors);

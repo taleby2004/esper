@@ -27,6 +27,11 @@ public class ContextDescriptorHashSegmentedItem implements ContextDescriptor {
     public ContextDescriptorHashSegmentedItem() {
     }
 
+    /**
+     * Ctor.
+     * @param hashFunction the hash function, expecting SingleRowMethodExpression
+     * @param filter the event types to apply to
+     */
     public ContextDescriptorHashSegmentedItem(Expression hashFunction, Filter filter) {
         this.hashFunction = hashFunction;
         this.filter = filter;
@@ -48,10 +53,18 @@ public class ContextDescriptorHashSegmentedItem implements ContextDescriptor {
         this.filter = filter;
     }
 
+    /**
+     * Returns the hash function.
+     * @return hash function
+     */
     public Expression getHashFunction() {
         return hashFunction;
     }
 
+    /**
+     * Set the hash function (SingleRowMethodExpression)
+     * @param hashFunction to set
+     */
     public void setHashFunction(Expression hashFunction) {
         this.hashFunction = hashFunction;
     }

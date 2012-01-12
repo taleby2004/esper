@@ -60,10 +60,18 @@ public class ConfigurationVariable implements Serializable
         this.initializationValue = initializationValue;
     }
 
+    /**
+     * Returns true if the variable is a constant, or false for regular variable.
+     * @return true for constant, false for variable
+     */
     public boolean isConstant() {
         return constant;
     }
 
+    /**
+     * Set to true to indicate that the variable is a constant, or false for regular variable.
+     * @param constant true for constant, false for variable
+     */
     public void setConstant(boolean constant) {
         this.constant = constant;
     }

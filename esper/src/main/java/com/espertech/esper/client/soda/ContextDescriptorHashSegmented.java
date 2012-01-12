@@ -31,6 +31,12 @@ public class ContextDescriptorHashSegmented implements ContextDescriptor {
         items = new ArrayList<ContextDescriptorHashSegmentedItem>();
     }
 
+    /**
+     * Ctor.
+     * @param items list of hash code functions and event types to apply to
+     * @param granularity a number between 1 and Integer.MAX for parallelism
+     * @param preallocate true to allocate each context partition at time of statement creation
+     */
     public ContextDescriptorHashSegmented(List<ContextDescriptorHashSegmentedItem> items, int granularity, boolean preallocate) {
         this.items = items;
         this.granularity = granularity;
@@ -45,18 +51,34 @@ public class ContextDescriptorHashSegmented implements ContextDescriptor {
         return items;
     }
 
+    /**
+     * Returns the granularity.
+     * @return granularity
+     */
     public int getGranularity() {
         return granularity;
     }
 
+    /**
+     * Sets the granularity.
+     * @param granularity granularity to set
+     */
     public void setGranularity(int granularity) {
         this.granularity = granularity;
     }
 
+    /**
+     * Returns flag indicating whether to allocate context partitions upon statement creation, or only when actually referred to
+     * @return preallocation flag
+     */
     public boolean isPreallocate() {
         return preallocate;
     }
 
+    /**
+     * Set the flag indicating whether to allocate context partitions upon statement creation, or only when actually referred to
+     * @param preallocate preallocation flag
+     */
     public void setPreallocate(boolean preallocate) {
         this.preallocate = preallocate;
     }

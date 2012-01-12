@@ -13,6 +13,13 @@ package com.espertech.esper.client.context;
 
 import java.util.Set;
 
+/**
+ * Selects context partitions based on hash codes, for use with hashed context.
+ */
 public interface ContextPartitionSelectorHash extends ContextPartitionSelector {
+    /**
+     * Returns a set of hashes.
+     * @return hashes
+     */
     public Set<Integer> getHashes();
 }

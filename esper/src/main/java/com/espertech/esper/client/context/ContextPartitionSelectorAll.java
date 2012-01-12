@@ -11,6 +11,13 @@
 
 package com.espertech.esper.client.context;
 
+/**
+ * Selects all context paritions.
+ */
 public final class ContextPartitionSelectorAll implements ContextPartitionSelector {
+
+    /**
+     * Instance for selecting all context partitions.
+     */
     public static ContextPartitionSelectorAll INSTANCE = new ContextPartitionSelectorAll();
 }

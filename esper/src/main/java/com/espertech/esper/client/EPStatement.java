@@ -169,7 +169,19 @@ public interface EPStatement extends EPListenable, EPIterable
      */
     public String getServiceIsolated();
 
+    /**
+     * For use with statements that have a context declared and that may therefore have multiple context partitions,
+     * allows to iterate over context partitions selectively.
+     * @param selector selects context partitions to consider
+     * @return iterator
+     */
     public Iterator<EventBean> iterator(ContextPartitionSelector selector);
 
+    /**
+     * For use with statements that have a context declared and that may therefore have multiple context partitions,
+     * allows to safe-iterate over context partitions selectively.
+     * @param selector selects context partitions to consider
+     * @return safe iterator
+     */
     public SafeIterator<EventBean> safeIterator(ContextPartitionSelector selector);
 }

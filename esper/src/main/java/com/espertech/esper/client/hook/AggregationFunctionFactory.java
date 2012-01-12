@@ -14,8 +14,15 @@ package com.espertech.esper.client.hook;
 import com.espertech.esper.epl.agg.AggregationMethod;
 import com.espertech.esper.epl.agg.AggregationValidationContext;
 
+/**
+ * Interface to implement for factories of aggregation functions.
+ */
 public interface AggregationFunctionFactory {
 
+    /**
+     * Sets the EPL function name assigned to the factory.
+     * @param functionName assigned
+     */
     public void setFunctionName(String functionName);
 
     /**

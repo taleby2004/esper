@@ -95,19 +95,34 @@ public class ContainedEventSelect implements Serializable
         this.whereClause = whereClause;
     }
 
-
+    /**
+     * Returns the event type name assigned to events that result by applying the split (contained event) expression.
+     * @return type name, or null if none assigned
+     */
     public String getOptionalSplitExpressionTypeName() {
         return optionalSplitExpressionTypeName;
     }
 
+    /**
+     * Sets the event type name assigned to events that result by applying the split (contained event) expression.
+     * @param optionalSplitExpressionTypeName type name, or null if none assigned
+     */
     public void setOptionalSplitExpressionTypeName(String optionalSplitExpressionTypeName) {
         this.optionalSplitExpressionTypeName = optionalSplitExpressionTypeName;
     }
 
+    /**
+     * Returns the expression that returns the contained events.
+     * @return contained event expression
+     */
     public Expression getSplitExpression() {
         return splitExpression;
     }
 
+    /**
+     * Sets the expression that returns the contained events.
+     * @param splitExpression contained event expression
+     */
     public void setSplitExpression(Expression splitExpression) {
         this.splitExpression = splitExpression;
     }

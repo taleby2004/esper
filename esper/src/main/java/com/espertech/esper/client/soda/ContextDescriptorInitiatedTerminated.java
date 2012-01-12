@@ -29,32 +29,62 @@ public class ContextDescriptorInitiatedTerminated implements ContextDescriptor {
     public ContextDescriptorInitiatedTerminated() {
     }
 
+    /**
+     * Ctor.
+     * @param startCondition the condition that starts/initiates a context partition
+     * @param endCondition the condition that ends/terminates a context partition
+     * @param overlapping true for overlapping contexts
+     */
     public ContextDescriptorInitiatedTerminated(ContextDescriptorCondition startCondition, ContextDescriptorCondition endCondition, boolean overlapping) {
         this.startCondition = startCondition;
         this.endCondition = endCondition;
         this.overlapping = overlapping;
     }
 
+    /**
+     * Returns the condition that starts/initiates a context partition
+     * @return start condition
+     */
     public ContextDescriptorCondition getStartCondition() {
         return startCondition;
     }
 
+    /**
+     * Sets the condition that starts/initiates a context partition
+     * @param startCondition start condition
+     */
     public void setStartCondition(ContextDescriptorCondition startCondition) {
         this.startCondition = startCondition;
     }
 
+    /**
+     * Returns the condition that ends/terminates a context partition
+     * @return end condition
+     */
     public ContextDescriptorCondition getEndCondition() {
         return endCondition;
     }
 
+    /**
+     * Sets the condition that ends/terminates a context partition
+     * @param endCondition end condition
+     */
     public void setEndCondition(ContextDescriptorCondition endCondition) {
         this.endCondition = endCondition;
     }
 
+    /**
+     * Returns true for overlapping context, false for non-overlapping.
+     * @return overlap indicator
+     */
     public boolean isOverlapping() {
         return overlapping;
     }
 
+    /**
+     * Set to true for overlapping context, false for non-overlapping.
+     * @param overlapping overlap indicator
+     */
     public void setOverlapping(boolean overlapping) {
         this.overlapping = overlapping;
     }

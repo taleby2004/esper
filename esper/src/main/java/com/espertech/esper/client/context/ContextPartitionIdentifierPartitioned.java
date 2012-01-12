@@ -11,13 +11,24 @@
 
 package com.espertech.esper.client.context;
 
+/**
+ * Context partition identifier for segmented contexts.
+ */
 public class ContextPartitionIdentifierPartitioned extends ContextPartitionIdentifier {
     private Object[] keys;
 
+    /**
+     * Returns the partition keys.
+     * @return keys
+     */
     public Object[] getKeys() {
         return keys;
     }
 
+    /**
+     * Sets the partition keys.
+     * @param keys to set
+     */
     public void setKeys(Object[] keys) {
         this.keys = keys;
     }

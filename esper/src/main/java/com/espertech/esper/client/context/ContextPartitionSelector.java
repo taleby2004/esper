@@ -11,5 +11,8 @@
 
 package com.espertech.esper.client.context;
 
+/**
+ * Interface for classes representing a selector for navigating, querying or selecting among context partitions.
+ */
 public interface ContextPartitionSelector {
 }

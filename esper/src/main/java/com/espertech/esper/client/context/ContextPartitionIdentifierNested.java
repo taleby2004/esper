@@ -11,13 +11,24 @@
 
 package com.espertech.esper.client.context;
 
+/**
+ * Context partition identifier for nested contexts.
+ */
 public class ContextPartitionIdentifierNested extends ContextPartitionIdentifier {
     private ContextPartitionIdentifier[] identifiers;
 
+    /**
+     * Returns nested partition identifiers.
+     * @return identifiers
+     */
     public ContextPartitionIdentifier[] getIdentifiers() {
         return identifiers;
     }
 
+    /**
+     * Sets nested partition identifiers.
+     * @param identifiers identifiers
+     */
     public void setIdentifiers(ContextPartitionIdentifier[] identifiers) {
         this.identifiers = identifiers;
     }

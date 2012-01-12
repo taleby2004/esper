@@ -11,6 +11,9 @@
 
 package com.espertech.esper.client.context;
 
+/**
+ * Selects context partitions by receiving a context partition identifier for interrogation.
+ */
 public interface ContextPartitionSelectorFiltered extends ContextPartitionSelector {
     /**
      * Filter function should return true or false to indicate

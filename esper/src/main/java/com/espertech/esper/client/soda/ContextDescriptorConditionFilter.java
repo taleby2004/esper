@@ -12,33 +12,59 @@
 package com.espertech.esper.client.soda;
 
 import java.io.StringWriter;
-import java.util.List;
 
+/**
+ * Context condition that start/initiated or ends/terminates context partitions based on a filter expression.
+ */
 public class ContextDescriptorConditionFilter implements ContextDescriptorCondition {
 
     private Filter filter;
     private String optionalAsName;
 
+    /**
+     * Ctor.
+     */
     public ContextDescriptorConditionFilter() {
     }
 
+    /**
+     * Ctor.
+     * @param filter event filter
+     * @param optionalAsName tag name of the filtered events
+     */
     public ContextDescriptorConditionFilter(Filter filter, String optionalAsName) {
         this.filter = filter;
         this.optionalAsName = optionalAsName;
     }
 
+    /**
+     * Returns the event stream filter.
+     * @return filter
+     */
     public Filter getFilter() {
         return filter;
     }
 
+    /**
+     * Returns the tag name assigned, if any.
+     * @return tag name
+     */
     public String getOptionalAsName() {
         return optionalAsName;
     }
 
+    /**
+     * Sets the event stream filter.
+     * @param filter filter to set
+     */
     public void setFilter(Filter filter) {
         this.filter = filter;
     }
 
+    /**
+     * Returns the tag name assigned, if any.
+     * @param optionalAsName tag name
+     */
     public void setOptionalAsName(String optionalAsName) {
         this.optionalAsName = optionalAsName;
     }

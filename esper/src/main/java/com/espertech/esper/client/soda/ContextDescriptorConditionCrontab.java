@@ -14,13 +14,23 @@ package com.espertech.esper.client.soda;
 import java.io.StringWriter;
 import java.util.List;
 
+/**
+ * Context condition that start/initiated or ends/terminates context partitions based on a crontab expression.
+ */
 public class ContextDescriptorConditionCrontab implements ContextDescriptorCondition {
 
     private List<Expression> crontabExpressions;
 
+    /**
+     * Ctor.
+     */
     public ContextDescriptorConditionCrontab() {
     }
 
+    /**
+     * Ctor.
+     * @param crontabExpressions crontab expressions returning number sets for each crontab position
+     */
     public ContextDescriptorConditionCrontab(List<Expression> crontabExpressions) {
         this.crontabExpressions = crontabExpressions;
     }
