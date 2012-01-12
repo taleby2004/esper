@@ -1700,15 +1700,75 @@ when matched and ce.action = 'LEAVE' then update set carcount = carcount - 1</pr
       </answer>
     </faq>
     
-    <faq id="semantic-window">
+    <faq id="semantic-window-1">
+      <question>Start a window for each unique id when it arrives, wait 10 seconds for that id and output the last event for that window, starting a new window when the next event arrives for that id?</question>
+      <answer>
+        <p>
+	Let's say we have a stream of ChangeEvent objects that are coming in at a rate of a few thousand per second. 
+	The ChangeEvent has an 'id' field that identifies the type of event. Over the course of 10 seconds, we could receive several ChangeEvent 'ticks' for the same id
+	but we really only need to process the last one.
+        </p>
+        <p>
+	The logic needs to start a separate window for each ChangeEvent tick with a unique id and replace any future ticks for that same id. 
+	10 seconds after the first tick for that id is received the last event with that id is delivered to the listener and then the window for that id is no longer available 
+	until another ChangeEvent with that id is received.
+        </p>
+        <p>
+          For example the sequence and output is:
+        </p>
+        <pre>
+Say ChangeEvent is the tuple (id, quantity, price)
+
+Input events:
+
+ChangeEvent(1, 500, 99.75) t=0 secs
+ChangeEvent(2, 200, 98.10) t=1 secs
+...
+ChangeEvent(1, 400, 99.81) t=8 secs
+ChangeEvent(2, 190, 98.50) t=10.1 secs
+...
+ChangeEvent(1, 375, 99.82) t=10.1 secs
+
+
+So my desired output to the listener is this:
+
+ChangeEvent(1, 400, 99.81) at t=10 secs
+ChangeEvent(2, 190, 98.50) at t=11 secs
+ChangeEvent(1, 375, 99.82) at t=20.1 secs
+	</pre>
+	
+        <p>
+    	  Controlling the lifecycle of a data window, or any analysis, is a feature of context declarations.
+        </p>        
+	<div class="source"><pre>// Declare a context that allocates a context partition when a unique id arrives
+// and terminates the context partition after 10 seconds
+create context CtxPerIdAnd10Sec initiated pattern[every-distinct(a.id, 10 sec) a=ChangeEvent] terminated after 10 sec</pre></div>
+
+	<div class="source"><pre>// Within the context, output the last event upon context partition termination
+context CtxPerIdAnd10Sec select * from ChangeEvent output last when terminated</pre></div>
+      </answer>
+    </faq>
+
+    <faq id="semantic-window-2">
       <question>How to perform an aggregation over a "semantic" window, i.e. a window that opens upon the arrival of a given event and closes upon the arrival of another event?</question>
       <answer>
+        <p>
+          The overlapping or non-overlapping contexts address this use case. In addition named windows can also be used. Both solutions are discussed here.
+        </p>
         <p>
           An example use case for this is: Give me the average CPU utilization of machine "X" while user "Y" was logged onto it.
           So the "semantic" window opens when the event "user_Y_logged_In" arrives and closes when another event "user_Y_logged_Out" arrives.
         </p>
         <p>
-    	  This solution uses two named windows. Named windows offer a custom expiry policy, through the use of on-merge and on-delete.
+    	  This <b>first solution</b> declares a context that initiates when a user logs in and terminates when a user logs out.
+        </p>        
+	<div class="source"><pre>// declare context
+create context WhileUserLogedInCtx as initiated by UserLoginEvent as ule terminated by UserLogoutEvent(userId=ule.userId)</pre></div>
+	<div class="source"><pre>// perform some analysis for that user
+context WhileUserLogedInCtx select sum(cpuTime) from CPUReportEvent(userId = context.ule.userId)</pre></div>
+        
+        <p>
+    	  This <b>second solution</b> uses two named windows. Named windows offer a custom expiry policy, through the use of on-merge and on-delete.
         </p>        
        	<p>
        	  Hold CPU utilization:

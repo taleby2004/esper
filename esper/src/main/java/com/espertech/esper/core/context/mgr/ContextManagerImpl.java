@@ -285,7 +285,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         // build built-in context properties
         contextProperties.put(ContextPropertyEventType.PROP_CTX_NAME, contextName);
         contextProperties.put(ContextPropertyEventType.PROP_CTX_ID, contextId);
-        MappedEventBean contextBean = (MapEventBean) servicesContext.getEventAdapterService().adapterForTypedMap(contextProperties, contextDescriptor.getContextPropertyRegistry().getContextEventType());
+        MappedEventBean contextBean = (MappedEventBean) servicesContext.getEventAdapterService().adapterForTypedMap(contextProperties, contextDescriptor.getContextPropertyRegistry().getContextEventType());
 
         // activate
         StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statementDesc.getStatement(), false, contextId, contextBean, proxy);
