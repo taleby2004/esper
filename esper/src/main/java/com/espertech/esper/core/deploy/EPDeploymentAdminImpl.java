@@ -162,27 +162,34 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
                 continue;
             }
 
-            try {
+            String statementName = null;
+            Object userObject = null;
+            if (options.getStatementNameResolver() != null || options.getStatementUserObjectResolver() != null) {
+                StatementDeploymentContext ctx = new StatementDeploymentContext(item.getExpression(), module, item, deploymentId);
+                statementName = options.getStatementNameResolver() != null ? options.getStatementNameResolver().getStatementName(ctx) : null;
+                userObject = options.getStatementUserObjectResolver() != null ? options.getStatementUserObjectResolver().getUserObject(ctx) : null;
+            }
 
+            try {
                 EPStatement stmt;
                 if (optionalStatementIdGenerator == null) {
                     if (options.getIsolatedServiceProvider() == null) {
-                        stmt = epService.createEPL(item.getExpression());
+                        stmt = epService.createEPL(item.getExpression(), statementName, userObject);
                     }
                     else {
                         EPServiceProviderIsolated unit = statementIsolationService.getIsolationUnit(options.getIsolatedServiceProvider(), -1);
-                        stmt = unit.getEPAdministrator().createEPL(item.getExpression(), null, null);
+                        stmt = unit.getEPAdministrator().createEPL(item.getExpression(), statementName, userObject);
                     }
                 }
                 else {
                     String statementId = optionalStatementIdGenerator.getNextStatementId();
                     if (options.getIsolatedServiceProvider() == null) {
-                        stmt = epService.createEPLStatementId(item.getExpression(), null, null, statementId);
+                        stmt = epService.createEPLStatementId(item.getExpression(), statementName, userObject, statementId);
                     }
                     else {
                         EPServiceProviderIsolated unit = statementIsolationService.getIsolationUnit(options.getIsolatedServiceProvider(), -1);
                         EPAdministratorIsolatedSPI spi = (EPAdministratorIsolatedSPI) unit.getEPAdministrator();
-                        stmt = spi.createEPLStatementId(item.getExpression(), null, null, statementId);
+                        stmt = spi.createEPLStatementId(item.getExpression(), statementName, userObject, statementId);
                     }
                 }
                 statementNames.add(new DeploymentInformationItem(stmt.getName(), stmt.getText()));

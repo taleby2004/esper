@@ -53,8 +53,20 @@ public class ContextDescriptorConditionPattern implements ContextDescriptorCondi
         this.pattern = pattern;
     }
 
+    /**
+     * Return the inclusive flag, meaning events that constitute the pattern match should be considered for context-associated statements.
+     * @return inclusive flag
+     */
     public boolean isInclusive() {
         return inclusive;
+    }
+
+    /**
+     * Set the inclusive flag, meaning events that constitute the pattern match should be considered for context-associated statements.
+     * @param inclusive inclusive flag
+     */
+    public void setInclusive(boolean inclusive) {
+        this.inclusive = inclusive;
     }
 
     public void toEPL(StringWriter writer, EPStatementFormatter formatter) {

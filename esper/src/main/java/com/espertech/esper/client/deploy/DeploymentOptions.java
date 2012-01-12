@@ -26,6 +26,8 @@ public class DeploymentOptions implements Serializable {
     private boolean failFast = true;
     private String isolatedServiceProvider = null;
     private boolean validateOnly = false;
+    private StatementNameResolver statementNameResolver;
+    private StatementUserObjectResolver statementUserObjectResolver;
 
     /**
      * Returns true (the default) to indicate that the deploy operation first performs a compile step for
@@ -145,5 +147,37 @@ public class DeploymentOptions implements Serializable {
     public void setValidateOnly(boolean validateOnly)
     {
         this.validateOnly = validateOnly;
+    }
+
+    /**
+     * Returns the statement name resolver.
+     * @return statement name resolver
+     */
+    public StatementNameResolver getStatementNameResolver() {
+        return statementNameResolver;
+    }
+
+    /**
+     * Sets the statement name resolver.
+     * @param statementNameResolver name resolver
+     */
+    public void setStatementNameResolver(StatementNameResolver statementNameResolver) {
+        this.statementNameResolver = statementNameResolver;
+    }
+
+    /**
+     * Returns the statement user object resolver.
+     * @return statement user object resolver
+     */
+    public StatementUserObjectResolver getStatementUserObjectResolver() {
+        return statementUserObjectResolver;
+    }
+
+    /**
+     * Sets the statement user object resolver.
+     * @param statementUserObjectResolver statement user object resolver
+     */
+    public void setStatementUserObjectResolver(StatementUserObjectResolver statementUserObjectResolver) {
+        this.statementUserObjectResolver = statementUserObjectResolver;
     }
 }

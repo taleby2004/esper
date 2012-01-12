@@ -39,6 +39,31 @@ public class TestDeployAdmin extends TestCase
         listener = new SupportUpdateListener();
     }
 
+    public void tearDown() {
+        listener = null;
+        deploymentAdmin = null;
+    }
+
+    public void testUserObjectAndStatementNameResolver() throws Exception {
+        Module module = deploymentAdmin.parse("select * from java.lang.Object where 1=2; select * from java.lang.Object where 3=4;");
+        DeploymentOptions options = new DeploymentOptions();
+        options.setStatementNameResolver(new StatementNameResolver() {
+            public String getStatementName(StatementDeploymentContext context) {
+                return context.getEpl().contains("1=2") ? "StmtOne" : "StmtTwo";
+            }
+        });
+        options.setStatementUserObjectResolver(new StatementUserObjectResolver() {
+            public Object getUserObject(StatementDeploymentContext context) {
+                return context.getEpl().contains("1=2") ? 100 : 200;
+            }
+        });
+
+        deploymentAdmin.deploy(module, options);
+
+        assertEquals(100, epService.getEPAdministrator().getStatement("StmtOne").getUserObject());
+        assertEquals(200, epService.getEPAdministrator().getStatement("StmtTwo").getUserObject());
+    }
+
     public void testExplicitDeploymentId() throws Exception {
         // try module-add
         Module module = deploymentAdmin.parse("select * from java.lang.Object");

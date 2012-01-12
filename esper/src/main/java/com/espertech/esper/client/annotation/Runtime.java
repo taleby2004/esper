@@ -11,6 +11,9 @@
 
 package com.espertech.esper.client.annotation;
 
+/**
+ * Experimental and may be deprecated in the future: Provides a runtime instruction to the engine.
+ */
 public @interface Runtime
 {
     Instruction[] value();

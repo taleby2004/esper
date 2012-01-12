@@ -295,7 +295,10 @@ select id, count(*) from MyOffOnStream.win:time(1 hour) group by id;]]></program
 		  Your code can remove a module in undeployed state using the <literal>remove</literal> method or the <literal>undeployRemove</literal> method. If the module is in deployed state, use <literal>undeployRemove</literal> to undeploy and remove the module.
 		</para>
 
-		<para>The <literal>DeploymentOptions</literal> instance that can be passed to the <literal>deploy</literal> method when validating or deploying modules controls validation, fail-fast, rollback and the isolated service provider, if any, for the deployment.</para>
+		<para>
+		  The <literal>DeploymentOptions</literal> instance that can be passed to the <literal>deploy</literal> method when validating or deploying modules controls validation, fail-fast, rollback and the isolated service provider, if any, for the deployment.
+		  Also use <literal>DeploymentOptions</literal> to set a user object per statement or to set a statement name per statement.
+		</para>
 
 		<para>
 		  We also provide additional sample code to read and deploy modules as part of the J2EE considerations below.
