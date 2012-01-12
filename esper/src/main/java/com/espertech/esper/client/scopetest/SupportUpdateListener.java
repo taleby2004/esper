@@ -135,6 +135,9 @@ public class SupportUpdateListener implements UpdateListener
         ScopeTestHelper.assertEquals(1, newDataList.size());
         ScopeTestHelper.assertEquals(1, oldDataList.size());
 
+        if (lastNewData == null) {
+            ScopeTestHelper.fail();
+        }
         ScopeTestHelper.assertEquals(1, lastNewData.length);
         ScopeTestHelper.assertNull(lastOldData);
 
@@ -154,6 +157,9 @@ public class SupportUpdateListener implements UpdateListener
         ScopeTestHelper.assertEquals(1, newDataList.size());
         ScopeTestHelper.assertEquals(1, oldDataList.size());
 
+        if (lastOldData == null) {
+            ScopeTestHelper.fail();
+        }
         ScopeTestHelper.assertEquals(1, lastOldData.length);
         ScopeTestHelper.assertNull(lastNewData);
 
@@ -173,6 +179,9 @@ public class SupportUpdateListener implements UpdateListener
         ScopeTestHelper.assertEquals(1, newDataList.size());
         ScopeTestHelper.assertEquals(1, oldDataList.size());
 
+        if (lastNewData == null) {
+            ScopeTestHelper.fail();
+        }
         ScopeTestHelper.assertEquals(1, lastNewData.length);
         return lastNewData[0];
     }
@@ -188,6 +197,9 @@ public class SupportUpdateListener implements UpdateListener
         ScopeTestHelper.assertEquals(1, newDataList.size());
         ScopeTestHelper.assertEquals(1, oldDataList.size());
 
+        if (lastOldData == null) {
+            ScopeTestHelper.fail();
+        }
         ScopeTestHelper.assertEquals(1, lastOldData.length);
         return lastOldData[0];
     }

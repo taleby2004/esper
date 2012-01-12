@@ -19,6 +19,7 @@ import java.io.StringWriter;
 public class ContextDescriptorConditionPattern implements ContextDescriptorCondition {
 
     private PatternExpr pattern;
+    private boolean inclusive;  // statements declaring the context are inclusive of the events matching the pattern
 
     /**
      * Ctor.
@@ -29,9 +30,11 @@ public class ContextDescriptorConditionPattern implements ContextDescriptorCondi
     /**
      * Ctor.
      * @param pattern pattern expression
+     * @param inclusive if the events of the pattern should be included in the contextual statements
      */
-    public ContextDescriptorConditionPattern(PatternExpr pattern) {
+    public ContextDescriptorConditionPattern(PatternExpr pattern, boolean inclusive) {
         this.pattern = pattern;
+        this.inclusive = inclusive;
     }
 
     /**
@@ -50,11 +53,18 @@ public class ContextDescriptorConditionPattern implements ContextDescriptorCondi
         this.pattern = pattern;
     }
 
+    public boolean isInclusive() {
+        return inclusive;
+    }
+
     public void toEPL(StringWriter writer, EPStatementFormatter formatter) {
         writer.write("pattern [");
         if (pattern != null) {
             pattern.toEPL(writer, PatternExprPrecedenceEnum.MINIMUM, formatter);
         }
         writer.write("]");
+        if (inclusive) {
+            writer.write("@Inclusive");
+        }
     }
 }

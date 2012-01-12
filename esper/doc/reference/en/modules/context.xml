@@ -682,6 +682,10 @@ select * from pattern [every a=LoginEvent -> b=LogoutEvent where timer:within(10
 			</para>
 			
 			<para>
+			    If you specified an event filter as the start condition, then the event also counts towards the statement(s) that refer to that context. If you specified a pattern as the start condition, then the events that may constitute the pattern match can also count towards the statement(s) that refer to the context provided that <literal>@inclusive</literal> and event tags are both specified (see below).
+			</para>
+
+			<para>
 			  At the time of context activation when your application creates a statement that utilizes the context, the engine checks whether the start and end condition are crontab expressions. The engine evaluates the start and end crontab expressions and determines whether the current time is a time between start and end. If the current time
 			  is between start and end times, the engine allocates the context partition and waits for observing the end time. Otherwise the engine waits to observe the start time and does not allocate a context partition.
 			</para>
@@ -746,7 +750,7 @@ select * from pattern [every a=LoginEvent -> b=LogoutEvent where timer:within(10
 			</para>
 			
 			<para>
-			    If you specified an initiating event, then the event that initiates a new context partition also counts towards the statement(s) that refer to that context. If you specified a pattern to initiate a new context partition, then the events that may constitute the pattern match do not count towards the statement(s) that refer to the context.
+			    If you specified an event filter for the initiating condition, then the event that initiates a new context partition also counts towards the statement(s) that refer to that context. If you specified a pattern to initiate a new context partition, then the events that may constitute the pattern match can also count towards the statement(s) that refer to the context provided that <literal>@inclusive</literal> and event tags are both specified (see below).
 			</para>
 
 			<para>
@@ -903,30 +907,50 @@ terminated by MyTermEvent(id=e1.id, level <> e1.level)]]></programlisting>
 				<para>
 					The syntax is: 
 				</para>
-				<synopsis>pattern [<emphasis>pattern_expression</emphasis>]</synopsis>
+				<synopsis>pattern [<emphasis>pattern_expression</emphasis>] [@inclusive]</synopsis>
 						
 				<para>
 				  The <emphasis>pattern_expression</emphasis> is a pattern at <xref linkend="event_patterns"/>.
+				</para>
+				
+				<para>
+				  Specify <literal>@inclusive</literal> after the pattern to have those same events that constitute the pattern match also count towards any statements that are associated to the context.
+				  You must also provide a tag for each event in a pattern that should be included.
 				</para>
 
 				<para>
 				  Examples are:
 				</para>
 				<programlisting><![CDATA[// A non-overlapping context that starts when either StartEventOne or StartEventTwo arrive
-// and that ends after 5 seconds
-create context MyContext start pattern [StartEventOne or StartEventTwo] end after 5 seconds]]></programlisting>
+// and that ends after 5 seconds.
+// Here neither StartEventOne or StartEventTwo count towards any statements
+// that are referring to the context.
+create context MyContext 
+  start pattern [StartEventOne or StartEventTwo] 
+  end after 5 seconds]]></programlisting>
+
+				<programlisting><![CDATA[// Same as above. 
+// Here both StartEventOne or StartEventTwo do count towards any statements
+// that are referring to the context.
+create context MyContext 
+  start pattern [a=StartEventOne or b=StartEventTwo] @inclusive 
+  end after 5 seconds]]></programlisting>
 
 				<programlisting><![CDATA[// An overlapping context where each distinct MyInitEvent initiates a new context 
 // and each context partition terminates after 20 seconds
+// We use @inclusive to say that the same MyInitEvent that fires the pattern
+// also applies to statements that are associated to the context.
 create context MyContext
-initiated by pattern [every-distinct(a.id, 20 sec) a=MyInitEvent]
-terminated after 20 sec]]></programlisting>
+  initiated by pattern [every-distinct(a.id, 20 sec) a=MyInitEvent]@inclusive
+  terminated after 20 sec]]></programlisting>
 
 				<programlisting><![CDATA[// An overlapping context where each pattern match initiates a new context 
-// and all context partitions terminate when MyTermEvent arrives
+// and all context partitions terminate when MyTermEvent arrives.
+// The MyInitEvent and MyOtherEvent that trigger the pattern are themselves not included 
+// in any statements that are associated to the context.
 create context MyContext
-initiated by pattern [every MyInitEvent -> MyOtherEvent where timer:within(5)]
-terminated by MyTermEvent]]></programlisting>
+  initiated by pattern [every MyInitEvent -> MyOtherEvent where timer:within(5)]
+  terminated by MyTermEvent]]></programlisting>
 
 				<para>
 				  You may correlate the start and end streams by providing tags as part of the pattern, and by referring to the tag name(s) in the filter criteria of the end condition.
@@ -938,8 +962,8 @@ terminated by MyTermEvent]]></programlisting>
 				<programlisting><![CDATA[// A non-overlapping context that starts when either StartEventOne or StartEventTwo arrive
 // and that ends when either a matching EndEventOne or EndEventTwo arrive
 create context MyContext 
-start pattern [a=StartEventOne or b=StartEventTwo]
-end pattern [EndEventOne(id=a.id) or EndEventTwo(id=b.id)]]]></programlisting>
+  start pattern [a=StartEventOne or b=StartEventTwo]@inclusive
+  end pattern [EndEventOne(id=a.id) or EndEventTwo(id=b.id)]]]></programlisting>
 			</sect3>
 
 			<sect3 id="context_def_condition_crontab" revision="1">

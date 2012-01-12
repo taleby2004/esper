@@ -399,7 +399,7 @@ public class StatementSpecMapper
         else if (endpoint instanceof ContextDetailConditionPattern) {
             ContextDetailConditionPattern pattern = (ContextDetailConditionPattern) endpoint;
             PatternExpr patternExpr = unmapPatternEvalDeep(pattern.getPatternRaw(), unmapContext);
-            return new ContextDescriptorConditionPattern(patternExpr);
+            return new ContextDescriptorConditionPattern(patternExpr, pattern.isInclusive());
         }
         else if (endpoint instanceof ContextDetailConditionFilter) {
             ContextDetailConditionFilter filter = (ContextDetailConditionFilter) endpoint;
@@ -1221,7 +1221,7 @@ public class StatementSpecMapper
         if (condition instanceof ContextDescriptorConditionPattern) {
             ContextDescriptorConditionPattern pattern = (ContextDescriptorConditionPattern) condition;
             EvalFactoryNode patternExpr = mapPatternEvalDeep(pattern.getPattern(), mapContext);
-            return new ContextDetailConditionPattern(patternExpr);
+            return new ContextDetailConditionPattern(patternExpr, pattern.isInclusive());
         }
         if (condition instanceof ContextDescriptorConditionTimePeriod) {
             ContextDescriptorConditionTimePeriod timePeriod = (ContextDescriptorConditionTimePeriod) condition;

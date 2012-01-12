@@ -17,5 +17,5 @@ import com.espertech.esper.pattern.MatchedEventMap;
 import java.util.Map;
 
 public interface ContextControllerConditionCallback {
-    public void rangeNotification(ContextControllerCondition originEndpoint, EventBean optionalTriggeringEvent, Map<String, Object> builtinProperties);
+    public void rangeNotification(Map<String, Object> builtinProperties, ContextControllerCondition originEndpoint, EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern);
 }

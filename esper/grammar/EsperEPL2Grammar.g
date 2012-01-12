@@ -294,6 +294,7 @@ tokens
    	CREATE_CTX_INIT;
    	CREATE_CTX_CATITEM;
    	CREATE_CTX_NESTED;
+   	CREATE_CTX_PATTERN;
    	PARTITIONITEM;
 	
    	INT_TYPE;
@@ -957,7 +958,7 @@ createContextChoice
 	
 createContextRangePoint
 	:	createContextFilter 
-	| 	patternInclusionExpression
+	| 	patternInclusionExpression (ATCHAR i=IDENT)? -> ^(CREATE_CTX_PATTERN patternInclusionExpression $i?)
 	|	crontabLimitParameterSet
 	|	AFTER timePeriod -> ^(AFTER timePeriod)
 	;

@@ -15,7 +15,6 @@ import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.event.MappedEventBean;
-import com.espertech.esper.event.map.MapEventBean;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecLookupable;
 import com.espertech.esper.filter.FilterValueSetParam;
@@ -116,7 +115,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
             int pathId,
             ContextController originator,
             EventBean optionalTriggeringEvent,
-            Object partitionKey,
+            Map<String, Object> optionalTriggeringPattern, Object partitionKey,
             Map<String, Object> contextProperties,
             ContextControllerState states) {
 
@@ -138,9 +137,9 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         }
 
         // for all new contexts: evaluate this event for this statement
-        if (optionalTriggeringEvent != null) {
+        if (optionalTriggeringEvent != null || optionalTriggeringPattern != null) {
             for (AgentInstance context : newInstances) {
-                StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, optionalTriggeringEvent, context.getAgentInstanceContext());
+                StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, optionalTriggeringEvent, optionalTriggeringPattern, context.getAgentInstanceContext());
             }
         }
 
@@ -193,7 +192,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
     }
 
     private void activate() {
-        rootContext.activate(null, null);
+        rootContext.activate(null, null, null);
     }
 
     private AgentInstance[] getAgentInstancesForStmt(String statementId, ContextPartitionSelector selector) {

@@ -63,7 +63,7 @@ public class ContextControllerConditionTimePeriod implements ContextControllerCo
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
             {
                 scheduleHandle = null;  // terminates automatically unless scheduled again
-                callback.rangeNotification(ContextControllerConditionTimePeriod.this, null, Collections.<String, Object>emptyMap());
+                callback.rangeNotification(Collections.<String, Object>emptyMap(), ContextControllerConditionTimePeriod.this, null, null);
             }
         };
         EPStatementAgentInstanceHandle agentHandle = new EPStatementAgentInstanceHandle(agentInstanceContext.getStatementContext().getEpStatementHandle(), agentInstanceContext.getStatementContext().getDefaultAgentInstanceLock(), -1, new StatementAgentInstanceFilterVersion());

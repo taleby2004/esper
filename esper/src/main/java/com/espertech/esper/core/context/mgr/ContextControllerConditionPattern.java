@@ -19,6 +19,7 @@ import com.espertech.esper.epl.spec.ContextDetailConditionPattern;
 import com.espertech.esper.epl.spec.PatternStreamSpecCompiled;
 import com.espertech.esper.pattern.*;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ContextControllerConditionPattern implements ContextControllerCondition, PatternMatchCallback {
@@ -59,18 +60,24 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
     }
 
     public void matchFound(Map<String, Object> matchEvent) {
-        EventBean triggeringEvent = null;
-        /**
-         * TODO
-         * 
-        if (matchEvent.size() == 1) {
-            Object first = matchEvent.values().iterator().next();
-            if (first instanceof EventBean) {
-                triggeringEvent = (EventBean) first;
+        Map<String, Object> matchEventInclusive = null;
+        if (endpointPatternSpec.isInclusive()) {
+            if (matchEvent.size() < 2) {
+                matchEventInclusive = matchEvent;
+            }
+            else {
+                // need to reorder according to tag order
+                LinkedHashMap<String, Object> ordered = new LinkedHashMap<String, Object>();
+                for (String key : endpointPatternSpec.getPatternCompiled().getTaggedEventTypes().keySet()) {
+                    ordered.put(key, matchEvent.get(key));
+                }
+                for (String key : endpointPatternSpec.getPatternCompiled().getArrayEventTypes().keySet()) {
+                    ordered.put(key, matchEvent.get(key));
+                }
+                matchEventInclusive = ordered;
             }
         }
-         */
-        callback.rangeNotification(this, triggeringEvent, matchEvent);
+        callback.rangeNotification(matchEvent, this, null, matchEventInclusive);
     }
 
     public void deactivate() {

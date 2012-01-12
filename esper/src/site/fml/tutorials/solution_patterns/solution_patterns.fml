@@ -1741,8 +1741,9 @@ ChangeEvent(1, 375, 99.82) at t=20.1 secs
     	  Controlling the lifecycle of a data window, or any analysis, is a feature of context declarations.
         </p>        
 	<div class="source"><pre>// Declare a context that allocates a context partition when a unique id arrives
-// and terminates the context partition after 10 seconds
-create context CtxPerIdAnd10Sec initiated pattern[every-distinct(a.id, 10 sec) a=ChangeEvent] terminated after 10 sec</pre></div>
+// and terminates the context partition after 10 seconds.
+// Specify @inclusive to have the ChangeEvent that triggers the pattern be included in the next statement's evaluation.
+create context CtxPerIdAnd10Sec initiated pattern[every-distinct(a.id, 10 sec) a=ChangeEvent]@inclusive terminated after 10 sec</pre></div>
 
 	<div class="source"><pre>// Within the context, output the last event upon context partition termination
 context CtxPerIdAnd10Sec select * from ChangeEvent(id=context.a.id) output last when terminated</pre></div>

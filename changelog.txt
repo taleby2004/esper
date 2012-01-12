@@ -10,6 +10,7 @@ Major API or EPL changes
   - Support for nested contexts allowing combined context policies
   - Support for context partition targeting for on-demand queries and for statement iteration
   - Support for context initiation by event or patterns and termination by a correlated event or pattern
+  - Support for context initiation by patterns to include those event(s) that match a pattern in the statement associated to the context
   - Support for MVEL and JSR-223 scripting engine i.e. JavaScript and others
   - Support for contained-event syntax; one can now specify any expression for returning contained events
   - Support for constants: Variables that are constant values and cannot be assigned. Useful for the engine to perform optimizations knowing variable values can't change.

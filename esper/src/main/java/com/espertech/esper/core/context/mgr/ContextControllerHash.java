@@ -68,7 +68,7 @@ public class ContextControllerHash implements ContextController, ContextControll
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[]{ContextPartitionSelectorHash.class}, contextPartitionSelector);
     }
 
-    public void activate(EventBean optionalTriggeringEvent, ContextControllerState states) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states) {
         ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
 
         // handle preallocate
@@ -76,7 +76,7 @@ public class ContextControllerHash implements ContextController, ContextControll
             for (int i = 0; i < factory.getHashedSpec().getGranularity(); i++) {
                 Map<String, Object> properties = ContextPropertyEventType.getHashBean(factoryContext.getContextName(), i);
                 currentSubpathId++;
-                ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, i, properties, states);
+                ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, null, i, properties, states);
                 partitionKeys.put(i, handle);
             }
             return;
@@ -128,7 +128,7 @@ public class ContextControllerHash implements ContextController, ContextControll
         
         Map<String, Object> properties = ContextPropertyEventType.getHashBean(factoryContext.getContextName(), id);
         currentSubpathId++;
-        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, event, id, properties, null);
+        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, event, null, id, properties, null);
         partitionKeys.put(id, handle);
     }
 

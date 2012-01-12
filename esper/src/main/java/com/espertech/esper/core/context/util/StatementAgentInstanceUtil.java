@@ -32,10 +32,7 @@ import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayDeque;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class StatementAgentInstanceUtil {
 
@@ -201,7 +198,27 @@ public class StatementAgentInstanceUtil {
         }
     }
 
-    public static void evaluateEventForStatement(EPServicesContext servicesContext, EventBean event, AgentInstanceContext agentInstanceContext) {
+    public static void evaluateEventForStatement(EPServicesContext servicesContext, EventBean event, Map<String, Object> optionalTriggeringPattern, AgentInstanceContext agentInstanceContext) {
+        if (event != null) {
+            evaluateEventForStatementInternal(servicesContext, event, agentInstanceContext);
+        }
+        if (optionalTriggeringPattern != null) {
+            // evaluation order definition is up to the originator of the triggering pattern
+            for (Map.Entry<String, Object> entry : optionalTriggeringPattern.entrySet()) {
+                if (entry.getValue() instanceof EventBean) {
+                    evaluateEventForStatementInternal(servicesContext, (EventBean) entry.getValue(), agentInstanceContext);
+                }
+                else if (entry.getValue() instanceof EventBean[]) {
+                    EventBean[] eventsArray = (EventBean[]) entry.getValue();
+                    for (EventBean eventElement : eventsArray) {
+                        evaluateEventForStatementInternal(servicesContext, eventElement, agentInstanceContext);
+                    }
+                }
+            }
+        }
+    }
+
+    private static void evaluateEventForStatementInternal(EPServicesContext servicesContext, EventBean event, AgentInstanceContext agentInstanceContext) {
         // context was created - reevaluate for the given event
         ArrayDeque<FilterHandle> callbacks = new ArrayDeque<FilterHandle>();
         servicesContext.getFilterService().evaluate(event, callbacks, agentInstanceContext.getStatementContext().getStatementId());

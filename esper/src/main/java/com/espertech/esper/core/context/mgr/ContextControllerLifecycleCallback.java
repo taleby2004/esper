@@ -17,6 +17,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public interface ContextControllerLifecycleCallback {
-    public ContextControllerInstanceHandle contextPartitionInstantiate(Integer optionalContextPartitionId, int pathId, ContextController originator, EventBean optionalTriggeringEvent, Object partitionKey, Map<String, Object> contextProperties, ContextControllerState states);
+    public ContextControllerInstanceHandle contextPartitionInstantiate(Integer optionalContextPartitionId, int pathId, ContextController originator, EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, Object partitionKey, Map<String, Object> contextProperties, ContextControllerState states);
     public void contextPartitionTerminate(ContextControllerInstanceHandle contextNestedHandle, Map<String, Object> terminationProperties);
 }

@@ -73,12 +73,12 @@ public class ContextControllerCategory implements ContextController {
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[] {ContextPartitionSelectorCategory.class}, contextPartitionSelector);
     }
 
-    public void activate(EventBean optionalTriggeringEvent, ContextControllerState states) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states) {
         int count = 0;
         for (ContextDetailCategoryItem category : factory.getCategorySpec().getItems()) {
             Map<String, Object> context = ContextPropertyEventType.getCategorizedBean(factory.getFactoryContext().getContextName(), 0, category.getName());
             currentSubpathId++;
-            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, null, category.getName(), context, states);
+            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, null, null, category.getName(), context, states);
             handleCategories.put(count, handle);
             count++;
         }

@@ -88,7 +88,7 @@ public class ContextControllerPartitioned implements ContextController, ContextC
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[]{ContextPartitionSelectorSegmented.class}, contextPartitionSelector);
     }
 
-    public void activate(EventBean optionalTriggeringEvent, ContextControllerState states) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states) {
         ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
 
         for (ContextDetailPartitionItem item : factory.getSegmentedSpec().getItems()) {
@@ -136,7 +136,7 @@ public class ContextControllerPartitioned implements ContextController, ContextC
 
         ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
         Map<String, Object> props = ContextPropertyEventType.getPartitionBean(factoryContext.getContextName(), 0, key, factory.getSegmentedSpec().getItems().get(0).getPropertyNames());
-        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, event, key, props, null);
+        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, event, null, key, props, null);
 
         partitionKeys.put(key, handle);
 

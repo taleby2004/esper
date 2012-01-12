@@ -58,6 +58,66 @@ public class TestContextInitatedTerminated extends TestCase {
         listener = null;
     }
 
+    public void testPatternInclusion() {
+        /*
+        TODO
+        String[] fields = "string,intPrimitive".split(",");
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        String contextExpr =  "create context CtxPerId initiated by pattern [every-distinct (a.string, 10 sec) a=SupportBean]@Inclusive terminated after 10 sec ";
+        epService.getEPAdministrator().createEPL(contextExpr);
+        String streamExpr = "context CtxPerId select * from SupportBean(string = context.a.string) output last when terminated";
+        EPStatement stream = epService.getEPAdministrator().createEPL(streamExpr);
+        stream.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(8000));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(9999));
+        assertFalse(listener.isInvoked());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 3});
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10100));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 4));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(11000));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 4});
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(16100));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 6));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(20099));
+        assertFalse(listener.isInvoked());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(20100));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 5});
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(26100-1));
+        assertFalse(listener.isInvoked());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(26100));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 6});
+
+        epService.getEPAdministrator().destroyAllStatements();
+         */
+
+        // test multiple pattern with multiple events
+        String contextExprMulti =  "create context CtxPerId initiated by pattern [every a=SupportBean_S0 -> b=SupportBean_S1]@Inclusive terminated after 10 sec ";
+        epService.getEPAdministrator().createEPL(contextExprMulti);
+        String streamExprMulti = "context CtxPerId select * from pattern [every a=SupportBean_S0 -> b=SupportBean_S1]";
+        EPStatement streamMulti = epService.getEPAdministrator().createEPL(streamExprMulti);
+        streamMulti.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "S0_1"));
+        epService.getEPRuntime().sendEvent(new SupportBean_S1(20, "S1_1"));
+        assertTrue(listener.isInvoked());
+    }
+
     public void testEndSameEventAsAnalyzed() {
 
         // same event terminates - not included

@@ -43,7 +43,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         this.factory = factory;
     }
 
-    public void activate(EventBean optionalTriggeringEvent, ContextControllerState states) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states) {
 
         startCondition = makeEndpoint(factory.getContextDetail().getStart());
 
@@ -60,7 +60,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
             long startTime = factory.getSchedulingService().getTime();
             long endTime = endEndpoint.getExpectedEndTime();
             Map<String, Object> builtinProps = getBuiltinProperties(factory, startTime, endTime, Collections.<String, Object>emptyMap());
-            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, null, builtinProps, states);
+            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, optionalTriggeringPattern, null, builtinProps, states);
             endConditions.put(endEndpoint, new ContextControllerInitTermInstance(instanceHandle, null, startTime, endTime));
         }
         else {
@@ -92,7 +92,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[0], contextPartitionSelector);
     }
 
-    public void rangeNotification(ContextControllerCondition originCondition, EventBean optionalTriggeringEvent, Map<String, Object> builtinProperties) {
+    public void rangeNotification(Map<String, Object> builtinProperties, ContextControllerCondition originCondition, EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern) {
         // handle start-condition notification
         if (originCondition == startCondition) {
 
@@ -115,7 +115,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
             long startTime = factory.getSchedulingService().getTime();
             Long endTime = endEndpoint.getExpectedEndTime();
             Map<String, Object> builtinProps = getBuiltinProperties(factory, startTime, endTime, builtinProperties);
-            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, null, builtinProps, null);
+            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, optionalTriggeringPattern, null, builtinProps, null);
             endConditions.put(endEndpoint, new ContextControllerInitTermInstance(instanceHandle, builtinProperties, startTime, endTime));
         }
         else {

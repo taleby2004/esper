@@ -58,7 +58,7 @@ public class ContextControllerConditionCrontab implements ContextControllerCondi
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
             {
                 scheduleHandle = null;  // terminates automatically unless scheduled again
-                callback.rangeNotification(ContextControllerConditionCrontab.this, null, Collections.<String, Object>emptyMap());
+                callback.rangeNotification(Collections.<String, Object>emptyMap(), ContextControllerConditionCrontab.this, null, null);
             }
         };
         EPStatementAgentInstanceHandle agentHandle = new EPStatementAgentInstanceHandle(statementContext.getEpStatementHandle(), statementContext.getDefaultAgentInstanceLock(), -1, new StatementAgentInstanceFilterVersion());

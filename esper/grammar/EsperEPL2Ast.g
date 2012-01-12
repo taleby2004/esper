@@ -239,7 +239,7 @@ createContextDetail
 
 createContextRangePoint
 	:	createContextFilter 
-	| 	patternInclusionExpression
+	| 	^(CREATE_CTX_PATTERN patternInclusionExpression IDENT?)
 	|	crontabLimitParameterSet
 	|	^(AFTER timePeriod)
 	;

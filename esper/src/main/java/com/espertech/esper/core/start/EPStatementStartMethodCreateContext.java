@@ -173,7 +173,7 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
 
             // compile as pattern if there are prior matches to consider, since this is a type of followed-by relationship
             EvalFactoryNode factoryNode = services.getPatternNodeFactory().makeFilterNode(filter.getFilterSpecRaw(), filter.getOptionalFilterAsName(), 0);
-            ContextDetailConditionPattern pattern = new ContextDetailConditionPattern(factoryNode);
+            ContextDetailConditionPattern pattern = new ContextDetailConditionPattern(factoryNode, true);
             MatchEventSpec matches = validatePatternContextConditionPattern(pattern, eventTypesReferenced, priorMatches);
             return new ContextDetailMatchPair(pattern, matches);
         }

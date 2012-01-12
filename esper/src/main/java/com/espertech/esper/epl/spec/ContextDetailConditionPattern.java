@@ -16,11 +16,13 @@ import com.espertech.esper.pattern.EvalFactoryNode;
 public class ContextDetailConditionPattern implements ContextDetailCondition {
 
     private final EvalFactoryNode patternRaw;
+    private final boolean inclusive;
 
     private transient PatternStreamSpecCompiled patternCompiled;
 
-    public ContextDetailConditionPattern(EvalFactoryNode patternRaw) {
+    public ContextDetailConditionPattern(EvalFactoryNode patternRaw, boolean inclusive) {
         this.patternRaw = patternRaw;
+        this.inclusive = inclusive;
     }
 
     public EvalFactoryNode getPatternRaw() {
@@ -33,5 +35,9 @@ public class ContextDetailConditionPattern implements ContextDetailCondition {
 
     public void setPatternCompiled(PatternStreamSpecCompiled patternCompiled) {
         this.patternCompiled = patternCompiled;
+    }
+
+    public boolean isInclusive() {
+        return inclusive;
     }
 }

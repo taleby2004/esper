@@ -73,7 +73,7 @@ public class ContextControllerConditionFilter implements ContextControllerCondit
         if (endpointFilterSpec.getOptionalFilterAsName() != null) {
             props = Collections.<String, Object>singletonMap(endpointFilterSpec.getOptionalFilterAsName(), event);
         }
-        callback.rangeNotification(this, event, props);
+        callback.rangeNotification(props, this, event, null);
     }
 
     public void deactivate() {

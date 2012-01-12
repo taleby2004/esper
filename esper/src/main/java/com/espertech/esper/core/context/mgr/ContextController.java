@@ -17,10 +17,11 @@ import com.espertech.esper.type.NumberSetParameter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface ContextController {
     public int getPathId();
-    public void activate(EventBean optionalTriggeringEvent, ContextControllerState states);
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states);
     public ContextControllerFactory getFactory();
     public void deactivate();
     public Collection<Integer> getSelectedContextPartitionPathIds(ContextPartitionSelector contextPartitionSelector);

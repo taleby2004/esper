@@ -125,9 +125,17 @@ public class ASTContextHelper
             List<ExprNode> crontab = ASTExprHelper.getRemoveAllChildExpr(parent, astExprNodeMap);
             return new ContextDetailConditionCrontab(crontab);
         }
-        else if (parent.getType() == EsperEPL2Ast.PATTERN_INCL_EXPR) {
-            EvalFactoryNode evalNode = astPatternNodeMap.remove(parent.getChild(0));
-            return new ContextDetailConditionPattern(evalNode);
+        else if (parent.getType() == EsperEPL2Ast.CREATE_CTX_PATTERN) {
+            EvalFactoryNode evalNode = astPatternNodeMap.remove(parent.getChild(0).getChild(0));
+            boolean inclusive = false;
+            if (parent.getChildCount() > 1) {
+                String ident = parent.getChild(1).getText();
+                if (ident != null && !ident.toLowerCase().equals("inclusive")) {
+                    throw new ASTWalkException("Expected 'inclusive' keyword after '@', found '" + ident + "' instead");
+                }
+                inclusive = true;
+            }
+            return new ContextDetailConditionPattern(evalNode, inclusive);
         }
         else if (parent.getType() == EsperEPL2Ast.STREAM_EXPR) {
             FilterSpecRaw filterSpecRaw = ASTExprHelper.walkFilterSpec(parent.getChild(0), propertyEvalSpec, astExprNodeMap);

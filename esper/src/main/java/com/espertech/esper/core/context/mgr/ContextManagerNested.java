@@ -179,6 +179,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             int pathId,
             ContextController originator,
             EventBean optionalTriggeringEvent,
+            Map<String, Object> optionalTriggeringPattern,
             Object partitionKey,
             Map<String, Object> contextProperties,
             ContextControllerState states) {
@@ -203,7 +204,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             subcontexts.put(nextContext, entry);
 
             // now post-initialize, this may actually call back
-            nextContext.activate(optionalTriggeringEvent, states);
+            nextContext.activate(optionalTriggeringEvent, optionalTriggeringPattern, states);
 
             if (log.isDebugEnabled()) {
                 log.debug("Instantiating branch context path for " + contextName +
@@ -248,7 +249,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         // for all new contexts: evaluate this event for this statement
         if (optionalTriggeringEvent != null) {
             for (AgentInstance context : newInstances) {
-                StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, optionalTriggeringEvent, context.getAgentInstanceContext());
+                StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, optionalTriggeringEvent, optionalTriggeringPattern, context.getAgentInstanceContext());
             }
         }
 
@@ -372,7 +373,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
 
         rootContext = nestedContextFactories[0].createNoCallback(0, this);
         subcontexts.put(rootContext, new ContextControllerTreeEntry(null, null, null, null));
-        rootContext.activate(null, null);
+        rootContext.activate(null, null, null);
     }
 
     private void removeStatement(String statementId) {
