@@ -9,15 +9,9 @@
  * *************************************************************************************
  */
 
-package com.espertech.esper.core.context.mgr;
+package com.espertech.esper.client.annotation;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.pattern.MatchedEventMap;
-
-public interface ContextControllerCondition {
-
-    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset);
-    public void deactivate();
-    public boolean isRunning();
-    public Long getExpectedEndTime();
+public @interface Runtime
+{
+    Instruction[] value();
 }

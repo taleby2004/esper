@@ -103,7 +103,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
             rootContext.deactivate();
 
             for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> entryCP : agentInstances.entrySet()) {
-                StatementAgentInstanceUtil.stopAgentInstances(entryCP.getValue().getAgentInstances(), null, servicesContext);
+                StatementAgentInstanceUtil.stopAgentInstances(entryCP.getValue().getAgentInstances(), null, servicesContext, true);
             }
             agentInstances.clear();
             contextPartitionIds.clear();
@@ -154,7 +154,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         ContextNestedHandleImpl handle = (ContextNestedHandleImpl) contextNestedHandle;
         ContextControllerTreeAgentInstanceList entry = agentInstances.remove(handle.getContextPartitionOrPathId());
         if (entry != null) {
-            StatementAgentInstanceUtil.stopAgentInstances(entry.getAgentInstances(), terminationProperties, servicesContext);
+            StatementAgentInstanceUtil.stopAgentInstances(entry.getAgentInstances(), terminationProperties, servicesContext, false);
             entry.getAgentInstances().clear();
             contextPartitionIds.remove(contextNestedHandle.getContextPartitionOrPathId());
         }

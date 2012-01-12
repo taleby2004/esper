@@ -287,7 +287,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             if (leafEntry != null) { // could be terminated earlier
                 ContextControllerTreeAgentInstanceList ailist = leafEntry.getAgentInstances().get(leafHandle.getContextPartitionOrPathId());
                 if (ailist != null) {
-                    StatementAgentInstanceUtil.stopAgentInstances(ailist.getAgentInstances(), null, servicesContext);
+                    StatementAgentInstanceUtil.stopAgentInstances(ailist.getAgentInstances(), null, servicesContext, false);
                     contextPartitionIds.remove(leafHandle.getContextPartitionOrPathId());
                     ailist.getAgentInstances().clear();
                 }
@@ -426,7 +426,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         // stop instances
         if (entry.getAgentInstances() != null) {
             for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> entryCP : entry.getAgentInstances().entrySet()) {
-                StatementAgentInstanceUtil.stopAgentInstances(entryCP.getValue().getAgentInstances(), null, servicesContext);
+                StatementAgentInstanceUtil.stopAgentInstances(entryCP.getValue().getAgentInstances(), null, servicesContext, false);
                 contextPartitionIds.remove(entryCP.getKey());
             }
         }

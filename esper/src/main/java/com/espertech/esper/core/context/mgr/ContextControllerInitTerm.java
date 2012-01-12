@@ -55,7 +55,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         
         if (currentlyRunning) {
             ContextControllerCondition endEndpoint = makeEndpoint(factory.getContextDetail().getEnd());
-            endEndpoint.activate(optionalTriggeringEvent, null);
+            endEndpoint.activate(optionalTriggeringEvent, null, 0);
             currentSubpathId++;
             long startTime = factory.getSchedulingService().getTime();
             long endTime = endEndpoint.getExpectedEndTime();
@@ -64,7 +64,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
             endConditions.put(endEndpoint, new ContextControllerInitTermInstance(instanceHandle, null, startTime, endTime));
         }
         else {
-            startCondition.activate(optionalTriggeringEvent, null);
+            startCondition.activate(optionalTriggeringEvent, null, 0);
         }
     }
 
@@ -105,12 +105,12 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
             // For overlapping mode, make sure we activate again or stay activated
             else {
                 if (!startCondition.isRunning()) {
-                    startCondition.activate(null, null);
+                    startCondition.activate(null, null, 0);
                 }
             }
 
             ContextControllerCondition endEndpoint = makeEndpoint(factory.getContextDetail().getEnd());
-            endEndpoint.activate(null, new MatchedEventMapImpl(builtinProperties));
+            endEndpoint.activate(null, new MatchedEventMapImpl(builtinProperties), 0);
             currentSubpathId++;
             long startTime = factory.getSchedulingService().getTime();
             Long endTime = endEndpoint.getExpectedEndTime();
@@ -132,7 +132,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
 
             // re-activate start condition if not overlapping
             if (!factory.getContextDetail().isOverlapping()) {
-                startCondition.activate(optionalTriggeringEvent, null);
+                startCondition.activate(optionalTriggeringEvent, null, 0);
             }
         }
     }

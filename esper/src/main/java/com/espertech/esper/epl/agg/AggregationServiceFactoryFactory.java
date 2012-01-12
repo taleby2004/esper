@@ -11,6 +11,7 @@ package com.espertech.esper.epl.agg;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.annotation.Hint;
 import com.espertech.esper.client.annotation.HintEnum;
+import com.espertech.esper.client.annotation.Instruction;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.util.CollectionUtil;
@@ -305,7 +306,13 @@ public class AggregationServiceFactoryFactory
             else
             {
                 if ((evaluatorsArr.length > 0) && (accessorPairs.isEmpty())) {
-                    serviceFactory = new AggSvcGroupByRefcountedNoAccessFactory(evaluatorsArr, aggregatorsArr);
+                    boolean noref = Instruction.GROUPBY_NOREF.containsInstruction(annotations);
+                    if (noref) {
+                        serviceFactory = new AggSvcGroupByExperimentalFactory(evaluatorsArr, aggregatorsArr);
+                    }
+                    else {
+                        serviceFactory = new AggSvcGroupByRefcountedNoAccessFactory(evaluatorsArr, aggregatorsArr);
+                    }
                 }
                 else {
                     serviceFactory = new AggSvcGroupByRefcountedWAccessFactory(evaluatorsArr, aggregatorsArr, pairs, accessedStreams, isJoin);

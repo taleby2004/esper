@@ -46,8 +46,8 @@ public class ContextControllerConditionTimePeriod implements ContextControllerCo
         this.callback = callback;
     }
 
-    public void activate(EventBean optionalTriggerEvent, MatchedEventMap priorMatches) {
-        startContextCallback();
+    public void activate(EventBean optionalTriggerEvent, MatchedEventMap priorMatches, long timeOffset) {
+        startContextCallback(timeOffset);
     }
 
     public void deactivate() {
@@ -58,7 +58,7 @@ public class ContextControllerConditionTimePeriod implements ContextControllerCo
         return scheduleHandle != null;
     }
 
-    private void startContextCallback() {
+    private void startContextCallback(long timeOffset) {
         ScheduleHandleCallback scheduleCallback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
             {
@@ -74,7 +74,7 @@ public class ContextControllerConditionTimePeriod implements ContextControllerCo
             log.warn("Time period expression in context '" + contextName + "' returned a null value, not scheduling time period");
         }
         else {
-            long msec = (long) (interval * 1000L);
+            long msec = (long) (interval * 1000L) - timeOffset;
             agentInstanceContext.getStatementContext().getSchedulingService().add(msec, scheduleHandle, scheduleSlot);
         }
     }

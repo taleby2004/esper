@@ -41,7 +41,7 @@ public class ContextControllerConditionFilter implements ContextControllerCondit
         this.callback = callback;
     }
 
-    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches) {
+    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset) {
         FilterHandleCallback filterCallback = new FilterHandleCallback() {
             public String getStatementId() {
                 return agentInstanceContext.getStatementContext().getStatementId();

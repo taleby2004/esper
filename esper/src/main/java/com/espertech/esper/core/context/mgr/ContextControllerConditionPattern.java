@@ -37,7 +37,7 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
         this.callback = callback;
     }
 
-    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches) {
+    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset) {
         if (patternStopCallback != null) {
             patternStopCallback.stop();
         }
@@ -59,7 +59,18 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
     }
 
     public void matchFound(Map<String, Object> matchEvent) {
-        callback.rangeNotification(this, null, matchEvent);
+        EventBean triggeringEvent = null;
+        /**
+         * TODO
+         * 
+        if (matchEvent.size() == 1) {
+            Object first = matchEvent.values().iterator().next();
+            if (first instanceof EventBean) {
+                triggeringEvent = (EventBean) first;
+            }
+        }
+         */
+        callback.rangeNotification(this, triggeringEvent, matchEvent);
     }
 
     public void deactivate() {

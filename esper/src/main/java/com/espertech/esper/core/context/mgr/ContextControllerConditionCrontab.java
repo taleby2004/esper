@@ -41,7 +41,7 @@ public class ContextControllerConditionCrontab implements ContextControllerCondi
         this.callback = callback;
     }
 
-    public void activate(EventBean optionalTriggerEvent, MatchedEventMap priorMatches) {
+    public void activate(EventBean optionalTriggerEvent, MatchedEventMap priorMatches, long timeOffset) {
         startContextCallback();
     }
 

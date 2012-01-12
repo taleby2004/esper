@@ -1745,7 +1745,7 @@ ChangeEvent(1, 375, 99.82) at t=20.1 secs
 create context CtxPerIdAnd10Sec initiated pattern[every-distinct(a.id, 10 sec) a=ChangeEvent] terminated after 10 sec</pre></div>
 
 	<div class="source"><pre>// Within the context, output the last event upon context partition termination
-context CtxPerIdAnd10Sec select * from ChangeEvent output last when terminated</pre></div>
+context CtxPerIdAnd10Sec select * from ChangeEvent(id=context.a.id) output last when terminated</pre></div>
       </answer>
     </faq>
 

@@ -41,7 +41,7 @@ public class StatementAgentInstanceUtil {
 
     private static final Log log = LogFactory.getLog(EPStatementStopMethodImpl.class);
 
-    public static void stopAgentInstances(List<AgentInstance> agentInstances, Map<String, Object> terminationProperties, EPServicesContext servicesContext) {
+    public static void stopAgentInstances(List<AgentInstance> agentInstances, Map<String, Object> terminationProperties, EPServicesContext servicesContext, boolean isStatementStop) {
         if (agentInstances == null) {
             return;
         }
@@ -49,7 +49,7 @@ public class StatementAgentInstanceUtil {
             if (terminationProperties != null) {
                 instance.getAgentInstanceContext().getContextProperties().getProperties().putAll(terminationProperties);
             }
-            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext, false);
+            StatementAgentInstanceUtil.stop(instance.getStopCallback(), instance.getAgentInstanceContext(), instance.getFinalView(), servicesContext, isStatementStop);
         }
     }
 

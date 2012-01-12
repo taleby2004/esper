@@ -43,6 +43,26 @@ public class TestGroupByEventPerGroup extends TestCase
         listener = null;
     }
 
+    public void testUnboundAggregationNoGroupRef() {
+        String[] fields = "c0,c1".split(",");
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        String epl = "@Runtime({Instruction.GROUPBY_NOREF}) select string as c0, sum(intPrimitive) as c1 from SupportBean group by string";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 10});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 15));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 15});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 20));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 20});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 25));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 25});
+    }
+
     public void testUnboundStreamIterate() {
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
 
