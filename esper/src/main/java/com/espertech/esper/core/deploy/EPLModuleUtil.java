@@ -202,15 +202,16 @@ public class EPLModuleUtil
             Token t = (Token) tokens.get(i);
             if ((t.getType() != EsperEPL2GrammarParser.IDENT) &&
                 (t.getType() != EsperEPL2GrammarParser.DOT) && 
-                (t.getType() != EsperEPL2GrammarParser.STAR)) {
-                throw getMessage(isModule, isUses, resourceName);
+                (t.getType() != EsperEPL2GrammarParser.STAR) &&
+                (!t.getText().matches("[a-zA-Z]*"))) {
+                throw getMessage(isModule, isUses, resourceName, t.getType());
             }
             buffer.append(t.getText().trim());
         }
 
         String result = buffer.toString().trim();
         if (result.length() == 0) {
-            throw getMessage(isModule, isUses, resourceName);
+            throw getMessage(isModule, isUses, resourceName, -1);
         }
 
         if (isModule) {
@@ -222,7 +223,7 @@ public class EPLModuleUtil
         return new ParseNodeImport(item, result);
     }
 
-    private static ParseException getMessage(boolean module, boolean uses, String resourceName)
+    private static ParseException getMessage(boolean module, boolean uses, String resourceName, int type)
     {
         String message = "Keyword '";
         if (module) {
@@ -235,6 +236,16 @@ public class EPLModuleUtil
             message += "import";
         }
         message += "' must be followed by a name or package name (set of names separated by dots) for resource '" + resourceName + "'";
+
+        if (type != -1) {
+            String tokenName = EsperEPL2GrammarParser.getLexerTokenParaphrases().get(type);
+            if (tokenName == null) {
+                tokenName = EsperEPL2GrammarParser.getParserTokenParaphrases().get(type);
+            }
+            if (tokenName != null) {
+                message += ", unexpected reserved keyword " + tokenName + " was encountered as part of the name";
+            }
+        }
         return new ParseException(message);
     }
 

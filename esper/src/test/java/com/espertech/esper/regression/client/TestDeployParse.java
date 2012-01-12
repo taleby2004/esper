@@ -97,6 +97,11 @@ public class TestDeployParse extends TestCase
                 "select * from A",
             }
         );
+
+        assertEquals("org.mycompany.events", deploySvc.parse("module org.mycompany.events; select * from java.lang.Object;").getName());
+        assertEquals("glob.update.me", deploySvc.parse("module glob.update.me; select * from java.lang.Object;").getName());
+        assertEquals("seconds.until.every.where", deploySvc.parse("uses seconds.until.every.where; select * from java.lang.Object;").getUses().toArray()[0]);
+        assertEquals("seconds.until.every.where", deploySvc.parse("import seconds.until.every.where; select * from java.lang.Object;").getImports().toArray()[0]);
     }
 
     public void testParseFail() throws Exception {
