@@ -91,13 +91,16 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
             isEnableSubqueryIndexShare = true;  // index share is always enabled for virtual data window (otherwise it wouldn't make sense)
         }
         boolean isBatchingDataWindow = determineBatchingDataWindow(unmaterializedViewChain.getViewFactoryChain());
-        boolean isVirtualDataWindow = determineVirtualDataWindow(unmaterializedViewChain.getViewFactoryChain());
-        NamedWindowProcessor processor = services.getNamedWindowService().addProcessor(windowName, contextName, singleInstanceContext, filterStreamSpec.getFilterSpec().getResultEventType(), statementContext.getStatementResultService(), optionalRevisionProcessor, statementContext.getExpression(), statementContext.getStatementName(), isPrioritized, isEnableSubqueryIndexShare, isBatchingDataWindow, isVirtualDataWindow, statementContext.getEpStatementHandle().getMetricsHandle());
+        final VirtualDWViewFactory virtualDataWindowFactory = determineVirtualDataWindow(unmaterializedViewChain.getViewFactoryChain());
+        NamedWindowProcessor processor = services.getNamedWindowService().addProcessor(windowName, contextName, singleInstanceContext, filterStreamSpec.getFilterSpec().getResultEventType(), statementContext.getStatementResultService(), optionalRevisionProcessor, statementContext.getExpression(), statementContext.getStatementName(), isPrioritized, isEnableSubqueryIndexShare, isBatchingDataWindow, virtualDataWindowFactory != null, statementContext.getEpStatementHandle().getMetricsHandle());
 
         // add stop callback
         stopCallbacks.add(new StopCallback() {
             public void stop() {
                 services.getNamedWindowService().removeProcessor(windowName);
+                if (virtualDataWindowFactory != null) {
+                    virtualDataWindowFactory.destroyNamedWindow();
+                }
             }
         });
 
@@ -160,13 +163,13 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
         return new EPStatementStartResult(finalViewable, stopStatementMethod, destroyStatementMethod);
     }
 
-    private static boolean determineVirtualDataWindow(List<ViewFactory> viewFactoryChain) {
+    private static VirtualDWViewFactory determineVirtualDataWindow(List<ViewFactory> viewFactoryChain) {
         for (ViewFactory viewFactory : viewFactoryChain) {
             if (viewFactory instanceof VirtualDWViewFactory) {
-                return true;
+                return (VirtualDWViewFactory) viewFactory;
             }
         }
-        return false;
+        return null;
     }
 
     private static boolean determineBatchingDataWindow(List<ViewFactory> viewFactoryChain) {

@@ -9,4 +9,8 @@ public class SampleVirtualDataWindowFactory implements VirtualDataWindowFactory 
     public VirtualDataWindow create(VirtualDataWindowContext context) {
         return new SampleVirtualDataWindow(context);
     }
+
+    public void destroyAllContextPartitions() {
+        // cleanup can be performed here
+    }
 }

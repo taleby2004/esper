@@ -87,6 +87,10 @@ public interface VirtualDataWindow {
 
     /**
      * Called when the named window is stopped or destroyed.
+     * <p>
+     * We used with contexts then this method is invoked for each context partition that gets destroyed.
+     * <p>
+     * There is also a destroy method on the factory level that is called once per named window (and not once per context partition).
      */
     public void destroy();
 

@@ -17,7 +17,7 @@ public class SampleVirtualDataWindowLookup implements VirtualDataWindowLookup {
         this.context = context;
     }
 
-    public Set<EventBean> lookup(Object[] keys) {
+    public Set<EventBean> lookup(Object[] keys, EventBean[] eventsPerStream) {
         // Add code to interogate lookup-keys here.
 
         // Create sample event.

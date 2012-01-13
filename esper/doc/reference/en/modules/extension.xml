@@ -80,29 +80,7 @@
 		<para> 
 			Once you have completed above steps, the virtual data window is ready to use in EPL statements.
 		</para>       	
-		
-		<para>
-			The following restrictions apply to virtual data windows:
-		</para>
-	
-		<orderedlist spacing="compact">
-			<listitem>
-				<para>
-					The virtual data window may not be iterated via the <literal>iterator</literal> or <literal>safeIterator</literal> methods.
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					A statement consuming a stream from a virtual data window does not get up-to-date state at statement creation time. For example, the EPL <literal>select count(*) from MySampleWindow</literal> always starts at count zero and not the count of events that are currently held in store.
-				</para>
-			</listitem>
-			<listitem>
-				<para>
-					When a virtual data window itself originates new events, use insert-into to insert into the named window.
-				</para>
-			</listitem>
-		</orderedlist>
-		
+				
 		<para>
 		  From a threading perspective, virtual data window implementation classes must be thread-safe if objects are shared between multiple named windows. If no objects are shared between multiple different named windows, thereby each object is only used for the same named window and other named windows receive a separate instance, it is no necessary that the implementation classes are thread-safe.
 		</para>
@@ -213,12 +191,21 @@ catch (NamingException e) {
 			<title>Implementing the Factory</title>
 			
 			<para>
+			  For each named window that refers to the virtual data window, the engine instantiates one instance of the factory.
+			</para>
+			
+			<para>
 				A virtual data window factory class is responsible for the following functions:
 			</para>
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						Accept the factory context object as a parameter and return the <literal>VirtualDataWindow</literal> implementation.
+						Implement the <literal>create</literal> method that accepts a factory context object as a parameter and returns a <literal>VirtualDataWindow</literal> implementation.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Implement the <literal>destroyAllContextPartitions</literal> method: This method is called once when the named window is stopped or destroyed i.e. called once for all context partitions and not once per context partition.
 					</para>
 				</listitem>
 			</itemizedlist>
@@ -228,7 +215,12 @@ catch (NamingException e) {
 			</para>
 			<programlisting><![CDATA[public class SampleVirtualDataWindowFactory implements VirtualDataWindowFactory {
   public VirtualDataWindow create(VirtualDataWindowContext context) {
+    // For sharing the same instance between context partitions, return the same reference.
     return new SampleVirtualDataWindow(context);
+  }
+  
+  public void destroyAllContextPartitions() {
+    // Release shared resources here
   }
 }]]></programlisting>
 
@@ -267,6 +259,11 @@ AgentInstanceContext agentInstanceContext;  // Other EPL statement information i
 				<listitem>
 					<para>
 						Optionally, post insert and remove stream data.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Implement the <literal>destroy</literal> method, which the engine calls for each context partition when the named window is stopped or destroyed, or once when a context partition is ended/terminated.
 					</para>
 				</listitem>
 			</itemizedlist>

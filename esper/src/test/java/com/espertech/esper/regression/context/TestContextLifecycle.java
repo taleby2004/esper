@@ -42,6 +42,8 @@ public class TestContextLifecycle extends TestCase {
 
     public void testVirtualDataWindow() {
         SupportVirtualDWFactory.getWindows().clear();
+        SupportVirtualDWFactory.setDestroyed(false);
+        
         epService.getEPAdministrator().createEPL("create context CtxSegmented as partition by string from SupportBean");
         epService.getEPAdministrator().createEPL("context CtxSegmented create window TestVDWWindow.test:vdw() as SupportBean");
         epService.getEPAdministrator().createEPL("select * from TestVDWWindow");
@@ -51,6 +53,10 @@ public class TestContextLifecycle extends TestCase {
         assertEquals(2, SupportVirtualDWFactory.getWindows().size());   // Independent windows for independent contexts
 
         epService.getEPAdministrator().destroyAllStatements();
+        for (SupportVirtualDW vdw : SupportVirtualDWFactory.getWindows()) {
+            assertTrue(vdw.isDestroyed());
+        }
+        assertTrue(SupportVirtualDWFactory.isDestroyed());
     }
 
     public void testNWOtherContextOnExpr() {

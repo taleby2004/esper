@@ -21,6 +21,7 @@ import java.util.List;
 public class SupportVirtualDWFactory implements VirtualDataWindowFactory {
 
     private static List<SupportVirtualDW> windows = new ArrayList<SupportVirtualDW>();
+    private static boolean destroyed;
 
     public SupportVirtualDWFactory() {
     }
@@ -29,9 +30,21 @@ public class SupportVirtualDWFactory implements VirtualDataWindowFactory {
         return windows;
     }
 
+    public static boolean isDestroyed() {
+        return destroyed;
+    }
+
+    public static void setDestroyed(boolean destroyed) {
+        SupportVirtualDWFactory.destroyed = destroyed;
+    }
+
     public VirtualDataWindow create(VirtualDataWindowContext context) {
         SupportVirtualDW vdw = new SupportVirtualDW(context);
         windows.add(vdw);
         return vdw;
+    }
+
+    public void destroyAllContextPartitions() {
+        destroyed = true;
     }
 }

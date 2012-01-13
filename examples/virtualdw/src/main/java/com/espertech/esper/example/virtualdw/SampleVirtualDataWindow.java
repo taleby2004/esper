@@ -1,10 +1,10 @@
 package com.espertech.esper.example.virtualdw;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.hook.VirtualDataWindow;
-import com.espertech.esper.client.hook.VirtualDataWindowContext;
-import com.espertech.esper.client.hook.VirtualDataWindowLookup;
-import com.espertech.esper.client.hook.VirtualDataWindowLookupContext;
+import com.espertech.esper.client.hook.*;
+
+import java.util.Collections;
+import java.util.Iterator;
 
 public class SampleVirtualDataWindow implements VirtualDataWindow {
 
@@ -29,7 +29,14 @@ public class SampleVirtualDataWindow implements VirtualDataWindow {
     }
 
     public void destroy() {
-        // Called when the named window is stopped or destroyed.
+        // Called when the named window is stopped or destroyed, for each context partition.
         // This sample does not need to clean up resources.
+    }
+
+    public void handleEvent(VirtualDataWindowEvent event) {
+    }
+
+    public Iterator<EventBean> iterator() {
+        return Collections.<EventBean>emptyList().iterator();
     }
 }

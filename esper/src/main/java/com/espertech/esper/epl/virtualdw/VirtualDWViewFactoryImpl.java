@@ -97,4 +97,10 @@ public class VirtualDWViewFactoryImpl implements ViewFactory, DataWindowViewFact
     public boolean canReuse(View view) {
         return false;
     }
+
+    public void destroyNamedWindow() {
+        if (virtualDataWindowFactory != null) {
+            virtualDataWindowFactory.destroyAllContextPartitions();
+        }
+    }
 }

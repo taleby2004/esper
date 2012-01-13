@@ -21,8 +21,26 @@ public interface VirtualDataWindowFactory {
     /**
      * Return a virtual data window to handle the specific event type, named window or paramaters
      * as provided in the context.
+     * <p>
+     *     This method is invoked for each named window instance.
+     * </p>
+     * <p>
+     *     If using context partitions, the method is invoked once per context partition per named window.
+     * </p>
      * @param context provides contextual information such as event type, named window name and parameters.
      * @return virtual data window
      */
     public VirtualDataWindow create(VirtualDataWindowContext context);
+
+    /**
+     * Invoked to indicate the named window is destroyed.
+     * <p>
+     *     This method is invoked once per named window (and not once per context partition).
+     * </p>
+     * <p>
+     *     For reference, the VirtualDataWindow destroy method is called once per context partition,
+     *     before this method is invoked.
+     * </p>
+     */
+    public void destroyAllContextPartitions();
 }
