@@ -43,9 +43,9 @@ public class WrapperEventType implements EventTypeSPI
      */
     protected final MapEventType underlyingMapType;
 
-    private final String[] propertyNames;
-    private final EventPropertyDescriptor[] propertyDesc;
-    private final Map<String, EventPropertyDescriptor> propertyDescriptorMap;
+    private String[] propertyNames;
+    private EventPropertyDescriptor[] propertyDesc;
+    private Map<String, EventPropertyDescriptor> propertyDescriptorMap;
     private final int eventTypeId;
 
     private final boolean isNoMapProperties;
@@ -56,6 +56,7 @@ public class WrapperEventType implements EventTypeSPI
 
     private String startTimestampPropertyName;
     private String endTimestampPropertyName;
+    private int numPropertiesUnderlyingType;
 
     /**
      * Ctor.
@@ -78,13 +79,33 @@ public class WrapperEventType implements EventTypeSPI
         this.eventTypeId = eventTypeId;
         propertyGetterCache = new HashMap<String, EventPropertyGetter>();
 
+        checkInitProperties();
+
+        if (metadata.getTypeClass() == EventTypeMetadata.TypeClass.NAMED_WINDOW) {
+            startTimestampPropertyName = eventType.getStartTimestampPropertyName();
+            endTimestampPropertyName = eventType.getEndTimestampPropertyName();
+            EventTypeUtility.validateTimestampProperties(this, startTimestampPropertyName, endTimestampPropertyName);
+        }
+    }
+
+    private void checkInitProperties() {
+        if (propertyNames == null || numPropertiesUnderlyingType != underlyingEventType.getPropertyDescriptors().length) {
+            PropertyDescriptorComposite compositeProperties = getCompositeProperties(underlyingEventType, underlyingMapType);
+            propertyNames = compositeProperties.getPropertyNames();
+            propertyDescriptorMap = compositeProperties.getPropertyDescriptorMap();
+            propertyDesc = compositeProperties.getDescriptors();
+            numPropertiesUnderlyingType = underlyingEventType.getPropertyDescriptors().length;
+        }
+    }
+
+    private static PropertyDescriptorComposite getCompositeProperties(EventType underlyingEventType, MapEventType underlyingMapType) {
         List<String> propertyNames = new ArrayList<String>();
         propertyNames.addAll(Arrays.asList(underlyingEventType.getPropertyNames()));
         propertyNames.addAll(Arrays.asList(underlyingMapType.getPropertyNames()));
-		this.propertyNames = propertyNames.toArray(new String[propertyNames.size()]);
+		String[] propertyNamesArr = propertyNames.toArray(new String[propertyNames.size()]);
 
         List<EventPropertyDescriptor> propertyDesc = new ArrayList<EventPropertyDescriptor>();
-        propertyDescriptorMap = new HashMap<String, EventPropertyDescriptor>();
+        HashMap<String, EventPropertyDescriptor> propertyDescriptorMap = new HashMap<String, EventPropertyDescriptor>();
 		for(EventPropertyDescriptor eventProperty : underlyingEventType.getPropertyDescriptors())
 		{
 			propertyDesc.add(eventProperty);
@@ -95,13 +116,8 @@ public class WrapperEventType implements EventTypeSPI
 			propertyDesc.add(mapProperty);
             propertyDescriptorMap.put(mapProperty.getPropertyName(), mapProperty);
 		}
-		this.propertyDesc = propertyDesc.toArray(new EventPropertyDescriptor[propertyDesc.size()]);
-
-        if (metadata.getTypeClass() == EventTypeMetadata.TypeClass.NAMED_WINDOW) {
-            startTimestampPropertyName = eventType.getStartTimestampPropertyName();
-            endTimestampPropertyName = eventType.getEndTimestampPropertyName();
-            EventTypeUtility.validateTimestampProperties(this, startTimestampPropertyName, endTimestampPropertyName);
-        }
+		EventPropertyDescriptor[] propertyDescArr = propertyDesc.toArray(new EventPropertyDescriptor[propertyDesc.size()]);
+        return new PropertyDescriptorComposite(propertyDescriptorMap, propertyNamesArr, propertyDescArr);
     }
 
     public String getStartTimestampPropertyName() {
@@ -295,6 +311,7 @@ public class WrapperEventType implements EventTypeSPI
 
     public String[] getPropertyNames()
 	{
+        checkInitProperties();
 		return propertyNames;
 	}
 
@@ -402,11 +419,13 @@ public class WrapperEventType implements EventTypeSPI
 
     public EventPropertyDescriptor[] getPropertyDescriptors()
     {
+        checkInitProperties();
         return propertyDesc;
     }
 
     public EventPropertyDescriptor getPropertyDescriptor(String propertyName)
     {
+        checkInitProperties();
         return propertyDescriptorMap.get(propertyName);
     }
 
@@ -626,4 +645,28 @@ public class WrapperEventType implements EventTypeSPI
 			}
 		}
 	}
+
+    public static class PropertyDescriptorComposite {
+        private final HashMap<String, EventPropertyDescriptor> propertyDescriptorMap;
+        private final String[] propertyNames;
+        private final EventPropertyDescriptor[] descriptors;
+
+        public PropertyDescriptorComposite(HashMap<String, EventPropertyDescriptor> propertyDescriptorMap, String[] propertyNames, EventPropertyDescriptor[] descriptors) {
+            this.propertyDescriptorMap = propertyDescriptorMap;
+            this.propertyNames = propertyNames;
+            this.descriptors = descriptors;
+        }
+
+        public HashMap<String, EventPropertyDescriptor> getPropertyDescriptorMap() {
+            return propertyDescriptorMap;
+        }
+
+        public String[] getPropertyNames() {
+            return propertyNames;
+        }
+
+        public EventPropertyDescriptor[] getDescriptors() {
+            return descriptors;
+        }
+    }
 }

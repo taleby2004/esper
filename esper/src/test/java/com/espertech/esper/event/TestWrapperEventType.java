@@ -15,11 +15,13 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.support.bean.SupportBeanSimple;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import junit.framework.TestCase;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,6 +44,20 @@ public class TestWrapperEventType extends TestCase
         EventTypeMetadata meta = EventTypeMetadata.createWrapper("test", true, false, false);
         eventType = new WrapperEventType(meta, "mytype", 1, underlyingEventTypeOne, properties, eventAdapterService);
 	}
+
+    public void testTypeUpdate() {
+        Map<String, Object> typeOne = new HashMap<String, Object>();
+        typeOne.put("field1", String.class);
+        MapEventType underlying = new MapEventType(EventTypeMetadata.createAnonymous("noname"), "noname", 1, eventAdapterService, typeOne, null, null, null);
+        EventTypeMetadata meta = EventTypeMetadata.createWrapper("test", true, false, false);
+        eventType = new WrapperEventType(meta, "mytype", 1, underlying, properties, eventAdapterService);
+
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[] {"additionalString", "additionalInt", "field1"}, eventType.getPropertyNames());
+        underlying.addAdditionalProperties(Collections.<String, Object>singletonMap("field2", String.class), eventAdapterService);
+        EPAssertionUtil.assertEqualsAnyOrder(new Object[] {"additionalString", "additionalInt", "field1", "field2"}, eventType.getPropertyNames());
+        assertEquals(4, eventType.getPropertyDescriptors().length);
+        assertEquals(String.class, eventType.getPropertyDescriptor("field2").getPropertyType());
+    }
 	
 	public void testInvalidRepeatedNames()
 	{
