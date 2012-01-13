@@ -245,6 +245,11 @@ EventType eventType;  // The event type of events.
 EventBeanFactory eventFactory;  // A factory for creating EventBean instances from store rows.
 VirtualDataWindowOutStream outputStream;  // For stream output to consuming statements.
 AgentInstanceContext agentInstanceContext;  // Other EPL statement information in statement context.]]></programlisting>
+
+			<para>
+			    When using contexts you can decide whether your factory returns a new virtual data window for each context partition or returns the same virtual data window instance for all context partitions.
+			    Your extension code may refer to the named window name to identify the named window and may refer to the agent instance context that holds the agent instance id which is the id of the context partition. 
+			</para>
 		</sect2>
 
 		<sect2 id="extension-virtualdw-vdw" revision="1">

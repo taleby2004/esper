@@ -13,7 +13,13 @@ package com.espertech.esper.client.annotation;
 
 import java.lang.annotation.Annotation;
 
+/**
+ * Experimental runtime instructions, not intended for use.
+ */
 public enum Instruction {
+    /**
+     * Experimental - group-by aggregations do not remember groups.
+     */
     GROUPBY_NOREF;
 
     /**

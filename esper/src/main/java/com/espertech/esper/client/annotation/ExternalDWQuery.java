@@ -12,13 +12,19 @@
 package com.espertech.esper.client.annotation;
 
 /**
- * Experimental and may be deprecated in the future: Provides a runtime instruction to the engine.
+ * Annotation for defining the name of the functions returning external data window key and value objects for use with queries against external data windows.
  */
-public @interface Runtime
+public @interface ExternalDWQuery
 {
     /**
-     * Returns a set of instructions.
-     * @return instructions
+     * Returns function name that return key objects.
+     * @return function name
      */
-    Instruction[] value();
+    String functionKeys() default "";
+
+    /**
+     * Returns function name that return value objects.
+     * @return function name
+     */
+    String functionValues() default "";
 }

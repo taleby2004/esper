@@ -12,13 +12,19 @@
 package com.espertech.esper.client.annotation;
 
 /**
- * Experimental and may be deprecated in the future: Provides a runtime instruction to the engine.
+ * Annotation for configuring external data window listeners.
  */
-public @interface Runtime
+public @interface ExternalDWListener
 {
     /**
-     * Returns a set of instructions.
-     * @return instructions
+     * Returns indicator whether a listener thread is required or not.
+     * @return indicator
      */
-    Instruction[] value();
+    boolean threaded() default true;
+
+    /**
+     * Returns indicator the number of listener threads.
+     * @return number of threads
+     */
+    int numThreads() default 1;
 }

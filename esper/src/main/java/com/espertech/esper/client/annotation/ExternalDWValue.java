@@ -12,13 +12,19 @@
 package com.espertech.esper.client.annotation;
 
 /**
- * Experimental and may be deprecated in the future: Provides a runtime instruction to the engine.
+ * Annotation for mapping of event-to-value and value-to-event for external data windows.
  */
-public @interface Runtime
+public @interface ExternalDWValue
 {
     /**
-     * Returns a set of instructions.
-     * @return instructions
+     * Returns the function name of the function that maps event beans to value objects.
+     * @return event to value mapping function name
      */
-    Instruction[] value();
+    String functionBeanToValue();
+
+    /**
+     * Returns the function name of the function that maps values to event objects.
+     * @return value to event mapping function name
+     */
+    String functionValueToBean();
 }

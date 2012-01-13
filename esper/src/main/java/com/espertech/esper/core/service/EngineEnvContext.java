@@ -9,9 +9,9 @@
 package com.espertech.esper.core.service;
 
 import javax.naming.*;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.HashMap;
 
 /**
  * Implements a JNDI context for providing a directory for engine-external resources such as adapters.
@@ -45,10 +45,6 @@ public class EngineEnvContext implements Context
 
     public void bind(String name, Object obj) throws NamingException
     {
-        if (context.containsKey(name))
-        {
-            throw new NamingException("Already in context: " + name);
-        }
         context.put(name, obj);
     }
 

@@ -12,13 +12,19 @@
 package com.espertech.esper.client.annotation;
 
 /**
- * Experimental and may be deprecated in the future: Provides a runtime instruction to the engine.
+ * Annotation for defining a external data window settings.
  */
-public @interface Runtime
+public @interface ExternalDWSetting
 {
     /**
-     * Returns a set of instructions.
-     * @return instructions
+     * Indicator whether iterable or not.
+     * @return iterable flag
      */
-    Instruction[] value();
+    boolean iterable() default true;
+
+    /**
+     * Function name to invoke when a lookup completed.
+     * @return function name
+     */
+    String functionLookupCompleted() default "";
 }

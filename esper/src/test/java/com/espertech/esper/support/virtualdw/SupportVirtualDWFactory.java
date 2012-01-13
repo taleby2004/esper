@@ -22,6 +22,9 @@ public class SupportVirtualDWFactory implements VirtualDataWindowFactory {
 
     private static List<SupportVirtualDW> windows = new ArrayList<SupportVirtualDW>();
 
+    public SupportVirtualDWFactory() {
+    }
+
     public static List<SupportVirtualDW> getWindows() {
         return windows;
     }

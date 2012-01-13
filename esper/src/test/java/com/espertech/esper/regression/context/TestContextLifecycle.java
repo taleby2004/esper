@@ -18,6 +18,8 @@ import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.virtualdw.SupportVirtualDW;
+import com.espertech.esper.support.virtualdw.SupportVirtualDWFactory;
 import junit.framework.TestCase;
 
 public class TestContextLifecycle extends TestCase {
@@ -30,10 +32,25 @@ public class TestContextLifecycle extends TestCase {
         Configuration configuration = SupportConfigFactory.getConfiguration();
         configuration.addEventType("SupportBean", SupportBean.class);
         configuration.addEventType("SupportBean_S0", SupportBean_S0.class);
+        configuration.addPlugInVirtualDataWindow("test", "vdw", SupportVirtualDWFactory.class.getName(), SupportVirtualDW.ITERATE);    // configure with iteration
+
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
         spi = (EPServiceProviderSPI) epService;
+    }
+
+    public void testVirtualDataWindow() {
+        SupportVirtualDWFactory.getWindows().clear();
+        epService.getEPAdministrator().createEPL("create context CtxSegmented as partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("context CtxSegmented create window TestVDWWindow.test:vdw() as SupportBean");
+        epService.getEPAdministrator().createEPL("select * from TestVDWWindow");
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        assertEquals(2, SupportVirtualDWFactory.getWindows().size());   // Independent windows for independent contexts
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testNWOtherContextOnExpr() {

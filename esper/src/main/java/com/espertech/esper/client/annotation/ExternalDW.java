@@ -12,13 +12,25 @@
 package com.espertech.esper.client.annotation;
 
 /**
- * Experimental and may be deprecated in the future: Provides a runtime instruction to the engine.
+ * Annotation for defining an external data window name and open/close functon.
  */
-public @interface Runtime
+public @interface ExternalDW
 {
     /**
-     * Returns a set of instructions.
-     * @return instructions
+     * Name
+     * @return name
      */
-    Instruction[] value();
+    String name();
+
+    /**
+     * Open function.
+     * @return open function.
+     */
+    String functionOpen() default "";
+
+    /**
+     * Close function.
+     * @return close function
+     */
+    String functionClose() default "";
 }
