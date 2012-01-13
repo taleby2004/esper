@@ -348,9 +348,14 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
-        String stmt ="select * from pattern [a=A until b=B -> c=C(id = ('C' || a[0].id || a[1].id || b.id))]";
-        SupportUpdateListener listener = new SupportUpdateListener();
-        EPStatement statement = epService.getEPAdministrator().createEPL(stmt);
+        String stmt;
+        SupportUpdateListener listener;
+        EPStatement statement;
+        EventBean event;
+
+        stmt ="select * from pattern [a=A until b=B -> c=C(id = ('C' || a[0].id || a[1].id || b.id))]";
+        listener = new SupportUpdateListener();
+        statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(listener);
 
         Object eventA1 = new SupportBean_A("A1");
@@ -367,7 +372,7 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
 
         Object eventC1 = new SupportBean_C("CA1A2B1");
         epService.getEPRuntime().sendEvent(eventC1);
-        EventBean event = listener.assertOneGetNewAndReset();
+        event = listener.assertOneGetNewAndReset();
         assertSame(eventA1, event.get("a[0]"));
         assertSame(eventA2, event.get("a[1]"));
         assertNull(event.get("a[2]"));
@@ -491,6 +496,22 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         epService.getEPRuntime().sendEvent(new SupportBean("2", 0));
         epService.getEPRuntime().sendEvent(new SupportBean("2", 0));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(15000));
+
+        // test followed by 3 streams
+        epService.getEPAdministrator().destroyAllStatements();
+        listener.reset();
+        String epl = "select * from pattern [ every [2] A=SupportBean(string='1') " +
+                "-> [2] B=SupportBean(string='2' and intPrimitive=A[0].intPrimitive)" +
+                "-> [2] C=SupportBean(string='3' and intPrimitive=A[0].intPrimitive)]";
+        epService.getEPAdministrator().createEPL(epl).addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("1", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("1", 20));
+        epService.getEPRuntime().sendEvent(new SupportBean("2", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("2", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("3", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("3", 10));
+        assertTrue(listener.isInvoked());
     }
 
     public void testArrayFunctionRepeat()

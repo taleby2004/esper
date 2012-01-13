@@ -59,8 +59,6 @@ public class TestContextInitatedTerminated extends TestCase {
     }
 
     public void testPatternInclusion() {
-        /*
-        TODO
         String[] fields = "string,intPrimitive".split(",");
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         String contextExpr =  "create context CtxPerId initiated by pattern [every-distinct (a.string, 10 sec) a=SupportBean]@Inclusive terminated after 10 sec ";
@@ -104,7 +102,6 @@ public class TestContextInitatedTerminated extends TestCase {
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 6});
 
         epService.getEPAdministrator().destroyAllStatements();
-         */
 
         // test multiple pattern with multiple events
         String contextExprMulti =  "create context CtxPerId initiated by pattern [every a=SupportBean_S0 -> b=SupportBean_S1]@Inclusive terminated after 10 sec ";

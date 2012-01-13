@@ -216,9 +216,13 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             {
                 arrayCompositeEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
                 String patternSubexEventType = getPatternSubexEventType(context.getStatementId(), "pattern", subexpressionIdStack);
-                EventType arrayTagCompositeEventType = context.getEventAdapterService().createSemiAnonymousMapType(patternSubexEventType, new HashMap(), tags.getArrayEventTypes(), isInsertInto);
+
                 for (Map.Entry<String, Pair<EventType, String>> entry : tags.getArrayEventTypes().entrySet())
                 {
+                    LinkedHashMap<String, Pair<EventType, String>> specificArrayType = new LinkedHashMap<String, Pair<EventType, String>>();
+                    specificArrayType.put(entry.getKey(), entry.getValue());
+                    EventType arrayTagCompositeEventType = context.getEventAdapterService().createSemiAnonymousMapType(patternSubexEventType, Collections.<String, Pair<EventType,String>>emptyMap(), specificArrayType, isInsertInto);
+
                     String tag = entry.getKey();
                     if (!filterTypes.containsKey(tag))
                     {
