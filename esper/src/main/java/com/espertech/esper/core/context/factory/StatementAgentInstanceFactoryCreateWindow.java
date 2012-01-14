@@ -88,6 +88,10 @@ public class StatementAgentInstanceFactoryCreateWindow implements StatementAgent
             // Obtain processor for this named window
             NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(windowName);
 
+            if (processor == null) {
+                throw new RuntimeException("Failed to obtain named window processor for named window '" + windowName + "'");
+            }
+
             // Allocate processor instance
             NamedWindowProcessorInstance processorInstance = processor.addInstance(agentInstanceContext);
             View rootView = processorInstance.getRootViewInstance();
@@ -195,7 +199,6 @@ public class StatementAgentInstanceFactoryCreateWindow implements StatementAgent
             }
         }
         catch (RuntimeException ex) {
-            services.getNamedWindowService().removeProcessor(windowName);
             StatementAgentInstanceUtil.stopSafe(stopCallback, statementContext);
             throw ex;
         }

@@ -149,7 +149,14 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
         // Without context - start here
         else {
             AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
-            final StatementAgentInstanceFactoryCreateWindowResult resultOfStart = contextFactory.newContext(agentInstanceContext);
+            final StatementAgentInstanceFactoryCreateWindowResult resultOfStart;
+            try {
+                resultOfStart = contextFactory.newContext(agentInstanceContext);
+            }
+            catch (RuntimeException ex) {
+                services.getNamedWindowService().removeProcessor(windowName);
+                throw ex;
+            }
             finalViewable = resultOfStart.getFinalView();
             stopStatementMethod = new EPStatementStopMethod() {
                 public void stop() {
