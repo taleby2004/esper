@@ -16,6 +16,7 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.hook.VirtualDataWindow;
 import com.espertech.esper.client.hook.VirtualDataWindowContext;
 import com.espertech.esper.client.hook.VirtualDataWindowFactory;
+import com.espertech.esper.client.hook.VirtualDataWindowFactoryContext;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.StatementContext;
@@ -40,6 +41,7 @@ public class VirtualDWViewFactoryImpl implements ViewFactory, DataWindowViewFact
     private EventType parentEventType;
     private Object[] viewParameterArr;
     private ExprNode[] viewParameterExp;
+    private EventBeanFactory eventBeanFactory;
 
     public VirtualDWViewFactoryImpl(Class first, String namedWindowName, Serializable customConfiguration) throws ViewProcessingException {
         if (!JavaClassHelper.isImplementsInterface(first, VirtualDataWindowFactory.class)) {
@@ -48,6 +50,7 @@ public class VirtualDWViewFactoryImpl implements ViewFactory, DataWindowViewFact
         this.customConfiguration = customConfiguration;
         this.namedWindowName = namedWindowName;
         virtualDataWindowFactory = (VirtualDataWindowFactory) JavaClassHelper.instantiate(VirtualDataWindowFactory.class, first.getName());
+
     }
 
     public void setViewParameters(ViewFactoryContext viewFactoryContext, List<ExprNode> viewParameters) throws ViewParameterException {
@@ -71,13 +74,16 @@ public class VirtualDWViewFactoryImpl implements ViewFactory, DataWindowViewFact
         }
 
         viewParameterExp = ViewFactorySupport.validate(viewFactoryContext.getViewName(), parentEventType, viewFactoryContext.getStatementContext(), viewParameters, true);
+
+        // initialize
+        eventBeanFactory = EventAdapterServiceHelper.getFactoryForType(parentEventType, statementContext.getEventAdapterService());
+        virtualDataWindowFactory.initialize(new VirtualDataWindowFactoryContext(parentEventType, viewParameterArr, viewParameterExp, eventBeanFactory, namedWindowName, viewFactoryContext, customConfiguration));
     }
 
     public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        EventBeanFactory factory = EventAdapterServiceHelper.getFactoryForType(parentEventType, agentInstanceViewFactoryContext.getAgentInstanceContext().getStatementContext().getEventAdapterService());
         VirtualDataWindowOutStreamImpl outputStream = new VirtualDataWindowOutStreamImpl();
-        VirtualDataWindowContext context = new VirtualDataWindowContext(agentInstanceViewFactoryContext.getAgentInstanceContext(), parentEventType, viewParameterArr, viewParameterExp, factory, outputStream, namedWindowName, viewFactoryContext, customConfiguration);
+        VirtualDataWindowContext context = new VirtualDataWindowContext(agentInstanceViewFactoryContext.getAgentInstanceContext(), parentEventType, viewParameterArr, viewParameterExp, eventBeanFactory, outputStream, namedWindowName, viewFactoryContext, customConfiguration);
         VirtualDataWindow window;
         try {
             window = virtualDataWindowFactory.create(context);

@@ -14,8 +14,12 @@ package com.espertech.esper.support.virtualdw;
 import com.espertech.esper.client.hook.VirtualDataWindow;
 import com.espertech.esper.client.hook.VirtualDataWindowContext;
 import com.espertech.esper.client.hook.VirtualDataWindowFactory;
+import com.espertech.esper.client.hook.VirtualDataWindowFactoryContext;
 
 public class SupportVirtualDWInvalidFactory implements VirtualDataWindowFactory {
+
+    public void initialize(VirtualDataWindowFactoryContext factoryContext) {
+    }
 
     public VirtualDataWindow create(VirtualDataWindowContext context) {
         return new SupportVirtualDWInvalid();

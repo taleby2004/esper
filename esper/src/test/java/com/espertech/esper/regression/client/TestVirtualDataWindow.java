@@ -365,8 +365,10 @@ public class TestVirtualDataWindow extends TestCase {
 
         // start named window (not an event but a new factory call)
         SupportVirtualDWFactory.getWindows().clear();
+        SupportVirtualDWFactory.getInitializations().clear();
         epService.getEPAdministrator().getStatement("create-nw").start();
         assertEquals(1, SupportVirtualDWFactory.getWindows().size());
+        assertEquals(1, SupportVirtualDWFactory.getInitializations().size());
     }
 
     private void tryInvalid(String epl, String message) {
@@ -387,7 +389,17 @@ public class TestVirtualDataWindow extends TestCase {
         mapType.put("col3", "int");
         epService.getEPAdministrator().getConfiguration().addEventType("MapType", mapType);
 
+        SupportVirtualDWFactory.getInitializations().clear();
         epService.getEPAdministrator().createEPL("@Name('create-nw') create window MyVDW.test:vdw() as MapType");
+
+        assertEquals(1, SupportVirtualDWFactory.getInitializations().size());
+        VirtualDataWindowFactoryContext factoryContext = SupportVirtualDWFactory.getInitializations().get(0);
+        assertNotNull(factoryContext.getEventFactory());
+        assertEquals("MyVDW", factoryContext.getEventType().getName());
+        assertNotNull("MyVDW", factoryContext.getNamedWindowName());
+        assertEquals(0, factoryContext.getParameters().length);
+        assertEquals(0, factoryContext.getParameterExpressions().length);
+        assertNotNull(factoryContext.getViewFactoryContext());
 
         // define some test data to return, via lookup
         SupportVirtualDW window = (SupportVirtualDW) getFromContext("/virtualdw/MyVDW");

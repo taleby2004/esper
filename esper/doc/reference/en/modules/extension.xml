@@ -200,22 +200,47 @@ catch (NamingException e) {
 			<itemizedlist spacing="compact">
 				<listitem>
 					<para>
-						Implement the <literal>create</literal> method that accepts a factory context object as a parameter and returns a <literal>VirtualDataWindow</literal> implementation.
+						Implement the <literal>initialize</literal> method that accepts a virtual data window factory context object as a parameter.
 					</para>
 				</listitem>
 				<listitem>
 					<para>
-						Implement the <literal>destroyAllContextPartitions</literal> method: This method is called once when the named window is stopped or destroyed i.e. called once for all context partitions and not once per context partition.
+						Implement the <literal>create</literal> method that accepts a virtual data window context object as a parameter and returns a <literal>VirtualDataWindow</literal> implementation.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						Implement the <literal>destroyAllContextPartitions</literal> method that gets called once when the named window is stopped or destroyed.
 					</para>
 				</listitem>
 			</itemizedlist>
+			
+			<para>
+			  The engine instantiates a <literal>VirtualDataWindowFactory</literal> instance for each named window created via <literal>create window</literal>. The engine invokes the <literal>initialize</literal> method once in respect to the named window being created passing a <literal>VirtualDataWindowFactoryContext</literal> context object.
+			</para>
+
+			<para>
+			  If not using contexts, the engine calls the <literal>create</literal> method once after calling the <literal>initialize</literal> method. If using contexts, the engine calls the <literal>create</literal> method every time it allocates a context partition.
+			  If using contexts and your virtual data window implementation operates thread-safe, you may return the same virtual data window implementation object for each context partition. If using contexts and your implementation object is not thread safe, return a separate thread-safe implementation object for each context partition.
+			</para>
+
+			<para>
+			  The engine invokes the <literal>destroyAllContextPartitions</literal> once when the named window is stopped or destroyed. If not using contexts, the engine calls the <literal>destroy</literal> method of the virtual data window implementation object before calling
+			  the <literal>destroyAllContextPartitions</literal> method on the factory object. If using contexts, the engine calls the <literal>destroy</literal> method on each instance associates to a context partition at the time when the associated context partition terminates.
+			</para>
 
 			<para>
 				The sample code shown here can be found among the examples in the distribution under <literal>virtualdw</literal>:
 			</para>
 			<programlisting><![CDATA[public class SampleVirtualDataWindowFactory implements VirtualDataWindowFactory {
+
+    public void initialize(VirtualDataWindowFactoryContext factoryContext) {
+		// Can add initialization logic here.
+    }
+
   public VirtualDataWindow create(VirtualDataWindowContext context) {
-    // For sharing the same instance between context partitions, return the same reference.
+    // This example allocates a new virtual data window (one per context partitions if using contexts).
+    // For sharing the virtual data window instance between context partitions, return the same reference.
     return new SampleVirtualDataWindow(context);
   }
   
