@@ -20,6 +20,7 @@ import com.espertech.esper.support.bean.SupportBeanRange;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.virtualdw.SupportVirtualDW;
+import com.espertech.esper.support.virtualdw.SupportVirtualDWExceptionFactory;
 import com.espertech.esper.support.virtualdw.SupportVirtualDWFactory;
 import com.espertech.esper.support.virtualdw.SupportVirtualDWInvalidFactory;
 import junit.framework.TestCase;
@@ -43,6 +44,7 @@ public class TestVirtualDataWindow extends TestCase {
         configuration.addPlugInVirtualDataWindow("test", "vdw", SupportVirtualDWFactory.class.getName());
         configuration.addPlugInVirtualDataWindow("invalid", "invalid", TestCase.class.getName());
         configuration.addPlugInVirtualDataWindow("test", "testnoindex", SupportVirtualDWInvalidFactory.class.getName());
+        configuration.addPlugInVirtualDataWindow("test", "exceptionvdw", SupportVirtualDWExceptionFactory.class.getName());
         configuration.addEventType("SupportBean", SupportBean.class);
         configuration.addEventType("SupportBean_ST0", SupportBean_ST0.class);
         configuration.addEventType("SupportBeanRange", SupportBeanRange.class);
@@ -333,6 +335,14 @@ public class TestVirtualDataWindow extends TestCase {
         epService.getEPAdministrator().createEPL("create window ABC.test:testnoindex() as SupportBean");
         epl = "select (select * from ABC) from SupportBean";
         tryInvalid(epl, "Unexpected exception starting statement: Exception obtaining index lookup from virtual data window, the implementation has returned a null index [select (select * from ABC) from SupportBean]");
+        
+        try {
+            epService.getEPAdministrator().createEPL("create window ABC.test:exceptionvdw() as SupportBean");
+            fail();
+        }
+        catch (EPStatementException ex) {
+            assertEquals("Error starting statement: Error attaching view to event stream: Validation exception initializing virtual data window 'ABC': This is a test exception [create window ABC.test:exceptionvdw() as SupportBean]", ex.getMessage());
+        }
     }
 
     public void testManagementEvents() {

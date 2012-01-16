@@ -13,6 +13,7 @@ package com.espertech.esper.client.hook;
 
 import com.espertech.esper.client.EventBeanFactory;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.view.ViewFactoryContext;
 
@@ -109,4 +110,11 @@ public class VirtualDataWindowFactoryContext {
         return customConfiguration;
     }
 
+    /**
+     * Returns the statement contextual information and services.
+     * @return statement context
+     */
+    public StatementContext getStatementContext() {
+        return viewFactoryContext.getStatementContext();
+    }
 }

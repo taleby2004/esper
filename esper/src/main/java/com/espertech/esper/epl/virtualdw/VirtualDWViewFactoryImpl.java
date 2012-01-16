@@ -76,8 +76,13 @@ public class VirtualDWViewFactoryImpl implements ViewFactory, DataWindowViewFact
         viewParameterExp = ViewFactorySupport.validate(viewFactoryContext.getViewName(), parentEventType, viewFactoryContext.getStatementContext(), viewParameters, true);
 
         // initialize
-        eventBeanFactory = EventAdapterServiceHelper.getFactoryForType(parentEventType, statementContext.getEventAdapterService());
-        virtualDataWindowFactory.initialize(new VirtualDataWindowFactoryContext(parentEventType, viewParameterArr, viewParameterExp, eventBeanFactory, namedWindowName, viewFactoryContext, customConfiguration));
+        try {
+            eventBeanFactory = EventAdapterServiceHelper.getFactoryForType(parentEventType, statementContext.getEventAdapterService());
+            virtualDataWindowFactory.initialize(new VirtualDataWindowFactoryContext(parentEventType, viewParameterArr, viewParameterExp, eventBeanFactory, namedWindowName, viewFactoryContext, customConfiguration));
+        }
+        catch (RuntimeException ex) {
+            throw new ViewParameterException("Validation exception initializing virtual data window '" + namedWindowName + "': " + ex.getMessage(), ex);
+        }
     }
 
     public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
