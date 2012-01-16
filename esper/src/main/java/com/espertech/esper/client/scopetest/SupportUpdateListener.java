@@ -169,6 +169,32 @@ public class SupportUpdateListener implements UpdateListener
     }
 
     /**
+     * Asserts that exactly one insert stream event and exactly one remove stream event was received, resets the listener clearing all state and returns the received events as a pair.
+     * @return pair of insert-stream and remove-stream events
+     */
+    public UniformPair<EventBean> assertPairGetIRAndReset()
+    {
+        ScopeTestHelper.assertTrue(isInvoked);
+
+        ScopeTestHelper.assertEquals(1, newDataList.size());
+        ScopeTestHelper.assertEquals(1, oldDataList.size());
+
+        if (lastNewData == null) {
+            ScopeTestHelper.fail();
+        }
+        if (lastOldData == null) {
+            ScopeTestHelper.fail();
+        }
+        ScopeTestHelper.assertEquals(1, lastNewData.length);
+        ScopeTestHelper.assertEquals(1, lastOldData.length);
+
+        EventBean lastNew = lastNewData[0];
+        EventBean lastOld = lastOldData[0];
+        reset();
+        return new UniformPair<EventBean>(lastNew, lastOld);
+    }
+
+    /**
      * Asserts that exactly one insert stream event was received not checking remove stream data, and returns the received event.
      * @return single insert-stream event
      */

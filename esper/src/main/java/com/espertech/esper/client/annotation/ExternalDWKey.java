@@ -23,6 +23,12 @@ public @interface ExternalDWKey
     String property() default "";
 
     /**
+     * Multiple property names acting as key (check for support in the documentation).
+     * @return property names array
+     */
+    String[] propertyNames() default {};
+
+    /**
      * Key generator function.
      * @return function name
      */
