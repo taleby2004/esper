@@ -35,7 +35,7 @@ public class DynamicIndexedPropertyGetter extends DynamicPropertyGetterBase
     public DynamicIndexedPropertyGetter(String fieldName, int index, EventAdapterService eventAdapterService)
     {
         super(eventAdapterService);
-        getterMethodName = getGetterMethodName(fieldName);
+        getterMethodName = PropertyHelper.getGetterMethodName(fieldName);
         this.params = new Object[] {index};
         this.index = index;
     }
@@ -100,14 +100,5 @@ public class DynamicIndexedPropertyGetter extends DynamicPropertyGetterBase
         {
             throw new PropertyAccessException(e);
         }
-    }
-
-    private static String getGetterMethodName(String propertyName)
-    {
-        StringWriter writer = new StringWriter();
-        writer.write("get");
-        writer.write(Character.toUpperCase(propertyName.charAt(0)));
-        writer.write(propertyName.substring(1));
-        return writer.toString();
     }
 }

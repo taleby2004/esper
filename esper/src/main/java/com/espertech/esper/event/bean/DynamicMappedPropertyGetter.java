@@ -34,7 +34,7 @@ public class DynamicMappedPropertyGetter extends DynamicPropertyGetterBase
     public DynamicMappedPropertyGetter(String fieldName, String key, EventAdapterService eventAdapterService)
     {
         super(eventAdapterService);
-        getterMethodName = getGetterMethodName(fieldName);
+        getterMethodName = PropertyHelper.getGetterMethodName(fieldName);
         this.params = new Object[] {key};
     }
 
@@ -95,14 +95,5 @@ public class DynamicMappedPropertyGetter extends DynamicPropertyGetterBase
         {
             throw new PropertyAccessException(e);
         }
-    }
-
-    private static String getGetterMethodName(String propertyName)
-    {
-        StringWriter writer = new StringWriter();
-        writer.write("get");
-        writer.write(Character.toUpperCase(propertyName.charAt(0)));
-        writer.write(propertyName.substring(1));
-        return writer.toString();
     }
 }

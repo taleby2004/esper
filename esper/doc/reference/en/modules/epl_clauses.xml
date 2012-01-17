@@ -4783,6 +4783,11 @@ set price = case when ord.price is null then flush.price else ord.price end
 where ord.id = win.id or flush.id = win.id]]></programlisting>
 
 			<para>
+				When updating indexed properties use the syntax <emphasis>propertyName</emphasis><literal>[</literal><emphasis>index</emphasis><literal>] = </literal><emphasis>value</emphasis> with the index value being an integer number. 
+				When updating mapped properties use the syntax <emphasis>propertyName</emphasis><literal>(</literal><emphasis>key</emphasis><literal>) = </literal><emphasis>value</emphasis> with the key being a string value.
+			</para>
+	
+			<para>
 				The following restrictions apply:
 			</para>
 			<orderedlist spacing="compact">
@@ -4803,7 +4808,7 @@ where ord.id = win.id or flush.id = win.id]]></programlisting>
 				</listitem>
 				<listitem>
 					<para>
-						Nested, indexed and mapped properties are not supported for update. Revision event types and variant streams may also not be updated.						
+						Nested properties are not supported for update. Revision event types and variant streams may also not be updated.						
 					</para>
 				</listitem>
 			</orderedlist>
@@ -6412,6 +6417,11 @@ from pattern [a=Withdrawal -> b=Withdrawal(id = a.id)]]]></programlisting>
     (select phone from PhoneEvent.std:unique(empid) where empid = ae.reporter)]]></programlisting>
 		
 		<para>
+			When updating indexed properties use the syntax <emphasis>propertyName</emphasis><literal>[</literal><emphasis>index</emphasis><literal>] = </literal><emphasis>value</emphasis> with the index value being an integer number. 
+			When updating mapped properties use the syntax <emphasis>propertyName</emphasis><literal>(</literal><emphasis>key</emphasis><literal>) = </literal><emphasis>value</emphasis> with the key being a string value.
+		</para>
+
+		<para>
 			When using <literal>update</literal>, please note these limitations:
 		</para>
 		
@@ -6438,7 +6448,7 @@ from pattern [a=Withdrawal -> b=Withdrawal(id = a.id)]]]></programlisting>
 			</listitem>
 			<listitem>
 				<para>
-					Nested, indexed and mapped properties are not supported for update. Revision event types and variant streams may also not be updated.
+					Nested properties are not supported for update. Revision event types and variant streams may also not be updated.
 				</para>
 			</listitem>
 		</orderedlist>

@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.beans.*;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -335,6 +336,30 @@ public class PropertyHelper
         }
 
         return beanInfo.getPropertyDescriptors();
+    }
+
+    public static String getGetterMethodName(String propertyName)
+    {
+        return getGetterSetterMethodName(propertyName, "get");
+    }
+
+    public static String getSetterMethodName(String propertyName)
+    {
+        return getGetterSetterMethodName(propertyName, "set");
+    }
+
+    public static String getIsMethodName(String propertyName)
+    {
+        return getGetterSetterMethodName(propertyName, "is");
+    }
+
+    private static String getGetterSetterMethodName(String propertyName, String operation)
+    {
+        StringWriter writer = new StringWriter();
+        writer.write(operation);
+        writer.write(Character.toUpperCase(propertyName.charAt(0)));
+        writer.write(propertyName.substring(1));
+        return writer.toString();
     }
 
     private static final Log log = LogFactory.getLog(PropertyHelper.class);

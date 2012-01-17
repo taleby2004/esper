@@ -43,9 +43,13 @@ public class BeanEventPropertyWriter implements EventPropertyWriter
 
     public void write(Object value, EventBean target)
     {
+        invoke(new Object[] {value}, target);
+    }
+
+    protected void invoke(Object[] values, EventBean target) {
         try
         {
-            writerMethod.invoke(target.getUnderlying(), new Object[] {value});
+            writerMethod.invoke(target.getUnderlying(), values);
         }
         catch (InvocationTargetException e)
         {

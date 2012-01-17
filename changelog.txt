@@ -18,6 +18,7 @@ Major API or EPL changes
   - Support for the new expression batch window that also allows aggregation functions as part of the expiry expression
   - Support for iterating statements that have unbound streams (no data window) and have fully-grouped aggregation
   - Support for defining an output pattern for audit logs
+  - Support for updating mapped and indexed property values of events via update-istream, on-merge or on-update
   - Added the test framework API for event processing testing
   - For plug-in aggregation functions we added support for a AggregationFunctionFactory and deprecated AggregationSupport
   - Optimization to detect when a statement is stateless and thereby operate lock-free

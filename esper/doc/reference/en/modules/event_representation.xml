@@ -572,6 +572,43 @@ from MyEvent as myevent]]></programlisting>
 from NewEmployeeEvent]]></programlisting>
 		</sect2>
 
+		<sect2 id="event-properties-indexedmappedsetter">
+		   <title>Setter Methods for Indexed and Mapped Properties</title>
+		   
+			<para>
+				An EPL statement may update indexed or mapped properties of an event, provided the event class exposes the required setter method. 
+			</para>
+
+			<para>
+				The setter method for indexed properties must be named <literal>set</literal><emphasis>PropertyName</emphasis> and must take two parameters: the <literal>int</literal>-type index and the <literal>Object</literal> type new value.
+			</para>
+
+			<para>
+				The setter method for mapped properties must be named <literal>set</literal><emphasis>PropertyName</emphasis> and must take two parameters: the <literal>String</literal>-type map key and the <literal>Object</literal> type new map value.
+			</para>
+
+			<para>
+			  The following is an example event that features a setter method for the <literal>props</literal> mapped property and for the <literal>array</literal> indexed property:
+			</para>
+			<programlisting><![CDATA[public class MyEvent {
+  private Map props = new HashMap();
+  private Object[] array = new Object[10];
+
+  public void setProps(String name, Object value) {
+    props.put(name, value);
+  }
+
+  public void setArray(int index, Object value) {
+    array[index] = value;
+  }
+  // ... also provide regular JavaBean getters and setters for all properties]]></programlisting>
+
+			<para>
+			  This sample statement updates mapped and indexed property values:
+			</para>	
+			<programlisting><![CDATA[update istream MyEventStream set props('key') = 'abc', array[2] = 100]]></programlisting>
+		</sect2>
+
 		<sect2 id="event-properties-knownlimit">
 		   <title>Known Limitations</title>
 

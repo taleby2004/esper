@@ -10,9 +10,11 @@ package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.epl.core.EngineNoSuchMethodException;
 import com.espertech.esper.event.*;
 import com.espertech.esper.event.property.*;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.MethodResolver;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 import org.apache.commons.logging.Log;
@@ -762,18 +764,54 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         return EventBeanUtility.createNativeFragmentType(genericProp.getType(), genericProp.getGeneric(), eventAdapterService);
     }
 
-    public EventPropertyWriter getWriter(String propertyName)
+    public BeanEventPropertyWriter getWriter(String propertyName)
     {
-        if (writeablePropertyDescriptors == null)
-        {
+        if (writeablePropertyDescriptors == null) {
             initializeWriters();
         }
         Pair<EventPropertyDescriptor, BeanEventPropertyWriter> pair = writerMap.get(propertyName);
-        if (pair == null)
-        {
-            return null;
+        if (pair != null) {
+            return pair.getSecond();
         }
-        return pair.getSecond();
+
+        Property property = PropertyParser.parse(propertyName, false);
+        if (property instanceof MappedProperty) {
+            MappedProperty mapProp = (MappedProperty) property;
+            String methodName = PropertyHelper.getSetterMethodName(mapProp.getPropertyNameAtomic());
+            Method setterMethod;
+            try {
+                setterMethod = MethodResolver.resolveMethod(clazz, methodName, new Class[] {String.class, Object.class}, true);
+            }
+            catch (EngineNoSuchMethodException e) {
+                log.info("Failed to find mapped property setter method '" + methodName + "' for writing to property '" + propertyName + "' taking {String, Object} as parameters");
+                return null;
+            }
+            if (setterMethod == null) {
+                return null;
+            }
+            final FastMethod fastMethod = fastClass.getMethod(setterMethod);
+            return new BeanEventPropertyWriterMapProp(clazz, fastMethod, mapProp.getKey());
+        }
+
+        if (property instanceof IndexedProperty) {
+            IndexedProperty indexedProp = (IndexedProperty) property;
+            String methodName = PropertyHelper.getSetterMethodName(indexedProp.getPropertyNameAtomic());
+            Method setterMethod;
+            try {
+                setterMethod = MethodResolver.resolveMethod(clazz, methodName, new Class[] {int.class, Object.class}, true);
+            }
+            catch (EngineNoSuchMethodException e) {
+                log.info("Failed to find indexed property setter method '" + methodName + "' for writing to property '" + propertyName + "' taking {int, Object} as parameters");
+                return null;
+            }
+            if (setterMethod == null) {
+                return null;
+            }
+            final FastMethod fastMethod = fastClass.getMethod(setterMethod);
+            return new BeanEventPropertyWriterIndexedProp(clazz, fastMethod, indexedProp.getIndex());
+        }
+
+        return null;
     }
 
     public EventPropertyDescriptor getWritableProperty(String propertyName)
@@ -783,11 +821,28 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
             initializeWriters();
         }
         Pair<EventPropertyDescriptor, BeanEventPropertyWriter> pair = writerMap.get(propertyName);
-        if (pair == null)
-        {
-            return null;
+        if (pair != null) {
+            return pair.getFirst();
         }
-        return pair.getFirst();
+
+        Property property = PropertyParser.parse(propertyName, false);
+        if (property instanceof MappedProperty) {
+            EventPropertyWriter writer = getWriter(propertyName);
+            if (writer == null) {
+                return null;
+            }
+            MappedProperty mapProp = (MappedProperty) property;
+            return new EventPropertyDescriptor(mapProp.getPropertyNameAtomic(), Object.class, null, false, true, false, true, false);
+        }
+        if (property instanceof IndexedProperty) {
+            EventPropertyWriter writer = getWriter(propertyName);
+            if (writer == null) {
+                return null;
+            }
+            IndexedProperty indexedProp = (IndexedProperty) property;
+            return new EventPropertyDescriptor(indexedProp.getPropertyNameAtomic(), Object.class, null, true, false, true, false, false);
+        }
+        return null;
     }
 
     public EventPropertyDescriptor[] getWriteableProperties()
@@ -842,11 +897,13 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         for (int i = 0; i < properties.length; i++)
         {
             Pair<EventPropertyDescriptor, BeanEventPropertyWriter> pair = writerMap.get(properties[i]);
-            if (pair == null)
-            {
-                return null;
+            if (pair != null) {
+                writers[i] = pair.getSecond();
             }
-            writers[i] = pair.getSecond();
+            else {
+                writers[i] = getWriter(properties[i]);
+            }
+
         }
         return new BeanEventBeanWriter(writers);
     }

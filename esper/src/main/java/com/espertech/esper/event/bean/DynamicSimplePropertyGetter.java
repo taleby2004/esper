@@ -32,8 +32,8 @@ public class DynamicSimplePropertyGetter extends DynamicPropertyGetterBase
     public DynamicSimplePropertyGetter(String fieldName, EventAdapterService eventAdapterService)
     {
         super(eventAdapterService);
-        getterMethodName = getGetterMethodName(fieldName);
-        isMethodName = getIsMethodName(fieldName);
+        getterMethodName = PropertyHelper.getGetterMethodName(fieldName);
+        isMethodName = PropertyHelper.getIsMethodName(fieldName);
     }
 
     protected Object call(DynamicPropertyDescriptor descriptor, Object underlying)
@@ -73,23 +73,5 @@ public class DynamicSimplePropertyGetter extends DynamicPropertyGetterBase
                 return null;
             }
         }
-    }
-
-    private static String getGetterMethodName(String propertyName)
-    {
-        StringWriter writer = new StringWriter();
-        writer.write("get");
-        writer.write(Character.toUpperCase(propertyName.charAt(0)));
-        writer.write(propertyName.substring(1));
-        return writer.toString();
-    }
-
-    private static String getIsMethodName(String propertyName)
-    {
-        StringWriter writer = new StringWriter();
-        writer.write("is");
-        writer.write(Character.toUpperCase(propertyName.charAt(0)));
-        writer.write(propertyName.substring(1));
-        return writer.toString();
     }
 }

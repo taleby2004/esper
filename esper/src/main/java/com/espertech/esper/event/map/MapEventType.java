@@ -44,7 +44,7 @@ public class MapEventType implements EventTypeSPI
 
     // Nestable definition of Map contents is here
     private Map<String, Object> nestableTypes;  // Deep definition of the map-type, containing nested maps and objects
-    private Map<String, Pair<EventPropertyDescriptor, EventPropertyWriter>> propertyWriters;
+    private Map<String, Pair<EventPropertyDescriptor, MapEventBeanPropertyWriter>> propertyWriters;
     private EventPropertyDescriptor[] writablePropertyDescriptors;
 
     private String startTimstampPropertyName;
@@ -1441,18 +1441,29 @@ public class MapEventType implements EventTypeSPI
         return isDeepEqualsProperties(otherType.getName(), other.nestableTypes, this.nestableTypes);
     }
 
-    public EventPropertyWriter getWriter(String propertyName)
+    public MapEventBeanPropertyWriter getWriter(String propertyName)
     {
         if (writablePropertyDescriptors == null)
         {
             initializeWriters();
         }
-        Pair<EventPropertyDescriptor, EventPropertyWriter> pair = propertyWriters.get(propertyName);
-        if (pair == null)
-        {
-            return null;
+        Pair<EventPropertyDescriptor, MapEventBeanPropertyWriter> pair = propertyWriters.get(propertyName);
+        if (pair != null) {
+            return pair.getSecond();
         }
-        return pair.getSecond();
+
+        Property property = PropertyParser.parse(propertyName, false);
+        if (property instanceof MappedProperty) {
+            MappedProperty mapProp = (MappedProperty) property;
+            return new MapEventBeanPropertyWriterMapProp(mapProp.getPropertyNameAtomic(), mapProp.getKey());
+        }
+
+        if (property instanceof IndexedProperty) {
+            IndexedProperty indexedProp = (IndexedProperty) property;
+            return new MapEventBeanPropertyWriterIndexedProp(indexedProp.getPropertyNameAtomic(), indexedProp.getIndex());
+        }
+
+        return null;
     }
 
     public EventPropertyDescriptor getWritableProperty(String propertyName)
@@ -1461,12 +1472,29 @@ public class MapEventType implements EventTypeSPI
         {
             initializeWriters();
         }
-        Pair<EventPropertyDescriptor, EventPropertyWriter> pair = propertyWriters.get(propertyName);
-        if (pair == null)
-        {
-            return null;
+        Pair<EventPropertyDescriptor, MapEventBeanPropertyWriter> pair = propertyWriters.get(propertyName);
+        if (pair != null) {
+            return pair.getFirst();
         }
-        return pair.getFirst();
+
+        Property property = PropertyParser.parse(propertyName, false);
+        if (property instanceof MappedProperty) {
+            EventPropertyWriter writer = getWriter(propertyName);
+            if (writer == null) {
+                return null;
+            }
+            MappedProperty mapProp = (MappedProperty) property;
+            return new EventPropertyDescriptor(mapProp.getPropertyNameAtomic(), Object.class, null, false, true, false, true, false);
+        }
+        if (property instanceof IndexedProperty) {
+            EventPropertyWriter writer = getWriter(propertyName);
+            if (writer == null) {
+                return null;
+            }
+            IndexedProperty indexedProp = (IndexedProperty) property;
+            return new EventPropertyDescriptor(indexedProp.getPropertyNameAtomic(), Object.class, null, true, false, true, false, false);
+        }
+        return null;
     }
 
     public EventPropertyDescriptor[] getWriteableProperties()
@@ -1481,7 +1509,7 @@ public class MapEventType implements EventTypeSPI
     private void initializeWriters()
     {
         List<EventPropertyDescriptor> writeableProps = new ArrayList<EventPropertyDescriptor>();
-        Map<String, Pair<EventPropertyDescriptor, EventPropertyWriter>> propertWritersMap = new HashMap<String, Pair<EventPropertyDescriptor, EventPropertyWriter>>();
+        Map<String, Pair<EventPropertyDescriptor, MapEventBeanPropertyWriter>> propertWritersMap = new HashMap<String, Pair<EventPropertyDescriptor, MapEventBeanPropertyWriter>>();
         for (EventPropertyDescriptor prop : propertyDescriptors)
         {
             if (prop.isFragment() || prop.isIndexed() || prop.isMapped())
@@ -1490,16 +1518,8 @@ public class MapEventType implements EventTypeSPI
             }
             writeableProps.add(prop);
             final String propertyName = prop.getPropertyName();
-            EventPropertyWriter eventPropertyWriter = new EventPropertyWriter()
-            {
-                public void write(Object value, EventBean target)
-                {
-                    MappedEventBean map = (MappedEventBean) target;
-                    map.getProperties().put(propertyName, value);
-                }
-            };
-
-            propertWritersMap.put(propertyName, new Pair<EventPropertyDescriptor, EventPropertyWriter>(prop, eventPropertyWriter));
+            MapEventBeanPropertyWriter eventPropertyWriter = new MapEventBeanPropertyWriter(propertyName);
+            propertWritersMap.put(propertyName, new Pair<EventPropertyDescriptor, MapEventBeanPropertyWriter>(prop, eventPropertyWriter));
         }
 
         propertyWriters = propertWritersMap;
@@ -1512,19 +1532,58 @@ public class MapEventType implements EventTypeSPI
         {
             initializeWriters();
         }
+
+        boolean allSimpleProps = true;
+        MapEventBeanPropertyWriter[] writers = new MapEventBeanPropertyWriter[properties.length];
         for (int i = 0; i < properties.length; i++)
         {
-            if (!propertyWriters.containsKey(properties[i]))
-            {
-                return null;
+            Pair<EventPropertyDescriptor, MapEventBeanPropertyWriter> writerPair = propertyWriters.get(properties[i]);
+            if (writerPair != null) {
+                writers[i] = writerPair.getSecond();
+            }
+            else {
+                writers[i] = getWriter(properties[i]);
+                if (writers[i] == null) {
+                    return null;
+                }
+                allSimpleProps = false;
             }
         }
-        return new MapEventBeanWriter(properties);
+
+        if (allSimpleProps) {
+            return new MapEventBeanWriterSimpleProps(properties);
+        }
+        else {
+            return new MapEventBeanWriterPerProp(writers);
+        }
     }
 
     public EventBeanCopyMethod getCopyMethod(String[] properties)
     {
-        return new MapEventBeanCopyMethod(this, eventAdapterService);
+        Set<String> mapPropertiesToCopy = new HashSet<String>();
+        Set<String> arrayPropertiesToCopy = new HashSet<String>();
+        for (int i = 0; i < properties.length; i++) {
+            Pair<EventPropertyDescriptor, MapEventBeanPropertyWriter> writerPair = propertyWriters.get(properties[i]);
+            if (propertyWriters.containsKey(properties[i])) {
+                continue;
+            }
+            Property prop = PropertyParser.parse(properties[i], false);
+            if (prop instanceof MappedProperty) {
+                MappedProperty mappedProperty = (MappedProperty) prop;
+                mapPropertiesToCopy.add(mappedProperty.getPropertyNameAtomic());
+            }
+            if (prop instanceof IndexedProperty) {
+                IndexedProperty indexedProperty = (IndexedProperty) prop;
+                arrayPropertiesToCopy.add(indexedProperty.getPropertyNameAtomic());
+            }
+        }
+
+        if (mapPropertiesToCopy.isEmpty() && arrayPropertiesToCopy.isEmpty()) {
+            return new MapEventBeanCopyMethod(this, eventAdapterService);
+        }
+        else {
+            return new MapEventBeanCopyMethodWithArrayMap(this, eventAdapterService, mapPropertiesToCopy, arrayPropertiesToCopy);
+        }
     }
 
     public boolean equalsCompareType(EventType otherEventType) {
