@@ -1374,12 +1374,15 @@ public class EPAssertionUtil
             return true;
         }
         if (expected == null || actual == null) {
-            ScopeTestHelper.fail();
+            if (expected == null) {
+                ScopeTestHelper.assertNull("Expected is null but actual is not null", actual);
+            }
+            ScopeTestHelper.assertNull("Actual is null but expected is not null", expected);
         }
         else {
             int expectedLength = Array.getLength(expected);
             int actualLength = actual.size();
-            ScopeTestHelper.assertEquals("mismatch in the number of expected and actual length", expectedLength, actualLength);
+            ScopeTestHelper.assertEquals("Mismatch in the number of expected and actual length", expectedLength, actualLength);
         }
         return false;
     }
@@ -1389,13 +1392,15 @@ public class EPAssertionUtil
             return true;
         }
         if (expected == null || actual == null) {
-
-            ScopeTestHelper.fail();
+            if (expected == null) {
+                ScopeTestHelper.assertNull("Expected is null but actual is not null", actual);
+            }
+            ScopeTestHelper.assertNull("Actual is null but expected is not null", expected);
         }
         else {
             int expectedLength = Array.getLength(expected);
             int actualLength = Array.getLength(actual);
-            ScopeTestHelper.assertEquals("mismatch in the number of expected and actual length", expectedLength, actualLength);
+            ScopeTestHelper.assertEquals("Mismatch in the number of expected and actual length", expectedLength, actualLength);
         }
         return false;
     }
