@@ -65,9 +65,9 @@ Core Esper Features
 	
 * Event Stream Processing
 
-	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed (value-based windowing), 
+	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed (value-based windowing), expiry-expression-based with aggregations
 
-	* Tumbling windows: time, length and multi-policy; first-event
+	* Tumbling windows: time, length and multi-policy; first-event; expiry-expression-based with aggregations
 	
 	* Combine windows with intersection and union semantics. Partitioned windows. Dynamically shrinking or expanding windows. Expiry-expression-driven windows.
 
@@ -79,7 +79,7 @@ Core Esper Features
 
 	* Subqueries including <exists> and <in>
 
-	* Output rate limiting and stabilizing, snapshot output
+	* Output rate limiting and stabilizing, snapshot output, expression support
 	
 	* Named windows
 
@@ -95,7 +95,10 @@ Core Esper Features
 		
 	* Enumeration methods, date-time methods, Allan's interval algebra, lambda-expressions, expression definition and reuse, 'new' operator for returning multiple results from an expression
 	
-	* Declarative context dimensions
+	* Declarative context dimensions based on consistent-hashes, partitions, categories, overlapping or non-overlapping initiated by event arrival and patterns, with correlated termination; nested context dimensions;
+	  Context partition targeting for runtime queries and iteration.
+	
+	* High degree of parallelization processing the same statement and processing multiple statements. Stateless statements process lock-free.
 	
 	[]
 		
@@ -153,6 +156,8 @@ Core Esper Features
     		* Suspend statements: take statements offline and online without losing state
     		
     		* Load statements from historical data and merge into real-time streams
+    		
+    	* We provide a <<test framework>> for unit or regression testing EPL-based applications
     			
 	[]
 
@@ -220,11 +225,13 @@ Core Esper Features
     	
     	[]
 
-    * <<Variables>> can occur in any expression and can dynamically control output rate
+    * <<Variables>> and <<Constants>> can occur in any expression and can dynamically control output rate
 
         * Guarantees of consistency and atomicity of variable updates
         
         * Scalar, un-typed and event-typed variables with support for nested property read/write
+        
+        * Constants ensure query optimizations for constant values are possible for variables that never change
         
     * <<Variant event streams>> allows treating disparate types of events as the same type, such as when the event type can only be known at runtime, 
        when the event type is expected to vary, or when optional properties are desired.
@@ -260,7 +267,8 @@ Core Esper Features
     
     * Support for all Java data types including BigInteger and BigDecimal
     
-    * <<Contained-Event>> select syntax for easy handling of coarse-grained, business-level events that themselves contain events
+    * <<Contained-Event>> select syntax for easy handling of coarse-grained, business-level events that themselves contain events or that need to be broken down
+      into rows.
     
     * JSON and XML output event rendering without syntax to learn
             
@@ -271,6 +279,8 @@ Core Esper Features
     * Declarative update of event properties via <<on update>> for named windows and <<update istream>> of events entering a stream.
         
     * Support for <<versioned events>> that update, provide a new version or that revise an existing event held by an engine.
+    
+    * Support for MVEL and JSR 223 scripts
 	
     []		
     

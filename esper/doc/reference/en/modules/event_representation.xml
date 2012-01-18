@@ -206,7 +206,7 @@
 			<para>
 				The next example assumes a <literal>Quote</literal> event that has a property by name <literal>order</literal>, while <literal>order</literal> is also a reserved keyword:
 			</para>
-			<programlisting>select `order`, `property.with.dots` from Quote</programlisting> 
+			<programlisting>select `order`, price as `price.for.goods` from Quote</programlisting> 
 		</sect2>
 	</sect1>
 		

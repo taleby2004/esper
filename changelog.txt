@@ -22,7 +22,7 @@ Major API or EPL changes
   - Support for when-terminated in output rate limiting to also provide an expression and set-assignments; Support for a new count-total built-in property
   - Support for defining an output pattern for audit logs
   - Added test framework API for event processing unit or regression testing
-  - For plug-in aggregation functions we added support for a AggregationFunctionFactory and deprecated AggregationSupport
+  - For plug-in aggregation functions we added support for an AggregationFunctionFactory and deprecated AggregationSupport
   - Optimization to detect when a statement is stateless and thereby operate lock-free
 
 Bug fixes or other changes

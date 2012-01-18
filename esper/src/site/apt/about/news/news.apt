@@ -1,5 +1,49 @@
 News
 
+* January 19, 2012  -  Esper 4.5.0 - Update release
+
+  * We have made a change to the behavior of intersection data windows (multiple data windows in intersection) when one of the data windows is a batch window.
+    The engine now provides batching behavior, when one of the data windows is a batch window, and not continuous stream behavior.
+    
+  * Support for declaring a hashed context that uses a consistent-hash algorithm to target context partitions for declarative parallelism in statement execution
+  
+  * Support for declaring nested contexts allowing combined context policies
+  
+  * Support for a new API to that provides context partition targeting for on-demand queries and statement iteration
+  
+  * Support for context initiation by event or patterns and termination by a correlated event or pattern
+  
+  * Support for context initiation by patterns to include those event(s) that match a pattern in the statement associated to the context
+  
+  * Support for MVEL and JSR-223 scripting engine i.e. JavaScript and others
+  
+  * Support for contained-event syntax; one can now specify any expression for returning contained events
+  
+  * Support for constants: Variables that are constant values and cannot be assigned. Useful for the engine to perform optimizations knowing variable values can't change.
+  
+  * Support for a new expression batch window that also allows aggregation functions as part of the expiry expression
+  
+  * Support for aggregation functions in the expiry expression of the expression data window
+  
+  * Support for iterating statements that have unbound streams (no data window) and have fully-grouped aggregation
+  
+  * Support for outer joins with streams that don't provide properties (i.e. pattern timer)
+  
+  * Support for updating mapped and indexed property values of events via update-istream, on-merge or on-update
+  
+  * Support for when-terminated in output rate limiting to also provide an expression and set-assignments; Support for a new count-total built-in property
+  
+  * Support for defining an output pattern for audit logs
+  
+  * Added test framework API for event processing unit or regression testing
+  
+  * For plug-in aggregation functions we added support for an AggregationFunctionFactory and deprecated AggregationSupport
+  
+  * Optimization to detect when a statement is stateless and thereby operate lock-free
+  
+  []
+
+
 * October 24, 2011  -  Esper 4.4.0 - Update release
 
   * Support for context declarations: Temporal context for interval-based context partitions; Keyed and category segmented contexts; Initiated contexts
