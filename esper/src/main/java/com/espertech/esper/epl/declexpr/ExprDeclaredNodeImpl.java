@@ -248,7 +248,7 @@ public class ExprDeclaredNodeImpl extends ExprNodeBase implements ExprDeclaredNo
 
     public String toExpressionString()
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(prototype.getName() + "(");
         String delimiter = "";
         for (ExprNode parameter : chainParameters) {

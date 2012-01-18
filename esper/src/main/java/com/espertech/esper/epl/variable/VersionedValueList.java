@@ -240,7 +240,7 @@ public class VersionedValueList<T>
 
     public String toString()
     {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Variable '").append(name).append("' ");
         buffer.append(" current=").append(currentAndPriorValue.getCurrentVersion().toString());
         buffer.append(" prior=").append(currentAndPriorValue.getCurrentVersion().toString());

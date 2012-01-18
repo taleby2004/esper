@@ -1389,6 +1389,7 @@ public class EPAssertionUtil
             return true;
         }
         if (expected == null || actual == null) {
+
             ScopeTestHelper.fail();
         }
         else {

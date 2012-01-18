@@ -16,6 +16,8 @@ import java.util.Comparator;
 
 public class EPStatementAgentInstanceHandleComparator implements Comparator<EPStatementAgentInstanceHandle>, Serializable {
 
+    private static final long serialVersionUID = 8926266145763075051L;
+
     public final static EPStatementAgentInstanceHandleComparator INSTANCE = new EPStatementAgentInstanceHandleComparator();
 
     public int compare(EPStatementAgentInstanceHandle o1, EPStatementAgentInstanceHandle o2)

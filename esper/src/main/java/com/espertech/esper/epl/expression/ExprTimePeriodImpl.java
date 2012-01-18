@@ -243,7 +243,7 @@ public class ExprTimePeriodImpl extends ExprNodeBase implements ExprEvaluator, E
 
     public String toExpressionString()
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         int exprCtr = 0;
         if (hasYear)
         {

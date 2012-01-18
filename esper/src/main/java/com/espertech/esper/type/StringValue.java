@@ -102,7 +102,7 @@ public final class StringValue extends PrimitiveValueBase
     {
         int i = 0, len = s.length();
         char c;
-        StringBuffer sb = new StringBuffer(len);
+        StringBuilder sb = new StringBuilder(len);
         while (i < len)
         {
             c = s.charAt(i++);

@@ -114,7 +114,7 @@ public class ThreadLogUtil
 
     private static void write(String text, Object ... objects)
     {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(text);
         buf.append(' ');
         for (Object obj : objects)

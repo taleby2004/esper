@@ -39,7 +39,7 @@ public interface AggregationService extends AggregationResultFuture
     /**
      * Set the current aggregation state row - for use when evaluation nodes are asked to evaluate.
      * @param groupKey - key identify the row of aggregation states
-     * @param agentInstanceIds
+     * @param agentInstanceId context partition id
      */
     public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId);
 

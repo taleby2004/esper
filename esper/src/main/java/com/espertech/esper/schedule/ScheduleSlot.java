@@ -17,8 +17,8 @@ import java.io.Serializable;
  */
 public class ScheduleSlot implements Comparable<ScheduleSlot>, MetaDefItem, Serializable
 {
-    private int bucketNum;
-    private int slotNum;
+    private final int bucketNum;
+    private final int slotNum;
     private static final long serialVersionUID = 4560709630904887631L;
 
     /**

@@ -18,8 +18,8 @@ import java.util.List;
  */
 public class IndexedPropDesc implements Comparable
 {
-    private String indexPropName;
-    private Class coercionType;
+    private final String indexPropName;
+    private final Class coercionType;
 
     /**
      * Ctor.

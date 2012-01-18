@@ -24,7 +24,7 @@ public interface AggregationResultFuture
      * Returns current aggregation state, for use by expression node representing an aggregation function.
      *
      * @param column is assigned to the aggregation expression node and passed as an column (index) into a row
-     * @param agentInstanceIds
+     * @param agentInstanceId the context partition id
      * @return current aggragation state
      */
     public Object getValue(int column, int agentInstanceId);
