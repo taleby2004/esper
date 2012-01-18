@@ -31,12 +31,13 @@ import java.util.Map;
 public class ExprNodeScript extends ExprNodeBase {
 
     public static String CONTEXT_BINDING_NAME = "epl";
+    private static final long serialVersionUID = 2661218104424440161L;
 
     private final String defaultDialect;
     private final ExpressionScriptProvided script;
     private final List<ExprNode> parameters;
 
-    private ExprEvaluator evaluator;
+    private transient ExprEvaluator evaluator;
 
     public ExprNodeScript(String defaultDialect, ExpressionScriptProvided script, List<ExprNode> parameters) {
         this.defaultDialect = defaultDialect;

@@ -425,7 +425,7 @@ public class ExprDotEvalDT implements ExprDotEval
         }
     }
 
-    private class DTLocalEvaluatorBeanIntervalWithEnd implements DTLocalEvaluator {
+    private static class DTLocalEvaluatorBeanIntervalWithEnd implements DTLocalEvaluator {
         private final EventPropertyGetter getterStartTimestamp;
         private final EventPropertyGetter getterEndTimestamp;
         private final DTLocalEvaluatorIntervalComp inner;

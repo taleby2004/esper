@@ -14,6 +14,7 @@ package com.espertech.esper.epl.spec;
 import java.util.List;
 
 public class ContextDetailNested implements ContextDetail {
+    private static final long serialVersionUID = -6809635026804573109L;
     private final List<CreateContextDesc> contexts;
 
     public ContextDetailNested(List<CreateContextDesc> contexts) {

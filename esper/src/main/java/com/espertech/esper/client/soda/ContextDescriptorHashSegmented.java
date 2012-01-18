@@ -20,6 +20,7 @@ import java.util.List;
  */
 public class ContextDescriptorHashSegmented implements ContextDescriptor {
 
+    private static final long serialVersionUID = 5131255287304974685L;
     private List<ContextDescriptorHashSegmentedItem> items;
     private int granularity;
     private boolean preallocate;

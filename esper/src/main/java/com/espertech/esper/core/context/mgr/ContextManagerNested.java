@@ -421,7 +421,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         // remove from parent
         ContextControllerTreeEntry parent = subcontexts.get(entry.getParent());
         if (parent != null) {
-            parent.getChildContexts().remove(currentContext);
+            parent.getChildContexts().remove(currentContext.getPathId());
         }
 
         // stop instances

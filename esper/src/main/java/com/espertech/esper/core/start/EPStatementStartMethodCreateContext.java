@@ -190,7 +190,7 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
         return new MatchEventSpec(compiled.getTaggedEventTypes(), compiled.getArrayEventTypes());
     }
 
-    private class ContextDetailMatchPair {
+    private static class ContextDetailMatchPair {
         private final ContextDetailCondition condition;
         private final MatchEventSpec matches;
 

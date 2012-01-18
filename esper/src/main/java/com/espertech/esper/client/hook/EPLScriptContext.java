@@ -11,7 +11,21 @@
 
 package com.espertech.esper.client.hook;
 
+/**
+ * Available when using JSR-223 scripts or MVEL, for access of script attributes.
+ */
 public interface EPLScriptContext {
+    /**
+     * Set a script attributed.
+     * @param attribute name to use
+     * @param value value to set
+     */
     public void setScriptAttribute(String attribute, Object value);
+
+    /**
+     * Return a script attribute value.
+     * @param attribute name to retrieve value for
+     * @return attribute value or null if undefined
+     */
     public Object getScriptAttribute(String attribute);
 }

@@ -285,13 +285,19 @@ public class DatabasePollingViewableFactory
             throw new ExprValidationException(text + ", reason: " + ex.getMessage());
         }
 
-        ResultSet result;
+        ResultSet result = null;
         try
         {
             result = statement.executeQuery(sampleSQL);
         }
         catch (SQLException ex)
         {
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                log.info("Error closing statement: " + e.getMessage(), e);
+            }
+
             String text;
             if (isUsingMetadataSQL)
             {
@@ -300,12 +306,6 @@ public class DatabasePollingViewableFactory
             else
             {
                 text = "Error compiling metadata SQL to retrieve statement metadata, consider using the 'metadatasql' syntax, using sql text '" + sampleSQL + "'";
-            }
-
-            try {
-                statement.close();
-            } catch (SQLException e) {
-                log.info("Error closing statement: " + e.getMessage(), e);
             }
 
             log.error(text, ex);
@@ -338,6 +338,24 @@ public class DatabasePollingViewableFactory
             String text = "Error in statement '" + sampleSQL + "', failed to obtain result metadata";
             log.error(text, ex);
             throw new ExprValidationException(text + ", please check the statement, reason: " + ex.getMessage());
+        }
+        finally {
+            if (result != null) {
+                try {
+                    result.close();
+                }
+                catch (SQLException e) {
+                    log.warn("Exception closing result set: " + e.getMessage());
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                }
+                catch (SQLException e) {
+                    log.warn("Exception closing result set: " + e.getMessage());
+                }
+            }
         }
 
         return new QueryMetaData(inputParameters, outputProperties);

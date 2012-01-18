@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class ScriptExpression implements Serializable
 {
+    private static final long serialVersionUID = 3264067514571908258L;
     private String name;
     private List<String> parameterNames;
     private String expressionText;

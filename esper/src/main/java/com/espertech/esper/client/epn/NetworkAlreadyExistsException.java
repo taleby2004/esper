@@ -12,6 +12,8 @@
 package com.espertech.esper.client.epn;
 
 public class NetworkAlreadyExistsException extends NetworkAdminException {
+    private static final long serialVersionUID = -7871515776503952213L;
+
     public NetworkAlreadyExistsException(String message) {
         super(message);
     }

@@ -620,7 +620,7 @@ public final class FilterSpecCompiler
 
         if (endpoint instanceof ExprContextPropertyNode) {
             ExprContextPropertyNode node = (ExprContextPropertyNode) endpoint;
-            return new RangeValueContextProp(node.getPropertyName(), node.getGetter());
+            return new RangeValueContextProp(node.getGetter());
         }
 
         // or property

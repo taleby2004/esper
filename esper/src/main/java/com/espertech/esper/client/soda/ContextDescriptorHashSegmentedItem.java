@@ -18,6 +18,7 @@ import java.io.StringWriter;
  */
 public class ContextDescriptorHashSegmentedItem implements ContextDescriptor {
 
+    private static final long serialVersionUID = 5445043920003179875L;
     private Expression hashFunction;    // expecting SingleRowMethodExpression
     private Filter filter;
 

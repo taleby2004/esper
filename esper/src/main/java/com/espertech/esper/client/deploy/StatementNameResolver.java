@@ -11,13 +11,15 @@
 
 package com.espertech.esper.client.deploy;
 
+import java.io.Serializable;
+
 /**
  * Implement this interface to provide a custom statement name for the statements deployed via the deployment API.
  * <p>
  *     Statement names provided by the resolver override the statement name provided via the @Name annotation.
  * </p>
  */
-public interface StatementNameResolver {
+public interface StatementNameResolver extends Serializable {
     /**
      * Returns the statement name to assign to a newly-deployed statement.
      * <p>

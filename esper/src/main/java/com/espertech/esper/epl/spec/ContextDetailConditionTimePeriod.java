@@ -14,6 +14,7 @@ package com.espertech.esper.epl.spec;
 import com.espertech.esper.epl.expression.ExprTimePeriod;
 
 public class ContextDetailConditionTimePeriod implements ContextDetailCondition {
+    private static final long serialVersionUID = 5140498109356559324L;
     private ExprTimePeriod timePeriod;
 
     public ContextDetailConditionTimePeriod(ExprTimePeriod timePeriod) {

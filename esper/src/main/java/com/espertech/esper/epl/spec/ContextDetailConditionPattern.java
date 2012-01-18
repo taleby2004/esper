@@ -15,6 +15,7 @@ import com.espertech.esper.pattern.EvalFactoryNode;
 
 public class ContextDetailConditionPattern implements ContextDetailCondition {
 
+    private static final long serialVersionUID = -5855240089039407834L;
     private final EvalFactoryNode patternRaw;
     private final boolean inclusive;
 

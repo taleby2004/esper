@@ -20,8 +20,8 @@ public class InSetOfValuesContextProp implements FilterSpecParamInValue
 {
     private static final long serialVersionUID = 1193129743441752016L;
     private final String propertyName;
-    private final EventPropertyGetter getter;
-    private final SimpleNumberCoercer numberCoercer;
+    private transient final EventPropertyGetter getter;
+    private transient final SimpleNumberCoercer numberCoercer;
 
     public InSetOfValuesContextProp(String propertyName, EventPropertyGetter getter, SimpleNumberCoercer coercer) {
         this.propertyName = propertyName;

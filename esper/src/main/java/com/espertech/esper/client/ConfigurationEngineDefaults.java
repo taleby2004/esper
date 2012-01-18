@@ -1046,6 +1046,7 @@ public class ConfigurationEngineDefaults implements Serializable
      */
     public static class Scripts implements Serializable
     {
+        private static final long serialVersionUID = -3111856398932434323L;
         private String defaultDialect = "js";
 
         /**

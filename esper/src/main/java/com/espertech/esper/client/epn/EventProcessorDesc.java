@@ -14,6 +14,7 @@ package com.espertech.esper.client.epn;
 import java.io.Serializable;
 
 public class EventProcessorDesc implements Serializable {
+    private static final long serialVersionUID = 946489949161515812L;
     private EventProcessorState state;
     private EventProcessor processor;
 

@@ -18,6 +18,7 @@ import java.io.StringWriter;
  */
 public class ContextDescriptorConditionPattern implements ContextDescriptorCondition {
 
+    private static final long serialVersionUID = -481920039587982117L;
     private PatternExpr pattern;
     private boolean inclusive;  // statements declaring the context are inclusive of the events matching the pattern
 

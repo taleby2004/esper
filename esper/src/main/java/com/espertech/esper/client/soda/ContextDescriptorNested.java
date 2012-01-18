@@ -20,6 +20,7 @@ import java.util.List;
  */
 public class ContextDescriptorNested implements ContextDescriptor {
 
+    private static final long serialVersionUID = -3624078353563531396L;
     private List<CreateContextClause> contexts;
 
     /**

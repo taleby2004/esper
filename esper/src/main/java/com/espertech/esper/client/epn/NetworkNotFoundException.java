@@ -12,6 +12,8 @@
 package com.espertech.esper.client.epn;
 
 public class NetworkNotFoundException extends NetworkAdminException {
+    private static final long serialVersionUID = 676846948753454199L;
+
     public NetworkNotFoundException(String message) {
         super(message);
     }

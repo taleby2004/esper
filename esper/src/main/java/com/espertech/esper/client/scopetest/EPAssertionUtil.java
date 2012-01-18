@@ -40,19 +40,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(String[][] expected, String[][] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ((expected == null) || (actual == null))
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        assert expected != null;
-        assert actual != null;
-        ScopeTestHelper.assertEquals("mismatch in number to elements", expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             ScopeTestHelper.assertTrue(Arrays.equals(actual[i], expected[i]));
@@ -67,15 +57,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(Object[][] actual, String[] propertyNames, Object[][] expected)
     {
-        if (expected == null)
-        {
-            if ((actual == null) || (actual.length == 0))
-            {
-                return;
-            }
+        if (compareArraySize(expected, actual)) {
+            return;
         }
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             Object[] propertiesThisRow = expected[i];
@@ -138,17 +122,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrderUnderlying(Object[] expected, EventBean[] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
 
         ArrayList<Object> underlying = new ArrayList<Object>();
         for (EventBean event : actual)
@@ -166,14 +142,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(Object[][] expected, List<Object[]> actual)
     {
-        if (expected == null)
-        {
-            if ((actual == null) || (actual.size() == 0))
-            {
-                return;
-            }
+        if (compareArrayAndCollSize(expected, actual)) {
+            return;
         }
-        ScopeTestHelper.assertEquals(expected.length, actual.size());
 
         for (int i = 0; i < expected.length; i++)
         {
@@ -197,18 +168,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(Object[] expected, Object[] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             Object value = actual[i];
@@ -224,18 +186,9 @@ public class EPAssertionUtil
      */
     public static void assertSameExactOrder(Object[] expected, Object[] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             ScopeTestHelper.assertSame("at element " + i, expected[i], actual[i]);
@@ -249,18 +202,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(int[] expected, int[] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             ScopeTestHelper.assertEquals(expected[i], actual[i]);
@@ -274,21 +218,12 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(int[] expected, Integer[] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
-            ScopeTestHelper.assertEquals(expected[i], (int) actual[i]);
+            ScopeTestHelper.assertEquals(expected[i], actual[i]);
         }
     }
 
@@ -299,18 +234,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(short[] expected, short[] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             ScopeTestHelper.assertEquals(expected[i], actual[i]);
@@ -324,18 +250,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(long[] expected, long[] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             ScopeTestHelper.assertEquals(expected[i], actual[i]);
@@ -349,18 +266,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(String[] expected, String[] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             ScopeTestHelper.assertEquals(expected[i], actual[i]);
@@ -374,18 +282,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsExactOrder(boolean[] expected, boolean[] actual)
     {
-        if ((expected == null) && (actual == null))
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
-        }
-
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             ScopeTestHelper.assertEquals(expected[i], actual[i]);
@@ -431,15 +330,11 @@ public class EPAssertionUtil
      */
     public static void assertEqualsAnyOrder(int[] expected, Set<Integer> actual)
     {
-        if ((actual == null) && (expected == null))
-        {
+        if (compareArrayAndCollSize(expected, actual)) {
             return;
         }
-
-        ScopeTestHelper.assertEquals("length mismatch", expected.length, actual.size());
-        for (int i = 0; i < expected.length; i++)
-        {
-            ScopeTestHelper.assertTrue("not found: " + expected[i], actual.contains(expected[i]));
+        for (int anExpected : expected) {
+            ScopeTestHelper.assertTrue("not found: " + anExpected, actual.contains(anExpected));
         }
     }
 
@@ -450,12 +345,13 @@ public class EPAssertionUtil
      */
     public static void assertEqualsAnyOrder(int[] expected, int[] actual)
     {
-        ScopeTestHelper.assertEquals("length mismatch", expected.length, actual.length);
+        if (compareArraySize(expected, actual)) {
+            return;
+        }
 
         Set<Integer> intSet = new HashSet<Integer>();
-        for (int i = 0; i < actual.length; i++)
-        {
-            intSet.add(actual[i]);
+        for (int anActual : actual) {
+            intSet.add(anActual);
         }
 
         assertEqualsAnyOrder(expected, intSet);
@@ -468,16 +364,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsAnyOrder(Object[] expected, Object[] actual)
     {
-        // Empty lists are fine
-        if ( ((actual == null) && (expected == null)) ||
-             ((actual.length == 0) && (expected == null)) ||
-             ((actual == null) && (expected.length == 0)) )
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-
-        // Same number
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
         Object[] received = new Object[actual.length];
         System.arraycopy(actual, 0, received, 0, actual.length);
 
@@ -592,21 +481,15 @@ public class EPAssertionUtil
 
     /**
      * Compare the Map values identified by property names against expected values.
-     * @param received array of Maps, one for each row
+     * @param actual array of Maps, one for each row
      * @param propertyNames property names
      * @param expected expected values
      */
-    public static void assertPropsPerRow(Map[] received, String[] propertyNames, Object[][] expected)
+    public static void assertPropsPerRow(Map[] actual, String[] propertyNames, Object[][] expected)
     {
-        if (expected == null)
-        {
-            if ((received == null) || (received.length == 0))
-            {
-                return;
-            }
+        if (compareArraySize(expected, actual)) {
+            return;
         }
-        ScopeTestHelper.assertEquals(expected.length, received.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             Object[] propertiesThisRow = expected[i];
@@ -614,7 +497,7 @@ public class EPAssertionUtil
             {
                 String name = propertyNames[j];
                 Object value = propertiesThisRow[j];
-                Object eventProp = received[i].get(name);
+                Object eventProp = actual[i].get(name);
                 ScopeTestHelper.assertEquals("Error asserting property named " + name, value, eventProp);
             }
         }
@@ -633,30 +516,16 @@ public class EPAssertionUtil
 
     /**
      * Compare the property values of events with the expected values, using exact-order semantics.
-     * @param received provides events
+     * @param actual provides events
      * @param propertyNames array of property names
      * @param expected expected values
      * @param streamName an optional name for the stream for use in messages
      */
-    public static void assertPropsPerRow(EventBean[] received, String[] propertyNames, Object[][] expected, String streamName)
+    public static void assertPropsPerRow(EventBean[] actual, String[] propertyNames, Object[][] expected, String streamName)
     {
-        if (expected == null)
-        {
-            if ((received == null) || (received.length == 0))
-            {
-                return;
-            }
-            else
-            {
-                ScopeTestHelper.fail("No events expected but received one or more for stream " + streamName);
-            }
+        if (compareArraySize(expected, actual)) {
+            return;
         }
-        if (received == null)
-        {
-            ScopeTestHelper.fail("No events received, however some were expected for stream " + streamName);
-        }
-        ScopeTestHelper.assertEquals("Mismatch in the number of rows received", expected.length, received.length);
-
         for (int i = 0; i < expected.length; i++)
         {
             Object[] propertiesThisRow = expected[i];
@@ -664,7 +533,7 @@ public class EPAssertionUtil
             {
                 String name = propertyNames[j];
                 Object value = propertiesThisRow[j];
-                Object eventProp = received[i].get(name);
+                Object eventProp = actual[i].get(name);
                 assertEqualsAllowArray("Error asserting property named " + name + " for row " + i + " for " + streamName, value, eventProp);
             }
         }
@@ -672,44 +541,29 @@ public class EPAssertionUtil
 
     /**
      * Compare the property values of events with the expected values, using any-order semantics.
-     * @param received provides events
+     * @param actual provides events
      * @param propertyNames array of property names
      * @param expected expected values
      */
-    public static void assertPropsPerRowAnyOrder(EventBean[] received, String[] propertyNames, Object[][] expected)
+    public static void assertPropsPerRowAnyOrder(EventBean[] actual, String[] propertyNames, Object[][] expected)
     {
-        if (expected == null)
-        {
-            if ((received == null) || (received.length == 0))
-            {
-                return;
-            }
-            else
-            {
-                ScopeTestHelper.fail("No events expected but received one or more");
-            }
+        if (compareArraySize(expected, actual)) {
+            return;
         }
-        if (received == null)
-        {
-            ScopeTestHelper.fail("No events received, however some were expected");
-        }
-        ScopeTestHelper.assertEquals("Mismatch in the number of rows received", expected.length, received.length);
 
         // build expected
         Object[] expectedArray = new Object[expected.length];
-        for (int i = 0; i < expectedArray.length; i++) {
-            expectedArray[i] = expected[i];
-        }
+        System.arraycopy(expected, 0, expectedArray, 0, expectedArray.length);
 
         // build received
-        Object[] receivedArray = new Object[received.length];
-        for (int i = 0; i < received.length; i++) {
+        Object[] receivedArray = new Object[actual.length];
+        for (int i = 0; i < actual.length; i++) {
             Object[] data = new Object[propertyNames.length];
             receivedArray[i] = data;
             for (int j = 0; j < propertyNames.length; j++)
             {
                 String name = propertyNames[j];
-                Object eventProp = received[i].get(name);
+                Object eventProp = actual[i].get(name);
                 data[j] = eventProp;
             }
         }
@@ -725,14 +579,9 @@ public class EPAssertionUtil
      */
     public static void assertProps(EventBean received, String[] propertyNames, Object[] expected)
     {
-        if (expected == null)
-        {
-            if (received == null)
-            {
-                return;
-            }
+        if (compareArraySize(expected, propertyNames)) {
+            return;
         }
-        ScopeTestHelper.assertEquals(expected.length, propertyNames.length);
 
         for (int j = 0; j < expected.length; j++)
         {
@@ -835,18 +684,23 @@ public class EPAssertionUtil
                 return;
             }
         }
+        else {
+            ScopeTestHelper.assertNotNull(received);
+        }
 
-        String[] propertyNames = received.getEventType().getPropertyNames();
-        String[] propertyNamesSorted = new String[propertyNames.length];
-        System.arraycopy(propertyNames, 0, propertyNamesSorted, 0, propertyNames.length);
-        Arrays.sort(propertyNamesSorted);
+        if (expected != null) {
+            String[] propertyNames = received.getEventType().getPropertyNames();
+            String[] propertyNamesSorted = new String[propertyNames.length];
+            System.arraycopy(propertyNames, 0, propertyNamesSorted, 0, propertyNames.length);
+            Arrays.sort(propertyNamesSorted);
 
-        for (int j = 0; j < expected.length; j++)
-        {
-            String name = propertyNamesSorted[j].trim();
-            Object value = expected[j];
-            Object eventProp = received.get(name);
-            ScopeTestHelper.assertEquals("Error asserting property named '" + name + "'", value, eventProp);
+            for (int j = 0; j < expected.length; j++)
+            {
+                String name = propertyNamesSorted[j].trim();
+                Object value = expected[j];
+                Object eventProp = received.get(name);
+                ScopeTestHelper.assertEquals("Error asserting property named '" + name + "'", value, eventProp);
+            }
         }
     }
 
@@ -865,13 +719,18 @@ public class EPAssertionUtil
                 return;
             }
         }
+        else {
+            ScopeTestHelper.assertNotNull(received);
+        }
 
-        for (int j = 0; j < expected.length; j++)
-        {
-            String name = propertyNames[j].trim();
-            Object value = expected[j];
-            Object eventProp = received.get(name);
-            ScopeTestHelper.assertEquals("Error asserting property named '" + name + "'", value, eventProp);
+        if (expected != null) {
+            for (int j = 0; j < expected.length; j++)
+            {
+                String name = propertyNames[j].trim();
+                Object value = expected[j];
+                Object eventProp = received.get(name);
+                ScopeTestHelper.assertEquals("Error asserting property named '" + name + "'", value, eventProp);
+            }
         }
     }
 
@@ -897,16 +756,9 @@ public class EPAssertionUtil
      */
     public static void assertEqualsAnyOrder(EventBean[][] expected, EventBean[][] actual)
     {
-        // Empty lists are fine
-        if ( ((actual == null) && (expected == null)) ||
-             ((actual.length == 0) && (expected == null)) ||
-             ((actual == null) && (expected.length == 0)) )
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-
-        // Same number
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
 
         // For each expected object find a received object
         int numMatches = 0;
@@ -951,16 +803,9 @@ public class EPAssertionUtil
      */
     public static void assertSameAnyOrder(Object[][] expected, Object[][] actual)
     {
-        // Empty lists are fine
-        if ( ((actual == null) && (expected == null)) ||
-             ((actual.length == 0) && (expected == null)) ||
-             ((actual == null) && (expected.length == 0)) )
-        {
+        if (compareArraySize(expected, actual)) {
             return;
         }
-
-        // Same number
-        ScopeTestHelper.assertEquals(expected.length, actual.length);
 
         // For each expected object find a received object
         int numMatches = 0;
@@ -1008,9 +853,8 @@ public class EPAssertionUtil
      */
     public static void assertAllBooleanTrue(Object[] objects)
     {
-        for (int i = 0; i < objects.length; i++)
-        {
-            ScopeTestHelper.assertTrue((Boolean) objects[i]);
+        for (Object object : objects) {
+            ScopeTestHelper.assertTrue((Boolean) object);
         }
     }
 
@@ -1040,13 +884,14 @@ public class EPAssertionUtil
         if (iterator == null)
         {
             ScopeTestHelper.fail("Null iterator");
+            return null;
         }
         ArrayList<EventBean> events = new ArrayList<EventBean>();
         for (;iterator.hasNext();)
         {
             events.add(iterator.next());
         }
-        return events.toArray(new EventBean[0]);
+        return events.toArray(new EventBean[events.size()]);
     }
 
     /**
@@ -1092,17 +937,15 @@ public class EPAssertionUtil
         {
             return;
         }
-        if ( ((expected == null) && (received != null)) ||
-             ((expected != null) && (received == null)) )
-        {
-            ScopeTestHelper.assertTrue(false);
+        if (expected == null || received == null) {
+            ScopeTestHelper.fail();
         }
-
-        ScopeTestHelper.assertEquals(expected.size(), received.length);
-
-        for (int i = 0; i < expected.size(); i++)
-        {
-            assertProps(received[i], expected.get(i));
+        else {
+            ScopeTestHelper.assertEquals(expected.size(), received.length);
+            for (int i = 0; i < expected.size(); i++)
+            {
+                assertProps(received[i], expected.get(i));
+            }
         }
     }
 
@@ -1132,7 +975,7 @@ public class EPAssertionUtil
         EventBean[] data = null;
         if (values.size() > 0)
         {
-            data = values.toArray(new EventBean[0]);
+            data = values.toArray(new EventBean[values.size()]);
         }
 
         assertPropsPerRow(data, expected);
@@ -1365,8 +1208,7 @@ public class EPAssertionUtil
         {
             return true;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
+        if (expected == null || actual == null)
         {
             return false;
         }
@@ -1403,8 +1245,7 @@ public class EPAssertionUtil
         {
             return true;
         }
-        if ( ((expected == null) && (actual != null)) ||
-             ((expected != null) && (actual == null)) )
+        if (expected == null || actual == null)
         {
             return false;
         }
@@ -1470,7 +1311,7 @@ public class EPAssertionUtil
     public static Object[] toObjectArray(Object array)
     {
         if ((array == null) || (!array.getClass().isArray())) {
-            throw new IllegalArgumentException("Object not an array but type '" + array.getClass() + "'");
+            throw new IllegalArgumentException("Object not an array but type '" + (array == null ? "null" : array.getClass()) + "'");
         }
         int size = Array.getLength(array);
         Object[] val = new Object[size];
@@ -1526,5 +1367,35 @@ public class EPAssertionUtil
 
             ScopeTestHelper.assertEquals(valueExpected, property);
         }
+    }
+
+    private static boolean compareArrayAndCollSize(Object expected, Collection actual) {
+        if (expected == null && (actual == null || actual.size() == 0)) {
+            return true;
+        }
+        if (expected == null || actual == null) {
+            ScopeTestHelper.fail();
+        }
+        else {
+            int expectedLength = Array.getLength(expected);
+            int actualLength = actual.size();
+            ScopeTestHelper.assertEquals("mismatch in the number of expected and actual length", expectedLength, actualLength);
+        }
+        return false;
+    }
+
+    private static boolean compareArraySize(Object expected, Object actual) {
+        if ((expected == null) && (actual == null || Array.getLength(actual) == 0)) {
+            return true;
+        }
+        if (expected == null || actual == null) {
+            ScopeTestHelper.fail();
+        }
+        else {
+            int expectedLength = Array.getLength(expected);
+            int actualLength = Array.getLength(actual);
+            ScopeTestHelper.assertEquals("mismatch in the number of expected and actual length", expectedLength, actualLength);
+        }
+        return false;
     }
 }

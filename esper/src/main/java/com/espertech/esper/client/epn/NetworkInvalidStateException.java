@@ -12,6 +12,8 @@
 package com.espertech.esper.client.epn;
 
 public class NetworkInvalidStateException extends NetworkAdminException {
+    private static final long serialVersionUID = 7760893917800274976L;
+
     public NetworkInvalidStateException(String message) {
         super(message);
     }

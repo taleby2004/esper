@@ -446,6 +446,8 @@ public class SchemaUtil {
                 }
                 writer.write(">\n");
                 break;
+            default:
+                break;
         }
     }
 

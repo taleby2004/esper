@@ -17,6 +17,7 @@ import com.espertech.esper.schedule.ScheduleSpec;
 import java.util.List;
 
 public class ContextDetailConditionCrontab implements ContextDetailCondition {
+    private static final long serialVersionUID = -1671433952748059211L;
     private final List<ExprNode> crontab;
     private ScheduleSpec schedule;
 

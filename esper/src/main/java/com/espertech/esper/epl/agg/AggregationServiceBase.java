@@ -8,9 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.agg.AggregationMethod;
 
 /**
  * All aggregation services require evaluation nodes which supply the value to be aggregated (summed, averaged, etc.)
@@ -30,5 +28,9 @@ public abstract class AggregationServiceBase implements AggregationService
     public AggregationServiceBase(ExprEvaluator evaluators[])
     {
         this.evaluators = evaluators;
+    }
+
+    public ExprEvaluator[] getEvaluators() {
+        return evaluators;
     }
 }

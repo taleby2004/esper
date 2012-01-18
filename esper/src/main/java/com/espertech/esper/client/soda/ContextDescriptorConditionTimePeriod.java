@@ -18,6 +18,7 @@ import java.io.StringWriter;
  */
 public class ContextDescriptorConditionTimePeriod implements ContextDescriptorCondition {
 
+    private static final long serialVersionUID = 212201302878097145L;
     private Expression timePeriod;
 
     /**

@@ -15,8 +15,9 @@ import java.io.Serializable;
 
 public class FilterSpecLookupable implements MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = 3576828533611557509L;
     private final String expression;
-    private final EventPropertyGetter getter;
+    private transient final EventPropertyGetter getter;
     private final Class returnType;
 
     public FilterSpecLookupable(String expression, EventPropertyGetter getter, Class returnType) {

@@ -13,6 +13,8 @@ package com.espertech.esper.client.epn;
 
 public class NetworkAdminException extends RuntimeException {
 
+    private static final long serialVersionUID = -6926099879278297365L;
+
     public NetworkAdminException(String message) {
         super(message);
     }

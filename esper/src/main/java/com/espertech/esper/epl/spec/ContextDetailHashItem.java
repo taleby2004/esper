@@ -21,6 +21,7 @@ import java.util.ArrayDeque;
 
 public class ContextDetailHashItem implements Serializable {
 
+    private static final long serialVersionUID = -1311534513012512587L;
     private final ExprChainedSpec function;
     private final FilterSpecRaw filterSpecRaw;
 

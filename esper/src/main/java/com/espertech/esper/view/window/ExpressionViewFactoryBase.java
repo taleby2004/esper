@@ -13,7 +13,6 @@ import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
 import com.espertech.esper.epl.agg.AggregationServiceFactoryFactory;
-import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.*;
@@ -82,8 +81,6 @@ public abstract class ExpressionViewFactoryBase implements DataWindowViewFactory
         ExprAggregateNodeUtil.getAggregatesBottomUp(expiryExpression, aggregateNodes);
         if (!aggregateNodes.isEmpty()) {
             try {
-                // We use a non-HA method resolution in all cases
-                MethodResolutionServiceImpl methodResolutionService = new MethodResolutionServiceImpl(statementContext.getMethodResolutionService().getEngineImportService(), statementContext.getTimeProvider());
                 aggregationServiceFactoryDesc = AggregationServiceFactoryFactory.getService(Collections.<ExprAggregateNode>emptyList(), aggregateNodes, Collections.<ExprAggregateNode>emptyList(), false, new ExprEvaluatorContextStatement(statementContext), statementContext.getAnnotations(), statementContext.getVariableService(), false, null, null);
             }
             catch (ExprValidationException ex) {

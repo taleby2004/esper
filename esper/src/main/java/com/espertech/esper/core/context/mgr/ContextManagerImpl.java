@@ -293,7 +293,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         return new AgentInstance(result.getStopCallback(), result.getAgentInstanceContext(), result.getFinalView());
     }
 
-    public class ContextNestedHandleImpl implements ContextControllerInstanceHandle {
+    public static class ContextNestedHandleImpl implements ContextControllerInstanceHandle {
         private int contextPartitionId;
 
         public ContextNestedHandleImpl(int contextPartitionId) {

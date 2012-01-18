@@ -13,11 +13,9 @@ package com.espertech.esper.epl.enummethod.eval;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.event.map.MapEventBean;
 import com.espertech.esper.event.map.MapEventType;
 
-import java.util.Collection;
 import java.util.HashMap;
 
 public class EnumEvalAggregateBase {

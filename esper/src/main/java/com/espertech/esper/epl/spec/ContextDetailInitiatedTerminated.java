@@ -13,6 +13,7 @@ package com.espertech.esper.epl.spec;
 
 public class ContextDetailInitiatedTerminated implements ContextDetail {
 
+    private static final long serialVersionUID = 800736876398383226L;
     private ContextDetailCondition start;
     private ContextDetailCondition end;
     private boolean overlapping;

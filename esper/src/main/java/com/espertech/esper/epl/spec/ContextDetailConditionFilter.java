@@ -15,6 +15,7 @@ import com.espertech.esper.filter.FilterSpecCompiled;
 
 public class ContextDetailConditionFilter implements ContextDetailCondition {
 
+    private static final long serialVersionUID = -8522513130123236000L;
     private final FilterSpecRaw filterSpecRaw;
     private final String optionalFilterAsName;
 

@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class ContextDescriptorConditionCrontab implements ContextDescriptorCondition {
 
+    private static final long serialVersionUID = 5676956299459269157L;
     private List<Expression> crontabExpressions;
 
     /**

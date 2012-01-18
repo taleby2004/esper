@@ -17,6 +17,7 @@ import java.io.Serializable;
  */
 public class EngineImportSingleRowDesc implements Serializable
 {
+    private static final long serialVersionUID = -6024893655764123446L;
     private final String className;
     private final String methodName;
     private final ConfigurationPlugInSingleRowFunction.ValueCache valueCache;

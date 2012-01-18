@@ -14,6 +14,7 @@ package com.espertech.esper.client.epn;
 import java.io.Serializable;
 
 public class EventProcessorOptions implements Serializable {
+    private static final long serialVersionUID = 6904088526753382606L;
     private boolean isIgnoreIfExists;
     private boolean logMessages;
 

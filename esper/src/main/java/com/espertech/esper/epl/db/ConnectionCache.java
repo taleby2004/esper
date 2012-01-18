@@ -8,15 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.epl.db;
 
-import com.espertech.esper.collection.Pair;
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.collection.Pair;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Base class for a Connection and PreparedStatement cache.
@@ -117,12 +116,10 @@ public abstract class ConnectionCache
         }
         catch (SQLException ex)
         {
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    log.warn("Error closing connection: " + e.getMessage(), e);
-                }
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                log.warn("Error closing connection: " + e.getMessage(), e);
             }
 
             throw new EPException("Error preparing statement '" + sql + '\'', ex);

@@ -46,4 +46,12 @@ public class VirtualDataWindowLookupContextSPI extends VirtualDataWindowLookupCo
     public EventType[] getOuterTypePerStream() {
         return outerTypePerStream;
     }
+
+    public String getAccessedByStatementName() {
+        return accessedByStatementName;
+    }
+
+    public int getAccessedByStatementSequenceNum() {
+        return accessedByStatementSequenceNum;
+    }
 }

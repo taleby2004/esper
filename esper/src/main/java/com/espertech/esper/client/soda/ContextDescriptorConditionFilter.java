@@ -18,6 +18,7 @@ import java.io.StringWriter;
  */
 public class ContextDescriptorConditionFilter implements ContextDescriptorCondition {
 
+    private static final long serialVersionUID = 7022506366665896834L;
     private Filter filter;
     private String optionalAsName;
 

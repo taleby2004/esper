@@ -594,6 +594,8 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case WINDOW_AGGREG:
                 postLeaveAggregate(node);
                 break;
+            default:
+                break;
         }
     }
 

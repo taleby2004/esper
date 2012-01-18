@@ -20,7 +20,7 @@ public final class FilterSpecParamContextProp extends FilterSpecParam
 {
     private static final long serialVersionUID = -1651262234386299344L;
     private final String contextPropertyName;
-    private final EventPropertyGetter getter;
+    private transient final EventPropertyGetter getter;
     private transient final SimpleNumberCoercer numberCoercer;
 
     public FilterSpecParamContextProp(FilterSpecLookupable lookupable, FilterOperator filterOperator, String contextPropertyName, EventPropertyGetter getter, SimpleNumberCoercer numberCoercer) {

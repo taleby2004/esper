@@ -8,11 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
-import com.espertech.esper.event.*;
-import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.event.EventAdapterService;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Base revision processor.
@@ -107,5 +109,9 @@ public abstract class VAERevisionProcessorBase implements ValueAddEventProcessor
     {
         return "Selected event type is not a valid base or delta event type of revision event type '"
                 + revisionEventTypeName + "'";
+    }
+
+    public EventAdapterService getEventAdapterService() {
+        return eventAdapterService;
     }
 }

@@ -28,11 +28,20 @@ public class SerializableObjectCopier
     {
         SimpleByteArrayOutputStream fbos = new SimpleByteArrayOutputStream();
         ObjectOutputStream out = new ObjectOutputStream(fbos);
-        out.writeObject(orig);
-        out.flush();
-        out.close();
+        try {
+            out.writeObject(orig);
+            out.flush();
+        }
+        finally {
+            out.close();
+        }
 
         ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
-        return in.readObject();
+        try {
+            return in.readObject();
+        }
+        finally {
+            in.close();
+        }
     }
 }

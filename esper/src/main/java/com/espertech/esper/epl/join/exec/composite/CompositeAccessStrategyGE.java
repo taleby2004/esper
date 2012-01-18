@@ -28,7 +28,7 @@ public class CompositeAccessStrategyGE extends CompositeAccessStrategyRelOpBase 
     }
 
     public Set<EventBean> lookup(EventBean event, Map parent, Set<EventBean> result, CompositeIndexQuery next, ExprEvaluatorContext context) {
-        TreeMap index = (TreeMap) parent;
+        TreeMap<Object, ?> index = (TreeMap<Object, ?>) parent;
         Object comparable = super.evaluateLookup(event, context);
         if (comparable == null) {
             return null;

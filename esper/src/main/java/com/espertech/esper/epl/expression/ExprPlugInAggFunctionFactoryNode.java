@@ -19,6 +19,7 @@ import com.espertech.esper.epl.core.StreamTypeService;
  */
 public class ExprPlugInAggFunctionFactoryNode extends ExprAggregateNodeBase
 {
+    private static final long serialVersionUID = 65459875362787079L;
     private transient AggregationFunctionFactory aggregationFunctionFactory;
     private final String functionName;
 

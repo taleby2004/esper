@@ -11,9 +11,10 @@
 
 package com.espertech.esper.core.context.util;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
-public class EPStatementAgentInstanceHandleComparator implements Comparator<EPStatementAgentInstanceHandle> {
+public class EPStatementAgentInstanceHandleComparator implements Comparator<EPStatementAgentInstanceHandle>, Serializable {
 
     public final static EPStatementAgentInstanceHandleComparator INSTANCE = new EPStatementAgentInstanceHandleComparator();
 

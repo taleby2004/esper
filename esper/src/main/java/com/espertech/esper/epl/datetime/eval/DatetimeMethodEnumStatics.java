@@ -17,7 +17,7 @@ import com.espertech.esper.epl.datetime.reformatop.ReformatOpFactory;
 
 public class DatetimeMethodEnumStatics {
 
-    public static OpFactory calendarOpFactory = new CalendarOpFactory();
-    public static OpFactory reformatOpFactory = new ReformatOpFactory();
-    public static OpFactory intervalOpFactory = new IntervalOpFactory();
+    public final static OpFactory calendarOpFactory = new CalendarOpFactory();
+    public final static OpFactory reformatOpFactory = new ReformatOpFactory();
+    public final static OpFactory intervalOpFactory = new IntervalOpFactory();
 }

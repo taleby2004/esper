@@ -16,6 +16,7 @@ import java.util.List;
 
 public class ExpressionScriptProvided implements Serializable {
 
+    private static final long serialVersionUID = -6815352549811750093L;
     private final String name;
     private final String expression;
     private final List<String> parameterNames;

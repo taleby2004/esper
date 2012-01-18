@@ -23,7 +23,7 @@ public class ExprContextPropertyNode extends ExprNodeBase implements ExprEvaluat
     private static final long serialVersionUID = 2816977190089087618L;
     private final String propertyName;
     private Class returnType;
-    private EventPropertyGetter getter;
+    private transient EventPropertyGetter getter;
 
     public ExprContextPropertyNode(String propertyName) {
         this.propertyName = propertyName;
