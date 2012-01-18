@@ -41,7 +41,9 @@ Bug fixes or other changes
   - Fixed issue ESPER-632 No @Audit output for stream category for statement that selects from a named window via select star
   - Fixed issue ESPER-633 Undeployment not removing event type for on-merge with insert into new stream
   - Fixed issue ESPER-634 ClassCastException in pattern with unbound repeat until and interval observer
+  - Fixed issue ESPER-635 Property is ambiguous exception for a pattern that features multiple repeats and followed by
   - Fixed issue ESPER-637 Update of Map event type not causing derived type to update its event property information
+  - Fixed issue ESPER-639 NullPointerException with Subscriber and Context and Aggregation
 
 
 Changes in version 4.4.0

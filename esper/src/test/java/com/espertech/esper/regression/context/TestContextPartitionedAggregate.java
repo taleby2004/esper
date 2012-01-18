@@ -21,6 +21,7 @@ import com.espertech.esper.regression.client.MyConcatAggregationFunction;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportSubscriber;
 import junit.framework.TestCase;
 
 import java.util.Collection;
@@ -291,6 +292,22 @@ public class TestContextPartitionedAggregate extends TestCase {
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsThree, new Object[]{new Object[]{5, 2}});
 
         stmtThree.destroy();
+
+        // test subscriber
+        EPStatement stmtFour = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
+                "select count(*) as col1 " +
+                "from SupportBean");
+        SupportSubscriber subs = new SupportSubscriber();
+        stmtFour.setSubscriber(subs);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean("G1", 1));
+        assertEquals(1L, subs.assertOneGetNewAndReset());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("G1", 1));
+        assertEquals(2L, subs.assertOneGetNewAndReset());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("G2", 2));
+        assertEquals(1L, subs.assertOneGetNewAndReset());
     }
 
     public void testGroupByEventPerGroupUnidirectionalJoin() {

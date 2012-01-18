@@ -24,25 +24,20 @@ public class SelectExprResultProcessor implements SelectExprProcessor
     private final StatementResultService statementResultService;
     private final SelectExprProcessor syntheticProcessor;
     private final BindProcessor bindProcessor;
-    private final ExprEvaluatorContext exprEvaluatorContext;
 
     /**
      * Ctor.
      * @param statementResultService for awareness of listeners and subscribers handles output results
      * @param syntheticProcessor is the processor generating synthetic events according to the select clause
      * @param bindProcessor for generating natural object column results
-     * @param exprEvaluatorContext context for expression evalauation
-     * @throws ExprValidationException if the validation failed
      */
     public SelectExprResultProcessor(StatementResultService statementResultService,
                                      SelectExprProcessor syntheticProcessor,
-                                     BindProcessor bindProcessor,
-                                     ExprEvaluatorContext exprEvaluatorContext)
+                                     BindProcessor bindProcessor)
     {
         this.statementResultService = statementResultService;
         this.syntheticProcessor = syntheticProcessor;
         this.bindProcessor = bindProcessor;
-        this.exprEvaluatorContext = exprEvaluatorContext;
     }
 
     public EventType getResultEventType()
@@ -76,7 +71,7 @@ public class SelectExprResultProcessor implements SelectExprProcessor
             return null; // neither synthetic nor natural required, be cheap and generate no output event
         }
 
-        Object[] parameters = bindProcessor.process(eventsPerStream, isNewData, this.exprEvaluatorContext);
+        Object[] parameters = bindProcessor.process(eventsPerStream, isNewData, exprEvaluatorContext);
         return new NaturalEventBean(syntheticEventType, parameters, syntheticEvent);
     }
 }

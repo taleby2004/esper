@@ -110,7 +110,7 @@ public class SelectExprProcessorFactory
 
             BindProcessor bindProcessor = new BindProcessor(selectionList, typeService.getEventTypes(), typeService.getStreamNames());
             statementResultService.setSelectClause(bindProcessor.getExpressionTypes(), bindProcessor.getColumnNamesAssigned(), forDelivery, ExprNodeUtility.getEvaluators(groupedDeliveryExpr), exprEvaluatorContext);
-            return new SelectExprResultProcessor(statementResultService, synthetic, bindProcessor, exprEvaluatorContext);
+            return new SelectExprResultProcessor(statementResultService, synthetic, bindProcessor);
         }
 
         return synthetic;
