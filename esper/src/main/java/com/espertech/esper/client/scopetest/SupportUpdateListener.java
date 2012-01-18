@@ -130,16 +130,16 @@ public class SupportUpdateListener implements UpdateListener
      */
     public EventBean assertOneGetNewAndReset()
     {
-        ScopeTestHelper.assertTrue(isInvoked);
+        ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
         
-        ScopeTestHelper.assertEquals(1, newDataList.size());
-        ScopeTestHelper.assertEquals(1, oldDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, newDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, oldDataList.size());
 
         if (lastNewData == null) {
-            ScopeTestHelper.fail();
+            ScopeTestHelper.fail("No new-data events received");
         }
-        ScopeTestHelper.assertEquals(1, lastNewData.length);
-        ScopeTestHelper.assertNull(lastOldData);
+        ScopeTestHelper.assertEquals("Mismatch in the number of new-data events", 1, lastNewData.length);
+        ScopeTestHelper.assertNull("No old-data events are expected but some were received", lastOldData);
 
         EventBean lastNew = lastNewData[0];
         reset();
@@ -152,16 +152,16 @@ public class SupportUpdateListener implements UpdateListener
      */
     public EventBean assertOneGetOldAndReset()
     {
-        ScopeTestHelper.assertTrue(isInvoked);
+        ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
 
-        ScopeTestHelper.assertEquals(1, newDataList.size());
-        ScopeTestHelper.assertEquals(1, oldDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, newDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, oldDataList.size());
 
         if (lastOldData == null) {
-            ScopeTestHelper.fail();
+            ScopeTestHelper.fail("No old-data events received");
         }
-        ScopeTestHelper.assertEquals(1, lastOldData.length);
-        ScopeTestHelper.assertNull(lastNewData);
+        ScopeTestHelper.assertEquals("Mismatch in the number of old-data events", 1, lastOldData.length);
+        ScopeTestHelper.assertNull("Expected no new-data events", lastNewData);
 
         EventBean lastNew = lastOldData[0];
         reset();
@@ -174,19 +174,19 @@ public class SupportUpdateListener implements UpdateListener
      */
     public UniformPair<EventBean> assertPairGetIRAndReset()
     {
-        ScopeTestHelper.assertTrue(isInvoked);
+        ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
 
-        ScopeTestHelper.assertEquals(1, newDataList.size());
-        ScopeTestHelper.assertEquals(1, oldDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, newDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, oldDataList.size());
 
         if (lastNewData == null) {
-            ScopeTestHelper.fail();
+            ScopeTestHelper.fail("No new-data events received");
         }
         if (lastOldData == null) {
-            ScopeTestHelper.fail();
+            ScopeTestHelper.fail("No old-data events received");
         }
-        ScopeTestHelper.assertEquals(1, lastNewData.length);
-        ScopeTestHelper.assertEquals(1, lastOldData.length);
+        ScopeTestHelper.assertEquals("Mismatch in the number of new-data events", 1, lastNewData.length);
+        ScopeTestHelper.assertEquals("Mismatch in the number of old-data events", 1, lastOldData.length);
 
         EventBean lastNew = lastNewData[0];
         EventBean lastOld = lastOldData[0];
@@ -200,15 +200,15 @@ public class SupportUpdateListener implements UpdateListener
      */
     public EventBean assertOneGetNew()
     {
-        ScopeTestHelper.assertTrue(isInvoked);
+        ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
 
-        ScopeTestHelper.assertEquals(1, newDataList.size());
-        ScopeTestHelper.assertEquals(1, oldDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, newDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, oldDataList.size());
 
         if (lastNewData == null) {
-            ScopeTestHelper.fail();
+            ScopeTestHelper.fail("No new-data events received");
         }
-        ScopeTestHelper.assertEquals(1, lastNewData.length);
+        ScopeTestHelper.assertEquals("Mismatch in the number of new-data events", 1, lastNewData.length);
         return lastNewData[0];
     }
 
@@ -218,15 +218,15 @@ public class SupportUpdateListener implements UpdateListener
      */
     public EventBean assertOneGetOld()
     {
-        ScopeTestHelper.assertTrue(isInvoked);
+        ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
 
-        ScopeTestHelper.assertEquals(1, newDataList.size());
-        ScopeTestHelper.assertEquals(1, oldDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, newDataList.size());
+        ScopeTestHelper.assertEquals("Mismatch in the number of invocations", 1, oldDataList.size());
 
         if (lastOldData == null) {
-            ScopeTestHelper.fail();
+            ScopeTestHelper.fail("No old-data events received");
         }
-        ScopeTestHelper.assertEquals(1, lastOldData.length);
+        ScopeTestHelper.assertEquals("Mismatch in the number of old-data events", 1, lastOldData.length);
         return lastOldData[0];
     }
 
@@ -336,9 +336,9 @@ public class SupportUpdateListener implements UpdateListener
      * @return pair of event arrays, the first in the pair is the insert stream data, the second in the pair is the remove stream data
      */
     public UniformPair<EventBean[]> assertInvokedAndReset() {
-        ScopeTestHelper.assertTrue(isInvoked);
-        ScopeTestHelper.assertEquals(1, getNewDataList().size());
-        ScopeTestHelper.assertEquals(1, getOldDataList().size());
+        ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
+        ScopeTestHelper.assertEquals("Received more then one invocation", 1, getNewDataList().size());
+        ScopeTestHelper.assertEquals("Received more then one invocation", 1, getOldDataList().size());
         EventBean[] newEvents = getLastNewData();
         EventBean[] oldEvents = getLastOldData();
         reset();

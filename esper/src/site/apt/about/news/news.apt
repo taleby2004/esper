@@ -41,6 +41,8 @@ News
   
   * Optimization to detect when a statement is stateless and thereby operate lock-free
   
+  * Many other bug fixes, improvements to code, performance-related changes; Please see history or changelog.txt for additional information.
+
   []
 
 

@@ -63,6 +63,8 @@ Version 4.5.0
   
   * Optimization to detect when a statement is stateless and thereby operate lock-free
   
+  * Many bug fixes and improvements to documentation, code and performance; Please see history or changelog.txt for additional information.
+
   []
 
 
