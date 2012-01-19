@@ -62,7 +62,12 @@ public class WorkerThread extends Thread {
                 }
                 else {
                     String str = br.readLine();
-                    handleString(str);
+                    if (str != null) {
+                        handleString(str);
+                    }
+                    else {
+                        break;
+                    }
                 }
             }
         }
