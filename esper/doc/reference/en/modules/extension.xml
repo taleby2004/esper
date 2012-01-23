@@ -1104,7 +1104,7 @@ public EventType getEventType() {
 		
 			<programlisting><![CDATA[<esper-configuration
   <plugin-aggregation-function name="concat" 
-    factory-class="com.espertech.esper.example.runtimeconfig.MyConcatAggregationFunction" />
+    factory-class="com.espertech.esper.example.runtimeconfig.MyConcatAggregationFunctionFactory" />
 </esper-configuration>]]></programlisting>
 
 			<para>

@@ -96,7 +96,7 @@ Core Esper Features
 	* Enumeration methods, date-time methods, Allan's interval algebra, lambda-expressions, expression definition and reuse, 'new' operator for returning multiple results from an expression
 	
 	* Declarative context dimensions based on consistent-hashes, partitions, categories, overlapping or non-overlapping initiated by event arrival and patterns, with correlated termination; nested context dimensions;
-	  Context partition targeting for runtime queries and iteration.
+	  Context partition targeting for runtime queries and iteration. Achieves data parallelism and component parallelism.
 	
 	* High degree of parallelization processing the same statement and processing multiple statements. Stateless statements process lock-free.
 	
