@@ -286,6 +286,62 @@ where sensor.sensorId = loc.sensorId</pre></div>
   	<title>EPL Questions</title>
   	
     <faq id="aggregate-0">
+      <question>How do I detect N events within X seconds?</question>
+      <answer>
+        <p>
+          The next statement outputs the count of events within the last 3 minutes:
+        </p>
+	<div class="source"><pre>select count(*) from MyEvent.win:time(3 min)</pre></div>      
+
+        <p>
+          By adding a having-clause the query only outputs a result when at least 5 events occur within 3 minutes:
+        </p>
+	<div class="source"><pre>select count(*) from MyEvent.win:time(3 min) having count(*) >= 5</pre></div>      
+
+        <p>
+          By adding a filter the engine looks for events that match a certain criteria:
+        </p>
+	<div class="source"><pre>select count(*) from MyEvent(somefield = 10).win:time(3 min) having count(*) >= 5</pre></div>      
+
+        <p>
+          This query also suppresses output for 3 minutes after a first match occurs:
+        </p>
+	<div class="source"><pre>select count(*) from MyEvent(somefield = 10).win:time(3 min) having count(*) >= 5 output first every 3 minutes</pre></div>      
+
+        <p>
+          This query also outputs the events themselves:
+        </p>
+	<div class="source"><pre>select count(*), window(*) from MyEvent(somefield = 10).win:time(3 min) having count(*) >= 5 output first every 3 minutes</pre></div>      
+	
+        <p>
+          The query could also have a group-by clause to count per group. Of course and as always, in multithreaded use it is ensured that the event entering the 
+          window and the count(*) firing is atomic. The count can not jump i.e. count is incremental.
+        </p>
+	
+      </answer>
+    </faq>   
+
+    <faq id="aggregate-1">
+      <question>How to I compute a percentage or ratio?</question>
+      <answer>
+        <p>
+          Let's assume we have an event that indicates whether an item is black or white. Assume the boolean-type "black" property is true when the 
+          item is black. 
+        </p>
+        <p>
+          Most aggregation functions allow passing a filter expression as a parameter to the aggregation function.
+          This solution passes the boolean "black" property as the filter expression to the count aggregation function to compute the
+          running percentage of items that are black compared to all items:
+        </p>
+	<div class="source"><pre>select count(*, black)/count(*) as pct from BlackWhiteItem</pre></div>      
+        <p>
+          One could also formulate the same query as follows:
+        </p>
+	<div class="source"><pre>select count(*, black = true)/count(*) as pct from BlackWhiteItem</pre></div>      
+      </answer>
+    </faq>   
+
+    <faq id="aggregate-2">
       <question>How do I measure the rate of arrival of events in a given time period? Per category?</question>
       <answer>
         <p>
@@ -322,27 +378,7 @@ where sensor.sensorId = loc.sensorId</pre></div>
       </answer>
     </faq>    
     
-    <faq id="aggregate-1">
-      <question>How to I compute a percentage or ratio?</question>
-      <answer>
-        <p>
-          Let's assume we have an event that indicates whether an item is black or white. Assume the boolean-type "black" property is true when the 
-          item is black. 
-        </p>
-        <p>
-          Most aggregation functions allow passing a filter expression as a parameter to the aggregation function.
-          This solution passes the boolean "black" property as the filter expression to the count aggregation function to compute the
-          running percentage of items that are black compared to all items:
-        </p>
-	<div class="source"><pre>select count(*, black)/count(*) as pct from BlackWhiteItem</pre></div>      
-        <p>
-          One could also formulate the same query as follows:
-        </p>
-	<div class="source"><pre>select count(*, black = true)/count(*) as pct from BlackWhiteItem</pre></div>      
-      </answer>
-    </faq>   
-
-    <faq id="aggregate-2">
+    <faq id="aggregate-3">
       <question>I want to get average, count, min and max for a 60-second time window?</question>
       <answer>
         <p>
@@ -379,7 +415,7 @@ min(value) as minValue, max(value) as maxValue from MyEvent.win:time(60 sec)</pr
       </answer>
     </faq>    
 
-    <faq id="aggregate-3">
+    <faq id="aggregate-4">
       <question>I want to compute and compare the maximum of all events since start and the maximum for the last 10 seconds?</question>
       <answer>
         <p>
