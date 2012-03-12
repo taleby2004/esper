@@ -1,5 +1,14 @@
 News
 
+* March 12, 2012  -  NEsper 4.5.0 for .NET
+	      
+  * Feature equivalent to Esper version 4.5.0
+  
+  * See Esper 4.1.0 to 4.5.0 changes below for a detailed changed list.
+
+  []  
+
+
 * January 19, 2012  -  Esper 4.5.0 - Update release
 
   * We have made a change to the behavior of intersection data windows (multiple data windows in intersection) when one of the data windows is a batch window.
