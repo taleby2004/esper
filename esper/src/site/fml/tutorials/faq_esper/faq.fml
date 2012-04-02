@@ -339,7 +339,7 @@ variable factor in the statements?</i>".
       <answer>
         <p>
             The EPL pattern engine is a dynamic state machine in which states can have sub-states. The idea of EPL patterns is from the "Rapide" pattern language of Stanford 
-            University research.
+            University research. The EPL pattern engine does not employ NFA, it is a based on dynamic state trees where branches (active pattern sub-expressions) create and destroy.
         </p>
         <p>
             The term "delta networks", a network of objects in which only changes to data are communicated across object boundaries and only when required,
@@ -371,6 +371,7 @@ variable factor in the statements?</i>".
         <p>
 	    Enumeration methods employ lambda expressions aka. closures.
         </p>
+        <p>
       </answer>
     </faq>
     <faq id="execution model">

@@ -7,9 +7,9 @@ NEsper Documentation
 	
 	<<Reference documentation>>
 	
- 	{{{../../nesper-4.5.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
- 	{{{../../nesper-4.5.0/doc/reference/en/html/index.html}Online HTML}} \
- 	{{{../../nesper-4.5.0/doc/reference/en/html_single/index.html}Single page HTML}}
+ 	{{{../../esper-4.5.0/doc/reference/en/pdf/esper_reference.pdf}PDF print version}} \
+ 	{{{../../esper-4.5.0/doc/reference/en/html/index.html}Online HTML}} \
+ 	{{{../../esper-4.5.0/doc/reference/en/html_single/index.html}Single page HTML}}
 
 * NEsper 4.1.0 - Feature-equivalent to Esper 4.1.
 	
