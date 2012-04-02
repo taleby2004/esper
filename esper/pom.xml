@@ -102,8 +102,32 @@
 					<version>1.0-beta-1</version>
 			  </extension>
 		</extensions>
-		<plugins>
+		<pluginManagement>
+		  <plugins>
+		    <plugin>
+		      <groupId>org.apache.maven.plugins</groupId>
+		      <artifactId>maven-site-plugin</artifactId>
+		      <version>3.0</version>
+			<configuration>
+				<locales>en</locales>
+				<templateFile>src/site/site.vm</templateFile>
+			</configuration>
+		    </plugin>
+		  </plugins>
+		</pluginManagement>
+        	<plugins>
 			<plugin>
+			    <artifactId>maven-site-plugin</artifactId>
+			    <executions>
+			      <execution>
+				<id>attach-descriptor</id>
+				<goals>
+				  <goal>attach-descriptor</goal>
+				</goals>
+			      </execution>
+			    </executions>
+			</plugin>
+          		<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			 	<configuration>
@@ -111,13 +135,6 @@
 					<target>1.6</target>
 					<!-- <showDeprecation>true</showDeprecation> -->
           				<skip>false</skip>
-				</configuration>
-			</plugin>
-			<plugin>
-				<artifactId>maven-site-plugin</artifactId>
-				<configuration>
-					<locales>en</locales>
-					<templateFile>src/site/site.vm</templateFile>
 				</configuration>
 			</plugin>
 			<plugin>

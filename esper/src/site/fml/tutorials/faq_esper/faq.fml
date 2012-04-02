@@ -371,7 +371,6 @@ variable factor in the statements?</i>".
         <p>
 	    Enumeration methods employ lambda expressions aka. closures.
         </p>
-        <p>
       </answer>
     </faq>
     <faq id="execution model">
