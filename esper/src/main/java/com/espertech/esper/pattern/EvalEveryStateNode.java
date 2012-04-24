@@ -11,7 +11,7 @@ package com.espertech.esper.pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,7 +37,7 @@ public final class EvalEveryStateNode extends EvalStateNode implements Evaluator
         super(parentNode, null);
 
         this.evalEveryNode = evalEveryNode;
-        this.spawnedNodes = new LinkedList<EvalStateNode>();
+        this.spawnedNodes = new ArrayList<EvalStateNode>();
         this.beginState = beginState.shallowCopy();
 
         EvalStateNode child = evalEveryNode.getChildNode().newState(this, beginState, null);

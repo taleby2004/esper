@@ -23,6 +23,7 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.bean.SupportBean_B;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -68,19 +69,19 @@ public class TestNamedWindowInsertFrom extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create consumer
-        String stmtTextSelectOne = "select string from MyWindow";
+        String stmtTextSelectOne = "select theString from MyWindow";
         EPStatement stmtSelectOne = epService.getEPAdministrator().createEPL(stmtTextSelectOne);
         stmtSelectOne.addListener(listeners[2]);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPAssertionUtil.assertProps(listeners[0].assertOneGetNewAndReset(), fields, new Object[]{"E1"});
         EPAssertionUtil.assertProps(listeners[2].assertOneGetNewAndReset(), fields, new Object[]{"E1"});
     }
 
     public void testInsertWhereTypeAndFilter() throws Exception
     {
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
 
         // create window
         String stmtTextCreateOne = "create window MyWindow.win:keepall() as SupportBean";
@@ -116,7 +117,7 @@ public class TestNamedWindowInsertFrom extends TestCase
         assertEquals(StatementType.CREATE_WINDOW, ((EPStatementSPI) stmtCreateTwo).getStatementMetadata().getStatementType());
 
         // create window with keep-all and filter
-        String stmtTextCreateThree = "create window MyWindowThree.win:keepall() as MyWindow insert where string like 'A%'";
+        String stmtTextCreateThree = "create window MyWindowThree.win:keepall() as MyWindow insert where theString like 'A%'";
         EPStatement stmtCreateThree = epService.getEPAdministrator().createEPL(stmtTextCreateThree);
         stmtCreateThree.addListener(listeners[3]);
         EPAssertionUtil.assertPropsPerRow(stmtCreateThree.iterator(), fields, new Object[][]{{"A1"}, {"A4"}});
@@ -133,10 +134,10 @@ public class TestNamedWindowInsertFrom extends TestCase
         assertFalse(listeners[4].isInvoked());
         assertEquals(2, getCount("MyWindowFour"));
 
-        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean(string like 'A%')");
-        epService.getEPAdministrator().createEPL("insert into MyWindowTwo select * from SupportBean(string like 'B%')");
-        epService.getEPAdministrator().createEPL("insert into MyWindowThree select * from SupportBean(string like 'C%')");
-        epService.getEPAdministrator().createEPL("insert into MyWindowFour select * from SupportBean(string like 'D%')");        
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean(theString like 'A%')");
+        epService.getEPAdministrator().createEPL("insert into MyWindowTwo select * from SupportBean(theString like 'B%')");
+        epService.getEPAdministrator().createEPL("insert into MyWindowThree select * from SupportBean(theString like 'C%')");
+        epService.getEPAdministrator().createEPL("insert into MyWindowFour select * from SupportBean(theString like 'D%')");
         assertFalse(listeners[0].isInvoked() || listeners[2].isInvoked() || listeners[3].isInvoked() || listeners[4].isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("B9", -9));
@@ -167,11 +168,19 @@ public class TestNamedWindowInsertFrom extends TestCase
 
     public void testInsertWhereOMStaggered()
     {
+        runAssertionInsertWhereOMStaggered(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionInsertWhereOMStaggered(EventRepresentationEnum.DEFAULT);
+        runAssertionInsertWhereOMStaggered(EventRepresentationEnum.MAP);
+    }
+
+    private void runAssertionInsertWhereOMStaggered(EventRepresentationEnum eventRepresentationEnum) {
+
         Map<String, Object> dataType = makeMap(new Object[][] {{"a", String.class}, {"b", int.class}});
         epService.getEPAdministrator().getConfiguration().addEventType("MyMap", dataType);
 
-        String stmtTextCreateOne = "create window MyWindow.win:keepall() as select a, b from MyMap";
+        String stmtTextCreateOne = eventRepresentationEnum.getAnnotationText() + " create window MyWindow.win:keepall() as select a, b from MyMap";
         EPStatement stmtCreateOne = epService.getEPAdministrator().createEPL(stmtTextCreateOne);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtCreateOne.getEventType().getUnderlyingType());
         stmtCreateOne.addListener(listeners[0]);
 
         // create insert into
@@ -185,22 +194,28 @@ public class TestNamedWindowInsertFrom extends TestCase
 
         // create window with keep-all using OM
         EPStatementObjectModel model = new EPStatementObjectModel();
+        eventRepresentationEnum.addAnnotation(model);
         Expression where = Expressions.eq("b", 10);
         model.setCreateWindow(CreateWindowClause.create("MyWindowTwo", View.create("win", "keepall")).insert(true).insertWhereClause(where));
         model.setSelectClause(SelectClause.createWildcard());
         model.setFromClause(FromClause.create(FilterStream.create("MyWindow")));
-        String text = "create window MyWindowTwo.win:keepall() as select * from MyWindow insert where b = 10";
-        assertEquals(text, model.toEPL());
+        String text = eventRepresentationEnum.getAnnotationText() + " create window MyWindowTwo.win:keepall() as select * from MyWindow insert where b = 10";
+        assertEquals(text.trim(), model.toEPL());
 
         EPStatementObjectModel modelTwo = epService.getEPAdministrator().compileEPL(text);
-        assertEquals(text, modelTwo.toEPL());
+        assertEquals(text.trim(), modelTwo.toEPL());
         
         EPStatement stmt = epService.getEPAdministrator().create(modelTwo);
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "a,b".split(","), new Object[][]{{"E2", 10}, {"E3", 10}});
 
         // test select individual fields and from an insert-from named window
-        stmt = epService.getEPAdministrator().createEPL("create window MyWindowThree.win:keepall() as select a from MyWindowTwo insert where a = 'E2'");
+        stmt = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create window MyWindowThree.win:keepall() as select a from MyWindowTwo insert where a = 'E2'");
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "a".split(","), new Object[][]{{"E2"}});
+
+        epService.getEPAdministrator().destroyAllStatements();
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyWindow", true);
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyWindowTwo", true);
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyWindowThree", true);
     }
 
     public void testVariantStream()

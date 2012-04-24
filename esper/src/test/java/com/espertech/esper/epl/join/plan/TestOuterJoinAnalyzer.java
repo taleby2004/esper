@@ -25,7 +25,7 @@ public class TestOuterJoinAnalyzer extends TestCase
     {
         List<OuterJoinDesc> descList = new LinkedList<OuterJoinDesc>();
         descList.add(SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s0", "intBoxed", "s1", OuterJoinType.LEFT));
-        descList.add(SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "string", "s1", OuterJoinType.LEFT));
+        descList.add(SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "theString", "s1", OuterJoinType.LEFT));
         // simpleProperty in s2
 
         QueryGraph graph = new QueryGraph(3);
@@ -39,7 +39,7 @@ public class TestOuterJoinAnalyzer extends TestCase
         assertEquals("intBoxed", QueryGraphTestUtil.getStrictKeyProperties(graph, 1, 0)[0]);
 
         assertTrue(graph.isNavigableAtAll(1, 2));
-        assertEquals("string", QueryGraphTestUtil.getStrictKeyProperties(graph, 1, 2)[0]);
+        assertEquals("theString", QueryGraphTestUtil.getStrictKeyProperties(graph, 1, 2)[0]);
         assertEquals("simpleProperty", QueryGraphTestUtil.getStrictKeyProperties(graph, 2, 1)[0]);
     }
 }

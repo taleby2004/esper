@@ -19,6 +19,7 @@ import com.espertech.esper.epl.spec.ContextDetailConditionPattern;
 import com.espertech.esper.epl.spec.PatternStreamSpecCompiled;
 import com.espertech.esper.pattern.*;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -47,16 +48,24 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
         StatementContext stmtContext = agentInstanceContext.getStatementContext();
 
         EvalRootFactoryNode rootFactoryNode = servicesContext.getPatternNodeFactory().makeRootNode();
-        PatternContext patternContext = stmtContext.getPatternContextFactory().createContext(stmtContext, 0, rootFactoryNode, !patternStreamSpec.getArrayEventTypes().isEmpty());
+        PatternContext patternContext = stmtContext.getPatternContextFactory().createContext(stmtContext, 0, rootFactoryNode, new MatchedEventMapMeta(patternStreamSpec.getAllTags(), !patternStreamSpec.getArrayEventTypes().isEmpty()));
         rootFactoryNode.addChildNode(patternStreamSpec.getEvalFactoryNode());
 
         PatternAgentInstanceContext patternAgentInstanceContext = stmtContext.getPatternContextFactory().createPatternAgentContext(patternContext, agentInstanceContext, false);
         EvalRootNode rootNode = EvalNodeUtil.makeRootNodeFromFactory(rootFactoryNode, patternAgentInstanceContext);
 
         if (priorMatches == null) {
-            priorMatches = new MatchedEventMapImpl();
+            priorMatches = new MatchedEventMapImpl(patternContext.getMatchedEventMapMeta());
         }
-        patternStopCallback = rootNode.start(this, patternContext, priorMatches);
+
+        // capture any callbacks that may occur right after start
+        ConditionPatternMatchCallback callback = new ConditionPatternMatchCallback(this);
+        patternStopCallback = rootNode.start(callback, patternContext, priorMatches);
+        callback.forwardCalls = true;
+
+        if (callback.isInvoked) {
+            matchFound(Collections.<String, Object>emptyMap());
+        }
     }
 
     public void matchFound(Map<String, Object> matchEvent) {
@@ -93,5 +102,27 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
 
     public Long getExpectedEndTime() {
         return null;
+    }
+
+    public static class ConditionPatternMatchCallback implements PatternMatchCallback {
+        private final ContextControllerConditionPattern condition;
+
+        private boolean isInvoked;
+        private boolean forwardCalls;
+
+        public ConditionPatternMatchCallback(ContextControllerConditionPattern condition) {
+            this.condition = condition;
+        }
+
+        public void matchFound(Map<String, Object> matchEvent) {
+            isInvoked = true;
+            if (forwardCalls) {
+                condition.matchFound(matchEvent);
+            }
+        }
+
+        public boolean isInvoked() {
+            return isInvoked;
+        }
     }
 }

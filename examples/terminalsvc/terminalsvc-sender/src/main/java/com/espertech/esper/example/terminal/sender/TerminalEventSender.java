@@ -35,9 +35,9 @@ public class TerminalEventSender
     {
         List<BaseTerminalEvent> eventsToSend = eventGenerator.generateBatch();
 
-        for (BaseTerminalEvent event : eventsToSend)
+        for (BaseTerminalEvent theEvent : eventsToSend)
         {
-            sender.sendEvent(event);
+            sender.sendEvent(theEvent);
         }
 
         // Throttle the sender to roughly send a batch every 1 second

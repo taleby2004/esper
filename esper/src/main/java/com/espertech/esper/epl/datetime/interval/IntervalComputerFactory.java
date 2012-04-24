@@ -22,106 +22,106 @@ import java.util.List;
 public class IntervalComputerFactory {
 
     public static IntervalComputer make(DatetimeMethodEnum method, List<ExprNode> expressions) throws ExprValidationException {
-        ExprOptionalConstant[] params = getParameters(expressions);
+        ExprOptionalConstant[] parameters = getParameters(expressions);
 
         if (method == DatetimeMethodEnum.BEFORE) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 return new IntervalComputerBeforeNoParam();
             }
-            IntervalStartEndParameterPair pair = IntervalStartEndParameterPair.fromParamsWithLongMaxEnd(params);
+            IntervalStartEndParameterPair pair = IntervalStartEndParameterPair.fromParamsWithLongMaxEnd(parameters);
             if (pair.isConstant()) {
                 return new IntervalComputerConstantBefore(pair);
             }
             return new IntervalComputerBeforeWithDeltaExpr(pair);
         }
         else if (method == DatetimeMethodEnum.AFTER) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 return new IntervalComputerAfterNoParam();
             }
-            IntervalStartEndParameterPair pair = IntervalStartEndParameterPair.fromParamsWithLongMaxEnd(params);
+            IntervalStartEndParameterPair pair = IntervalStartEndParameterPair.fromParamsWithLongMaxEnd(parameters);
             if (pair.isConstant()) {
                 return new IntervalComputerConstantAfter(pair);
             }
             return new IntervalComputerAfterWithDeltaExpr(pair);
         }
         else if (method == DatetimeMethodEnum.COINCIDES) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 return new IntervalComputerCoincidesNoParam();
             }
-            IntervalStartEndParameterPair pair = IntervalStartEndParameterPair.fromParamsWithSameEnd(params);
+            IntervalStartEndParameterPair pair = IntervalStartEndParameterPair.fromParamsWithSameEnd(parameters);
             if (pair.isConstant()) {
                 return new IntervalComputerConstantCoincides(pair);
             }
             return new IntervalComputerCoincidesWithDeltaExpr(pair);
         }
         else if (method == DatetimeMethodEnum.DURING || method == DatetimeMethodEnum.INCLUDES) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 if (method == DatetimeMethodEnum.DURING) {
                     return new IntervalComputerDuringNoParam();
                 }
                 return new IntervalComputerIncludesNoParam();
             }
-            if (params.length == 1) {
-                return new IntervalComputerDuringAndIncludesThreshold(method == DatetimeMethodEnum.DURING, params[0].getEvaluator());
+            if (parameters.length == 1) {
+                return new IntervalComputerDuringAndIncludesThreshold(method == DatetimeMethodEnum.DURING, parameters[0].getEvaluator());
             }
-            if (params.length == 2) {
-                return new IntervalComputerDuringAndIncludesMinMax(method == DatetimeMethodEnum.DURING, params[0].getEvaluator(), params[1].getEvaluator());
+            if (parameters.length == 2) {
+                return new IntervalComputerDuringAndIncludesMinMax(method == DatetimeMethodEnum.DURING, parameters[0].getEvaluator(), parameters[1].getEvaluator());
             }
-            return new IntervalComputerDuringMinMaxStartEnd(method == DatetimeMethodEnum.DURING, params);
+            return new IntervalComputerDuringMinMaxStartEnd(method == DatetimeMethodEnum.DURING, parameters);
         }
         else if (method == DatetimeMethodEnum.FINISHES) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 return new IntervalComputerFinishesNoParam();
             }
-            validateConstantThreshold("finishes", params[0]);
-            return new IntervalComputerFinishesThreshold(params[0].getEvaluator());
+            validateConstantThreshold("finishes", parameters[0]);
+            return new IntervalComputerFinishesThreshold(parameters[0].getEvaluator());
         }
         else if (method == DatetimeMethodEnum.FINISHEDBY) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 return new IntervalComputerFinishedByNoParam();
             }
-            validateConstantThreshold("finishedby", params[0]);
-            return new IntervalComputerFinishedByThreshold(params[0].getEvaluator());
+            validateConstantThreshold("finishedby", parameters[0]);
+            return new IntervalComputerFinishedByThreshold(parameters[0].getEvaluator());
         }
         else if (method == DatetimeMethodEnum.MEETS) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 return new IntervalComputerMeetsNoParam();
             }
-            validateConstantThreshold("meets", params[0]);
-            return new IntervalComputerMeetsThreshold(params[0].getEvaluator());
+            validateConstantThreshold("meets", parameters[0]);
+            return new IntervalComputerMeetsThreshold(parameters[0].getEvaluator());
         }
         else if (method == DatetimeMethodEnum.METBY) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 return new IntervalComputerMetByNoParam();
             }
-            validateConstantThreshold("metBy", params[0]);
-            return new IntervalComputerMetByThreshold(params[0].getEvaluator());
+            validateConstantThreshold("metBy", parameters[0]);
+            return new IntervalComputerMetByThreshold(parameters[0].getEvaluator());
         }
         else if (method == DatetimeMethodEnum.OVERLAPS || method == DatetimeMethodEnum.OVERLAPPEDBY) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 if (method == DatetimeMethodEnum.OVERLAPS) {
                     return new IntervalComputerOverlapsNoParam();
                 }
                 return new IntervalComputerOverlappedByNoParam();
             }
-            if (params.length == 1) {
-                return new IntervalComputerOverlapsAndByThreshold(method == DatetimeMethodEnum.OVERLAPS, params[0].getEvaluator());
+            if (parameters.length == 1) {
+                return new IntervalComputerOverlapsAndByThreshold(method == DatetimeMethodEnum.OVERLAPS, parameters[0].getEvaluator());
             }
-            return new IntervalComputerOverlapsAndByMinMax(method == DatetimeMethodEnum.OVERLAPS, params[0].getEvaluator(), params[1].getEvaluator());
+            return new IntervalComputerOverlapsAndByMinMax(method == DatetimeMethodEnum.OVERLAPS, parameters[0].getEvaluator(), parameters[1].getEvaluator());
         }
         else if (method == DatetimeMethodEnum.STARTS) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 return new IntervalComputerStartsNoParam();
             }
-            validateConstantThreshold("starts", params[0]);
-            return new IntervalComputerStartsThreshold(params[0].getEvaluator());
+            validateConstantThreshold("starts", parameters[0]);
+            return new IntervalComputerStartsThreshold(parameters[0].getEvaluator());
         }
         else if (method == DatetimeMethodEnum.STARTEDBY) {
-            if (params.length == 0) {
+            if (parameters.length == 0) {
                 return new IntervalComputerStartedByNoParam();
             }
-            validateConstantThreshold("startedBy", params[0]);
-            return new IntervalComputerStartedByThreshold(params[0].getEvaluator());
+            validateConstantThreshold("startedBy", parameters[0]);
+            return new IntervalComputerStartedByThreshold(parameters[0].getEvaluator());
         }
         throw new IllegalArgumentException("Unknown datetime method '" + method + "'");
     }
@@ -133,11 +133,11 @@ public class IntervalComputerFactory {
     }
 
     private static ExprOptionalConstant[] getParameters(List<ExprNode> expressions) {
-        ExprOptionalConstant[] params = new ExprOptionalConstant[expressions.size() - 1];
+        ExprOptionalConstant[] parameters = new ExprOptionalConstant[expressions.size() - 1];
         for (int i = 1; i < expressions.size(); i++) {
-            params[i - 1] = getExprOrConstant(expressions.get(i));
+            parameters[i - 1] = getExprOrConstant(expressions.get(i));
         }
-        return params;
+        return parameters;
     }
 
     private static ExprOptionalConstant getExprOrConstant(ExprNode exprNode) {
@@ -427,12 +427,12 @@ public class IntervalComputerFactory {
         private final ExprEvaluator minEndEval;
         private final ExprEvaluator maxEndEval;
 
-        public IntervalComputerDuringMinMaxStartEnd(boolean during, ExprOptionalConstant[] params) {
+        public IntervalComputerDuringMinMaxStartEnd(boolean during, ExprOptionalConstant[] parameters) {
             this.during = during;
-            minStartEval = params[0].getEvaluator();
-            maxStartEval = params[1].getEvaluator();
-            minEndEval = params[2].getEvaluator();
-            maxEndEval = params[3].getEvaluator();
+            minStartEval = parameters[0].getEvaluator();
+            maxStartEval = parameters[1].getEvaluator();
+            minEndEval = parameters[2].getEvaluator();
+            maxEndEval = parameters[3].getEvaluator();
         }
 
         public Boolean compute(long leftStart, long leftEnd, long rightStart, long rightEnd, EventBean[] eventsPerStream, boolean newData, ExprEvaluatorContext context) {

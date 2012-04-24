@@ -158,9 +158,9 @@ public class Test3StreamSingleOpJoin extends TestCase
         updateListener.reset();
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendEvent(Object[] events)

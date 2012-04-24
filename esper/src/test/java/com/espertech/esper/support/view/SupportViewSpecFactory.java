@@ -56,7 +56,7 @@ public class SupportViewSpecFactory
         List<ViewSpec> specifications = new LinkedList<ViewSpec>();
 
         ViewSpec specOne = makeSpec("std", "groupwin",
-                new Class[] { String.class }, new String[] { "string" } );
+                new Class[] { String.class }, new String[] { "theString" } );
         ViewSpec specTwo = makeSpec("win", "length",
                 new Class[] { int.class }, new String[] { "100" } );
 
@@ -78,7 +78,7 @@ public class SupportViewSpecFactory
         ViewSpec specOne = SupportViewSpecFactory.makeSpec("win", "length",
                 new Class[] { Integer.class}, new String[] { "1000" } );
         ViewSpec specTwo = SupportViewSpecFactory.makeSpec("std", "unique",
-                new Class[] { String.class}, new String[] { "string" } );
+                new Class[] { String.class}, new String[] { "theString" } );
 
         specifications.add(specOne);
         specifications.add(specTwo);
@@ -136,10 +136,10 @@ public class SupportViewSpecFactory
 
     private static LinkedList<ExprNode> makeParams(Class clazz[], String[] values) throws Exception
     {
-        LinkedList<ExprNode> params = new LinkedList<ExprNode>();
+        LinkedList<ExprNode> parameters = new LinkedList<ExprNode>();
         if (values == null)
         {
-            return params;
+            return parameters;
         }
 
         for (int i = 0; i < values.length; i++)
@@ -166,10 +166,10 @@ public class SupportViewSpecFactory
             {
                 node = new ExprConstantNodeImpl(Integer.valueOf(value));
             }
-            params.add(node);
+            parameters.add(node);
         }
 
-        return params;
+        return parameters;
     }
 
     private static List<ViewFactory> makeFactories(EventType parentEventType, List<ViewSpec> viewSpecs) throws Exception

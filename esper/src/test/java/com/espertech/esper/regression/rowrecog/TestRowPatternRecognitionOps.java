@@ -50,7 +50,7 @@ public class TestRowPatternRecognitionOps extends TestCase {
         String[] fields = "a_string,b_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string " +
+                "  measures A.theString as a_string, B.theString as b_string " +
                 "  all matches " +
                 "  pattern (A B) " +
                 "  define B as B.value > A.value" +
@@ -107,11 +107,11 @@ public class TestRowPatternRecognitionOps extends TestCase {
         String[] fields = "a_string,b0_string,b1_string,b2_string,c_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, " +
-                "    B[0].string as b0_string, " +
-                "    B[1].string as b1_string, " +
-                "    B[2].string as b2_string, " +
-                "    C.string as c_string" +
+                "  measures A.theString as a_string, " +
+                "    B[0].theString as b0_string, " +
+                "    B[1].theString as b1_string, " +
+                "    B[2].theString as b2_string, " +
+                "    C.theString as c_string" +
                 "  all matches " +
                 "  pattern (A B* C) " +
                 "  define \n" +
@@ -171,11 +171,11 @@ public class TestRowPatternRecognitionOps extends TestCase {
         String[] fields = "a_string,b0_string,b1_string,b2_string,c_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, " +
-                "    B[0].string as b0_string, " +
-                "    B[1].string as b1_string, " +
-                "    B[2].string as b2_string, " +
-                "    C.string as c_string" +
+                "  measures A.theString as a_string, " +
+                "    B[0].theString as b0_string, " +
+                "    B[1].theString as b1_string, " +
+                "    B[2].theString as b2_string, " +
+                "    C.theString as c_string" +
                 "  all matches " +
                 "  pattern (A B+ C) " +
                 "  define \n" +
@@ -226,8 +226,8 @@ public class TestRowPatternRecognitionOps extends TestCase {
         String[] fields = "a_string,b_string,c_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string, " +
-                "    C.string as c_string" +
+                "  measures A.theString as a_string, B.theString as b_string, " +
+                "    C.theString as c_string" +
                 "  all matches " +
                 "  pattern (A B? C) " +
                 "  define \n" +
@@ -300,8 +300,8 @@ public class TestRowPatternRecognitionOps extends TestCase {
         String[] fields = "a_string,a_value,b_value".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  partition by string" +
-                "  measures A.string as a_string, A.value as a_value, B.value as b_value " +
+                "  partition by theString" +
+                "  measures A.theString as a_string, A.value as a_value, B.value as b_value " +
                 "  all matches pattern (A B) " +
                 "  define B as (B.value > A.value)" +
                 ")" +
@@ -384,11 +384,11 @@ public class TestRowPatternRecognitionOps extends TestCase {
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
                 "  partition by value" +
-                "  measures A.string as a_string " +
+                "  measures A.theString as a_string " +
                 "  pattern (A B) " +
                 "  define " +
-                "    A as (A.string = 'A')," +
-                "    B as (B.string = 'B')" +
+                "    A as (A.theString = 'A')," +
+                "    B as (B.theString = 'B')" +
                 ")";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -424,7 +424,7 @@ public class TestRowPatternRecognitionOps extends TestCase {
         String[] fields = "a_string,b_string,c_string,d_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string, C.string as c_string, D.string as d_string " +
+                "  measures A.theString as a_string, B.theString as b_string, C.theString as c_string, D.theString as d_string " +
                 "  all matches pattern ( A B | C D ) " +
                 "  define " +
                 "    A as (A.value = 1)," +
@@ -471,7 +471,7 @@ public class TestRowPatternRecognitionOps extends TestCase {
         String[] fields = "a_string,b_string,c_string,d_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string, C.string as c_string, D.string as d_string " +
+                "  measures A.theString as a_string, B.theString as b_string, C.theString as c_string, D.theString as d_string " +
                 "  all matches pattern ( (A | B) (C | D) ) " +
                 "  define " +
                 "    A as (A.value = 1)," +
@@ -516,7 +516,7 @@ public class TestRowPatternRecognitionOps extends TestCase {
         String[] fields = "a0,b,a1".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A[0].string as a0, B.string as b, A[1].string as a1 " +
+                "  measures A[0].theString as a0, B.theString as b, A[1].theString as a1 " +
                 "  all matches pattern ( A B A ) " +
                 "  define " +
                 "    A as (A.value = 1)," +

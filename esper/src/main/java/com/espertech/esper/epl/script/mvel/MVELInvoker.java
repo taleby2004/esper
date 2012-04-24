@@ -89,9 +89,9 @@ public class MVELInvoker {
         }
     }
 
-    public static Object executeExpression(Object executable, Map<String, Object> params) throws InvocationTargetException {
+    public static Object executeExpression(Object executable, Map<String, Object> parameters) throws InvocationTargetException {
         try {
-            return executeExpressionMethod.invoke(null, new Object[] {executable, params});
+            return executeExpressionMethod.invoke(null, new Object[] {executable, parameters});
         }
         catch (IllegalAccessException e) {
             throw new EPException("Failed to find MVEL method: " + e.getMessage(), e);

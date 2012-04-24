@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
@@ -25,7 +24,7 @@ public class RevisionEventBeanMerge implements EventBean
 
     private NullableObject<Object>[] overlay;
     private EventBean lastBaseEvent;
-    private MultiKeyUntyped key;
+    private Object key;
     private boolean latest;
 
     /**
@@ -70,7 +69,7 @@ public class RevisionEventBeanMerge implements EventBean
      * Returns the key.
      * @return key
      */
-    public MultiKeyUntyped getKey()
+    public Object getKey()
     {
         return key;
     }
@@ -79,7 +78,7 @@ public class RevisionEventBeanMerge implements EventBean
      * Sets the key.
      * @param key to set
      */
-    public void setKey(MultiKeyUntyped key)
+    public void setKey(Object key)
     {
         this.key = key;
     }
@@ -141,33 +140,23 @@ public class RevisionEventBeanMerge implements EventBean
     }
 
     /**
-     * Returns a value from the key.
-     * @param index within key
-     * @return value
-     */
-    public Object getKeyValue(int index)
-    {
-        return key.getKeys()[index];
-    }
-
-    /**
      * Returns base event value.
-     * @param params supplies getter
+     * @param parameters supplies getter
      * @return value
      */
-    public Object getBaseEventValue(RevisionGetterParameters params)
+    public Object getBaseEventValue(RevisionGetterParameters parameters)
     {
-        return params.getBaseGetter().get(lastBaseEvent);
+        return parameters.getBaseGetter().get(lastBaseEvent);
     }
 
     /**
      * Returns a versioned value.
-     * @param params getter and indexes
+     * @param parameters getter and indexes
      * @return value
      */
-    public Object getVersionedValue(RevisionGetterParameters params)
+    public Object getVersionedValue(RevisionGetterParameters parameters)
     {
-        int propertyNumber = params.getPropertyNumber();
+        int propertyNumber = parameters.getPropertyNumber();
 
         if (overlay != null)
         {
@@ -178,7 +167,7 @@ public class RevisionEventBeanMerge implements EventBean
             }
         }
 
-        EventPropertyGetter getter = params.getBaseGetter();
+        EventPropertyGetter getter = parameters.getBaseGetter();
         if (getter == null)
         {
             return null;  // The property was added by a delta event and only exists on a delta

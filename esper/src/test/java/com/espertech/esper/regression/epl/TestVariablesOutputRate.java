@@ -209,23 +209,23 @@ public class TestVariablesOutputRate extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void sendSupportBeans(String ...strings)
     {
-        for (String string : strings)
+        for (String theString : strings)
         {
-            sendSupportBean(string);
+            sendSupportBean(theString);
         }
     }
 
-    private SupportBean sendSupportBean(String string)
+    private SupportBean sendSupportBean(String theString)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }

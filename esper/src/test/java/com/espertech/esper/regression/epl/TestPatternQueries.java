@@ -207,22 +207,22 @@ public class TestPatternQueries extends TestCase
 
     private void sendEvent(int id, String p00)
     {
-        SupportBean_S0 event = new SupportBean_S0(id, p00);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean_S0 theEvent = new SupportBean_S0(id, p00);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private SupportBean_S0 sendEventS0(int id)
     {
-        SupportBean_S0 event = new SupportBean_S0(id);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean_S0 theEvent = new SupportBean_S0(id);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
     private SupportBean_S1 sendEventS1(int id)
     {
-        SupportBean_S1 event = new SupportBean_S1(id);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean_S1 theEvent = new SupportBean_S1(id);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
     private void assertEventIds(Integer idS0, Integer idS1)

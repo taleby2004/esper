@@ -61,16 +61,16 @@ public class TestEnumNamedWindowPerformance extends TestCase {
                         "  x => (select * from Win where intPrimitive = x.p00)" +
                         "}" +
                         "select " +
-                        "q(st0).where(x => string = key0) as val0, " +
-                        "q(st0).where(x => string = key0) as val1, " +
-                        "q(st0).where(x => string = key0) as val2, " +
-                        "q(st0).where(x => string = key0) as val3, " +
-                        "q(st0).where(x => string = key0) as val4, " +
-                        "q(st0).where(x => string = key0) as val5, " +
-                        "q(st0).where(x => string = key0) as val6, " +
-                        "q(st0).where(x => string = key0) as val7, " +
-                        "q(st0).where(x => string = key0) as val8, " +
-                        "q(st0).where(x => string = key0) as val9 " +
+                        "q(st0).where(x => theString = key0) as val0, " +
+                        "q(st0).where(x => theString = key0) as val1, " +
+                        "q(st0).where(x => theString = key0) as val2, " +
+                        "q(st0).where(x => theString = key0) as val3, " +
+                        "q(st0).where(x => theString = key0) as val4, " +
+                        "q(st0).where(x => theString = key0) as val5, " +
+                        "q(st0).where(x => theString = key0) as val6, " +
+                        "q(st0).where(x => theString = key0) as val7, " +
+                        "q(st0).where(x => theString = key0) as val8, " +
+                        "q(st0).where(x => theString = key0) as val9 " +
                         "from SupportBean_ST0 st0";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -78,12 +78,12 @@ public class TestEnumNamedWindowPerformance extends TestCase {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 5000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID", "K50", 1050));
-            EventBean event = listener.assertOneGetNewAndReset();
+            EventBean theEvent = listener.assertOneGetNewAndReset();
             for (int j = 0; j < 10; j++) {
-                Collection coll = (Collection) event.get("val" + j);
+                Collection coll = (Collection) theEvent.get("val" + j);
                 assertEquals(1, coll.size());
                 SupportBean bean = (SupportBean) coll.iterator().next();
-                assertEquals("K50", bean.getString());
+                assertEquals("K50", bean.getTheString());
                 assertEquals(1050, bean.getIntPrimitive());
             }
         }
@@ -97,7 +97,7 @@ public class TestEnumNamedWindowPerformance extends TestCase {
 
         // test expression reuse
         String epl =    "expression q {" +
-                        "  x => Win(string = x.key0).where(y => intPrimitive = x.p00)" +
+                        "  x => Win(theString = x.key0).where(y => intPrimitive = x.p00)" +
                         "}" +
                         "select " +
                         "q(st0) as val0, " +
@@ -117,12 +117,12 @@ public class TestEnumNamedWindowPerformance extends TestCase {
         long start = System.currentTimeMillis();
         for (int i = 0; i < 5000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBean_ST0("ID", "K50", 1050));
-            EventBean event = listener.assertOneGetNewAndReset();
+            EventBean theEvent = listener.assertOneGetNewAndReset();
             for (int j = 0; j < 10; j++) {
-                Collection coll = (Collection) event.get("val" + j);
+                Collection coll = (Collection) theEvent.get("val" + j);
                 assertEquals(1, coll.size());
                 SupportBean bean = (SupportBean) coll.iterator().next();
-                assertEquals("K50", bean.getString());
+                assertEquals("K50", bean.getTheString());
                 assertEquals(1050, bean.getIntPrimitive());
             }
         }

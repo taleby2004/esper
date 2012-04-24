@@ -93,7 +93,7 @@ public class CollectionUtil
      * @param set to return array for
      * @return array
      */
-    public static int[] intArray(Set<Integer> set)
+    public static int[] intArray(Collection<Integer> set)
     {
         if (set == null)
         {
@@ -131,23 +131,23 @@ public class CollectionUtil
 
     /**
      * Returns a list of the elements invoking toString on non-null elements.
-     * @param set to render
+     * @param collection to render
      * @param <T> type
      * @return comma-separate list of values (no escape)
      */
-    public static <T> String toString(Set<T> set)
+    public static <T> String toString(Collection<T> collection)
     {
-        if (set == null)
+        if (collection == null)
         {
             return "null";
         }
-        if (set.isEmpty())
+        if (collection.isEmpty())
         {
             return "";
         }
         StringBuilder buf = new StringBuilder();
         String delimiter = "";
-        for (T t : set)
+        for (T t : collection)
         {
             if (t == null)
             {
@@ -202,5 +202,49 @@ public class CollectionUtil
         }
         buf.append("]");
         return buf.toString();
+    }
+
+    public static Map<String, Object> populateNameValueMap(Object... values) {
+        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        int count = values.length / 2;
+        if (values.length != count * 2) {
+            throw new IllegalArgumentException("Expected an event number of name-value pairs");
+        }
+        for (int i = 0; i < count; i++) {
+            int index = i * 2;
+            Object keyValue = values[index];
+            if (!(keyValue instanceof String)) {
+                throw new IllegalArgumentException("Expected string-type key value at index " + index + " but found " + keyValue);
+            }
+            String key = (String) keyValue;
+            Object value = values[index + 1];
+            if (result.containsKey(key)) {
+                throw new IllegalArgumentException("Found two or more values for key '" + key + "'");
+            }
+            result.put(key, value);
+        }
+        return result;
+    }
+
+    public static Object addArrays(Object first, Object second) {
+        if (first != null && !first.getClass().isArray()) {
+            throw new IllegalArgumentException("Parameter is not an array: " + first);
+        }
+        if (second != null && !second.getClass().isArray()) {
+            throw new IllegalArgumentException("Parameter is not an array: " + second);
+        }
+        if (first == null) {
+            return second;
+        }
+        if (second == null) {
+            return first;
+        }
+        int firstLength = Array.getLength(first);
+        int secondLength = Array.getLength(second);
+        int total = firstLength + secondLength;
+        Object dest = Array.newInstance(first.getClass().getComponentType(), total);
+        System.arraycopy(first, 0, dest, 0, firstLength);
+        System.arraycopy(second, 0, dest, firstLength, secondLength);
+        return dest;
     }
 }

@@ -44,7 +44,7 @@ public class TestFirstEverLastEverAgg extends TestCase {
 
     public void testFirstEverLastEver()
     {
-        String epl = "select firstever(string) as firsteverstring, lastever(string) as lasteverstring, " +
+        String epl = "select firstever(theString) as firsteverstring, lastever(theString) as lasteverstring, " +
                 "firstever(intPrimitive) as firsteverint, lastever(intPrimitive) as lasteverint from SupportBean.win:length(2)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -64,10 +64,10 @@ public class TestFirstEverLastEverAgg extends TestCase {
     {
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as select * from SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
-        epService.getEPAdministrator().createEPL("on SupportBean_A delete from MyWindow where string = id");
+        epService.getEPAdministrator().createEPL("on SupportBean_A delete from MyWindow where theString = id");
 
         String[] fields = "firsteverstring,lasteverstring".split(",");
-        String epl = "select firstever(string) as firsteverstring, lastever(string) as lasteverstring from MyWindow";
+        String epl = "select firstever(theString) as firsteverstring, lastever(theString) as lasteverstring from MyWindow";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
         

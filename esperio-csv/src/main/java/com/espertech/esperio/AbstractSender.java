@@ -32,18 +32,18 @@ public abstract class AbstractSender {
 
     /**
      * Send an event
-     * @param event wrapper
+     * @param theEvent wrapper
      * @param beanToSend event object
      */
-    public abstract void sendEvent(AbstractSendableEvent event, Object beanToSend);
+    public abstract void sendEvent(AbstractSendableEvent theEvent, Object beanToSend);
 
     /**
      * Send an event.
-     * @param event wrapper
+     * @param theEvent wrapper
      * @param mapToSend event object
      * @param eventTypeName name of event type
      */
-    public abstract void sendEvent(AbstractSendableEvent event, Map mapToSend, String eventTypeName);
+    public abstract void sendEvent(AbstractSendableEvent theEvent, Map mapToSend, String eventTypeName);
 
     /**
      * Indicate that sender should stop.

@@ -8,20 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.event.property;
 
-import com.espertech.esper.event.*;
-import com.espertech.esper.event.map.MapEventPropertyGetter;
-import com.espertech.esper.event.bean.DynamicSimplePropertyGetter;
+import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.arr.ObjectArrayDynamicPropertyGetter;
+import com.espertech.esper.event.arr.ObjectArrayEventPropertyGetter;
 import com.espertech.esper.event.bean.BeanEventType;
-import com.espertech.esper.event.xml.SchemaElementComplex;
-import com.espertech.esper.event.xml.SchemaItem;
+import com.espertech.esper.event.bean.DynamicSimplePropertyGetter;
+import com.espertech.esper.event.map.MapDynamicPropertyGetter;
+import com.espertech.esper.event.map.MapEventPropertyGetter;
 import com.espertech.esper.event.xml.BaseXMLEventType;
 import com.espertech.esper.event.xml.DOMAttributeAndElementGetter;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.xml.SchemaElementComplex;
+import com.espertech.esper.event.xml.SchemaItem;
 
-import java.util.Map;
 import java.io.StringWriter;
+import java.util.Map;
 
 /**
  * Represents a dynamic simple property of a given name.
@@ -71,36 +72,7 @@ public class DynamicSimpleProperty extends PropertyBase implements DynamicProper
 
     public MapEventPropertyGetter getGetterMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)
     {
-        final String propertyName = this.getPropertyNameAtomic();
-        return new MapEventPropertyGetter()
-        {
-            public Object getMap(Map<String, Object> map) throws PropertyAccessException
-            {
-                return map.get(propertyName);
-            }
-
-            public boolean isMapExistsProperty(Map<String, Object> map)
-            {
-                return map.containsKey(propertyName);
-            }
-
-            public Object get(EventBean eventBean) throws PropertyAccessException
-            {
-                Map map = (Map) eventBean.getUnderlying();
-                return map.get(propertyName);
-            }
-
-            public boolean isExistsProperty(EventBean eventBean)
-            {
-                Map map = (Map) eventBean.getUnderlying();
-                return map.containsKey(propertyName);
-            }
-
-            public Object getFragment(EventBean eventBean)
-            {
-                return null;
-            }
-        };
+        return new MapDynamicPropertyGetter(propertyNameAtomic);
     }
 
     public void toPropertyEPL(StringWriter writer)
@@ -121,5 +93,9 @@ public class DynamicSimpleProperty extends PropertyBase implements DynamicProper
     public SchemaItem getPropertyTypeSchema(SchemaElementComplex complexProperty, EventAdapterService eventAdapterService)
     {
         return null;    // always returns Node
-    }    
+    }
+
+    public ObjectArrayEventPropertyGetter getGetterObjectArray(Map<String, Integer> indexPerProperty, Map<String, Object> nestableTypes, EventAdapterService eventAdapterService) {
+        return new ObjectArrayDynamicPropertyGetter(propertyNameAtomic);
+    }
 }

@@ -11,15 +11,14 @@
 
 package com.espertech.esper.regression.event;
 
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import junit.framework.TestCase;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
-import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.util.EventRepresentationEnum;
+import junit.framework.TestCase;
+
+import java.util.Map;
 
 public class TestEventPropertyDynamicBean extends TestCase
 {
@@ -37,32 +36,11 @@ public class TestEventPropertyDynamicBean extends TestCase
         listener = null;
     }
 
-    public void testGetValue() throws Exception
+    public void testGetValueDynamic() throws Exception
     {
-        String stmtText = "select item.id? as myid from " + SupportBeanDynRoot.class.getName();
-        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
-        stmt.addListener(listener);
-
-        // check type
-        assertEquals(Object.class, stmt.getEventType().getPropertyType("myid"));
-
-        // check value with an object that has the property as an int
-        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBean_S0(101)));
-        assertEquals(101, listener.assertOneGetNewAndReset().get("myid"));
-
-        // check value with an object that doesn't have the property
-        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new String("abc")));
-        assertEquals(null, listener.assertOneGetNewAndReset().get("myid"));
-
-        // check value with an object that has the property as a string
-        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBean_A("e1")));
-        assertEquals("e1", listener.assertOneGetNewAndReset().get("myid"));
-
-        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBean_B("e2")));
-        assertEquals("e2", listener.assertOneGetNewAndReset().get("myid"));
-
-        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBean_S1(102)));
-        assertEquals(102, listener.assertOneGetNewAndReset().get("myid"));
+        runAssertionGetDynamicWObjectArr(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionGetDynamicWObjectArr(EventRepresentationEnum.MAP);
+        runAssertionGetDynamicWObjectArr(EventRepresentationEnum.DEFAULT);
     }
 
     public void testGetValueNested() throws Exception
@@ -88,26 +66,26 @@ public class TestEventPropertyDynamicBean extends TestCase
         SupportBeanComplexProps bean = SupportBeanComplexProps.makeDefaultBean();
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(bean));
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(bean.getNested().getNestedValue(), event.get("n1"));
-        assertEquals(bean.getNested().getNestedValue(), event.get("n2"));
-        assertEquals(bean.getNested().getNestedNested().getNestedNestedValue(), event.get("n3"));
-        assertEquals(bean.getNested().getNestedNested().getNestedNestedValue(), event.get("n4"));
-        assertEquals(bean.getNested().getNestedNested().getNestedNestedValue(), event.get("n5"));
-        assertEquals(bean.getNested().getNestedNested().getNestedNestedValue(), event.get("n6"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(bean.getNested().getNestedValue(), theEvent.get("n1"));
+        assertEquals(bean.getNested().getNestedValue(), theEvent.get("n2"));
+        assertEquals(bean.getNested().getNestedNested().getNestedNestedValue(), theEvent.get("n3"));
+        assertEquals(bean.getNested().getNestedNested().getNestedNestedValue(), theEvent.get("n4"));
+        assertEquals(bean.getNested().getNestedNested().getNestedNestedValue(), theEvent.get("n5"));
+        assertEquals(bean.getNested().getNestedNested().getNestedNestedValue(), theEvent.get("n6"));
 
         bean = SupportBeanComplexProps.makeDefaultBean();
         bean.getNested().setNestedValue("nested1");
         bean.getNested().getNestedNested().setNestedNestedValue("nested2");
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(bean));
 
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("nested1", event.get("n1"));
-        assertEquals("nested1", event.get("n2"));
-        assertEquals("nested2", event.get("n3"));
-        assertEquals("nested2", event.get("n4"));
-        assertEquals("nested2", event.get("n5"));
-        assertEquals("nested2", event.get("n6"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("nested1", theEvent.get("n1"));
+        assertEquals("nested1", theEvent.get("n2"));
+        assertEquals("nested2", theEvent.get("n3"));
+        assertEquals("nested2", theEvent.get("n4"));
+        assertEquals("nested2", theEvent.get("n5"));
+        assertEquals("nested2", theEvent.get("n6"));
     }
 
     public void testGetValueTop() throws Exception
@@ -144,10 +122,10 @@ public class TestEventPropertyDynamicBean extends TestCase
         assertEquals(Object.class, stmt.getEventType().getPropertyType("nestedNested"));
 
         epService.getEPRuntime().sendEvent(SupportBeanComplexProps.makeDefaultBean());
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("simple", event.get("simple"));
-        assertEquals("nestedValue", event.get("nested"));
-        assertEquals("nestedNestedValue", event.get("nestedNested"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("simple", theEvent.get("simple"));
+        assertEquals("nestedValue", theEvent.get("nested"));
+        assertEquals("nestedNestedValue", theEvent.get("nestedNested"));
     }
 
     public void testGetValueTopComplex() throws Exception
@@ -170,13 +148,13 @@ public class TestEventPropertyDynamicBean extends TestCase
 
         SupportBeanComplexProps inner = SupportBeanComplexProps.makeDefaultBean();
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(inner));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(inner.getIndexed(0), event.get("indexed1"));
-        assertEquals(inner.getIndexed(1), event.get("indexed2"));
-        assertEquals(inner.getMapped("keyOne"), event.get("mapped1"));
-        assertEquals(inner.getMapped("keyTwo"), event.get("mapped2"));
-        assertEquals(inner.getMapProperty().get("xOne"), event.get("map"));
-        assertEquals(inner.getArrayProperty()[1], event.get("array"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(inner.getIndexed(0), theEvent.get("indexed1"));
+        assertEquals(inner.getIndexed(1), theEvent.get("indexed2"));
+        assertEquals(inner.getMapped("keyOne"), theEvent.get("mapped1"));
+        assertEquals(inner.getMapped("keyTwo"), theEvent.get("mapped2"));
+        assertEquals(inner.getMapProperty().get("xOne"), theEvent.get("map"));
+        assertEquals(inner.getArrayProperty()[1], theEvent.get("array"));
     }
 
     public void testGetValueRootComplex() throws Exception
@@ -196,11 +174,11 @@ public class TestEventPropertyDynamicBean extends TestCase
 
         SupportBeanComplexProps inner = SupportBeanComplexProps.makeDefaultBean();
         epService.getEPRuntime().sendEvent(inner);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(inner.getIndexed(0), event.get("indexed1"));
-        assertEquals(inner.getIndexed(1), event.get("indexed2"));
-        assertEquals(inner.getMapped("keyOne"), event.get("mapped1"));
-        assertEquals(inner.getMapped("keyTwo"), event.get("mapped2"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(inner.getIndexed(0), theEvent.get("indexed1"));
+        assertEquals(inner.getIndexed(1), theEvent.get("indexed2"));
+        assertEquals(inner.getMapped("keyOne"), theEvent.get("mapped1"));
+        assertEquals(inner.getMapped("keyTwo"), theEvent.get("mapped2"));
     }
 
     public void testPerformance() throws Exception
@@ -219,10 +197,10 @@ public class TestEventPropertyDynamicBean extends TestCase
 
         SupportBeanComplexProps inner = SupportBeanComplexProps.makeDefaultBean();
         epService.getEPRuntime().sendEvent(inner);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(inner.getSimpleProperty(), event.get("simpleProperty?"));
-        assertEquals(inner.getIndexed(1), event.get("indexed"));
-        assertEquals(inner.getMapped("keyOne"), event.get("mapped"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(inner.getSimpleProperty(), theEvent.get("simpleProperty?"));
+        assertEquals(inner.getIndexed(1), theEvent.get("indexed"));
+        assertEquals(inner.getMapped("keyOne"), theEvent.get("mapped"));
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++)
@@ -236,5 +214,41 @@ public class TestEventPropertyDynamicBean extends TestCase
         long end = System.currentTimeMillis();
         long delta = end - start;
         assertTrue("delta=" + delta, delta < 1000);
+    }
+
+    private void runAssertionGetDynamicWObjectArr(EventRepresentationEnum eventRepresentationEnum) {
+        String stmtText = eventRepresentationEnum.getAnnotationText() + " select item.id? as myid from " + SupportBeanDynRoot.class.getName();
+        EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
+        stmt.addListener(listener);
+
+        // check type
+        assertEquals(Object.class, stmt.getEventType().getPropertyType("myid"));
+
+        // check value with an object that has the property as an int
+        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBean_S0(101)));
+        assertEquals(101, listener.assertOneGetNewAndReset().get("myid"));
+
+        // check value with an object that doesn't have the property
+        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new String("abc")));
+        assertEquals(null, listener.assertOneGetNewAndReset().get("myid"));
+
+        // check value with an object that has the property as a string
+        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBean_A("e1")));
+        assertEquals("e1", listener.assertOneGetNewAndReset().get("myid"));
+
+        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBean_B("e2")));
+        assertEquals("e2", listener.assertOneGetNewAndReset().get("myid"));
+
+        epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBean_S1(102)));
+        assertEquals(102, listener.assertOneGetNewAndReset().get("myid"));
+
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            assertEquals(Object[].class, stmt.getEventType().getUnderlyingType());
+        }
+        else {
+            assertEquals(Map.class, stmt.getEventType().getUnderlyingType());
+        }
+
+        stmt.destroy();
     }
 }

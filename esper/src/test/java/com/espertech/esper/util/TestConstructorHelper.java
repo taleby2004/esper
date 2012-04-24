@@ -21,9 +21,9 @@ public class TestConstructorHelper extends TestCase
 {
     public void testValidInvokeConstructor() throws Exception
     {
-        Object[] params = new Object[] { "test", 1 };
-        SupportCtorObjectArray objOne = (SupportCtorObjectArray) ConstructorHelper.invokeConstructor(SupportCtorObjectArray.class, params);
-        assertEquals(params, objOne.getArguments());
+        Object[] parameters = new Object[] { "test", 1 };
+        SupportCtorObjectArray objOne = (SupportCtorObjectArray) ConstructorHelper.invokeConstructor(SupportCtorObjectArray.class, parameters);
+        assertEquals(parameters, objOne.getArguments());
 
         SupportCtorInt objTwo = (SupportCtorInt) ConstructorHelper.invokeConstructor(SupportCtorInt.class, new Object[] { 99 });
         assertEquals(99, objTwo.getSomeValue());
@@ -32,8 +32,8 @@ public class TestConstructorHelper extends TestCase
 
         SupportCtorIntObjectArray objThree = (SupportCtorIntObjectArray) ConstructorHelper.invokeConstructor(SupportCtorIntObjectArray.class, new Object[] { 1 });
         assertEquals(1, objThree.getSomeValue());
-        objThree = (SupportCtorIntObjectArray) ConstructorHelper.invokeConstructor(SupportCtorIntObjectArray.class, params);
-        assertEquals(params, objThree.getArguments());
+        objThree = (SupportCtorIntObjectArray) ConstructorHelper.invokeConstructor(SupportCtorIntObjectArray.class, parameters);
+        assertEquals(parameters, objThree.getArguments());
     }
 
     public void testInvalidInvokeConstructor() throws Exception

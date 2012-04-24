@@ -66,7 +66,7 @@ public class TestMTStmtNamedWindowMerge extends TestCase
         // setup statements
         engine.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as select * from SupportBean");
         engine.getEPAdministrator().createEPL("on SupportBean sb " +
-                "merge MyWindow nw where nw.string = sb.string " +
+                "merge MyWindow nw where nw.theString = sb.theString " +
                 " when not matched then insert select * " +
                 " when matched then update set intPrimitive = nw.intPrimitive + 1");
 

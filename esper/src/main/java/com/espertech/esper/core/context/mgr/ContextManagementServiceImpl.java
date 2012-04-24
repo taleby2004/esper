@@ -54,6 +54,8 @@ public class ContextManagementServiceImpl implements ContextManagementService {
             contextManager = new ContextManagerImpl(factoryServiceContext);
         }
 
+        factoryServiceContext.getAgentInstanceContextCreate().getEpStatementAgentInstanceHandle().setFilterFaultHandler(contextManager);
+
         contexts.put(contextDesc.getContextName(), new ContextManagerEntry(contextManager));
     }
 

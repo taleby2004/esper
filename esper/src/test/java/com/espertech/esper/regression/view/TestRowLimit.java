@@ -79,7 +79,7 @@ public class TestRowLimit extends TestCase {
         String statementString = "select * from SupportBean.win:length(5) output every 5 events order by intPrimitive limit 2 offset 2";
         EPStatement stmt = epService.getEPAdministrator().createEPL(statementString);
 
-        String[] fields = "string".split(",");
+        String[] fields = "theString".split(",");
         stmt.addListener(listener);
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
@@ -103,7 +103,7 @@ public class TestRowLimit extends TestCase {
 
     private void runAssertionVariable(EPStatement stmt)
     {
-        String[] fields = "string".split(",");
+        String[] fields = "theString".split(",");
         stmt.addListener(listener);
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
@@ -204,10 +204,10 @@ public class TestRowLimit extends TestCase {
 
     public void testFullyGroupedOrdered()
 	{
-        String statementString = "select string, sum(intPrimitive) as mysum from SupportBean.win:length(5) group by string order by sum(intPrimitive) limit 2";
+        String statementString = "select theString, sum(intPrimitive) as mysum from SupportBean.win:length(5) group by theString order by sum(intPrimitive) limit 2";
         EPStatement stmt = epService.getEPAdministrator().createEPL(statementString);
 
-        String[] fields = "string,mysum".split(",");
+        String[] fields = "theString,mysum".split(",");
         stmt.addListener(listener);
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
@@ -230,10 +230,10 @@ public class TestRowLimit extends TestCase {
     public void testEventPerRowUnGrouped()
 	{
         sendTimer(1000);
-        String statementString = "select string, sum(intPrimitive) as mysum from SupportBean.win:length(5) output every 10 seconds order by string desc limit 2";
+        String statementString = "select theString, sum(intPrimitive) as mysum from SupportBean.win:length(5) output every 10 seconds order by theString desc limit 2";
         EPStatement stmt = epService.getEPAdministrator().createEPL(statementString);
 
-        String[] fields = "string,mysum".split(",");
+        String[] fields = "theString,mysum".split(",");
         stmt.addListener(listener);
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
@@ -249,10 +249,10 @@ public class TestRowLimit extends TestCase {
     public void testGroupedSnapshot()
 	{
         sendTimer(1000);
-        String statementString = "select string, sum(intPrimitive) as mysum from SupportBean.win:length(5) group by string output snapshot every 10 seconds order by sum(intPrimitive) desc limit 2";
+        String statementString = "select theString, sum(intPrimitive) as mysum from SupportBean.win:length(5) group by theString output snapshot every 10 seconds order by sum(intPrimitive) desc limit 2";
         EPStatement stmt = epService.getEPAdministrator().createEPL(statementString);
 
-        String[] fields = "string,mysum".split(",");
+        String[] fields = "theString,mysum".split(",");
         stmt.addListener(listener);
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
@@ -268,10 +268,10 @@ public class TestRowLimit extends TestCase {
     public void testGroupedSnapshotNegativeRowcount()
 	{
         sendTimer(1000);
-        String statementString = "select string, sum(intPrimitive) as mysum from SupportBean.win:length(5) group by string output snapshot every 10 seconds order by sum(intPrimitive) desc limit -1 offset 1";
+        String statementString = "select theString, sum(intPrimitive) as mysum from SupportBean.win:length(5) group by theString output snapshot every 10 seconds order by sum(intPrimitive) desc limit -1 offset 1";
         EPStatement stmt = epService.getEPAdministrator().createEPL(statementString);
 
-        String[] fields = "string,mysum".split(",");
+        String[] fields = "theString,mysum".split(",");
         stmt.addListener(listener);
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, null);
 
@@ -299,14 +299,14 @@ public class TestRowLimit extends TestCase {
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void runAssertion(EPStatement stmt)
     {
-        String[] fields = "string".split(",");
+        String[] fields = "theString".split(",");
         stmt.addListener(listener);
         sendEvent("E1", 1);
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}});
@@ -344,8 +344,8 @@ public class TestRowLimit extends TestCase {
         }
     }
 
-    private void sendEvent(String string, int intPrimitive)
+    private void sendEvent(String theString, int intPrimitive)
     {
-        epService.getEPRuntime().sendEvent(new SupportBean(string, intPrimitive));
+        epService.getEPRuntime().sendEvent(new SupportBean(theString, intPrimitive));
     }
 }

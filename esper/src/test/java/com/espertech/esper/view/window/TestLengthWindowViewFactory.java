@@ -30,7 +30,7 @@ public class TestLengthWindowViewFactory extends TestCase
     {
         tryParameter(new Object[] {10}, 10);
 
-        tryInvalidParameter("string");
+        tryInvalidParameter("theString");
         tryInvalidParameter(true);
         tryInvalidParameter(1.1d);
         tryInvalidParameter(0);

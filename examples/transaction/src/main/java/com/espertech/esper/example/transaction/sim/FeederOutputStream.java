@@ -42,9 +42,9 @@ public class FeederOutputStream implements OutputStream
         sendTimerEvent(startTimeMSec);
 
         int count = 0, total = 0;
-        for (TxnEventBase event : bucket)
+        for (TxnEventBase theEvent : bucket)
         {
-            runtime.sendEvent(event);
+            runtime.sendEvent(theEvent);
             count++;
             total++;
 

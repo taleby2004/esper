@@ -45,10 +45,10 @@ public class StmtNamedWindowQueryCallable implements Callable
                 sendMarketBean(threadKey, loop);
                 total++;
 
-                String selectQuery = "select * from MyWindow where string='" + threadKey + "' and longPrimitive=" + loop;
+                String selectQuery = "select * from MyWindow where theString='" + threadKey + "' and longPrimitive=" + loop;
                 EPOnDemandQueryResult queryResult = engine.executeQuery(selectQuery);
                 Assert.assertEquals(1, queryResult.getArray().length);
-                Assert.assertEquals(threadKey, queryResult.getArray()[0].get("string"));
+                Assert.assertEquals(threadKey, queryResult.getArray()[0].get("theString"));
                 Assert.assertEquals((long)loop, queryResult.getArray()[0].get("longPrimitive"));
             }
         }

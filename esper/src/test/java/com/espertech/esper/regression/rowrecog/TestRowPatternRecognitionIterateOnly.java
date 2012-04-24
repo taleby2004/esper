@@ -38,7 +38,7 @@ public class TestRowPatternRecognitionIterateOnly extends TestCase {
         String[] fields = "a".split(",");
         String text = "@Hint('iterate_only') select * from MyEvent.win:length(1) " +
                 "match_recognize (" +
-                "  measures A.string as a" +
+                "  measures A.theString as a" +
                 "  all matches " +
                 "  pattern (A) " +
                 "  define A as SupportStaticMethodLib.sleepReturnTrue(mySleepDuration)" +
@@ -75,7 +75,7 @@ public class TestRowPatternRecognitionIterateOnly extends TestCase {
         String[] fields = "a".split(",");
         String text = "@Hint('iterate_only') select * from MyEvent.std:lastevent() " +
                 "match_recognize (" +
-                "  measures A.string as a" +
+                "  measures A.theString as a" +
                 "  all matches " +
                 "  pattern (A) " +
                 "  define A as prev(A.value, 2) = value" +
@@ -113,7 +113,7 @@ public class TestRowPatternRecognitionIterateOnly extends TestCase {
         String text = "@Hint('iterate_only') select * from MyEvent.std:lastevent() " +
                 "match_recognize (" +
                 "  partition by cat" +
-                "  measures A.string as a, A.cat as cat" +
+                "  measures A.theString as a, A.cat as cat" +
                 "  all matches " +
                 "  pattern (A) " +
                 "  define A as prev(A.value, 2) = value" +

@@ -845,7 +845,8 @@ public class JavaClassHelper
             return String.class;
         }
 
-        if ("integer".equals(className.toLowerCase().trim()))
+        if (("integer".equals(className.toLowerCase().trim())) ||
+            ("int".equals(className.toLowerCase().trim())))
         {
             return Integer.class;
         }
@@ -1612,7 +1613,7 @@ public class JavaClassHelper
 
     public static Map<String, Object> getClassObjectFromPropertyTypeNames(Properties properties)
     {
-        Map<String, Object> propertyTypes = new HashMap<String, Object>();
+        Map<String, Object> propertyTypes = new LinkedHashMap<String, Object>();
         for(Map.Entry<Object, Object> entry : properties.entrySet())
         {
             String className = (String) entry.getValue();
@@ -1650,5 +1651,148 @@ public class JavaClassHelper
         catch (ClassNotFoundException ex) {
             return null;
         }
+    }
+
+    public static boolean isSignatureCompatible(Class<?>[] one, Class<?>[] two) {
+        if (Arrays.equals(one, two)) {
+            return true;
+        }
+        if (one.length != two.length) {
+            return false;
+        }
+        for (int i = 0; i < one.length; i++) {
+            Class oneClass = one[i];
+            Class twoClass = two[i];
+            if (!JavaClassHelper.isAssignmentCompatible(oneClass, twoClass)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static Method findRequiredMethod(Class clazz, String methodName) {
+        Method found = null;
+        for (Method m : clazz.getMethods()) {
+            if (m.getName().equals(methodName)) {
+                found = m;
+                break;
+            }
+        }
+        if (found == null) {
+            throw new IllegalArgumentException("Not found method '" + methodName + "'");
+        }
+        return found;
+    }
+
+    public static List<Method> findMethodsByNameStartsWith(Class clazz, String methodName) {
+        Method methods[] = clazz.getMethods();
+        List<Method> result = new ArrayList<Method>();
+        for (Method method : methods) {
+            if (method.getName().startsWith(methodName)) {
+                result.add(method);
+            }
+        }
+        return result;
+    }
+
+    public static List<Annotation> getAnnotations(Class<? extends Annotation> annotationClass, Annotation[] annotations) {
+        List<Annotation> result = null;
+        for (Annotation annotation : annotations) {
+            if (annotation.annotationType() == annotationClass) {
+                if (result == null) {
+                    result = new ArrayList<Annotation>();
+                }
+                result.add(annotation);
+            }
+        }
+        if (result == null) {
+            return Collections.emptyList();
+        }
+        return result;
+    }
+
+    public static boolean isAnnotationListed(Class<? extends Annotation> annotationClass, Annotation[] annotations) {
+        return !getAnnotations(annotationClass, annotations).isEmpty();
+    }
+
+    public static Set<Field> findAnnotatedFields(Class targetClass, Class<? extends Annotation> annotation) {
+        Set<Field> fields = new LinkedHashSet<Field>();
+        findFieldInternal(targetClass, annotation, fields);
+
+        // superclass fields
+        Class clazz = targetClass;
+        while (true) {
+            clazz = clazz.getSuperclass();
+            if (clazz == Object.class || clazz == null) {
+                break;
+            }
+            findFieldInternal(clazz, annotation, fields);
+        }
+        return fields;
+    }
+
+    private static void findFieldInternal(Class currentClass, Class<? extends Annotation> annotation, Set<Field> fields) {
+        for (Field field : currentClass.getDeclaredFields()) {
+            if (isAnnotationListed(annotation, field.getDeclaredAnnotations())) {
+                fields.add(field);
+            }
+        }
+    }
+
+    public static Set<Method> findAnnotatedMethods(Class targetClass, Class<? extends Annotation> annotation) {
+        Set<Method> methods = new LinkedHashSet<Method>();
+        findAnnotatedMethodsInternal(targetClass, annotation, methods);
+
+        // superclass fields
+        Class clazz = targetClass;
+        while (true) {
+            clazz = clazz.getSuperclass();
+            if (clazz == Object.class || clazz == null) {
+                break;
+            }
+            findAnnotatedMethodsInternal(clazz, annotation, methods);
+        }
+        return methods;
+    }
+
+    private static void findAnnotatedMethodsInternal(Class currentClass, Class<? extends Annotation> annotation, Set<Method> methods) {
+        for (Method method : currentClass.getDeclaredMethods()) {
+            if (isAnnotationListed(annotation, method.getDeclaredAnnotations())) {
+                methods.add(method);
+            }
+        }
+    }
+
+    public static void setFieldForAnnotation(Object target, Class<? extends Annotation> annotation, Object value) {
+        boolean found = setFieldForAnnotation(target, annotation, value, target.getClass());
+        if (!found) {
+
+            Class superClass =  target.getClass().getSuperclass();
+            while (!found) {
+                found = setFieldForAnnotation(target, annotation, value, superClass);
+                if (!found) {
+                    superClass = superClass.getSuperclass();
+                }
+                if (superClass == Object.class || superClass == null) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private static boolean setFieldForAnnotation(Object target, Class<? extends Annotation> annotation, Object value, Class currentClass) {
+        boolean found = false;
+        for (Field field : currentClass.getDeclaredFields()) {
+            if (isAnnotationListed(annotation, field.getDeclaredAnnotations())) {
+                field.setAccessible(true);
+                try {
+                    field.set(target, value);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("Failed to set field " + field + " on class " + currentClass.getName() + ": " + e.getMessage(), e);
+                }
+                return true;
+            }
+        }
+        return found;
     }
 }

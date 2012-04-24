@@ -13,15 +13,17 @@ package com.espertech.esper.event.util;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.util.EventPropertyRenderer;
+import com.espertech.esper.client.util.EventPropertyRendererContext;
 import com.espertech.esper.client.util.XMLEventRenderer;
 import com.espertech.esper.client.util.XMLRenderingOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Array;
-import java.util.Stack;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * Renderer for XML-formatted properties.
@@ -42,21 +44,28 @@ public class XMLRendererImpl implements XMLEventRenderer
      */
     public XMLRendererImpl(EventType eventType, XMLRenderingOptions options)
     {
-        rendererMetaOptions = new RendererMetaOptions(options.isPreventLooping(), true);
+        EventPropertyRenderer propertyRenderer = null;
+        EventPropertyRendererContext propertyRendererContext = null;
+        if (options.getRenderer() != null) {
+            propertyRenderer = options.getRenderer();
+            propertyRendererContext = new EventPropertyRendererContext(eventType, false);
+        }
+
+        rendererMetaOptions = new RendererMetaOptions(options.isPreventLooping(), true, propertyRenderer, propertyRendererContext);
         meta = new RendererMeta(eventType, new Stack<EventTypePropertyPair>(), rendererMetaOptions);
         this.options = options;
     }
 
-    public String render(String rootElementName, EventBean event)
+    public String render(String rootElementName, EventBean theEvent)
     {
         if (options.isDefaultAsAttribute())
         {
-            return renderAttributeXML(rootElementName, event);
+            return renderAttributeXML(rootElementName, theEvent);
         }
-        return renderElementXML(rootElementName, event);
+        return renderElementXML(rootElementName, theEvent);
     }
 
-    private String renderElementXML(String rootElementName, EventBean event)
+    private String renderElementXML(String rootElementName, EventBean theEvent)
     {
         StringBuilder buf = new StringBuilder();
 
@@ -68,7 +77,7 @@ public class XMLRendererImpl implements XMLEventRenderer
         buf.append('>');
         buf.append(NEWLINE);
 
-        recursiveRender(event, buf, 1, meta, rendererMetaOptions);
+        recursiveRender(theEvent, buf, 1, meta, rendererMetaOptions);
             
         buf.append("</");
         buf.append(getFirstWord(rootElementName));
@@ -77,7 +86,7 @@ public class XMLRendererImpl implements XMLEventRenderer
         return buf.toString();
     }
 
-    private String renderAttributeXML(String rootElementName, EventBean event)
+    private String renderAttributeXML(String rootElementName, EventBean theEvent)
     {
         StringBuilder buf = new StringBuilder();
 
@@ -86,9 +95,9 @@ public class XMLRendererImpl implements XMLEventRenderer
 
         buf.append('<');
         buf.append(rootElementName);
-        renderAttributes(event, buf, meta);
+        renderAttributes(theEvent, buf, meta);
 
-        String inner = renderAttElements(event, 1, meta);
+        String inner = renderAttElements(theEvent, 1, meta);
 
         if ((inner == null) || (inner.trim().length() == 0))
         {
@@ -108,14 +117,14 @@ public class XMLRendererImpl implements XMLEventRenderer
         return buf.toString();
     }
 
-    private String renderAttElements(EventBean event, int level, RendererMeta meta)
+    private String renderAttElements(EventBean theEvent, int level, RendererMeta meta)
     {
         StringBuilder buf = new StringBuilder();
 
         GetterPair[] indexProps = meta.getIndexProperties();
         for (GetterPair indexProp : indexProps)
         {
-            Object value = indexProp.getGetter().get(event);
+            Object value = indexProp.getGetter().get(theEvent);
 
             if (value == null)
             {
@@ -139,7 +148,18 @@ public class XMLRendererImpl implements XMLEventRenderer
                 buf.append('<');
                 buf.append(indexProp.getName());
                 buf.append('>');
-                indexProp.getOutput().render(arrayItem, buf);
+                if (rendererMetaOptions.getRenderer() == null) {
+                    indexProp.getOutput().render(arrayItem, buf);
+                }
+                else {
+                    EventPropertyRendererContext context = rendererMetaOptions.getRendererContext();
+                    context.setStringBuilderAndReset(buf);
+                    context.setPropertyName(indexProp.getName());
+                    context.setPropertyValue(arrayItem);
+                    context.setIndexedPropertyIndex(i);
+                    context.setDefaultRenderer(indexProp.getOutput());
+                    rendererMetaOptions.getRenderer().render(context);
+                }
                 buf.append("</");
                 buf.append(indexProp.getName());
                 buf.append('>');
@@ -150,7 +170,7 @@ public class XMLRendererImpl implements XMLEventRenderer
         GetterPair[] mappedProps = meta.getMappedProperties();
         for (GetterPair mappedProp : mappedProps)
         {
-            Object value = mappedProp.getGetter().get(event);
+            Object value = mappedProp.getGetter().get(theEvent);
 
             if ((value != null) && (!(value instanceof Map)))
             {
@@ -164,23 +184,36 @@ public class XMLRendererImpl implements XMLEventRenderer
 
             if (value != null)
             {
-                Map map = (Map) value;
+                Map<String, Object> map = (Map<String, Object>) value;
                 if (!map.isEmpty())
                 {
-                    Iterator<Map.Entry> it = map.entrySet().iterator();
+                    Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
                     for (;it.hasNext();)
                     {
-                        Map.Entry entry = it.next();
+                        Map.Entry<String, Object> entry = it.next();
                         if ((entry.getKey() == null) || (entry.getValue() == null))
                         {
                             continue;
                         }
 
                         buf.append(" ");
-                        buf.append(entry.getKey().toString());
+                        buf.append(entry.getKey());
                         buf.append("=\"");
-                        OutputValueRenderer out = OutputValueRendererFactory.getOutputValueRenderer(entry.getValue().getClass(), rendererMetaOptions);
-                        out.render(entry.getValue(), buf);
+                        OutputValueRenderer outputValueRenderer = OutputValueRendererFactory.getOutputValueRenderer(entry.getValue().getClass(), rendererMetaOptions);
+
+                        if (rendererMetaOptions.getRenderer() == null) {
+                            outputValueRenderer.render(entry.getValue(), buf);
+                        }
+                        else {
+                            EventPropertyRendererContext context = rendererMetaOptions.getRendererContext();
+                            context.setStringBuilderAndReset(buf);
+                            context.setPropertyName(mappedProp.getName());
+                            context.setPropertyValue(entry.getValue());
+                            context.setMappedPropertyKey(entry.getKey());
+                            context.setDefaultRenderer(outputValueRenderer);
+                            rendererMetaOptions.getRenderer().render(context);
+                        }
+
                         buf.append("\"");
                     }
                 }
@@ -193,7 +226,7 @@ public class XMLRendererImpl implements XMLEventRenderer
         NestedGetterPair[] nestedProps = meta.getNestedProperties();
         for (NestedGetterPair nestedProp : nestedProps)
         {
-            Object value = nestedProp.getGetter().getFragment(event);
+            Object value = nestedProp.getGetter().getFragment(theEvent);
 
             if (value == null)
             {
@@ -232,13 +265,13 @@ public class XMLRendererImpl implements XMLEventRenderer
         return buf.toString();
     }
 
-    private void renderAttributes(EventBean event, StringBuilder buf, RendererMeta meta)
+    private void renderAttributes(EventBean theEvent, StringBuilder buf, RendererMeta meta)
     {
         String delimiter = " ";
         GetterPair[] simpleProps = meta.getSimpleProperties();
         for (GetterPair simpleProp : simpleProps)
         {
-            Object value = simpleProp.getGetter().get(event);
+            Object value = simpleProp.getGetter().get(theEvent);
 
             if (value == null)
             {
@@ -248,7 +281,17 @@ public class XMLRendererImpl implements XMLEventRenderer
             buf.append(delimiter);
             buf.append(simpleProp.getName());
             buf.append("=\"");
-            simpleProp.getOutput().render(value, buf);
+            if (rendererMetaOptions.getRenderer() == null) {
+                simpleProp.getOutput().render(value, buf);
+            }
+            else {
+                EventPropertyRendererContext context = rendererMetaOptions.getRendererContext();
+                context.setStringBuilderAndReset(buf);
+                context.setPropertyName(simpleProp.getName());
+                context.setPropertyValue(value);
+                context.setDefaultRenderer(simpleProp.getOutput());
+                rendererMetaOptions.getRenderer().render(context);
+            }
             buf.append('"');
         }
     }
@@ -267,12 +310,12 @@ public class XMLRendererImpl implements XMLEventRenderer
         buf.append(' ');
     }
 
-    private static void recursiveRender(EventBean event, StringBuilder buf, int level, RendererMeta meta, RendererMetaOptions rendererMetaOptions)
+    private static void recursiveRender(EventBean theEvent, StringBuilder buf, int level, RendererMeta meta, RendererMetaOptions rendererMetaOptions)
     {
         GetterPair[] simpleProps = meta.getSimpleProperties();
         for (GetterPair simpleProp : simpleProps)
         {
-            Object value = simpleProp.getGetter().get(event);
+            Object value = simpleProp.getGetter().get(theEvent);
 
             if (value == null)
             {
@@ -283,7 +326,19 @@ public class XMLRendererImpl implements XMLEventRenderer
             buf.append('<');
             buf.append(simpleProp.getName());
             buf.append('>');
-            simpleProp.getOutput().render(value, buf);
+
+            if (rendererMetaOptions.getRenderer() == null) {
+                simpleProp.getOutput().render(value, buf);
+            }
+            else {
+                EventPropertyRendererContext context = rendererMetaOptions.getRendererContext();
+                context.setStringBuilderAndReset(buf);
+                context.setPropertyName(simpleProp.getName());
+                context.setPropertyValue(value);
+                context.setDefaultRenderer(simpleProp.getOutput());
+                rendererMetaOptions.getRenderer().render(context);
+            }
+            
             buf.append("</");
             buf.append(simpleProp.getName());
             buf.append('>');
@@ -293,7 +348,7 @@ public class XMLRendererImpl implements XMLEventRenderer
         GetterPair[] indexProps = meta.getIndexProperties();
         for (GetterPair indexProp : indexProps)
         {
-            Object value = indexProp.getGetter().get(event);
+            Object value = indexProp.getGetter().get(theEvent);
 
             if (value == null)
             {
@@ -317,7 +372,18 @@ public class XMLRendererImpl implements XMLEventRenderer
                 buf.append('<');
                 buf.append(indexProp.getName());
                 buf.append('>');
-                indexProp.getOutput().render(arrayItem, buf);
+                if (rendererMetaOptions.getRenderer() == null) {
+                    indexProp.getOutput().render(arrayItem, buf);
+                }
+                else {
+                    EventPropertyRendererContext context = rendererMetaOptions.getRendererContext();
+                    context.setStringBuilderAndReset(buf);
+                    context.setPropertyName(indexProp.getName());
+                    context.setPropertyValue(arrayItem);
+                    context.setIndexedPropertyIndex(i);
+                    context.setDefaultRenderer(indexProp.getOutput());
+                    rendererMetaOptions.getRenderer().render(context);
+                }
                 buf.append("</");
                 buf.append(indexProp.getName());
                 buf.append('>');
@@ -328,7 +394,7 @@ public class XMLRendererImpl implements XMLEventRenderer
         GetterPair[] mappedProps = meta.getMappedProperties();
         for (GetterPair mappedProp : mappedProps)
         {
-            Object value = mappedProp.getGetter().get(event);
+            Object value = mappedProp.getGetter().get(theEvent);
 
             if ((value != null) && (!(value instanceof Map)))
             {
@@ -344,14 +410,14 @@ public class XMLRendererImpl implements XMLEventRenderer
 
             if (value != null)
             {
-                Map map = (Map) value;
+                Map<String, Object> map = (Map<String, Object>) value;
                 if (!map.isEmpty())
                 {
                     String localDelimiter = "";
-                    Iterator<Map.Entry> it = map.entrySet().iterator();
+                    Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
                     for (;it.hasNext();)
                     {
-                        Map.Entry entry = it.next();
+                        Map.Entry<String, Object> entry = it.next();
                         if (entry.getKey() == null)
                         {
                             continue;
@@ -360,17 +426,28 @@ public class XMLRendererImpl implements XMLEventRenderer
                         buf.append(localDelimiter);
                         ident(buf, level + 1);
                         buf.append('<');
-                        buf.append(entry.getKey().toString());
+                        buf.append(entry.getKey());
                         buf.append('>');
 
                         if (entry.getValue() != null)
                         {
-                            OutputValueRenderer out = OutputValueRendererFactory.getOutputValueRenderer(entry.getValue().getClass(), rendererMetaOptions);
-                            out.render(entry.getValue(), buf);
+                            OutputValueRenderer outputValueRenderer = OutputValueRendererFactory.getOutputValueRenderer(entry.getValue().getClass(), rendererMetaOptions);
+                            if (rendererMetaOptions.getRenderer() == null) {
+                                outputValueRenderer.render(entry.getValue(), buf);
+                            }
+                            else {
+                                EventPropertyRendererContext context = rendererMetaOptions.getRendererContext();
+                                context.setStringBuilderAndReset(buf);
+                                context.setPropertyName(mappedProp.getName());
+                                context.setPropertyValue(entry.getValue());
+                                context.setMappedPropertyKey(entry.getKey());
+                                context.setDefaultRenderer(outputValueRenderer);
+                                rendererMetaOptions.getRenderer().render(context);
+                            }
                         }
 
                         buf.append('<');
-                        buf.append(entry.getKey().toString());
+                        buf.append(entry.getKey());
                         buf.append('>');
                         localDelimiter = NEWLINE;
                     }
@@ -388,7 +465,7 @@ public class XMLRendererImpl implements XMLEventRenderer
         NestedGetterPair[] nestedProps = meta.getNestedProperties();
         for (NestedGetterPair nestedProp : nestedProps)
         {
-            Object value = nestedProp.getGetter().getFragment(event);
+            Object value = nestedProp.getGetter().getFragment(theEvent);
 
             if (value == null)
             {

@@ -12,8 +12,6 @@ import com.espertech.esper.epl.expression.ExprNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.Set;
-
 /**
  * This class represents a match-until observer in the evaluation tree representing any event expressions.
  */
@@ -23,7 +21,7 @@ public class EvalMatchUntilFactoryNode extends EvalNodeFactoryBase
     private ExprNode lowerBounds;
     private ExprNode upperBounds;
     private transient MatchedEventConvertor convertor;
-    private String[] tagsArrayed;
+    private int[] tagsArrayed;
 
     /**
      * Ctor.
@@ -43,7 +41,7 @@ public class EvalMatchUntilFactoryNode extends EvalNodeFactoryBase
      * Returns an array of tags for events, which is all tags used within the repeat-operator.
      * @return array of tags
      */
-    public String[] getTagsArrayed()
+    public int[] getTagsArrayed()
     {
         return tagsArrayed;
     }
@@ -76,16 +74,9 @@ public class EvalMatchUntilFactoryNode extends EvalNodeFactoryBase
      * Sets the tags used within the repeat operator.
      * @param tagsArrayedSet tags used within the repeat operator
      */
-    public void setTagsArrayedSet(Set<String> tagsArrayedSet)
+    public void setTagsArrayedSet(int[] tagsArrayedSet)
     {
-        if (tagsArrayedSet != null)
-        {
-            tagsArrayed = tagsArrayedSet.toArray(new String[tagsArrayedSet.size()]);
-        }
-        else
-        {
-            tagsArrayed = new String[0];
-        }
+        tagsArrayed = tagsArrayedSet;
     }
 
     public MatchedEventConvertor getConvertor() {

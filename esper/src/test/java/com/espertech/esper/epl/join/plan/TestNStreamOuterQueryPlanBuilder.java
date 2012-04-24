@@ -12,15 +12,14 @@
 package com.espertech.esper.epl.join.plan;
 
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.collection.InterchangeablePair;
 import com.espertech.esper.epl.spec.OuterJoinDesc;
 import com.espertech.esper.support.epl.SupportOuterJoinDescFactory;
 import com.espertech.esper.type.OuterJoinType;
-import com.espertech.esper.collection.InterchangeablePair;
 import com.espertech.esper.util.DependencyGraph;
+import junit.framework.TestCase;
 
 import java.util.*;
-
-import junit.framework.TestCase;
 
 public class TestNStreamOuterQueryPlanBuilder extends TestCase
 {
@@ -28,7 +27,7 @@ public class TestNStreamOuterQueryPlanBuilder extends TestCase
     {
         List<OuterJoinDesc> descList = new LinkedList<OuterJoinDesc>();
         descList.add(SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s0", "intBoxed", "s1", OuterJoinType.RIGHT));
-        descList.add(SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "string", "s1", OuterJoinType.FULL));
+        descList.add(SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "theString", "s1", OuterJoinType.FULL));
 
         OuterInnerDirectionalGraph graph = NStreamOuterQueryPlanBuilder.graphOuterJoins(3, descList);
 
@@ -38,7 +37,7 @@ public class TestNStreamOuterQueryPlanBuilder extends TestCase
 
         descList.clear();
         descList.add(SupportOuterJoinDescFactory.makeDesc("intPrimitive", "s1", "intBoxed", "s0", OuterJoinType.LEFT));
-        descList.add(SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "string", "s1", OuterJoinType.RIGHT));
+        descList.add(SupportOuterJoinDescFactory.makeDesc("simpleProperty", "s2", "theString", "s1", OuterJoinType.RIGHT));
 
         graph = NStreamOuterQueryPlanBuilder.graphOuterJoins(3, descList);
 
@@ -87,7 +86,7 @@ public class TestNStreamOuterQueryPlanBuilder extends TestCase
         Stack<Integer> streamStack = new Stack<Integer>();
 
         NStreamOuterQueryPlanBuilder.recursiveBuild(streamNum, streamStack, queryGraph, outerInnerGraph, innerJoinGraph, completedStreams,
-                substreamsPerStream, requiredPerStream, new DependencyGraph(6));
+                substreamsPerStream, requiredPerStream, new DependencyGraph(6, false));
 
         assertEquals(6, substreamsPerStream.size());
         EPAssertionUtil.assertEqualsExactOrder(substreamsPerStream.get(2), new int[]{3, 1});

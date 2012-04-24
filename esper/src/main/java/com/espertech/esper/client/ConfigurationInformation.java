@@ -8,11 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.net.URI;
 
 /**
  * Provides configurations for an engine instance.
@@ -33,7 +33,7 @@ public interface ConfigurationInformation
 
     /**
      * Returns a map keyed by event type name, and values being the definition for the
-     * event type of the property names and types that make up the event.
+     * Map event type of the property names and types that make up the event.
      * @return map of event type name and definition of event properties
      */
     public Map<String, Properties> getEventTypesMapEvents();
@@ -182,6 +182,10 @@ public interface ConfigurationInformation
      * @return map of name to set of supertype names
      */
     public Map<String, ConfigurationEventTypeMap> getMapTypeConfigurations();
+
+    public Map<String, ConfigurationEventTypeObjectArray> getObjectArrayTypeConfigurations();
+
+    public Map<String,Map<String, Object>> getEventTypesNestableObjectArrayEvents();
 }
 
 

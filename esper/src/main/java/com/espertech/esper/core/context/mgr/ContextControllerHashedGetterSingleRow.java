@@ -48,14 +48,14 @@ public class ContextControllerHashedGetterSingleRow implements EventPropertyGett
     public Object get(EventBean eventBean) throws PropertyAccessException {
         EventBean[] events = new EventBean[] {eventBean};
 
-        Object[] params = new Object[evaluators.length];
+        Object[] parameters = new Object[evaluators.length];
         for (int i = 0; i < evaluators.length; i++) {
-            params[i] = evaluators[i].evaluate(events, true, null);
+            parameters[i] = evaluators[i].evaluate(events, true, null);
         }
 
         try
         {
-            Object result = fastMethod.invoke(null, params);
+            Object result = fastMethod.invoke(null, parameters);
             if (result == null) {
                 return 0;
             }
@@ -67,7 +67,7 @@ public class ContextControllerHashedGetterSingleRow implements EventPropertyGett
         }
         catch (InvocationTargetException e)
         {
-            String message = JavaClassHelper.getMessageInvocationTarget(statementName, fastMethod.getJavaMethod(), fastMethod.getDeclaringClass().getName(), params, e);
+            String message = JavaClassHelper.getMessageInvocationTarget(statementName, fastMethod.getJavaMethod(), fastMethod.getDeclaringClass().getName(), parameters, e);
             log.error(message, e.getTargetException());
         }
 

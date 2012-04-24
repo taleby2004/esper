@@ -34,7 +34,7 @@ public class OutputValueRendererFactory
         }
         if ((type == String.class) || (type == Character.class) || (type == char.class) || type.isEnum())
         {
-            if (options.isXMLOutput())
+            if (options.isXmlOutput())
             {
                 return xmlStringOutput;
             }

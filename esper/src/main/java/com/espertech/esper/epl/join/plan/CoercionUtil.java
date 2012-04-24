@@ -40,8 +40,8 @@ public class CoercionUtil {
             Class coercionType;
 
             if (entry.getType().isRange()) {
-                QueryGraphValueEntryRangeIn in = (QueryGraphValueEntryRangeIn) entry;
-                coercionType = getCoercionTypeRangeIn(valuePropType, in.getExprStart(), in.getExprEnd());
+                QueryGraphValueEntryRangeIn rangeIn = (QueryGraphValueEntryRangeIn) entry;
+                coercionType = getCoercionTypeRangeIn(valuePropType, rangeIn.getExprStart(), rangeIn.getExprEnd());
             }
             else {
                 QueryGraphValueEntryRangeRelOp relOp = (QueryGraphValueEntryRangeRelOp) entry;
@@ -112,8 +112,8 @@ public class CoercionUtil {
     public static Class getCoercionTypeRange(EventType indexedType, String indexedProp, SubordPropRangeKey rangeKey) {
         QueryGraphValueEntryRange desc = rangeKey.getRangeInfo();
         if (desc.getType().isRange()) {
-            QueryGraphValueEntryRangeIn in = (QueryGraphValueEntryRangeIn) desc;
-            return getCoercionTypeRangeIn(indexedType.getPropertyType(indexedProp), in.getExprStart(), in.getExprEnd());
+            QueryGraphValueEntryRangeIn rangeIn = (QueryGraphValueEntryRangeIn) desc;
+            return getCoercionTypeRangeIn(indexedType.getPropertyType(indexedProp), rangeIn.getExprStart(), rangeIn.getExprEnd());
         }
         else {
             QueryGraphValueEntryRangeRelOp relOp = (QueryGraphValueEntryRangeRelOp) desc;
@@ -138,8 +138,8 @@ public class CoercionUtil {
             Class coercionType;
 
             if (rangeDesc.getType().isRange()) {
-                QueryGraphValueEntryRangeIn in = (QueryGraphValueEntryRangeIn) rangeDesc;
-                coercionType = getCoercionTypeRangeIn(valuePropType, in.getExprStart(), in.getExprEnd());
+                QueryGraphValueEntryRangeIn rangeIn = (QueryGraphValueEntryRangeIn) rangeDesc;
+                coercionType = getCoercionTypeRangeIn(valuePropType, rangeIn.getExprStart(), rangeIn.getExprEnd());
             }
             else {
                 QueryGraphValueEntryRangeRelOp relOp = (QueryGraphValueEntryRangeRelOp) rangeDesc;

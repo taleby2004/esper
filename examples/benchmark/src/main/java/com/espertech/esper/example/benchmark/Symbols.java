@@ -41,10 +41,10 @@ public class Symbols {
 
     public static final String SYMBOLS[];
 
-    public static double nextPrice(double base) {
+    public static double nextPrice(double theBase) {
         int percentVar = RAND.nextInt(9) + 1;
         int trend = RAND.nextInt(3);
-        double result = base;
+        double result = theBase;
         switch (trend) {
             case 0:
                 result *= 1.0D - (double) percentVar * 0.01D;

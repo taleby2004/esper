@@ -41,7 +41,7 @@ public class TestNewExpr extends TestCase
     }
 
     public void testNewAlone() {
-        String epl = "select new { string = 'x' || string || 'x', intPrimitive = intPrimitive + 2} as val0 from SupportBean as sb";
+        String epl = "select new { theString = 'x' || theString || 'x', intPrimitive = intPrimitive + 2} as val0 from SupportBean as sb";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -50,10 +50,10 @@ public class TestNewExpr extends TestCase
         FragmentEventType fragType = stmt.getEventType().getFragmentType("val0");
         assertFalse(fragType.isIndexed());
         assertFalse(fragType.isNative());
-        assertEquals(String.class, fragType.getFragmentType().getPropertyType("string"));
+        assertEquals(String.class, fragType.getFragmentType().getPropertyType("theString"));
         assertEquals(Integer.class, fragType.getFragmentType().getPropertyType("intPrimitive"));
 
-        String[] fieldsInner = "string,intPrimitive".split(",");
+        String[] fieldsInner = "theString,intPrimitive".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", -5));
         EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{"xE1x", -3});
     }
@@ -61,9 +61,9 @@ public class TestNewExpr extends TestCase
     public void testDefaultColumnsAndSODA()
     {
         String epl = "select " +
-                "case string" +
-                " when \"A\" then new { string = \"Q\", intPrimitive, col2 = string || \"A\" }" +
-                " when \"B\" then new { string, intPrimitive = 10, col2 = string || \"B\" } " +
+                "case theString" +
+                " when \"A\" then new { theString = \"Q\", intPrimitive, col2 = theString || \"A\" }" +
+                " when \"B\" then new { theString, intPrimitive = 10, col2 = theString || \"B\" } " +
                 "end as val0 from SupportBean as sb";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
@@ -78,14 +78,14 @@ public class TestNewExpr extends TestCase
 
         // test to-expression string
         epl = "select " +
-                "case string" +
-                " when \"A\" then new { string = \"Q\", intPrimitive, col2 = string || \"A\" }" +
-                " when \"B\" then new { string, intPrimitive = 10, col2 = string || \"B\" } " +
+                "case theString" +
+                " when \"A\" then new { theString = \"Q\", intPrimitive, col2 = theString || \"A\" }" +
+                " when \"B\" then new { theString, intPrimitive = 10, col2 = theString || \"B\" } " +
                 "end from SupportBean as sb";
 
         stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
-        assertEquals("case string when \"A\" then new { string = \"Q\", intPrimitive, col2 = (string||\"A\") } when \"B\" then new { string, intPrimitive = 10, col2 = (string||\"B\") } end", stmt.getEventType().getPropertyNames()[0]);
+        assertEquals("case theString when \"A\" then new { theString = \"Q\", intPrimitive, col2 = (theString||\"A\") } when \"B\" then new { theString, intPrimitive = 10, col2 = (theString||\"B\") } end", stmt.getEventType().getPropertyNames()[0]);
     }
 
     private void runAssertionDefault(EPStatement stmt) {
@@ -94,11 +94,11 @@ public class TestNewExpr extends TestCase
         FragmentEventType fragType = stmt.getEventType().getFragmentType("val0");
         assertFalse(fragType.isIndexed());
         assertFalse(fragType.isNative());
-        assertEquals(String.class, fragType.getFragmentType().getPropertyType("string"));
+        assertEquals(String.class, fragType.getFragmentType().getPropertyType("theString"));
         assertEquals(Integer.class, fragType.getFragmentType().getPropertyType("intPrimitive"));
         assertEquals(String.class, fragType.getFragmentType().getPropertyType("col2"));
 
-        String[] fieldsInner = "string,intPrimitive,col2".split(",");
+        String[] fieldsInner = "theString,intPrimitive,col2".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         EPAssertionUtil.assertPropsMap((Map) listener.assertOneGetNewAndReset().get("val0"), fieldsInner, new Object[]{null, null, null});
 
@@ -115,15 +115,15 @@ public class TestNewExpr extends TestCase
     {
         String epl = "select " +
                 "case " +
-                "  when string = 'A' then new { col1 = 'X', col2 = 10 } " +
-                "  when string = 'B' then new { col1 = 'Y', col2 = 20 } " +
-                "  when string = 'C' then new { col1 = null, col2 = null } " +
+                "  when theString = 'A' then new { col1 = 'X', col2 = 10 } " +
+                "  when theString = 'B' then new { col1 = 'Y', col2 = 20 } " +
+                "  when theString = 'C' then new { col1 = null, col2 = null } " +
                 "  else new { col1 = 'Z', col2 = 30 } " +
                 "end as val0 from SupportBean sb";
         runAssertion(epl);
 
         epl = "select " +
-                "case string " +
+                "case theString " +
                 "  when 'A' then new { col1 = 'X', col2 = 10 } " +
                 "  when 'B' then new { col1 = 'Y', col2 = 20 } " +
                 "  when 'C' then new { col1 = null, col2 = null } " +

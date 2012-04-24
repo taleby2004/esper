@@ -75,15 +75,15 @@ public class TestExprRegexpNode extends TestCase
 
     public void testToExpressionString() throws Exception
     {
-        assertEquals("s0.string regexp \"[a-z][a-z]\"", regexpNodeNormal.toExpressionString());
-        assertEquals("s0.string not regexp \"[a-z][a-z]\"", regexpNodeNot.toExpressionString());
+        assertEquals("s0.theString regexp \"[a-z][a-z]\"", regexpNodeNormal.toExpressionString());
+        assertEquals("s0.theString not regexp \"[a-z][a-z]\"", regexpNodeNot.toExpressionString());
     }
 
     private EventBean[] makeEvent(String stringValue)
     {
-        SupportBean event = new SupportBean();
-        event.setString(stringValue);
-        return new EventBean[] {SupportEventBeanFactory.createObject(event)};
+        SupportBean theEvent = new SupportBean();
+        theEvent.setTheString(stringValue);
+        return new EventBean[] {SupportEventBeanFactory.createObject(theEvent)};
     }
 
     private void tryInvalidValidate(ExprRegexpNode exprLikeRegexpNode) throws Exception

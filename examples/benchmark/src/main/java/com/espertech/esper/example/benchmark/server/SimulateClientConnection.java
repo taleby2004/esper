@@ -83,9 +83,9 @@ public class SimulateClientConnection extends Thread {
                 long ms = System.currentTimeMillis();
                 for (int i = 0; i < eventPer10Millis; i++) {
                     tickerIndex = tickerIndex % Symbols.SYMBOLS.length;
-                    final MarketData event = market[tickerIndex++];
+                    final MarketData theEvent = market[tickerIndex++];
                     //note the cloning here, although we don't change volume or price
-                    final MarketData simulatedEvent = (MarketData) event.clone();
+                    final MarketData simulatedEvent = (MarketData) theEvent.clone();
                     if (executor == null) {
                         long ns = System.nanoTime();
                         cepProvider.sendEvent(simulatedEvent);

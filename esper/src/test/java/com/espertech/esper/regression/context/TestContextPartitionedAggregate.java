@@ -16,12 +16,12 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriber;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.regression.client.MyConcatAggregationFunction;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportSubscriber;
 import junit.framework.TestCase;
 
 import java.util.Collection;
@@ -52,11 +52,11 @@ public class TestContextPartitionedAggregate extends TestCase {
     public void testAccessOnly() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 
-        String eplContext = "@Name('CTX') create context SegmentedByString partition by string from SupportBean";
+        String eplContext = "@Name('CTX') create context SegmentedByString partition by theString from SupportBean";
         epService.getEPAdministrator().createEPL(eplContext);
 
-        String[] fieldsGrouped = "string,intPrimitive,col1".split(",");
-        String eplGroupedAccess = "@Name('S2') context SegmentedByString select string,intPrimitive,window(longPrimitive) as col1 from SupportBean.win:keepall() sb group by intPrimitive";
+        String[] fieldsGrouped = "theString,intPrimitive,col1".split(",");
+        String eplGroupedAccess = "@Name('S2') context SegmentedByString select theString,intPrimitive,window(longPrimitive) as col1 from SupportBean.win:keepall() sb group by intPrimitive";
         epService.getEPAdministrator().createEPL(eplGroupedAccess);
         epService.getEPAdministrator().getStatement("S2").addListener(listener);
 
@@ -74,11 +74,11 @@ public class TestContextPartitionedAggregate extends TestCase {
     }
 
     public void testSegmentedSubqueryWithAggregation() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
-        String[] fields = new String[] {"string", "intPrimitive", "val0"};
+        String[] fields = new String[] {"theString", "intPrimitive", "val0"};
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
-                "select string, intPrimitive, (select concat(p00) from SupportBean_S0.win:keepall() as s0 where sb.intPrimitive = s0.id) as val0 " +
+                "select theString, intPrimitive, (select concat(p00) from SupportBean_S0.win:keepall() as s0 where sb.intPrimitive = s0.id) as val0 " +
                 "from SupportBean as sb");
         stmtOne.addListener(listener);
 
@@ -88,7 +88,7 @@ public class TestContextPartitionedAggregate extends TestCase {
     }
 
     public void testGroupByEventPerGroupStream() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
         String[] fieldsOne = "intPrimitive,count(*)".split(",");
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString select intPrimitive, count(*) from SupportBean group by intPrimitive");
@@ -115,8 +115,8 @@ public class TestContextPartitionedAggregate extends TestCase {
         stmtOne.destroy();
 
         // add "string" : a context property
-        String[] fieldsTwo = "string,intPrimitive,count(*)".split(",");
-        EPStatement stmtTwo = epService.getEPAdministrator().createEPL("@Name('B') context SegmentedByString select string, intPrimitive, count(*) from SupportBean group by intPrimitive");
+        String[] fieldsTwo = "theString,intPrimitive,count(*)".split(",");
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL("@Name('B') context SegmentedByString select theString, intPrimitive, count(*) from SupportBean group by intPrimitive");
         stmtTwo.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
@@ -139,7 +139,7 @@ public class TestContextPartitionedAggregate extends TestCase {
     }
 
     public void testGroupByEventPerGroupBatchContextProp() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
         String[] fieldsOne = "intPrimitive,count(*)".split(",");
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString select intPrimitive, count(*) from SupportBean.win:length_batch(2) group by intPrimitive order by intPrimitive asc");
@@ -171,8 +171,8 @@ public class TestContextPartitionedAggregate extends TestCase {
         stmtOne.destroy();
 
         // add "string" : add context property
-        String[] fieldsTwo = "string,intPrimitive,count(*)".split(",");
-        EPStatement stmtTwo = epService.getEPAdministrator().createEPL("@Name('B') context SegmentedByString select string, intPrimitive, count(*) from SupportBean.win:length_batch(2) group by intPrimitive order by string, intPrimitive asc");
+        String[] fieldsTwo = "theString,intPrimitive,count(*)".split(",");
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL("@Name('B') context SegmentedByString select theString, intPrimitive, count(*) from SupportBean.win:length_batch(2) group by intPrimitive order by theString, intPrimitive asc");
         stmtTwo.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
@@ -200,7 +200,7 @@ public class TestContextPartitionedAggregate extends TestCase {
     }
 
     public void testGroupByEventPerGroupWithAccess() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
         String[] fieldsOne = "intPrimitive,col1,col2,col3".split(",");
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
@@ -225,7 +225,7 @@ public class TestContextPartitionedAggregate extends TestCase {
     }
 
     public void testGroupByEventForAll() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
         // test aggregation-only (no access)
         String[] fieldsOne = "col1".split(",");
@@ -311,7 +311,7 @@ public class TestContextPartitionedAggregate extends TestCase {
     }
 
     public void testGroupByEventPerGroupUnidirectionalJoin() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
         String[] fieldsOne = "intPrimitive,col1".split(",");
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
@@ -351,13 +351,13 @@ public class TestContextPartitionedAggregate extends TestCase {
         stmtOne.destroy();
     }
 
-    private SupportBean makeEvent(String string, int intPrimitive, long longPrimitive) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private SupportBean makeEvent(String theString, int intPrimitive, long longPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
         return bean;
     }
 
-    public static Object toArray(Collection in) {
-        return in.toArray();
+    public static Object toArray(Collection input) {
+        return input.toArray();
     }
 }

@@ -12,7 +12,6 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.ArrayEventIterator;
 import com.espertech.esper.collection.MultiKey;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.agg.AggregationService;
@@ -169,7 +168,7 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
         // Pull all parent events, generate order keys
         EventBean[] eventsPerStream = new EventBean[1];
         List<EventBean> outgoingEvents = new ArrayList<EventBean>();
-        List<MultiKeyUntyped> orderKeys = new ArrayList<MultiKeyUntyped>();
+        List<Object> orderKeys = new ArrayList<Object>();
 
         for (EventBean candidate : parent)
         {
@@ -187,13 +186,13 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
 
             outgoingEvents.add(selectExprProcessor.process(eventsPerStream, true, true, exprEvaluatorContext));
 
-            MultiKeyUntyped orderKey = orderByProcessor.getSortKey(eventsPerStream, true, exprEvaluatorContext);
+            Object orderKey = orderByProcessor.getSortKey(eventsPerStream, true, exprEvaluatorContext);
             orderKeys.add(orderKey);
         }
 
         // sort
         EventBean[] outgoingEventsArr = outgoingEvents.toArray(new EventBean[outgoingEvents.size()]);
-        MultiKeyUntyped[] orderKeysArr = orderKeys.toArray(new MultiKeyUntyped[orderKeys.size()]);
+        Object[] orderKeysArr = orderKeys.toArray(new Object[orderKeys.size()]);
         EventBean[] orderedEvents = orderByProcessor.sort(outgoingEventsArr, orderKeysArr, exprEvaluatorContext);
 
         return new ArrayEventIterator(orderedEvents);
@@ -321,14 +320,14 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
                 oldEvents = new LinkedList<EventBean>();
             }
 
-            List<MultiKeyUntyped> newEventsSortKey = null;
-            List<MultiKeyUntyped> oldEventsSortKey = null;
+            List<Object> newEventsSortKey = null;
+            List<Object> oldEventsSortKey = null;
             if (orderByProcessor != null)
             {
-                newEventsSortKey = new LinkedList<MultiKeyUntyped>();
+                newEventsSortKey = new LinkedList<Object>();
                 if (prototype.isSelectRStream())
                 {
-                    oldEventsSortKey = new LinkedList<MultiKeyUntyped>();
+                    oldEventsSortKey = new LinkedList<Object>();
                 }
             }
 
@@ -393,11 +392,11 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
 
             if (orderByProcessor != null)
             {
-                MultiKeyUntyped[] sortKeysNew = (newEventsSortKey.isEmpty()) ? null : newEventsSortKey.toArray(new MultiKeyUntyped[newEventsSortKey.size()]);
+                Object[] sortKeysNew = (newEventsSortKey.isEmpty()) ? null : newEventsSortKey.toArray(new Object[newEventsSortKey.size()]);
                 newEventsArr = orderByProcessor.sort(newEventsArr, sortKeysNew, exprEvaluatorContext);
                 if (prototype.isSelectRStream())
                 {
-                    MultiKeyUntyped[] sortKeysOld = (oldEventsSortKey.isEmpty()) ? null : oldEventsSortKey.toArray(new MultiKeyUntyped[oldEventsSortKey.size()]);
+                    Object[] sortKeysOld = (oldEventsSortKey.isEmpty()) ? null : oldEventsSortKey.toArray(new Object[oldEventsSortKey.size()]);
                     oldEventsArr = orderByProcessor.sort(oldEventsArr, sortKeysOld, exprEvaluatorContext);
                 }
             }
@@ -492,14 +491,14 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
             {
                 oldEvents = new LinkedList<EventBean>();
             }
-            List<MultiKeyUntyped> newEventsSortKey = null;
-            List<MultiKeyUntyped> oldEventsSortKey = null;
+            List<Object> newEventsSortKey = null;
+            List<Object> oldEventsSortKey = null;
             if (orderByProcessor != null)
             {
-                newEventsSortKey = new LinkedList<MultiKeyUntyped>();
+                newEventsSortKey = new LinkedList<Object>();
                 if (prototype.isSelectRStream())
                 {
-                    oldEventsSortKey = new LinkedList<MultiKeyUntyped>();
+                    oldEventsSortKey = new LinkedList<Object>();
                 }
             }
 
@@ -561,12 +560,12 @@ public class ResultSetProcessorAggregateAll implements ResultSetProcessor
             }
             if (orderByProcessor != null)
             {
-                MultiKeyUntyped[] sortKeysNew = (newEventsSortKey.isEmpty()) ? null : newEventsSortKey.toArray(new MultiKeyUntyped[newEventsSortKey.size()]);
+                Object[] sortKeysNew = (newEventsSortKey.isEmpty()) ? null : newEventsSortKey.toArray(new Object[newEventsSortKey.size()]);
                 newEventsArr = orderByProcessor.sort(newEventsArr, sortKeysNew, exprEvaluatorContext);
 
                 if (prototype.isSelectRStream())
                 {
-                    MultiKeyUntyped[] sortKeysOld = (oldEventsSortKey.isEmpty()) ? null : oldEventsSortKey.toArray(new MultiKeyUntyped[oldEventsSortKey.size()]);
+                    Object[] sortKeysOld = (oldEventsSortKey.isEmpty()) ? null : oldEventsSortKey.toArray(new Object[oldEventsSortKey.size()]);
                     oldEventsArr = orderByProcessor.sort(oldEventsArr, sortKeysOld, exprEvaluatorContext);
                 }
             }

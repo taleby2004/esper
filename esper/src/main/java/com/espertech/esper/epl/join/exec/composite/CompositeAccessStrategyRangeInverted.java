@@ -24,12 +24,12 @@ public class CompositeAccessStrategyRangeInverted extends CompositeAccessStrateg
         super(isNWOnTrigger, lookupStream, numStreams, start, includeStart, end, includeEnd, coercionType);
     }
 
-    public Set<EventBean> lookup(EventBean event, Map parent, Set<EventBean> result, CompositeIndexQuery next, ExprEvaluatorContext context) {
-        Object comparableStart = super.evaluateLookupStart(event, context);
+    public Set<EventBean> lookup(EventBean theEvent, Map parent, Set<EventBean> result, CompositeIndexQuery next, ExprEvaluatorContext context) {
+        Object comparableStart = super.evaluateLookupStart(theEvent, context);
         if (comparableStart == null) {
             return null;
         }
-        Object comparableEnd = super.evaluateLookupEnd(event, context);
+        Object comparableEnd = super.evaluateLookupEnd(theEvent, context);
         if (comparableEnd == null) {
             return null;
         }
@@ -39,7 +39,7 @@ public class CompositeAccessStrategyRangeInverted extends CompositeAccessStrateg
         TreeMap index = (TreeMap) parent;
         SortedMap<Object,Set<EventBean>> submapOne = index.headMap(comparableStart, !includeStart);
         SortedMap<Object,Set<EventBean>> submapTwo = index.tailMap(comparableEnd, !includeEnd);
-        return CompositeIndexQueryRange.handle(event, submapOne, submapTwo, result, next);
+        return CompositeIndexQueryRange.handle(theEvent, submapOne, submapTwo, result, next);
     }
 
     public Collection<EventBean> lookup(EventBean[] eventPerStream, Map parent, Collection<EventBean> result, CompositeIndexQuery next, ExprEvaluatorContext context) {

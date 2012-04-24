@@ -22,10 +22,10 @@ public class SupportStmtLifecycleObserver implements StatementLifecycleObserver
     private List<StatementLifecycleEvent> events = new ArrayList<StatementLifecycleEvent>();
     private Object[] lastContext;
 
-    public void observe(StatementLifecycleEvent event)
+    public void observe(StatementLifecycleEvent theEvent)
     {
-        events.add(event);
-        lastContext = event.getParams();
+        events.add(theEvent);
+        lastContext = theEvent.getParameters();
     }
 
     public Object[] getLastContext()
@@ -41,8 +41,8 @@ public class SupportStmtLifecycleObserver implements StatementLifecycleObserver
     public String getEventsAsString()
     {
         String result = "";
-        for (StatementLifecycleEvent event : events) {
-            result += event.getEventType().toString() + ";";
+        for (StatementLifecycleEvent theEvent : events) {
+            result += theEvent.getEventType().toString() + ";";
         }
         return result;
     }

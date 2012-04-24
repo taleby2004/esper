@@ -50,7 +50,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
 
     public void testLastNoDataWindow() {
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
-        String epl = "select string, intPrimitive as intp from SupportBean group by string output last every 1 seconds order by string asc";
+        String epl = "select theString, intPrimitive as intp from SupportBean group by theString output last every 1 seconds order by theString asc";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -63,37 +63,37 @@ public class TestOutputLimitEventPerGroup extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
 
-        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), new String[]{"string", "intp"}, new Object[][]{{"E1", 3}, {"E2", 21}, {"E3", 31}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), new String[]{"theString", "intp"}, new Object[][]{{"E1", 3}, {"E2", 21}, {"E3", 31}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 31));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 33));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
 
-        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), new String[]{"string", "intp"}, new Object[][]{{"E1", 5}, {"E3", 33}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), new String[]{"theString", "intp"}, new Object[][]{{"E1", 5}, {"E3", 33}});
 }
 
     public void testOutputFirstHavingJoinNoJoin() {
 
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
 
-        String stmtText = "select string, sum(intPrimitive) as value from MyWindow group by string having sum(intPrimitive) > 20 output first every 2 events";
+        String stmtText = "select theString, sum(intPrimitive) as value from MyWindow group by theString having sum(intPrimitive) > 20 output first every 2 events";
         tryOutputFirstHaving(stmtText);
 
-        String stmtTextJoin = "select string, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.string " +
-                "group by string having sum(intPrimitive) > 20 output first every 2 events";
+        String stmtTextJoin = "select theString, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.theString " +
+                "group by theString having sum(intPrimitive) > 20 output first every 2 events";
         tryOutputFirstHaving(stmtTextJoin);
 
-        String stmtTextOrder = "select string, sum(intPrimitive) as value from MyWindow group by string having sum(intPrimitive) > 20 output first every 2 events order by string asc";
+        String stmtTextOrder = "select theString, sum(intPrimitive) as value from MyWindow group by theString having sum(intPrimitive) > 20 output first every 2 events order by theString asc";
         tryOutputFirstHaving(stmtTextOrder);
 
-        String stmtTextOrderJoin = "select string, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.string " +
-                "group by string having sum(intPrimitive) > 20 output first every 2 events order by string asc";
+        String stmtTextOrderJoin = "select theString, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.theString " +
+                "group by theString having sum(intPrimitive) > 20 output first every 2 events order by theString asc";
         tryOutputFirstHaving(stmtTextOrderJoin);
     }
 
     private void tryOutputFirstHaving(String statementText) {
-        String[] fields = "string,value".split(",");
+        String[] fields = "theString,value".split(",");
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
         epService.getEPAdministrator().createEPL("on MarketData md delete from MyWindow mw where mw.intPrimitive = md.price");
@@ -159,12 +159,12 @@ public class TestOutputLimitEventPerGroup extends TestCase
 
     public void testOutputFirstCrontab() {
         sendTimer(0);
-        String[] fields = "string,value".split(",");
+        String[] fields = "theString,value".split(",");
         epService.getEPAdministrator().getConfiguration().addVariable("varout", boolean.class, false);
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
         epService.getEPAdministrator().createEPL("on MarketData md delete from MyWindow mw where mw.intPrimitive = md.price");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, sum(intPrimitive) as value from MyWindow group by string output first at (*/2, *, *, *, *)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString, sum(intPrimitive) as value from MyWindow group by theString output first at (*/2, *, *, *, *)");
         stmt.addListener(listener);
 
         sendBeanEvent("E1", 10);
@@ -195,12 +195,12 @@ public class TestOutputLimitEventPerGroup extends TestCase
     }
 
     public void testOutputFirstWhenThen() {
-        String[] fields = "string,value".split(",");
+        String[] fields = "theString,value".split(",");
         epService.getEPAdministrator().getConfiguration().addVariable("varout", boolean.class, false);
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
         epService.getEPAdministrator().createEPL("on MarketData md delete from MyWindow mw where mw.intPrimitive = md.price");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, sum(intPrimitive) as value from MyWindow group by string output first when varout then set varout = false");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString, sum(intPrimitive) as value from MyWindow group by theString output first when varout then set varout = false");
         stmt.addListener(listener);
 
         sendBeanEvent("E1", 10);
@@ -223,11 +223,11 @@ public class TestOutputLimitEventPerGroup extends TestCase
     }
 
     public void testOutputFirstEveryNEvents() {
-        String[] fields = "string,value".split(",");
+        String[] fields = "theString,value".split(",");
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
         epService.getEPAdministrator().createEPL("on MarketData md delete from MyWindow mw where mw.intPrimitive = md.price");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, sum(intPrimitive) as value from MyWindow group by string output first every 3 events");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString, sum(intPrimitive) as value from MyWindow group by theString output first every 3 events");
         stmt.addListener(listener);
 
         sendBeanEvent("E1", 10);
@@ -257,7 +257,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
         // test variable
         epService.getEPAdministrator().createEPL("create variable int myvar = 1");
         stmt.destroy();
-        stmt = epService.getEPAdministrator().createEPL("select string, sum(intPrimitive) as value from MyWindow group by string output first every myvar events");
+        stmt = epService.getEPAdministrator().createEPL("select theString, sum(intPrimitive) as value from MyWindow group by theString output first every myvar events");
         stmt.addListener(listener);
         
         sendBeanEvent("E3", 10);
@@ -283,7 +283,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
 
     public void testWildcardEventPerGroup() {
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean group by string output last every 3 events order by string asc");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean group by theString output last every 3 events order by theString asc");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
@@ -294,14 +294,14 @@ public class TestOutputLimitEventPerGroup extends TestCase
         EventBean[] events = listener.getNewDataListFlattened();
         listener.reset();
         assertEquals(2, events.length);
-        assertEquals("ATT", events[0].get("string"));
+        assertEquals("ATT", events[0].get("theString"));
         assertEquals(11, events[0].get("intPrimitive"));
-        assertEquals("IBM", events[1].get("string"));
+        assertEquals("IBM", events[1].get("theString"));
         assertEquals(100, events[1].get("intPrimitive"));
         stmt.destroy();
 
         // All means each event
-        stmt = epService.getEPAdministrator().createEPL("select * from SupportBean group by string output all every 3 events");
+        stmt = epService.getEPAdministrator().createEPL("select * from SupportBean group by theString output all every 3 events");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("IBM", 10));
@@ -310,11 +310,11 @@ public class TestOutputLimitEventPerGroup extends TestCase
 
         events = listener.getNewDataListFlattened();
         assertEquals(3, events.length);
-        assertEquals("IBM", events[0].get("string"));
+        assertEquals("IBM", events[0].get("theString"));
         assertEquals(10, events[0].get("intPrimitive"));
-        assertEquals("ATT", events[1].get("string"));
+        assertEquals("ATT", events[1].get("theString"));
         assertEquals(11, events[1].get("intPrimitive"));
-        assertEquals("IBM", events[2].get("string"));
+        assertEquals("IBM", events[2].get("theString"));
         assertEquals(100, events[2].get("intPrimitive"));
     }
     
@@ -331,7 +331,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "order by symbol asc";
         runAssertion12(stmtText, "none");
@@ -350,7 +350,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "having sum(price) > 50";
         runAssertion34(stmtText, "none");
@@ -369,7 +369,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "output every 1 seconds order by symbol asc";
         runAssertion56(stmtText, "default");
@@ -389,7 +389,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "having sum(price) > 50" +
                             "output every 1 seconds";
@@ -410,7 +410,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "output all every 1 seconds " +
                             "order by symbol";
@@ -431,7 +431,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "having sum(price) > 50 " +
                             "output all every 1 seconds";
@@ -452,7 +452,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "output last every 1 seconds " +
                             "order by symbol";
@@ -473,7 +473,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "having sum(price) > 50 " +
                             "output last every 1 seconds";
@@ -493,7 +493,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "output first every 1 seconds";
         runAssertion17(stmtText, "first");
@@ -513,7 +513,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "output snapshot every 1 seconds " +
                             "order by symbol";
@@ -799,15 +799,15 @@ public class TestOutputLimitEventPerGroup extends TestCase
         sendTimer(0);
         String selectStmt = "select symbol, min(price) as minprice from " + SupportMarketDataBean.class.getName() +
                 ".win:time(10 seconds) as m, " +
-                SupportBean.class.getName() + ".win:keepall() as s where s.string = m.symbol " +
+                SupportBean.class.getName() + ".win:keepall() as s where s.theString = m.symbol " +
                 "group by symbol output snapshot every 1 seconds order by symbol asc";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(selectStmt);
         stmt.addListener(listener);
 
-        for (String string : "ABC,IBM,MSFT".split(","))
+        for (String theString : "ABC,IBM,MSFT".split(","))
         {
-            epService.getEPRuntime().sendEvent(new SupportBean(string, 1));
+            epService.getEPRuntime().sendEvent(new SupportBean(theString, 1));
         }
 
         sendMDEvent("ABC", 20);
@@ -964,7 +964,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
     	"from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
     	SupportMarketDataBean.class.getName() + ".win:length(3) as two " +
     	"where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-    	"       and one.string = two.symbol " +
+    	"       and one.theString = two.symbol " +
     	"group by symbol";
 
     	EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
@@ -1001,7 +1001,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
 	                      "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
 	                                SupportMarketDataBean.class.getName() + ".win:length(3) as two " +
 	                      "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-	                      "       and one.string = two.symbol " +
+	                      "       and one.theString = two.symbol " +
 	                      "group by symbol " +
 	                      "output last every 2 events";
 
@@ -1023,7 +1023,7 @@ public class TestOutputLimitEventPerGroup extends TestCase
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-                          "       and one.string = two.symbol " +
+                          "       and one.theString = two.symbol " +
                           "group by symbol " +
                           "output all every 2 events";
 
@@ -1176,15 +1176,15 @@ public class TestOutputLimitEventPerGroup extends TestCase
 	    epService.getEPRuntime().sendEvent(bean);
 	}
 
-    private void sendBeanEvent(String string, int intPrimitive)
+    private void sendBeanEvent(String theString, int intPrimitive)
 	{
-	    epService.getEPRuntime().sendEvent(new SupportBean(string, intPrimitive));
+	    epService.getEPRuntime().sendEvent(new SupportBean(theString, intPrimitive));
 	}
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

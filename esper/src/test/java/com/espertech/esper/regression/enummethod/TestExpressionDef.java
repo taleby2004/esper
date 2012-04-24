@@ -19,6 +19,7 @@ import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.ArrayList;
@@ -68,10 +69,10 @@ public class TestExpressionDef extends TestCase {
         String epl =
                 "@Audit('exprdef') " +
                 "expression last2X {\n" +
-                "  p => WindowOne(WindowOne.col1 = p.string).takeLast(2)\n" +
+                "  p => WindowOne(WindowOne.col1 = p.theString).takeLast(2)\n" +
                 "} " +
                 "expression last2Y {\n" +
-                "  p => WindowTwo(WindowTwo.col1 = p.string).takeLast(2).selectFrom(q => q.col2)\n" +
+                "  p => WindowTwo(WindowTwo.col1 = p.theString).takeLast(2).selectFrom(q => q.col2)\n" +
                 "} " +
                 "select last2X(sb).selectFrom(a => a.col2).sequenceEqual(last2Y(sb)) as val from SupportBean as sb";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
@@ -86,8 +87,8 @@ public class TestExpressionDef extends TestCase {
         String[] fieldsInner = "col1,col2".split(",");
         String epl = "expression gettotal {" +
                 " x => case " +
-                "  when string = 'A' then new { col1 = 'X', col2 = 10 } " +
-                "  when string = 'B' then new { col1 = 'Y', col2 = 20 } " +
+                "  when theString = 'A' then new { col1 = 'X', col2 = 10 } " +
+                "  when theString = 'B' then new { col1 = 'Y', col2 = 20 } " +
                 "end" +
                 "} " +
                 "insert into OtherStream select gettotal(sb) as val0 from SupportBean sb";
@@ -177,7 +178,7 @@ public class TestExpressionDef extends TestCase {
         String fields[] = new String[] {"val1"};
         String epl = "" +
                 "expression subq {" +
-                " (x, y) => (select string from SupportBean.win:keepall() where string = x.id and intPrimitive = y.p10)" +
+                " (x, y) => (select theString from SupportBean.win:keepall() where theString = x.id and intPrimitive = y.p10)" +
                 "} " +
                 "select subq(one, two) as val1 " +
                 "from SupportBean_ST0.std:lastevent() as one, SupportBean_ST1.std:lastevent() as two";
@@ -200,7 +201,7 @@ public class TestExpressionDef extends TestCase {
         String fields[] = new String[] {"val1", "val2"};
         String epl = "" +
                 "expression subq {" +
-                " x => (select intPrimitive from SupportBean.win:keepall() where string = x.pcommon)" +   // a common field
+                " x => (select intPrimitive from SupportBean.win:keepall() where theString = x.pcommon)" +   // a common field
                 "} " +
                 "select subq(one) as val1, subq(two) as val2 " +
                 "from SupportBean_ST0.std:lastevent() as one, SupportBean_ST1.std:lastevent() as two";
@@ -227,7 +228,7 @@ public class TestExpressionDef extends TestCase {
                 "expression subqOne {" +
                 " x => (select id from SupportBean_ST0.win:keepall() where p00 = x.intPrimitive)" +
                 "} " +
-                "select string as val0, subqOne(t) as val1 from SupportBean as t";
+                "select theString as val0, subqOne(t) as val1 from SupportBean as t";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -254,7 +255,7 @@ public class TestExpressionDef extends TestCase {
                 "expression subqOne {" +
                 " (select id from SupportBean_ST0.std:lastevent())" +
                 "} " +
-                "select string as val0, subqOne() as val1 from SupportBean as t";
+                "select theString as val0, subqOne() as val1 from SupportBean as t";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -273,8 +274,8 @@ public class TestExpressionDef extends TestCase {
     }
 
     public void testSubqueryNamedWindowUncorrelated() {
-        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as (val0 string, val1 int)");
-        epService.getEPAdministrator().createEPL("insert into MyWindow (val0, val1) select string, intPrimitive from SupportBean");
+        epService.getEPAdministrator().createEPL(EventRepresentationEnum.MAP.getAnnotationText() + " create window MyWindow.win:keepall() as (val0 string, val1 int)");
+        epService.getEPAdministrator().createEPL("insert into MyWindow (val0, val1) select theString, intPrimitive from SupportBean");
 
         String[] fieldsSelected = "c0,c1".split(",");
         String[] fieldsInside = "val0".split(",");
@@ -329,21 +330,21 @@ public class TestExpressionDef extends TestCase {
         runAssertionSubqNWCorrelated(epl);
 
         // test ambiguous property names
-        epService.getEPAdministrator().createEPL("create window MyWindowTwo.win:keepall() as (id string, p00 int)");
-        epService.getEPAdministrator().createEPL("insert into MyWindowTwo (id, p00) select string, intPrimitive from SupportBean");
+        epService.getEPAdministrator().createEPL(EventRepresentationEnum.MAP.getAnnotationText() + " create window MyWindowTwo.win:keepall() as (id string, p00 int)");
+        epService.getEPAdministrator().createEPL("insert into MyWindowTwo (id, p00) select theString, intPrimitive from SupportBean");
         epl =    "expression subqnamedwin {" +
                         "  x => MyWindowTwo(MyWindowTwo.id = x.id).where(y => y.p00 > 10)" +
                         "} " +
                         "select subqnamedwin(t) as c0 from SupportBean_ST0 as t";
-        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        epService.getEPAdministrator().createEPL(epl);
     }
 
     private void runAssertionSubqNWCorrelated(String epl) {
         String[] fieldSelected = "c0".split(",");
         String[] fieldInside = "val0".split(",");
 
-        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as (val0 string, val1 int)");
-        epService.getEPAdministrator().createEPL("insert into MyWindow (val0, val1) select string, intPrimitive from SupportBean");
+        epService.getEPAdministrator().createEPL(EventRepresentationEnum.MAP.getAnnotationText() + " create window MyWindow.win:keepall() as (val0 string, val1 int)");
+        epService.getEPAdministrator().createEPL("insert into MyWindow (val0, val1) select theString, intPrimitive from SupportBean");
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
         LambdaAssertionUtil.assertTypes(stmt.getEventType(), fieldSelected, new Class[]{Collection.class});
@@ -420,13 +421,13 @@ public class TestExpressionDef extends TestCase {
         LambdaAssertionUtil.assertTypes(stmt.getEventType(), "val1".split(","), new Class[]{Collection.class, Collection.class});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
-        SupportBean[] out = toArray((Collection)listener.assertOneGetNewAndReset().get("val1"));
-        assertEquals(0, out.length);
+        SupportBean[] outArray = toArray((Collection)listener.assertOneGetNewAndReset().get("val1"));
+        assertEquals(0, outArray.length);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 3));
-        out = toArray((Collection)listener.assertOneGetNewAndReset().get("val1"));
-        assertEquals(1, out.length);
-        assertEquals("E2", out[0].getString());
+        outArray = toArray((Collection)listener.assertOneGetNewAndReset().get("val1"));
+        assertEquals(1, outArray.length);
+        assertEquals("E2", outArray[0].getTheString());
     }
 
     public void testScalarReturn() {
@@ -500,13 +501,13 @@ public class TestExpressionDef extends TestCase {
         stmt.addListener(listener);
         LambdaAssertionUtil.assertTypes(stmt.getEventType(), "val1,val2".split(","), new Class[]{Collection.class, Collection.class});
 
-        SupportBean_ST0_Container event = SupportBean_ST0_Container.make3Value("E1,K1,1", "E2,K2,2", "E20,K20,20");
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean_ST0_Container theEvent = SupportBean_ST0_Container.make3Value("E1,K1,1", "E2,K2,2", "E20,K20,20");
+        epService.getEPRuntime().sendEvent(theEvent);
         Object[] resultVal1 = ((Collection) listener.getLastNewData()[0].get("val1")).toArray();
-        EPAssertionUtil.assertEqualsExactOrder(new Object[]{event.getContained().get(0), event.getContained().get(1)}, resultVal1
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{theEvent.getContained().get(0), theEvent.getContained().get(1)}, resultVal1
         );
         Object[] resultVal2 = ((Collection) listener.getLastNewData()[0].get("val2")).toArray();
-        EPAssertionUtil.assertEqualsExactOrder(new Object[]{event.getContained().get(1)}, resultVal2
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{theEvent.getContained().get(1)}, resultVal2
         );
     }
 
@@ -556,9 +557,9 @@ public class TestExpressionDef extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean());
         assertFalse(listener.isInvoked());
 
-        SupportBean event = new SupportBean();
-        event.setBoolPrimitive(true);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setBoolPrimitive(true);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertTrue(listener.isInvoked());
     }
 

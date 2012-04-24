@@ -90,7 +90,7 @@ public class CreateVariableView extends ViewSupport implements VariableChangeCal
         Object value = reader.getValue();
         Map<String, Object> values = new HashMap<String, Object>();
         values.put(variableName, value);
-        EventBean event = eventAdapterService.adapterForTypedMap(values, eventType);
-        return new SingleEventIterator(event);
+        EventBean theEvent = eventAdapterService.adapterForTypedMap(values, eventType);
+        return new SingleEventIterator(theEvent);
     }
 }

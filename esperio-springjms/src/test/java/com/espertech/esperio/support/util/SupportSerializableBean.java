@@ -12,15 +12,15 @@ import java.io.Serializable;
 
 public class SupportSerializableBean implements Serializable
 {
-    private String string;
+    private String theString;
 
-    public SupportSerializableBean(String string)
+    public SupportSerializableBean(String theString)
     {
-        this.string = string;
+        this.theString = theString;
     }
 
-    public String getString()
+    public String getTheString()
     {
-        return string;
+        return theString;
     }
 }

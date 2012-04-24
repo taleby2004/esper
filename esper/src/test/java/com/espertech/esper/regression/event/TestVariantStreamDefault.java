@@ -54,7 +54,7 @@ public class TestVariantStreamDefault extends TestCase
         epService.getEPAdministrator().createEPL("create window MainEventWindow.win:length(10000) as AllEvents");
         epService.getEPAdministrator().createEPL("insert into MainEventWindow select " + this.getClass().getSimpleName() + ".preProcessEvent(event) from AllEvents as event");
 
-		EPStatement statement = epService.getEPAdministrator().createEPL("select * from MainEventWindow where string = 'E'");
+		EPStatement statement = epService.getEPAdministrator().createEPL("select * from MainEventWindow where theString = 'E'");
 		statement.addListenerWithReplay(new SupportUpdateListener());
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -93,7 +93,7 @@ public class TestVariantStreamDefault extends TestCase
         assertSame(eventTwo, listenerOne.assertOneGetNewAndReset().getUnderlying());
 
         stmt.destroy();
-        String fields = "string,boolBoxed,intPrimitive,longPrimitive,doublePrimitive,enumValue";
+        String fields = "theString,boolBoxed,intPrimitive,longPrimitive,doublePrimitive,enumValue";
         stmt = epService.getEPAdministrator().createEPL("select " + fields + " from MyVariantStream");
         stmt.addListener(listenerOne);
         assertEventTypeDefault(stmt.getEventType());
@@ -188,10 +188,10 @@ public class TestVariantStreamDefault extends TestCase
 
     private void assertEventTypeDefault(EventType eventType)
     {
-        String[] expected = "string,boolBoxed,intPrimitive,longPrimitive,doublePrimitive,enumValue".split(",");
+        String[] expected = "theString,boolBoxed,intPrimitive,longPrimitive,doublePrimitive,enumValue".split(",");
         String[] propertyNames = eventType.getPropertyNames();
         EPAssertionUtil.assertEqualsAnyOrder(expected, propertyNames);
-        assertEquals(String.class, eventType.getPropertyType("string"));
+        assertEquals(String.class, eventType.getPropertyType("theString"));
         assertEquals(Boolean.class, eventType.getPropertyType("boolBoxed"));
         assertEquals(Integer.class, eventType.getPropertyType("intPrimitive"));
         assertEquals(Long.class, eventType.getPropertyType("longPrimitive"));
@@ -204,7 +204,7 @@ public class TestVariantStreamDefault extends TestCase
         }
 
         EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
-                new EventPropertyDescriptor("string", String.class, null, false, false, false, false, false),
+                new EventPropertyDescriptor("theString", String.class, null, false, false, false, false, false),
                 new EventPropertyDescriptor("boolBoxed", Boolean.class, null, false, false, false, false, false),
                 new EventPropertyDescriptor("intPrimitive", Integer.class, null, false, false, false, false, false),
                 new EventPropertyDescriptor("longPrimitive", Long.class, null, false, false, false, false, false),
@@ -224,7 +224,7 @@ public class TestVariantStreamDefault extends TestCase
         epService.getEPAdministrator().getConfiguration().addVariantStream("MyVariantStream", variant);
 
         // test named window
-        EPStatement stmt = epService.getEPAdministrator().createEPL("create window MyVariantWindow.std:unique(string) as select * from MyVariantStream");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("create window MyVariantWindow.std:unique(theString) as select * from MyVariantStream");
         stmt.addListener(listenerOne);
         epService.getEPAdministrator().createEPL("insert into MyVariantWindow select * from MyVariantStream");
         epService.getEPAdministrator().createEPL("insert into MyVariantStream select * from SupportBeanVariantStream");
@@ -275,7 +275,7 @@ public class TestVariantStreamDefault extends TestCase
 
         // test subquery
         stmt.destroy();
-        stmt = epService.getEPAdministrator().createEPL("select * from SupportBean_A as a where exists(select * from MyVariantStream.std:lastevent() as b where b.string=a.id)");
+        stmt = epService.getEPAdministrator().createEPL("select * from SupportBean_A as a where exists(select * from MyVariantStream.std:lastevent() as b where b.theString=a.id)");
         stmt.addListener(listenerOne);
         events = new Object[] {new SupportBean("E1", -1), new SupportBeanVariantStream("E2"), new SupportBean_A("E2")};
 

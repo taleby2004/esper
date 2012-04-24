@@ -17,6 +17,20 @@ import com.espertech.esper.util.LevenshteinDistance;
 
 public class ExprIdentNodeUtil
 {
+    public static Pair<PropertyResolutionDescriptor, String> getTypeFromStream(StreamTypeService streamTypeService, String propertyNameNestable, boolean explicitPropertiesOnly, boolean obtainFragment)
+                    throws ExprValidationPropertyException {
+        String streamOrProp = null;
+        String prop = propertyNameNestable;
+        if (propertyNameNestable.indexOf('.') != -1) {
+            prop = propertyNameNestable.substring(propertyNameNestable.indexOf('.') + 1);
+            streamOrProp = propertyNameNestable.substring(0, propertyNameNestable.indexOf('.'));
+        }
+        if (explicitPropertiesOnly) {
+            return getTypeFromStreamExplicitProperties(streamTypeService, prop, streamOrProp, obtainFragment);
+        }
+        return getTypeFromStream(streamTypeService, prop, streamOrProp, obtainFragment);
+    }
+
     /**
      * Determine stream id and property type given an unresolved property name and
      * a stream name that may also be part of the property name.
@@ -28,7 +42,7 @@ public class ExprIdentNodeUtil
      * @return pair of stream number and property type
      * @throws ExprValidationPropertyException if no such property exists
      */
-    protected static Pair<PropertyResolutionDescriptor, String> getTypeFromStream(StreamTypeService streamTypeService, String unresolvedPropertyName, String streamOrPropertyName)
+    protected static Pair<PropertyResolutionDescriptor, String> getTypeFromStream(StreamTypeService streamTypeService, String unresolvedPropertyName, String streamOrPropertyName, boolean obtainFragment)
         throws ExprValidationPropertyException
     {
         PropertyResolutionDescriptor propertyInfo;
@@ -38,7 +52,7 @@ public class ExprIdentNodeUtil
         {
             try
             {
-                propertyInfo = streamTypeService.resolveByPropertyName(unresolvedPropertyName);
+                propertyInfo = streamTypeService.resolveByPropertyName(unresolvedPropertyName, obtainFragment);
             }
             catch (StreamTypesException ex)
             {
@@ -46,7 +60,7 @@ public class ExprIdentNodeUtil
             }
             catch (PropertyAccessException ex)
             {
-                throw new ExprValidationPropertyException(ex.getMessage());
+                throw new ExprValidationPropertyException("Failed to find property '" + unresolvedPropertyName + "', the property name does not parse (are you sure?): " + ex.getMessage(), ex);
             }
 
             // resolves without a stream name, return descriptor and null stream name
@@ -57,7 +71,7 @@ public class ExprIdentNodeUtil
         StreamTypesException typeExceptionOne;
         try
         {
-            propertyInfo = streamTypeService.resolveByStreamAndPropName(streamOrPropertyName, unresolvedPropertyName);
+            propertyInfo = streamTypeService.resolveByStreamAndPropName(streamOrPropertyName, unresolvedPropertyName, obtainFragment);
             // resolves with a stream name, return descriptor and stream name
             return new Pair<PropertyResolutionDescriptor, String>(propertyInfo, streamOrPropertyName);
         }
@@ -71,7 +85,7 @@ public class ExprIdentNodeUtil
         String propertyNameCandidate = streamOrPropertyName + '.' + unresolvedPropertyName;
         try
         {
-            propertyInfo = streamTypeService.resolveByPropertyName(propertyNameCandidate);
+            propertyInfo = streamTypeService.resolveByPropertyName(propertyNameCandidate, obtainFragment);
             // resolves without a stream name, return null for stream name
             return new Pair<PropertyResolutionDescriptor, String>(propertyInfo, null);
         }
@@ -91,7 +105,7 @@ public class ExprIdentNodeUtil
      * @return property info
      * @throws ExprValidationPropertyException if the property could not be resolved
      */
-    protected static Pair<PropertyResolutionDescriptor, String> getTypeFromStreamExplicitProperties(StreamTypeService streamTypeService, String unresolvedPropertyName, String streamOrPropertyName)
+    protected static Pair<PropertyResolutionDescriptor, String> getTypeFromStreamExplicitProperties(StreamTypeService streamTypeService, String unresolvedPropertyName, String streamOrPropertyName, boolean obtainFragment)
         throws ExprValidationPropertyException
     {
         PropertyResolutionDescriptor propertyInfo;
@@ -101,7 +115,7 @@ public class ExprIdentNodeUtil
         {
             try
             {
-                propertyInfo = streamTypeService.resolveByPropertyNameExplicitProps(unresolvedPropertyName);
+                propertyInfo = streamTypeService.resolveByPropertyNameExplicitProps(unresolvedPropertyName, obtainFragment);
             }
             catch (StreamTypesException ex)
             {
@@ -120,7 +134,7 @@ public class ExprIdentNodeUtil
         StreamTypesException typeExceptionOne;
         try
         {
-            propertyInfo = streamTypeService.resolveByStreamAndPropNameExplicitProps(streamOrPropertyName, unresolvedPropertyName);
+            propertyInfo = streamTypeService.resolveByStreamAndPropNameExplicitProps(streamOrPropertyName, unresolvedPropertyName, obtainFragment);
             // resolves with a stream name, return descriptor and stream name
             return new Pair<PropertyResolutionDescriptor, String>(propertyInfo, streamOrPropertyName);
         }
@@ -134,7 +148,7 @@ public class ExprIdentNodeUtil
         String propertyNameCandidate = streamOrPropertyName + '.' + unresolvedPropertyName;
         try
         {
-            propertyInfo = streamTypeService.resolveByPropertyNameExplicitProps(propertyNameCandidate);
+            propertyInfo = streamTypeService.resolveByPropertyNameExplicitProps(propertyNameCandidate, obtainFragment);
             // resolves without a stream name, return null for stream name
             return new Pair<PropertyResolutionDescriptor, String>(propertyInfo, null);
         }

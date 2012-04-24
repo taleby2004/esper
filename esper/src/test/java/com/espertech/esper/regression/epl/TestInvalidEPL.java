@@ -68,7 +68,7 @@ public class TestInvalidEPL extends TestCase
                 SupportMarketDataBean.class.getName() + ".win:length(3)" +
                             " where ";
 
-        tryInvalid(streamDef + "sa.intPrimitive = sb.string");
+        tryInvalid(streamDef + "sa.intPrimitive = sb.theString");
         tryValid(streamDef + "sa.intPrimitive = sb.intBoxed");
         tryValid(streamDef + "sa.intPrimitive = sb.intPrimitive");
         tryValid(streamDef + "sa.intPrimitive = sb.longBoxed");
@@ -76,23 +76,23 @@ public class TestInvalidEPL extends TestCase
         tryInvalid(streamDef + "sa.intPrimitive = sb.intPrimitive and sb.intBoxed = sa.boolPrimitive");
         tryValid(streamDef + "sa.intPrimitive = sb.intPrimitive and sb.boolBoxed = sa.boolPrimitive");
 
-        tryInvalid(streamDef + "sa.intPrimitive = sb.intPrimitive and sb.intBoxed = sa.intPrimitive and sa.string=sX.string");
-        tryValid(streamDef + "sa.intPrimitive = sb.intPrimitive and sb.intBoxed = sa.intPrimitive and sa.string=sb.string");
+        tryInvalid(streamDef + "sa.intPrimitive = sb.intPrimitive and sb.intBoxed = sa.intPrimitive and sa.theString=sX.theString");
+        tryValid(streamDef + "sa.intPrimitive = sb.intPrimitive and sb.intBoxed = sa.intPrimitive and sa.theString=sb.theString");
 
-        tryInvalid(streamDef + "sa.intPrimitive = sb.intPrimitive or sa.string=sX.string");
+        tryInvalid(streamDef + "sa.intPrimitive = sb.intPrimitive or sa.theString=sX.theString");
         tryValid(streamDef + "sa.intPrimitive = sb.intPrimitive or sb.intBoxed = sa.intPrimitive");
 
         // try constants
         tryValid(streamDef + "sa.intPrimitive=5");
-        tryValid(streamDef + "sa.string='4'");
-        tryValid(streamDef + "sa.string=\"4\"");
+        tryValid(streamDef + "sa.theString='4'");
+        tryValid(streamDef + "sa.theString=\"4\"");
         tryValid(streamDef + "sa.boolPrimitive=false");
         tryValid(streamDef + "sa.longPrimitive=-5L");
         tryValid(streamDef + "sa.doubleBoxed=5.6d");
         tryValid(streamDef + "sa.floatPrimitive=-5.6f");
 
         tryInvalid(streamDef + "sa.intPrimitive='5'");
-        tryInvalid(streamDef + "sa.string=5");
+        tryInvalid(streamDef + "sa.theString=5");
         tryInvalid(streamDef + "sa.boolBoxed=f");
         tryInvalid(streamDef + "sa.intPrimitive=x");
         tryValid(streamDef + "sa.intPrimitive=5.5");
@@ -107,7 +107,7 @@ public class TestInvalidEPL extends TestCase
         tryValid(streamDef + "sa.intPrimitive > sa.intBoxed and sb.doublePrimitive < sb.doubleBoxed");
         tryValid(streamDef + "sa.intPrimitive >= sa.intBoxed and sa.doublePrimitive <= sa.doubleBoxed");
         tryValid(streamDef + "sa.intPrimitive > (sa.intBoxed + sb.doublePrimitive)");
-        tryInvalid(streamDef + "sa.intPrimitive >= sa.string");
+        tryInvalid(streamDef + "sa.intPrimitive >= sa.theString");
         tryInvalid(streamDef + "sa.boolBoxed >= sa.boolPrimitive");
 
         // Try some nested
@@ -133,7 +133,7 @@ public class TestInvalidEPL extends TestCase
         tryInvalid(outerJoinDef + "on sa.XX = sb.intBoxed");
         tryInvalid(outerJoinDef + "on sa.boolBoxed = sb.intBoxed");
         tryValid(outerJoinDef + "on sa.boolPrimitive = sb.boolBoxed");
-        tryInvalid(outerJoinDef + "on sa.boolPrimitive = sb.string");
+        tryInvalid(outerJoinDef + "on sa.boolPrimitive = sb.theString");
         tryInvalid(outerJoinDef + "on sa.intPrimitive <= sb.intBoxed");
         tryInvalid(outerJoinDef + "on sa.intPrimitive = sa.intBoxed");
         tryInvalid(outerJoinDef + "on sb.intPrimitive = sb.intBoxed");

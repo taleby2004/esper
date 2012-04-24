@@ -277,10 +277,10 @@ public class DatabasePollingViewable implements HistoricalEventViewable
         if ((sqlParameters == null) || (sqlParameters.isEmpty())) {
             return null;
         }
-        List<ExprNode> params = sqlParameters.get(myStreamNumber);
-        if ((params == null) || (params.isEmpty()) || (params.size() < (count + 1))) {
+        List<ExprNode> parameters = sqlParameters.get(myStreamNumber);
+        if ((parameters == null) || (parameters.isEmpty()) || (parameters.size() < (count + 1))) {
             return null;
         }
-        return params.get(count);
+        return parameters.get(count);
     }
 }

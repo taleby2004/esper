@@ -53,6 +53,7 @@ public class TestMTStmtNamedWindowSubqueryAgg extends TestCase
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventType("SupportBean", SupportBean.class);
         config.addPlugInAggregationFunction("intListAgg", MyIntListAggregation.class.getName());
+        config.getEngineDefaults().getEventMeta().setDefaultEventRepresentation(Configuration.EventRepresentation.MAP); // use Map-type events for testing
         engine = EPServiceProviderManager.getDefaultProvider(config);
         engine.initialize();
 
@@ -72,7 +73,7 @@ public class TestMTStmtNamedWindowSubqueryAgg extends TestCase
                 "when not matched then insert select uekey as wskey, ueint as wsint " +
                 "when matched then delete");
         // note: here all threads use the same string key to insert/delete and different values for the int
-        EPStatement targetStatement = engine.getEPAdministrator().createEPL("select (select intListAgg(wsint) from MyWindow mw where wskey = sb.string) as val from SupportBean sb");
+        EPStatement targetStatement = engine.getEPAdministrator().createEPL("select (select intListAgg(wsint) from MyWindow mw where wskey = sb.theString) as val from SupportBean sb");
 
         // execute
         ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);

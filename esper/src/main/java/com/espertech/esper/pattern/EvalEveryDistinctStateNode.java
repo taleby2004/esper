@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,7 +24,7 @@ import java.util.Set;
 public final class EvalEveryDistinctStateNode extends EvalStateNode implements Evaluator
 {
     private final EvalEveryDistinctNode everyDistinctNode;
-    private final Map<EvalStateNode, Set<MultiKeyUntyped>> spawnedNodes;
+    private final Map<EvalStateNode, Set<Object>> spawnedNodes;
     private final MatchedEventMap beginState;
 
     /**
@@ -41,11 +40,11 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
         super(parentNode, null);
 
         this.everyDistinctNode = everyDistinctNode;
-        this.spawnedNodes = new LinkedHashMap<EvalStateNode, Set<MultiKeyUntyped>>();
+        this.spawnedNodes = new LinkedHashMap<EvalStateNode, Set<Object>>();
         this.beginState = beginState.shallowCopy();
 
         EvalStateNode child = everyDistinctNode.getChildNode().newState(this, beginState, null);
-        spawnedNodes.put(child, new HashSet<MultiKeyUntyped>());
+        spawnedNodes.put(child, new HashSet<Object>());
     }
 
     @Override
@@ -98,7 +97,7 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
         }
         else
         {
-            spawnedNodes.put(spawned, new HashSet<MultiKeyUntyped>());
+            spawnedNodes.put(spawned, new HashSet<Object>());
             spawned.setParentEvaluator(this);
         }
     }
@@ -106,9 +105,9 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
     {
         // determine if this evaluation has been seen before from the same node
-        MultiKeyUntyped matchEventKey = PatternExpressionUtil.getKeys(matchEvent, everyDistinctNode);
+        Object matchEventKey = PatternExpressionUtil.getKeys(matchEvent, everyDistinctNode);
         boolean haveSeenThis = false;
-        Set<MultiKeyUntyped> keysFromNode = spawnedNodes.get(fromNode);
+        Set<Object> keysFromNode = spawnedNodes.get(fromNode);
         if (keysFromNode != null)
         {
             if (keysFromNode.contains(matchEventKey))
@@ -147,7 +146,7 @@ public final class EvalEveryDistinctStateNode extends EvalStateNode implements E
             }
             else
             {
-                Set<MultiKeyUntyped> keyset = new HashSet<MultiKeyUntyped>();
+                Set<Object> keyset = new HashSet<Object>();
                 if (keysFromNode != null)
                 {
                     keyset.addAll(keysFromNode);

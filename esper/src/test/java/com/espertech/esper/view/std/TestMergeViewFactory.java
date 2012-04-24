@@ -60,12 +60,12 @@ public class TestMergeViewFactory extends TestCase
         assertTrue(factory.canReuse(new MergeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesMD("symbol", "feed"), null)));
     }
 
-    private void tryInvalidParameter(Object[] params) throws Exception
+    private void tryInvalidParameter(Object[] parameters) throws Exception
     {
         try
         {
             MergeViewFactory factory = new MergeViewFactory();
-            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
+            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(parameters));
             factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, parents);
             fail();
         }
@@ -75,10 +75,10 @@ public class TestMergeViewFactory extends TestCase
         }
     }
 
-    private void tryParameter(Object[] params, String[] fieldNames) throws Exception
+    private void tryParameter(Object[] parameters, String[] fieldNames) throws Exception
     {
         MergeViewFactory factory = new MergeViewFactory();
-        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
+        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(parameters));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, parents);
         MergeView view = (MergeView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldNames[0], view.getGroupFieldNames()[0].toExpressionString());

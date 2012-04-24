@@ -44,8 +44,8 @@ public class EvalInsertBeanRecast implements SelectExprProcessor {
     }
 
     public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
-        EventBean event = eventsPerStream[streamNumber];
-        return eventAdapterService.adapterForTypedBean(event.getUnderlying(), eventType);
+        EventBean theEvent = eventsPerStream[streamNumber];
+        return eventAdapterService.adapterForTypedBean(theEvent.getUnderlying(), eventType);
     }
 
     public EventType getResultEventType() {

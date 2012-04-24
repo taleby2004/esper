@@ -10,6 +10,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventPropertyDescriptor;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.FragmentEventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
@@ -140,14 +141,14 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return -1;
     }
 
-    public PropertyResolutionDescriptor resolveByPropertyName(String propertyName)
+    public PropertyResolutionDescriptor resolveByPropertyName(String propertyName, boolean obtainFragment)
         throws DuplicatePropertyException, PropertyNotFoundException
     {
         if (propertyName == null)
         {
             throw new IllegalArgumentException("Null property name");
         }
-        PropertyResolutionDescriptor desc = findByPropertyName(propertyName);
+        PropertyResolutionDescriptor desc = findByPropertyName(propertyName, obtainFragment);
         if ((requireStreamNames) && (desc.getStreamNum() != 0))
         {
             throw new PropertyNotFoundException("Property named '" + propertyName + "' must be prefixed by a stream name, use the stream name itself or use the as-clause to name the stream with the property in the format \"stream.property\"", null);
@@ -155,12 +156,12 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return desc;
     }
 
-    public PropertyResolutionDescriptor resolveByPropertyNameExplicitProps(String propertyName) throws PropertyNotFoundException, DuplicatePropertyException {
+    public PropertyResolutionDescriptor resolveByPropertyNameExplicitProps(String propertyName, boolean obtainFragment) throws PropertyNotFoundException, DuplicatePropertyException {
         if (propertyName == null)
         {
             throw new IllegalArgumentException("Null property name");
         }
-        PropertyResolutionDescriptor desc = findByPropertyNameExplicitProps(propertyName);
+        PropertyResolutionDescriptor desc = findByPropertyNameExplicitProps(propertyName, obtainFragment);
         if ((requireStreamNames) && (desc.getStreamNum() != 0))
         {
             throw new PropertyNotFoundException("Property named '" + propertyName + "' must be prefixed by a stream name, use the stream name itself or use the as-clause to name the stream with the property in the format \"stream.property\"", null);
@@ -168,7 +169,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return desc;
     }
 
-    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamName, String propertyName)
+    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamName, String propertyName, boolean obtainFragment)
         throws PropertyNotFoundException, StreamNotFoundException
     {
         if (streamName == null)
@@ -179,10 +180,10 @@ public class StreamTypeServiceImpl implements StreamTypeService
         {
             throw new IllegalArgumentException("Null property name");
         }
-        return findByStreamAndEngineName(propertyName, streamName, false);
+        return findByStreamAndEngineName(propertyName, streamName, false, obtainFragment);
     }
 
-    public PropertyResolutionDescriptor resolveByStreamAndPropNameExplicitProps(String streamName, String propertyName) throws PropertyNotFoundException, StreamNotFoundException {
+    public PropertyResolutionDescriptor resolveByStreamAndPropNameExplicitProps(String streamName, String propertyName, boolean obtainFragment) throws PropertyNotFoundException, StreamNotFoundException {
         if (streamName == null)
         {
             throw new IllegalArgumentException("Null property name");
@@ -191,10 +192,10 @@ public class StreamTypeServiceImpl implements StreamTypeService
         {
             throw new IllegalArgumentException("Null property name");
         }
-        return findByStreamAndEngineName(propertyName, streamName, true);
+        return findByStreamAndEngineName(propertyName, streamName, true, obtainFragment);
     }
 
-    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamAndPropertyName) throws DuplicatePropertyException, PropertyNotFoundException
+    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamAndPropertyName, boolean obtainFragment) throws DuplicatePropertyException, PropertyNotFoundException
     {
         if (streamAndPropertyName == null)
         {
@@ -205,7 +206,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
         try
         {
             // first try to resolve as a property name
-            desc = findByPropertyName(streamAndPropertyName);
+            desc = findByPropertyName(streamAndPropertyName, obtainFragment);
         }
         catch (PropertyNotFoundException ex)
         {
@@ -220,7 +221,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
             try
             {
                 // try to resolve a stream and property name
-                desc = findByStreamAndEngineName(propertyName, streamName, false);
+                desc = findByStreamAndEngineName(propertyName, streamName, false, obtainFragment);
             }
             catch (StreamNotFoundException e)
             {
@@ -232,7 +233,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
                 }
                 try
                 {
-                    return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond(), false);
+                    return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond(), false, obtainFragment);
                 }
                 catch (StreamNotFoundException e1)
                 {
@@ -245,7 +246,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return desc;
     }
 
-    private PropertyResolutionDescriptor findByPropertyName(String propertyName)
+    private PropertyResolutionDescriptor findByPropertyName(String propertyName, boolean obtainFragment)
         throws DuplicatePropertyException, PropertyNotFoundException
     {
         int index = 0;
@@ -259,9 +260,13 @@ public class StreamTypeServiceImpl implements StreamTypeService
             {
                 Class propertyType = null;
                 boolean found = false;
+                FragmentEventType fragmentEventType = null;
                 
                 if (eventTypes[i].isProperty(propertyName)) {
                     propertyType = eventTypes[i].getPropertyType(propertyName);
+                    if (obtainFragment) {
+                        fragmentEventType = eventTypes[i].getFragmentType(propertyName);
+                    }
                     found = true;
                 }
                 else {
@@ -270,6 +275,9 @@ public class StreamTypeServiceImpl implements StreamTypeService
                     if (descriptor != null) {
                         found = true;
                         propertyType = descriptor.getPropertyType();
+                        if (descriptor.isFragment() && obtainFragment) {
+                            fragmentEventType =  eventTypes[i].getFragmentType(propertyName);
+                        }
                     }
                 }
 
@@ -281,7 +289,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
                     // If the property could be resolved from stream 0 then we don't need to look further
                     if ((i == 0) && isStreamZeroUnambigous)
                     {
-                        return new PropertyResolutionDescriptor(streamNames[0], eventTypes[0], propertyName, 0, propertyType);
+                        return new PropertyResolutionDescriptor(streamNames[0], eventTypes[0], propertyName, 0, propertyType, fragmentEventType);
                     }
                 }
             }
@@ -289,10 +297,16 @@ public class StreamTypeServiceImpl implements StreamTypeService
         }
 
         handleFindExceptions(propertyName, foundCount, streamType);
-        return new PropertyResolutionDescriptor(streamNames[foundIndex], eventTypes[foundIndex], propertyName, foundIndex, streamType.getPropertyType(propertyName));
+
+        FragmentEventType fragmentEventType = null;
+        if (obtainFragment) {
+            fragmentEventType = streamType.getFragmentType(propertyName);
+        }
+
+        return new PropertyResolutionDescriptor(streamNames[foundIndex], eventTypes[foundIndex], propertyName, foundIndex, streamType.getPropertyType(propertyName), fragmentEventType);
     }
 
-    private PropertyResolutionDescriptor findByPropertyNameExplicitProps(String propertyName)
+    private PropertyResolutionDescriptor findByPropertyNameExplicitProps(String propertyName, boolean obtainFragment)
         throws DuplicatePropertyException, PropertyNotFoundException
     {
         int index = 0;
@@ -307,11 +321,15 @@ public class StreamTypeServiceImpl implements StreamTypeService
                 EventPropertyDescriptor[] descriptors  = eventTypes[i].getPropertyDescriptors();
                 Class propertyType = null;
                 boolean found = false;
+                FragmentEventType fragmentEventType = null;
 
                 for (EventPropertyDescriptor desc : descriptors) {
                     if (desc.getPropertyName().equals(propertyName)) {
                         propertyType = desc.getPropertyType();
                         found = true;
+                        if (obtainFragment && desc.isFragment()) {
+                            fragmentEventType = eventTypes[i].getFragmentType(propertyName);
+                        }
                     }
                 }
 
@@ -323,7 +341,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
                     // If the property could be resolved from stream 0 then we don't need to look further
                     if ((i == 0) && isStreamZeroUnambigous)
                     {
-                        return new PropertyResolutionDescriptor(streamNames[0], eventTypes[0], propertyName, 0, propertyType);
+                        return new PropertyResolutionDescriptor(streamNames[0], eventTypes[0], propertyName, 0, propertyType, fragmentEventType);
                     }
                 }
             }
@@ -331,7 +349,13 @@ public class StreamTypeServiceImpl implements StreamTypeService
         }
 
         handleFindExceptions(propertyName, foundCount, streamType);
-        return new PropertyResolutionDescriptor(streamNames[foundIndex], eventTypes[foundIndex], propertyName, foundIndex, streamType.getPropertyType(propertyName));
+
+        FragmentEventType fragmentEventType = null;
+        if (obtainFragment) {
+            fragmentEventType = streamType.getFragmentType(propertyName);
+        }
+
+        return new PropertyResolutionDescriptor(streamNames[foundIndex], eventTypes[foundIndex], propertyName, foundIndex, streamType.getPropertyType(propertyName), fragmentEventType);
     }
 
     private void handleFindExceptions(String propertyName, int foundCount, EventType streamType) throws DuplicatePropertyException, PropertyNotFoundException {
@@ -399,13 +423,13 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return null;
     }
 
-    private PropertyResolutionDescriptor findByStreamAndEngineName(String propertyName, String streamName, boolean explicitPropertiesOnly)
+    private PropertyResolutionDescriptor findByStreamAndEngineName(String propertyName, String streamName, boolean explicitPropertiesOnly, boolean obtainFragment)
         throws PropertyNotFoundException, StreamNotFoundException
     {
         PropertyResolutionDescriptor desc;
         try
         {
-            desc = findByStreamNameOnly(propertyName, streamName, explicitPropertiesOnly);
+            desc = findByStreamNameOnly(propertyName, streamName, explicitPropertiesOnly, obtainFragment);
         }
         catch (PropertyNotFoundException ex)
         {
@@ -414,7 +438,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
             {
                 throw ex;
             }
-            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond(), explicitPropertiesOnly);
+            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond(), explicitPropertiesOnly, obtainFragment);
         }
         catch (StreamNotFoundException ex)
         {
@@ -423,7 +447,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
             {
                 throw ex;
             }
-            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond(), explicitPropertiesOnly);
+            return findByStreamNameOnly(propertyNoEnginePair.getFirst(), propertyNoEnginePair.getSecond(), explicitPropertiesOnly, obtainFragment);
         }
         return desc;
     }
@@ -447,7 +471,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
         return new Pair<String, String>(propertyNameNoEngine, streamNameNoEngine);
     }
 
-    private PropertyResolutionDescriptor findByStreamNameOnly(String propertyName, String streamName, boolean explicitPropertiesOnly)
+    private PropertyResolutionDescriptor findByStreamNameOnly(String propertyName, String streamName, boolean explicitPropertiesOnly, boolean obtainFragment)
         throws PropertyNotFoundException, StreamNotFoundException
     {
         int index = 0;
@@ -524,6 +548,8 @@ public class StreamTypeServiceImpl implements StreamTypeService
         }
 
         Class propertyType = null;
+        FragmentEventType fragmentEventType = null;
+
         if (!explicitPropertiesOnly) {
             propertyType = streamType.getPropertyType(propertyName);
             if (propertyType == null)
@@ -533,6 +559,14 @@ public class StreamTypeServiceImpl implements StreamTypeService
                     throw handlePropertyNotFound(propertyName, streamName, streamType);
                 }
                 propertyType = desc.getPropertyType();
+                if (obtainFragment && desc.isFragment()) {
+                    fragmentEventType = streamType.getFragmentType(propertyName);
+                }
+            }
+            else {
+                if (obtainFragment) {
+                    fragmentEventType = streamType.getFragmentType(propertyName);
+                }
             }
         }
         else {
@@ -541,6 +575,9 @@ public class StreamTypeServiceImpl implements StreamTypeService
             for (EventPropertyDescriptor prop : explicitProps) {
                 if (prop.getPropertyName().equals(propertyName)) {
                     propertyType = prop.getPropertyType();
+                    if (obtainFragment && prop.isFragment()) {
+                        fragmentEventType = streamType.getFragmentType(propertyName);
+                    }
                     found = true;
                     break;
                 }
@@ -550,7 +587,7 @@ public class StreamTypeServiceImpl implements StreamTypeService
             }
         }
 
-        return new PropertyResolutionDescriptor(streamName, streamType, propertyName, index, propertyType);
+        return new PropertyResolutionDescriptor(streamName, streamType, propertyName, index, propertyType, fragmentEventType);
     }
 
     private PropertyNotFoundException handlePropertyNotFound(String propertyName, String streamName, EventType streamType) {

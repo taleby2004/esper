@@ -27,9 +27,9 @@ public class ExprNodeAdapterBaseVariables extends ExprNodeAdapterBase
     }
 
     @Override
-    public boolean evaluate(EventBean event)
+    public boolean evaluate(EventBean theEvent)
     {
         variableService.setLocalVersion();
-        return evaluatePerStream(new EventBean[] {event});
+        return evaluatePerStream(new EventBean[] {theEvent});
     }
 }

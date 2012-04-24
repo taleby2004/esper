@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Getter for one or more levels deep nested properties.
  */
-public class NestedPropertyGetter extends BaseNativePropertyGetter implements EventPropertyGetter
+public class NestedPropertyGetter extends BaseNativePropertyGetter implements BeanEventPropertyGetter
 {
     private final BeanEventPropertyGetter[] getterChain;
 
@@ -40,9 +40,7 @@ public class NestedPropertyGetter extends BaseNativePropertyGetter implements Ev
         }
     }
 
-    public Object get(EventBean eventBean) throws PropertyAccessException
-    {
-        Object value = eventBean.getUnderlying();
+    public Object getBeanProp(Object value) throws PropertyAccessException {
         if (value == null)
         {
             return value;
@@ -60,9 +58,7 @@ public class NestedPropertyGetter extends BaseNativePropertyGetter implements Ev
         return value;
     }
 
-    public boolean isExistsProperty(EventBean eventBean)
-    {
-        Object value = eventBean.getUnderlying();
+    public boolean isBeanExistsProperty(Object value) {
         if (value == null)
         {
             return false;
@@ -83,5 +79,15 @@ public class NestedPropertyGetter extends BaseNativePropertyGetter implements Ev
         }
 
         return getterChain[lastElementIndex].isBeanExistsProperty(value);
+    }
+
+    public Object get(EventBean eventBean) throws PropertyAccessException
+    {
+        return getBeanProp(eventBean.getUnderlying());
+    }
+
+    public boolean isExistsProperty(EventBean eventBean)
+    {
+        return isBeanExistsProperty(eventBean.getUnderlying());
     }
 }

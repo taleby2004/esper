@@ -16,15 +16,11 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.event.DecoratingEventBean;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class EvalSelectWildcardSSWrapper extends EvalBase implements SelectExprProcessor {
-
-    private static final Log log = LogFactory.getLog(EvalSelectWildcardSSWrapper.class);
+public class EvalSelectWildcardSSWrapper extends EvalBaseMap implements SelectExprProcessor {
 
     public EvalSelectWildcardSSWrapper(SelectExprContext selectExprContext, EventType resultEventType) {
         super(selectExprContext, resultEventType);
@@ -48,10 +44,10 @@ public class EvalSelectWildcardSSWrapper extends EvalBase implements SelectExprP
             }
         }
 
-        EventBean event = eventsPerStream[0];
+        EventBean theEvent = eventsPerStream[0];
 
         // Using a wrapper bean since we cannot use the same event type else same-type filters match.
         // Wrapping it even when not adding properties is very inexpensive.
-        return super.getEventAdapterService().adapterForTypedWrapper(event, props, super.getResultEventType());
+        return super.getEventAdapterService().adapterForTypedWrapper(theEvent, props, super.getResultEventType());
     }
 }

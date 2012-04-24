@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
@@ -37,23 +36,23 @@ public class OrderByProcessorOrderedLimit implements OrderByProcessor
         return orderByProcessorRowLimit.applyLimit(sorted);
     }
 
-    public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, MultiKeyUntyped[] groupByKeys, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+    public EventBean[] sort(EventBean[] outgoingEvents, EventBean[][] generatingEvents, Object[] groupByKeys, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         EventBean[] sorted = orderByProcessor.sort(outgoingEvents, generatingEvents, groupByKeys, isNewData, exprEvaluatorContext);
         return orderByProcessorRowLimit.applyLimit(sorted);
     }
 
-    public MultiKeyUntyped getSortKey(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+    public Object getSortKey(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         return orderByProcessor.getSortKey(eventsPerStream, isNewData, exprEvaluatorContext);
     }
 
-    public MultiKeyUntyped[] getSortKeyPerRow(EventBean[] generatingEvents, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
+    public Object[] getSortKeyPerRow(EventBean[] generatingEvents, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
         return orderByProcessor.getSortKeyPerRow(generatingEvents, isNewData, exprEvaluatorContext);
     }
 
-    public EventBean[] sort(EventBean[] outgoingEvents, MultiKeyUntyped[] orderKeys, ExprEvaluatorContext exprEvaluatorContext)
+    public EventBean[] sort(EventBean[] outgoingEvents, Object[] orderKeys, ExprEvaluatorContext exprEvaluatorContext)
     {
         EventBean[] sorted = orderByProcessor.sort(outgoingEvents, orderKeys, exprEvaluatorContext);
         return orderByProcessorRowLimit.applyLimit(sorted);

@@ -11,6 +11,7 @@ package com.espertech.esper.event.map;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.BaseNestableEventUtil;
 
 import java.util.Map;
 
@@ -43,8 +44,8 @@ public class MapEventBeanEntryPropertyGetter implements MapEventPropertyGetter {
         }
 
         // Object within the map
-        EventBean event = (EventBean) value;
-        return eventBeanEntryGetter.get(event);
+        EventBean theEvent = (EventBean) value;
+        return eventBeanEntryGetter.get(theEvent);
     }
 
     public boolean isMapExistsProperty(Map<String, Object> map)
@@ -54,17 +55,7 @@ public class MapEventBeanEntryPropertyGetter implements MapEventPropertyGetter {
 
     public Object get(EventBean obj)
     {
-        Object underlying = obj.getUnderlying();
-
-        // The underlying is expected to be a map
-        if (!(underlying instanceof Map))
-        {
-            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                    "the underlying data object is not of type java.lang.Map");
-        }
-
-        Map map = (Map) underlying;
-        return getMap(map);
+        return getMap(BaseNestableEventUtil.checkedCastUnderlyingMap(obj));
     }
 
     public boolean isExistsProperty(EventBean eventBean)
@@ -74,16 +65,7 @@ public class MapEventBeanEntryPropertyGetter implements MapEventPropertyGetter {
 
     public Object getFragment(EventBean obj)
     {
-        Object underlying = obj.getUnderlying();
-
-        // The underlying is expected to be a map
-        if (!(underlying instanceof Map))
-        {
-            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                    "the underlying data object is not of type java.lang.Map");
-        }
-
-        Map map = (Map) underlying;
+        Map<String, Object> map = BaseNestableEventUtil.checkedCastUnderlyingMap(obj);
 
         // If the map does not contain the key, this is allowed and represented as null
         Object value = map.get(propertyMap);
@@ -94,7 +76,7 @@ public class MapEventBeanEntryPropertyGetter implements MapEventPropertyGetter {
         }
 
         // Object within the map
-        EventBean event = (EventBean) value;
-        return eventBeanEntryGetter.getFragment(event);
+        EventBean theEvent = (EventBean) value;
+        return eventBeanEntryGetter.getFragment(theEvent);
     }
 }

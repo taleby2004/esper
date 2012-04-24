@@ -18,6 +18,8 @@ import com.espertech.esper.client.context.ContextPartitionSelectorFiltered;
 import com.espertech.esper.core.context.util.ContextControllerSelectorUtil;
 import com.espertech.esper.epl.spec.ContextDetailCondition;
 import com.espertech.esper.epl.spec.ContextDetailConditionCrontab;
+import com.espertech.esper.epl.spec.ContextDetailConditionTimePeriod;
+import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.pattern.MatchedEventMapImpl;
 import com.espertech.esper.schedule.ScheduleComputeHelper;
 import com.espertech.esper.schedule.ScheduleSpec;
@@ -50,7 +52,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         // if this is single-instance mode, check if we are currently running according to schedule
         boolean currentlyRunning = false;
         if (!factory.getContextDetail().isOverlapping()) {
-            currentlyRunning = determineCurrentlyRunning();
+            currentlyRunning = determineCurrentlyRunning(startCondition);
         }
         
         if (currentlyRunning) {
@@ -110,7 +112,8 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
             }
 
             ContextControllerCondition endEndpoint = makeEndpoint(factory.getContextDetail().getEnd());
-            endEndpoint.activate(null, new MatchedEventMapImpl(builtinProperties), 0);
+            MatchedEventMap matchedEventMap = getMatchedEventMap(builtinProperties);
+            endEndpoint.activate(null, matchedEventMap, 0);
             currentSubpathId++;
             long startTime = factory.getSchedulingService().getTime();
             Long endTime = endEndpoint.getExpectedEndTime();
@@ -137,23 +140,40 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         }
     }
 
+    protected MatchedEventMap getMatchedEventMap(Map<String, Object> builtinProperties) {
+        Object[] props = new Object[factory.getContextBuiltinProps().size()];
+        int count = 0;
+        for (String name : factory.getMatchedEventMapMeta().getTagsPerIndex()) {
+            props[count++] = builtinProperties.get(name);
+        }
+        return new MatchedEventMapImpl(factory.getMatchedEventMapMeta(), props);
+    }
+
     public void setContextPartitionRange(List<NumberSetParameter> partitionRanges) {
         throw new UnsupportedOperationException();
     }
 
-    private boolean determineCurrentlyRunning() {
+    private boolean determineCurrentlyRunning(ContextControllerCondition startCondition) {
 
         // we are not currently running if either of the endpoints is not crontab-triggered
-        if (!(factory.getContextDetail().getStart() instanceof ContextDetailConditionCrontab) ||
-           (!(factory.getContextDetail().getEnd() instanceof ContextDetailConditionCrontab)))     {
-            return false;
+        if ((factory.getContextDetail().getStart() instanceof ContextDetailConditionCrontab) &&
+           ((factory.getContextDetail().getEnd() instanceof ContextDetailConditionCrontab)))     {
+            ScheduleSpec scheduleStart = ((ContextDetailConditionCrontab) factory.getContextDetail().getStart()).getSchedule();
+            ScheduleSpec scheduleEnd = ((ContextDetailConditionCrontab) factory.getContextDetail().getEnd()).getSchedule();
+            long nextScheduledStartTime = ScheduleComputeHelper.computeNextOccurance(scheduleStart, factory.getTimeProvider().getTime());
+            long nextScheduledEndTime = ScheduleComputeHelper.computeNextOccurance(scheduleEnd, factory.getTimeProvider().getTime());
+            return nextScheduledStartTime >= nextScheduledEndTime;
         }
 
-        ScheduleSpec scheduleStart = ((ContextDetailConditionCrontab) factory.getContextDetail().getStart()).getSchedule();
-        ScheduleSpec scheduleEnd = ((ContextDetailConditionCrontab) factory.getContextDetail().getEnd()).getSchedule();
-        long nextScheduledStartTime = ScheduleComputeHelper.computeNextOccurance(scheduleStart, factory.getTimeProvider().getTime());
-        long nextScheduledEndTime = ScheduleComputeHelper.computeNextOccurance(scheduleEnd, factory.getTimeProvider().getTime());
-        return nextScheduledStartTime >= nextScheduledEndTime;
+        if (startCondition instanceof ContextControllerConditionTimePeriod) {
+            ContextControllerConditionTimePeriod condition = (ContextControllerConditionTimePeriod) startCondition;
+            Long endTime = condition.getExpectedEndTime();
+            if (endTime != null && endTime <= 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public ContextControllerFactory getFactory() {

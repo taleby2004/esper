@@ -39,9 +39,9 @@ public interface StatementLifecycleSvc
 
     /**
      * Dispatch event to observers.
-     * @param event to dispatch
+     * @param theEvent to dispatch
      */
-    public void dispatchStatementLifecycleEvent(StatementLifecycleEvent event);
+    public void dispatchStatementLifecycleEvent(StatementLifecycleEvent theEvent);
 
     /**
      * Create and start the statement.

@@ -119,7 +119,7 @@ public class TestEnumDataSources extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
 
         // test named window correlated
-        String eplNamedWindowCorrelated = "select MyWindow(key0 = sb.string).allOf(x => x.p00 < 5) as allOfX from SupportBean.win:keepall() sb";
+        String eplNamedWindowCorrelated = "select MyWindow(key0 = sb.theString).allOf(x => x.p00 < 5) as allOfX from SupportBean.win:keepall() sb";
         EPStatement stmtNamedWindowCorrelated = epService.getEPAdministrator().createEPL(eplNamedWindowCorrelated);
         stmtNamedWindowCorrelated.addListener(listener);
 
@@ -166,7 +166,7 @@ public class TestEnumDataSources extends TestCase {
         stmtSubselectScalar.destroy();
 
         // test subselect-correlated scalar return
-        String eplSubselectScalarCorrelated = "select (select key0 from SupportBean_ST0.win:keepall() st0 where st0.id = sb.string).allOf(x => x  like '%hello%') as allOfX from SupportBean.win:keepall() sb";
+        String eplSubselectScalarCorrelated = "select (select key0 from SupportBean_ST0.win:keepall() st0 where st0.id = sb.theString).allOf(x => x  like '%hello%') as allOfX from SupportBean.win:keepall() sb";
         EPStatement stmtSubselectScalarCorrlated = epService.getEPAdministrator().createEPL(eplSubselectScalarCorrelated);
         stmtSubselectScalarCorrlated.addListener(listener);
 

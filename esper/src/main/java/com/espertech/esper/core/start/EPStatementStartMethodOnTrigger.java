@@ -99,7 +99,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
 
             EvalRootFactoryNode rootNode = services.getPatternNodeFactory().makeRootNode();
             rootNode.addChildNode(patternStreamSpec.getEvalFactoryNode());
-            PatternContext patternContext = statementContext.getPatternContextFactory().createContext(statementContext, 0, rootNode, !patternStreamSpec.getArrayEventTypes().isEmpty());
+            PatternContext patternContext = statementContext.getPatternContextFactory().createContext(statementContext, 0, rootNode, patternStreamSpec.getMatchedEventMapMeta());
             activator = new ViewableActivatorPattern(patternContext, rootNode, eventType, EPStatementStartMethodHelperUtil.isConsumingFilters(patternStreamSpec.getEvalFactoryNode()));
             activatorResultEventType = eventType;
         }
@@ -198,7 +198,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             }
             AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
             resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                    statementSpec, statementContext, typeService, null, new boolean[0], true, contextPropertyRegistry);
+                    statementSpec, statementContext, typeService, null, new boolean[0], true, contextPropertyRegistry, null);
 
             InternalEventRouter routerService = null;
             boolean addToFront = false;
@@ -271,7 +271,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             ResultSetProcessorFactoryDesc[] processorFactories = new ResultSetProcessorFactoryDesc[desc.getSplitStreams().size() + 1];
             ExprNode[] whereClauses = new ExprNode[desc.getSplitStreams().size() + 1];
             processorFactories[0] = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                    statementSpec, statementContext, typeService, null, new boolean[0], false, contextPropertyRegistry);
+                    statementSpec, statementContext, typeService, null, new boolean[0], false, contextPropertyRegistry, null);
             whereClauses[0] = statementSpec.getFilterRootNode();
             boolean[] isNamedWindowInsert = new boolean[desc.getSplitStreams().size() + 1];
             isNamedWindowInsert[0] = false;
@@ -286,7 +286,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
                 EPStatementStartMethodHelperValidate.validateNodes(splitSpec, statementContext, typeService, null);
 
                 processorFactories[index] = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                        splitSpec, statementContext, typeService, null, new boolean[0], false, contextPropertyRegistry);
+                        splitSpec, statementContext, typeService, null, new boolean[0], false, contextPropertyRegistry, null);
                 whereClauses[index] = splitSpec.getFilterRootNode();
                 isNamedWindowInsert[index] = statementContext.getNamedWindowService().isNamedWindow(splits.getInsertInto().getEventTypeName());
 
@@ -306,11 +306,11 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             defaultSelectAllSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
 
             StreamTypeService streamTypeService = new StreamTypeServiceImpl(new EventType[] {outputEventType}, new String[] {"trigger_stream"}, new boolean[] {true}, services.getEngineURI(), false);
-            outputResultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(defaultSelectAllSpec, statementContext, streamTypeService, null, new boolean[0], true, contextPropertyRegistry);
+            outputResultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(defaultSelectAllSpec, statementContext, streamTypeService, null, new boolean[0], true, contextPropertyRegistry, null);
         }
 
         EventType resultEventType = resultSetProcessorPrototype == null ? null : resultSetProcessorPrototype.getResultSetProcessorFactory().getResultEventType();
-        OutputProcessViewFactory outputViewFactory = OutputProcessViewFactoryFactory.make(statementSpec, services.getInternalEventRouter(), statementContext, resultEventType);
+        OutputProcessViewFactory outputViewFactory = OutputProcessViewFactoryFactory.make(statementSpec, services.getInternalEventRouter(), statementContext, resultEventType, null);
 
         // create context factory
         StatementAgentInstanceFactoryOnTrigger contextFactory = new StatementAgentInstanceFactoryOnTrigger(statementContext, statementSpec, services, activator, subSelectStrategyCollection, resultSetProcessorPrototype, validatedJoin, activatorResultEventType, splitDesc, outputResultSetProcessorPrototype, onSetVariableViewFactory, onExprFactory, outputViewFactory, isRecoveringStatement);

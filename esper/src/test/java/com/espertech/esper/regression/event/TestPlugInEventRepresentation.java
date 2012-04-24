@@ -251,11 +251,11 @@ public class TestPlugInEventRepresentation extends TestCase
 
     private Properties makeProperties(String[][] values)
     {
-        Properties event = new Properties();
+        Properties theEvent = new Properties();
         for (int i = 0; i < values.length; i++)
         {
-            event.put(values[i][0], values[i][1]);
+            theEvent.put(values[i][0], values[i][1]);
         }
-        return event;
+        return theEvent;
     }
 }

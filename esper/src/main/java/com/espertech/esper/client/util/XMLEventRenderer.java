@@ -26,8 +26,8 @@ public interface XMLEventRenderer
     /**
      * Render a given event in the XML format.
      * @param rootElementName the name of the root element, may include namespace information
-     * @param event the event to render
+     * @param theEvent the event to render
      * @return XML formatted text
      */
-    public String render(String rootElementName, EventBean event);
+    public String render(String rootElementName, EventBean theEvent);
 }

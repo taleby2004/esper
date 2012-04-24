@@ -59,9 +59,9 @@ public class TestSchemaXMLEvent extends TestCase
             "<order>\n" +
             "<order_amount>202.1</order_amount>" +
             "</order>");
-        EventBean event = updateListener.getLastNewData()[0];
-        assertEquals(Double.class, event.get("order_amount").getClass());
-        assertEquals(202.1d, event.get("order_amount"));
+        EventBean theEvent = updateListener.getLastNewData()[0];
+        assertEquals(Double.class, theEvent.get("order_amount").getClass());
+        assertEquals(202.1d, theEvent.get("order_amount"));
         updateListener.reset();
     }
 
@@ -94,8 +94,8 @@ public class TestSchemaXMLEvent extends TestCase
             "<event-page-visit xmlns=\"samples:schemas:simpleSchemaWithAll\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"samples:schemas:simpleSchemaWithAll simpleSchemaWithAll.xsd\">\n" +
             "<url>page1</url>" +
             "</event-page-visit>");
-        EventBean event = updateListener.getLastNewData()[0];
-        assertEquals("page1", event.get("sesja"));
+        EventBean theEvent = updateListener.getLastNewData()[0];
+        assertEquals("page1", theEvent.get("sesja"));
         updateListener.reset();
 
         SupportXML.sendEvent(epService.getEPRuntime(),
@@ -161,16 +161,16 @@ public class TestSchemaXMLEvent extends TestCase
         Document eventDoc = SupportXML.sendDefaultEvent(epService.getEPRuntime(), "test");
 
         assertNotNull(updateListener.getLastNewData());
-        EventBean event = updateListener.getLastNewData()[0];
+        EventBean theEvent = updateListener.getLastNewData()[0];
 
-        assertSame(eventDoc.getDocumentElement().getChildNodes().item(1), event.get("nodeProp"));
-        assertEquals("SAMPLE_V6", event.get("nested1Prop"));
-        assertEquals(true, event.get("nested2Prop"));
-        assertEquals("SAMPLE_V8", event.get("complexProp"));
-        assertEquals(5, event.get("indexedProp"));
-        assertEquals(3.0, event.get("customProp"));
-        assertEquals(true, event.get("attrOneProp"));
-        assertEquals("c", event.get("attrTwoProp"));
+        assertSame(eventDoc.getDocumentElement().getChildNodes().item(1), theEvent.get("nodeProp"));
+        assertEquals("SAMPLE_V6", theEvent.get("nested1Prop"));
+        assertEquals(true, theEvent.get("nested2Prop"));
+        assertEquals("SAMPLE_V8", theEvent.get("complexProp"));
+        assertEquals(5, theEvent.get("indexedProp"));
+        assertEquals(3.0, theEvent.get("customProp"));
+        assertEquals(true, theEvent.get("attrOneProp"));
+        assertEquals("c", theEvent.get("attrTwoProp"));
 
         /**
          * Comment-in for performance testing
@@ -232,16 +232,16 @@ public class TestSchemaXMLEvent extends TestCase
         Document eventDoc = SupportXML.sendDefaultEvent(epService.getEPRuntime(), "test");
 
         assertNotNull(updateListener.getLastNewData());
-        EventBean event = updateListener.getLastNewData()[0];
+        EventBean theEvent = updateListener.getLastNewData()[0];
 
-        assertSame(eventDoc.getDocumentElement().getChildNodes().item(1), event.get("nodeProp"));
-        assertEquals("SAMPLE_V6", event.get("nested1Prop"));
-        assertEquals(true, event.get("nested2Prop"));
-        assertEquals("SAMPLE_V8", event.get("complexProp"));
-        assertEquals(5, event.get("indexedProp"));
-        assertEquals(3.0, event.get("customProp"));
-        assertEquals(true, event.get("attrOneProp"));
-        assertEquals("c", event.get("attrTwoProp"));
+        assertSame(eventDoc.getDocumentElement().getChildNodes().item(1), theEvent.get("nodeProp"));
+        assertEquals("SAMPLE_V6", theEvent.get("nested1Prop"));
+        assertEquals(true, theEvent.get("nested2Prop"));
+        assertEquals("SAMPLE_V8", theEvent.get("complexProp"));
+        assertEquals(5, theEvent.get("indexedProp"));
+        assertEquals(3.0, theEvent.get("customProp"));
+        assertEquals(true, theEvent.get("attrOneProp"));
+        assertEquals("c", theEvent.get("attrTwoProp"));
 
         /**
          * Comment-in for performance testing

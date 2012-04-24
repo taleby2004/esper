@@ -12,11 +12,14 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.hook.AggregationFunctionFactory;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
+import com.espertech.esper.epl.agg.AggregationMethod;
 import com.espertech.esper.epl.agg.AggregationValidationContext;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportPluginAggregationMethodOne;
 import com.espertech.esper.support.epl.SupportPluginAggregationMethodThree;
@@ -45,29 +48,29 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
     public void testGrouped() throws Exception
     {
-        String textOne = "select irstream CONCATSTRING(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        String textOne = "select irstream CONCATSTRING(theString) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
         tryGrouped(textOne, null);
 
-        String textTwo = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        String textTwo = "select irstream concatstring(theString) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
         tryGrouped(textTwo, null);
 
-        String textThree = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        String textThree = "select irstream concatstring(theString) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(textThree);
         SerializableObjectCopier.copy(model);
         assertEquals(textThree, model.toEPL());
         tryGrouped(null, model);
 
-        String textFour = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        String textFour = "select irstream concatstring(theString) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
         EPStatementObjectModel modelTwo = new EPStatementObjectModel();
         modelTwo.setSelectClause(SelectClause.create().streamSelector(StreamSelector.RSTREAM_ISTREAM_BOTH)
-                .add(Expressions.plugInAggregation("concatstring", Expressions.property("string")), "val"));
+                .add(Expressions.plugInAggregation("concatstring", Expressions.property("theString")), "val"));
         modelTwo.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName()).addView("win", "length", Expressions.constant(10))));
         modelTwo.setGroupByClause(GroupByClause.create("intPrimitive"));
         assertEquals(textFour, modelTwo.toEPL());
         SerializableObjectCopier.copy(modelTwo);
         tryGrouped(null, modelTwo);
 
-        String textFive = "select irstream concatstringTwo(string) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
+        String textFive = "select irstream concatstringTwo(theString) as val from " + SupportBean.class.getName() + ".win:length(10) group by intPrimitive";
         tryGrouped(textFive, null);
     }
 
@@ -108,7 +111,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
     public void testWindow()
     {
-        String text = "select irstream concatstring(string) as val from " + SupportBean.class.getName() + ".win:length(2)";
+        String text = "select irstream concatstring(theString) as val from " + SupportBean.class.getName() + ".win:length(2)";
         EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -128,7 +131,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
     public void testDistinct()
     {
-        String text = "select irstream concatstring(distinct string) as val from " + SupportBean.class.getName();
+        String text = "select irstream concatstring(distinct theString) as val from " + SupportBean.class.getName();
         EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -149,7 +152,7 @@ public class TestAggregationFunctionPlugIn extends TestCase
         EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"a b c"}, new Object[] {"a b c"});
     }
 
-    public void testArrayParams()
+    public void testArrayParamsAndDotMethod()
     {
         epService.getEPAdministrator().getConfiguration().addPlugInAggregationFunction("countback", SupportPluginAggregationMethodOne.class.getName());
 
@@ -160,6 +163,19 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean());
         EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {-1}, new Object[] {0});
+
+        // test dot-method
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean_A.class);
+        epService.getEPAdministrator().getConfiguration().addPlugInAggregationFunctionFactory("myagg", MyAggFuncFactory.class.getName());
+        String[] fields = "val0,val1".split(",");
+        epService.getEPAdministrator().createEPL("select (myagg(id)).getTheString() as val0, (myagg(id)).getIntPrimitive() as val1 from SupportBean_A").addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"XX", 1});
+        assertEquals(1, MyAggFuncFactory.getInstanceCount());
+
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A2"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"XX", 2});
     }
 
     public void testMultipleParams()
@@ -325,8 +341,8 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
     public void testInvalid()
     {
-        tryInvalid("select xxx(string) from " + SupportBean.class.getName(),
-                "Error starting statement: Unknown single-row function, aggregation function or mapped or indexed property named 'xxx' could not be resolved [select xxx(string) from com.espertech.esper.support.bean.SupportBean]");
+        tryInvalid("select xxx(theString) from " + SupportBean.class.getName(),
+                "Error starting statement: Unknown single-row function, aggregation function or mapped or indexed property named 'xxx' could not be resolved [select xxx(theString) from com.espertech.esper.support.bean.SupportBean]");
     }
 
     private void tryInvalid(String stmtText, String expectedMsg)
@@ -339,6 +355,54 @@ public class TestAggregationFunctionPlugIn extends TestCase
         catch (EPStatementException ex)
         {
             assertEquals(expectedMsg, ex.getMessage());
+        }
+    }
+
+    public static class MyAggFuncFactory implements AggregationFunctionFactory {
+        private static int instanceCount;
+
+        public static int getInstanceCount() {
+            return instanceCount;
+        }
+
+        public void setFunctionName(String functionName) {
+        }
+
+        public void validate(AggregationValidationContext validationContext) {
+        }
+
+        public AggregationMethod newAggregator() {
+            instanceCount++;
+            return new MyAggFuncMethod();
+        }
+
+        public Class getValueType() {
+            return SupportBean.class;
+        }
+    }
+
+    public static class MyAggFuncMethod implements AggregationMethod {
+
+        private int count;
+
+        public void enter(Object value) {
+            count++;
+        }
+
+        public void leave(Object value) {
+            count--;
+        }
+
+        public Object getValue() {
+            return new SupportBean("XX", count);
+        }
+
+        public Class getValueType() {
+            return SupportBean.class;
+        }
+
+        public void clear() {
+            count = 0;
         }
     }
 }

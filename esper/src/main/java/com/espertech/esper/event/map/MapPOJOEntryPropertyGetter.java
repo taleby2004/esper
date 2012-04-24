@@ -9,10 +9,11 @@
 package com.espertech.esper.event.map;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.event.bean.BaseNativePropertyGetter;
+import com.espertech.esper.event.BaseNestableEventUtil;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.bean.BaseNativePropertyGetter;
+import com.espertech.esper.event.bean.BeanEventPropertyGetter;
 
 import java.util.Map;
 
@@ -22,8 +23,7 @@ import java.util.Map;
 public class MapPOJOEntryPropertyGetter extends BaseNativePropertyGetter implements MapEventPropertyGetter
 {
     private final String propertyMap;
-    private final EventPropertyGetter mapEntryGetter;
-    private final EventAdapterService eventAdapterService;
+    private final BeanEventPropertyGetter mapEntryGetter;
 
     /**
      * Ctor.
@@ -32,11 +32,10 @@ public class MapPOJOEntryPropertyGetter extends BaseNativePropertyGetter impleme
      * @param eventAdapterService for producing wrappers to objects
      * @param returnType type of the entry returned
      */
-    public MapPOJOEntryPropertyGetter(String propertyMap, EventPropertyGetter mapEntryGetter, EventAdapterService eventAdapterService, Class returnType) {
+    public MapPOJOEntryPropertyGetter(String propertyMap, BeanEventPropertyGetter mapEntryGetter, EventAdapterService eventAdapterService, Class returnType) {
         super(eventAdapterService, returnType, null);
         this.propertyMap = propertyMap;
         this.mapEntryGetter = mapEntryGetter;
-        this.eventAdapterService = eventAdapterService;
     }
 
     public Object getMap(Map<String, Object> map) throws PropertyAccessException
@@ -50,8 +49,7 @@ public class MapPOJOEntryPropertyGetter extends BaseNativePropertyGetter impleme
         }
 
         // Object within the map
-        EventBean event = eventAdapterService.adapterForBean(value);
-        return mapEntryGetter.get(event);
+        return mapEntryGetter.getBeanProp(value);
     }
 
     public boolean isMapExistsProperty(Map<String, Object> map)
@@ -61,17 +59,7 @@ public class MapPOJOEntryPropertyGetter extends BaseNativePropertyGetter impleme
 
     public Object get(EventBean obj)
     {
-        Object underlying = obj.getUnderlying();
-
-        // The underlying is expected to be a map
-        if (!(underlying instanceof Map))
-        {
-            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                    "the underlying data object is not of type java.lang.Map");
-        }
-
-        Map map = (Map) underlying;
-        return getMap(map);
+        return getMap(BaseNestableEventUtil.checkedCastUnderlyingMap(obj));
     }
 
     public boolean isExistsProperty(EventBean eventBean)

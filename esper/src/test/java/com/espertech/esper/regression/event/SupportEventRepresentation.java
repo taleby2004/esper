@@ -65,7 +65,7 @@ public class SupportEventRepresentation implements PlugInEventRepresentation
     {
         this.eventBeanContext = context;
         return new PlugInEventBeanFactory() {
-            public EventBean create(Object event, URI resolutionURI)
+            public EventBean create(Object theEvent, URI resolutionURI)
             {
                 return null;  //To change body of implemented methods use File | Settings | File Templates.
             }

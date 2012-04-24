@@ -31,7 +31,7 @@ public class TestOutputLimitAfter extends TestCase
 
      public void setUp()
      {
-         fields = new String[] {"string"};
+         fields = new String[] {"theString"};
          Configuration config = SupportConfigFactory.getConfiguration();
          config.addEventType("SupportBean", SupportBean.class);
          epService = EPServiceProviderManager.getDefaultProvider(config);
@@ -47,14 +47,14 @@ public class TestOutputLimitAfter extends TestCase
      public void testEveryPolicy()
      {
          sendTimer(0);
-         String stmtText = "select string from SupportBean.win:keepall() output after 0 days 0 hours 0 minutes 20 seconds 0 milliseconds every 0 days 0 hours 0 minutes 5 seconds 0 milliseconds";
+         String stmtText = "select theString from SupportBean.win:keepall() output after 0 days 0 hours 0 minutes 20 seconds 0 milliseconds every 0 days 0 hours 0 minutes 5 seconds 0 milliseconds";
          EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
          stmt.addListener(listener);
 
          runAssertion();
          
          EPStatementObjectModel model = new EPStatementObjectModel();
-         model.setSelectClause(SelectClause.create("string"));
+         model.setSelectClause(SelectClause.create("theString"));
          model.setFromClause(FromClause.create(FilterStream.create("SupportBean").addView("win", "keepall")));
          model.setOutputLimitClause(OutputLimitClause.create(Expressions.timePeriod(0, 0, 0, 5, 0)).afterTimePeriodExpression(Expressions.timePeriod(0, 0, 0, 20, 0)));
          assertEquals(stmtText, model.toEPL());
@@ -94,7 +94,7 @@ public class TestOutputLimitAfter extends TestCase
 
      public void testDirectNumberOfEvents()
      {
-         String stmtText = "select string from SupportBean.win:keepall() output after 3 events";
+         String stmtText = "select theString from SupportBean.win:keepall() output after 3 events";
          EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
          stmt.addListener(listener);
 
@@ -112,10 +112,10 @@ public class TestOutputLimitAfter extends TestCase
          stmt.destroy();
          
          EPStatementObjectModel model = new EPStatementObjectModel();
-         model.setSelectClause(SelectClause.create("string"));
+         model.setSelectClause(SelectClause.create("theString"));
          model.setFromClause(FromClause.create(FilterStream.create("SupportBean").addView("win", "keepall")));
          model.setOutputLimitClause(OutputLimitClause.createAfter(3));
-         assertEquals("select string from SupportBean.win:keepall() output after 3 events ", model.toEPL());
+         assertEquals("select theString from SupportBean.win:keepall() output after 3 events ", model.toEPL());
 
          stmt = epService.getEPAdministrator().create(model);
          stmt.addListener(listener);
@@ -131,14 +131,14 @@ public class TestOutputLimitAfter extends TestCase
          sendEvent("E5");
          EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E5"});
          
-         model = epService.getEPAdministrator().compileEPL("select string from SupportBean.win:keepall() output after 3 events");
-         assertEquals("select string from SupportBean.win:keepall() output after 3 events ", model.toEPL());
+         model = epService.getEPAdministrator().compileEPL("select theString from SupportBean.win:keepall() output after 3 events");
+         assertEquals("select theString from SupportBean.win:keepall() output after 3 events ", model.toEPL());
      }
 
      public void testDirectTimePeriod()
      {
          sendTimer(0);
-         String stmtText = "select string from SupportBean.win:keepall() output after 20 seconds ";
+         String stmtText = "select theString from SupportBean.win:keepall() output after 20 seconds ";
          EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
          stmt.addListener(listener);
 
@@ -166,7 +166,7 @@ public class TestOutputLimitAfter extends TestCase
          epService.getEPAdministrator().createEPL("create variable int myvar = 1");
 
          sendTimer(0);
-         String stmtText = "select string from SupportBean.win:keepall() output after 20 seconds snapshot when myvar = 1";
+         String stmtText = "select theString from SupportBean.win:keepall() output after 20 seconds snapshot when myvar = 1";
          EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
          stmt.addListener(listener);
 
@@ -230,8 +230,8 @@ public class TestOutputLimitAfter extends TestCase
          epService.getEPRuntime().sendEvent(new CurrentTimeEvent(time));
      }
 
-     private void sendEvent(String string)
+     private void sendEvent(String theString)
      {
-         epService.getEPRuntime().sendEvent(new SupportBean(string, 0));
+         epService.getEPRuntime().sendEvent(new SupportBean(theString, 0));
      }
  }

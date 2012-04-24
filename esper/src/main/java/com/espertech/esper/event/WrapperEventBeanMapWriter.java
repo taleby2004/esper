@@ -31,9 +31,9 @@ public class WrapperEventBeanMapWriter implements EventBeanWriter
         this.properties = properties;
     }
 
-    public void write(Object[] values, EventBean event)
+    public void write(Object[] values, EventBean theEvent)
     {
-        DecoratingEventBean mappedEvent = (DecoratingEventBean) event;
+        DecoratingEventBean mappedEvent = (DecoratingEventBean) theEvent;
         Map<String, Object> map = mappedEvent.getDecoratingProperties();
 
         for (int i = 0; i < properties.length; i++)

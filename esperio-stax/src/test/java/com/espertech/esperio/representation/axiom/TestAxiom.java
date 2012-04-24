@@ -114,9 +114,9 @@ public class TestAxiom extends TestCase
         joinView.addListener(updateListener);
 
         sendXMLEvent(epService, "SensorEvent", "<measurement><temperature>98.6</temperature><sensorid>8374744</sensorid></measurement>");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals(98.6, event.get("temp"));
-        assertEquals(8374744L, event.get("sensorId"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals(98.6, theEvent.get("temp"));
+        assertEquals(8374744L, theEvent.get("sensorId"));
     }
 
     public void testNestedXML() throws Exception
@@ -136,19 +136,19 @@ public class TestAxiom extends TestCase
         joinView.addListener(updateListener);
 
         sendXMLEvent(epService, "AEvent", "<a><b><c></c></b></a>");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("", event.get("type"));
-        assertEquals("", event.get("element1"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("", theEvent.get("type"));
+        assertEquals("", theEvent.get("element1"));
 
         sendXMLEvent(epService, "AEvent", "<a><b></b></a>");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEquals("", event.get("type"));
-        assertEquals("", event.get("element1"));
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("", theEvent.get("type"));
+        assertEquals("", theEvent.get("element1"));
 
         sendXMLEvent(epService, "AEvent", "<a><b><c>text</c></b></a>");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEquals("text", event.get("type"));
-        assertEquals("text", event.get("element1"));
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("text", theEvent.get("type"));
+        assertEquals("text", theEvent.get("element1"));
 
         // Use a URI sender list
         String xml = "<a><b><c>hype</c></b></a>";
@@ -156,9 +156,9 @@ public class TestAxiom extends TestCase
         InputStream s = new ByteArrayInputStream(xml.getBytes());
         OMElement documentElement = new StAXOMBuilder(s).getDocumentElement();
         sender.sendEvent(documentElement);
-        event = updateListener.assertOneGetNewAndReset();
-        assertEquals("hype", event.get("type"));
-        assertEquals("hype", event.get("element1"));
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("hype", theEvent.get("type"));
+        assertEquals("hype", theEvent.get("element1"));
     }
 
     public void testDotEscapeSyntax() throws Exception
@@ -177,8 +177,8 @@ public class TestAxiom extends TestCase
         joinView.addListener(updateListener);
 
         sendXMLEvent(epService, "AEvent", "<myroot><a.b><c.d>value</c.d></a.b></myroot>");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("value", event.get("val"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("value", theEvent.get("val"));
     }
 
     public void testEventXML() throws Exception
@@ -199,9 +199,9 @@ public class TestAxiom extends TestCase
         joinView.addListener(updateListener);
 
         sendXMLEvent(epService, "MyEvent", "<event type=\"a-f-G\" uid=\"terminal.55\" time=\"2007-04-19T13:05:20.22Z\" version=\"2.0\"></event>");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("a-f-G", event.get("type"));
-        assertEquals("terminal.55", event.get("uid"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("a-f-G", theEvent.get("type"));
+        assertEquals("terminal.55", theEvent.get("uid"));
     }
 
     public void testElementNode() throws Exception
@@ -228,9 +228,9 @@ public class TestAxiom extends TestCase
 
         sendXMLEvent(epService, "MyEvent", xml);
 
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("a-f-G", event.get("type"));
-        assertEquals("terminal.55", event.get("uid"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("a-f-G", theEvent.get("type"));
+        assertEquals("terminal.55", theEvent.get("uid"));
     }
 
     public void testNamespaceXPathRelative() throws Exception
@@ -255,9 +255,9 @@ public class TestAxiom extends TestCase
         String xml = "<m0:getQuote xmlns:m0=\"http://services.samples/xsd\"><m0:request><m0:symbol>IBM</m0:symbol></m0:request></m0:getQuote>";
         sendXMLEvent(epService, "StockQuote", xml);
 
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("IBM", event.get("symbol_a"));
-        assertEquals("IBM", event.get("symbol_b"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("IBM", theEvent.get("symbol_a"));
+        assertEquals("IBM", theEvent.get("symbol_b"));
     }
 
     public void testNamespaceXPathAbsolute() throws Exception
@@ -284,31 +284,31 @@ public class TestAxiom extends TestCase
         String xml = "<m0:getQuote xmlns:m0=\"http://services.samples/xsd\"><m0:request><m0:symbol>IBM</m0:symbol></m0:request></m0:getQuote>";
         sendXMLEvent(epService, "StockQuote", xml);
 
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("IBM", event.get("symbol_a"));
-        assertEquals("IBM", event.get("symbol_c"));
-        assertEquals("IBM", event.get("symbol_d"));
-        assertEquals("", event.get("symbol_e"));    // should be empty string as we are doing absolute XPath
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("IBM", theEvent.get("symbol_a"));
+        assertEquals("IBM", theEvent.get("symbol_c"));
+        assertEquals("IBM", theEvent.get("symbol_d"));
+        assertEquals("", theEvent.get("symbol_e"));    // should be empty string as we are doing absolute XPath
     }
 
     private void assertData(String element1)
     {
         assertNotNull(updateListener.getLastNewData());
-        EventBean event = updateListener.getLastNewData()[0];
+        EventBean theEvent = updateListener.getLastNewData()[0];
 
-        assertEquals(element1, event.get("element1"));
-        assertEquals("VAL4-1", event.get("nestedElement"));
-        assertEquals("VAL21-2", event.get("mappedElement"));
-        assertEquals("VAL21-2", event.get("indexedElement"));
+        assertEquals(element1, theEvent.get("element1"));
+        assertEquals("VAL4-1", theEvent.get("nestedElement"));
+        assertEquals("VAL21-2", theEvent.get("mappedElement"));
+        assertEquals("VAL21-2", theEvent.get("indexedElement"));
 
-        assertEquals(element1, event.get("xpathElement1"));
-        assertEquals(2.0, event.get("xpathCountE21"));
-        assertEquals("VAL3", event.get("xpathAttrString"));
-        assertEquals(5.6, event.get("xpathAttrNum"));
-        assertEquals(true, event.get("xpathAttrBool"));
+        assertEquals(element1, theEvent.get("xpathElement1"));
+        assertEquals(2.0, theEvent.get("xpathCountE21"));
+        assertEquals("VAL3", theEvent.get("xpathAttrString"));
+        assertEquals(5.6, theEvent.get("xpathAttrNum"));
+        assertEquals(true, theEvent.get("xpathAttrBool"));
 
-        assertEquals("", event.get("invalidelement"));        // properties not found come back as empty string without schema
-        assertEquals("", event.get("invalidattr"));     // attributes not supported when no schema supplied, use XPath
+        assertEquals("", theEvent.get("invalidelement"));        // properties not found come back as empty string without schema
+        assertEquals("", theEvent.get("invalidattr"));     // attributes not supported when no schema supplied, use XPath
     }
 
     private void sendEvent(EPServiceProvider engine, String alias, String value) throws Exception

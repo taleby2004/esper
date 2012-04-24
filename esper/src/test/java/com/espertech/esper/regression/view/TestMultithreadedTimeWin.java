@@ -134,11 +134,11 @@ public class TestMultithreadedTimeWin extends TestCase {
                 String symbol = symbols[symbolNum];
                 long volume = 1;
 
-                Object event = new SupportMarketDataBean(symbol, -1, volume, null);
+                Object theEvent = new SupportMarketDataBean(symbol, -1, volume, null);
 
                 sharedLock.lock();
                 try {
-                    epRuntime.sendEvent(event);
+                    epRuntime.sendEvent(theEvent);
                 }
                 finally {
                     sharedLock.unlock();

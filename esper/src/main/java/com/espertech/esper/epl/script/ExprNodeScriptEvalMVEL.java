@@ -35,14 +35,14 @@ public class ExprNodeScriptEvalMVEL extends ExprNodeScriptEvalBase {
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> paramsList = new HashMap<String, Object>();
         for (int i = 0; i < names.length; i++) {
-            params.put(names[i], parameters[i].evaluate(eventsPerStream, isNewData, context));
+            paramsList.put(names[i], parameters[i].evaluate(eventsPerStream, isNewData, context));
         }
-        params.put(ExprNodeScript.CONTEXT_BINDING_NAME, context.getAgentInstanceScriptContext());
+        paramsList.put(ExprNodeScript.CONTEXT_BINDING_NAME, context.getAgentInstanceScriptContext());
 
         try {
-            Object result = MVELInvoker.executeExpression(executable, params);
+            Object result = MVELInvoker.executeExpression(executable, paramsList);
 
             if (coercer != null) {
                 return coercer.coerceBoxed((Number) result);

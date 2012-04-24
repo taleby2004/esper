@@ -54,7 +54,7 @@ public class TestJoinMultiKeyAndRange extends TestCase
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(eplOne);
         stmtOne.addListener(listener);
 
-        String eplTwo = "select sb.* from SupportBean.win:keepall() sb, SupportBeanRange.std:lastevent() where string = key and intBoxed in [rangeStart: rangeEnd]";
+        String eplTwo = "select sb.* from SupportBean.win:keepall() sb, SupportBeanRange.std:lastevent() where theString = key and intBoxed in [rangeStart: rangeEnd]";
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL(eplTwo);
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmtTwo.addListener(listenerTwo);
@@ -80,7 +80,7 @@ public class TestJoinMultiKeyAndRange extends TestCase
         EPAssertionUtil.assertEqualsAnyOrder(new Object[]{eventOne, eventTwo}, EPAssertionUtil.getUnderlying(events));
 
         // test string compare
-        String eplThree = "select sb.* from SupportBeanRange.win:keepall() sb, SupportBean.std:lastevent() where string in [rangeStartStr:rangeEndStr]";
+        String eplThree = "select sb.* from SupportBeanRange.win:keepall() sb, SupportBean.std:lastevent() where theString in [rangeStartStr:rangeEndStr]";
         epService.getEPAdministrator().createEPL(eplThree);
 
         sendSupportBean("P", 1, 1);
@@ -94,8 +94,8 @@ public class TestJoinMultiKeyAndRange extends TestCase
         String eventClass = SupportBean.class.getName();
 
         String joinStatement = "select * from " +
-            eventClass + "(string='A').win:length(3) as streamA," +
-            eventClass + "(string='B').win:length(3) as streamB" +
+            eventClass + "(theString='A').win:length(3) as streamA," +
+            eventClass + "(theString='B').win:length(3) as streamB" +
             " where streamA.intPrimitive = streamB.intPrimitive " +
                "and streamA.intBoxed = streamB.intBoxed";
 
@@ -109,12 +109,12 @@ public class TestJoinMultiKeyAndRange extends TestCase
         for (int i = 0; i < eventData.length; i++)
         {
             eventsA[i] = new SupportBean();
-            eventsA[i].setString("A");
+            eventsA[i].setTheString("A");
             eventsA[i].setIntPrimitive(eventData[i][0]);
             eventsA[i].setIntBoxed(eventData[i][1]);
 
             eventsB[i] = new SupportBean();
-            eventsB[i].setString("B");
+            eventsB[i].setTheString("B");
             eventsB[i].setIntPrimitive(eventData[i][0]);
             eventsB[i].setIntBoxed(eventData[i][1]);
         }
@@ -126,13 +126,13 @@ public class TestJoinMultiKeyAndRange extends TestCase
         assertNull(listener.getLastNewData());    // No events expected
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
-    private SupportBean sendSupportBean(String string, int intPrimitive, Integer intBoxed) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private SupportBean sendSupportBean(String theString, int intPrimitive, Integer intBoxed) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setIntBoxed(intBoxed);
         epService.getEPRuntime().sendEvent(bean);
         return bean;

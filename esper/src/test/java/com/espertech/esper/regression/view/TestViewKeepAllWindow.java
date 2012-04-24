@@ -50,30 +50,30 @@ public class TestViewKeepAllWindow extends TestCase
 
         // check iterator results
         Iterator<EventBean> events = statement.iterator();
-        EventBean event = events.next();
-        assertEquals("ABC", event.get("symbol"));
-        assertEquals(20d, event.get("price"));
+        EventBean theEvent = events.next();
+        assertEquals("ABC", theEvent.get("symbol"));
+        assertEquals(20d, theEvent.get("price"));
 
-        event = events.next();
-        assertEquals("DEF", event.get("symbol"));
-        assertEquals(100d, event.get("price"));
+        theEvent = events.next();
+        assertEquals("DEF", theEvent.get("symbol"));
+        assertEquals(100d, theEvent.get("price"));
         assertFalse(events.hasNext());
 
         sendEvent("EFG", 50);
 
         // check iterator results
         events = statement.iterator();
-        event = events.next();
-        assertEquals("ABC", event.get("symbol"));
-        assertEquals(20d, event.get("price"));
+        theEvent = events.next();
+        assertEquals("ABC", theEvent.get("symbol"));
+        assertEquals(20d, theEvent.get("price"));
 
-        event = events.next();
-        assertEquals("DEF", event.get("symbol"));
-        assertEquals(100d, event.get("price"));
+        theEvent = events.next();
+        assertEquals("DEF", theEvent.get("symbol"));
+        assertEquals(100d, theEvent.get("price"));
 
-        event = events.next();
-        assertEquals("EFG", event.get("symbol"));
-        assertEquals(50d, event.get("price"));
+        theEvent = events.next();
+        assertEquals("EFG", theEvent.get("symbol"));
+        assertEquals(50d, theEvent.get("price"));
     }
 
     public void testWindowStats()
@@ -108,7 +108,7 @@ public class TestViewKeepAllWindow extends TestCase
 
     private void sendEvent(String symbol, double price)
     {
-        SupportMarketDataBean event = new SupportMarketDataBean(symbol, price, 0L, "");
-        epService.getEPRuntime().sendEvent(event);
+        SupportMarketDataBean theEvent = new SupportMarketDataBean(symbol, price, 0L, "");
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

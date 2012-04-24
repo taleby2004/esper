@@ -14,5 +14,5 @@ package com.espertech.esper.core.service;
 import com.espertech.esper.client.EventBean;
 
 public interface InsertIntoListener {
-    public void inserted(EventBean event, EPStatementHandle statementHandle);
+    public void inserted(EventBean theEvent, EPStatementHandle statementHandle);
 }

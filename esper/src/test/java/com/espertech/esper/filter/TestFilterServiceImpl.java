@@ -49,7 +49,7 @@ public class TestFilterServiceImpl extends TestCase
         filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeOne, new Object[0]).getValueSet(null, null, null));
         filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeOne, new Object[] {
                 "intPrimitive", FilterOperator.RANGE_CLOSED, 10, 20,
-                "string", FilterOperator.EQUAL, "HELLO",
+                "theString", FilterOperator.EQUAL, "HELLO",
                 "boolPrimitive", FilterOperator.EQUAL, false,
                 "doubleBoxed", FilterOperator.GREATER, 100d} ).getValueSet(null, null, null));
         filterSpecs.add(SupportFilterSpecBuilder.build(eventTypeTwo, new Object[0]).getValueSet(null, null, null));
@@ -162,7 +162,7 @@ public class TestFilterServiceImpl extends TestCase
                 return "";
             }
 
-            public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+            public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
             {
                 log.debug(".matchFound Removing callbackTwo");
                 filterService.remove(callbackTwo);
@@ -178,13 +178,13 @@ public class TestFilterServiceImpl extends TestCase
         filterService.add(spec, callbackTwo);
 
         // send event
-        EventBean event = makeTypeOneEvent(1, "HELLO", false, 1);
+        EventBean theEvent = makeTypeOneEvent(1, "HELLO", false, 1);
         List<FilterHandle> matches = new LinkedList<FilterHandle>();
-        filterService.evaluate(event, matches);
+        filterService.evaluate(theEvent, matches);
         for (FilterHandle match : matches)
         {
             FilterHandleCallback handle = (FilterHandleCallback) match;
-            handle.matchFound(event, null);
+            handle.matchFound(theEvent, null);
         }
 
         // Callback two MUST be invoked, was removed by callback one, but since the
@@ -192,11 +192,11 @@ public class TestFilterServiceImpl extends TestCase
         assertEquals(1, callbackTwo.getAndResetCountInvoked());
     }
 
-    private EventBean makeTypeOneEvent(int intPrimitive, String string, boolean boolPrimitive, double doubleBoxed)
+    private EventBean makeTypeOneEvent(int intPrimitive, String theString, boolean boolPrimitive, double doubleBoxed)
     {
         SupportBean bean = new SupportBean();
         bean.setIntPrimitive(intPrimitive);
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setBoolPrimitive(boolPrimitive);
         bean.setDoubleBoxed(doubleBoxed);
         return SupportEventBeanFactory.createObject(bean);

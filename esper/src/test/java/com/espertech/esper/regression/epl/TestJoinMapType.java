@@ -70,11 +70,11 @@ public class TestJoinMapType extends TestCase
         assertFalse(listener.isInvoked());
         
         sendMapEvent("MapS1", "a", 2);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("a", event.get("S0.id"));
-        assertEquals("a", event.get("S1.id"));
-        assertEquals(1, event.get("S0.p00"));
-        assertEquals(2, event.get("S1.p00"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("a", theEvent.get("S0.id"));
+        assertEquals("a", theEvent.get("S1.id"));
+        assertEquals(1, theEvent.get("S0.p00"));
+        assertEquals(2, theEvent.get("S1.p00"));
 
         sendMapEvent("MapS1", "b", 3);
         sendMapEvent("MapS0", "c", 4);
@@ -106,8 +106,8 @@ public class TestJoinMapType extends TestCase
     public void testJoinWrapperEventNotUnique()
     {
         // Test for Esper-122
-        epService.getEPAdministrator().createEPL("insert into S0 select 's0' as stream, * from " + SupportBean.class.getName());
-        epService.getEPAdministrator().createEPL("insert into S1 select 's1' as stream, * from " + SupportBean.class.getName());
+        epService.getEPAdministrator().createEPL("insert into S0 select 's0' as streamone, * from " + SupportBean.class.getName());
+        epService.getEPAdministrator().createEPL("insert into S1 select 's1' as streamtwo, * from " + SupportBean.class.getName());
         String joinStatement = "select * from S0.win:keepall() as a, S1.win:keepall() as b where a.intBoxed = b.intBoxed";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(joinStatement);
@@ -121,9 +121,9 @@ public class TestJoinMapType extends TestCase
 
     private void sendMapEvent(String name, String id, int p00)
     {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("id", id);
-        event.put("p00", p00);
-        epService.getEPRuntime().sendEvent(event, name);
+        Map<String, Object> theEvent = new HashMap<String, Object>();
+        theEvent.put("id", id);
+        theEvent.put("p00", p00);
+        epService.getEPRuntime().sendEvent(theEvent, name);
     }
 }

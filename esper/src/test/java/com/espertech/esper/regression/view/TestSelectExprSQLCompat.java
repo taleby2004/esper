@@ -57,7 +57,7 @@ public class TestSelectExprSQLCompat extends TestCase
 
     private void runAssertionProperty(EPServiceProvider engine)
     {
-        String epl = "select default.SupportBean.string as val1, SupportBean.intPrimitive as val2 from SupportBean";
+        String epl = "select default.SupportBean.theString as val1, SupportBean.intPrimitive as val2 from SupportBean";
         EPStatement selectTestView = engine.getEPAdministrator().createEPL(epl);
         selectTestView.addListener(testListener);
 
@@ -70,13 +70,13 @@ public class TestSelectExprSQLCompat extends TestCase
     // Test stream name prefixed by engine URI
     private void runAssertionPrefixStream(EPServiceProvider engine)
     {
-        String epl = "select string from default.SupportBean";
+        String epl = "select theString from default.SupportBean";
         EPStatement selectTestView = engine.getEPAdministrator().createEPL(epl);
         selectTestView.addListener(testListener);
 
         sendEvent(engine, "E1", 10);
         EventBean received = testListener.getAndResetLastNewData()[0];
-        assertEquals("E1", received.get("string"));
+        assertEquals("E1", received.get("theString"));
     }
 
     private void sendEvent(EPServiceProvider engine, String s, int intPrimitive)

@@ -42,8 +42,8 @@ public class RevisionNestedPropertyGetter implements EventPropertyGetter
         }
 
         // Object within the map
-        EventBean event = eventAdapterService.adapterForBean(result);
-        return nestedGetter.get(event);
+        EventBean theEvent = eventAdapterService.adapterForBean(result);
+        return nestedGetter.get(theEvent);
     }
 
     public boolean isExistsProperty(EventBean eventBean)

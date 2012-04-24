@@ -54,7 +54,7 @@ public class TestEnumNestedPerformance extends TestCase {
         }
         SupportBean_ST0 minEvent = new SupportBean_ST0("E2", 5);
         list.add(minEvent);
-        SupportBean_ST0_Container event = new SupportBean_ST0_Container(list);
+        SupportBean_ST0_Container theEvent = new SupportBean_ST0_Container(list);
 
         // the "contained.min" inner lambda only depends on values within "contained" (a stream's value)
         // and not on the particular "x".
@@ -63,7 +63,7 @@ public class TestEnumNestedPerformance extends TestCase {
         stmtFragment.addListener(listener);
 
         long start = System.currentTimeMillis();
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
         long delta = System.currentTimeMillis() - start;
         assertTrue("delta=" + delta, delta < 100);
 

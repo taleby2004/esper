@@ -112,9 +112,9 @@ public class TestViewTimeWindowWeightedAvg extends TestCase
         assertEquals(SYMBOL, values.get("symbol"));
     }
 
-    private double getDoubleValue(ViewFieldEnum field, EventBean event)
+    private double getDoubleValue(ViewFieldEnum field, EventBean theEvent)
     {
-        return  (Double) event.get(field.getName());
+        return  (Double) theEvent.get(field.getName());
     }
 
     private void sleep(int msec)

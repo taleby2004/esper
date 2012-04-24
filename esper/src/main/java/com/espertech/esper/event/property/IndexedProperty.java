@@ -10,11 +10,18 @@ package com.espertech.esper.event.property;
 
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.event.*;
-import com.espertech.esper.event.map.*;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventPropertyGetterAndIndexed;
+import com.espertech.esper.event.EventTypeUtility;
+import com.espertech.esper.event.arr.ObjectArrayArrayPOJOEntryIndexedPropertyGetter;
+import com.espertech.esper.event.arr.ObjectArrayArrayPropertyGetter;
+import com.espertech.esper.event.arr.ObjectArrayEventPropertyGetterAndIndexed;
 import com.espertech.esper.event.bean.*;
+import com.espertech.esper.event.map.MapArrayPOJOEntryIndexedPropertyGetter;
+import com.espertech.esper.event.map.MapArrayPropertyGetter;
+import com.espertech.esper.event.map.MapEventPropertyGetterAndIndexed;
+import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.xml.*;
-import com.espertech.esper.event.xml.DOMIndexedGetter;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
@@ -22,8 +29,8 @@ import net.sf.cglib.reflect.FastMethod;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an indexed property or array property, ie. an 'value' property with read method getValue(int index)
@@ -304,7 +311,7 @@ public class IndexedProperty extends PropertyBase
             }
             else
             {
-                return new MapArrayMaptypedUndPropertyGetter(this.propertyNameAtomic, index, eventAdapterService, innerType);
+                return new MapArrayPropertyGetter(this.propertyNameAtomic, index, eventAdapterService, innerType);
             }
         }
         else {
@@ -412,5 +419,51 @@ public class IndexedProperty extends PropertyBase
         int end = propertyName.indexOf(']');
         String indexStr = propertyName.substring(start, end);
         return Integer.parseInt(indexStr);
+    }
+
+    public ObjectArrayEventPropertyGetterAndIndexed getGetterObjectArray(Map<String, Integer> indexPerProperty, Map<String, Object> nestableTypes, EventAdapterService eventAdapterService) {
+        Integer propertyIndex = indexPerProperty.get(propertyNameAtomic);
+        if (propertyIndex == null) {
+            return null;
+        }
+        Object type = nestableTypes.get(getPropertyNameAtomic());
+        if (type == null)
+        {
+            return null;
+        }
+        if (type instanceof String) // resolve a property that is a map event type
+        {
+            String nestedName = type.toString();
+            boolean isArray = EventTypeUtility.isPropertyArray(nestedName);
+            if (isArray) {
+                nestedName = EventTypeUtility.getPropertyRemoveArray(nestedName);
+            }
+            EventType innerType = eventAdapterService.getExistsTypeByName(nestedName);
+            if (!(innerType instanceof MapEventType))
+            {
+                return null;
+            }
+            if (!isArray)
+            {
+                return null; // must be declared as an array to use an indexed notation
+            }
+            else
+            {
+                return new ObjectArrayArrayPropertyGetter(propertyIndex, index, eventAdapterService, innerType);
+            }
+        }
+        else {
+            if (!(type instanceof Class))
+            {
+                return null;
+            }
+            if (!((Class) type).isArray())
+            {
+                return null;
+            }
+            Class componentType = ((Class)type).getComponentType();
+            // its an array
+            return new ObjectArrayArrayPOJOEntryIndexedPropertyGetter(propertyIndex, index, eventAdapterService, componentType);
+        }
     }
 }

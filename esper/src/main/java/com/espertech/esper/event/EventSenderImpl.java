@@ -47,17 +47,17 @@ public class EventSenderImpl implements EventSender
         this.threadingService = threadingService;
     }
 
-    public void sendEvent(Object event) throws EPException
+    public void sendEvent(Object theEvent) throws EPException
     {
-        sendIn(event, false);
+        sendIn(theEvent, false);
     }
 
-    public void route(Object event) throws EPException
+    public void route(Object theEvent) throws EPException
     {
-        sendIn(event, true);
+        sendIn(theEvent, true);
     }
 
-    private void sendIn(Object event, boolean isRoute) throws EPException
+    private void sendIn(Object theEvent, boolean isRoute) throws EPException
     {
         // Ask each factory in turn to take care of it
         for (EventSenderURIDesc entry : handlingFactories)
@@ -66,11 +66,11 @@ public class EventSenderImpl implements EventSender
 
             try
             {
-                eventBean = entry.getBeanFactory().create(event, entry.getResolutionURI());
+                eventBean = entry.getBeanFactory().create(theEvent, entry.getResolutionURI());
             }
             catch (RuntimeException ex)
             {
-                log.warn("Unexpected exception thrown by plug-in event bean factory '" + entry.getBeanFactory() + "' processing event " + event, ex);
+                log.warn("Unexpected exception thrown by plug-in event bean factory '" + entry.getBeanFactory() + "' processing event " + theEvent, ex);
             }
 
             if (eventBean != null)

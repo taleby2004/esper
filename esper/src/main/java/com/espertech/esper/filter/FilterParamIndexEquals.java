@@ -23,9 +23,9 @@ public final class FilterParamIndexEquals extends FilterParamIndexEqualsBase
         super(lookupable, FilterOperator.EQUAL);
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
-        Object attributeValue = lookupable.getGetter().get(eventBean);
+        Object attributeValue = lookupable.getGetter().get(theEvent);
         if (attributeValue == null) {   //  null cannot match, not even null: requires use of "is"
             return;
         }
@@ -48,6 +48,6 @@ public final class FilterParamIndexEquals extends FilterParamIndexEqualsBase
             return;
         }
 
-        evaluator.matchEvent(eventBean, matches);
+        evaluator.matchEvent(theEvent, matches);
     }
 }

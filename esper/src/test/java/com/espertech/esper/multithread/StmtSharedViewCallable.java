@@ -39,8 +39,8 @@ public class StmtSharedViewCallable implements Callable
             {
                 for (String symbol : symbols)
                 {
-                    Object event = makeEvent(symbol, loop);
-                    engine.getEPRuntime().sendEvent(event);
+                    Object theEvent = makeEvent(symbol, loop);
+                    engine.getEPRuntime().sendEvent(theEvent);
                 }
             }
         }

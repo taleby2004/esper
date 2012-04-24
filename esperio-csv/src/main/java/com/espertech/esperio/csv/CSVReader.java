@@ -8,18 +8,17 @@
  **************************************************************************************/
 package com.espertech.esperio.csv;
 
+import com.espertech.esper.client.EPException;
+import com.espertech.esper.util.ExecutionPathDebugLog;
+import com.espertech.esperio.AdapterInputSource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.espertech.esperio.AdapterInputSource;
-import com.espertech.esper.client.EPException;
-import com.espertech.esper.util.ExecutionPathDebugLog;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * A source that processes a CSV file and returns CSV records

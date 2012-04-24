@@ -163,7 +163,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                 {
                     if (postOldEvents == null)
                     {
-                        postOldEvents = new ArrayList<EventBean>();
+                        postOldEvents = new ArrayList<EventBean>(2);
                     }
                     postOldEvents.add(newEvent);
                 }
@@ -183,7 +183,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                     }
                     else
                     {
-                        listOfBeans = new ArrayList<EventBean>();
+                        listOfBeans = new ArrayList<EventBean>(2);
                         listOfBeans.add(newEvent);
                         sortedEvents.put(timestamp, listOfBeans);
                     }

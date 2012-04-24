@@ -36,10 +36,10 @@ public class TestRowPatternRecognitionPrev extends TestCase {
         String[] fields = "a_string,b_string".split(",");
         String text = "select * from MyEvent.win:time(5) " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string" +
+                "  measures A.theString as a_string, B.theString as b_string" +
                 "  all matches pattern (A B) " +
                 "  define " +
-                "    A as PREV(A.string, 3) = 'P3' and PREV(A.string, 2) = 'P2' and PREV(A.string, 4) = 'P4' and Math.abs(prev(A.value, 0)) >= 0," +
+                "    A as PREV(A.theString, 3) = 'P3' and PREV(A.theString, 2) = 'P2' and PREV(A.theString, 4) = 'P4' and Math.abs(prev(A.value, 0)) >= 0," +
                 "    B as B.value in (PREV(B.value, 4), PREV(B.value, 2))" +
                 ")";
 
@@ -113,10 +113,10 @@ public class TestRowPatternRecognitionPrev extends TestCase {
         String text = "select * from MyEvent.win:time(5) " +
                 "match_recognize (" +
                 "  partition by cat" +
-                "  measures A.cat as cat, A.string as a_string, B.string as b_string" +
+                "  measures A.cat as cat, A.theString as a_string, B.theString as b_string" +
                 "  all matches pattern (A B) " +
                 "  define " +
-                "    A as PREV(A.string, 3) = 'P3' and PREV(A.string, 2) = 'P2' and PREV(A.string, 4) = 'P4'," +
+                "    A as PREV(A.theString, 3) = 'P3' and PREV(A.theString, 2) = 'P2' and PREV(A.theString, 4) = 'P4'," +
                 "    B as B.value in (PREV(B.value, 4), PREV(B.value, 2))" +
                 ") order by cat";
 
@@ -189,7 +189,7 @@ public class TestRowPatternRecognitionPrev extends TestCase {
         String text = "select * from MyEvent.win:time(5 sec) " +
                 "match_recognize (" +
                 "  partition by cat " +
-                "  measures A.cat as cat, A.string as a_string" +
+                "  measures A.cat as cat, A.theString as a_string" +
                 "  all matches pattern (A) " +
                 "  define " +
                 "    A as PREV(A.value) = (A.value - 1)" +
@@ -268,8 +268,8 @@ public class TestRowPatternRecognitionPrev extends TestCase {
         String[] fields = "a_string,a_cat,a_value,b_value".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  partition by string, cat" +
-                "  measures A.string as a_string, A.cat as a_cat, A.value as a_value, B.value as b_value " +
+                "  partition by theString, cat" +
+                "  measures A.theString as a_string, A.cat as a_cat, A.value as a_value, B.value as b_value " +
                 "  all matches pattern (A B) " +
                 "  define " +
                 "    A as (A.value > PREV(A.value))," +
@@ -332,7 +332,7 @@ public class TestRowPatternRecognitionPrev extends TestCase {
         String[] fields = "a_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string" +
+                "  measures A.theString as a_string" +
                 "  all matches pattern (A) " +
                 "  define A as (A.value > PREV(A.value))" +
                 ") " +
@@ -380,7 +380,7 @@ public class TestRowPatternRecognitionPrev extends TestCase {
 
         text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string" +
+                "  measures A.theString as a_string" +
                 "  all matches pattern (A) " +
                 "  define A as (PREV(A.value, 2) = 5)" +
                 ") " +
@@ -424,8 +424,8 @@ public class TestRowPatternRecognitionPrev extends TestCase {
 
     private void sendTimer(long time, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }    
 }

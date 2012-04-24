@@ -42,6 +42,35 @@ public class TestEventSenderBuiltin extends TestCase
         listener = null;
     }
 
+    public void testSenderObjectArray() throws Exception
+    {
+        Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.addEventType("MyObjectArray", new String[] {"f1"}, new Object[] {Integer.class});
+
+        epService = EPServiceProviderManager.getDefaultProvider(configuration);
+        epService.initialize();
+
+        // type resolved for each by the first event representation picking both up, i.e. the one with "r2" since that is the most specific URI
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from MyObjectArray");
+        stmt.addListener(listener);
+
+        // send right event
+        EventSender sender = epService.getEPRuntime().getEventSender("MyObjectArray");
+        sender.sendEvent(new Object[] {10});
+        assertSame(10, listener.assertOneGetNewAndReset().get("f1"));
+
+        // send wrong event
+        try
+        {
+            sender.sendEvent(new SupportBean());
+            fail();
+        }
+        catch (EPException ex)
+        {
+            assertEquals("Unexpected event object of type com.espertech.esper.support.bean.SupportBean, expected Object[]", ex.getMessage());
+        }
+    }
+
     public void testSenderPOJO() throws Exception
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
@@ -137,9 +166,9 @@ public class TestEventSenderBuiltin extends TestCase
         EventSender sender = epService.getEPRuntime().getEventSender("AEvent");
         sender.sendEvent(doc);
         
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("text", event.get("type"));
-        assertEquals("text", event.get("element1"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("text", theEvent.get("type"));
+        assertEquals("text", theEvent.get("element1"));
 
         // send wrong event
         try
@@ -177,8 +206,8 @@ public class TestEventSenderBuiltin extends TestCase
         EventSender senderTwo = epService.getEPRuntime().getEventSender("BEvent");
         senderTwo.sendEvent(getDocument("<xxxx><b><c>text</c></b></xxxx>"));    // allowed, not checking
 
-        event = stmtTwo.iterator().next();
-        assertEquals("text", event.get("element2"));
+        theEvent = stmtTwo.iterator().next();
+        assertEquals("text", theEvent.get("element2"));
     }
 
     public void testInvalid()
@@ -198,7 +227,7 @@ public class TestEventSenderBuiltin extends TestCase
             assertEquals("Event type named 'ABC' could not be found", ex.getMessage());
         }
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL("insert into ABC select *, string as value from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("insert into ABC select *, theString as value from SupportBean");
         stmt.addListener(listener);
 
         try

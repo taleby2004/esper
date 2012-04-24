@@ -41,7 +41,7 @@ public class TestExternallyTimedWindowView extends TestCase
     {
         try
         {
-            myView = new ExternallyTimedWindowView(null, SupportExprNodeFactory.makeIdentNodeBean("string"), null, 0, null, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
+            myView = new ExternallyTimedWindowView(null, SupportExprNodeFactory.makeIdentNodeBean("theString"), null, 0, null, SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         }
         catch (IllegalArgumentException ex)
         {
@@ -117,7 +117,7 @@ public class TestExternallyTimedWindowView extends TestCase
         {
             SupportBean bean = new SupportBean();
             bean.setLongPrimitive(timestamp);
-            bean.setString(id + 1);
+            bean.setTheString(id + 1);
             beans[i] = SupportEventBeanFactory.createObject(bean);
         }
         return beans;

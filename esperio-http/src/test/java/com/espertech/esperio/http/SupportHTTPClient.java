@@ -28,9 +28,9 @@ public class SupportHTTPClient {
         httpclient = new DefaultHttpClient();
     }
 
-    public void request(int port, String document, String... params) throws Exception {
+    public void request(int port, String document, String... parameters) throws Exception {
         String uri = "http://localhost:" + port + "/" + document;
-        URI requestURI = URIUtil.withQuery(new URI(uri), params);
+        URI requestURI = URIUtil.withQuery(new URI(uri), parameters);
         log.info("Requesting from URI " + requestURI);
         HttpGet httpget = new HttpGet(requestURI);
 

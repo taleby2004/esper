@@ -75,9 +75,9 @@ public final class FilterParamIndexCompareString extends FilterParamIndexLookupa
         return constantsMapRWLock;
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
-        Object propertyValue = lookupable.getGetter().get(eventBean);
+        Object propertyValue = lookupable.getGetter().get(theEvent);
 
         if (propertyValue == null)
         {
@@ -88,51 +88,54 @@ public final class FilterParamIndexCompareString extends FilterParamIndexLookupa
 
         // Look up in table
         constantsMapRWLock.readLock().lock();
+        try {
 
-        // Get the head or tail end of the map depending on comparison type
-        Map<Object, EventEvaluator> subMap;
+            // Get the head or tail end of the map depending on comparison type
+            Map<Object, EventEvaluator> subMap;
 
-        if ((filterOperator == FilterOperator.GREATER) ||
-            (filterOperator == FilterOperator.GREATER_OR_EQUAL))
-        {
-            // At the head of the map are those with a lower numeric constants
-            subMap = constantsMap.headMap(propertyValue);
-        }
-        else
-        {
-            subMap = constantsMap.tailMap(propertyValue);
-        }
-
-        // All entries in the subMap are elgibile, with an exception
-        EventEvaluator exactEquals = null;
-        if (filterOperator == FilterOperator.LESS)
-        {
-            exactEquals = constantsMap.get(propertyValue);
-        }
-
-        for (EventEvaluator matcher : subMap.values())
-        {
-            // For the LESS comparison type we ignore the exactly equal case
-            // The subMap is sorted ascending, thus the exactly equals case is the first
-            if (exactEquals != null)
+            if ((filterOperator == FilterOperator.GREATER) ||
+                (filterOperator == FilterOperator.GREATER_OR_EQUAL))
             {
-                exactEquals = null;
-                continue;
+                // At the head of the map are those with a lower numeric constants
+                subMap = constantsMap.headMap(propertyValue);
+            }
+            else
+            {
+                subMap = constantsMap.tailMap(propertyValue);
             }
 
-            matcher.matchEvent(eventBean, matches);
-        }
-
-        if (filterOperator == FilterOperator.GREATER_OR_EQUAL)
-        {
-            EventEvaluator matcher = constantsMap.get(propertyValue);
-            if (matcher != null)
+            // All entries in the subMap are elgibile, with an exception
+            EventEvaluator exactEquals = null;
+            if (filterOperator == FilterOperator.LESS)
             {
-                matcher.matchEvent(eventBean, matches);
+                exactEquals = constantsMap.get(propertyValue);
+            }
+
+            for (EventEvaluator matcher : subMap.values())
+            {
+                // For the LESS comparison type we ignore the exactly equal case
+                // The subMap is sorted ascending, thus the exactly equals case is the first
+                if (exactEquals != null)
+                {
+                    exactEquals = null;
+                    continue;
+                }
+
+                matcher.matchEvent(theEvent, matches);
+            }
+
+            if (filterOperator == FilterOperator.GREATER_OR_EQUAL)
+            {
+                EventEvaluator matcher = constantsMap.get(propertyValue);
+                if (matcher != null)
+                {
+                    matcher.matchEvent(theEvent, matches);
+                }
             }
         }
-
-        constantsMapRWLock.readLock().unlock();
+        finally {
+            constantsMapRWLock.readLock().unlock();
+        }
     }
 
     private static final Log log = LogFactory.getLog(FilterParamIndexCompareString.class);

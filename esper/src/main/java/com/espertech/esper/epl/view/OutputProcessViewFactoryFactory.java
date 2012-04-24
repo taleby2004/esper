@@ -21,9 +21,14 @@ import com.espertech.esper.epl.spec.*;
  */
 public class OutputProcessViewFactoryFactory
 {
-    public static OutputProcessViewFactory make(StatementSpecCompiled statementSpec, InternalEventRouter internalEventRouter, StatementContext statementContext, EventType resultEventType)
+    public static OutputProcessViewFactory make(StatementSpecCompiled statementSpec, InternalEventRouter internalEventRouter, StatementContext statementContext, EventType resultEventType, OutputProcessViewCallback optionalOutputProcessViewCallback)
             throws ExprValidationException
     {
+        // determine direct-callback
+        if (optionalOutputProcessViewCallback != null) {
+            return new OutputProcessViewFactoryCallback(optionalOutputProcessViewCallback);
+        }
+
         // determine routing
         boolean isRouted = false;
         boolean routeToFront = false;

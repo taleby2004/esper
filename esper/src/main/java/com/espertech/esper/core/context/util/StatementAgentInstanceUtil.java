@@ -14,9 +14,7 @@ package com.espertech.esper.core.context.util;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.context.factory.StatementAgentInstanceFactoryResult;
 import com.espertech.esper.core.context.factory.StatementAgentInstancePreload;
-import com.espertech.esper.core.context.mgr.AgentInstance;
-import com.espertech.esper.core.context.mgr.AgentInstanceFilterProxy;
-import com.espertech.esper.core.context.mgr.ContextControllerStatementBase;
+import com.espertech.esper.core.context.mgr.*;
 import com.espertech.esper.core.context.stmt.AIRegistryAggregation;
 import com.espertech.esper.core.context.stmt.AIRegistryExpr;
 import com.espertech.esper.core.context.subselect.SubSelectStrategyHolder;
@@ -25,6 +23,7 @@ import com.espertech.esper.core.start.EPStatementStopMethodImpl;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.epl.view.OutputProcessViewTerminable;
+import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.event.MappedEventBean;
 import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.util.StopCallback;
@@ -37,6 +36,16 @@ import java.util.*;
 public class StatementAgentInstanceUtil {
 
     private static final Log log = LogFactory.getLog(EPStatementStopMethodImpl.class);
+
+    public static void handleFilterFault(EventBean theEvent, long version, EPServicesContext servicesContext, Map<Integer, ContextControllerTreeAgentInstanceList> agentInstanceListMap) {
+        for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> agentInstanceEntry : agentInstanceListMap.entrySet()) {
+            if (agentInstanceEntry.getValue().getFilterVersionAfterAllocation() > version) {
+                for (AgentInstance context : agentInstanceEntry.getValue().getAgentInstances()) {
+                    StatementAgentInstanceUtil.evaluateEventForStatement(servicesContext, theEvent, null, context.getAgentInstanceContext());
+                }
+            }
+        }
+    }
 
     public static void stopAgentInstances(List<AgentInstance> agentInstances, Map<String, Object> terminationProperties, EPServicesContext servicesContext, boolean isStatementStop) {
         if (agentInstances == null) {
@@ -198,9 +207,9 @@ public class StatementAgentInstanceUtil {
         }
     }
 
-    public static void evaluateEventForStatement(EPServicesContext servicesContext, EventBean event, Map<String, Object> optionalTriggeringPattern, AgentInstanceContext agentInstanceContext) {
-        if (event != null) {
-            evaluateEventForStatementInternal(servicesContext, event, agentInstanceContext);
+    public static void evaluateEventForStatement(EPServicesContext servicesContext, EventBean theEvent, Map<String, Object> optionalTriggeringPattern, AgentInstanceContext agentInstanceContext) {
+        if (theEvent != null) {
+            evaluateEventForStatementInternal(servicesContext, theEvent, agentInstanceContext);
         }
         if (optionalTriggeringPattern != null) {
             // evaluation order definition is up to the originator of the triggering pattern
@@ -218,10 +227,10 @@ public class StatementAgentInstanceUtil {
         }
     }
 
-    private static void evaluateEventForStatementInternal(EPServicesContext servicesContext, EventBean event, AgentInstanceContext agentInstanceContext) {
+    private static void evaluateEventForStatementInternal(EPServicesContext servicesContext, EventBean theEvent, AgentInstanceContext agentInstanceContext) {
         // context was created - reevaluate for the given event
         ArrayDeque<FilterHandle> callbacks = new ArrayDeque<FilterHandle>();
-        servicesContext.getFilterService().evaluate(event, callbacks, agentInstanceContext.getStatementContext().getStatementId());
+        servicesContext.getFilterService().evaluate(theEvent, callbacks, agentInstanceContext.getStatementContext().getStatementId());
 
         try
         {
@@ -234,7 +243,7 @@ public class StatementAgentInstanceUtil {
                 if (callback.getAgentInstanceHandle() != agentInstanceContext.getEpStatementAgentInstanceHandle()) {
                     continue;
                 }
-                callback.getFilterCallback().matchFound(event, null);
+                callback.getFilterCallback().matchFound(theEvent, null);
             }
             agentInstanceContext.getEpStatementAgentInstanceHandle().internalDispatch(agentInstanceContext);
 
@@ -246,10 +255,10 @@ public class StatementAgentInstanceUtil {
         }
     }
 
-    public static boolean evaluateFilterForStatement(EPServicesContext servicesContext, EventBean event, AgentInstanceContext agentInstanceContext, FilterHandle filterHandle) {
+    public static boolean evaluateFilterForStatement(EPServicesContext servicesContext, EventBean theEvent, AgentInstanceContext agentInstanceContext, FilterHandle filterHandle) {
         // context was created - reevaluate for the given event
         ArrayDeque<FilterHandle> callbacks = new ArrayDeque<FilterHandle>();
-        servicesContext.getFilterService().evaluate(event, callbacks, agentInstanceContext.getStatementContext().getStatementId());
+        servicesContext.getFilterService().evaluate(theEvent, callbacks, agentInstanceContext.getStatementContext().getStatementId());
 
         try
         {

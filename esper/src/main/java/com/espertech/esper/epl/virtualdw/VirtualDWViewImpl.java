@@ -244,8 +244,8 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
 
     public void handleStopIndex(CreateIndexDesc spec) {
         try {
-            VirtualDataWindowEventStopIndex event = new VirtualDataWindowEventStopIndex(spec.getWindowName(), spec.getIndexName());
-            dataExternal.handleEvent(event);
+            VirtualDataWindowEventStopIndex theEvent = new VirtualDataWindowEventStopIndex(spec.getWindowName(), spec.getIndexName());
+            dataExternal.handleEvent(theEvent);
         }
         catch (Exception ex) {
             String message = "Exception encountered invoking virtual data window handle stop-index event for window '" + namedWindowName + "': " + ex.getMessage();
@@ -255,8 +255,8 @@ public class VirtualDWViewImpl extends ViewSupport implements VirtualDWView {
 
     public void handleStopWindow() {
         try {
-            VirtualDataWindowEventStopWindow event = new VirtualDataWindowEventStopWindow(namedWindowName);
-            dataExternal.handleEvent(event);
+            VirtualDataWindowEventStopWindow theEvent = new VirtualDataWindowEventStopWindow(namedWindowName);
+            dataExternal.handleEvent(theEvent);
         }
         catch (Exception ex) {
             String message = "Exception encountered invoking virtual data window handle stop-window event for window '" + namedWindowName + "': " + ex.getMessage();

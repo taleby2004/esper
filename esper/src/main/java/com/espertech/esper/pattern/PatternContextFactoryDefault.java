@@ -19,8 +19,8 @@ public class PatternContextFactoryDefault implements PatternContextFactory
     public PatternContext createContext(StatementContext statementContext,
                                         int streamId,
                                         EvalRootFactoryNode rootNode,
-                                        boolean hasArrayProperties) {
-        return new PatternContext(statementContext, streamId);
+                                        MatchedEventMapMeta matchedEventMapMeta) {
+        return new PatternContext(statementContext, streamId, matchedEventMapMeta);
     }
 
     public PatternAgentInstanceContext createPatternAgentContext(PatternContext patternContext, AgentInstanceContext agentInstanceContext, boolean hasConsumingFilter) {

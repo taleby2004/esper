@@ -19,7 +19,6 @@ import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.event.bean.ReflectionPropMethodGetter;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
@@ -31,7 +30,7 @@ public class TestReflectionPropMethodGetter extends TestCase
     {
         SupportBean testEvent = new SupportBean();
         testEvent.setIntPrimitive(10);
-        testEvent.setString("a");
+        testEvent.setTheString("a");
         testEvent.setDoubleBoxed(null);
 
         unitTestBean = SupportEventBeanFactory.createObject(testEvent);
@@ -42,7 +41,7 @@ public class TestReflectionPropMethodGetter extends TestCase
         ReflectionPropMethodGetter getter = makeGetter(SupportBean.class, "getIntPrimitive");
         assertEquals(10, getter.get(unitTestBean));
 
-        getter = makeGetter(SupportBean.class, "getString");
+        getter = makeGetter(SupportBean.class, "getTheString");
         assertEquals("a", getter.get(unitTestBean));
 
         getter = makeGetter(SupportBean.class, "getDoubleBoxed");

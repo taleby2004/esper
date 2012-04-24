@@ -119,12 +119,12 @@ public class ExprStreamUnderlyingNodeImpl extends ExprNodeBase implements ExprEv
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        EventBean event = eventsPerStream[streamNum];
-        if (event == null)
+        EventBean theEvent = eventsPerStream[streamNum];
+        if (theEvent == null)
         {
             return null;
         }
-        return event.getUnderlying();
+        return theEvent.getUnderlying();
     }
 
     public String toExpressionString()

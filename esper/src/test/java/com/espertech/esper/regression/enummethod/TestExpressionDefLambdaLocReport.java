@@ -51,12 +51,12 @@ public class TestExpressionDefLambdaLocReport extends TestCase {
         /**
          * Regular algorithm to find separated luggage and new owner.
          */
-        LocationReport event = LocationReportFactory.makeLarge();
-        List<Item> separatedLuggage = LocationReportFactory.findSeparatedLuggage(event);
+        LocationReport theEvent = LocationReportFactory.makeLarge();
+        List<Item> separatedLuggage = LocationReportFactory.findSeparatedLuggage(theEvent);
 
         for (Item item : separatedLuggage) {
             //log.info("Luggage that are separated (dist>20): " + item);
-            Item newOwner = LocationReportFactory.findPotentialNewOwner(event, item);
+            Item newOwner = LocationReportFactory.findPotentialNewOwner(theEvent, item);
             //log.info("Found new owner " + newOwner);
         }       
 

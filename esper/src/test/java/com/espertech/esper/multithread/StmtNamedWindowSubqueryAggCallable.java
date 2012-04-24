@@ -96,10 +96,10 @@ public class StmtNamedWindowSubqueryAggCallable implements Callable<Boolean>
     }
 
     private void sendEvent(String key, int intupd) {
-        Map<String,Object> event = new HashMap<String,Object>();
-        event.put("uekey", key);
-        event.put("ueint", intupd);
-        engine.getEPRuntime().sendEvent(event, "UpdateEvent");
+        Map<String,Object> theEvent = new HashMap<String,Object>();
+        theEvent.put("uekey", key);
+        theEvent.put("ueint", intupd);
+        engine.getEPRuntime().sendEvent(theEvent, "UpdateEvent");
     }
 
     private static final Log log = LogFactory.getLog(StmtNamedWindowSubqueryAggCallable.class);

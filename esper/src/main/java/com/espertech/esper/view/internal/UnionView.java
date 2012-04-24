@@ -77,8 +77,8 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
             Iterator<EventBean> viewSnapshot = views[i].iterator();
             for (;viewSnapshot.hasNext();)
             {
-                EventBean event = viewSnapshot.next();
-                unionWindow.add(event);
+                EventBean theEvent = viewSnapshot.next();
+                unionWindow.add(theEvent);
             }
         }
     }

@@ -11,25 +11,9 @@
 
 package com.espertech.esper.regression.pattern;
 
+import com.espertech.esper.regression.support.*;
+import com.espertech.esper.support.bean.*;
 import junit.framework.TestCase;
-import com.espertech.esper.regression.support.CaseList;
-import com.espertech.esper.regression.support.EventCollection;
-import com.espertech.esper.regression.support.EventCollectionFactory;
-import com.espertech.esper.regression.support.EventExpressionCase;
-import com.espertech.esper.regression.support.PatternTestHarness;
-import com.espertech.esper.support.bean.ISupportA;
-import com.espertech.esper.support.bean.ISupportAImplSuperG;
-import com.espertech.esper.support.bean.ISupportAImplSuperGImplPlus;
-import com.espertech.esper.support.bean.ISupportB;
-import com.espertech.esper.support.bean.ISupportBaseAB;
-import com.espertech.esper.support.bean.ISupportBaseD;
-import com.espertech.esper.support.bean.ISupportBaseDBase;
-import com.espertech.esper.support.bean.ISupportC;
-import com.espertech.esper.support.bean.ISupportD;
-import com.espertech.esper.support.bean.SupportOverrideBase;
-import com.espertech.esper.support.bean.SupportOverrideOne;
-import com.espertech.esper.support.bean.SupportOverrideOneA;
-import com.espertech.esper.support.bean.SupportOverrideOneB;
 
 public class TestSuperAndInterfaces extends TestCase
 {

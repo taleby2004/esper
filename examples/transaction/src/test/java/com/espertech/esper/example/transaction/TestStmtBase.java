@@ -29,9 +29,9 @@ public abstract class TestStmtBase extends TestCase
         epService.initialize();
     }
 
-    protected void sendEvent(Object event)
+    protected void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
 }

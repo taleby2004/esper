@@ -36,14 +36,14 @@ public class AxionEventSender implements EventSender
         this.runtimeEventSender = runtimeEventSender;
     }
 
-    public void sendEvent(Object node)
+    public void sendEvent(Object theEvent)
     {
-        processEvent(node, false);
+        processEvent(theEvent, false);
     }
 
-    public void route(Object node)
+    public void route(Object theEvent)
     {
-        processEvent(node, true);
+        processEvent(theEvent, true);
     }
 
     public void processEvent(Object node, boolean isRoute)

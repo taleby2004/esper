@@ -9,12 +9,18 @@
 package com.espertech.esperio;
 
 import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.WriteablePropertyDescriptor;
+import com.espertech.esper.event.bean.BeanEventPropertyWriter;
+import com.espertech.esper.event.bean.PropertyHelper;
 import com.espertech.esper.schedule.ScheduleSlot;
-import net.sf.cglib.core.ReflectUtils;
-import org.apache.commons.beanutils.BeanUtils;
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
 
-import java.beans.PropertyDescriptor;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * An implementation of SendableEvent that wraps a Map event for
@@ -23,6 +29,7 @@ import java.util.Map;
 public class SendableBeanEvent extends AbstractSendableEvent
 {
 	private final Object beanToSend;
+    private final Map<Class, Map<String, BeanEventPropertyWriter>> writersMap = new HashMap<Class, Map<String, BeanEventPropertyWriter>>();
 
 	/**
 	 * Converts mapToSend to an instance of beanClass
@@ -36,21 +43,32 @@ public class SendableBeanEvent extends AbstractSendableEvent
 	{
 		super(timestamp, scheduleSlot);
 
-		try {
-			beanToSend = beanClass.newInstance();
-			// pre-create nested properties if any, as BeanUtils does not otherwise populate 'null' objects from their respective properties
-			PropertyDescriptor[] pds = ReflectUtils.getBeanSetters(beanClass);
-			for (PropertyDescriptor pd : pds) {
-				if (!pd.getPropertyType().isPrimitive() && !pd.getPropertyType().getName().startsWith("java")) {
-					BeanUtils.setProperty(beanToSend, pd.getName(), pd.getPropertyType().newInstance());
-				}
-			}
-			// this method silently ignores read only properties on the dest bean but we should
-			// have caught them in CSVInputAdapter.constructPropertyTypes.
-			BeanUtils.copyProperties(beanToSend, mapToSend);
-		} catch (Exception e) {
-			throw new EPException("Cannot populate bean instance", e);
-		}
+        try {
+            Map<String, BeanEventPropertyWriter> writers = writersMap.get(beanClass);
+            if (writers == null) {
+                Set<WriteablePropertyDescriptor> props = PropertyHelper.getWritableProperties(beanClass);
+                writers = new HashMap<String, BeanEventPropertyWriter>();
+                writersMap.put(beanClass, writers);
+                FastClass fastClass = FastClass.create(beanClass);
+                for (WriteablePropertyDescriptor prop : props) {
+                    FastMethod writerMethod = fastClass.getMethod(prop.getWriteMethod());
+                    writers.put(prop.getPropertyName(), new BeanEventPropertyWriter(beanClass, writerMethod));
+                }
+                // populate writers
+            }
+
+            beanToSend = beanClass.newInstance();
+
+            for (Map.Entry<String, Object> entry : mapToSend.entrySet()) {
+                BeanEventPropertyWriter writer = writers.get(entry.getKey());
+                if (writer != null) {
+                    writer.writeValue(entry.getValue(), beanToSend);
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new EPException("Cannot populate bean instance", e);
+        }
 	}
 
 	/* (non-Javadoc)

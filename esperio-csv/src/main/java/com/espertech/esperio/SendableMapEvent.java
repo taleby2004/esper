@@ -8,10 +8,10 @@
  **************************************************************************************/
 package com.espertech.esperio;
 
+import com.espertech.esper.schedule.ScheduleSlot;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import com.espertech.esper.schedule.ScheduleSlot;
 
 /**
  * An implementation of SendableEvent that wraps a Map event for

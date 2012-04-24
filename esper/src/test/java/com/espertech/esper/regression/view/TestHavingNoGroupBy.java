@@ -103,7 +103,7 @@ public class TestHavingNoGroupBy extends TestCase
         String viewExpr = "select irstream symbol, price, avg(price) as avgPrice " +
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
-                          "where one.string = two.symbol " +
+                          "where one.theString = two.symbol " +
                           "having price < avg(price)";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
@@ -215,9 +215,9 @@ public class TestHavingNoGroupBy extends TestCase
         Assert.assertEquals(1, listener.getNewDataList().size());   // since event null is put into the list
         Assert.assertNull(listener.getLastNewData());
 
-        EventBean event = listener.getLastOldData()[0];
+        EventBean theEvent = listener.getLastOldData()[0];
 
-        compareSpreadEvent(event, aprice, bprice, spread);
+        compareSpreadEvent(theEvent, aprice, bprice, spread);
         listener.reset();
     }
 
@@ -228,16 +228,16 @@ public class TestHavingNoGroupBy extends TestCase
         Assert.assertEquals(1, listener.getOldDataList().size());
         Assert.assertNull(listener.getLastOldData());
 
-        EventBean event = listener.getLastNewData()[0];
-        compareSpreadEvent(event, aprice, bprice, spread);
+        EventBean theEvent = listener.getLastNewData()[0];
+        compareSpreadEvent(theEvent, aprice, bprice, spread);
         listener.reset();
     }
 
-    private void compareSpreadEvent(EventBean event, double aprice, double bprice, double spread)
+    private void compareSpreadEvent(EventBean theEvent, double aprice, double bprice, double spread)
     {
-        assertEquals(aprice, event.get("aPrice"));
-        assertEquals(bprice, event.get("bPrice"));
-        assertEquals(spread, event.get("spread"));
+        assertEquals(aprice, theEvent.get("aPrice"));
+        assertEquals(bprice, theEvent.get("bPrice"));
+        assertEquals(spread, theEvent.get("spread"));
     }
 
     private void sendPriceEvent(String symbol, double price)

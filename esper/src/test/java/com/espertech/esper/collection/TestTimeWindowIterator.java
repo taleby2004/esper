@@ -11,11 +11,14 @@
 
 package com.espertech.esper.collection;
 
-import com.espertech.esper.client.scopetest.EPAssertionUtil;
-import junit.framework.TestCase;
-import java.util.*;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.event.EventFactoryHelper;
+import junit.framework.TestCase;
+
+import java.util.ArrayDeque;
+import java.util.Iterator;
+import java.util.Map;
 
 public class TestTimeWindowIterator extends TestCase
 {
@@ -28,14 +31,14 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testEmpty()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
         Iterator<EventBean> it = new TimeWindowIterator(testWindow);
         EPAssertionUtil.assertEqualsExactOrder(null, it);
     }
 
     public void testOneElement()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
         ArrayDeque<EventBean> list = new ArrayDeque<EventBean>();
         list.add(events.get("a"));
         addToWindow(testWindow, 10L, list);
@@ -46,7 +49,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testTwoInOneEntryElement()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
         ArrayDeque<EventBean> list = new ArrayDeque<EventBean>();
         list.add(events.get("a"));
         list.add(events.get("b"));
@@ -58,7 +61,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testTwoSeparateEntryElement()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
         ArrayDeque<EventBean> list2 = new ArrayDeque<EventBean>();
         list2.add(events.get("b"));
         addToWindow(testWindow, 5L, list2); // Actually before list1
@@ -72,7 +75,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testTwoByTwoEntryElement()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
         ArrayDeque<EventBean> list1 = new ArrayDeque<EventBean>();
         list1.add(events.get("a"));
         list1.add(events.get("b"));
@@ -88,7 +91,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testMixedEntryElement()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
         ArrayDeque<EventBean> list1 = new ArrayDeque<EventBean>();
         list1.add(events.get("a"));
         addToWindow(testWindow, 10L, list1);
@@ -109,7 +112,7 @@ public class TestTimeWindowIterator extends TestCase
     
     public void testEmptyList()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
 
         ArrayDeque<EventBean> list1 = new ArrayDeque<EventBean>();
         addToWindow(testWindow, 10L, list1);
@@ -120,7 +123,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testTwoEmptyList()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
 
         ArrayDeque<EventBean> list1 = new ArrayDeque<EventBean>();
         addToWindow(testWindow, 10L, list1);
@@ -133,7 +136,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testThreeEmptyList()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
 
         ArrayDeque<EventBean> list1 = new ArrayDeque<EventBean>();
         addToWindow(testWindow, 10L, list1);
@@ -148,7 +151,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testEmptyListFrontTail()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
 
         ArrayDeque<EventBean> list1 = new ArrayDeque<EventBean>();
         addToWindow(testWindow, 10L, list1);
@@ -167,7 +170,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testEmptyListSprinkle()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
 
         ArrayDeque<EventBean> list1 = new ArrayDeque<EventBean>();
         list1.add(events.get("a"));
@@ -190,7 +193,7 @@ public class TestTimeWindowIterator extends TestCase
 
     public void testEmptyListFront()
     {
-        ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
 
         ArrayDeque<EventBean> list1 = new ArrayDeque<EventBean>();
         addToWindow(testWindow, 10L, list1);
@@ -212,10 +215,31 @@ public class TestTimeWindowIterator extends TestCase
         EPAssertionUtil.assertEqualsExactOrder(new Object[]{events.get("a"), events.get("c"), events.get("d"), events.get("e")}, it);
     }
 
-    private void addToWindow(ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> testWindow,
-                             long key, 
-                             ArrayDeque<EventBean> value)
+    public void testObjectAndNull()
     {
-        testWindow.add(new Pair<Long, ArrayDeque<EventBean>> (key, value));
+        ArrayDeque<Pair<Long, Object>> testWindow = new ArrayDeque<Pair<Long, Object>>();
+
+        ArrayDeque<EventBean> list1 = new ArrayDeque<EventBean>();
+        list1.add(events.get("c"));
+        list1.add(events.get("d"));
+        addToWindow(testWindow, 10L, list1);
+
+        addToWindow(testWindow, 20L, events.get("a"));
+
+        addToWindow(testWindow, 30L, null);
+
+        ArrayDeque<EventBean> list3 = new ArrayDeque<EventBean>();
+        list3.add(events.get("e"));
+        addToWindow(testWindow, 40L, list3);
+
+        Iterator it = new TimeWindowIterator(testWindow);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{events.get("c"), events.get("d"), events.get("a"), events.get("e")}, it);
+    }
+
+    private void addToWindow(ArrayDeque<Pair<Long, Object>> testWindow,
+                             long key, 
+                             Object value)
+    {
+        testWindow.add(new Pair<Long, Object> (key, value));
     }
 }

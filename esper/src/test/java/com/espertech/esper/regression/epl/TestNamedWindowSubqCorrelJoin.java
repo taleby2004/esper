@@ -52,14 +52,14 @@ public class TestNamedWindowSubqCorrelJoin extends TestCase
     }
 
     private void runAssertion(boolean enableIndexShareCreate) {
-        String createEpl = "create window MyWindow.std:unique(string) as select * from SupportBean";
+        String createEpl = "create window MyWindow.std:unique(theString) as select * from SupportBean";
         if (enableIndexShareCreate) {
             createEpl = "@Hint('enable_window_subquery_indexshare') " + createEpl;
         }
         epService.getEPAdministrator().createEPL(createEpl);
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
 
-        String consumeEpl = "select (select intPrimitive from MyWindow where string = s1.p10) as val from S0Bean.std:lastevent() as s0, S1Bean.std:lastevent() as s1";
+        String consumeEpl = "select (select intPrimitive from MyWindow where theString = s1.p10) as val from S0Bean.std:lastevent() as s0, S1Bean.std:lastevent() as s1";
         EPStatement consumeStmt = epService.getEPAdministrator().createEPL(consumeEpl);
         consumeStmt.addListener(listener);
 

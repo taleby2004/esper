@@ -35,7 +35,7 @@ public class TestRowPatternRecognitionPerf extends TestCase {
         String text = "select * from MyEvent " +
                 "match_recognize (" +
                 "  partition by value " +
-                "  measures A.string as a_string, C.string as c_string " +
+                "  measures A.theString as a_string, C.theString as c_string " +
                 "  all matches " +
                 "  pattern (A B*? C) " +
                 "  define A as A.cat = '1'," +

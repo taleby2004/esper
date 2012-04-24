@@ -32,19 +32,19 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.initialize();
 
         engine.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
-        String expression = "select * from pattern [every-distinct(a.intPrimitive, 1 sec) a=SupportBean(string like 'A%')]";
+        String expression = "select * from pattern [every-distinct(a.intPrimitive, 1 sec) a=SupportBean(theString like 'A%')]";
         EPStatement statement = engine.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"A1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 2));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"A3"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
@@ -53,9 +53,9 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"A4"});
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"A5"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A6", 1));
         engine.getEPRuntime().sendEvent(new CurrentTimeEvent(1999));
@@ -64,7 +64,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         
         engine.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
         engine.getEPRuntime().sendEvent(new SupportBean("A7", 2));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A7"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"A7"});
     }
 
     public void testEveryDistinctOverFilter() throws Exception
@@ -87,16 +87,16 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         statement.addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        assertEquals("E1", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E1", listener.assertOneGetNewAndReset().get("a.theString"));
 
         engine.getEPRuntime().sendEvent(new SupportBean("E2", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("E3", 2));
-        assertEquals("E3", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E3", listener.assertOneGetNewAndReset().get("a.theString"));
 
         engine.getEPRuntime().sendEvent(new SupportBean("E4", 3));
-        assertEquals("E4", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E4", listener.assertOneGetNewAndReset().get("a.theString"));
 
         engine.getEPRuntime().sendEvent(new SupportBean("E5", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("E6", 3));
@@ -104,7 +104,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("E8", 0));
-        assertEquals("E8", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E8", listener.assertOneGetNewAndReset().get("a.theString"));
 
         EPStatementObjectModel model = engine.getEPAdministrator().compileEPL(expression);
         assertEquals(expression, model.toEPL());
@@ -138,9 +138,9 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("E3", 2));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("E1", event.get("a[0].string"));
-        assertEquals("E3", event.get("a[1].string"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("E1", theEvent.get("a[0].theString"));
+        assertEquals("E3", theEvent.get("a[1].theString"));
 
         engine.getEPRuntime().sendEvent(new SupportBean("E4", 3));
         engine.getEPRuntime().sendEvent(new SupportBean("E5", 2));
@@ -169,9 +169,9 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("E2", 1));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("E1", event.get("a[0].string"));
-        assertEquals("E2", event.get("a[1].string"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("E1", theEvent.get("a[0].theString"));
+        assertEquals("E2", theEvent.get("a[1].theString"));
 
         engine.getEPRuntime().sendEvent(new SupportBean("E3", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("E4", 2));
@@ -179,9 +179,9 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("E5", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("E6", 1));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("E5", event.get("a[0].string"));
-        assertEquals("E6", event.get("a[1].string"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("E5", theEvent.get("a[0].theString"));
+        assertEquals("E6", theEvent.get("a[1].theString"));
     }
 
     public void testTimerWithinOverDistinct() throws Exception
@@ -207,13 +207,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         statement.addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        assertEquals("E1", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E1", listener.assertOneGetNewAndReset().get("a.theString"));
 
         engine.getEPRuntime().sendEvent(new SupportBean("E2", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("E3", 2));
-        assertEquals("E3", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E3", listener.assertOneGetNewAndReset().get("a.theString"));
 
         sendTimer(11000, engine);
         engine.getEPRuntime().sendEvent(new SupportBean("E4", 3));
@@ -245,14 +245,14 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         statement.addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        assertEquals("E1", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E1", listener.assertOneGetNewAndReset().get("a.theString"));
 
         engine.getEPRuntime().sendEvent(new SupportBean("E2", 1));
         assertFalse(listener.isInvoked());
 
         sendTimer(5000, engine);
         engine.getEPRuntime().sendEvent(new SupportBean("E3", 2));
-        assertEquals("E3", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E3", listener.assertOneGetNewAndReset().get("a.theString"));
         
         sendTimer(10000, engine);
         engine.getEPRuntime().sendEvent(new SupportBean("E4", 1));
@@ -278,13 +278,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         sendTimer(50000, engine);
         engine.getEPRuntime().sendEvent(new SupportBean("E10", 1));
-        assertEquals("E10", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E10", listener.assertOneGetNewAndReset().get("a.theString"));
 
         engine.getEPRuntime().sendEvent(new SupportBean("E11", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("E12", 2));
-        assertEquals("E12", listener.assertOneGetNewAndReset().get("a.string"));
+        assertEquals("E12", listener.assertOneGetNewAndReset().get("a.theString"));
 
         engine.getEPRuntime().sendEvent(new SupportBean("E13", 2));
         assertFalse(listener.isInvoked());
@@ -297,10 +297,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider(config);
         engine.initialize();
 
-        String expression = "select * from pattern [every-distinct(a.intPrimitive, b.intPrimitive) (a=SupportBean(string like 'A%') and b=SupportBean(string like 'B%'))]";
+        String expression = "select * from pattern [every-distinct(a.intPrimitive, b.intPrimitive) (a=SupportBean(theString like 'A%') and b=SupportBean(theString like 'B%'))]";
         runEveryDistinctOverAnd(engine, expression);
 
-        expression = "select * from pattern [every-distinct(a.intPrimitive, b.intPrimitive, 1 hour) (a=SupportBean(string like 'A%') and b=SupportBean(string like 'B%'))]";
+        expression = "select * from pattern [every-distinct(a.intPrimitive, b.intPrimitive, 1 hour) (a=SupportBean(theString like 'A%') and b=SupportBean(theString like 'B%'))]";
         runEveryDistinctOverAnd(engine, expression);
     }
 
@@ -313,7 +313,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
         assertFalse(listener.isInvoked());
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 10));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A1", "B1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 10));
@@ -321,11 +321,11 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B3", 10));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A3", "B3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A3", "B3"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 20));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A4", "B4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A4", "B4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 10));
@@ -333,7 +333,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A6", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B6", 20));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A6", "B6"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A6", "B6"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A7", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B7", 20));
@@ -347,10 +347,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider(config);
         engine.initialize();
 
-        String expression = "select * from pattern [every-distinct(coalesce(a.intPrimitive, 0) + coalesce(b.intPrimitive, 0)) (a=SupportBean(string like 'A%') or b=SupportBean(string like 'B%'))]";
+        String expression = "select * from pattern [every-distinct(coalesce(a.intPrimitive, 0) + coalesce(b.intPrimitive, 0)) (a=SupportBean(theString like 'A%') or b=SupportBean(theString like 'B%'))]";
         runEveryDistinctOverOr(engine, expression);
 
-        expression = "select * from pattern [every-distinct(coalesce(a.intPrimitive, 0) + coalesce(b.intPrimitive, 0), 1 hour) (a=SupportBean(string like 'A%') or b=SupportBean(string like 'B%'))]";
+        expression = "select * from pattern [every-distinct(coalesce(a.intPrimitive, 0) + coalesce(b.intPrimitive, 0), 1 hour) (a=SupportBean(theString like 'A%') or b=SupportBean(theString like 'B%'))]";
         runEveryDistinctOverOr(engine, expression);
     }
 
@@ -361,10 +361,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         statement.addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A1", null});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 2));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{null, "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{null, "B1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 2));
@@ -373,10 +373,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 3));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{null, "B4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{null, "B4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 4));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{null, "B5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{null, "B5"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B6", 3));
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 3));
@@ -391,10 +391,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider(config);
         engine.initialize();
 
-        String expression = "select * from pattern [every-distinct(a.intPrimitive) (a=SupportBean(string like 'A%') and not SupportBean(string like 'B%'))]";
+        String expression = "select * from pattern [every-distinct(a.intPrimitive) (a=SupportBean(theString like 'A%') and not SupportBean(theString like 'B%'))]";
         runEveryDistinctOverNot(engine, expression);
 
-        expression = "select * from pattern [every-distinct(a.intPrimitive, 1 hour) (a=SupportBean(string like 'A%') and not SupportBean(string like 'B%'))]";
+        expression = "select * from pattern [every-distinct(a.intPrimitive, 1 hour) (a=SupportBean(theString like 'A%') and not SupportBean(theString like 'B%'))]";
         runEveryDistinctOverNot(engine, expression);
     }
 
@@ -405,19 +405,19 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         statement.addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"A1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 2));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"A3"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"A4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"A4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 1));
         assertFalse(listener.isInvoked());
@@ -430,10 +430,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider(config);
         engine.initialize();
 
-        String expression = "select * from pattern [every-distinct(a.intPrimitive + b.intPrimitive) (a=SupportBean(string like 'A%') -> b=SupportBean(string like 'B%'))]";
+        String expression = "select * from pattern [every-distinct(a.intPrimitive + b.intPrimitive) (a=SupportBean(theString like 'A%') -> b=SupportBean(theString like 'B%'))]";
         runEveryDistinctOverFollowedBy(engine, expression);
 
-        expression = "select * from pattern [every-distinct(a.intPrimitive + b.intPrimitive, 1 hour) (a=SupportBean(string like 'A%') -> b=SupportBean(string like 'B%'))]";
+        expression = "select * from pattern [every-distinct(a.intPrimitive + b.intPrimitive, 1 hour) (a=SupportBean(theString like 'A%') -> b=SupportBean(theString like 'B%'))]";
         runEveryDistinctOverFollowedBy(engine, expression);
     }
 
@@ -445,7 +445,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
         assertFalse(listener.isInvoked());
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A1", "B1"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 1));
@@ -457,7 +457,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A4", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A4", "B4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A4", "B4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 3));
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 0));
@@ -471,10 +471,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider(config);
         engine.initialize();
 
-        String expression = "select * from pattern [(every-distinct(a.intPrimitive) a=SupportBean(string like 'A%')) -> b=SupportBean(intPrimitive=a.intPrimitive)]";
+        String expression = "select * from pattern [(every-distinct(a.intPrimitive) a=SupportBean(theString like 'A%')) -> b=SupportBean(intPrimitive=a.intPrimitive)]";
         runEveryDistinctWithinFollowedBy(engine, expression);
 
-        expression = "select * from pattern [(every-distinct(a.intPrimitive, 2 hours 1 minute) a=SupportBean(string like 'A%')) -> b=SupportBean(intPrimitive=a.intPrimitive)]";
+        expression = "select * from pattern [(every-distinct(a.intPrimitive, 2 hours 1 minute) a=SupportBean(theString like 'A%')) -> b=SupportBean(intPrimitive=a.intPrimitive)]";
         runEveryDistinctWithinFollowedBy(engine, expression);
     }
 
@@ -487,7 +487,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 0));
         assertFalse(listener.isInvoked());
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A1", "B2"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 3));
@@ -495,13 +495,13 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("B3", 3));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A3", "B3"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A3", "B3"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 2));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A2", "B5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A2", "B5"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A5", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B6", 2));
@@ -509,7 +509,7 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A6", 4));
         engine.getEPRuntime().sendEvent(new SupportBean("B7", 4));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A6", "B7"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A6", "B7"});
     }
 
     public void testFollowedByWithDistinct() throws Exception
@@ -519,10 +519,10 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
         EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider(config);
         engine.initialize();
 
-        String expression = "select * from pattern [every-distinct(a.intPrimitive) a=SupportBean(string like 'A%') -> every-distinct(b.intPrimitive) b=SupportBean(string like 'B%')]";
+        String expression = "select * from pattern [every-distinct(a.intPrimitive) a=SupportBean(theString like 'A%') -> every-distinct(b.intPrimitive) b=SupportBean(theString like 'B%')]";
         runFollowedByWithDistinct(engine, expression);
 
-        expression = "select * from pattern [every-distinct(a.intPrimitive, 1 day) a=SupportBean(string like 'A%') -> every-distinct(b.intPrimitive) b=SupportBean(string like 'B%')]";
+        expression = "select * from pattern [every-distinct(a.intPrimitive, 1 day) a=SupportBean(theString like 'A%') -> every-distinct(b.intPrimitive) b=SupportBean(theString like 'B%')]";
         runFollowedByWithDistinct(engine, expression);
     }
     
@@ -533,26 +533,26 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
         engine.getEPRuntime().sendEvent(new SupportBean("A1", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B1", 0));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A1", "B1"});
         engine.getEPRuntime().sendEvent(new SupportBean("B2", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A1", "B2"});
         engine.getEPRuntime().sendEvent(new SupportBean("B3", 0));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("A2", 1));
         engine.getEPRuntime().sendEvent(new SupportBean("B4", 2));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A1", "B4"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A1", "B4"});
 
         engine.getEPRuntime().sendEvent(new SupportBean("A3", 2));
         engine.getEPRuntime().sendEvent(new SupportBean("B5", 1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,b.string".split(","), new Object[]{"A3", "B5"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,b.theString".split(","), new Object[]{"A3", "B5"});
         engine.getEPRuntime().sendEvent(new SupportBean("B6", 1));
         assertFalse(listener.isInvoked());
 
         engine.getEPRuntime().sendEvent(new SupportBean("B7", 3));
         EventBean[] events = listener.getAndResetLastNewData();
-        EPAssertionUtil.assertProps(events[0], "a.string,b.string".split(","), new Object[]{"A1", "B7"});
-        EPAssertionUtil.assertProps(events[1], "a.string,b.string".split(","), new Object[]{"A3", "B7"});
+        EPAssertionUtil.assertProps(events[0], "a.theString,b.theString".split(","), new Object[]{"A1", "B7"});
+        EPAssertionUtil.assertProps(events[1], "a.theString,b.theString".split(","), new Object[]{"A3", "B7"});
     }
 
     public void testInvalid() throws Exception
@@ -588,8 +588,8 @@ public class TestEveryDistinct extends TestCase implements SupportBeanConstants
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

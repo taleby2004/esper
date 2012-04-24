@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 
 public class SupportBean implements Serializable
 {
-    private String string;
+    private String theString;
 
     private boolean boolPrimitive;
     private int intPrimitive;
@@ -43,15 +43,15 @@ public class SupportBean implements Serializable
     {
     }
 
-    public SupportBean(String string, int intPrimitive)
+    public SupportBean(String theString, int intPrimitive)
     {
-        this.string = string;
+        this.theString = theString;
         this.intPrimitive = intPrimitive;
     }
 
-    public String getString()
+    public String getTheString()
     {
-        return string;
+        return theString;
     }
 
     public boolean isBoolPrimitive()
@@ -134,9 +134,9 @@ public class SupportBean implements Serializable
         return doubleBoxed;
     }
 
-    public void setString(String string)
+    public void setTheString(String theString)
     {
-        this.string = string;
+        this.theString = theString;
     }
 
     public void setBoolPrimitive(boolean boolPrimitive)
@@ -236,7 +236,7 @@ public class SupportBean implements Serializable
 
     public String toString()
     {
-        return this.getClass().getSimpleName() + "(" + string + ", " + intPrimitive + ")";
+        return this.getClass().getSimpleName() + "(" + theString + ", " + intPrimitive + ")";
     }
 
     public BigDecimal getBigDecimal() {

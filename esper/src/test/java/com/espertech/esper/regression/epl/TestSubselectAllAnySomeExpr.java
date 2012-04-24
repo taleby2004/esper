@@ -43,11 +43,11 @@ public class TestSubselectAllAnySomeExpr extends TestCase
     {
         String[] fields = "g,ge,l,le".split(",");
         String stmtText = "select " +
-            "intPrimitive > all (select intPrimitive from SupportBean(string like \"S%\").win:keepall()) as g, " +
-            "intPrimitive >= all (select intPrimitive from SupportBean(string like \"S%\").win:keepall()) as ge, " +
-            "intPrimitive < all (select intPrimitive from SupportBean(string like \"S%\").win:keepall()) as l, " +
-            "intPrimitive <= all (select intPrimitive from SupportBean(string like \"S%\").win:keepall()) as le " +
-            "from SupportBean(string like \"E%\")";
+            "intPrimitive > all (select intPrimitive from SupportBean(theString like \"S%\").win:keepall()) as g, " +
+            "intPrimitive >= all (select intPrimitive from SupportBean(theString like \"S%\").win:keepall()) as ge, " +
+            "intPrimitive < all (select intPrimitive from SupportBean(theString like \"S%\").win:keepall()) as l, " +
+            "intPrimitive <= all (select intPrimitive from SupportBean(theString like \"S%\").win:keepall()) as le " +
+            "from SupportBean(theString like \"E%\")";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -100,9 +100,9 @@ public class TestSubselectAllAnySomeExpr extends TestCase
     {
         String[] fields = "vall,vany".split(",");
         String stmtText = "select " +
-            "intBoxed >= all (select doubleBoxed from SupportBean(string like 'S%').win:keepall()) as vall, " +
-            "intBoxed >= any (select doubleBoxed from SupportBean(string like 'S%').win:keepall()) as vany " +
-            " from SupportBean(string like 'E%')";
+            "intBoxed >= all (select doubleBoxed from SupportBean(theString like 'S%').win:keepall()) as vall, " +
+            "intBoxed >= any (select doubleBoxed from SupportBean(theString like 'S%').win:keepall()) as vany " +
+            " from SupportBean(theString like 'E%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -132,19 +132,19 @@ public class TestSubselectAllAnySomeExpr extends TestCase
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, true});
 
         sendEvent("E7", 0, null);
-        EventBean event = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(event, fields, new Object[]{false, false});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        EPAssertionUtil.assertProps(theEvent, fields, new Object[]{false, false});
     }
 
     public void testRelationalOpSome()
     {
         String[] fields = "g,ge,l,le".split(",");
         String stmtText = "select " +
-            "intPrimitive > any (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as g, " +
-            "intPrimitive >= any (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as ge, " +
-            "intPrimitive < any (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as l, " +
-            "intPrimitive <= any (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as le " +
-            " from SupportBean(string like 'E%')";
+            "intPrimitive > any (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as g, " +
+            "intPrimitive >= any (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as ge, " +
+            "intPrimitive < any (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as l, " +
+            "intPrimitive <= any (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as le " +
+            " from SupportBean(theString like 'E%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -181,11 +181,11 @@ public class TestSubselectAllAnySomeExpr extends TestCase
     {
         String[] fields = "eq,neq,sqlneq,nneq".split(",");
         String stmtText = "select " +
-                          "intPrimitive = all (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as eq, " +
-                          "intPrimitive != all (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as neq, " +
-                          "intPrimitive <> all (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as sqlneq, " +
-                          "not intPrimitive = all (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as nneq " +
-                          " from SupportBean(string like 'E%')";
+                          "intPrimitive = all (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as eq, " +
+                          "intPrimitive != all (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as neq, " +
+                          "intPrimitive <> all (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as sqlneq, " +
+                          "not intPrimitive = all (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as nneq " +
+                          " from SupportBean(theString like 'E%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -214,11 +214,11 @@ public class TestSubselectAllAnySomeExpr extends TestCase
     {
         String[] fields = "r1,r2,r3,r4".split(",");
         String stmtText = "select " +
-                    "intPrimitive = SOME (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as r1, " +
-                    "intPrimitive = ANY (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as r2, " +
-                    "intPrimitive != SOME (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as r3, " +
-                    "intPrimitive <> ANY (select intPrimitive from SupportBean(string like 'S%').win:keepall()) as r4 " +
-                    "from SupportBean(string like 'E%')";
+                    "intPrimitive = SOME (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as r1, " +
+                    "intPrimitive = ANY (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as r2, " +
+                    "intPrimitive != SOME (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as r3, " +
+                    "intPrimitive <> ANY (select intPrimitive from SupportBean(theString like 'S%').win:keepall()) as r4 " +
+                    "from SupportBean(theString like 'E%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -244,12 +244,12 @@ public class TestSubselectAllAnySomeExpr extends TestCase
     {
         String[] fields = "eall,eany,neall,neany,isin".split(",");
         String stmtText = "select " +
-            "intBoxed = all (select doubleBoxed from SupportBean(string like 'S%').win:keepall()) as eall, " +
-            "intBoxed = any (select doubleBoxed from SupportBean(string like 'S%').win:keepall()) as eany, " +
-            "intBoxed != all (select doubleBoxed from SupportBean(string like 'S%').win:keepall()) as neall, " +
-            "intBoxed != any (select doubleBoxed from SupportBean(string like 'S%').win:keepall()) as neany, " +
-            "intBoxed in (select doubleBoxed from SupportBean(string like 'S%').win:keepall()) as isin " +
-            " from SupportBean(string like 'E%')";
+            "intBoxed = all (select doubleBoxed from SupportBean(theString like 'S%').win:keepall()) as eall, " +
+            "intBoxed = any (select doubleBoxed from SupportBean(theString like 'S%').win:keepall()) as eany, " +
+            "intBoxed != all (select doubleBoxed from SupportBean(theString like 'S%').win:keepall()) as neall, " +
+            "intBoxed != any (select doubleBoxed from SupportBean(theString like 'S%').win:keepall()) as neany, " +
+            "intBoxed in (select doubleBoxed from SupportBean(theString like 'S%').win:keepall()) as isin " +
+            " from SupportBean(theString like 'E%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -295,9 +295,9 @@ public class TestSubselectAllAnySomeExpr extends TestCase
         }
     }
 
-    private void sendEvent(String string, Integer intBoxed, Double doubleBoxed)
+    private void sendEvent(String theString, Integer intBoxed, Double doubleBoxed)
     {
-        SupportBean bean = new SupportBean(string, -1);
+        SupportBean bean = new SupportBean(theString, -1);
         bean.setIntBoxed(intBoxed);
         bean.setDoubleBoxed(doubleBoxed);
         epService.getEPRuntime().sendEvent(bean);

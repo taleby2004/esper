@@ -33,14 +33,14 @@ public class RangeValueEventProp implements FilterSpecParamRangeValue
     }
 
     public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext) {
-        EventBean event = matchedEvents.getMatchingEvent(resultEventAsName);
-        if (event == null)
+        EventBean theEvent = matchedEvents.getMatchingEventByTag(resultEventAsName);
+        if (theEvent == null)
         {
             throw new IllegalStateException("Matching event named " +
                     '\'' + resultEventAsName + "' not found in event result set");
         }
 
-        Number value = (Number) event.get(resultEventProperty);
+        Number value = (Number) theEvent.get(resultEventProperty);
         if (value == null)
         {
             return null;

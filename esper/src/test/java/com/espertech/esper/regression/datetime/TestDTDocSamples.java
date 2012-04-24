@@ -11,9 +11,10 @@
 
 package com.espertech.esper.regression.datetime;
 
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.support.bean.SupportTimeStartEndA;
+import com.espertech.esper.support.bean.SupportTimeStartEndB;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
@@ -24,12 +25,18 @@ import java.util.Map;
 public class TestDTDocSamples extends TestCase {
 
     private EPServiceProvider epService;
+    private SupportUpdateListener listener;
 
     public void setUp() {
 
         Configuration config = SupportConfigFactory.getConfiguration();
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
+        listener = new SupportUpdateListener();
+    }
+
+    public void tearDown() {
+        listener = null;
     }
 
     public void testInput() {
@@ -52,5 +59,27 @@ public class TestDTDocSamples extends TestCase {
         epService.getEPAdministrator().createEPL("select timeTaken.toCalendar() as timeTakenCal from RFIDEvent");
         epService.getEPAdministrator().createEPL("select timeTaken.toDate() as timeTakenDate from RFIDEvent");
         epService.getEPAdministrator().createEPL("select timeTaken.toMillisec() as timeTakenLong from RFIDEvent");
+
+        // test pattern use
+        ConfigurationEventTypeLegacy leg = new ConfigurationEventTypeLegacy();
+        leg.setStartTimestampPropertyName("msecdateStart");
+        epService.getEPAdministrator().getConfiguration().addEventType("A", SupportTimeStartEndA.class.getName(), leg);
+        epService.getEPAdministrator().getConfiguration().addEventType("B", SupportTimeStartEndB.class.getName(), leg);
+
+        tryRun("a.msecdateStart.after(b)", "2002-05-30T9:00:00.000", "2002-05-30T8:59:59.999", true);
+        tryRun("a.after(b.msecdateStart)", "2002-05-30T9:00:00.000", "2002-05-30T8:59:59.999", true);
+        tryRun("a.after(b)", "2002-05-30T9:00:00.000", "2002-05-30T8:59:59.999", true);
+        tryRun("a.after(b)", "2002-05-30T8:59:59.999", "2002-05-30T9:00:00.000", false);
+    }
+
+    private void tryRun(String condition, String tsa, String tsb, boolean isInvoked) {
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from pattern [a=A -> b=B] as abc where " + condition);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(SupportTimeStartEndA.make("E1", tsa, 0));
+        epService.getEPRuntime().sendEvent(SupportTimeStartEndB.make("E2", tsb, 0));
+        assertEquals(isInvoked, listener.getAndClearIsInvoked());
+
+        stmt.destroy();
     }
 }

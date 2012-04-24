@@ -44,9 +44,9 @@ public class SubselectAggregatorView extends ViewSupport
 
         if (newData != null)
         {
-            for (EventBean event : newData)
+            for (EventBean theEvent : newData)
             {
-                eventsPerStream[0] = event;
+                eventsPerStream[0] = theEvent;
 
                 boolean isPass = filter(eventsPerStream, true, exprEvaluatorContext);
                 if (isPass)
@@ -58,9 +58,9 @@ public class SubselectAggregatorView extends ViewSupport
 
         if (oldData != null)
         {
-            for (EventBean event : oldData)
+            for (EventBean theEvent : oldData)
             {
-                eventsPerStream[0] = event;
+                eventsPerStream[0] = theEvent;
                 boolean isPass = filter(eventsPerStream, false, exprEvaluatorContext);
                 if (isPass)
                 {

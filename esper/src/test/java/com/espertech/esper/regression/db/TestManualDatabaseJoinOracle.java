@@ -64,12 +64,12 @@ public class TestManualDatabaseJoinOracle
         Assert.assertEquals(BigDecimal.class, statement.getEventType().getPropertyType("MYINT"));
 
         sendSupportBeanEvent("A");
-        EventBean event = listener.assertOneGetNewAndReset();
-        Assert.assertEquals(new BigDecimal(10), event.get("MYINT"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        Assert.assertEquals(new BigDecimal(10), theEvent.get("MYINT"));
 
         sendSupportBeanEvent("H");
-        event = listener.assertOneGetNewAndReset();
-        Assert.assertEquals(new BigDecimal(80), event.get("MYINT"));
+        theEvent = listener.assertOneGetNewAndReset();
+        Assert.assertEquals(new BigDecimal(80), theEvent.get("MYINT"));
     }
 
     public void manualHasMetaSQLIntParamLowercase()
@@ -209,10 +209,10 @@ public class TestManualDatabaseJoinOracle
         return configuration;
     }
     
-    private void sendSupportBeanEvent(String string)
+    private void sendSupportBeanEvent(String theString)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         epService.getEPRuntime().sendEvent(bean);
     }
 

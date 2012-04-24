@@ -57,8 +57,8 @@ public class TestContextMTSegmented extends TestCase
         
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         epService.getEPAdministrator().createEPL("create variable boolean myvar = false");
-        epService.getEPAdministrator().createEPL("create context SegmentedByString as partition by string from SupportBean");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("context SegmentedByString select string, count(*) - 1 as cnt from SupportBean output snapshot when myvar = true");
+        epService.getEPAdministrator().createEPL("create context SegmentedByString as partition by theString from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("context SegmentedByString select theString, count(*) - 1 as cnt from SupportBean output snapshot when myvar = true");
         stmt.addListener(listener);
 
         // preload - since concurrently sending same-category events an event can be dropped
@@ -109,10 +109,10 @@ public class TestContextMTSegmented extends TestCase
         EventBean[] result = listener.getLastNewData();
         assertEquals(choices.length, result.length);
         for (EventBean item : result) {
-            String string = (String) item.get("string");
+            String theString = (String) item.get("theString");
             Long count = (Long) item.get("cnt");
             //System.out.println("String " + string + " count " + count);
-            assertEquals(count, totals.get(string));
+            assertEquals(count, totals.get(theString));
         }
     }
 

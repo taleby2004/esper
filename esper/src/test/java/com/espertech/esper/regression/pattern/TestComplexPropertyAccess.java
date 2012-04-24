@@ -107,17 +107,17 @@ public class TestComplexPropertyAccess extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createPattern(pattern);
         stmt.addListener(testListener);
 
-        Object event = new SupportBeanComplexProps(new int[] { 3, 4});
-        epService.getEPRuntime().sendEvent(event);
-        assertSame(event, testListener.assertOneGetNewAndReset().get("a"));
+        Object theEvent = new SupportBeanComplexProps(new int[] { 3, 4});
+        epService.getEPRuntime().sendEvent(theEvent);
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().get("a"));
 
-        event = new SupportBeanComplexProps(new int[] { 6});
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportBeanComplexProps(new int[] { 6});
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(testListener.isInvoked());
 
-        event = new SupportBeanComplexProps(new int[] { 3});
-        epService.getEPRuntime().sendEvent(event);
-        assertSame(event, testListener.assertOneGetNewAndReset().get("a"));
+        theEvent = new SupportBeanComplexProps(new int[] { 3});
+        epService.getEPRuntime().sendEvent(theEvent);
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().get("a"));
     }
 
     public void testIndexedValueProp() throws Exception
@@ -176,8 +176,8 @@ public class TestComplexPropertyAccess extends TestCase
         epService.getEPRuntime().sendEvent(eventOne);
         assertFalse(testListener.isInvoked());
 
-        Object event = new SupportBeanComplexProps(new int[] { 6});
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBeanComplexProps(new int[] { 6});
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(testListener.isInvoked());
 
         Object eventTwo = new SupportBeanComplexProps(new int[] { 3});

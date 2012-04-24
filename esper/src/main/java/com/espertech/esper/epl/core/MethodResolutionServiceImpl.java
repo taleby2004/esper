@@ -10,7 +10,6 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.hook.AggregationFunctionFactory;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.*;
 import com.espertech.esper.schedule.TimeProvider;
@@ -331,7 +330,7 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return newAggregatorsInternal(prototypes, agentInstanceId);
     }
 
-    public AggregationMethod[] newAggregators(AggregationMethodFactory[] prototypes, int agentInstanceId, MultiKeyUntyped groupKey) {
+    public AggregationMethod[] newAggregators(AggregationMethodFactory[] prototypes, int agentInstanceId, Object groupKey) {
         return newAggregatorsInternal(prototypes, agentInstanceId);
     }
 
@@ -349,12 +348,12 @@ public class MethodResolutionServiceImpl implements MethodResolutionService
         return 0;   // since the aggregators are always fresh ones 
     }
 
-    public void removeAggregators(int agentInstanceId, MultiKeyUntyped groupKey)
+    public void removeAggregators(int agentInstanceId, Object groupKey)
     {
         // To be overridden by implementations that care when aggregators get removed
     }
 
-    public AggregationAccess makeAccessStreamId(int agentInstanceId, boolean isJoin, int streamId, MultiKeyUntyped groupKey)
+    public AggregationAccess makeAccessStreamId(int agentInstanceId, boolean isJoin, int streamId, Object groupKey)
     {
         if (isJoin) {
             return new AggregationAccessJoinImpl(streamId);

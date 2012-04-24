@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -26,7 +25,7 @@ public class AggSvcGroupByExperimental extends AggregationServiceBaseGrouped
     private AggregationMethod[] currentAggregatorRow;
 
     private MethodResolutionService methodResolutionService;
-    private MultiKeyUntyped lastrow;
+    private Object lastrow;
 
     /**
      * Ctor.
@@ -47,7 +46,7 @@ public class AggSvcGroupByExperimental extends AggregationServiceBaseGrouped
     {
     }
 
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped groupByKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyEnter(EventBean[] eventsPerStream, Object groupByKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (lastrow != null && lastrow.equals(groupByKey)) {
             // no action
@@ -66,7 +65,7 @@ public class AggSvcGroupByExperimental extends AggregationServiceBaseGrouped
         }
     }
 
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped groupByKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyLeave(EventBean[] eventsPerStream, Object groupByKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (lastrow != null && lastrow.equals(groupByKey)) {
             // no action
@@ -85,7 +84,7 @@ public class AggSvcGroupByExperimental extends AggregationServiceBaseGrouped
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey, int agentInstanceId)
+    public void setCurrentAccess(Object groupByKey, int agentInstanceId)
     {
         if (lastrow != null && lastrow.equals(groupByKey)) {
             // no action

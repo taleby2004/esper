@@ -73,8 +73,8 @@ public class SupportJoinResultNodeFactory
 
     public static EventBean makeEvent()
     {
-        EventBean event = SupportEventBeanFactory.createObject(new Object());
-        return event;
+        EventBean theEvent = SupportEventBeanFactory.createObject(new Object());
+        return theEvent;
     }
 
     public static EventBean[] makeEvents(int numEvents)

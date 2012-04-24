@@ -184,7 +184,7 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
 
     public void testSelectLargeResultSetCoercion()
     {
-        String stmtText = "select string, mycol3, mycol4 from " +
+        String stmtText = "select theString, mycol3, mycol4 from " +
                 " sql:MyDB ['select mycol3, mycol4 from mytesttable_large'] as s0, " +
                 SupportBean.class.getName() + ".win:keepall() as s1 where s1.doubleBoxed = s0.mycol3 and s1.byteBoxed = s0.mycol4";
 
@@ -199,9 +199,9 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
             SupportBean bean = new SupportBean();
             bean.setDoubleBoxed(100d);
             bean.setByteBoxed((byte)10);
-            bean.setString("E" + i);
+            bean.setTheString("E" + i);
             epServiceRetained.getEPRuntime().sendEvent(bean);
-            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"string", "mycol3", "mycol4"}, new Object[]{"E" + i, 100, 10});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"theString", "mycol3", "mycol4"}, new Object[]{"E" + i, 100, 10});
         }
         long endTime = System.currentTimeMillis();
 
@@ -211,9 +211,9 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
 
     public void test2StreamOuterJoin()
     {
-        String stmtText = "select string, mycol3, mycol1 from " +
+        String stmtText = "select theString, mycol3, mycol1 from " +
                 " sql:MyDB ['select mycol1, mycol3 from mytesttable_large'] as s1 right outer join " +
-                SupportBean.class.getName() + " as s0 on string = mycol1";
+                SupportBean.class.getName() + " as s0 on theString = mycol1";
 
         EPStatement statement = epServiceRetained.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
@@ -224,17 +224,17 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
         for (int i = 0; i < 200; i++)
         {
             SupportBean bean = new SupportBean();
-            bean.setString("50");
+            bean.setTheString("50");
             epServiceRetained.getEPRuntime().sendEvent(bean);
-            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"string", "mycol3", "mycol1"}, new Object[]{"50", 50, "50"});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"theString", "mycol3", "mycol1"}, new Object[]{"50", 50, "50"});
         }
         long endTime = System.currentTimeMillis();
 
         // no matching
         SupportBean bean = new SupportBean();
-        bean.setString("-1");
+        bean.setTheString("-1");
         epServiceRetained.getEPRuntime().sendEvent(bean);
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"string", "mycol3", "mycol1"}, new Object[]{"-1", null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"theString", "mycol3", "mycol1"}, new Object[]{"-1", null, null});
 
         log.info("delta=" + (endTime - startTime));
         assertTrue(endTime - startTime < 500);
@@ -242,9 +242,9 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
     
     public void testOuterJoinPlusWhere()
     {
-        String stmtText = "select string, mycol3, mycol1 from " +
+        String stmtText = "select theString, mycol3, mycol1 from " +
                 " sql:MyDB ['select mycol1, mycol3 from mytesttable_large'] as s1 right outer join " +
-                SupportBean.class.getName() + " as s0 on string = mycol1 where s1.mycol3 = s0.intPrimitive";
+                SupportBean.class.getName() + " as s0 on theString = mycol1 where s1.mycol3 = s0.intPrimitive";
 
         EPStatement statement = epServiceRetained.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
@@ -255,10 +255,10 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
         for (int i = 0; i < 200; i++)
         {
             SupportBean bean = new SupportBean();
-            bean.setString("50");
+            bean.setTheString("50");
             bean.setIntPrimitive(50);
             epServiceRetained.getEPRuntime().sendEvent(bean);
-            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"string", "mycol3", "mycol1"}, new Object[]{"50", 50, "50"});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), new String[]{"theString", "mycol3", "mycol1"}, new Object[]{"50", 50, "50"});
         }
         long endTime = System.currentTimeMillis();
 
@@ -268,7 +268,7 @@ public class TestDatabaseJoinPerfWithCache extends TestCase
 
         // matching on-clause not matching where
         bean = new SupportBean();
-        bean.setString("50");
+        bean.setTheString("50");
         bean.setIntPrimitive(49);
         epServiceRetained.getEPRuntime().sendEvent(bean);
         assertFalse(listener.isInvoked());

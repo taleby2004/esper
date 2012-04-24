@@ -71,21 +71,21 @@ public class InternalEventRouterPreprocessor
 
     /**
      * Pre-proces the event.
-     * @param event to pre-process
+     * @param theEvent to pre-process
      * @param exprEvaluatorContext expression evaluation context
      * @return processed event
      */
-    public EventBean process(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
+    public EventBean process(EventBean theEvent, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (empty)
         {
-            return event;
+            return theEvent;
         }
 
-        EventBean oldEvent = event;
+        EventBean oldEvent = theEvent;
         boolean haveCloned = false;
         EventBean[] eventsPerStream = new EventBean[1];
-        eventsPerStream[0] = event;
+        eventsPerStream[0] = theEvent;
         InternalEventRouterEntry lastEntry = null;
 
         for (int i = 0; i < entries.length; i++)
@@ -112,7 +112,7 @@ public class InternalEventRouterPreprocessor
                 InternalRoutePreprocessView view = lastEntry.getOutputView();
                 if (view.isIndicate())
                 {
-                    EventBean copied = copyMethod.copy(event);
+                    EventBean copied = copyMethod.copy(theEvent);
                     view.indicate(copied, oldEvent);
                     oldEvent = copied;
                 }
@@ -120,7 +120,7 @@ public class InternalEventRouterPreprocessor
                 {
                     if (entries[i].getOutputView().isIndicate())
                     {
-                        oldEvent = copyMethod.copy(event);
+                        oldEvent = copyMethod.copy(theEvent);
                     }
                 }
             }
@@ -128,18 +128,18 @@ public class InternalEventRouterPreprocessor
             // copy event for the first update that applies
             if (!haveCloned)
             {
-                EventBean copiedEvent = copyMethod.copy(event);
+                EventBean copiedEvent = copyMethod.copy(theEvent);
                 if (copiedEvent == null)
                 {
-                    log.warn("Event of type " + event.getEventType().getName() + " could not be copied");
+                    log.warn("Event of type " + theEvent.getEventType().getName() + " could not be copied");
                     return null;
                 }
                 haveCloned = true;
                 eventsPerStream[0] = copiedEvent;
-                event = copiedEvent;
+                theEvent = copiedEvent;
             }
 
-            apply(event, eventsPerStream, entry, exprEvaluatorContext);
+            apply(theEvent, eventsPerStream, entry, exprEvaluatorContext);
             lastEntry = entry;
         }
 
@@ -148,14 +148,14 @@ public class InternalEventRouterPreprocessor
             InternalRoutePreprocessView view = lastEntry.getOutputView();
             if (view.isIndicate())
             {
-                view.indicate(event, oldEvent);
+                view.indicate(theEvent, oldEvent);
             }
         }
 
-        return event;
+        return theEvent;
     }
 
-    private void apply(EventBean event, EventBean[] eventsPerStream, InternalEventRouterEntry entry, ExprEvaluatorContext exprEvaluatorContext)
+    private void apply(EventBean theEvent, EventBean[] eventsPerStream, InternalEventRouterEntry entry, ExprEvaluatorContext exprEvaluatorContext)
     {
         // evaluate
         Object[] values = new Object[entry.getAssignments().length];
@@ -172,6 +172,6 @@ public class InternalEventRouterPreprocessor
         }
 
         // apply
-        entry.getWriter().write(values, event);
+        entry.getWriter().write(values, theEvent);
     }
 }

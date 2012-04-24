@@ -76,7 +76,7 @@ public class OnSetVariableView extends ViewSupport
     public Iterator<EventBean> iterator()
     {
         Map<String, Object> values = factory.getVariableReadWritePackage().iterate();
-        EventBean event = factory.getEventAdapterService().adapterForTypedMap(values, factory.getEventType());
-        return new SingleEventIterator(event);
+        EventBean theEvent = factory.getEventAdapterService().adapterForTypedMap(values, factory.getEventType());
+        return new SingleEventIterator(theEvent);
     }
 }

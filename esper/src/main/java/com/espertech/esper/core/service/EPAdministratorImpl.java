@@ -10,13 +10,14 @@ package com.espertech.esper.core.service;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
-import com.espertech.esper.client.epn.EPNetworkAdmin;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.core.deploy.EPDeploymentAdminImpl;
-import com.espertech.esper.core.epn.EPNetworkAdminImpl;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.spec.*;
+import com.espertech.esper.event.EventTypeIdGeneratorContext;
+import com.espertech.esper.event.EventTypeIdGeneratorFactory;
 import com.espertech.esper.pattern.EvalFactoryNode;
+import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +32,6 @@ public class EPAdministratorImpl implements EPAdministratorSPI
     private ConfigurationOperations configurationOperations;
     private SelectClauseStreamSelectorEnum defaultStreamSelector;
     private EPDeploymentAdmin deploymentAdminService;
-    private EPNetworkAdmin networkAdminService;
 
     /**
      * Constructor - takes the services context as argument.
@@ -42,12 +42,14 @@ public class EPAdministratorImpl implements EPAdministratorSPI
         this.services = adminContext.getServices();
         this.configurationOperations = adminContext.getConfigurationOperations();
         this.defaultStreamSelector = adminContext.getDefaultStreamSelector();
-        this.deploymentAdminService = new EPDeploymentAdminImpl(this, adminContext.getServices().getDeploymentStateService(), adminContext.getServices().getStatementEventTypeRefService(), adminContext.getServices().getEventAdapterService(), adminContext.getServices().getStatementIsolationService(), null, adminContext.getServices().getFilterService());
-        this.networkAdminService = new EPNetworkAdminImpl(adminContext.getServices().getEngineURI(), adminContext.getRuntimeSPI(), adminContext.getServices().getThreadingService());
-    }
 
-    public EPNetworkAdmin getNetworkAdmin() {
-        return networkAdminService;
+        ConfigurationEngineDefaults.AlternativeContext alternativeContext = adminContext.getServices().getConfigSnapshot().getEngineDefaults().getAlternativeContext();
+        StatementIdGenerator statementIdGenerator = null;
+        if (alternativeContext != null && alternativeContext.getStatementIdGeneratorFactory() != null) {
+            StatementIdGeneratorFactory statementIdGeneratorFactory = (StatementIdGeneratorFactory) JavaClassHelper.instantiate(StatementIdGeneratorFactory.class, alternativeContext.getStatementIdGeneratorFactory());
+            statementIdGenerator = statementIdGeneratorFactory.create(new StatementIdGeneratorFactoryContext(services.getEngineURI()));
+        }
+        this.deploymentAdminService = new EPDeploymentAdminImpl(this, adminContext.getServices().getDeploymentStateService(), adminContext.getServices().getStatementEventTypeRefService(), adminContext.getServices().getEventAdapterService(), adminContext.getServices().getStatementIsolationService(), statementIdGenerator, adminContext.getServices().getFilterService());
     }
 
     public EPDeploymentAdmin getDeploymentAdmin()

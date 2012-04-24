@@ -40,13 +40,13 @@ public class PatternListenerDispatch implements Dispatchable
 
     /**
      * Add an event to be dispatched.
-     * @param event to add
+     * @param theEvent to add
      */
-    public void add(EventBean event)
+    public void add(EventBean theEvent)
     {
         if (singleEvent == null)
         {
-            singleEvent = event;
+            singleEvent = theEvent;
         }
         else
         {
@@ -55,7 +55,7 @@ public class PatternListenerDispatch implements Dispatchable
                 eventList = new ArrayList<EventBean>(5);
                 eventList.add(singleEvent);
             }
-            eventList.add(event);
+            eventList.add(theEvent);
         }
     }
 

@@ -8,21 +8,21 @@ import java.io.ObjectOutputStream;
 public class SupportSocketClientObject {
 
     private final Socket requestSocket;
-    private final ObjectOutputStream out;
+    private final ObjectOutputStream outStream;
 
     public SupportSocketClientObject(int port) throws UnknownHostException, IOException {
         requestSocket = new Socket("localhost", port);
-        out = new ObjectOutputStream(requestSocket.getOutputStream());
+        outStream = new ObjectOutputStream(requestSocket.getOutputStream());
     }
 
     public void send(Object object) throws IOException
     {
-        out.writeObject(object);
-        out.flush();
+        outStream.writeObject(object);
+        outStream.flush();
     }
 
     public void close() throws IOException {
-        out.close();
+        outStream.close();
         requestSocket.close();
     }
 }

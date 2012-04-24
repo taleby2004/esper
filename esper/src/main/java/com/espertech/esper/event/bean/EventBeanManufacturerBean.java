@@ -100,12 +100,18 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
 
     public EventBean make(Object[] propertyValues)
     {
-        Object out;
+        Object outObject = makeUnderlying(propertyValues);
+        return service.adapterForTypedBean(outObject, beanEventType);
+    }
+
+    public Object makeUnderlying(Object[] propertyValues)
+    {
+        Object outObject;
         if (factoryMethod == null)
         {
             try
             {
-                out = fastClass.newInstance();
+                outObject = fastClass.newInstance();
             }
             catch (InvocationTargetException e)
             {
@@ -118,7 +124,7 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
         {
             try
             {
-                out = factoryMethod.invoke(null, null);
+                outObject = factoryMethod.invoke(null, null);
             }
             catch (InvocationTargetException e)
             {
@@ -129,13 +135,13 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
         }
 
         if (!hasPrimitiveTypes) {
-            Object[] params = new Object[1];
+            Object[] parameters = new Object[1];
             for (int i = 0; i < writeMethods.length; i++)
             {
-                params[0] = propertyValues[i];
+                parameters[0] = propertyValues[i];
                 try
                 {
-                    writeMethods[i].invoke(out, params);
+                    writeMethods[i].invoke(outObject, parameters);
                 }
                 catch (InvocationTargetException e)
                 {
@@ -147,7 +153,7 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
         }
         else
         {
-            Object[] params = new Object[1];
+            Object[] parameters = new Object[1];
             for (int i = 0; i < writeMethods.length; i++)
             {
                 if (primitiveType[i]) {
@@ -155,10 +161,10 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
                         continue;
                     }
                 }
-                params[0] = propertyValues[i];
+                parameters[0] = propertyValues[i];
                 try
                 {
-                    writeMethods[i].invoke(out, params);
+                    writeMethods[i].invoke(outObject, parameters);
                 }
                 catch (InvocationTargetException e)
                 {
@@ -169,8 +175,7 @@ public class EventBeanManufacturerBean implements EventBeanManufacturer
             }
         }
 
-
-        return service.adapterForTypedBean(out, beanEventType);
+        return outObject;
     }
 
     private static FastMethod resolveFactoryMethod(FastClass fastClass, String factoryMethodName, MethodResolutionService methodResolutionService)

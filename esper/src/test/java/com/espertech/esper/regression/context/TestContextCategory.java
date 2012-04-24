@@ -53,7 +53,7 @@ public class TestContextCategory extends TestCase {
     public void testContextPartitionSelection() {
         String[] fields = "c0,c1,c2,c3".split(",");
         epService.getEPAdministrator().createEPL("create context MyCtx as group by intPrimitive < -5 as grp1, group by intPrimitive between -5 and +5 as grp2, group by intPrimitive > 5 as grp3 from SupportBean");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, context.label as c1, string as c2, sum(intPrimitive) as c3 from SupportBean.win:keepall() group by string");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, context.label as c1, theString as c2, sum(intPrimitive) as c3 from SupportBean.win:keepall() group by theString");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", -5));
@@ -99,7 +99,7 @@ public class TestContextCategory extends TestCase {
         String epl;
 
         // invalid filter spec
-        epl = "create context ACtx group string is not null as cat1 from SupportBean(dummy = 1)";
+        epl = "create context ACtx group theString is not null as cat1 from SupportBean(dummy = 1)";
         tryInvalid(epl, "Error starting statement: Property named 'dummy' is not valid in any stream [");
 
         // not a boolean expression

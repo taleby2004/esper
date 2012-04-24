@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -37,14 +36,14 @@ public class AggSvcGroupByReclaimAgedImpl extends AggregationServiceBaseGrouped
     private final MethodResolutionService methodResolutionService;
 
     // maintain for each group a row of aggregator states that the expression node canb pull the data from via index
-    private Map<MultiKeyUntyped, AggregationMethodRowAged> aggregatorsPerGroup;
+    private Map<Object, AggregationMethodRowAged> aggregatorsPerGroup;
 
     // maintain a current row for random access into the aggregator state table
     // (row=groups, columns=expression nodes that have aggregation functions)
     private AggregationMethod[] currentAggregatorMethods;
     private AggregationAccess[] currentAggregatorAccesses;
 
-    private List<MultiKeyUntyped> removedKeys;
+    private List<Object> removedKeys;
     private Long nextSweepTime = null;
     private AggregationRowRemovedCallback removedCallback;
     private volatile long currentMaxAge = DEFAULT_MAX_AGE_MSEC;
@@ -58,8 +57,8 @@ public class AggSvcGroupByReclaimAgedImpl extends AggregationServiceBaseGrouped
         this.evaluationFunctionMaxAge = evaluationFunctionMaxAge;
         this.evaluationFunctionFrequency = evaluationFunctionFrequency;
         this.methodResolutionService = methodResolutionService;
-        this.aggregatorsPerGroup = new HashMap<MultiKeyUntyped, AggregationMethodRowAged>();
-        removedKeys = new ArrayList<MultiKeyUntyped>();
+        this.aggregatorsPerGroup = new HashMap<Object, AggregationMethodRowAged>();
+        removedKeys = new ArrayList<Object>();
     }
 
     public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
@@ -67,7 +66,7 @@ public class AggSvcGroupByReclaimAgedImpl extends AggregationServiceBaseGrouped
         aggregatorsPerGroup.clear();
     }
 
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped groupByKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyEnter(EventBean[] eventsPerStream, Object groupByKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         long currentTime = exprEvaluatorContext.getTimeProvider().getTime();
         if ((nextSweepTime == null) || (nextSweepTime <= currentTime))
@@ -84,7 +83,7 @@ public class AggSvcGroupByReclaimAgedImpl extends AggregationServiceBaseGrouped
 
         if (!removedKeys.isEmpty())     // we collect removed keys lazily on the next enter to reduce the chance of empty-group queries creating empty aggregators temporarily
         {
-            for (MultiKeyUntyped removedKey : removedKeys)
+            for (Object removedKey : removedKeys)
             {
                 aggregatorsPerGroup.remove(removedKey);
             }
@@ -127,8 +126,8 @@ public class AggSvcGroupByReclaimAgedImpl extends AggregationServiceBaseGrouped
 
     private void sweep(long currentTime, long currentMaxAge)
     {
-        ArrayDeque<MultiKeyUntyped> removed = new ArrayDeque<MultiKeyUntyped>();
-        for (Map.Entry<MultiKeyUntyped, AggregationMethodRowAged> entry : aggregatorsPerGroup.entrySet())
+        ArrayDeque<Object> removed = new ArrayDeque<Object>();
+        for (Map.Entry<Object, AggregationMethodRowAged> entry : aggregatorsPerGroup.entrySet())
         {
             long age = currentTime - entry.getValue().getLastUpdateTime();
             if (age > currentMaxAge)
@@ -137,7 +136,7 @@ public class AggSvcGroupByReclaimAgedImpl extends AggregationServiceBaseGrouped
             }
         }
 
-        for (MultiKeyUntyped key : removed)
+        for (Object key : removed)
         {
             aggregatorsPerGroup.remove(key);
             removedCallback.removed(key);
@@ -164,7 +163,7 @@ public class AggSvcGroupByReclaimAgedImpl extends AggregationServiceBaseGrouped
         return Math.round(frequency * 1000d);
     }
 
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped groupByKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyLeave(EventBean[] eventsPerStream, Object groupByKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         AggregationMethodRowAged row = aggregatorsPerGroup.get(groupByKey);
         long currentTime = exprEvaluatorContext.getTimeProvider().getTime();
@@ -207,7 +206,7 @@ public class AggSvcGroupByReclaimAgedImpl extends AggregationServiceBaseGrouped
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey, int agentInstanceId)
+    public void setCurrentAccess(Object groupByKey, int agentInstanceId)
     {
         AggregationMethodRowAged row = aggregatorsPerGroup.get(groupByKey);
 

@@ -47,14 +47,14 @@ public class TestMappedIndexedPropertyExpression extends TestCase {
     {
         // test bean-type
         String eplBeans = "select " +
-                "mapped(string) as val0, " +
+                "mapped(theString) as val0, " +
                 "indexed(intPrimitive) as val1 " +
                 "from SupportBeanComplexProps.std:lastevent(), SupportBean sb unidirectional";
         runAssertionBean(eplBeans);
 
         // test bean-type prefixed
         String eplBeansPrefixed = "select " +
-                "sbcp.mapped(string) as val0, " +
+                "sbcp.mapped(theString) as val0, " +
                 "sbcp.indexed(intPrimitive) as val1 " +
                 "from SupportBeanComplexProps.std:lastevent() sbcp, SupportBean sb unidirectional";
         runAssertionBean(eplBeansPrefixed);
@@ -63,13 +63,13 @@ public class TestMappedIndexedPropertyExpression extends TestCase {
         epService.getEPAdministrator().createEPL("insert into SecondStream select 'a' as val0, * from SupportBeanComplexProps");
 
         String eplWrap = "select " +
-                "mapped(string) as val0," +
+                "mapped(theString) as val0," +
                 "indexed(intPrimitive) as val1 " +
                 "from SecondStream .std:lastevent(), SupportBean unidirectional";
         runAssertionBean(eplWrap);
 
         String eplWrapPrefixed = "select " +
-                "sbcp.mapped(string) as val0," +
+                "sbcp.mapped(theString) as val0," +
                 "sbcp.indexed(intPrimitive) as val1 " +
                 "from SecondStream .std:lastevent() sbcp, SupportBean unidirectional";
         runAssertionBean(eplWrapPrefixed);
@@ -81,16 +81,45 @@ public class TestMappedIndexedPropertyExpression extends TestCase {
         epService.getEPAdministrator().getConfiguration().addEventType("MapEvent", def);
 
         String eplMap = "select " +
-                "mapped(string) as val0," +
+                "mapped(theString) as val0," +
                 "indexed(intPrimitive) as val1 " +
                 "from MapEvent.std:lastevent(), SupportBean unidirectional";
         runAssertionMap(eplMap);
 
         String eplMapPrefixed = "select " +
-                "sbcp.mapped(string) as val0," +
+                "sbcp.mapped(theString) as val0," +
                 "sbcp.indexed(intPrimitive) as val1 " +
                 "from MapEvent.std:lastevent() sbcp, SupportBean unidirectional";
         runAssertionMap(eplMapPrefixed);
+
+        // test insert-int
+        Map<String, Object> defType = new HashMap<String, Object>();
+        defType.put("name", String.class);
+        defType.put("value", String.class);
+        defType.put("properties", Map.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("InputEvent", defType);
+        epService.getEPAdministrator().createEPL("select name,value,properties(name) = value as ok from InputEvent").addListener(listener);
+
+        listener.reset();
+        epService.getEPRuntime().sendEvent(makeMapEvent("name", "value1", Collections.singletonMap("name", "xxxx")), "InputEvent");
+        assertFalse((Boolean) listener.assertOneGetNewAndReset().get("ok"));
+
+        epService.getEPRuntime().sendEvent(makeMapEvent("name", "value1", Collections.singletonMap("name", "value1")), "InputEvent");
+        assertTrue((Boolean) listener.assertOneGetNewAndReset().get("ok"));
+
+        // test Object-array-type
+        epService.getEPAdministrator().getConfiguration().addEventType("ObjectArrayEvent", new String[] {"mapped", "indexed"}, new Object[] {new HashMap(), int[].class});
+        String eplObjectArray = "select " +
+                "mapped(theString) as val0," +
+                "indexed(intPrimitive) as val1 " +
+                "from ObjectArrayEvent.std:lastevent(), SupportBean unidirectional";
+        runAssertionObjectArray(eplObjectArray);
+
+        String eplObjectArrayPrefixed = "select " +
+                "sbcp.mapped(theString) as val0," +
+                "sbcp.indexed(intPrimitive) as val1 " +
+                "from ObjectArrayEvent.std:lastevent() sbcp, SupportBean unidirectional";
+        runAssertionObjectArray(eplObjectArrayPrefixed);
     }
 
     private void runAssertionMap(String epl) {
@@ -101,6 +130,16 @@ public class TestMappedIndexedPropertyExpression extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("keyOne", 1));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1".split(","), new Object[]{"valueOne", 2});
         stmtMap.destroy();
+    }
+
+    private void runAssertionObjectArray(String epl) {
+        EPStatement stmtObjectArray = epService.getEPAdministrator().createEPL(epl);
+        stmtObjectArray.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new Object[] {Collections.singletonMap("keyOne", "valueOne"), new int[] {1, 2}}, "ObjectArrayEvent");
+        epService.getEPRuntime().sendEvent(new SupportBean("keyOne", 1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0,val1".split(","), new Object[]{"valueOne", 2});
+        stmtObjectArray.destroy();
     }
 
     private void runAssertionBean(String epl) {
@@ -117,6 +156,14 @@ public class TestMappedIndexedPropertyExpression extends TestCase {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("mapped", Collections.singletonMap("keyOne", "valueOne"));
         map.put("indexed", new int[] {1, 2});
+        return map;
+    }
+
+    private Map<String, Object> makeMapEvent(String name, String value, Map properties) {
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("name", name);
+        map.put("value", value);
+        map.put("properties", properties);
         return map;
     }
 }

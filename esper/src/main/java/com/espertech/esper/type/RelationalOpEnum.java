@@ -9,6 +9,7 @@
 package com.espertech.esper.type;
 
 import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.util.SimpleNumberBigIntegerCoercer;
 import com.espertech.esper.util.SimpleNumberBigDecimalCoercer;
 import com.espertech.esper.util.SimpleNumberCoercerFactory;
@@ -43,7 +44,7 @@ public enum RelationalOpEnum
      */
     LE ("<=");
 
-    private static Map<MultiKey<Object>, RelationalOpEnum.Computer> computers;
+    private static Map<MultiKeyUntyped, RelationalOpEnum.Computer> computers;
 
     private String expressionText;
 
@@ -93,35 +94,35 @@ public enum RelationalOpEnum
 
     static
     {
-        computers = new HashMap<MultiKey<Object>, RelationalOpEnum.Computer>();
-        computers.put(new MultiKey<Object>(new Object[] {String.class, GT}), new GTStringComputer());
-        computers.put(new MultiKey<Object>(new Object[] {String.class, GE}), new GEStringComputer());
-        computers.put(new MultiKey<Object>(new Object[] {String.class, LT}), new LTStringComputer());
-        computers.put(new MultiKey<Object>(new Object[] {String.class, LE}), new LEStringComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, GT}), new GTIntegerComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, GE}), new GEIntegerComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, LT}), new LTIntegerComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, LE}), new LEIntegerComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, GT}), new GTLongComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, GE}), new GELongComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, LT}), new LTLongComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, LE}), new LELongComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Double.class, GT}), new GTDoubleComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Double.class, GE}), new GEDoubleComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Double.class, LT}), new LTDoubleComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Double.class, LE}), new LEDoubleComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Float.class, GT}), new GTFloatComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Float.class, GE}), new GEFloatComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Float.class, LT}), new LTFloatComputer());
-        computers.put(new MultiKey<Object>(new Object[] {Float.class, LE}), new LEFloatComputer());
-        computers.put(new MultiKey<Object>(new Object[] {BigDecimal.class, GT}), new GTBigDecComputer());
-        computers.put(new MultiKey<Object>(new Object[] {BigDecimal.class, GE}), new GEBigDecComputer());
-        computers.put(new MultiKey<Object>(new Object[] {BigDecimal.class, LT}), new LTBigDecComputer());
-        computers.put(new MultiKey<Object>(new Object[] {BigDecimal.class, LE}), new LEBigDecComputer());
-        computers.put(new MultiKey<Object>(new Object[] {BigInteger.class, GT}), new GTBigIntComputer());
-        computers.put(new MultiKey<Object>(new Object[] {BigInteger.class, GE}), new GEBigIntComputer());
-        computers.put(new MultiKey<Object>(new Object[] {BigInteger.class, LT}), new LTBigIntComputer());
-        computers.put(new MultiKey<Object>(new Object[] {BigInteger.class, LE}), new LEBigIntComputer());
+        computers = new HashMap<MultiKeyUntyped, RelationalOpEnum.Computer>();
+        computers.put(new MultiKeyUntyped(new Object[] {String.class, GT}), new GTStringComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {String.class, GE}), new GEStringComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {String.class, LT}), new LTStringComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {String.class, LE}), new LEStringComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, GT}), new GTIntegerComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, GE}), new GEIntegerComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, LT}), new LTIntegerComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, LE}), new LEIntegerComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, GT}), new GTLongComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, GE}), new GELongComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, LT}), new LTLongComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, LE}), new LELongComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Double.class, GT}), new GTDoubleComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Double.class, GE}), new GEDoubleComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Double.class, LT}), new LTDoubleComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Double.class, LE}), new LEDoubleComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Float.class, GT}), new GTFloatComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Float.class, GE}), new GEFloatComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Float.class, LT}), new LTFloatComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {Float.class, LE}), new LEFloatComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {BigDecimal.class, GT}), new GTBigDecComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {BigDecimal.class, GE}), new GEBigDecComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {BigDecimal.class, LT}), new LTBigDecComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {BigDecimal.class, LE}), new LEBigDecComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {BigInteger.class, GT}), new GTBigIntComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {BigInteger.class, GE}), new GEBigIntComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {BigInteger.class, LT}), new LTBigIntComputer());
+        computers.put(new MultiKeyUntyped(new Object[] {BigInteger.class, LE}), new LEBigIntComputer());
     }
 
     /**
@@ -153,7 +154,7 @@ public enum RelationalOpEnum
             return makeBigIntegerComputer(typeOne, typeTwo);
         }
 
-        MultiKey<Object> key = new MultiKey<Object>(new Object[] {coercedType, this});
+        MultiKeyUntyped key = new MultiKeyUntyped(new Object[] {coercedType, this});
         return computers.get(key);
     }
 
@@ -161,7 +162,7 @@ public enum RelationalOpEnum
     {
         if ((typeOne == BigDecimal.class) && (typeTwo == BigDecimal.class))
         {
-            return computers.get(new MultiKey<Object>(new Object[] {BigDecimal.class, this}));
+            return computers.get(new MultiKeyUntyped(new Object[] {BigDecimal.class, this}));
         }
         SimpleNumberBigDecimalCoercer convertorOne = SimpleNumberCoercerFactory.getCoercerBigDecimal(typeOne);
         SimpleNumberBigDecimalCoercer convertorTwo = SimpleNumberCoercerFactory.getCoercerBigDecimal(typeTwo);
@@ -184,7 +185,7 @@ public enum RelationalOpEnum
     {
         if ((typeOne == BigInteger.class) && (typeTwo == BigInteger.class))
         {
-            return computers.get(new MultiKey<Object>(new Object[] {BigInteger.class, this}));
+            return computers.get(new MultiKeyUntyped(new Object[] {BigInteger.class, this}));
         }
         SimpleNumberBigIntegerCoercer convertorOne = SimpleNumberCoercerFactory.getCoercerBigInteger(typeOne);
         SimpleNumberBigIntegerCoercer convertorTwo = SimpleNumberCoercerFactory.getCoercerBigInteger(typeTwo);

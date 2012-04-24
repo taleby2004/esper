@@ -11,6 +11,8 @@ package com.espertech.esper.event.property;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventPropertyGetterAndMapped;
+import com.espertech.esper.event.arr.ObjectArrayEventPropertyGetterAndMapped;
+import com.espertech.esper.event.arr.ObjectArrayMappedPropertyGetter;
 import com.espertech.esper.event.bean.*;
 import com.espertech.esper.event.map.MapEventPropertyGetterAndMapped;
 import com.espertech.esper.event.map.MapMappedPropertyGetter;
@@ -279,6 +281,25 @@ public class MappedProperty extends PropertyBase
             return complex;
         }
 
+        return null;
+    }
+
+    public ObjectArrayEventPropertyGetterAndMapped getGetterObjectArray(Map<String, Integer> indexPerProperty, Map<String, Object> nestableTypes, EventAdapterService eventAdapterService) {
+        Integer index = indexPerProperty.get(propertyNameAtomic);
+        if (index == null) {
+            return null;
+        }
+        Object type = nestableTypes.get(getPropertyNameAtomic());
+        if (type instanceof Class)
+        {
+            if (JavaClassHelper.isImplementsInterface((Class) type, Map.class))
+            {
+                return new ObjectArrayMappedPropertyGetter(index, this.getKey());
+            }
+        }
+        if (type instanceof Map) {
+            return new ObjectArrayMappedPropertyGetter(index, this.getKey());
+        }
         return null;
     }
 }

@@ -11,14 +11,17 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import junit.framework.TestCase;
-import com.espertech.esper.client.*;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.support.bean.*;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanArrayCollMap;
+import com.espertech.esper.support.bean.SupportBeanComplexProps;
+import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.SerializableObjectCopier;
+import junit.framework.TestCase;
 
 public class TestInBetweenLikeExpr extends TestCase
 {
@@ -191,53 +194,53 @@ public class TestInBetweenLikeExpr extends TestCase
 
     public void testInStringExprOM() throws Exception
     {
-        String caseExpr = "select string in (\"a\", \"b\", \"c\") as result from " + SupportBean.class.getName();
+        String caseExpr = "select theString in (\"a\", \"b\", \"c\") as result from " + SupportBean.class.getName();
         EPStatementObjectModel model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.create().add(Expressions.in("string", "a", "b", "c"), "result"));
+        model.setSelectClause(SelectClause.create().add(Expressions.in("theString", "a", "b", "c"), "result"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName())));
 
         tryString(model, caseExpr,
                     new String[] {"0", "a", "b", "c", "d", null},
                     new Boolean[] {false, true, true, true, false, null});
 
-        caseExpr = "select string not in (\"a\", \"b\", \"c\") as result from " + SupportBean.class.getName();
+        caseExpr = "select theString not in (\"a\", \"b\", \"c\") as result from " + SupportBean.class.getName();
         model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.create().add(Expressions.notIn("string", "a", "b", "c"), "result"));
+        model.setSelectClause(SelectClause.create().add(Expressions.notIn("theString", "a", "b", "c"), "result"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName())));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
-        tryString("string not in ('a', 'b', 'c')",
+        tryString("theString not in ('a', 'b', 'c')",
                     new String[] {"0", "a", "b", "c", "d", null},
                     new Boolean[] {true, false, false, false, true, null});
     }
 
     public void testInStringExpr()
     {
-        tryString("string in ('a', 'b', 'c')",
+        tryString("theString in ('a', 'b', 'c')",
                     new String[] {"0", "a", "b", "c", "d", null},
                     new Boolean[] {false, true, true, true, false, null});
 
-        tryString("string in ('a')",
+        tryString("theString in ('a')",
                     new String[] {"0", "a", "b", "c", "d", null},
                     new Boolean[] {false, true, false, false, false, null});
 
-        tryString("string in ('a', 'b')",
+        tryString("theString in ('a', 'b')",
                     new String[] {"0", "b", "a", "c", "d", null},
                     new Boolean[] {false, true, true, false, false, null});
 
-        tryString("string in ('a', null)",
+        tryString("theString in ('a', null)",
                     new String[] {"0", "b", "a", "c", "d", null},
                     new Boolean[] {null, null, true, null, null, null});
 
-        tryString("string in (null)",
+        tryString("theString in (null)",
                     new String[] {"0", null, "b"},
                     new Boolean[] {null, null, null});
 
-        tryString("string not in ('a', 'b', 'c')",
+        tryString("theString not in ('a', 'b', 'c')",
                     new String[] {"0", "a", "b", "c", "d", null},
                     new Boolean[] {true, false, false, false, true, null});
 
-        tryString("string not in (null)",
+        tryString("theString not in (null)",
                     new String[] {"0", null, "b"},
                     new Boolean[] {null, null, null});
     }
@@ -249,25 +252,25 @@ public class TestInBetweenLikeExpr extends TestCase
 
         input = new String[] {"0",    "a1", "a10", "c", "d",    null, "a0", "b9", "b90"};
         result = new Boolean[] {false, true, true, false, false, false, true, true, false};
-        tryString("string between 'a0' and 'b9'", input, result);
-        tryString("string between 'b9' and 'a0'", input, result);
+        tryString("theString between 'a0' and 'b9'", input, result);
+        tryString("theString between 'b9' and 'a0'", input, result);
 
-        tryString("string between null and 'b9'",
+        tryString("theString between null and 'b9'",
                     new String[] {"0", null, "a0", "b9"},
                     new Boolean[] {false, false, false, false});
 
-        tryString("string between null and null",
+        tryString("theString between null and null",
                     new String[] {"0", null, "a0", "b9"},
                     new Boolean[] {false, false, false, false});
 
-        tryString("string between 'a0' and null",
+        tryString("theString between 'a0' and null",
                     new String[] {"0", null, "a0", "b9"},
                     new Boolean[] {false, false, false, false});
 
         input = new String[] {"0",    "a1", "a10", "c", "d",    null, "a0", "b9", "b90"};
         result = new Boolean[] {true, false, false, true, true, false, false, false, true};
-        tryString("string not between 'a0' and 'b9'", input, result);
-        tryString("string not between 'b9' and 'a0'", input, result);
+        tryString("theString not between 'a0' and 'b9'", input, result);
+        tryString("theString not between 'b9' and 'a0'", input, result);
     }
 
     public void testInNumericExpr()
@@ -430,7 +433,7 @@ public class TestInBetweenLikeExpr extends TestCase
         // test string type
         stmt.destroy();
         fields = "ro".split(",");
-        stmt = epService.getEPAdministrator().createEPL("select string in ('a':'d') as ro from SupportBean.std:lastevent()");
+        stmt = epService.getEPAdministrator().createEPL("select theString in ('a':'d') as ro from SupportBean.std:lastevent()");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("a", 5));
@@ -495,8 +498,8 @@ public class TestInBetweenLikeExpr extends TestCase
 
         epService.getEPRuntime().sendEvent(bean);
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(result, event.get("result"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(result, theEvent.get("result"));
     }
 
     private void sendAndAssert(int intPrimitive, int shortBoxed, Integer intBoxed, Long longBoxed, Boolean result)
@@ -509,8 +512,8 @@ public class TestInBetweenLikeExpr extends TestCase
 
         epService.getEPRuntime().sendEvent(bean);
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(result, event.get("result"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(result, theEvent.get("result"));
     }
 
     private void sendAndAssert(int intPrimitive, int shortBoxed, Long longBoxed, Boolean result)
@@ -522,8 +525,8 @@ public class TestInBetweenLikeExpr extends TestCase
 
         epService.getEPRuntime().sendEvent(bean);
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(result, event.get("result"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(result, theEvent.get("result"));
     }
 
     private void sendAndAssert(Integer intBoxed, Float floatBoxed, double doublePrimitve, Long longBoxed, Boolean result)
@@ -536,8 +539,8 @@ public class TestInBetweenLikeExpr extends TestCase
 
         epService.getEPRuntime().sendEvent(bean);
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(result, event.get("result"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(result, theEvent.get("result"));
     }
 
     private void tryInBoolean(String expr, Boolean[] input, boolean[] result)
@@ -551,8 +554,8 @@ public class TestInBetweenLikeExpr extends TestCase
         for (int i = 0; i < input.length; i++)
         {
             sendSupportBeanEvent(input[i]);
-            EventBean event = listener.assertOneGetNewAndReset();
-            assertEquals("Wrong result for " + input[i], result[i], event.get("result"));
+            EventBean theEvent = listener.assertOneGetNewAndReset();
+            assertEquals("Wrong result for " + input[i], result[i], theEvent.get("result"));
         }
         selectTestCase.stop();
     }
@@ -568,8 +571,8 @@ public class TestInBetweenLikeExpr extends TestCase
         for (int i = 0; i < input.length; i++)
         {
             sendSupportBeanEvent(input[i]);
-            EventBean event = listener.assertOneGetNewAndReset();
-            assertEquals("Wrong result for " + input[i], result[i], event.get("result"));
+            EventBean theEvent = listener.assertOneGetNewAndReset();
+            assertEquals("Wrong result for " + input[i], result[i], theEvent.get("result"));
         }
         selectTestCase.stop();
     }
@@ -585,8 +588,8 @@ public class TestInBetweenLikeExpr extends TestCase
         for (int i = 0; i < input.length; i++)
         {
             sendSupportBeanEvent(input[i]);
-            EventBean event = listener.assertOneGetNewAndReset();
-            assertEquals("Wrong result for " + input[i], result[i], event.get("result"));
+            EventBean theEvent = listener.assertOneGetNewAndReset();
+            assertEquals("Wrong result for " + input[i], result[i], theEvent.get("result"));
         }
         selectTestCase.stop();
     }
@@ -606,30 +609,30 @@ public class TestInBetweenLikeExpr extends TestCase
         for (int i = 0; i < input.length; i++)
         {
             sendSupportBeanEvent(input[i]);
-            EventBean event = listener.assertOneGetNewAndReset();
-            assertEquals("Wrong result for " + input[i], result[i], event.get("result"));
+            EventBean theEvent = listener.assertOneGetNewAndReset();
+            assertEquals("Wrong result for " + input[i], result[i], theEvent.get("result"));
         }
         selectTestCase.stop();
     }
 
     private void sendSupportBeanEvent(Double doubleBoxed)
     {
-        SupportBean event = new SupportBean();
-        event.setDoubleBoxed(doubleBoxed);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setDoubleBoxed(doubleBoxed);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
-    private void sendSupportBeanEvent(String string)
+    private void sendSupportBeanEvent(String theString)
     {
-        SupportBean event = new SupportBean();
-        event.setString(string);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setTheString(theString);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendSupportBeanEvent(boolean boolBoxed)
     {
-        SupportBean event = new SupportBean();
-        event.setBoolBoxed(boolBoxed);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setBoolBoxed(boolBoxed);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

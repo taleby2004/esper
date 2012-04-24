@@ -37,7 +37,7 @@ public class StmtNamedWindowIterateCallable implements Callable
         this.numRepeats = numRepeats;
         this.threadKey = threadKey;
 
-        statement = engine.getEPAdministrator().createEPL("select string, sum(longPrimitive) as sumLong from MyWindow group by string");
+        statement = engine.getEPAdministrator().createEPL("select theString, sum(longPrimitive) as sumLong from MyWindow group by theString");
     }
 
     public Object call() throws Exception
@@ -58,7 +58,7 @@ public class StmtNamedWindowIterateCallable implements Callable
 
                 for (int i = 0; i < received.length; i++)
                 {
-                    if (received[i].get("string").equals(threadKey))
+                    if (received[i].get("theString").equals(threadKey))
                     {
                         long sum = (Long) received[i].get("sumLong");
                         Assert.assertEquals(total, sum);

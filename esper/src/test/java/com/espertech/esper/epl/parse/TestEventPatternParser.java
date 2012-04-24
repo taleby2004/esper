@@ -129,9 +129,7 @@ public class TestEventPatternParser extends TestCase
         assertIsInvalid("timer:at(1a,*,*,*,*)");
         assertIsInvalid("timer:at(*,*,=2*,*,*)");
         assertIsInvalid("timer:at(*,*,*,*,1a=3) or b()");
-        assertIsInvalid("timer:at(*,[],*,*,*)");
         assertIsInvalid("timer:at(*,[1a],*,*,*)");
-        assertIsInvalid("timer:at(*,[],*,*,*)");
         assertIsInvalid("timer:at(*,[1a=3],*,*,*)");
         assertIsInvalid("timer:at(*,[2,,5],*,*,*)");
         assertIsInvalid("timer:at(*,[,2,5,7],*,*,*)");
@@ -213,7 +211,7 @@ public class TestEventPatternParser extends TestCase
         assertIsValid(className + "(doublePrimitive in [45775.2244502:1.345674))");
         assertIsValid(className + "(longPrimitive in [   1   :  2  ])");
         assertIsValid(className + "(intPrimitive in [1:2], longPrimitive=3)");
-        assertIsValid(className + "(intPrimitive=3, string=\"a2\", longPrimitive in [1:2], doubleBoxed=3)");
+        assertIsValid(className + "(intPrimitive=3, theString=\"a2\", longPrimitive in [1:2], doubleBoxed=3)");
         assertIsValid(className + "(intPrimitive in [2:10])");
         assertIsValid(className + "(doubleBoxed in [-0.00001:-0.1E2])");
         assertIsValid(className + "(doubleBoxed in [60.0:61.0])");

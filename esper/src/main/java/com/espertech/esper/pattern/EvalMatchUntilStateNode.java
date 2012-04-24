@@ -101,21 +101,21 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
             // Add the additional tagged events to the list for later posting
             isMatcher = true;
             numMatches++;
-            String[] tags = evalMatchUntilNode.getFactoryNode().getTagsArrayed();
+            int[] tags = evalMatchUntilNode.getFactoryNode().getTagsArrayed();
             for (int i = 0; i < tags.length; i++)
             {
-                Object event = matchEvent.getMatchingEventAsObject(tags[i]);
-                if (event != null)
+                Object theEvent = matchEvent.getMatchingEventAsObject(tags[i]);
+                if (theEvent != null)
                 {
                     if (matchedEventArrays[i] == null)
                     {
                         matchedEventArrays[i] = new ArrayList<EventBean>();
                     }
-                    if (event instanceof EventBean) {
-                        matchedEventArrays[i].add((EventBean) event);
+                    if (theEvent instanceof EventBean) {
+                        matchedEventArrays[i].add((EventBean) theEvent);
                     }
                     else {
-                        EventBean[] arrayEvents = (EventBean[]) event;
+                        EventBean[] arrayEvents = (EventBean[]) theEvent;
                         matchedEventArrays[i].addAll(Arrays.asList(arrayEvents));
                     }
 
@@ -188,7 +188,7 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
         }
     }
 
-    private static MatchedEventMap consolidate(MatchedEventMap beginState, ArrayList<EventBean>[] matchedEventList, String[] tagsArrayed)
+    private static MatchedEventMap consolidate(MatchedEventMap beginState, ArrayList<EventBean>[] matchedEventList, int[] tagsArrayed)
     {
         if (tagsArrayed == null)
         {

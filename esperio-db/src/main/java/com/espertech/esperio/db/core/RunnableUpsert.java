@@ -22,18 +22,18 @@ public class RunnableUpsert implements Runnable
     private static Log log = LogFactory.getLog(RunnableUpsert.class);
 
     private final RunnableUpsertContext context;
-    private final EventBean event;
+    private final EventBean theEvent;
 
-    public RunnableUpsert(RunnableUpsertContext context, EventBean event)
+    public RunnableUpsert(RunnableUpsertContext context, EventBean theEvent)
     {
         this.context = context;
-        this.event = event;
+        this.theEvent = theEvent;
     }
 
     public void run()
     {
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled() && (ExecutionPathDebugLog.isTimerDebugEnabled))) {
-            log.debug("Executing upsert work unit for event " + event);
+            log.debug("Executing upsert work unit for event " + theEvent);
         }
 
         int retryMax = context.getRetry() == null ? 1 : context.getRetry();
@@ -74,12 +74,12 @@ public class RunnableUpsert implements Runnable
         try {
             Object[] keys = new Object[context.getKeyGetters().length];
             for (int i = 0; i < context.getKeyGetters().length; i++) {
-                keys[i] = context.getKeyGetters()[i].get(event);
+                keys[i] = context.getKeyGetters()[i].get(theEvent);
             }
 
             Object[] values = new Object[context.getValueGetters().length];
             for (int i = 0; i < context.getValueGetters().length; i++) {
-                values[i] = context.getValueGetters()[i].get(event);
+                values[i] = context.getValueGetters()[i].get(theEvent);
             }
 
             boolean updated = context.getTable().updateValue(connection, keys, values);

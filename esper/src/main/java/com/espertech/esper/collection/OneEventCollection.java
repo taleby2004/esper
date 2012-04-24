@@ -24,18 +24,18 @@ public class OneEventCollection
 
     /**
      * Add an event to the collection.
-     * @param event is the event to add
+     * @param theEvent is the event to add
      */
-    public void add(EventBean event)
+    public void add(EventBean theEvent)
     {
-        if (event == null)
+        if (theEvent == null)
         {
             throw new IllegalArgumentException("Null event not allowed");
         }
 
         if (firstEvent == null)
         {
-            firstEvent = event;
+            firstEvent = theEvent;
             return;
         }
 
@@ -43,7 +43,7 @@ public class OneEventCollection
         {
             additionalEvents = new ArrayDeque<EventBean>();
         }
-        additionalEvents.add(event);
+        additionalEvents.add(theEvent);
     }
 
     /**
@@ -75,9 +75,9 @@ public class OneEventCollection
         events[0] = firstEvent;
 
         int count = 1;
-        for (EventBean event : additionalEvents)
+        for (EventBean theEvent : additionalEvents)
         {
-            events[count] = event;
+            events[count] = theEvent;
             count++;
         }
 
@@ -85,8 +85,8 @@ public class OneEventCollection
     }
 
     public void add(EventBean[] events) {
-        for (EventBean event : events) {
-            add(event);
+        for (EventBean theEvent : events) {
+            add(theEvent);
         }
     }
 }

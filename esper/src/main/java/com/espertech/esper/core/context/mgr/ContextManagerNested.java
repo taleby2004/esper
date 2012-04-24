@@ -29,6 +29,7 @@ import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
 import com.espertech.esper.event.MappedEventBean;
+import com.espertech.esper.filter.FilterFaultHandler;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecLookupable;
 import com.espertech.esper.filter.FilterValueSetParam;
@@ -38,7 +39,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
-public class ContextManagerNested implements ContextManager, ContextControllerLifecycleCallback, ContextIteratorHandler {
+public class ContextManagerNested implements ContextManager, ContextControllerLifecycleCallback, ContextIteratorHandler, FilterFaultHandler {
     private static final Log log = LogFactory.getLog(ContextManagerNested.class);
 
     private final String contextName;
@@ -258,9 +259,19 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         if (entry.getAgentInstances() == null) {
             entry.setAgentInstances(new LinkedHashMap<Integer, ContextControllerTreeAgentInstanceList>());
         }
-        entry.getAgentInstances().put(assignedContextId, new ContextControllerTreeAgentInstanceList(partitionKey, contextProperties, newInstances));
+
+        long filterVersion = servicesContext.getFilterService().getFiltersVersion();
+        entry.getAgentInstances().put(assignedContextId, new ContextControllerTreeAgentInstanceList(filterVersion, partitionKey, contextProperties, newInstances));
 
         return new ContextManagerNestedInstanceHandle(originator, assignedContextId, false);
+    }
+
+    public synchronized void handleFilterFault(EventBean theEvent, long version) {
+        for (Map.Entry<ContextController, ContextControllerTreeEntry> entry : subcontexts.entrySet()) {
+            if (entry.getValue().getAgentInstances() != null) {
+                StatementAgentInstanceUtil.handleFilterFault(theEvent, version, servicesContext, entry.getValue().getAgentInstances());
+            }
+        }
     }
 
     /**

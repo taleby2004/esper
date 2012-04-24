@@ -71,11 +71,11 @@ public class TestUnivariateStatisticsViewFactory extends TestCase
         }
     }
 
-    private void tryInvalidParameter(Object[] params) throws Exception
+    private void tryInvalidParameter(Object[] parameters) throws Exception
     {
         try
         {
-            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
+            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(parameters));
             factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
@@ -85,9 +85,9 @@ public class TestUnivariateStatisticsViewFactory extends TestCase
         }
     }
 
-    private void tryParameter(Object[] params, String fieldName) throws Exception
+    private void tryParameter(Object[] parameters, String fieldName) throws Exception
     {
-        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
+        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(parameters));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
         UnivariateStatisticsView view = (UnivariateStatisticsView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldName, view.getFieldExpression().toExpressionString());

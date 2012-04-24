@@ -18,7 +18,7 @@ public interface NamedWindowLifecycleObserver
 {
     /**
      * Observer named window changes.
-     * @param event indicates named window action
+     * @param theEvent indicates named window action
      */
-    public void observe(NamedWindowLifecycleEvent event);
+    public void observe(NamedWindowLifecycleEvent theEvent);
 }

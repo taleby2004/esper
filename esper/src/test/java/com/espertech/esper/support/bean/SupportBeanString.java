@@ -15,30 +15,30 @@ import java.io.Serializable;
 
 public class SupportBeanString implements Serializable
 {
-    private String string;
+    private String theString;
 
     public static SupportBeanString getInstance()
     {
         return new SupportBeanString(null);
     }
 
-    public SupportBeanString(String string)
+    public SupportBeanString(String theString)
     {
-        this.string = string;
+        this.theString = theString;
     }
 
-    public String getString()
+    public String getTheString()
     {
-        return string;
+        return theString;
     }
 
-    public void setString(String string)
+    public void setTheString(String theString)
     {
-        this.string = string;
+        this.theString = theString;
     }
 
     public String toString()
     {
-        return "SupportBeanString string=" + string;
+        return "SupportBeanString string=" + theString;
     }
 }

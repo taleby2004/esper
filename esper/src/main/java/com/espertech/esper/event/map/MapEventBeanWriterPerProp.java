@@ -13,6 +13,7 @@ package com.espertech.esper.event.map;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.event.EventBeanWriter;
+import com.espertech.esper.event.EventPropertyWriter;
 import com.espertech.esper.event.MappedEventBean;
 
 import java.util.Map;
@@ -36,11 +37,11 @@ public class MapEventBeanWriterPerProp implements EventBeanWriter
     /**
      * Write values to an event.
      * @param values to write
-     * @param event to write to
+     * @param theEvent to write to
      */
-    public void write(Object[] values, EventBean event)
+    public void write(Object[] values, EventBean theEvent)
     {
-        MappedEventBean mappedEvent = (MappedEventBean) event;
+        MappedEventBean mappedEvent = (MappedEventBean) theEvent;
         Map<String, Object> map = mappedEvent.getProperties();
 
         for (int i = 0; i < writers.length; i++)

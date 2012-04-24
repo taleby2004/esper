@@ -11,11 +11,11 @@
 
 package com.espertech.esper.event;
 
-import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.event.map.MapEventType;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Factory for Map-underlying events.
@@ -41,11 +41,16 @@ public class EventBeanManufacturerMap implements EventBeanManufacturer
 
     public EventBean make(Object[] properties)
     {
+        Map<String, Object> values = makeUnderlying(properties);
+        return eventAdapterService.adapterForTypedMap(values, mapEventType);
+    }
+
+    public Map<String, Object> makeUnderlying(Object[] properties) {
         Map<String, Object> values = new HashMap<String, Object>();
         for (int i = 0; i < properties.length; i++)
         {
             values.put(writables[i].getPropertyName(), properties[i]);
         }
-        return eventAdapterService.adapterForTypedMap(values, mapEventType);
+        return values;
     }
 }

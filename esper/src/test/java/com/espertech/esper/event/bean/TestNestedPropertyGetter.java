@@ -31,7 +31,7 @@ public class TestNestedPropertyGetter extends TestCase
 {
     private NestedPropertyGetter getter;
     private NestedPropertyGetter getterNull;
-    private EventBean event;
+    private EventBean theEvent;
     private SupportBeanCombinedProps bean;
     private BeanEventTypeFactory beanEventTypeFactory;
 
@@ -39,7 +39,7 @@ public class TestNestedPropertyGetter extends TestCase
     {
         beanEventTypeFactory = new BeanEventAdapter(new ConcurrentHashMap<Class, BeanEventType>(), SupportEventAdapterService.getService(), new EventTypeIdGeneratorImpl());
         bean = SupportBeanCombinedProps.makeDefaultBean();
-        event = SupportEventBeanFactory.createObject(bean);
+        theEvent = SupportEventBeanFactory.createObject(bean);
 
         List<EventPropertyGetter> getters = new LinkedList<EventPropertyGetter>();
         getters.add(makeGetterOne(0));
@@ -54,10 +54,10 @@ public class TestNestedPropertyGetter extends TestCase
 
     public void testGet()
     {
-        assertEquals(bean.getIndexed(0).getMapped("0ma"), getter.get(event));
+        assertEquals(bean.getIndexed(0).getMapped("0ma"), getter.get(theEvent));
 
         // test null value returned
-        assertNull(getterNull.get(event));
+        assertNull(getterNull.get(theEvent));
 
         try
         {

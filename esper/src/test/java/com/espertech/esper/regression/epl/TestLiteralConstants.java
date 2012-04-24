@@ -50,8 +50,8 @@ public class TestLiteralConstants extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("e1", 100));
 
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals((byte) 35, event.get("mybyte"));
-        assertEquals("A", event.get("myunicode"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals((byte) 35, theEvent.get("mybyte"));
+        assertEquals("A", theEvent.get("myunicode"));
     }
 }

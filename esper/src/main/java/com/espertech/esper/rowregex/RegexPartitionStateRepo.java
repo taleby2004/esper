@@ -21,18 +21,19 @@ public interface RegexPartitionStateRepo
 {
     /**
      * Return state for key or create state if not found.
+     *
      * @param key to look up
      * @return state
      */
-    public RegexPartitionState getState(MultiKeyUntyped key);
+    public RegexPartitionState getState(Object key);
 
     /**
      * Return state for event or create state if not found.
-     * @param event to look up
+     * @param theEvent to look up
      * @param isCollect true if a collection of unused state can occur
      * @return state
      */
-    public RegexPartitionState getState(EventBean event, boolean isCollect);
+    public RegexPartitionState getState(EventBean theEvent, boolean isCollect);
 
     /**
      * Remove old events from the state, applicable for "prev" function and partial NFA state.
@@ -48,5 +49,5 @@ public interface RegexPartitionStateRepo
      */
     public RegexPartitionStateRepo copyForIterate();
 
-    public void removeState(MultiKeyUntyped partitionKey);
+    public void removeState(Object partitionKey);
 }

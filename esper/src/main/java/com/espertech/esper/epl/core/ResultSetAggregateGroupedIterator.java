@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
@@ -83,7 +82,7 @@ public class ResultSetAggregateGroupedIterator implements Iterator<EventBean>
             EventBean candidate = sourceIterator.next();
             eventsPerStream[0] = candidate;
 
-            MultiKeyUntyped groupKey = resultSetProcessor.generateGroupKey(eventsPerStream, true);
+            Object groupKey = resultSetProcessor.generateGroupKey(eventsPerStream, true);
             aggregationService.setCurrentAccess(groupKey, exprEvaluatorContext.getAgentInstanceId());
 
             Boolean pass = true;

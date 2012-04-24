@@ -14,7 +14,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.epl.spec.ViewSpec;
-import com.espertech.esper.view.ext.IStreamSortedRandomAccess;
+import com.espertech.esper.view.ext.IStreamSortRankRandomAccess;
 import com.espertech.esper.view.ext.IStreamTimeOrderRandomAccess;
 import com.espertech.esper.view.window.IStreamRandomAccess;
 import com.espertech.esper.view.window.IStreamRelativeAccess;
@@ -54,17 +54,17 @@ public class ViewServiceHelper
         return relativeAccessByEvent;
     }
 
-    public static IStreamSortedRandomAccess getOptPreviousExprSortedAccess(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext) {
-        IStreamSortedRandomAccess sortedRandomAccess = null;
+    public static IStreamSortRankRandomAccess getOptPreviousExprSortedRankedAccess(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext) {
+        IStreamSortRankRandomAccess rankedRandomAccess = null;
 
         if (agentInstanceViewFactoryContext.getPreviousNodeGetter() != null)
         {
             RandomAccessByIndexGetter getter = (RandomAccessByIndexGetter) agentInstanceViewFactoryContext.getPreviousNodeGetter();
-            sortedRandomAccess = new IStreamSortedRandomAccess(getter);
-            getter.updated(sortedRandomAccess);
+            rankedRandomAccess = new IStreamSortRankRandomAccess(getter);
+            getter.updated(rankedRandomAccess);
         }
 
-        return sortedRandomAccess;
+        return rankedRandomAccess;
     }
 
     public static IStreamTimeOrderRandomAccess getOptPreviousExprTimeOrderAccess(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext) {

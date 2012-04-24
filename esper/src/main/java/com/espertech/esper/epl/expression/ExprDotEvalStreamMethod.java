@@ -38,12 +38,12 @@ public class ExprDotEvalStreamMethod implements ExprEvaluator
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
 	{
         // get underlying event
-        EventBean event = eventsPerStream[streamNumber];
-        if (event == null)
+        EventBean theEvent = eventsPerStream[streamNumber];
+        if (theEvent == null)
         {
             return null;
         }
-        Object inner = event.getUnderlying();
+        Object inner = theEvent.getUnderlying();
 
         if (inner == null) {
             return null;

@@ -18,11 +18,11 @@ public class LatencySpikeListener implements UpdateListener
 {
     public void update(EventBean[] newEvents, EventBean[] oldEvents)
     {
-        OperationMeasurement event = (OperationMeasurement) newEvents[0].get("alert");
+        OperationMeasurement theEvent = (OperationMeasurement) newEvents[0].get("alert");
 
-        log.info("Alert, for operation '" + event.getOperationName() +
-                "' and customer '" + event.getCustomerId() + "'" +
-                " latency was " + event.getLatency());
+        log.info("Alert, for operation '" + theEvent.getOperationName() +
+                "' and customer '" + theEvent.getCustomerId() + "'" +
+                " latency was " + theEvent.getLatency());
     }
 
     private static final Log log = LogFactory.getLog(LatencySpikeListener.class);

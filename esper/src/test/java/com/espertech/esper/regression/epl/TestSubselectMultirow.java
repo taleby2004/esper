@@ -85,7 +85,7 @@ public class TestSubselectMultirow extends TestCase
     public void testMultirowUnderlyingCorrelated()
     {
         String stmtText = "select p00, " +
-                "(select window(sb.*) from SupportBean.win:keepall() sb where string = s0.p00) as val " +
+                "(select window(sb.*) from SupportBean.win:keepall() sb where theString = s0.p00) as val " +
                 "from S0 as s0";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);

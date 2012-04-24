@@ -60,7 +60,7 @@ public class TestContextTemporalFixed extends TestCase {
         String[] fields = "c0,c1,c2,c3".split(",");
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         epService.getEPAdministrator().createEPL("create context MyCtx as start SupportBean_S0 s0 end SupportBean_S1(id=s0.id)");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, context.s0.p00 as c1, string as c2, sum(intPrimitive) as c3 from SupportBean.win:keepall() group by string");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, context.s0.p00 as c1, theString as c2, sum(intPrimitive) as c3 from SupportBean.win:keepall() group by theString");
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "S0_1"));
@@ -394,7 +394,7 @@ public class TestContextTemporalFixed extends TestCase {
         String[] fields = "col1,col2,col3,col4,col5".split(",");
         SupportUpdateListener listener = new SupportUpdateListener();
         EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NineToFive " +
-                "select prev(string) as col1, prevwindow(sb) as col2, prevtail(string) as col3, prior(1, string) as col4, sum(intPrimitive) as col5 " +
+                "select prev(theString) as col1, prevwindow(sb) as col2, prevtail(theString) as col3, prior(1, theString) as col4, sum(intPrimitive) as col5 " +
                 "from SupportBean.win:keepall() as sb");
         statement.addListener(listener);
 
@@ -439,8 +439,8 @@ public class TestContextTemporalFixed extends TestCase {
         String[] fields = "col1,col2,col3,col4".split(",");
         SupportUpdateListener listener = new SupportUpdateListener();
         EPStatement statement = epService.getEPAdministrator().createEPL("context NineToFive " +
-                "select sb.string as col1, sb.intPrimitive as col2, s0.id as col3, s0.p00 as col4 " +
-                "from SupportBean.win:keepall() as sb full outer join SupportBean_S0.win:keepall() as s0 on p00 = string");
+                "select sb.theString as col1, sb.intPrimitive as col2, s0.id as col3, s0.p00 as col4 " +
+                "from SupportBean.win:keepall() as sb full outer join SupportBean_S0.win:keepall() as s0 on p00 = theString");
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -510,9 +510,9 @@ public class TestContextTemporalFixed extends TestCase {
         sendTimeEvent("2002-05-1T8:00:00.000");
         epService.getEPAdministrator().createEPL("create context NineToFive as start (0, 9, *, *, *) end (0, 17, *, *, *)");
 
-        String[] fields = "string,col".split(",");
+        String[] fields = "theString,col".split(",");
         SupportUpdateListener listener = new SupportUpdateListener();
-        EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NineToFive select string, (select p00 from SupportBean_S0.std:lastevent()) as col from SupportBean");
+        EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NineToFive select theString, (select p00 from SupportBean_S0.std:lastevent()) as col from SupportBean");
         statement.addListener(listener);
         assertEquals(0, filterSPI.getFilterCountApprox());   // from the context
 
@@ -562,7 +562,7 @@ public class TestContextTemporalFixed extends TestCase {
         epService.getEPAdministrator().createEPL("create context NineToFive as start (0, 9, *, *, *) end (0, 17, *, *, *)");
 
         // no started yet
-        String[] fields = "string,intPrimitive".split(",");
+        String[] fields = "theString,intPrimitive".split(",");
         SupportUpdateListener listener = new SupportUpdateListener();
         EPStatement stmt = epService.getEPAdministrator().createEPL("context NineToFive create window MyWindow.win:keepall() as SupportBean");
         stmt.addListener(listener);
@@ -570,7 +570,7 @@ public class TestContextTemporalFixed extends TestCase {
         epService.getEPAdministrator().createEPL("context NineToFive insert into MyWindow select * from SupportBean");
 
         epService.getEPAdministrator().createEPL("context NineToFive " +
-                "on SupportBean_S0 s0 merge MyWindow mw where mw.string = s0.p00 " +
+                "on SupportBean_S0 s0 merge MyWindow mw where mw.theString = s0.p00 " +
                 "when matched then update set intPrimitive = s0.id " +
                 "when not matched then insert select makeBean(id, p00)");
 
@@ -701,16 +701,16 @@ public class TestContextTemporalFixed extends TestCase {
 
         // test built-in properties
         EPStatement stmtLast = epService.getEPAdministrator().createEPL("@Name('A') context NineToFive " +
-                "select context.name as c1, context.startTime as c2, context.endTime as c3, string as c4 from SupportBean");
+                "select context.name as c1, context.startTime as c2, context.endTime as c3, theString as c4 from SupportBean");
         SupportUpdateListener listener = new SupportUpdateListener();
         stmtLast.addListener(listener);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("NineToFive", event.get("c1"));
-        assertEquals("2002-05-03T16:59:59.000", DateTime.print(event.get("c2")));
-        assertEquals("2002-05-03T17:00:00.000", DateTime.print(event.get("c3")));
-        assertEquals("E1", event.get("c4"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("NineToFive", theEvent.get("c1"));
+        assertEquals("2002-05-03T16:59:59.000", DateTime.print(theEvent.get("c2")));
+        assertEquals("2002-05-03T17:00:00.000", DateTime.print(theEvent.get("c3")));
+        assertEquals("E1", theEvent.get("c4"));
     }
 
     public void testStartTurnedOn() {

@@ -9,7 +9,7 @@
 package com.espertech.esper.epl.db;
 
 import com.espertech.esper.client.ConfigurationCacheReferenceType;
-import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.apachecommons.ReferenceMap;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.core.service.EPStatementHandleCallback;
@@ -37,7 +37,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
     private final long purgeIntervalMSec;
     private final SchedulingService schedulingService;
     private final ScheduleSlot scheduleSlot;
-    private final Map<MultiKey<Object>, Item> cache;
+    private final Map<Object, Item> cache;
     private final EPStatementAgentInstanceHandle epStatementAgentInstanceHandle;
 
     private boolean isScheduled;
@@ -65,7 +65,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
 
         if (cacheReferenceType == ConfigurationCacheReferenceType.HARD)
         {
-            this.cache = new HashMap<MultiKey<Object>, Item>();
+            this.cache = new HashMap<Object, Item>();
         }
         else if (cacheReferenceType == ConfigurationCacheReferenceType.SOFT)
         {
@@ -73,7 +73,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
         }
         else
         {
-            this.cache = new WeakHashMap<MultiKey<Object>, Item>();
+            this.cache = new WeakHashMap<Object, Item>();
         }
 
         this.epStatementAgentInstanceHandle = epStatementAgentInstanceHandle;
@@ -81,7 +81,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
 
     public EventTable getCached(Object[] lookupKeys)
     {
-        MultiKey key = new MultiKey<Object>(lookupKeys);
+        Object key = DataCacheUtil.getLookupKey(lookupKeys);
         Item item = cache.get(key);
         if (item == null)
         {
@@ -100,7 +100,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
 
     public void put(Object[] lookupKeys, EventTable rows)
     {
-        MultiKey key = new MultiKey<Object>(lookupKeys);
+        Object key = DataCacheUtil.getLookupKey(lookupKeys);
         long now = schedulingService.getTime();
         Item item = new Item(rows, now);
         cache.put(key, item);
@@ -149,7 +149,7 @@ public class DataCacheExpiringImpl implements DataCache, ScheduleHandleCallback
     {
         // purge expired
         long now = schedulingService.getTime();
-        Iterator<MultiKey<Object>> it = cache.keySet().iterator();
+        Iterator<Object> it = cache.keySet().iterator();
         for (;it.hasNext();)
         {
             Item item = cache.get(it.next());

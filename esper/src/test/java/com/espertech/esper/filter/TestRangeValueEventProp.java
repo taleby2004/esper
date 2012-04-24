@@ -11,6 +11,7 @@
 
 package com.espertech.esper.filter;
 
+import com.espertech.esper.pattern.MatchedEventMapMeta;
 import junit.framework.TestCase;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
@@ -36,9 +37,9 @@ public class TestRangeValueEventProp extends TestCase
     {
         SupportBean eventBean = new SupportBean();
         eventBean.setIntPrimitive(1000);
-        EventBean event = SupportEventBeanFactory.createObject(eventBean);
-        MatchedEventMap matchedEvents = new MatchedEventMapImpl();
-        matchedEvents.add("asName", event);
+        EventBean theEvent = SupportEventBeanFactory.createObject(eventBean);
+        MatchedEventMap matchedEvents = new MatchedEventMapImpl(new MatchedEventMapMeta(new String[] {"asName"}, false));
+        matchedEvents.add(0, theEvent);
 
         tryInvalidGetFilterValue(matchedEvents, params[0]);
         tryInvalidGetFilterValue(matchedEvents, params[1]);

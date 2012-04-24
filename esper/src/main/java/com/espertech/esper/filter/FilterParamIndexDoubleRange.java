@@ -31,9 +31,9 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
         }
     }
     
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
-        Object objAttributeValue = lookupable.getGetter().get(eventBean);
+        Object objAttributeValue = lookupable.getGetter().get(theEvent);
 
         if (objAttributeValue == null)
         {
@@ -57,7 +57,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
                 if ((attributeValue > entry.getKey().getMin()) &&
                     (attributeValue < entry.getKey().getMax()))
                 {
-                    entry.getValue().matchEvent(eventBean, matches);
+                    entry.getValue().matchEvent(theEvent, matches);
                 }
             }
         }
@@ -68,7 +68,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
                 if ((attributeValue >= entry.getKey().getMin()) &&
                     (attributeValue <= entry.getKey().getMax()))
                 {
-                    entry.getValue().matchEvent(eventBean, matches);
+                    entry.getValue().matchEvent(theEvent, matches);
                 }
             }
         }
@@ -79,7 +79,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
                 if ((attributeValue > entry.getKey().getMin()) &&
                     (attributeValue <= entry.getKey().getMax()))
                 {
-                    entry.getValue().matchEvent(eventBean, matches);
+                    entry.getValue().matchEvent(theEvent, matches);
                 }
             }
         }
@@ -90,7 +90,7 @@ public final class FilterParamIndexDoubleRange extends FilterParamIndexDoubleRan
                 if ((attributeValue >= entry.getKey().getMin()) &&
                     (attributeValue < entry.getKey().getMax()))
                 {
-                    entry.getValue().matchEvent(eventBean, matches);
+                    entry.getValue().matchEvent(theEvent, matches);
                 }
             }
         }

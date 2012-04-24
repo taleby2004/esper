@@ -39,19 +39,19 @@ public class TestViewSimpleFilter extends TestCase
     {
         EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select * from " + SupportBean.class.getName() +
-                "(string != 'a')");
+                "(theString != 'a')");
         statement.addListener(testListener);
 
         sendEvent("a");
         assertFalse(testListener.isInvoked());
 
-        Object event = sendEvent("b");
-        assertSame(event, testListener.getAndResetLastNewData()[0].getUnderlying());
+        Object theEvent = sendEvent("b");
+        assertSame(theEvent, testListener.getAndResetLastNewData()[0].getUnderlying());
 
         sendEvent("a");
         assertFalse(testListener.isInvoked());
 
-        event = sendEvent(null);
+        theEvent = sendEvent(null);
         assertFalse(testListener.isInvoked());
     }
 
@@ -59,7 +59,7 @@ public class TestViewSimpleFilter extends TestCase
     {
         EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select * from " + SupportBean.class.getName() +
-                "(string != 'a', intPrimitive=0)");
+                "(theString != 'a', intPrimitive=0)");
         statement.addListener(testListener);
 
         sendEvent("b", 1);
@@ -68,10 +68,10 @@ public class TestViewSimpleFilter extends TestCase
         sendEvent("a", 0);
         assertFalse(testListener.isInvoked());
 
-        Object event = sendEvent("x", 0);
-        assertSame(event, testListener.getAndResetLastNewData()[0].getUnderlying());
+        Object theEvent = sendEvent("x", 0);
+        assertSame(theEvent, testListener.getAndResetLastNewData()[0].getUnderlying());
 
-        event = sendEvent(null, 0);
+        theEvent = sendEvent(null, 0);
         assertFalse(testListener.isInvoked());
     }
 
@@ -82,10 +82,10 @@ public class TestViewSimpleFilter extends TestCase
 
     private Object sendEvent(String stringValue, int intPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setString(stringValue);
-        event.setIntPrimitive(intPrimitive);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean theEvent = new SupportBean();
+        theEvent.setTheString(stringValue);
+        theEvent.setIntPrimitive(intPrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 }

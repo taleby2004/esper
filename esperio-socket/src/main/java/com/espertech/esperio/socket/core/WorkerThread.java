@@ -146,8 +146,8 @@ public class WorkerThread extends Thread {
                 values[i] = cacheEntry.getParsers()[i].parse(value);
             }
 
-            EventBean event = cacheEntry.getEventBeanManufacturer().make(values);
-            engine.getEPRuntime().sendEvent(event);
+            EventBean theEvent = cacheEntry.getEventBeanManufacturer().make(values);
+            engine.getEPRuntime().sendEvent(theEvent);
         }
         catch (Throwable t) {
             log.error("Unexpected exception encountered sending event " + input + " service '" + serviceName + "' :" + t.getMessage(), t);

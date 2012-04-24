@@ -46,7 +46,7 @@ public class TestGroupByEventPerRow extends TestCase
     }
 
     public void testUnaggregatedHaving() {
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string from SupportBean group by string having intPrimitive > 5");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString from SupportBean group by theString having intPrimitive > 5");
         stmt.addListener(listener);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 3));
@@ -54,17 +54,17 @@ public class TestGroupByEventPerRow extends TestCase
         assertFalse(listener.isInvoked());
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 6));
-        assertEquals("E1", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E1", listener.assertOneGetNewAndReset().get("theString"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 7));
-        assertEquals("E3", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E3", listener.assertOneGetNewAndReset().get("theString"));
     }
 
     public void testWildcard() {
 
         // test no output limit
-        String fields[] = "string, intPrimitive, minval".split(",");
-        String epl = "select *, min(intPrimitive) as minval from SupportBean.win:length(2) group by string";
+        String fields[] = "theString, intPrimitive, minval".split(",");
+        String epl = "select *, min(intPrimitive) as minval from SupportBean.win:length(2) group by theString";
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(epl);
         selectTestView.addListener(listener);
 
@@ -149,7 +149,7 @@ public class TestGroupByEventPerRow extends TestCase
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(3) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-                          "  and one.string = two.symbol " +
+                          "  and one.theString = two.symbol " +
                           "group by symbol";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);

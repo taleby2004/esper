@@ -8,16 +8,17 @@
  **************************************************************************************/
 package com.espertech.esper.event.property;
 
-import com.espertech.esper.event.*;
-import com.espertech.esper.event.map.MapEventPropertyGetter;
-import com.espertech.esper.event.bean.BeanEventType;
-import com.espertech.esper.event.xml.SchemaItem;
-import com.espertech.esper.event.xml.SchemaElementComplex;
-import com.espertech.esper.event.xml.BaseXMLEventType;
 import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.arr.ObjectArrayEventPropertyGetter;
+import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.event.map.MapEventPropertyGetter;
+import com.espertech.esper.event.xml.BaseXMLEventType;
+import com.espertech.esper.event.xml.SchemaElementComplex;
+import com.espertech.esper.event.xml.SchemaItem;
 
-import java.util.Map;
 import java.io.StringWriter;
+import java.util.Map;
 
 /**
  * Interface for a property of an event of type BeanEventType (JavaBean event). Properties are designed to
@@ -65,6 +66,8 @@ public interface Property
      * @return getter for maps
      */
     public MapEventPropertyGetter getGetterMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService);
+
+    public ObjectArrayEventPropertyGetter getGetterObjectArray(Map<String, Integer> indexPerProperty, Map<String, Object> nestableTypes, EventAdapterService eventAdapterService);
 
     /**
      * Returns the property type for use with DOM event representations.

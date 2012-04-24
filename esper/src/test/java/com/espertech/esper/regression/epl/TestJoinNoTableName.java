@@ -37,7 +37,7 @@ public class TestJoinNoTableName extends TestCase
         String joinStatement = "select * from " +
                 SupportMarketDataBean.class.getName() + ".win:length(3)," +
                 SupportBean.class.getName() + ".win:length(3)" +
-            " where symbol=string and volume=longBoxed";
+            " where symbol=theString and volume=longBoxed";
 
         EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
@@ -46,10 +46,10 @@ public class TestJoinNoTableName extends TestCase
         {
             setOne[i] = new SupportMarketDataBean("IBM", 0, (long) i, "");
 
-            SupportBean event = new SupportBean();
-            event.setString("IBM");
-            event.setLongBoxed((long)i);
-            setTwo[i] = event;
+            SupportBean theEvent = new SupportBean();
+            theEvent.setTheString("IBM");
+            theEvent.setLongBoxed((long) i);
+            setTwo[i] = theEvent;
         }
     }
 
@@ -64,8 +64,8 @@ public class TestJoinNoTableName extends TestCase
         assertNotNull(updateListener.getLastNewData());
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

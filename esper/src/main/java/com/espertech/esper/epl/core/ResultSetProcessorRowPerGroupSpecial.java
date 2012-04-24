@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.epl.agg.AggregationRowRemovedCallback;
@@ -26,7 +25,7 @@ import java.util.Map;
 public class ResultSetProcessorRowPerGroupSpecial extends ResultSetProcessorRowPerGroup implements AggregationRowRemovedCallback {
     private static final Log log = LogFactory.getLog(ResultSetProcessorRowPerGroupSpecial.class);
 
-    protected final Map<MultiKeyUntyped, EventBean> groupReps = new LinkedHashMap<MultiKeyUntyped, EventBean>();
+    protected final Map<Object, EventBean> groupReps = new LinkedHashMap<Object, EventBean>();
 
     public ResultSetProcessorRowPerGroupSpecial(ResultSetProcessorRowPerGroupFactory prototype, SelectExprProcessor selectExprProcessor, OrderByProcessor orderByProcessor, AggregationService aggregationService, AgentInstanceContext agentInstanceContext) {
         super(prototype, selectExprProcessor, orderByProcessor, aggregationService, agentInstanceContext);
@@ -38,9 +37,9 @@ public class ResultSetProcessorRowPerGroupSpecial extends ResultSetProcessorRowP
     public UniformPair<EventBean[]> processViewResult(EventBean[] newData, EventBean[] oldData, boolean isSynthesize)
     {
         // Generate group-by keys for all events, collect all keys in a set for later event generation
-        Map<MultiKeyUntyped, EventBean> keysAndEvents = new HashMap<MultiKeyUntyped, EventBean>();
-        MultiKeyUntyped[] newDataMultiKey = generateGroupKeys(newData, keysAndEvents, true);
-        MultiKeyUntyped[] oldDataMultiKey = generateGroupKeys(oldData, keysAndEvents, false);
+        Map<Object, EventBean> keysAndEvents = new HashMap<Object, EventBean>();
+        Object[] newDataMultiKey = generateGroupKeys(newData, keysAndEvents, true);
+        Object[] oldDataMultiKey = generateGroupKeys(oldData, keysAndEvents, false);
 
         EventBean[] selectOldEvents = null;
         if (prototype.isSelectRStream())
@@ -91,7 +90,7 @@ public class ResultSetProcessorRowPerGroupSpecial extends ResultSetProcessorRowP
     }
 
 
-    public void removed(MultiKeyUntyped optionalGroupKeyPerRow) {
+    public void removed(Object optionalGroupKeyPerRow) {
         groupReps.remove(optionalGroupKeyPerRow);
     }
 }

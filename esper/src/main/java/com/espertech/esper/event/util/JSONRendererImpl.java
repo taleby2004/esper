@@ -13,15 +13,17 @@ package com.espertech.esper.event.util;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.util.EventPropertyRenderer;
+import com.espertech.esper.client.util.EventPropertyRendererContext;
 import com.espertech.esper.client.util.JSONEventRenderer;
 import com.espertech.esper.client.util.JSONRenderingOptions;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Array;
-import java.util.Stack;
-import java.util.Map;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * Render for the JSON format.
@@ -43,11 +45,18 @@ public class JSONRendererImpl implements JSONEventRenderer
      */
     public JSONRendererImpl(EventType eventType, JSONRenderingOptions options)
     {
-        rendererOptions = new RendererMetaOptions(options.isPreventLooping(), false);
+        EventPropertyRenderer propertyRenderer = null;
+        EventPropertyRendererContext propertyRendererContext = null;
+        if (options.getRenderer() != null) {
+            propertyRenderer = options.getRenderer();
+            propertyRendererContext = new EventPropertyRendererContext(eventType, true);
+        }
+
+        rendererOptions = new RendererMetaOptions(options.isPreventLooping(), false, propertyRenderer, propertyRendererContext);
         meta = new RendererMeta(eventType, new Stack<EventTypePropertyPair>(), rendererOptions);
     }
 
-    public String render(String title, EventBean event)
+    public String render(String title, EventBean theEvent)
     {
         StringBuilder buf = new StringBuilder();
         buf.append('{');
@@ -59,7 +68,7 @@ public class JSONRendererImpl implements JSONEventRenderer
         buf.append("\": {");
         buf.append(NEWLINE);
 
-        recursiveRender(event, buf, 2, meta, rendererOptions);
+        recursiveRender(theEvent, buf, 2, meta, rendererOptions);
         
         ident(buf, 1);
         buf.append('}');
@@ -85,35 +94,41 @@ public class JSONRendererImpl implements JSONEventRenderer
         buf.append(' ');
     }
 
-    private static void recursiveRender(EventBean event, StringBuilder buf, int level, RendererMeta meta, RendererMetaOptions rendererOptions)
+    private static void recursiveRender(EventBean theEvent, StringBuilder buf, int level, RendererMeta meta, RendererMetaOptions rendererOptions)
     {
         String delimiter = "";
 
+        // simple properties
         GetterPair[] simpleProps = meta.getSimpleProperties();
-        for (GetterPair simpleProp : simpleProps)
-        {
-            Object value = simpleProp.getGetter().get(event);
-            
-            buf.append(delimiter);
-            ident(buf, level);
-            buf.append('\"');
-            buf.append(simpleProp.getName());
-            buf.append("\": ");
-            simpleProp.getOutput().render(value, buf);
-            delimiter = COMMA_DELIMITER_NEWLINE;
+        if (rendererOptions.getRenderer() == null) {
+            for (GetterPair simpleProp : simpleProps)
+            {
+                Object value = simpleProp.getGetter().get(theEvent);
+                writeDelimitedIndentedProp(buf, delimiter, level, simpleProp.getName());
+                simpleProp.getOutput().render(value, buf);
+                delimiter = COMMA_DELIMITER_NEWLINE;
+            }
+        }
+        else {
+            EventPropertyRendererContext context = rendererOptions.getRendererContext();
+            context.setStringBuilderAndReset(buf);
+            for (GetterPair simpleProp : simpleProps)
+            {
+                Object value = simpleProp.getGetter().get(theEvent);
+                writeDelimitedIndentedProp(buf, delimiter, level, simpleProp.getName());
+                context.setDefaultRenderer(simpleProp.getOutput());
+                context.setPropertyName(simpleProp.getName());
+                context.setPropertyValue(value);
+                rendererOptions.getRenderer().render(context);
+                delimiter = COMMA_DELIMITER_NEWLINE;
+            }
         }
 
         GetterPair[] indexProps = meta.getIndexProperties();
         for (GetterPair indexProp : indexProps)
         {
-            Object value = indexProp.getGetter().get(event);
-
-            buf.append(delimiter);
-            ident(buf, level);
-
-            buf.append('\"');
-            buf.append(indexProp.getName());
-            buf.append("\": ");
+            Object value = indexProp.getGetter().get(theEvent);
+            writeDelimitedIndentedProp(buf, delimiter, level, indexProp.getName());
 
             if (value == null)
             {
@@ -129,12 +144,30 @@ public class JSONRendererImpl implements JSONEventRenderer
                 {
                     buf.append('[');
                     String arrayDelimiter = "";
-                    for (int i = 0; i < Array.getLength(value); i++)
-                    {
-                        Object arrayItem = Array.get(value, i);
-                        buf.append(arrayDelimiter);
-                        indexProp.getOutput().render(arrayItem, buf);
-                        arrayDelimiter = ", ";
+
+                    if (rendererOptions.getRenderer() == null) {
+                        for (int i = 0; i < Array.getLength(value); i++)
+                        {
+                            Object arrayItem = Array.get(value, i);
+                            buf.append(arrayDelimiter);
+                            indexProp.getOutput().render(arrayItem, buf);
+                            arrayDelimiter = ", ";
+                        }
+                    }
+                    else {
+                        EventPropertyRendererContext context = rendererOptions.getRendererContext();
+                        context.setStringBuilderAndReset(buf);
+                        for (int i = 0; i < Array.getLength(value); i++)
+                        {
+                            Object arrayItem = Array.get(value, i);
+                            buf.append(arrayDelimiter);
+                            context.setPropertyName(indexProp.getName());
+                            context.setPropertyValue(arrayItem);
+                            context.setIndexedPropertyIndex(i);
+                            context.setDefaultRenderer(indexProp.getOutput());
+                            rendererOptions.getRenderer().render(context);
+                            arrayDelimiter = ", ";
+                        }
                     }
                     buf.append(']');
                 }
@@ -145,7 +178,7 @@ public class JSONRendererImpl implements JSONEventRenderer
         GetterPair[] mappedProps = meta.getMappedProperties();
         for (GetterPair mappedProp : mappedProps)
         {
-            Object value = mappedProp.getGetter().get(event);
+            Object value = mappedProp.getGetter().get(theEvent);
 
             if ((value != null) && (!(value instanceof Map)))
             {
@@ -153,12 +186,7 @@ public class JSONRendererImpl implements JSONEventRenderer
                 continue;
             }
 
-            buf.append(delimiter);
-            ident(buf, level);
-
-            buf.append('\"');
-            buf.append(mappedProp.getName());
-            buf.append("\": ");
+            writeDelimitedIndentedProp(buf, delimiter, level, mappedProp.getName());
 
             if (value == null)
             {
@@ -167,7 +195,7 @@ public class JSONRendererImpl implements JSONEventRenderer
             }
             else
             {
-                Map map = (Map) value;
+                Map<String, Object> map = (Map<String, Object>) value;
                 if (map.isEmpty())
                 {
                     buf.append("{}");
@@ -179,10 +207,10 @@ public class JSONRendererImpl implements JSONEventRenderer
                     buf.append(NEWLINE);
 
                     String localDelimiter = "";
-                    Iterator<Map.Entry> it = map.entrySet().iterator();
+                    Iterator<Map.Entry<String, Object>> it = map.entrySet().iterator();
                     for (;it.hasNext();)
                     {
-                        Map.Entry entry = it.next();
+                        Map.Entry<String, Object> entry = it.next();
                         if (entry.getKey() == null)
                         {
                             continue;
@@ -191,7 +219,7 @@ public class JSONRendererImpl implements JSONEventRenderer
                         buf.append(localDelimiter);
                         ident(buf, level + 1);
                         buf.append('\"');
-                        buf.append(entry.getKey().toString());
+                        buf.append(entry.getKey());
                         buf.append("\": ");
 
                         if (entry.getValue() == null)
@@ -200,8 +228,19 @@ public class JSONRendererImpl implements JSONEventRenderer
                         }
                         else
                         {
-                            OutputValueRenderer out = OutputValueRendererFactory.getOutputValueRenderer(entry.getValue().getClass(), rendererOptions);
-                            out.render(entry.getValue(), buf);
+                            OutputValueRenderer outRenderer = OutputValueRendererFactory.getOutputValueRenderer(entry.getValue().getClass(), rendererOptions);
+                            if (rendererOptions.getRenderer() == null) {
+                                outRenderer.render(entry.getValue(), buf);
+                            }
+                            else {
+                                EventPropertyRendererContext context = rendererOptions.getRendererContext();
+                                context.setStringBuilderAndReset(buf);
+                                context.setPropertyName(mappedProp.getName());
+                                context.setPropertyValue(entry.getValue());
+                                context.setMappedPropertyKey(entry.getKey());
+                                context.setDefaultRenderer(outRenderer);
+                                rendererOptions.getRenderer().render(context);
+                            }
                         }
                         localDelimiter = COMMA_DELIMITER_NEWLINE;
                     }
@@ -211,7 +250,6 @@ public class JSONRendererImpl implements JSONEventRenderer
                     buf.append('}');
                 }
             }
-            
 
             delimiter = COMMA_DELIMITER_NEWLINE;
         }
@@ -219,14 +257,9 @@ public class JSONRendererImpl implements JSONEventRenderer
         NestedGetterPair[] nestedProps = meta.getNestedProperties();
         for (NestedGetterPair nestedProp : nestedProps)
         {
-            Object value = nestedProp.getGetter().getFragment(event);
+            Object value = nestedProp.getGetter().getFragment(theEvent);
 
-            buf.append(delimiter);
-            ident(buf, level);
-
-            buf.append('\"');
-            buf.append(nestedProp.getName());
-            buf.append("\": ");
+            writeDelimitedIndentedProp(buf, delimiter, level, nestedProp.getName());
 
             if (value == null)
             {
@@ -288,5 +321,13 @@ public class JSONRendererImpl implements JSONEventRenderer
         }
 
         buf.append(NEWLINE);
+    }
+
+    private static void writeDelimitedIndentedProp(StringBuilder buf, String delimiter, int level, String name) {
+        buf.append(delimiter);
+        ident(buf, level);
+        buf.append('\"');
+        buf.append(name);
+        buf.append("\": ");
     }
 }

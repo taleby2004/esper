@@ -48,17 +48,17 @@ public final class ZeroDepthStream implements EventStream
         lastInsertedEvents = events;
     }
 
-    public final void insert(EventBean event)
+    public final void insert(EventBean theEvent)
     {
         // Get a new array created rather then re-use the old one since some client listeners
         // to this view may keep reference to the new data
-        EventBean[] row = new EventBean[]{event};
+        EventBean[] row = new EventBean[]{theEvent};
         for (View childView : children)
         {
             childView.update(row, null);
         }
 
-        lastInsertedEvent = event;
+        lastInsertedEvent = theEvent;
     }
 
     public final EventType getEventType()

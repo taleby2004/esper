@@ -12,6 +12,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventPropertyGetterAndMapped;
+import com.espertech.esper.event.vaevent.PropertyUtility;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -67,11 +68,11 @@ public class KeyedMapFastPropertyGetter extends BaseNativePropertyGetter impleme
         }
         catch (ClassCastException e)
         {
-            throw new PropertyAccessException("Mismatched getter instance to event bean type");
+            throw PropertyUtility.getMismatchException(fastMethod.getJavaMethod(), object, e);
         }
         catch (InvocationTargetException e)
         {
-            throw new PropertyAccessException(e);
+            throw PropertyUtility.getInvocationTargetException(fastMethod.getJavaMethod(), e);
         }
     }
 

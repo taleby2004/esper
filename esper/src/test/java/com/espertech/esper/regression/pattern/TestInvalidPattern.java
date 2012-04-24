@@ -44,7 +44,7 @@ public class TestInvalidPattern extends TestCase
         assertEquals("Incorrect syntax near ''ss'' expecting a closing parenthesis ')' but found end of input at line 1 column 63, please check the filter specification within the pattern expression [com.espertech.esper.support.bean.SupportBean_N(doublePrimitive='ss']", exceptionText);
 
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
-        epService.getEPAdministrator().createEPL("select * from pattern[(not a=SupportBean) -> SupportBean(string=a.string)]");
+        epService.getEPAdministrator().createEPL("select * from pattern[(not a=SupportBean) -> SupportBean(theString=a.theString)]");
 
         // test invalid subselect
         epService.getEPAdministrator().createEPL("create window WaitWindow.win:keepall() as (waitTime int)");
@@ -105,8 +105,8 @@ public class TestInvalidPattern extends TestCase
         assertEquals("Failed to resolve property 'x.abc' to a stream or nested property in a stream [com.espertech.esper.support.bean.SupportBean_N(doublePrimitive=x.abc)]", exceptionText);
 
         // range not valid on string
-        exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + "(string in [1:2])");
-        assertEquals("Implicit conversion from datatype 'String' to numeric is not allowed [com.espertech.esper.support.bean.SupportBean(string in [1:2])]", exceptionText);
+        exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + "(theString in [1:2])");
+        assertEquals("Implicit conversion from datatype 'String' to numeric is not allowed [com.espertech.esper.support.bean.SupportBean(theString in [1:2])]", exceptionText);
 
         // range does not allow string params
         exceptionText = getStatementExceptionPattern(EVENT_ALLTYPES + "(doubleBoxed in ['a':2])");

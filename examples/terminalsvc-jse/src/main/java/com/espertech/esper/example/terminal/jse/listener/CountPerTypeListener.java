@@ -19,19 +19,19 @@ public class CountPerTypeListener extends BaseTerminalListener {
     }
 
     public void update(EventBean[] newEvents, EventBean[] oldEvents) {
-        Formatter out = new Formatter(new StringBuffer());
-        out.format("%10s | %10s\n", "type", "count");
-        out.format("---------- | ----------\n");
+        Formatter outFormatter = new Formatter(new StringBuffer());
+        outFormatter.format("%10s | %10s\n", "type", "count");
+        outFormatter.format("---------- | ----------\n");
 
         int total = 0;
         for (int i = 0; i < newEvents.length; i++) {
             String type = (String) newEvents[i].get("type");
             long count = (Long) newEvents[i].get("countPerType");
-            out.format("%10s | %10s\n", type, count);
+            outFormatter.format("%10s | %10s\n", type, count);
             total += count;
         }
-        out.format("%10s | %10s\n", "total =", total);
+        outFormatter.format("%10s | %10s\n", "total =", total);
 
-        complexEventListener.onComplexEvent("Current count per type:\n" + out.out().toString());
+        complexEventListener.onComplexEvent("Current count per type:\n" + outFormatter.out().toString());
     }
 }

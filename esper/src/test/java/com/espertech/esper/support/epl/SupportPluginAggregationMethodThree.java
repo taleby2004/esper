@@ -41,10 +41,10 @@ public class SupportPluginAggregationMethodThree extends AggregationSupport impl
 
     public void enter(Object value)
     {
-        Object[] params = (Object[]) value;
-        int lower = (Integer) params[0];
-        int upper = (Integer) params[1];
-        int val = (Integer) params[2];
+        Object[] parameters = (Object[]) value;
+        int lower = (Integer) parameters[0];
+        int upper = (Integer) parameters[1];
+        int val = (Integer) parameters[2];
         if ((val >= lower) && (val <= upper))
         {
             count++;
@@ -53,10 +53,10 @@ public class SupportPluginAggregationMethodThree extends AggregationSupport impl
 
     public void leave(Object value)
     {
-        Object[] params = (Object[]) value;
-        int lower = (Integer) params[0];
-        int upper = (Integer) params[1];
-        int val = (Integer) params[2];
+        Object[] parameters = (Object[]) value;
+        int lower = (Integer) parameters[0];
+        int upper = (Integer) parameters[1];
+        int val = (Integer) parameters[2];
         if ((val >= lower) && (val <= upper))
         {
             count--;

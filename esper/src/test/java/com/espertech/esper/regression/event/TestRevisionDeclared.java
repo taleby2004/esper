@@ -181,7 +181,7 @@ public class TestRevisionDeclared extends TestCase
         EPStatement consumerOne = epService.getEPAdministrator().createEPL("select irstream * from RevQuote");
         consumerOne.addListener(listenerOne);
 
-        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=2) as sb delete from RevQuote where string = p2");
+        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=2) as sb delete from RevQuote where theString = p2");
 
         log("a00");
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("a", "a00", "a10", "a20", "a30", "a40", "a50"));
@@ -190,7 +190,7 @@ public class TestRevisionDeclared extends TestCase
         epService.getEPRuntime().sendEvent(new SupportDeltaThree("x", "03", "41"));
         assertFalse(listenerOne.isInvoked());
 
-        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=3) as sb delete from RevQuote where string = p3");
+        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=3) as sb delete from RevQuote where theString = p3");
 
         log("b00");
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("b", "b00", "b10", "b20", "b30", "b40", "b50"));
@@ -206,7 +206,7 @@ public class TestRevisionDeclared extends TestCase
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("c", "c00", "c10", "c20", "c30", "c40", "c50"));
         EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"c", "c00", "c10", "c20", "c30", "c40", "c50"});
 
-        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=0) as sb delete from RevQuote where string = p0");
+        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=0) as sb delete from RevQuote where theString = p0");
 
         log("c11");
         epService.getEPRuntime().sendEvent(new SupportDeltaFive("c", "c11", "c51"));
@@ -214,7 +214,7 @@ public class TestRevisionDeclared extends TestCase
         EPAssertionUtil.assertProps(listenerOne.getLastOldData()[0], fields, new Object[]{"c", "c00", "c10", "c20", "c30", "c40", "c50"});
         listenerOne.reset();
 
-        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=1) as sb delete from RevQuote where string = p1");
+        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=1) as sb delete from RevQuote where theString = p1");
 
         log("d00");
         epService.getEPRuntime().sendEvent(new SupportRevisionFull("d", "d00", "d10", "d20", "d30", "d40", "d50"));
@@ -230,7 +230,7 @@ public class TestRevisionDeclared extends TestCase
                 new Object[][]{{"b", "b00", "b10", "b20", "b30", "b40", "b50"}, {"a", "a01", "a10", "a20", "a30", "a41", "a50"},
                         {"c", "c00", "c11", "c20", "c30", "c40", "c51"}, {"d", "d01", "d10", "d21", "d30", "d40", "d51"}});
 
-        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=4) as sb delete from RevQuote where string = p4");
+        epService.getEPAdministrator().createEPL("on SupportBean(intPrimitive=4) as sb delete from RevQuote where theString = p4");
 
         epService.getEPRuntime().sendEvent(new SupportBean("abc", 1));
         assertFalse(listenerOne.isInvoked());
@@ -274,11 +274,11 @@ public class TestRevisionDeclared extends TestCase
         for (int i = 0; i < groups.length; i++)
         {
             String key = groups[i];
-            Object event = new SupportRevisionFull(key, "0-" + next(count), "1-" + next(count), "2-" + next(count),
+            Object theEvent = new SupportRevisionFull(key, "0-" + next(count), "1-" + next(count), "2-" + next(count),
                     "3-" + next(count), "4-" + next(count), "5-" + next(count));
             add(last, key, "0-" + next(count), "1-" + next(count), "2-" + next(count),
                     "3-" + next(count), "4-" + next(count), "5-" + next(count));
-            epService.getEPRuntime().sendEvent(event);
+            epService.getEPRuntime().sendEvent(theEvent);
         }
         listenerOne.reset();
         
@@ -292,38 +292,38 @@ public class TestRevisionDeclared extends TestCase
             String key = groups[random.nextInt(groups.length)];
             count++;
 
-            Object event;
+            Object theEvent;
             if (typeNum == 0) {
-                event = new SupportRevisionFull(key, "0-" + next(count), "1-" + next(count), "2-" + next(count),
+                theEvent = new SupportRevisionFull(key, "0-" + next(count), "1-" + next(count), "2-" + next(count),
                         "3-" + next(count), "4-" + next(count), "5-" + next(count));
                 add(last, key, "0-" + next(count), "1-" + next(count), "2-" + next(count),
                         "3-" + next(count), "4-" + next(count), "5-" + next(count));
             }
             else if (typeNum == 1) {
-                event = new SupportDeltaOne(key, "1-" + next(count), "5-" + next(count));
+                theEvent = new SupportDeltaOne(key, "1-" + next(count), "5-" + next(count));
                 add(last, key, null, "1-" + next(count), null, null, null, "5-" + next(count));
             }
             else if (typeNum == 2) {
-                event = new SupportDeltaTwo(key, "0-" + next(count), "2-" + next(count), "3-" + next(count));
+                theEvent = new SupportDeltaTwo(key, "0-" + next(count), "2-" + next(count), "3-" + next(count));
                 add(last, key, "0-" + next(count), null, "2-" + next(count), "3-" + next(count), null, null);
             }
             else if (typeNum == 3) {
-                event = new SupportDeltaThree(key, "0-" + next(count), "4-" + next(count));
+                theEvent = new SupportDeltaThree(key, "0-" + next(count), "4-" + next(count));
                 add(last, key, "0-" + next(count), null, null, null, "4-" + next(count), null);
             }
             else if (typeNum == 4) {
-                event = new SupportDeltaFour(key, "0-" + next(count), "2-" + next(count), "5-" + next(count));
+                theEvent = new SupportDeltaFour(key, "0-" + next(count), "2-" + next(count), "5-" + next(count));
                 add(last, key, "0-" + next(count), null, "2-" + next(count), null, null, "5-" + next(count));
             }
             else if (typeNum == 5) {
-                event = new SupportDeltaFive(key, "1-" + next(count), "5-" + next(count));
+                theEvent = new SupportDeltaFive(key, "1-" + next(count), "5-" + next(count));
                 add(last, key, null, "1-" + next(count), null, null, null, "5-" + next(count));
             }
             else {
                 throw new IllegalStateException();
             }
 
-            epService.getEPRuntime().sendEvent(event);
+            epService.getEPRuntime().sendEvent(theEvent);
             assertEvent(last, listenerOne.assertOneGetNewAndReset(), count);
         }
     }

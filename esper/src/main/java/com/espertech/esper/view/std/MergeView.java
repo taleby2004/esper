@@ -19,10 +19,9 @@ import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * The merge view works together with a group view that splits the data in a stream to multiple subviews, based on
@@ -37,7 +36,7 @@ import java.util.List;
 public final class MergeView extends ViewSupport implements CloneableView, MergeViewMarker
 {
     private final AgentInstanceViewFactoryChainContext agentInstanceContext;
-    private final LinkedList<View> parentViews = new LinkedList<View>();
+    private final ArrayDeque<View> parentViews = new ArrayDeque<View>();
     private final ExprNode[] groupFieldNames;
     private final EventType eventType;
 
@@ -90,7 +89,7 @@ public final class MergeView extends ViewSupport implements CloneableView, Merge
     public final Iterator<EventBean> iterator()
     {
         // The merge data view has multiple parent views which are AddPropertyValueView
-        List<Iterable<EventBean>> iterables = new LinkedList<Iterable<EventBean>>();
+        ArrayDeque<Iterable<EventBean>> iterables = new ArrayDeque<Iterable<EventBean>>();
 
         for (View dataView : parentViews)
         {

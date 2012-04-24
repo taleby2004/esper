@@ -78,13 +78,14 @@ public class ContextPropertyEventType {
         return makeEventType(LIST_INITIATEDTERM_PROPS, Collections.EMPTY_MAP);
     }
 
-    public static void addEndpointTypes(String contextName, ContextDetailCondition endpoint, Map<String, Object> properties) throws ExprValidationException {
+    public static void addEndpointTypes(String contextName, ContextDetailCondition endpoint, Map<String, Object> properties, Set<String> allTags) throws ExprValidationException {
         if (endpoint instanceof ContextDetailConditionFilter) {
             ContextDetailConditionFilter filter = (ContextDetailConditionFilter) endpoint;
             if (filter.getOptionalFilterAsName() != null) {
                 if (properties.containsKey(filter.getOptionalFilterAsName())) {
                     throw new ExprValidationException("For context '" + contextName + "' the stream or tag name '" + filter.getOptionalFilterAsName() + "' is already declared");
                 }
+                allTags.add(filter.getOptionalFilterAsName());
                 properties.put(filter.getOptionalFilterAsName(), filter.getFilterSpecCompiled().getFilterForEventType());
             }
         }
@@ -94,12 +95,13 @@ public class ContextPropertyEventType {
                 if (properties.containsKey(entry.getKey()) && !properties.get(entry.getKey()).equals(entry.getValue().getFirst())) {
                     throw new ExprValidationException("For context '" + contextName + "' the stream or tag name '" + entry.getKey() + "' is already declared");
                 }
+                allTags.add(entry.getKey());
                 properties.put(entry.getKey(), entry.getValue().getFirst());
             }
         }
     }
 
-    public static Map<String, Object> getTempOverlapBean(String contextName, int agentInstanceId, Map<String, Object> matchEvent, EventBean event, String filterAsName) {
+    public static Map<String, Object> getTempOverlapBean(String contextName, int agentInstanceId, Map<String, Object> matchEvent, EventBean theEvent, String filterAsName) {
         Map<String, Object> props = new HashMap<String, Object>();
         props.put(PROP_CTX_NAME, contextName);
         props.put(PROP_CTX_ID, agentInstanceId);
@@ -107,7 +109,7 @@ public class ContextPropertyEventType {
             props.putAll(matchEvent);
         }
         else {
-            props.put(filterAsName, event);
+            props.put(filterAsName, theEvent);
         }
         return props;
     }

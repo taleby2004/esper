@@ -63,7 +63,7 @@ public class TestFilterPropertyNested extends TestCase
 
     public void testNamedWindowSubquery()
     {
-        String[] fields = "string,totalPrice".split(",");
+        String[] fields = "theString,totalPrice".split(",");
         epService.getEPAdministrator().getConfiguration().addEventType("OrderEvent", OrderBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 
@@ -87,7 +87,7 @@ public class TestFilterPropertyNested extends TestCase
 
     public void testNamedWindowOnTrigger()
     {
-        String[] fields = "string,intPrimitive".split(",");
+        String[] fields = "theString,intPrimitive".split(",");
         epService.getEPAdministrator().getConfiguration().addEventType("OrderEvent", OrderBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 
@@ -96,7 +96,7 @@ public class TestFilterPropertyNested extends TestCase
         epService.getEPAdministrator().createEPL("create window OrderWindow.std:lastevent() as OrderEvent");
         epService.getEPAdministrator().createEPL("insert into OrderWindow select * from OrderEvent");
 
-        String stmtText = "on OrderWindow[books] owb select sbw.* from SupportBeanWindow sbw where string = title";
+        String stmtText = "on OrderWindow[books] owb select sbw.* from SupportBeanWindow sbw where theString = title";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -166,13 +166,6 @@ public class TestFilterPropertyNested extends TestCase
 
     public void testColumnSelect()
     {
-        //Object eventObject = TestFilterPropertySimple.makeEventOne();
-        //EventBean event = SupportEventAdapterService.getService().adapterForBean(eventObject);
-        //String xml = EventRendererProvider.renderXML("abc", event);
-        //StringBuilder builder = new StringBuilder();
-        //OutputValueRendererXMLString.xmlEncode(xml, builder, false);
-        //System.out.println(xml);
-
         epService.getEPAdministrator().getConfiguration().addEventType("OrderEvent", OrderBean.class);
 
         // columns supplied
@@ -252,7 +245,7 @@ public class TestFilterPropertyNested extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("OrderEvent", OrderBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string from SupportBean s0 where " +
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString from SupportBean s0 where " +
                 "exists (select * from OrderEvent[books][reviews].std:unique(reviewId) where reviewId = s0.intPrimitive)");
         stmt.addListener(listener);
 

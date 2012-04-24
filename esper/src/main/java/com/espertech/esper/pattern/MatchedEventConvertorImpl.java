@@ -10,14 +10,14 @@ package com.espertech.esper.pattern;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.Pair;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.map.MapEventBean;
-import com.espertech.esper.collection.Pair;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.HashMap;
-import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 /**
  * Implements a convertor for pattern partial results to events per stream.  
@@ -27,6 +27,7 @@ public class MatchedEventConvertorImpl implements MatchedEventConvertor
     private final EventBean[] eventsPerStream;
     private final LinkedHashMap<String, Pair<EventType, String>> filterTypes;
     private final LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes;
+    private final MatchedEventMapMeta matchedEventMapMeta;
 
     /**
      * Ctor.
@@ -34,7 +35,7 @@ public class MatchedEventConvertorImpl implements MatchedEventConvertor
      * @param arrayEventTypes the filter many-event types
      * @param eventAdapterService for creating wrappers if required
      */
-    public MatchedEventConvertorImpl(LinkedHashMap<String, Pair<EventType, String>> filterTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, EventAdapterService eventAdapterService)
+    public MatchedEventConvertorImpl(LinkedHashMap<String, Pair<EventType, String>> filterTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, LinkedHashSet<String> allTags, EventAdapterService eventAdapterService)
     {
         int size = filterTypes.size();
         if (arrayEventTypes != null)
@@ -52,6 +53,7 @@ public class MatchedEventConvertorImpl implements MatchedEventConvertor
         {
             this.arrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
         }
+        this.matchedEventMapMeta = new MatchedEventMapMeta(allTags.toArray(new String[allTags.size()]), !arrayEventTypes.isEmpty());
     }
 
     public EventBean[] convert(MatchedEventMap events)
@@ -59,20 +61,24 @@ public class MatchedEventConvertorImpl implements MatchedEventConvertor
         int count = 0;
         for (Map.Entry<String, Pair<EventType, String>> entry : filterTypes.entrySet())
         {
-            EventBean event = events.getMatchingEvent(entry.getKey());
-            eventsPerStream[count++] = event;
+            EventBean theEvent = events.getMatchingEventByTag(entry.getKey());
+            eventsPerStream[count++] = theEvent;
         }
         if (arrayEventTypes != null)
         {
             for (Map.Entry<String, Pair<EventType, String>> entry : arrayEventTypes.entrySet())
             {
-                EventBean[] eventArray = (EventBean[]) events.getMatchingEventAsObject(entry.getKey());
+                EventBean[] eventArray = (EventBean[]) events.getMatchingEventAsObjectByTag(entry.getKey());
                 HashMap map = new HashMap();
                 map.put(entry.getKey(), eventArray);
-                EventBean event = new MapEventBean(map, null);
-                eventsPerStream[count++] = event;
+                EventBean theEvent = new MapEventBean(map, null);
+                eventsPerStream[count++] = theEvent;
             }
         }
         return eventsPerStream;
+    }
+
+    public MatchedEventMapMeta getMatchedEventMapMeta() {
+        return matchedEventMapMeta;
     }
 }

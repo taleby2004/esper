@@ -12,20 +12,24 @@
 package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanString;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.HeapAndTime;
 import com.espertech.esper.util.SerializableObjectCopier;
-
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import junit.framework.TestCase;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestGroupByCount extends TestCase
 {
@@ -149,7 +153,7 @@ public class TestGroupByCount extends TestCase
                           " from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(3) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-                          "  and one.string = two.symbol " +
+                          "  and one.theString = two.symbol " +
                           "group by symbol";
 
         selectTestView = epService.getEPAdministrator().createEPL(viewExpr);

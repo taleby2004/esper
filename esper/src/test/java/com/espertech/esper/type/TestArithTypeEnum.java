@@ -78,7 +78,7 @@ public class TestArithTypeEnum extends TestCase
 
     public void testBigNumberComputers()
     {
-        Object[][] params = new Object[][] {
+        Object[][] parameters = new Object[][] {
                 {true, new BigDecimal(6), MathArithTypeEnum.DIVIDE, new BigDecimal(3), new BigDecimal(2)},
                 {false, BigInteger.valueOf(10), MathArithTypeEnum.ADD, BigInteger.valueOf(10), BigInteger.valueOf(20)},
                 {false, BigInteger.valueOf(100), MathArithTypeEnum.SUBTRACT, BigInteger.valueOf(10), BigInteger.valueOf(90)},
@@ -111,13 +111,13 @@ public class TestArithTypeEnum extends TestCase
                 {true, new BigDecimal(6), MathArithTypeEnum.SUBTRACT, (double)8, new BigDecimal(-2.0)},
                 };
 
-        for (int i = 0; i < params.length; i++)
+        for (int i = 0; i < parameters.length; i++)
         {
-            boolean isBigDec = (Boolean) params[i][0];
-            Object lhs = params[i][1];
-            MathArithTypeEnum e = (MathArithTypeEnum) params[i][2];
-            Object rhs = params[i][3];
-            Object expected = params[i][4];
+            boolean isBigDec = (Boolean) parameters[i][0];
+            Object lhs = parameters[i][1];
+            MathArithTypeEnum e = (MathArithTypeEnum) parameters[i][2];
+            Object rhs = parameters[i][3];
+            Object expected = parameters[i][4];
 
             MathArithTypeEnum.Computer computer;
             if (isBigDec)

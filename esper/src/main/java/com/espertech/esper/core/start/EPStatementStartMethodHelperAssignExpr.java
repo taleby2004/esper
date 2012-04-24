@@ -25,6 +25,22 @@ import java.util.Map;
 
 public class EPStatementStartMethodHelperAssignExpr
 {
+    public static void assignExpressionStrategies(EPStatementStartMethodSelectDesc selectDesc, AggregationService aggregationService, Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategyInstances, Map<ExprPriorNode, ExprPriorEvalStrategy> priorStrategyInstances, Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousStrategyInstances) {
+        // initialize aggregation expression nodes
+        if (selectDesc.getResultSetProcessorPrototypeDesc().getAggregationServiceFactoryDesc() != null) {
+            EPStatementStartMethodHelperAssignExpr.assignAggregations(aggregationService, selectDesc.getResultSetProcessorPrototypeDesc().getAggregationServiceFactoryDesc().getExpressions());
+        }
+
+        // assign subquery nodes
+        EPStatementStartMethodHelperAssignExpr.assignSubqueryStrategies(selectDesc.getSubSelectStrategyCollection(), subselectStrategyInstances);
+
+        // assign prior nodes
+        EPStatementStartMethodHelperAssignExpr.assignPriorStrategies(priorStrategyInstances);
+
+        // assign previous nodes
+        EPStatementStartMethodHelperAssignExpr.assignPreviousStrategies(previousStrategyInstances);
+    }
+
     public static void assignAggregations(AggregationResultFuture aggregationService, List<AggregationServiceAggExpressionDesc> aggregationExpressions) {
         for (AggregationServiceAggExpressionDesc aggregation : aggregationExpressions) {
             aggregation.assignFuture(aggregationService);

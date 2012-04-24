@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esperio;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.schedule.ScheduleSlot;
 
 /**

@@ -40,10 +40,10 @@ public class TestAggregateExtNTh extends TestCase {
     public void testNth()
     {
         String epl = "select " +
-                "string, " +
+                "theString, " +
                 "nth(intPrimitive, 0) as int1, " +  // current
                 "nth(intPrimitive, 1) as int2 " +   // one before
-                "from SupportBean.win:keepall() group by string output last every 3 events order by string";
+                "from SupportBean.win:keepall() group by theString output last every 3 events order by theString";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -62,7 +62,7 @@ public class TestAggregateExtNTh extends TestCase {
     }
 
     private void runAssertion() {
-        String[] fields = "string,int1,int2".split(",");
+        String[] fields = "theString,int1,int2".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
         epService.getEPRuntime().sendEvent(new SupportBean("G2", 11));

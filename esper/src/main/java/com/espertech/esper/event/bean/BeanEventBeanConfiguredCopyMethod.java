@@ -47,9 +47,9 @@ public class BeanEventBeanConfiguredCopyMethod implements EventBeanCopyMethod
         this.copyMethod = copyMethod;
     }
 
-    public EventBean copy(EventBean event)
+    public EventBean copy(EventBean theEvent)
     {
-        Object underlying = event.getUnderlying();
+        Object underlying = theEvent.getUnderlying();
         Object copied;
         try
         {

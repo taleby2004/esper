@@ -56,12 +56,12 @@ public class HistoricalTableLookupStrategy implements JoinExecTableLookupStrateg
         lookupEventsPerStream = new EventBean[1][numStreams];
     }
 
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
     {
         int currStream = cursor.getStream();
 
         // fill the current stream and the deep cursor events
-        lookupEventsPerStream[0][currStream] = event;
+        lookupEventsPerStream[0][currStream] = theEvent;
         recursiveFill(lookupEventsPerStream[0], cursor.getNode());
 
         // poll
@@ -72,7 +72,7 @@ public class HistoricalTableLookupStrategy implements JoinExecTableLookupStrateg
         {
             // Using the index, determine a subset of the whole indexed table to process, unless
             // the strategy is a full table scan
-            Iterator<EventBean> subsetIter = lookupStrategy.lookup(event, index, exprEvaluatorContext);
+            Iterator<EventBean> subsetIter = lookupStrategy.lookup(theEvent, index, exprEvaluatorContext);
 
             if (subsetIter != null)
             {

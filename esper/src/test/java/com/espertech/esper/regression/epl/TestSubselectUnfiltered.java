@@ -127,33 +127,33 @@ public class TestSubselectUnfiltered extends TestCase {
         // test no event, should return null
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(0));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(null, event.get("idS3"));
-        assertEquals(null, event.get("idS4"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(null, theEvent.get("idS3"));
+        assertEquals(null, theEvent.get("idS4"));
 
         // send one event
         epService.getEPRuntime().sendEvent(new SupportBean_S3(-1));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(1));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(-1, event.get("idS3"));
-        assertEquals(null, event.get("idS4"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(-1, theEvent.get("idS3"));
+        assertEquals(null, theEvent.get("idS4"));
 
         // send one event
         epService.getEPRuntime().sendEvent(new SupportBean_S4(-2));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(-1, event.get("idS3"));
-        assertEquals(-2, event.get("idS4"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(-1, theEvent.get("idS3"));
+        assertEquals(-2, theEvent.get("idS4"));
 
         // send second event
         epService.getEPRuntime().sendEvent(new SupportBean_S4(-2));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(3));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(-1, event.get("idS3"));
-        assertEquals(null, event.get("idS4"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(-1, theEvent.get("idS3"));
+        assertEquals(null, theEvent.get("idS4"));
 
         epService.getEPRuntime().sendEvent(new SupportBean_S3(-2));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3));
@@ -364,14 +364,14 @@ public class TestSubselectUnfiltered extends TestCase {
 
         // test no event, should return null
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(null, event.get("value"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(null, theEvent.get("value"));
 
         // test one event
         epService.getEPRuntime().sendEvent(new SupportBean_S1(-1, "a", "b"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("ab", event.get("value"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("ab", theEvent.get("value"));
     }
 
     public void testMultiColumnSelect()
@@ -388,29 +388,29 @@ public class TestSubselectUnfiltered extends TestCase {
 
         // test no event, should return null
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(null, event.get("idS1_0"));
-        assertEquals(null, event.get("idS1_1"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(null, theEvent.get("idS1_0"));
+        assertEquals(null, theEvent.get("idS1_1"));
 
         // test one event
         epService.getEPRuntime().sendEvent(new SupportBean_S1(10));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(11, event.get("idS1_0"));
-        assertEquals(12, event.get("idS1_1"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(11, theEvent.get("idS1_0"));
+        assertEquals(12, theEvent.get("idS1_1"));
 
         // resend event
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(11, event.get("idS1_0"));
-        assertEquals(12, event.get("idS1_1"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(11, theEvent.get("idS1_0"));
+        assertEquals(12, theEvent.get("idS1_1"));
 
         // test second event
         epService.getEPRuntime().sendEvent(new SupportBean_S1(999));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(3));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(1000, event.get("idS1_0"));
-        assertEquals(1001, event.get("idS1_1"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(1000, theEvent.get("idS1_0"));
+        assertEquals(1001, theEvent.get("idS1_1"));
     }
 
     private void runAssertSingleRowUnfiltered(String stmtText, String columnName)

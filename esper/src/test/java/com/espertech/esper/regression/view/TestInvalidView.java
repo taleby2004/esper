@@ -40,15 +40,15 @@ public class TestInvalidView extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean");
         epService.getEPRuntime().sendEvent(new SupportBean());
-        EventBean event = stmt.iterator().next();
+        EventBean theEvent = stmt.iterator().next();
 
-        String exceptionText = getSyntaxExceptionProperty("", event);
+        String exceptionText = getSyntaxExceptionProperty("", theEvent);
         assertEquals("Unexpected end of input []", exceptionText);
 
-        exceptionText = getSyntaxExceptionProperty("-", event);
+        exceptionText = getSyntaxExceptionProperty("-", theEvent);
         assertEquals("Incorrect syntax near '-' [-]", exceptionText);
 
-        exceptionText = getSyntaxExceptionProperty("a[]", event);
+        exceptionText = getSyntaxExceptionProperty("a[]", theEvent);
         assertEquals("Incorrect syntax near ']' expecting a numeric literal but found a right angle bracket ']' at line 1 column 2 [a[]]", exceptionText);
     }
 
@@ -89,8 +89,8 @@ public class TestInvalidView extends TestCase
         exceptionText = getStatementExceptionView("select s0.intPrimitv from " + SupportBean.class.getName() + " as s0");
         assertEquals("Error starting statement: Property named 'intPrimitv' is not valid in stream 's0' (did you mean 'intPrimitive'?) [select s0.intPrimitv from com.espertech.esper.support.bean.SupportBean as s0]", exceptionText);
         
-        exceptionText = getStatementExceptionView("select strring from " + SupportBean.class.getName());
-        assertEquals("Error starting statement: Property named 'strring' is not valid in any stream (did you mean 'string'?) [select strring from com.espertech.esper.support.bean.SupportBean]", exceptionText);
+        exceptionText = getStatementExceptionView("select theStrring from " + SupportBean.class.getName());
+        assertEquals("Error starting statement: Property named 'theStrring' is not valid in any stream (did you mean 'theString'?) [select theStrring from com.espertech.esper.support.bean.SupportBean]", exceptionText);
 
         // aggregation in where clause known
         exceptionText = getStatementExceptionView("select * from " + SupportBean.class.getName() + " where sum(intPrimitive) > 10");
@@ -113,8 +113,8 @@ public class TestInvalidView extends TestCase
         assertEquals("Error starting statement: Error in view 'win:length', Length window view requires a single integer-type parameter [select * from com.espertech.esper.support.bean.SupportBean_N.win:length('s')]", exceptionText);
 
         // where-clause relational op has invalid type
-        exceptionText = getStatementExceptionView("select * from " + EVENT_ALLTYPES + ".win:length(1) where string > 5");
-        assertEquals("Error validating expression: Implicit conversion from datatype 'String' to numeric is not allowed [select * from com.espertech.esper.support.bean.SupportBean.win:length(1) where string > 5]", exceptionText);
+        exceptionText = getStatementExceptionView("select * from " + EVENT_ALLTYPES + ".win:length(1) where theString > 5");
+        assertEquals("Error validating expression: Implicit conversion from datatype 'String' to numeric is not allowed [select * from com.espertech.esper.support.bean.SupportBean.win:length(1) where theString > 5]", exceptionText);
 
         // where-clause has aggregation function
         exceptionText = getStatementExceptionView("select * from " + EVENT_ALLTYPES + ".win:length(1) where sum(intPrimitive) > 5");
@@ -185,8 +185,8 @@ public class TestInvalidView extends TestCase
 
         // invalid outer join - same properties
         exceptionText = getStatementExceptionView("select * from " + EVENT_NUM + ".win:length(1) as aStr " +
-                "left outer join " + EVENT_ALLTYPES + ".win:length(1) on string=string");
-        assertEquals("Error validating expression: Outer join ON-clause cannot refer to properties of the same stream [select * from com.espertech.esper.support.bean.SupportBean_N.win:length(1) as aStr left outer join com.espertech.esper.support.bean.SupportBean.win:length(1) on string=string]", exceptionText);
+                "left outer join " + EVENT_ALLTYPES + ".win:length(1) on theString=theString");
+        assertEquals("Error validating expression: Outer join ON-clause cannot refer to properties of the same stream [select * from com.espertech.esper.support.bean.SupportBean_N.win:length(1) as aStr left outer join com.espertech.esper.support.bean.SupportBean.win:length(1) on theString=theString]", exceptionText);
 
         // invalid order by
         exceptionText = getStatementExceptionView("select * from " + EVENT_NUM + ".win:length(1) as aStr order by X");
@@ -205,8 +205,8 @@ public class TestInvalidView extends TestCase
         assertEquals("Error starting statement: Number of supplied values in the select clause does not match insert-into clause [insert into Google (a, b, c) select boolBoxed, boolPrimitive from com.espertech.esper.support.bean.SupportBean_N.win:length(1) as aStr]", exceptionText);
 
         // mismatched type on coalesce columns
-        exceptionText = getStatementExceptionView("select coalesce(boolBoxed, string) from " + SupportBean.class.getName() + ".win:length(1) as aStr");
-        assertEquals("Error starting statement: Implicit conversion not allowed: Cannot coerce to Boolean type java.lang.String [select coalesce(boolBoxed, string) from com.espertech.esper.support.bean.SupportBean.win:length(1) as aStr]", exceptionText);
+        exceptionText = getStatementExceptionView("select coalesce(boolBoxed, theString) from " + SupportBean.class.getName() + ".win:length(1) as aStr");
+        assertEquals("Error starting statement: Implicit conversion not allowed: Cannot coerce to Boolean type java.lang.String [select coalesce(boolBoxed, theString) from com.espertech.esper.support.bean.SupportBean.win:length(1) as aStr]", exceptionText);
 
         // mismatched case compare type
         exceptionText = getStatementExceptionView("select case boolPrimitive when 1 then true end from " + SupportBean.class.getName() + ".win:length(1) as aStr");
@@ -235,7 +235,7 @@ public class TestInvalidView extends TestCase
         String eventClass = SupportBean.class.getName();
 
         tryInvalid("select * from " + eventClass + "(dummy='a').win:length(3)");
-        tryValid("select * from " + eventClass + "(string='a').win:length(3)");
+        tryValid("select * from " + eventClass + "(theString='a').win:length(3)");
         tryInvalid("select * from " + eventClass + ".dummy:length(3)");
 
         tryInvalid("select djdjdj from " + eventClass + ".win:length(3)");
@@ -287,12 +287,12 @@ public class TestInvalidView extends TestCase
         return exceptionText;
     }
 
-    private String getSyntaxExceptionProperty(String expression, EventBean event)
+    private String getSyntaxExceptionProperty(String expression, EventBean theEvent)
     {
         String exceptionText = null;
         try
         {
-            event.get(expression);
+            theEvent.get(expression);
             fail();
         }
         catch (PropertyAccessException ex)

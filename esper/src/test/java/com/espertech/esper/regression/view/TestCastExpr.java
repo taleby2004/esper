@@ -40,10 +40,10 @@ public class TestCastExpr extends TestCase
 
     public void testCastSimple()
     {
-        String stmtText = "select cast(string as string) as t0, " +
+        String stmtText = "select cast(theString as string) as t0, " +
                           " cast(intBoxed, int) as t1, " +
                           " cast(floatBoxed, java.lang.Float) as t2, " +
-                          " cast(string, java.lang.String) as t3, " +
+                          " cast(theString, java.lang.String) as t3, " +
                           " cast(intPrimitive, java.lang.Integer) as t4, " +
                           " cast(intPrimitive, long) as t5, " +
                           " cast(intPrimitive, java.lang.Number) as t6, " +
@@ -66,25 +66,25 @@ public class TestCastExpr extends TestCase
         bean.setFloatBoxed(9.5f);
         bean.setIntBoxed(3);
         epService.getEPRuntime().sendEvent(bean);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {"abc", 3, 9.5f, "abc", 100, 100L, 100, 9l});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {"abc", 3, 9.5f, "abc", 100, 100L, 100, 9l});
 
         bean = new SupportBean(null, 100);
         bean.setFloatBoxed(null);
         bean.setIntBoxed(null);
         epService.getEPRuntime().sendEvent(bean);
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {null, null, null, null, 100, 100L, 100, null});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[]{null, null, null, null, 100, 100L, 100, null});
         bean = new SupportBean(null, 100);
         bean.setFloatBoxed(null);
         bean.setIntBoxed(null);
         epService.getEPRuntime().sendEvent(bean);
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {null, null, null, null, 100, 100L, 100, null});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {null, null, null, null, 100, 100L, 100, null});
 
         // test cast with chained
         selectTestCase.destroy();
-        stmtText = "select cast(one as " + SupportBean.class.getName() + ").getString() as t0" +
+        stmtText = "select cast(one as " + SupportBean.class.getName() + ").getTheString() as t0" +
                           " from " + SupportBeanObject.class.getName();
         selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
@@ -95,7 +95,7 @@ public class TestCastExpr extends TestCase
 
     public void testCastAsParse()
     {
-        String stmtText = "select cast(string, int) as t0 from " + SupportBean.class.getName();
+        String stmtText = "select cast(theString, int) as t0 from " + SupportBean.class.getName();
         EPStatement selectTestCase = epService.getEPAdministrator().createEPL(stmtText);
         selectTestCase.addListener(listener);
 
@@ -198,28 +198,28 @@ public class TestCastExpr extends TestCase
 
         Object bean = new SupportBeanDynRoot("abc");
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(bean));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {bean, null, null, null, null, null, null, null});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {bean, null, null, null, null, null, null, null});
 
         bean = new ISupportDImpl("", "", "");
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(bean));
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {null, null, null, null, null, bean, null, null});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[]{null, null, null, null, null, bean, null, null});
 
         bean = new ISupportBCImpl("", "", "");
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(bean));
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {null, null, bean, null, bean, null, null, null});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {null, null, bean, null, bean, null, null, null});
 
         bean = new ISupportAImplSuperGImplPlus();
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(bean));
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {null, bean, bean, null, bean, null, bean, bean});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[]{null, bean, bean, null, bean, null, bean, bean});
 
         bean = new ISupportBaseABImpl("");
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(bean));
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {null, null, bean, bean, null, null, null, null});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {null, null, bean, bean, null, null, null, null});
     }
 
     public void testCastBoolean()
@@ -240,22 +240,22 @@ public class TestCastExpr extends TestCase
         bean.setBoolPrimitive(true);
         bean.setBoolBoxed(true);
         epService.getEPRuntime().sendEvent(bean);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {true, true, "true"});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {true, true, "true"});
 
         bean = new SupportBean(null, 100);
         bean.setBoolPrimitive(false);
         bean.setBoolBoxed(false);
         epService.getEPRuntime().sendEvent(bean);
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {false, false, "false"});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[]{false, false, "false"});
 
         bean = new SupportBean(null, 100);
         bean.setBoolPrimitive(true);
         bean.setBoolBoxed(null);
         epService.getEPRuntime().sendEvent(bean);
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {true, null, null});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {true, null, null});
     }
 
     public void testCastMapStringInt()
@@ -315,11 +315,11 @@ public class TestCastExpr extends TestCase
         assertEquals(11L, row.get("longTwo"));
     }
 
-    private void assertResults(EventBean event, Object[] result)
+    private void assertResults(EventBean theEvent, Object[] result)
     {
         for (int i = 0; i < result.length; i++)
         {
-            assertEquals("failed for index " + i, result[i], event.get("t" + i));
+            assertEquals("failed for index " + i, result[i], theEvent.get("t" + i));
         }
     }
 }

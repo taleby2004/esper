@@ -41,14 +41,14 @@ public class InSetOfValuesEventProp implements FilterSpecParamInValue
 
     public final Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext)
     {
-        EventBean event = matchedEvents.getMatchingEvent(resultEventAsName);
-        if (event == null)
+        EventBean theEvent = matchedEvents.getMatchingEventByTag(resultEventAsName);
+        if (theEvent == null)
         {
             throw new IllegalStateException("Matching event named " +
                     '\'' + resultEventAsName + "' not found in event result set");
         }
 
-        Object value = event.get(resultEventProperty);
+        Object value = theEvent.get(resultEventProperty);
 
         // Coerce if necessary
         if (isMustCoerce)

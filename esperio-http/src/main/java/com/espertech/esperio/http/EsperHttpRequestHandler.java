@@ -79,8 +79,8 @@ public class EsperHttpRequestHandler implements HttpRequestHandler {
             values[i] = cacheEntry.getParsers()[i].parse(value);
         }
 
-        EventBean event = cacheEntry.getEventBeanManufacturer().make(values);
-        engineSPI.getEPRuntime().sendEvent(event);
+        EventBean theEvent = cacheEntry.getEventBeanManufacturer().make(values);
+        engineSPI.getEPRuntime().sendEvent(theEvent);
     }
 
     private EsperHttpRequestCacheEntry makeCacheEntry(String eventTypeName) {
@@ -135,15 +135,15 @@ public class EsperHttpRequestHandler implements HttpRequestHandler {
         if (start == -1) {
             return new HashMap<String, String>();
         }
-        String params = search.substring(start + 1, search.length());
-        return splitParams(params);
+        String parameters = search.substring(start + 1, search.length());
+        return splitParams(parameters);
     }
 
     private HashMap<String, String> splitParams(String search) throws UnsupportedEncodingException {
         HashMap<String, String> map = new HashMap<String, String>();
-        String params[] = search.split("&");
+        String parameters[] = search.split("&");
 
-        for (String param : params) {
+        for (String param : parameters) {
             String temp[] = param.split("=");
             if (temp.length != 2) {
                 continue;

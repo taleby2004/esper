@@ -9,10 +9,10 @@
 package com.espertech.esper.event.map;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.event.bean.BeanEventType;
+import com.espertech.esper.event.BaseNestableEventUtil;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.bean.BeanEventType;
 
 import java.util.Map;
 
@@ -50,15 +50,7 @@ public class MapEntryPropertyGetter implements MapEventPropertyGetter
 
     public Object get(EventBean obj)
     {
-        // The underlying is expected to be a map
-        if (!(obj.getUnderlying() instanceof Map))
-        {
-            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                    "the underlying data object is not of type java.lang.Map");
-        }
-
-        Map map = (Map) obj.getUnderlying();
-        return getMap(map);
+        return getMap(BaseNestableEventUtil.checkedCastUnderlyingMap(obj));
     }
 
     public boolean isExistsProperty(EventBean eventBean)
@@ -72,16 +64,7 @@ public class MapEntryPropertyGetter implements MapEventPropertyGetter
         {
             return null;
         }
-
         Object result = get(eventBean);
-        if (result == null)
-        {
-            return null;
-        }
-        if (result.getClass().isArray())
-        {
-            return null;
-        }
-        return eventAdapterService.adapterForTypedBean(result, eventType);
+        return BaseNestableEventUtil.getFragmentPojo(result, eventType, eventAdapterService);
     }
 }

@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -24,7 +23,7 @@ import java.util.Map;
 public final class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode implements Evaluator
 {
     private final EvalEveryDistinctNode everyNode;
-    private final Map<EvalStateNode, LinkedHashMap<MultiKeyUntyped, Long>> spawnedNodes;
+    private final Map<EvalStateNode, LinkedHashMap<Object, Long>> spawnedNodes;
     private final MatchedEventMap beginState;
 
     /**
@@ -40,11 +39,11 @@ public final class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode imp
         super(parentNode, null);
 
         this.everyNode = everyNode;
-        this.spawnedNodes = new LinkedHashMap<EvalStateNode, LinkedHashMap<MultiKeyUntyped, Long>>();
+        this.spawnedNodes = new LinkedHashMap<EvalStateNode, LinkedHashMap<Object, Long>>();
         this.beginState = beginState.shallowCopy();
 
         EvalStateNode child = everyNode.getChildNode().newState(this, beginState, null);
-        spawnedNodes.put(child, new LinkedHashMap<MultiKeyUntyped, Long>());
+        spawnedNodes.put(child, new LinkedHashMap<Object, Long>());
     }
 
     @Override
@@ -97,7 +96,7 @@ public final class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode imp
         }
         else
         {
-            spawnedNodes.put(spawned, new LinkedHashMap<MultiKeyUntyped, Long>());
+            spawnedNodes.put(spawned, new LinkedHashMap<Object, Long>());
             spawned.setParentEvaluator(this);
         }
     }
@@ -105,16 +104,16 @@ public final class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode imp
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
     {
         // determine if this evaluation has been seen before from the same node
-        MultiKeyUntyped matchEventKey = PatternExpressionUtil.getKeys(matchEvent, everyNode);
+        Object matchEventKey = PatternExpressionUtil.getKeys(matchEvent, everyNode);
         boolean haveSeenThis = false;
-        LinkedHashMap<MultiKeyUntyped, Long> keysFromNode = spawnedNodes.get(fromNode);
+        LinkedHashMap<Object, Long> keysFromNode = spawnedNodes.get(fromNode);
         if (keysFromNode != null)
         {
             // Clean out old keys
-            Iterator<Map.Entry<MultiKeyUntyped, Long>> it = keysFromNode.entrySet().iterator();
+            Iterator<Map.Entry<Object, Long>> it = keysFromNode.entrySet().iterator();
             long currentTime = everyNode.getContext().getPatternContext().getTimeProvider().getTime();
             for (;it.hasNext();) {
-                Map.Entry<MultiKeyUntyped, Long> entry = it.next();
+                Map.Entry<Object, Long> entry = it.next();
                 if (currentTime - entry.getValue() >= everyNode.getFactoryNode().getMsecToExpire()) {
                     it.remove();
                 }
@@ -159,7 +158,7 @@ public final class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode imp
             }
             else
             {
-                LinkedHashMap<MultiKeyUntyped, Long> keyset = new LinkedHashMap<MultiKeyUntyped, Long>();
+                LinkedHashMap<Object, Long> keyset = new LinkedHashMap<Object, Long>();
                 if (keysFromNode != null)
                 {
                     keyset.putAll(keysFromNode);

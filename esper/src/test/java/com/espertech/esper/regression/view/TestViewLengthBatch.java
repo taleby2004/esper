@@ -173,8 +173,8 @@ public class TestViewLengthBatch extends TestCase
         }
     }
 
-    private void sendEvent(SupportBean event)
+    private void sendEvent(SupportBean theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

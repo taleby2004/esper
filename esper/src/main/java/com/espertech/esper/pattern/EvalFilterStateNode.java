@@ -73,16 +73,16 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
         stopFiltering();
     }
 
-    private void evaluateTrue(MatchedEventMap event, boolean isQuitted)
+    private void evaluateTrue(MatchedEventMap theEvent, boolean isQuitted)
     {
-        this.getParentEvaluator().evaluateTrue(event, this, isQuitted);
+        this.getParentEvaluator().evaluateTrue(theEvent, this, isQuitted);
     }
 
     public EvalFilterNode getEvalFilterNode() {
         return evalFilterNode;
     }
 
-    public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+    public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
     {
         if (!isStarted)
         {
@@ -93,7 +93,7 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
 
         if (evalFilterNode.getFactoryNode().getFilterSpec().getOptionalPropertyEvaluator() != null)
         {
-            EventBean[] propertyEvents = evalFilterNode.getFactoryNode().getFilterSpec().getOptionalPropertyEvaluator().getProperty(event, evalFilterNode.getContext().getAgentInstanceContext());
+            EventBean[] propertyEvents = evalFilterNode.getFactoryNode().getFilterSpec().getOptionalPropertyEvaluator().getProperty(theEvent, evalFilterNode.getContext().getAgentInstanceContext());
             if (propertyEvents == null)
             {
                 return; // no results, ignore match
@@ -101,7 +101,7 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
             // Add event itself to the match event structure if a tag was provided
             if (evalFilterNode.getFactoryNode().getEventAsName() != null)
             {
-                passUp.add(evalFilterNode.getFactoryNode().getEventAsName(), propertyEvents);
+                passUp.add(evalFilterNode.getFactoryNode().getEventAsTagNumber(), propertyEvents);
             }
         }
         else
@@ -109,7 +109,7 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
             // Add event itself to the match event structure if a tag was provided
             if (evalFilterNode.getFactoryNode().getEventAsName() != null)
             {
-                passUp.add(evalFilterNode.getFactoryNode().getEventAsName(), event);
+                passUp.add(evalFilterNode.getFactoryNode().getEventAsTagNumber(), theEvent);
             }
         }
 

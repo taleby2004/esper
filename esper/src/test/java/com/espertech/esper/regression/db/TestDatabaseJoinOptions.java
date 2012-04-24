@@ -35,7 +35,7 @@ public class TestDatabaseJoinOptions extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
-        String sql = "select myint from mytesttable where ${string} = myvarchar'" +
+        String sql = "select myint from mytesttable where ${theString} = myvarchar'" +
                 "metadatasql 'select myint from mytesttable'";
         String stmtText = "select MYINT from " +
                 " sql:MyDB ['" + sql + "] as s0," +
@@ -161,10 +161,10 @@ public class TestDatabaseJoinOptions extends TestCase
         return configuration;
     }
 
-    private void sendSupportBeanEvent(String string)
+    private void sendSupportBeanEvent(String theString)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         epService.getEPRuntime().sendEvent(bean);
     }
 

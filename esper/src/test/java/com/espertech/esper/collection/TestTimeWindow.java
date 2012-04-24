@@ -12,7 +12,6 @@
 package com.espertech.esper.collection;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import junit.framework.TestCase;
@@ -20,8 +19,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayDeque;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 
 public class TestTimeWindow extends TestCase
 {
@@ -156,23 +153,6 @@ public class TestTimeWindow extends TestCase
         }
 
         log.info(".testTimeWindowPerformance Done");
-    }
-
-    public void testConcurrentIterator()
-    {
-        window.add(10000, beans[0]);
-        Iterator<EventBean> it = window.iterator();
-        window.add(10000, beans[1]);
-
-        try
-        {
-            EPAssertionUtil.assertEqualsExactOrder(new EventBean[]{beans[0], beans[1]}, it);
-            fail();
-        }
-        catch (ConcurrentModificationException ex)
-        {
-            // expected 
-        }
     }
 
     private EventBean createBean()

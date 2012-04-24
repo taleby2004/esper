@@ -26,6 +26,8 @@ import com.espertech.esper.view.EventStream;
 import com.espertech.esper.view.View;
 import junit.framework.TestCase;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.List;
 
 public class TestGroupByView extends TestCase
@@ -169,13 +171,13 @@ public class TestGroupByView extends TestCase
         mergeViewOne = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null);
         firstElementView_1.addView(mergeViewOne);
 
-        List<View> subViews = GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, agentInstanceContext);
+        Collection<View> subViews = GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, agentInstanceContext);
 
         assertTrue(subViews.size() == 1);
-        assertTrue(subViews.get(0) instanceof FirstElementView);
-        assertTrue(subViews.get(0) != firstElementView_1);
+        assertTrue(subViews.iterator().next() instanceof FirstElementView);
+        assertTrue(subViews.iterator().next() != firstElementView_1);
 
-        FirstElementView firstEleView = (FirstElementView) subViews.get(0);
+        FirstElementView firstEleView = (FirstElementView) subViews.iterator().next();
         assertEquals(1, firstEleView.getViews().size());
         assertTrue(firstEleView.getViews().get(0) instanceof AddPropertyValueView);
 

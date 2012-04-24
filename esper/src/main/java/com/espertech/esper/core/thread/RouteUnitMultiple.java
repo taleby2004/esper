@@ -28,7 +28,7 @@ public class RouteUnitMultiple implements RouteUnitRunnable
     private static final Log log = LogFactory.getLog(RouteUnitMultiple.class);
 
     private final EPRuntimeImpl epRuntime;
-    private final EventBean event;
+    private final EventBean theEvent;
     private ArrayDeque<FilterHandleCallback> callbackList;
     private EPStatementAgentInstanceHandle handle;
     private final long filterVersion;
@@ -37,15 +37,15 @@ public class RouteUnitMultiple implements RouteUnitRunnable
      * Ctor.
      * @param epRuntime runtime to process
      * @param callbackList callback list
-     * @param event event to pass
+     * @param theEvent event to pass
      * @param handle statement handle
      * @param filterVersion version of filter
      */
-    public RouteUnitMultiple(EPRuntimeImpl epRuntime, ArrayDeque<FilterHandleCallback> callbackList, EventBean event, EPStatementAgentInstanceHandle handle, long filterVersion)
+    public RouteUnitMultiple(EPRuntimeImpl epRuntime, ArrayDeque<FilterHandleCallback> callbackList, EventBean theEvent, EPStatementAgentInstanceHandle handle, long filterVersion)
     {
         this.epRuntime = epRuntime;
         this.callbackList = callbackList;
-        this.event = event;
+        this.theEvent = theEvent;
         this.handle = handle;
         this.filterVersion = filterVersion;
     }
@@ -54,7 +54,7 @@ public class RouteUnitMultiple implements RouteUnitRunnable
     {
         try
         {
-            epRuntime.processStatementFilterMultiple(handle, callbackList, event, filterVersion);
+            epRuntime.processStatementFilterMultiple(handle, callbackList, theEvent, filterVersion);
 
             epRuntime.dispatch();
 

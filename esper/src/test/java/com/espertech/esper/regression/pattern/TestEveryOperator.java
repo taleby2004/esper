@@ -123,8 +123,8 @@ public class TestEveryOperator extends TestCase implements SupportBeanConstants
 
     private void sendTimer(EPServiceProvider engine, long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = engine.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

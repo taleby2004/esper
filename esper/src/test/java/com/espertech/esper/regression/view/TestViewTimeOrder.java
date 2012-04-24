@@ -410,28 +410,28 @@ public class TestViewTimeOrder extends TestCase
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), new String[]{"id"}, new Object[][]{{"E1"}});
 
         sendEvent("E2", 21000);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("E2", event.get("id"));
-        assertEquals("E2", event.get("prevIdZero"));
-        assertEquals("E1", event.get("prevIdOne"));
-        assertEquals("E1", event.get("priorIdOne"));
-        assertEquals("E1", event.get("prevTailIdZero"));
-        assertEquals("E2", event.get("prevTailIdOne"));
-        assertEquals(2L, event.get("prevCountId"));
-        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("prevWindowId"), new Object[]{"E2", "E1"});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("E2", theEvent.get("id"));
+        assertEquals("E2", theEvent.get("prevIdZero"));
+        assertEquals("E1", theEvent.get("prevIdOne"));
+        assertEquals("E1", theEvent.get("priorIdOne"));
+        assertEquals("E1", theEvent.get("prevTailIdZero"));
+        assertEquals("E2", theEvent.get("prevTailIdOne"));
+        assertEquals(2L, theEvent.get("prevCountId"));
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) theEvent.get("prevWindowId"), new Object[]{"E2", "E1"});
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
                 new Object[][]{{"E2", "E2", "E1", "E1", "E1", "E2", 2L}, {"E1", "E2", "E1", null, "E1", "E2", 2L}});
 
         sendEvent("E3", 22000);
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("E3", event.get("id"));
-        assertEquals("E2", event.get("prevIdZero"));
-        assertEquals("E3", event.get("prevIdOne"));
-        assertEquals("E2", event.get("priorIdOne"));
-        assertEquals("E1", event.get("prevTailIdZero"));
-        assertEquals("E3", event.get("prevTailIdOne"));
-        assertEquals(3L, event.get("prevCountId"));
-        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("prevWindowId"), new Object[]{"E2", "E3", "E1"});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("E3", theEvent.get("id"));
+        assertEquals("E2", theEvent.get("prevIdZero"));
+        assertEquals("E3", theEvent.get("prevIdOne"));
+        assertEquals("E2", theEvent.get("priorIdOne"));
+        assertEquals("E1", theEvent.get("prevTailIdZero"));
+        assertEquals("E3", theEvent.get("prevTailIdOne"));
+        assertEquals(3L, theEvent.get("prevCountId"));
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) theEvent.get("prevWindowId"), new Object[]{"E2", "E3", "E1"});
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
                 new Object[][]{{"E2", "E2", "E3", "E1", "E1", "E3", 3L}, {"E3", "E2", "E3", "E2", "E1", "E3", 3L}, {"E1", "E2", "E3", null, "E1", "E3", 3L}});
 
@@ -439,15 +439,15 @@ public class TestViewTimeOrder extends TestCase
         assertNull(listener.getLastNewData());
         assertEquals(1, listener.getOldDataList().size());
         assertEquals(1, listener.getLastOldData().length);
-        event = listener.getLastOldData()[0];
-        assertEquals("E2", event.get("id"));
-        assertEquals(null, event.get("prevIdZero"));
-        assertEquals(null, event.get("prevIdOne"));
-        assertEquals("E1", event.get("priorIdOne"));
-        assertEquals(null, event.get("prevTailIdZero"));
-        assertEquals(null, event.get("prevTailIdOne"));
-        assertEquals(null, event.get("prevCountId"));
-        assertEquals(null, event.get("prevWindowId"));
+        theEvent = listener.getLastOldData()[0];
+        assertEquals("E2", theEvent.get("id"));
+        assertEquals(null, theEvent.get("prevIdZero"));
+        assertEquals(null, theEvent.get("prevIdOne"));
+        assertEquals("E1", theEvent.get("priorIdOne"));
+        assertEquals(null, theEvent.get("prevTailIdZero"));
+        assertEquals(null, theEvent.get("prevTailIdOne"));
+        assertEquals(null, theEvent.get("prevCountId"));
+        assertEquals(null, theEvent.get("prevWindowId"));
         listener.reset();
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields,
                 new Object[][]{{"E3", "E3", "E1", "E2", "E1", "E3", 2L}, {"E1", "E3", "E1", null, "E1", "E3", 2L}});
@@ -455,24 +455,24 @@ public class TestViewTimeOrder extends TestCase
 
     private SupportBeanTimestamp sendEvent(String id, String groupId, long timestamp)
     {
-        SupportBeanTimestamp event = new SupportBeanTimestamp(id, groupId, timestamp);
+        SupportBeanTimestamp theEvent = new SupportBeanTimestamp(id, groupId, timestamp);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
-        return event;
+        runtime.sendEvent(theEvent);
+        return theEvent;
     }
 
     private SupportBeanTimestamp sendEvent(String id, long timestamp)
     {
-        SupportBeanTimestamp event = new SupportBeanTimestamp(id, timestamp);
+        SupportBeanTimestamp theEvent = new SupportBeanTimestamp(id, timestamp);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
-        return event;
+        runtime.sendEvent(theEvent);
+        return theEvent;
     }
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

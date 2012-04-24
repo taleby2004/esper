@@ -14,7 +14,9 @@ import com.espertech.esper.core.context.util.ContextIteratorHandler;
 import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.event.MappedEventBean;
+import com.espertech.esper.filter.FilterFaultHandler;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecLookupable;
 import com.espertech.esper.filter.FilterValueSetParam;
@@ -22,7 +24,7 @@ import com.espertech.esper.type.NumberSetParameter;
 
 import java.util.*;
 
-public class ContextManagerImpl implements ContextManager, ContextControllerLifecycleCallback, ContextIteratorHandler {
+public class ContextManagerImpl implements ContextManager, ContextControllerLifecycleCallback, ContextIteratorHandler, FilterFaultHandler {
 
     private final String contextName;
     private final EPServicesContext servicesContext;
@@ -144,7 +146,11 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         }
 
         // save leaf
-        agentInstances.put(assignedContextId, new ContextControllerTreeAgentInstanceList(partitionKey, contextProperties, newInstances));
+        long filterVersion = servicesContext.getFilterService().getFiltersVersion();
+        agentInstances.put(assignedContextId, new ContextControllerTreeAgentInstanceList(filterVersion, partitionKey, contextProperties, newInstances));
+
+        // update the filter version for this handle
+        factory.getFactoryContext().getAgentInstanceContextCreate().getEpStatementAgentInstanceHandle().getStatementFilterVersion().setStmtFilterVersion(filterVersion);
 
         return new ContextNestedHandleImpl(assignedContextId);
     }
@@ -189,6 +195,10 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
 
     public Collection<Integer> getAgentInstanceIds(ContextPartitionSelector contextPartitionSelector) {
         return getAgentInstancesForSelector(contextPartitionSelector);
+    }
+
+    public synchronized void handleFilterFault(EventBean theEvent, long version) {
+        StatementAgentInstanceUtil.handleFilterFault(theEvent, version, servicesContext, agentInstances);
     }
 
     private void activate() {

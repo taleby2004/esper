@@ -14,6 +14,7 @@ package com.espertech.esper.filter;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.pattern.MatchedEventMapImpl;
+import com.espertech.esper.pattern.MatchedEventMapMeta;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.util.SimpleNumberCoercer;
@@ -40,16 +41,16 @@ public class TestFilterSpecParamEventProp extends TestCase
 
     public void testGetFilterValue()
     {
-        FilterSpecParamEventProp params = makeParam("asName", "intBoxed");
+        FilterSpecParamEventProp parameters = makeParam("asName", "intBoxed");
 
         SupportBean eventBean = new SupportBean();
         eventBean.setIntBoxed(1000);
-        EventBean event = SupportEventBeanFactory.createObject(eventBean);
+        EventBean theEvent = SupportEventBeanFactory.createObject(eventBean);
 
-        MatchedEventMap matchedEvents = new MatchedEventMapImpl();
-        matchedEvents.add("asName", event);
+        MatchedEventMap matchedEvents = new MatchedEventMapImpl(new MatchedEventMapMeta(new String[] {"asName"}, false));
+        matchedEvents.add(0, theEvent);
 
-        assertEquals(1000, params.getFilterValue(matchedEvents, null));
+        assertEquals(1000, parameters.getFilterValue(matchedEvents, null));
     }
 
     private FilterSpecParamEventProp makeParam(String eventAsName, String property)

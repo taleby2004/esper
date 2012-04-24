@@ -128,8 +128,8 @@ public class SupportExprNodeFactory
         e1.addChildNode(i1_1);
         e1.addChildNode(i1_2);
 
-        ExprIdentNode i2_1 = new ExprIdentNodeImpl("string", "s1");
-        ExprIdentNode i2_2 = new ExprIdentNodeImpl("string", "s0");
+        ExprIdentNode i2_1 = new ExprIdentNodeImpl("theString", "s1");
+        ExprIdentNode i2_2 = new ExprIdentNodeImpl("theString", "s0");
         e2.addChildNode(i2_1);
         e2.addChildNode(i2_2);
 
@@ -154,8 +154,8 @@ public class SupportExprNodeFactory
         equalNodes[0].addChildNode(i1_1);
         equalNodes[0].addChildNode(i1_2);
 
-        ExprIdentNode i2_1 = new ExprIdentNodeImpl("string", "s1");
-        ExprIdentNode i2_2 = new ExprIdentNodeImpl("string", "s0");
+        ExprIdentNode i2_1 = new ExprIdentNodeImpl("theString", "s1");
+        ExprIdentNode i2_2 = new ExprIdentNodeImpl("theString", "s0");
         equalNodes[1].addChildNode(i2_1);
         equalNodes[1].addChildNode(i2_2);
 
@@ -278,7 +278,7 @@ public class SupportExprNodeFactory
     {
         // Build :      s0.string regexp "[a-z][a-z]"  (with not)
         ExprRegexpNode node = new ExprRegexpNode(isNot);
-        node.addChildNode(makeIdentNode("string","s0"));
+        node.addChildNode(makeIdentNode("theString","s0"));
         node.addChildNode(new SupportExprNode("[a-z][a-z]"));
         validate3Stream(node);
         return node;
@@ -288,7 +288,7 @@ public class SupportExprNodeFactory
     {
         // Build :      s0.string like "%abc__"  (with or witout escape)
         ExprLikeNode node = new ExprLikeNode(isNot);
-        node.addChildNode(makeIdentNode("string","s0"));
+        node.addChildNode(makeIdentNode("theString","s0"));
         node.addChildNode(new SupportExprNode("%abc__"));
         if (optionalEscape != null)
         {

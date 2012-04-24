@@ -10,9 +10,8 @@ package com.espertech.esper.event.bean;
 
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.bean.DynamicPropertyDescriptor;
+import com.espertech.esper.event.vaevent.PropertyUtility;
 
-import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -23,7 +22,7 @@ import java.util.Map;
 public class DynamicMappedPropertyGetter extends DynamicPropertyGetterBase
 {
     private final String getterMethodName;
-    private final Object[] params;
+    private final Object[] parameters;
 
     /**
      * Ctor.
@@ -35,7 +34,7 @@ public class DynamicMappedPropertyGetter extends DynamicPropertyGetterBase
     {
         super(eventAdapterService);
         getterMethodName = PropertyHelper.getGetterMethodName(fieldName);
-        this.params = new Object[] {key};
+        this.parameters = new Object[] {key};
     }
 
     public Method determineMethod(Class clazz) throws PropertyAccessException
@@ -70,7 +69,7 @@ public class DynamicMappedPropertyGetter extends DynamicPropertyGetterBase
         {
             if (descriptor.isHasParameters())
             {
-                return descriptor.getMethod().invoke(underlying, params);
+                return descriptor.getMethod().invoke(underlying, parameters);
             }
             else
             {
@@ -78,22 +77,22 @@ public class DynamicMappedPropertyGetter extends DynamicPropertyGetterBase
                 if ((result instanceof Map) && (result != null))
                 {
                     Map map = (Map) result;
-                    return map.get(params[0]);
+                    return map.get(parameters[0]);
                 }
                 return null;
             }
         }
         catch (ClassCastException e)
         {
-            throw new PropertyAccessException("Mismatched getter instance to event bean type");
+            throw PropertyUtility.getMismatchException(descriptor.getMethod().getJavaMethod(), underlying, e);
         }
         catch (InvocationTargetException e)
         {
-            throw new PropertyAccessException(e);
+            throw PropertyUtility.getInvocationTargetException(descriptor.getMethod().getJavaMethod(), e);
         }
         catch (IllegalArgumentException e)
         {
-            throw new PropertyAccessException(e);
+            throw PropertyUtility.getIllegalArgumentException(descriptor.getMethod().getJavaMethod(), e);
         }
     }
 }

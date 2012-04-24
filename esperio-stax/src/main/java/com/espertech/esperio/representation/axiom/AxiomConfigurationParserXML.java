@@ -32,11 +32,11 @@ public class AxiomConfigurationParserXML
 {
     /**
      * Parses the configuration XML.
-     * @param string xml to parse
+     * @param theString xml to parse
      * @return parsed configuration
      * @throws EPException if the parse operation failed
      */
-    protected static ConfigurationEventTypeAxiom parse(String string) throws EPException
+    protected static ConfigurationEventTypeAxiom parse(String theString) throws EPException
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder;
@@ -46,7 +46,7 @@ public class AxiomConfigurationParserXML
         try
         {
             builder = factory.newDocumentBuilder();
-            document = builder.parse(new InputSource(new StringReader(string)));
+            document = builder.parse(new InputSource(new StringReader(theString)));
         }
         catch (ParserConfigurationException ex)
         {

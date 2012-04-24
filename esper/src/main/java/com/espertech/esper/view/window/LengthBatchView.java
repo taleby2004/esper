@@ -18,9 +18,9 @@ import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch when a maximum number of events has
@@ -45,8 +45,8 @@ public final class LengthBatchView extends ViewSupport implements CloneableView
     private final ViewUpdatedCollection viewUpdatedCollection;
 
     // Current running windows
-    private LinkedList<EventBean> lastBatch = null;
-    private LinkedList<EventBean> currentBatch = new LinkedList<EventBean>();
+    private ArrayDeque<EventBean> lastBatch = null;
+    private ArrayDeque<EventBean> currentBatch = new ArrayDeque<EventBean>();
 
     /**
      * Constructor.
@@ -144,7 +144,7 @@ public final class LengthBatchView extends ViewSupport implements CloneableView
         }
 
         lastBatch = currentBatch;
-        currentBatch = new LinkedList<EventBean>();
+        currentBatch = new ArrayDeque<EventBean>();
     }
 
     /**

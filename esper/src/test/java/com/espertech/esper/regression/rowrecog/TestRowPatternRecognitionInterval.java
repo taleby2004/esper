@@ -36,12 +36,12 @@ public class TestRowPatternRecognitionInterval extends TestCase {
         sendTimer(0, epService);
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                " measures A.string as a, B[0].string as b0, B[1].string as b1, last(B.string) as lastb" +
+                " measures A.theString as a, B[0].theString as b0, B[1].theString as b1, last(B.theString) as lastb" +
                 " pattern (A B*)" +
                 " interval 10 seconds" +
                 " define" +
-                " A as A.string like \"A%\"," +
-                " B as B.string like \"B%\"" +
+                " A as A.theString like \"A%\"," +
+                " B as B.theString like \"B%\"" +
                 ") order by a, b0, b1, lastb";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -124,12 +124,12 @@ public class TestRowPatternRecognitionInterval extends TestCase {
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
                 "  partition by cat " +
-                "  measures A.string as a, B[0].string as b0, B[1].string as b1, last(B.string) as lastb" +
+                "  measures A.theString as a, B[0].theString as b0, B[1].theString as b1, last(B.theString) as lastb" +
                 "  pattern (A B*) " +
                 "  interval 10 seconds " +
                 "  define " +
-                "    A as A.string like 'A%'," +
-                "    B as B.string like 'B%'" +
+                "    A as A.theString like 'A%'," +
+                "    B as B.theString like 'B%'" +
                 ") order by a, b0, b1, lastb";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -182,12 +182,12 @@ public class TestRowPatternRecognitionInterval extends TestCase {
         String[] fields = "a,b0,b1,lastb".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a, B[0].string as b0, B[1].string as b1, last(B.string) as lastb" +
+                "  measures A.theString as a, B[0].theString as b0, B[1].theString as b1, last(B.theString) as lastb" +
                 "  pattern (A B*) " +
                 "  interval 10 seconds " +
                 "  define " +
-                "    A as A.string like 'A%'," +
-                "    B as B.string like 'B%'" +
+                "    A as A.theString like 'A%'," +
+                "    B as B.theString like 'B%'" +
                 ") order by a, b0, b1, lastb";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -237,8 +237,8 @@ public class TestRowPatternRecognitionInterval extends TestCase {
 
     private void sendTimer(long time, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

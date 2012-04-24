@@ -15,5 +15,5 @@ package com.espertech.esper.example.terminal.jse.listener;
  */
 public interface ComplexEventListener {
 
-    public void onComplexEvent(String event);
+    public void onComplexEvent(String theEvent);
 }

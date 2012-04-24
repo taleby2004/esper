@@ -235,7 +235,7 @@ public class TestMapEventNested extends TestCase
         }
         catch (ConfigurationException ex)
         {
-            assertEquals("Map supertype by name 'doodle' could not be found",ex.getMessage());
+            assertEquals("Supertype by name 'doodle' could not be found",ex.getMessage());
         }
     }
 
@@ -408,7 +408,7 @@ public class TestMapEventNested extends TestCase
         tryInvalid(epService, invalid, "com.espertech.esper.support.bean.SupportBean cannot be cast to java.lang.String");
 
         invalid = makeMap(new Object[][] {{"abc", new SupportBean()} });
-        tryInvalid(epService, invalid, "Nestable map type configuration encountered an unexpected property type of 'SupportBean' for property 'abc', expected java.lang.Class or java.util.Map");
+        tryInvalid(epService, invalid, "Nestable type configuration encountered an unexpected property type of 'SupportBean' for property 'abc', expected java.lang.Class or java.util.Map or the name of a previously-declared Map or ObjectArray type");
     }
 
     public void testArrayProperty()
@@ -425,8 +425,8 @@ public class TestMapEventNested extends TestCase
 
         int[] p0 = new int[] {1, 2, 3};
         SupportBean[] beans = new SupportBean[] {new SupportBean("e1", 5), new SupportBean("e2", 6)};
-        Map<String, Object> event = makeMap(new Object[][] {{"p0", p0}, {"p1", beans}});
-        epService.getEPRuntime().sendEvent(event, "MyArrayMap");
+        Map<String, Object> theEvent = makeMap(new Object[][] {{"p0", p0}, {"p1", beans}});
+        epService.getEPRuntime().sendEvent(theEvent, "MyArrayMap");
 
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a,b,c,d,e".split(","), new Object[]{1, 2, 5, beans[1], p0});
         assertEquals(int.class, stmt.getEventType().getPropertyType("a"));
@@ -443,7 +443,7 @@ public class TestMapEventNested extends TestCase
         stmt = epService.getEPAdministrator().createEPL("select outer.p0[0] as a, outer.p0[1] as b, outer.p1[0].intPrimitive as c, outer.p1[1] as d, outer.p0 as e from MyArrayMapOuter");
         stmt.addListener(listener);
 
-        Map<String, Object> eventOuter = makeMap(new Object[][] {{"outer", event}});
+        Map<String, Object> eventOuter = makeMap(new Object[][] {{"outer", theEvent}});
         epService.getEPRuntime().sendEvent(eventOuter, "MyArrayMapOuter");
 
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a,b,c,d".split(","), new Object[]{1, 2, 5, beans[1]});
@@ -468,8 +468,8 @@ public class TestMapEventNested extends TestCase
 
         Map<String, Object> eventVal = new HashMap<String, Object>();
         eventVal.put("k1", "v1");
-        Map<String, Object> event = makeMap(new Object[][] {{"p0", eventVal}});
-        epService.getEPRuntime().sendEvent(event, "MyMappedPropertyMap");
+        Map<String, Object> theEvent = makeMap(new Object[][] {{"p0", eventVal}});
+        epService.getEPRuntime().sendEvent(theEvent, "MyMappedPropertyMap");
 
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a".split(","), new Object[]{"v1"});
         assertEquals(Object.class, stmt.getEventType().getPropertyType("a"));
@@ -482,7 +482,7 @@ public class TestMapEventNested extends TestCase
         stmt = epService.getEPAdministrator().createEPL("select outer.p0('k1') as a from MyMappedPropertyMapOuter");
         stmt.addListener(listener);
 
-        Map<String, Object> eventOuter = makeMap(new Object[][] {{"outer", event}});
+        Map<String, Object> eventOuter = makeMap(new Object[][] {{"outer", theEvent}});
         epService.getEPRuntime().sendEvent(eventOuter, "MyMappedPropertyMapOuter");
 
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a".split(","), new Object[]{"v1"});
@@ -526,8 +526,8 @@ public class TestMapEventNested extends TestCase
         Map<String, Object> n0_21 = makeMap(new Object[][] {{"n0", 2}});
         Map<String, Object> n0_22 = makeMap(new Object[][] {{"n0", 3}});
         Map[] n0_2 = new Map[] {n0_21, n0_22};
-        Map<String, Object> event = makeMap(new Object[][] {{"p0", n0_1}, {"p1", n0_2 }});
-        Map<String, Object> eventOuter = makeMap(new Object[][] {{"outer", event}});
+        Map<String, Object> theEvent = makeMap(new Object[][] {{"p0", n0_1}, {"p1", n0_2 }});
+        Map<String, Object> eventOuter = makeMap(new Object[][] {{"outer", theEvent}});
         epService.getEPRuntime().sendEvent(eventOuter, "MyArrayMapOuter");
 
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a,b,c,d,e".split(","), new Object[]{1, 2, 3, n0_1, n0_2});
@@ -566,8 +566,8 @@ public class TestMapEventNested extends TestCase
         Map<String, Object> n0_21 = makeMap(new Object[][] {{"n0", 2}});
         Map<String, Object> n0_22 = makeMap(new Object[][] {{"n0", 3}});
         Map[] n0_2 = new Map[] {n0_21, n0_22};
-        Map<String, Object> event = makeMap(new Object[][] {{"p0", n0_1}, {"p1", n0_2 }});
-        epService.getEPRuntime().sendEvent(event, "MyMapWithAMap");
+        Map<String, Object> theEvent = makeMap(new Object[][] {{"p0", n0_1}, {"p1", n0_2 }});
+        epService.getEPRuntime().sendEvent(theEvent, "MyMapWithAMap");
 
         EventBean eventResult = listener.assertOneGetNewAndReset();
         EPAssertionUtil.assertProps(eventResult, "a,b,c,d".split(","), new Object[]{1, 2, 3, n0_1});
@@ -631,11 +631,11 @@ public class TestMapEventNested extends TestCase
         Map<String, Object> mapEvent = getTestData();
         epService.getEPRuntime().sendEvent(mapEvent, "NestedMap");
         
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertSame(mapEvent.get("nested"), event.get("a"));
-        assertSame("abc", event.get("b"));
-        assertSame(((Map)mapEvent.get("nested")).get("n2"), event.get("c"));
-        assertSame("def", event.get("d"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertSame(mapEvent.get("nested"), theEvent.get("a"));
+        assertSame("abc", theEvent.get("b"));
+        assertSame(((Map) mapEvent.get("nested")).get("n2"), theEvent.get("c"));
+        assertSame("def", theEvent.get("d"));
         statement.stop();
     }
 

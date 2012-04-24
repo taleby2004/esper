@@ -15,6 +15,8 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventBeanCopyMethod;
 import com.espertech.esper.event.MappedEventBean;
+import com.espertech.esper.event.ObjectArrayBackedEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 
 import java.lang.reflect.Array;
 import java.util.HashMap;
@@ -45,9 +47,9 @@ public class MapEventBeanCopyMethodWithArrayMap implements EventBeanCopyMethod
         this.arrayPropertiesToCopy = arrayPropertiesToCopy;
     }
 
-    public EventBean copy(EventBean event)
+    public EventBean copy(EventBean theEvent)
     {
-        MappedEventBean mapped = (MappedEventBean) event;
+        MappedEventBean mapped = (MappedEventBean) theEvent;
         Map<String, Object> props = mapped.getProperties();
         HashMap<String, Object> shallowCopy = new HashMap<String, Object>(props);
 

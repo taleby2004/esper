@@ -64,15 +64,15 @@ public class SpringJMSTemplateInputAdapter extends JMSInputAdapter
 
             synchronized (message)
             {
-                Object event = jmsMessageUnmarshaller.unmarshal(epServiceProviderSPI.getEventAdapterService(), message);
+                Object theEvent = jmsMessageUnmarshaller.unmarshal(epServiceProviderSPI.getEventAdapterService(), message);
 
-                if (event != null)
+                if (theEvent != null)
                 {
-                    if (event instanceof Node) {
-                        epServiceProviderSPI.getEPRuntime().sendEvent((Node)event);
+                    if (theEvent instanceof Node) {
+                        epServiceProviderSPI.getEPRuntime().sendEvent((Node)theEvent);
                     }
                     else {
-                        epServiceProviderSPI.getEPRuntime().sendEvent(event);
+                        epServiceProviderSPI.getEPRuntime().sendEvent(theEvent);
                     }
                 }
                 else

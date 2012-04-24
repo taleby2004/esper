@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.util;
 
-import com.espertech.esper.client.ConfigurationEventTypeMap;
-
 import java.util.*;
 
 /**
@@ -67,7 +65,7 @@ public class GraphUtil
      * by a prior nodein the set
      * @throws GraphCircularDependencyException if a dependency has been detected
      */
-    public static Set<String> getTopDownOrder(Map<String, ConfigurationEventTypeMap> graph) throws GraphCircularDependencyException
+    public static Set<String> getTopDownOrder(Map<String, Set<String>> graph) throws GraphCircularDependencyException
     {
         Stack<String> circularDependency = getFirstCircularDependency(graph);
         if (circularDependency != null)
@@ -78,9 +76,9 @@ public class GraphUtil
         Map<String, Set<String>> reversedGraph = new HashMap<String, Set<String>>();
 
         // Reverse the graph - build a list of children per parent
-        for (Map.Entry<String, ConfigurationEventTypeMap> entry : graph.entrySet())
+        for (Map.Entry<String, Set<String>> entry : graph.entrySet())
         {
-            Set<String> parents = entry.getValue().getSuperTypes();
+            Set<String> parents = entry.getValue();
             String child = entry.getKey();
 
             for (String parent : parents)
@@ -97,13 +95,13 @@ public class GraphUtil
 
         // Determine all root nodes, which are those without parent
         TreeSet<String> roots = new TreeSet<String>();
-        for (ConfigurationEventTypeMap parents : graph.values())
+        for (Set<String> parents : graph.values())
         {
             if (parents == null)
             {
                 continue;
             }
-            for (String parent : parents.getSuperTypes())
+            for (String parent : parents)
             {
                 // node not itself a child
                 if (!graph.containsKey(parent))
@@ -142,14 +140,14 @@ public class GraphUtil
     }
 
     // Determine if all the node's parents and their parents have been added to the created set
-    private static boolean recursiveParentsCreated(String node, Set<String> created, Map<String, ConfigurationEventTypeMap> graph)
+    private static boolean recursiveParentsCreated(String node, Set<String> created, Map<String, Set<String>> graph)
     {
-        ConfigurationEventTypeMap parents = graph.get(node);
+        Set<String> parents = graph.get(node);
         if (parents == null)
         {
             return true;
         }
-        for (String parent : parents.getSuperTypes())
+        for (String parent : parents)
         {
             if (!created.contains(parent))
             {
@@ -183,7 +181,7 @@ public class GraphUtil
      * @param graph the dependency graph
      * @return circular dependency stack
      */
-    private static Stack<String> getFirstCircularDependency(Map<String, ConfigurationEventTypeMap> graph)
+    private static Stack<String> getFirstCircularDependency(Map<String, Set<String>> graph)
     {
         for (String child : graph.keySet())
         {
@@ -199,15 +197,15 @@ public class GraphUtil
         return null;
     }
 
-    private static boolean recursiveDeepDepends(Stack<String> deepDependencies, String currentChild, Map<String, ConfigurationEventTypeMap> graph)
+    private static boolean recursiveDeepDepends(Stack<String> deepDependencies, String currentChild, Map<String, Set<String>> graph)
     {
-        ConfigurationEventTypeMap required = graph.get(currentChild);
+        Set<String> required = graph.get(currentChild);
         if (required == null)
         {
             return false;
         }
 
-        for (String parent : required.getSuperTypes())
+        for (String parent : required)
         {
             if (deepDependencies.contains(parent))
             {

@@ -41,9 +41,9 @@ public class TestPerf3StreamCoercion extends TestCase
     public void testPerfCoercion3waySceneOne()
     {
         String stmtText = "select s1.intBoxed as value from " +
-                SupportBean.class.getName() + "(string='A').win:length(1000000) s1," +
-                SupportBean.class.getName() + "(string='B').win:length(1000000) s2," +
-                SupportBean.class.getName() + "(string='C').win:length(1000000) s3" +
+                SupportBean.class.getName() + "(theString='A').win:length(1000000) s1," +
+                SupportBean.class.getName() + "(theString='B').win:length(1000000) s2," +
+                SupportBean.class.getName() + "(theString='C').win:length(1000000) s3" +
             " where s1.intBoxed=s2.longBoxed and s1.intBoxed=s3.doubleBoxed";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
@@ -73,9 +73,9 @@ public class TestPerf3StreamCoercion extends TestCase
     public void testPerfCoercion3waySceneTwo()
     {
         String stmtText = "select s1.intBoxed as value from " +
-                SupportBean.class.getName() + "(string='A').win:length(1000000) s1," +
-                SupportBean.class.getName() + "(string='B').win:length(1000000) s2," +
-                SupportBean.class.getName() + "(string='C').win:length(1000000) s3" +
+                SupportBean.class.getName() + "(theString='A').win:length(1000000) s1," +
+                SupportBean.class.getName() + "(theString='B').win:length(1000000) s2," +
+                SupportBean.class.getName() + "(theString='C').win:length(1000000) s3" +
             " where s1.intBoxed=s2.longBoxed and s1.intBoxed=s3.doubleBoxed";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
@@ -105,9 +105,9 @@ public class TestPerf3StreamCoercion extends TestCase
     public void testPerfCoercion3waySceneThree()
     {
         String stmtText = "select s1.intBoxed as value from " +
-                SupportBean.class.getName() + "(string='A').win:length(1000000) s1," +
-                SupportBean.class.getName() + "(string='B').win:length(1000000) s2," +
-                SupportBean.class.getName() + "(string='C').win:length(1000000) s3" +
+                SupportBean.class.getName() + "(theString='A').win:length(1000000) s1," +
+                SupportBean.class.getName() + "(theString='B').win:length(1000000) s2," +
+                SupportBean.class.getName() + "(theString='C').win:length(1000000) s3" +
             " where s1.intBoxed=s2.longBoxed and s1.intBoxed=s3.doubleBoxed";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
@@ -134,10 +134,10 @@ public class TestPerf3StreamCoercion extends TestCase
         assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
-    private void sendEvent(String string, int intBoxed, long longBoxed, double doubleBoxed)
+    private void sendEvent(String theString, int intBoxed, long longBoxed, double doubleBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntBoxed(intBoxed);
         bean.setLongBoxed(longBoxed);
         bean.setDoubleBoxed(doubleBoxed);

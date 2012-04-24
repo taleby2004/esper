@@ -39,7 +39,7 @@ public class TestComments extends TestCase
     public void testComment()
     {
         String lineSeparator = System.getProperty("line.separator");
-        String statement = "select string, /* this is my string */\n" +
+        String statement = "select theString, /* this is my string */\n" +
                 "intPrimitive, // same line comment\n" +
                 "/* comment taking one line */\n" +
                 "// another comment taking a line\n" +
@@ -52,10 +52,10 @@ public class TestComments extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("e1", 100));
 
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("e1", event.get("string"));
-        assertEquals(100, event.get("intPrimitive"));
-        assertEquals(100, event.get("myPrimitive"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("e1", theEvent.get("theString"));
+        assertEquals(100, theEvent.get("intPrimitive"));
+        assertEquals(100, theEvent.get("myPrimitive"));
         updateListener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("e1", -1));

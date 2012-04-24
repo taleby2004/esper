@@ -51,7 +51,7 @@ public class SupportFilterParamIndex extends FilterParamIndexLookupableBase
         return null;
     }
 
-    public void matchEvent(EventBean event, Collection<FilterHandle> matches)
+    public void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
     }
 }

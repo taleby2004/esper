@@ -15,6 +15,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.pattern.MatchedEventMapImpl;
+import com.espertech.esper.pattern.MatchedEventMapMeta;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
@@ -69,17 +70,17 @@ public class TestFilterSpecCompiled extends TestCase
 
     public void testGetValueSet()
     {
-        List<FilterSpecParam> params = SupportFilterSpecBuilder.buildList(eventType, new Object[]
+        List<FilterSpecParam> parameters = SupportFilterSpecBuilder.buildList(eventType, new Object[]
                                     { "intPrimitive", FilterOperator.EQUAL, 2 });
         SimpleNumberCoercer numberCoercer = SimpleNumberCoercerFactory.getCoercer(int.class, Double.class);
-        params.add(new FilterSpecParamEventProp(makeLookupable("doubleBoxed"), FilterOperator.EQUAL, "asName", "doublePrimitive", false, numberCoercer, Double.class, "Test"));
-        FilterSpecCompiled filterSpec = new FilterSpecCompiled(eventType, "SupportBean", params, null);
+        parameters.add(new FilterSpecParamEventProp(makeLookupable("doubleBoxed"), FilterOperator.EQUAL, "asName", "doublePrimitive", false, numberCoercer, Double.class, "Test"));
+        FilterSpecCompiled filterSpec = new FilterSpecCompiled(eventType, "SupportBean", parameters, null);
 
         SupportBean eventBean = new SupportBean();
         eventBean.setDoublePrimitive(999.999);
-        EventBean event = SupportEventBeanFactory.createObject(eventBean);
-        MatchedEventMap matchedEvents = new MatchedEventMapImpl();
-        matchedEvents.add("asName", event);
+        EventBean theEvent = SupportEventBeanFactory.createObject(eventBean);
+        MatchedEventMap matchedEvents = new MatchedEventMapImpl(new MatchedEventMapMeta(new String[] {"asName"}, false));
+        matchedEvents.add(0, theEvent);
         FilterValueSet valueSet = filterSpec.getValueSet(matchedEvents, null, null);
 
         // Assert the generated filter value container

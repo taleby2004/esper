@@ -57,12 +57,12 @@ public class PropertySortedEventTable implements EventTable
 
     /**
      * Determine multikey for index access.
-     * @param event to get properties from for key
+     * @param theEvent to get properties from for key
      * @return multi key
      */
-    protected Object getIndexedValue(EventBean event)
+    protected Object getIndexedValue(EventBean theEvent)
     {
-        return propertyGetter.get(event);
+        return propertyGetter.get(theEvent);
     }
 
     /**
@@ -77,9 +77,9 @@ public class PropertySortedEventTable implements EventTable
         {
             return;
         }
-        for (EventBean event : events)
+        for (EventBean theEvent : events)
         {
-            add(event);
+            add(theEvent);
         }
     }
 
@@ -94,9 +94,9 @@ public class PropertySortedEventTable implements EventTable
         {
             return;
         }
-        for (EventBean event : events)
+        for (EventBean theEvent : events)
         {
-            remove(event);
+            remove(theEvent);
         }
     }
 
@@ -297,14 +297,14 @@ public class PropertySortedEventTable implements EventTable
         return result;
     }
 
-    private void add(EventBean event)
+    private void add(EventBean theEvent)
     {
-        Object key = getIndexedValue(event);
+        Object key = getIndexedValue(theEvent);
 
         key = coerce(key);
 
         if (key == null) {
-            nullKeyedValues.add(event);
+            nullKeyedValues.add(theEvent);
             return;
         }
 
@@ -315,15 +315,15 @@ public class PropertySortedEventTable implements EventTable
             propertyIndex.put(key, events);
         }
 
-        events.add(event);
+        events.add(theEvent);
     }
 
-    private void remove(EventBean event)
+    private void remove(EventBean theEvent)
     {
-        Object key = getIndexedValue(event);
+        Object key = getIndexedValue(theEvent);
 
         if (key == null) {
-            nullKeyedValues.remove(event);
+            nullKeyedValues.remove(theEvent);
             return;
         }
 
@@ -335,7 +335,7 @@ public class PropertySortedEventTable implements EventTable
             return;
         }
 
-        if (!events.remove(event))
+        if (!events.remove(theEvent))
         {
             // Not an error, its possible that an old-data event is artificial (such as for statistics) and
             // thus did not correspond to a new-data event raised earlier.

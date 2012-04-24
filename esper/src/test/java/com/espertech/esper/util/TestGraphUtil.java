@@ -11,13 +11,10 @@
 
 package com.espertech.esper.util;
 
-import com.espertech.esper.client.ConfigurationEventTypeMap;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TestGraphUtil extends TestCase
 {
@@ -50,7 +47,7 @@ public class TestGraphUtil extends TestCase
 
     public void testSimpleTopDownOrder() throws Exception
     {
-        Map<String, ConfigurationEventTypeMap> graph = new LinkedHashMap<String, ConfigurationEventTypeMap>();
+        Map<String, Set<String>> graph = new LinkedHashMap<String, Set<String>>();
         assertEquals(0, GraphUtil.getTopDownOrder(graph).size());
 
         add(graph, "1_1", "1");
@@ -80,7 +77,7 @@ public class TestGraphUtil extends TestCase
 
     public void testAcyclicTopDownOrder() throws Exception
     {
-        Map<String, ConfigurationEventTypeMap> graph = new LinkedHashMap<String, ConfigurationEventTypeMap>();
+        Map<String, Set<String>> graph = new LinkedHashMap<String, Set<String>>();
 
         add(graph, "1_1", "R2");
         add(graph, "A", "R1");
@@ -102,19 +99,19 @@ public class TestGraphUtil extends TestCase
 
     public void testInvalidTopDownOder() throws Exception
     {
-        Map<String, ConfigurationEventTypeMap> graph = new LinkedHashMap<String, ConfigurationEventTypeMap>();
+        Map<String, Set<String>> graph = new LinkedHashMap<String, Set<String>>();
         add(graph, "1_1", "1");
         add(graph, "1", "1_1");
         tryInvalid(graph, "Circular dependency detected between [1_1, 1]");
 
-        graph = new LinkedHashMap<String, ConfigurationEventTypeMap>();
+        graph = new LinkedHashMap<String, Set<String>>();
         add(graph, "1", "2");
         add(graph, "2", "3");
         add(graph, "3", "1");
         tryInvalid(graph, "Circular dependency detected between [1, 2, 3]");
     }
 
-    private void tryInvalid(Map<String, ConfigurationEventTypeMap> graph, String msg)
+    private void tryInvalid(Map<String, Set<String>> graph, String msg)
     {
         try
         {
@@ -129,15 +126,15 @@ public class TestGraphUtil extends TestCase
 
     }
 
-    private void add(Map<String, ConfigurationEventTypeMap> graph, String child, String parent)
+    private void add(Map<String, Set<String>> graph, String child, String parent)
     {
-        ConfigurationEventTypeMap parents = graph.get(child);
+        Set<String> parents = graph.get(child);
         if (parents == null)
         {
-            parents = new ConfigurationEventTypeMap();
+            parents = new HashSet<String>();
             graph.put(child, parents);
         }
-        parents.getSuperTypes().add(parent);
+        parents.add(parent);
     }
 
     private Map<String, Object> makeMap(Object[][] entries)

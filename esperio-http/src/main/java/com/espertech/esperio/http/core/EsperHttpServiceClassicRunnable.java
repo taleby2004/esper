@@ -18,15 +18,15 @@ public class EsperHttpServiceClassicRunnable implements Runnable {
 
     private String serviceName;
     private ServerSocket serversocket;
-    private HttpParams params;
+    private HttpParams parameters;
     private HttpService httpService;
     private List<WorkerThread> workers = new CopyOnWriteArrayList<WorkerThread>();
     private boolean shutdown;
 
-    public EsperHttpServiceClassicRunnable(String serviceName, ServerSocket serversocket, HttpParams params, HttpService httpService) {
+    public EsperHttpServiceClassicRunnable(String serviceName, ServerSocket serversocket, HttpParams parameters, HttpService httpService) {
         this.serviceName = serviceName;
         this.serversocket = serversocket;
-        this.params = params;
+        this.parameters = parameters;
         this.httpService = httpService;
     }
 
@@ -38,7 +38,7 @@ public class EsperHttpServiceClassicRunnable implements Runnable {
                 Socket socket = this.serversocket.accept();
                 DefaultHttpServerConnection conn = new DefaultHttpServerConnection();
                 log.info("Incoming connection service '" + serviceName + "' from " + socket.getInetAddress());
-                conn.bind(socket, this.params);
+                conn.bind(socket, this.parameters);
 
                 // Start worker thread
                 WorkerThread t = new WorkerThread(this.httpService, conn, this);

@@ -17,8 +17,8 @@ public interface TransformEventMethod
 {
     /**
      * Transform event returning the transformed event.
-     * @param event to transform
+     * @param theEvent to transform
      * @return transformed event
      */
-    public EventBean transform(EventBean event);
+    public EventBean transform(EventBean theEvent);
 }

@@ -116,13 +116,13 @@ public class ResultAssertExecution
             if (value.getEvents().size() >= step)
             {
                 EventSendDesc sendEvent = value.getEvents().get(step - 1);
-                log.info(".execute At " + timeInSec + " sending event: " + sendEvent.getEvent() + " " + sendEvent.getEventDesc());
-                engine.getEPRuntime().sendEvent(sendEvent.getEvent());
+                log.info(".execute At " + timeInSec + " sending event: " + sendEvent.getTheEvent() + " " + sendEvent.getEventDesc());
+                engine.getEPRuntime().sendEvent(sendEvent.getTheEvent());
 
                 if (preformatlog.isDebugEnabled())
                 {
                     preformatlog.debug(String.format("%5s  %5s%8s %7.1f   %s", "",
-                            sendEvent.getEvent().getSymbol(), sendEvent.getEvent().getVolume(), sendEvent.getEvent().getPrice(), sendEvent.getEventDesc()));
+                            sendEvent.getTheEvent().getSymbol(), sendEvent.getTheEvent().getVolume(), sendEvent.getTheEvent().getPrice(), sendEvent.getEventDesc()));
                 }
             }
 
@@ -221,10 +221,10 @@ public class ResultAssertExecution
         for (int i = 0; i < newDataListFlattened.length; i++)
         {
             Object[] values = new Object[fields.length];
-            EventBean event = newDataListFlattened[i];
+            EventBean theEvent = newDataListFlattened[i];
             for (int j = 0; j < fields.length; j++)
             {
-                values[j] = event.get(fields[j]);
+                values[j] = theEvent.get(fields[j]);
             }
             result[i] = Arrays.toString(values);
         }
@@ -233,8 +233,8 @@ public class ResultAssertExecution
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = engine.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

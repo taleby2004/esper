@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -111,15 +112,15 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
         }
         else if (contextDetail instanceof ContextDetailInitiatedTerminated) {
             ContextDetailInitiatedTerminated fixed = (ContextDetailInitiatedTerminated) contextDetail;
-            ContextDetailMatchPair startCondition = validateRewriteContextCondition(fixed.getStart(), eventTypesReferenced, new MatchEventSpec());
-            ContextDetailMatchPair endCondition = validateRewriteContextCondition(fixed.getEnd(), eventTypesReferenced, startCondition.getMatches());
+            ContextDetailMatchPair startCondition = validateRewriteContextCondition(fixed.getStart(), eventTypesReferenced, new MatchEventSpec(), new LinkedHashSet<String>());
+            ContextDetailMatchPair endCondition = validateRewriteContextCondition(fixed.getEnd(), eventTypesReferenced, startCondition.getMatches(), startCondition.getAllTags());
             fixed.setStart(startCondition.getCondition());
             fixed.setEnd(endCondition.getCondition());
         }
         else if (contextDetail instanceof ContextDetailInitiatedTerminated) {
             ContextDetailInitiatedTerminated overlap = (ContextDetailInitiatedTerminated) contextDetail;
-            ContextDetailMatchPair startCondition = validateRewriteContextCondition(overlap.getStart(), eventTypesReferenced, new MatchEventSpec());
-            ContextDetailMatchPair endCondition = validateRewriteContextCondition(overlap.getEnd(), eventTypesReferenced, startCondition.getMatches());
+            ContextDetailMatchPair startCondition = validateRewriteContextCondition(overlap.getStart(), eventTypesReferenced, new MatchEventSpec(), new LinkedHashSet<String>());
+            ContextDetailMatchPair endCondition = validateRewriteContextCondition(overlap.getEnd(), eventTypesReferenced, startCondition.getMatches(), startCondition.getAllTags());
             overlap.setStart(startCondition.getCondition());
             overlap.setEnd(endCondition.getCondition());
         }
@@ -134,25 +135,25 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
         }
     }
 
-    private ContextDetailMatchPair validateRewriteContextCondition(ContextDetailCondition endpoint, Set<String> eventTypesReferenced, MatchEventSpec priorMatches) throws ExprValidationException {
+    private ContextDetailMatchPair validateRewriteContextCondition(ContextDetailCondition endpoint, Set<String> eventTypesReferenced, MatchEventSpec priorMatches, Set<String> priorAllTags) throws ExprValidationException {
         if (endpoint instanceof ContextDetailConditionCrontab) {
             ContextDetailConditionCrontab crontab = (ContextDetailConditionCrontab) endpoint;
             ScheduleSpec schedule = ExprNodeUtility.toCrontabSchedule(crontab.getCrontab(), statementContext);
             crontab.setSchedule(schedule);
-            return new ContextDetailMatchPair(crontab, new MatchEventSpec());
+            return new ContextDetailMatchPair(crontab, new MatchEventSpec(), new LinkedHashSet<String>());
         }
 
         if (endpoint instanceof ContextDetailConditionTimePeriod) {
             ContextDetailConditionTimePeriod timePeriod = (ContextDetailConditionTimePeriod) endpoint;
             ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(services.getEngineURI(), false), statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), getDefaultAgentInstanceContext(), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
             timePeriod.getTimePeriod().validate(validationContext);
-            return new ContextDetailMatchPair(timePeriod, new MatchEventSpec());
+            return new ContextDetailMatchPair(timePeriod, new MatchEventSpec(), new LinkedHashSet<String>());
         }
 
         if (endpoint instanceof ContextDetailConditionPattern) {
             ContextDetailConditionPattern pattern = (ContextDetailConditionPattern) endpoint;
-            MatchEventSpec matches = validatePatternContextConditionPattern(pattern, eventTypesReferenced, priorMatches);
-            return new ContextDetailMatchPair(pattern, matches);
+            Pair<MatchEventSpec, Set<String>> matches = validatePatternContextConditionPattern(pattern, eventTypesReferenced, priorMatches, priorAllTags);
+            return new ContextDetailMatchPair(pattern, matches.getFirst(), matches.getSecond());
         }
 
         if (endpoint instanceof ContextDetailConditionFilter) {
@@ -165,38 +166,42 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
                 filter.setFilterSpecCompiled(compiled.getFilterSpec());
                 MatchEventSpec matchEventSpec = new MatchEventSpec();
                 EventType filterForType = compiled.getFilterSpec().getFilterForEventType();
+                LinkedHashSet<String> allTags = new LinkedHashSet<String>();
                 if (filter.getOptionalFilterAsName() != null) {
                     matchEventSpec.getTaggedEventTypes().put(filter.getOptionalFilterAsName(), new Pair<EventType, String>(filterForType, rawExpr.getRawFilterSpec().getEventTypeName()));
+                    allTags.add(filter.getOptionalFilterAsName());
                 }
-                return new ContextDetailMatchPair(filter, matchEventSpec);
+                return new ContextDetailMatchPair(filter, matchEventSpec, allTags);
             }
 
             // compile as pattern if there are prior matches to consider, since this is a type of followed-by relationship
             EvalFactoryNode factoryNode = services.getPatternNodeFactory().makeFilterNode(filter.getFilterSpecRaw(), filter.getOptionalFilterAsName(), 0);
             ContextDetailConditionPattern pattern = new ContextDetailConditionPattern(factoryNode, true);
-            MatchEventSpec matches = validatePatternContextConditionPattern(pattern, eventTypesReferenced, priorMatches);
-            return new ContextDetailMatchPair(pattern, matches);
+            Pair<MatchEventSpec, Set<String>> matches = validatePatternContextConditionPattern(pattern, eventTypesReferenced, priorMatches, priorAllTags);
+            return new ContextDetailMatchPair(pattern, matches.getFirst(), matches.getSecond());
         }
         else {
             throw new IllegalStateException("Unrecognized endpoint type " + endpoint);
         }
     }
 
-    private MatchEventSpec validatePatternContextConditionPattern(ContextDetailConditionPattern pattern, Set<String> eventTypesReferenced, MatchEventSpec priorMatches)
+    private Pair<MatchEventSpec, Set<String>> validatePatternContextConditionPattern(ContextDetailConditionPattern pattern, Set<String> eventTypesReferenced, MatchEventSpec priorMatches, Set<String> priorAllTags)
         throws ExprValidationException {
         PatternStreamSpecRaw raw = new PatternStreamSpecRaw(pattern.getPatternRaw(), Collections.<EvalFactoryNode, String>emptyMap(), Collections.<ViewSpec>emptyList(), null, new StreamSpecOptions());
-        PatternStreamSpecCompiled compiled = raw.compile(statementContext, eventTypesReferenced, false, Collections.<Integer>emptyList(), priorMatches);
+        PatternStreamSpecCompiled compiled = raw.compile(statementContext, eventTypesReferenced, false, Collections.<Integer>emptyList(), priorMatches, priorAllTags);
         pattern.setPatternCompiled(compiled);
-        return new MatchEventSpec(compiled.getTaggedEventTypes(), compiled.getArrayEventTypes());
+        return new Pair<MatchEventSpec, Set<String>>(new MatchEventSpec(compiled.getTaggedEventTypes(), compiled.getArrayEventTypes()), compiled.getAllTags());
     }
 
     private static class ContextDetailMatchPair {
         private final ContextDetailCondition condition;
         private final MatchEventSpec matches;
+        private final Set<String> allTags;
 
-        private ContextDetailMatchPair(ContextDetailCondition condition, MatchEventSpec matches) {
+        private ContextDetailMatchPair(ContextDetailCondition condition, MatchEventSpec matches, Set<String> allTags) {
             this.condition = condition;
             this.matches = matches;
+            this.allTags = allTags;
         }
 
         public ContextDetailCondition getCondition() {
@@ -205,6 +210,10 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
 
         public MatchEventSpec getMatches() {
             return matches;
+        }
+
+        public Set<String> getAllTags() {
+            return allTags;
         }
     }
 }

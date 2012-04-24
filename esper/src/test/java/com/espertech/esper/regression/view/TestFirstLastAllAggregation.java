@@ -51,9 +51,9 @@ public class TestFirstLastAllAggregation extends TestCase {
 
     public void testLastMaxMixedOnSelect() {
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
-        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean(string like 'A%')");
+        epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean(theString like 'A%')");
 
-        String epl = "on SupportBean(string like 'B%') select last(mw.intPrimitive) as li, max(mw.intPrimitive) as mi from MyWindow mw";
+        String epl = "on SupportBean(theString like 'B%') select last(mw.intPrimitive) as li, max(mw.intPrimitive) as mi from MyWindow mw";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
         String[] fields = "li,mi".split(",");
@@ -184,8 +184,8 @@ public class TestFirstLastAllAggregation extends TestCase {
         tryInvalid("select last(*) from SupportBean.std:lastevent() sa, SupportBean.std:lastevent() sb",
                    "Error starting statement: The 'last' aggregation function requires that in joins or subqueries the stream-wildcard (stream-alias.*) syntax is used instead [select last(*) from SupportBean.std:lastevent() sa, SupportBean.std:lastevent() sb]");
 
-        tryInvalid("select string, (select first(*) from SupportBean.std:lastevent() sa) from SupportBean.std:lastevent() sb",
-                   "Error starting statement: The 'first' aggregation function requires that in joins or subqueries the stream-wildcard (stream-alias.*) syntax is used instead [select string, (select first(*) from SupportBean.std:lastevent() sa) from SupportBean.std:lastevent() sb]");
+        tryInvalid("select theString, (select first(*) from SupportBean.std:lastevent() sa) from SupportBean.std:lastevent() sb",
+                   "Error starting statement: The 'first' aggregation function requires that in joins or subqueries the stream-wildcard (stream-alias.*) syntax is used instead [select theString, (select first(*) from SupportBean.std:lastevent() sa) from SupportBean.std:lastevent() sb]");
 
         tryInvalid("select window(x.*) from SupportBean.std:lastevent()",
                    "Error starting statement: The 'window' aggregation function stream wildcard 'x' does not resolve to any stream [select window(x.*) from SupportBean.std:lastevent()]");
@@ -244,7 +244,7 @@ public class TestFirstLastAllAggregation extends TestCase {
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5, intArray(2, 3)});
 
         stmt.destroy();
-        epl = "select sum(intPrimitive) as si, window(sa.intPrimitive) as wi from SupportBean.win:keepall() as sa group by string";
+        epl = "select sum(intPrimitive) as si, window(sa.intPrimitive) as wi from SupportBean.win:keepall() as sa group by theString";
         stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -340,9 +340,9 @@ public class TestFirstLastAllAggregation extends TestCase {
         Object[] expected = new Object[] {110d, 100, new Object[] {beanOne}, beanOne};
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, expected);
         if (isCheckStatic) {
-            Object[] params = SupportStaticMethodLib.getInvocations().get(0);
+            Object[] parameters = SupportStaticMethodLib.getInvocations().get(0);
             SupportStaticMethodLib.getInvocations().clear();
-            EPAssertionUtil.assertEqualsExactOrder(expected, params);
+            EPAssertionUtil.assertEqualsExactOrder(expected, parameters);
         }
     }
 
@@ -445,9 +445,9 @@ public class TestFirstLastAllAggregation extends TestCase {
     public void testBatchWindow()
     {
         String epl = "select irstream " +
-                "first(string) as fs, " +
-                "window(string) as ws, " +
-                "last(string) as ls " +
+                "first(theString) as fs, " +
+                "window(theString) as ws, " +
+                "last(theString) as ls " +
                 "from SupportBean.win:length_batch(2) as sb";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -476,15 +476,15 @@ public class TestFirstLastAllAggregation extends TestCase {
     public void testBatchWindowGrouped()
     {
         String epl = "select " +
-                "string, " +
+                "theString, " +
                 "first(intPrimitive) as fi, " +
                 "window(intPrimitive) as wi, " +
                 "last(intPrimitive) as li " +
-                "from SupportBean.win:length_batch(6) as sb group by string order by string asc";
+                "from SupportBean.win:length_batch(6) as sb group by theString order by theString asc";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
-        String[] fields = "string,fi,wi,li".split(",");
+        String[] fields = "theString,fi,wi,li".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
@@ -523,9 +523,9 @@ public class TestFirstLastAllAggregation extends TestCase {
 
         String[] fields = "firststring,windowstring,laststring".split(",");
         String epl = "select " +
-                "first(string) as firststring, " +
-                "window(string) as windowstring, " +
-                "last(string) as laststring " +
+                "first(theString) as firststring, " +
+                "window(theString) as windowstring, " +
+                "last(theString) as laststring " +
                 "from MyWindow";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -538,13 +538,13 @@ public class TestFirstLastAllAggregation extends TestCase {
     {
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as select * from SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
-        epService.getEPAdministrator().createEPL("on SupportBean_A delete from MyWindow where string = id");
+        epService.getEPAdministrator().createEPL("on SupportBean_A delete from MyWindow where theString = id");
 
         String[] fields = "firststring,windowstring,laststring".split(",");
         String epl = "select " +
-                "first(string) as firststring, " +
-                "window(string) as windowstring, " +
-                "last(string) as laststring " +
+                "first(theString) as firststring, " +
+                "window(theString) as windowstring, " +
+                "last(theString) as laststring " +
                 "from MyWindow";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -600,7 +600,7 @@ public class TestFirstLastAllAggregation extends TestCase {
         EPAssertionUtil.assertPropsPerRow(q.execute().getArray(), "f,w,l".split(","),
                 new Object[][]{{10, intArray(10, 20, 30, 31, 11, 12, 13), 13}});
 
-        q = epService.getEPRuntime().prepareQuery("select string as s, first(intPrimitive) as f, window(intPrimitive) as w, last(intPrimitive) as l from MyWindow as s group by string order by string asc");
+        q = epService.getEPRuntime().prepareQuery("select theString as s, first(intPrimitive) as f, window(intPrimitive) as w, last(intPrimitive) as l from MyWindow as s group by theString order by theString asc");
         Object[][] expected = new Object[][] {
                         {"E1", 10, intArray(10, 11, 12, 13), 13},
                         {"E2", 20, intArray(20), 20},
@@ -656,10 +656,10 @@ public class TestFirstLastAllAggregation extends TestCase {
     public void testUnboundedStream()
     {
         String epl = "select " +
-                "first(string) as f1, " +
+                "first(theString) as f1, " +
                 "first(sb.*) as f2, " +
                 "first(*) as f3, " +
-                "last(string) as l1, " +
+                "last(theString) as l1, " +
                 "last(sb.*) as l2, " +
                 "last(*) as l3 " +
                 "from SupportBean as sb";
@@ -681,8 +681,8 @@ public class TestFirstLastAllAggregation extends TestCase {
     public void testWindowedUnGrouped()
     {
         String epl = "select " +
-                "first(string) as firststring, " +
-                "last(string) as laststring, " +
+                "first(theString) as firststring, " +
+                "last(theString) as laststring, " +
                 "first(intPrimitive) as firstint, " +
                 "last(intPrimitive) as lastint, " +
                 "window(intPrimitive) as allint " +
@@ -705,14 +705,14 @@ public class TestFirstLastAllAggregation extends TestCase {
     public void testWindowedGrouped()
     {
         String epl = "select " +
-                "string, " +
-                "first(string) as firststring, " +
-                "last(string) as laststring, " +
+                "theString, " +
+                "first(theString) as firststring, " +
+                "last(theString) as laststring, " +
                 "first(intPrimitive) as firstint, " +
                 "last(intPrimitive) as lastint, " +
                 "window(intPrimitive) as allint " +
                 "from SupportBean.win:length(5) " +
-                "group by string order by string";
+                "group by theString order by theString";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -754,7 +754,7 @@ public class TestFirstLastAllAggregation extends TestCase {
     }
 
     private void runAssertionGrouped() {
-        String[] fields = "string,firststring,firstint,laststring,lastint,allint".split(",");
+        String[] fields = "theString,firststring,firstint,laststring,lastint,allint".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1", 10, "E1", 10, new int[]{10}});
@@ -815,8 +815,8 @@ public class TestFirstLastAllAggregation extends TestCase {
         return value;
     }
 
-    private SupportBean sendEvent(EPServiceProvider epService, String string, double doublePrimitive, int intPrimitive) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private SupportBean sendEvent(EPServiceProvider epService, String theString, double doublePrimitive, int intPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setDoublePrimitive(doublePrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;

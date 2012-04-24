@@ -127,12 +127,12 @@ public interface EventAdapterService
 
     /**
      * Creata a wrapper around an event and some additional properties
-     * @param event is the wrapped event
+     * @param theEvent is the wrapped event
      * @param properties are the additional properties
      * @param eventType os the type metadata for any wrappers of this type
      * @return wrapper event bean
      */
-    public EventBean adapterForTypedWrapper(EventBean event, Map<String, Object> properties, EventType eventType);
+    public EventBean adapterForTypedWrapper(EventBean theEvent, Map<String, Object> properties, EventType eventType);
 
     /**
      * Add an event type with the given name and Java fully-qualified class name.
@@ -173,21 +173,23 @@ public interface EventAdapterService
 
     /**
      * Wrap the native event returning an {@link EventBean}.
-     * @param event to be wrapped
+     * @param theEvent to be wrapped
      * @return event bean wrapping native underlying event
      */
-    public EventBean adapterForBean(Object event);
+    public EventBean adapterForBean(Object theEvent);
 
     /**
      * Wrap the Map-type event returning an {@link EventBean} using the event type name
      * to identify the EventType that the event should carry.
-     * @param event to be wrapped
+     * @param theEvent to be wrapped
      * @param eventTypeName name for the event type of the event
      * @return event bean wrapping native underlying event
      * @throws EventAdapterException if the name has not been declared, or the event cannot be wrapped using that
      * name's event type
      */
-    public EventBean adapterForMap(Map<String, Object> event, String eventTypeName) throws EventAdapterException;
+    public EventBean adapterForMap(Map<String, Object> theEvent, String eventTypeName) throws EventAdapterException;
+
+    public EventBean adapterForObjectArray(Object[] theEvent, String eventTypeName) throws EventAdapterException;
 
     /**
      * Create an event map bean from a set of event properties (name and value objectes) stored in a Map.
@@ -214,11 +216,11 @@ public interface EventAdapterService
 
     /**
      * Returns an adapter for an event underlying object when the event type is known.
-     * @param event underlying
+     * @param theEvent underlying
      * @param eventType type
      * @return event wrapper for object
      */
-    public EventBean adapterForType(Object event, EventType eventType);
+    public EventBean adapterForType(Object theEvent, EventType eventType);
 
     /**
      * Create a new anonymous event type with the given underlying event type,
@@ -347,4 +349,12 @@ public interface EventAdapterService
     public EventType replaceXMLEventType(String xmlEventTypeName, ConfigurationEventTypeXMLDOM config, SchemaModel schemaModel);
 
     public Map<String, EventType> getDeclaredEventTypes();
+
+    public EventBean adapterForTypedObjectArray(Object[] props, EventType resultEventType);
+    public EventType createAnonymousObjectArrayType(String typeName, Map<String, Object> propertyTypes);
+    public EventType addNestableObjectArrayType(String eventTypeName, Map<String, Object> propertyTypes, ConfigurationEventTypeObjectArray typeConfig, boolean isPreconfiguredStatic, boolean isPreconfigured, boolean isConfigured, boolean namedWindow, boolean insertInto) throws EventAdapterException;
+    public void updateObjectArrayEventType(String objectArrayEventTypeName, Map<String, Object> typeMap);
+    public EventBeanSPI getShellForType(EventType eventType);
+    public EventBeanAdapterFactory getAdapterFactoryForType(EventType eventType);
+    public EventType createAnonymousBeanType(String schemaName, Class clazz);
 }

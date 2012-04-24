@@ -60,8 +60,8 @@ public class TestJavaClassHelper extends TestCase
 
         for (int i = 0; i < testCases.length; i++)
         {
-            Class[] params = (Class[]) testCases[i][0];
-            assertEquals(testCases[i][1], JavaClassHelper.getParameterAsString(params));
+            Class[] parameters = (Class[]) testCases[i][0];
+            assertEquals(testCases[i][1], JavaClassHelper.getParameterAsString(parameters));
         }
     }
 

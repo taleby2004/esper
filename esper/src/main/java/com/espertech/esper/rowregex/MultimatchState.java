@@ -22,11 +22,11 @@ public class MultimatchState {
 
     /**
      * Ctor.
-     * @param event first event to hold
+     * @param theEvent first event to hold
      */
-    public MultimatchState(EventBean event) {
+    public MultimatchState(EventBean theEvent) {
         events = new EventBean[3];
-        add(event);
+        add(theEvent);
     }
 
     /**
@@ -44,9 +44,9 @@ public class MultimatchState {
 
     /**
      * Add an event.
-     * @param event to add
+     * @param theEvent to add
      */
-    public void add(EventBean event)
+    public void add(EventBean theEvent)
     {
         if (count == events.length)
         {
@@ -54,7 +54,7 @@ public class MultimatchState {
             System.arraycopy(events, 0, buf, 0, events.length);
             events = buf;
         }
-        events[count++] = event;
+        events[count++] = theEvent;
     }
 
     /**
@@ -75,14 +75,14 @@ public class MultimatchState {
 
     /**
      * Determines if an event is in the collection.
-     * @param event to check
+     * @param theEvent to check
      * @return indicator
      */
-    public boolean containsEvent(EventBean event)
+    public boolean containsEvent(EventBean theEvent)
     {
         for (int i = 0; i < count; i++)
         {
-            if (events[i] == event)
+            if (events[i] == theEvent)
             {
                 return true;
             }

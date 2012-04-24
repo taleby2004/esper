@@ -19,10 +19,7 @@ import com.espertech.esper.core.context.util.ContextMergeView;
 import com.espertech.esper.core.context.util.EPStatementAgentInstanceHandle;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.epl.core.ResultSetProcessorFactoryDesc;
-import com.espertech.esper.epl.core.ResultSetProcessorFactoryFactory;
-import com.espertech.esper.epl.core.StreamTypeService;
-import com.espertech.esper.epl.core.StreamTypeServiceImpl;
+import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.named.NamedWindowProcessor;
 import com.espertech.esper.epl.named.NamedWindowService;
@@ -112,10 +109,10 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
         // obtain result set processor factory
         StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {processor.getNamedWindowType()}, new String[] {windowName}, new boolean[] {true}, services.getEngineURI(), false);
         ResultSetProcessorFactoryDesc resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                statementSpec, statementContext, typeService, null, new boolean[0], true, null);
+                statementSpec, statementContext, typeService, null, new boolean[0], true, null, null);
 
         // obtain factory for output limiting
-        OutputProcessViewFactory outputViewFactory = OutputProcessViewFactoryFactory.make(statementSpec, services.getInternalEventRouter(), statementContext, resultSetProcessorPrototype.getResultSetProcessorFactory().getResultEventType());
+        OutputProcessViewFactory outputViewFactory = OutputProcessViewFactoryFactory.make(statementSpec, services.getInternalEventRouter(), statementContext, resultSetProcessorPrototype.getResultSetProcessorFactory().getResultEventType(), null);
 
         // create context factory
         StatementAgentInstanceFactoryCreateWindow contextFactory = new StatementAgentInstanceFactoryCreateWindow(statementContext, statementSpec, services, activator, unmaterializedViewChain, resultSetProcessorPrototype, outputViewFactory, isRecoveringStatement);

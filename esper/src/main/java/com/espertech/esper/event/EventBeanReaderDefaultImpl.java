@@ -45,12 +45,12 @@ public class EventBeanReaderDefaultImpl implements EventBeanReader
         gettersArray = getters.toArray(new EventPropertyGetter[getters.size()]);
     }
 
-    public Object[] read(EventBean event)
+    public Object[] read(EventBean theEvent)
     {
         Object[] values = new Object[gettersArray.length];
         for (int i = 0; i < gettersArray.length; i++)
         {
-            values[i] = gettersArray[i].get(event);
+            values[i] = gettersArray[i].get(theEvent);
         }
         return values;
     }

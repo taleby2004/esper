@@ -13,13 +13,13 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriberMRD;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportEnum;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportSubscriberMRD;
 import junit.framework.TestCase;
 
 public class TestForGroupDelivery extends TestCase
@@ -78,7 +78,7 @@ public class TestForGroupDelivery extends TestCase
     {
         SupportSubscriberMRD subscriber = new SupportSubscriberMRD();
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string,intPrimitive from SupportBean.win:time_batch(1) for discrete_delivery");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream theString,intPrimitive from SupportBean.win:time_batch(1) for discrete_delivery");
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -92,7 +92,7 @@ public class TestForGroupDelivery extends TestCase
 
         stmt.destroy();
         subscriber.reset();
-        stmt = epService.getEPAdministrator().createEPL("select irstream string,intPrimitive from SupportBean.win:time_batch(1) for grouped_delivery(intPrimitive)");
+        stmt = epService.getEPAdministrator().createEPL("select irstream theString,intPrimitive from SupportBean.win:time_batch(1) for grouped_delivery(intPrimitive)");
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -120,9 +120,20 @@ public class TestForGroupDelivery extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 1));
         sendTimer(1000);
         assertEquals(3, listener.getNewDataList().size());
-        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "string,intPrimitive".split(","), new Object[][]{{"E1", 1}});
-        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "string,intPrimitive".split(","), new Object[][]{{"E2", 2}});
-        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(2), "string,intPrimitive".split(","), new Object[][]{{"E3", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "theString,intPrimitive".split(","), new Object[][]{{"E1", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "theString,intPrimitive".split(","), new Object[][]{{"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(2), "theString,intPrimitive".split(","), new Object[][]{{"E3", 1}});
+        listener.reset();
+
+        // test no-event delivery
+        epService.getEPAdministrator().getConfiguration().addEventType("ObjectEvent", Object.class);
+        String epl = "SELECT *  FROM ObjectEvent OUTPUT ALL EVERY 1 seconds for discrete_delivery";
+		epService.getEPAdministrator().createEPL(epl).addListener(listener);
+        epService.getEPRuntime().sendEvent(new Object());
+        sendTimer(2000);
+        assertTrue(listener.getAndClearIsInvoked());
+        sendTimer(3000);
+        assertFalse(listener.getAndClearIsInvoked());
     }
 
     public void testGroupDelivery()
@@ -137,9 +148,9 @@ public class TestForGroupDelivery extends TestCase
         sendTimer(1000);
         assertEquals(2, listener.getNewDataList().size());
         assertEquals(2, listener.getNewDataList().get(0).length);
-        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "string,intPrimitive".split(","), new Object[][]{{"E1", 1}, {"E3", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "theString,intPrimitive".split(","), new Object[][]{{"E1", 1}, {"E3", 1}});
         assertEquals(1, listener.getNewDataList().get(1).length);
-        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "string,intPrimitive".split(","), new Object[][]{{"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "theString,intPrimitive".split(","), new Object[][]{{"E2", 2}});
 
         // test sorted
         stmt.destroy();
@@ -153,13 +164,13 @@ public class TestForGroupDelivery extends TestCase
         sendTimer(2000);
         assertEquals(2, listener.getNewDataList().size());
         assertEquals(1, listener.getNewDataList().get(0).length);
-        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "string,intPrimitive".split(","), new Object[][]{{"E2", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), "theString,intPrimitive".split(","), new Object[][]{{"E2", 2}});
         assertEquals(2, listener.getNewDataList().get(1).length);
-        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "string,intPrimitive".split(","), new Object[][]{{"E1", 1}, {"E3", 1}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), "theString,intPrimitive".split(","), new Object[][]{{"E1", 1}, {"E3", 1}});
 
         // test multiple criteria
         stmt.destroy();
-        String stmtText = "select string, doubleBoxed, enumValue from SupportBean.win:time_batch(1) order by string, doubleBoxed, enumValue for grouped_delivery(doubleBoxed, enumValue)";
+        String stmtText = "select theString, doubleBoxed, enumValue from SupportBean.win:time_batch(1) order by theString, doubleBoxed, enumValue for grouped_delivery(doubleBoxed, enumValue)";
         stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
         listener.reset();
@@ -174,7 +185,7 @@ public class TestForGroupDelivery extends TestCase
         sendEvent("E8", 10d, SupportEnum.ENUM_VALUE_1); // D
         sendTimer(3000);
         assertEquals(4, listener.getNewDataList().size());
-        String[] fields = "string,doubleBoxed,enumValue".split(",");
+        String[] fields = "theString,doubleBoxed,enumValue".split(",");
         EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(0), fields,
                 new Object[][]{{"E1", 10d, SupportEnum.ENUM_VALUE_2}, {"E4", 10d, SupportEnum.ENUM_VALUE_2}});
         EPAssertionUtil.assertPropsPerRow(listener.getNewDataList().get(1), fields,
@@ -205,14 +216,14 @@ public class TestForGroupDelivery extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
-    private void sendEvent(String string, Double doubleBoxed, SupportEnum enumVal) {
+    private void sendEvent(String theString, Double doubleBoxed, SupportEnum enumVal) {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setDoubleBoxed(doubleBoxed);
         bean.setEnumValue(enumVal);
         epService.getEPRuntime().sendEvent(bean);

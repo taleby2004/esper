@@ -8,22 +8,23 @@
  **************************************************************************************/
 package com.espertech.esper.event;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventBeanFactory;
-import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.*;
 import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.event.arr.ObjectArrayEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
+import com.espertech.esper.event.bean.BeanEventBean;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.EventBeanManufacturerBean;
 import com.espertech.esper.event.bean.PropertyHelper;
+import com.espertech.esper.event.map.MapEventBean;
 import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.xml.BaseXMLEventType;
+import com.espertech.esper.event.xml.XMLEventBean;
 import com.espertech.esper.util.JavaClassHelper;
 import net.sf.cglib.reflect.FastClass;
 import org.w3c.dom.Node;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Helper for writeable events.
@@ -42,6 +43,9 @@ public class EventAdapterServiceHelper
         }
         if (type instanceof MapEventType) {
             return new EventBeanFactoryMap(type, eventAdapterService);
+        }
+        if (type instanceof ObjectArrayEventType) {
+            return new EventBeanFactoryObjectArray(type, eventAdapterService);
         }
         if (type instanceof BaseXMLEventType) {
             return new EventBeanFactoryXML(type, eventAdapterService);
@@ -67,13 +71,13 @@ public class EventAdapterServiceHelper
             return PropertyHelper.getWritableProperties(fastClass.getJavaClass());
         }
         EventTypeSPI typeSPI = (EventTypeSPI) eventType;
-        if (!typeSPI.getMetadata().isApplicationConfigured())
+        if (!typeSPI.getMetadata().isApplicationConfigured() && typeSPI.getMetadata().getTypeClass() != EventTypeMetadata.TypeClass.ANONYMOUS)
         {
             return null;
         }
-        if (eventType instanceof MapEventType)
+        if (eventType instanceof BaseNestableEventType)
         {
-            Map<String, Object> mapdef = ((MapEventType) eventType).getTypes();
+            Map<String, Object> mapdef = ((BaseNestableEventType) eventType).getTypes();
             Set<WriteablePropertyDescriptor> writables = new HashSet<WriteablePropertyDescriptor>();
             for (Map.Entry<String, Object> types : mapdef.entrySet())
             {
@@ -101,27 +105,31 @@ public class EventAdapterServiceHelper
 
     /**
      * Return an adapter for the given type of event using the pre-validated object.
-     * @param event value object
+     * @param theEvent value object
      * @param eventType type of event
      * @param eventAdapterService service for instances
      * @return event adapter
      */
-    public static EventBean adapterForType(Object event, EventType eventType, EventAdapterService eventAdapterService)
+    public static EventBean adapterForType(Object theEvent, EventType eventType, EventAdapterService eventAdapterService)
     {
-        if (event == null) {
+        if (theEvent == null) {
             return null;
         }
         if (eventType instanceof BeanEventType)
         {
-            return eventAdapterService.adapterForTypedBean(event, (BeanEventType) eventType);
+            return eventAdapterService.adapterForTypedBean(theEvent, (BeanEventType) eventType);
         }
         else if (eventType instanceof MapEventType)
         {
-            return eventAdapterService.adapterForTypedMap((Map) event, eventType);
+            return eventAdapterService.adapterForTypedMap((Map) theEvent, eventType);
+        }
+        else if (eventType instanceof ObjectArrayEventType)
+        {
+            return eventAdapterService.adapterForTypedObjectArray((Object[]) theEvent, eventType);
         }
         else if (eventType instanceof BaseConfigurableEventType)
         {
-            return eventAdapterService.adapterForTypedDOM((Node) event, eventType);
+            return eventAdapterService.adapterForTypedDOM((Node) theEvent, eventType);
         }
         else
         {
@@ -151,7 +159,7 @@ public class EventAdapterServiceHelper
             return new EventBeanManufacturerBean(beanEventType, eventAdapterService, properties, methodResolutionService);
         }
         EventTypeSPI typeSPI = (EventTypeSPI) eventType;
-        if (!typeSPI.getMetadata().isApplicationConfigured())
+        if (!typeSPI.getMetadata().isApplicationConfigured() && typeSPI.getMetadata().getTypeClass() != EventTypeMetadata.TypeClass.ANONYMOUS)
         {
             return null;
         }
@@ -160,6 +168,142 @@ public class EventAdapterServiceHelper
             MapEventType mapEventType = (MapEventType) eventType;
             return new EventBeanManufacturerMap(mapEventType, eventAdapterService, properties);
         }
+        if (eventType instanceof ObjectArrayEventType)
+        {
+            ObjectArrayEventType objectArrayEventType = (ObjectArrayEventType) eventType;
+            return new EventBeanManufacturerObjectArray(objectArrayEventType, eventAdapterService, properties);
+        }
         return null;
+    }
+
+    public static EventBean[] typeCast(List<EventBean> events, EventType targetType, EventAdapterService eventAdapterService) {
+        EventBean[] convertedArray = new EventBean[events.size()];
+        int count = 0;
+        for (EventBean theEvent : events)
+        {
+            EventBean converted;
+            if (theEvent instanceof DecoratingEventBean)
+            {
+                DecoratingEventBean wrapper = (DecoratingEventBean) theEvent;
+                if (targetType instanceof MapEventType)
+                {
+                    Map<String, Object> props = new HashMap<String, Object>();
+                    props.putAll(wrapper.getDecoratingProperties());
+                    for (EventPropertyDescriptor propDesc : wrapper.getUnderlyingEvent().getEventType().getPropertyDescriptors())
+                    {
+                        props.put(propDesc.getPropertyName(), wrapper.getUnderlyingEvent().get(propDesc.getPropertyName()));
+                    }
+                    converted = eventAdapterService.adapterForTypedMap(props, targetType);
+                }
+                else
+                {
+                    converted = eventAdapterService.adapterForTypedWrapper(wrapper.getUnderlyingEvent(), wrapper.getDecoratingProperties(), targetType);
+                }
+            }
+            else if ((theEvent.getEventType() instanceof MapEventType) && (targetType instanceof MapEventType))
+            {
+                MappedEventBean mapEvent = (MappedEventBean) theEvent;
+                converted = eventAdapterService.adapterForTypedMap(mapEvent.getProperties(), targetType);
+            }
+            else if ((theEvent.getEventType() instanceof MapEventType) && (targetType instanceof WrapperEventType))
+            {
+                converted = eventAdapterService.adapterForTypedWrapper(theEvent, Collections.EMPTY_MAP, targetType);
+            }
+            else if ((theEvent.getEventType() instanceof BeanEventType) && (targetType instanceof BeanEventType))
+            {
+                converted = eventAdapterService.adapterForTypedBean(theEvent.getUnderlying(), targetType);
+            }
+            else if (theEvent.getEventType() instanceof ObjectArrayEventType && targetType instanceof ObjectArrayEventType) {
+                Object[] convertedObjectArray = ObjectArrayEventType.convertEvent(theEvent, (ObjectArrayEventType) targetType);
+                converted = eventAdapterService.adapterForTypedObjectArray(convertedObjectArray, targetType);
+            }
+            else
+            {
+                throw new EPException("Unknown event type " + theEvent.getEventType());
+            }
+            convertedArray[count] = converted;
+            count++;
+        }
+        return convertedArray;
+    }
+
+    public static EventBeanSPI getShellForType(EventType eventType) {
+        if (eventType instanceof BeanEventType) {
+            return new BeanEventBean(null, eventType);
+        }
+        if (eventType instanceof ObjectArrayEventType) {
+            return new ObjectArrayEventBean(null, eventType);
+        }
+        if (eventType instanceof MapEventType) {
+            return new MapEventBean(null, eventType);
+        }
+        if (eventType instanceof BaseXMLEventType) {
+            return new XMLEventBean(null, eventType);
+        }
+        throw new EventAdapterException("Event type '" + eventType.getName() + "' is not an engine-native event type");
+    }
+
+    public static EventBeanAdapterFactory getAdapterFactoryForType(EventType eventType) {
+        if (eventType instanceof BeanEventType) {
+            return new EventBeanAdapterFactoryBean(eventType);
+        }
+        if (eventType instanceof ObjectArrayEventType) {
+            return new EventBeanAdapterFactoryObjectArray(eventType);
+        }
+        if (eventType instanceof MapEventType) {
+            return new EventBeanAdapterFactoryMap(eventType);
+        }
+        if (eventType instanceof BaseXMLEventType) {
+            return new EventBeanAdapterFactoryXml(eventType);
+        }
+        throw new EventAdapterException("Event type '" + eventType.getName() + "' is not an engine-native event type");
+    }
+
+    public static class EventBeanAdapterFactoryBean implements EventBeanAdapterFactory {
+        private final EventType eventType;
+
+        public EventBeanAdapterFactoryBean(EventType eventType) {
+            this.eventType = eventType;
+        }
+
+        public EventBean makeAdapter(Object underlying) {
+            return new BeanEventBean(underlying, eventType);
+        }
+    }
+
+    public static class EventBeanAdapterFactoryMap implements EventBeanAdapterFactory {
+        private final EventType eventType;
+
+        public EventBeanAdapterFactoryMap(EventType eventType) {
+            this.eventType = eventType;
+        }
+
+        public EventBean makeAdapter(Object underlying) {
+            return new MapEventBean((Map<String, Object>) underlying, eventType);
+        }
+    }
+
+    public static class EventBeanAdapterFactoryObjectArray implements EventBeanAdapterFactory {
+        private final EventType eventType;
+
+        public EventBeanAdapterFactoryObjectArray(EventType eventType) {
+            this.eventType = eventType;
+        }
+
+        public EventBean makeAdapter(Object underlying) {
+            return new ObjectArrayEventBean((Object[]) underlying, eventType);
+        }
+    }
+
+    public static class EventBeanAdapterFactoryXml implements EventBeanAdapterFactory {
+        private final EventType eventType;
+
+        public EventBeanAdapterFactoryXml(EventType eventType) {
+            this.eventType = eventType;
+        }
+
+        public EventBean makeAdapter(Object underlying) {
+            return new XMLEventBean((Node) underlying, eventType);
+        }
     }
 }

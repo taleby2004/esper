@@ -65,12 +65,12 @@ public class TestStreamTypeServiceImpl extends TestCase
     public void testResolveByPropertyName() throws Exception
     {
         tryResolveByPropertyName(serviceRegular);
-        serviceStreamZeroUnambigous.resolveByPropertyName("boolPrimitive");
-        serviceRequireStreamName.resolveByPropertyName("boolPrimitive");
+        serviceStreamZeroUnambigous.resolveByPropertyName("boolPrimitive", false);
+        serviceRequireStreamName.resolveByPropertyName("boolPrimitive", false);
 
         try
         {
-            serviceRequireStreamName.resolveByPropertyName("volume");
+            serviceRequireStreamName.resolveByPropertyName("volume", false);
             fail();
         }
         catch (PropertyNotFoundException ex)
@@ -89,7 +89,7 @@ public class TestStreamTypeServiceImpl extends TestCase
     private static void tryResolveByStreamAndPropNameBoth(StreamTypeService service) throws Exception
     {
         // Test lookup by stream name and prop name
-        PropertyResolutionDescriptor desc = service.resolveByStreamAndPropName("s4", "volume");
+        PropertyResolutionDescriptor desc = service.resolveByStreamAndPropName("s4", "volume", false);
         assertEquals(3, (int) desc.getStreamNum());
         assertEquals(Long.class, desc.getPropertyType());
         assertEquals("volume", desc.getPropertyName());
@@ -98,7 +98,7 @@ public class TestStreamTypeServiceImpl extends TestCase
 
         try
         {
-            service.resolveByStreamAndPropName("xxx", "volume");
+            service.resolveByStreamAndPropName("xxx", "volume", false);
             fail();
         }
         catch (StreamNotFoundException ex)
@@ -108,7 +108,7 @@ public class TestStreamTypeServiceImpl extends TestCase
 
         try
         {
-            service.resolveByStreamAndPropName("s4", "xxxx");
+            service.resolveByStreamAndPropName("s4", "xxxx", false);
             fail();
         }
         catch (PropertyNotFoundException ex)
@@ -120,7 +120,7 @@ public class TestStreamTypeServiceImpl extends TestCase
     private static void tryResolveByPropertyName(StreamTypeService service) throws Exception
     {
         // Test lookup by property name only
-        PropertyResolutionDescriptor desc = service.resolveByPropertyName("volume");
+        PropertyResolutionDescriptor desc = service.resolveByPropertyName("volume", false);
         assertEquals(3, (int) (desc.getStreamNum()));
         assertEquals(Long.class, desc.getPropertyType());
         assertEquals("volume", desc.getPropertyName());
@@ -129,7 +129,7 @@ public class TestStreamTypeServiceImpl extends TestCase
 
         try
         {
-            service.resolveByPropertyName("boolPrimitive");
+            service.resolveByPropertyName("boolPrimitive", false);
             fail();
         }
         catch (DuplicatePropertyException ex)
@@ -139,7 +139,7 @@ public class TestStreamTypeServiceImpl extends TestCase
 
         try
         {
-            service.resolveByPropertyName("xxxx");
+            service.resolveByPropertyName("xxxx", false);
             fail();
         }
         catch (PropertyNotFoundException ex)
@@ -151,7 +151,7 @@ public class TestStreamTypeServiceImpl extends TestCase
     private static void tryResolveByStreamAndPropNameInOne(StreamTypeService service) throws Exception
     {
         // Test lookup by stream name and prop name
-        PropertyResolutionDescriptor desc = service.resolveByStreamAndPropName("s4.volume");
+        PropertyResolutionDescriptor desc = service.resolveByStreamAndPropName("s4.volume", false);
         assertEquals(3, (int) desc.getStreamNum());
         assertEquals(Long.class, desc.getPropertyType());
         assertEquals("volume", desc.getPropertyName());
@@ -160,7 +160,7 @@ public class TestStreamTypeServiceImpl extends TestCase
 
         try
         {
-            service.resolveByStreamAndPropName("xxx.volume");
+            service.resolveByStreamAndPropName("xxx.volume", false);
             fail();
         }
         catch (PropertyNotFoundException ex)
@@ -170,7 +170,7 @@ public class TestStreamTypeServiceImpl extends TestCase
 
         try
         {
-            service.resolveByStreamAndPropName("s4.xxxx");
+            service.resolveByStreamAndPropName("s4.xxxx", false);
             fail();
         }
         catch (PropertyNotFoundException ex)
@@ -179,11 +179,11 @@ public class TestStreamTypeServiceImpl extends TestCase
         }
 
         // resolve by event type alias (table name)
-        desc = service.resolveByStreamAndPropName("SupportMarketDataBean.volume");
+        desc = service.resolveByStreamAndPropName("SupportMarketDataBean.volume", false);
         assertEquals(3, (int) desc.getStreamNum());
 
         // resolve by engine URI plus event type alias
-        desc = service.resolveByStreamAndPropName("default.SupportMarketDataBean.volume");
+        desc = service.resolveByStreamAndPropName("default.SupportMarketDataBean.volume", false);
         assertEquals(3, (int) desc.getStreamNum());
     }
 }

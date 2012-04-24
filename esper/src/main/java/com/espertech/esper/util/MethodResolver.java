@@ -201,23 +201,23 @@ public class MethodResolver
 			return bestMatch;
 		}
 
-        StringBuffer params = new StringBuffer();
+        StringBuffer parameters = new StringBuffer();
         if(paramTypes != null && paramTypes.length != 0)
         {
             String appendString = "";
             for(Object param : paramTypes)
             {
-                params.append(appendString);
+                parameters.append(appendString);
                 if (param == null) {
-                    params.append("(null)");
+                    parameters.append("(null)");
                 }
                 else {
-                    params.append(param.toString());
+                    parameters.append(param.toString());
                 }
                 appendString = ", ";
             }
         }
-        throw new EngineNoSuchMethodException("Unknown method " + declaringClass.getSimpleName() + '.' + methodName + '(' + params + ')', conversionFailedMethod);
+        throw new EngineNoSuchMethodException("Unknown method " + declaringClass.getSimpleName() + '.' + methodName + '(' + parameters + ')', conversionFailedMethod);
 	}
 
     private static void logWarnBoxedToPrimitiveType(Class declaringClass, String methodName, Method bestMatch, Class[] paramTypes) {
@@ -228,7 +228,7 @@ public class MethodResolver
             }
             if (paramTypes[i] == null || (JavaClassHelper.getBoxedType(parametersMethod[i])) == paramTypes[i]) {
                 String paramTypeStr = paramTypes[i] == null ? "null" : paramTypes[i].getSimpleName();
-                log.warn("Method '" + methodName + "' in class '" + declaringClass.getName() + "' expects primitive type '" + parametersMethod[i] +
+                log.info("Method '" + methodName + "' in class '" + declaringClass.getName() + "' expects primitive type '" + parametersMethod[i] +
                         "' as parameter " + i + ", but receives a nullable (boxed) type " + paramTypeStr +
                         ". This may cause null pointer exception at runtime if the actual value is null, please consider using boxed types for method parameters.");
                 return;
@@ -377,23 +377,23 @@ public class MethodResolver
         }
         else
         {
-            StringBuffer params = new StringBuffer();
+            StringBuffer parameters = new StringBuffer();
             String message = "Constructor not found for " + declaringClass.getSimpleName() + " taking ";
             if(paramTypes != null && paramTypes.length != 0)
             {
                 String appendString = "";
                 for(Object param : paramTypes)
                 {
-                    params.append(appendString);
+                    parameters.append(appendString);
                     if (param == null) {
-                        params.append("(null)");
+                        parameters.append("(null)");
                     }
                     else {
-                        params.append(param.toString());
+                        parameters.append(param.toString());
                     }
                     appendString = ", ";
                 }
-                message += "('" + params + "')'";
+                message += "('" + parameters + "')'";
             }
             else {
                 message += "no parameters";

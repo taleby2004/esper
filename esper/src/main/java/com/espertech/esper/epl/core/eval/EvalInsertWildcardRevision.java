@@ -16,14 +16,8 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.event.vaevent.ValueAddEventProcessor;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Map;
 
 public class EvalInsertWildcardRevision extends EvalBase implements SelectExprProcessor {
-
-    private static final Log log = LogFactory.getLog(EvalInsertWildcardRevision.class);
 
     private final ValueAddEventProcessor vaeProcessor;
 
@@ -32,9 +26,8 @@ public class EvalInsertWildcardRevision extends EvalBase implements SelectExprPr
         this.vaeProcessor = vaeProcessor;
     }
 
-    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
-    {
-        EventBean event = eventsPerStream[0];
-        return vaeProcessor.getValueAddEventBean(event);
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
+        EventBean theEvent = eventsPerStream[0];
+        return vaeProcessor.getValueAddEventBean(theEvent);
     }
 }

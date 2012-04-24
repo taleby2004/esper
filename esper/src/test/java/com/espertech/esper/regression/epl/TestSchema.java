@@ -22,9 +22,11 @@ import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TestSchema extends TestCase
@@ -48,7 +50,7 @@ public class TestSchema extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_S0", SupportBean_S0.class);
         epService.getEPAdministrator().getConfiguration().addEventType("BeanSourceEvent", BeanSourceEvent.class);
-        BeanSourceEvent event = new BeanSourceEvent(new SupportBean("E1", 1), new SupportBean_S0[] {new SupportBean_S0(2)});
+        BeanSourceEvent theEvent = new BeanSourceEvent(new SupportBean("E1", 1), new SupportBean_S0[] {new SupportBean_S0(2)});
 
         // test schema
         EPStatement stmtSchema = epService.getEPAdministrator().createEPL("create schema MySchema (bean SupportBean, beanarray SupportBean_S0[])");
@@ -57,8 +59,8 @@ public class TestSchema extends TestCase
 
         EPStatement stmtSchemaInsert = epService.getEPAdministrator().createEPL("insert into MySchema select sb as bean, s0Arr as beanarray from BeanSourceEvent");
         stmtSchemaInsert.addListener(listener);
-        epService.getEPRuntime().sendEvent(event);
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
+        epService.getEPRuntime().sendEvent(theEvent);
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.theString,beanarray[0].id".split(","), new Object[] {"E1", 2});
         stmtSchemaInsert.destroy();
 
         // test named window
@@ -68,8 +70,8 @@ public class TestSchema extends TestCase
         assertEquals(new EventPropertyDescriptor("beanarray", SupportBean_S0[].class, SupportBean_S0.class, false, false, true, false, true), stmtWindow.getEventType().getPropertyDescriptor("beanarray"));
 
         EPStatement stmtWindowInsert = epService.getEPAdministrator().createEPL("insert into MyWindow select sb as bean, s0Arr as beanarray from BeanSourceEvent");
-        epService.getEPRuntime().sendEvent(event);
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
+        epService.getEPRuntime().sendEvent(theEvent);
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.theString,beanarray[0].id".split(","), new Object[] {"E1", 2});
         stmtWindowInsert.destroy();
 
         // insert pattern to named window
@@ -78,7 +80,7 @@ public class TestSchema extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "S0_1"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(20, "S0_2"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0, "S0_3"));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id,beanarray[1].id".split(","), new Object[] {"E2", 10, 20});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.theString,beanarray[0].id,beanarray[1].id".split(","), new Object[] {"E2", 10, 20});
         stmtWindowPattern.destroy();
 
         // test configured Map type
@@ -89,30 +91,42 @@ public class TestSchema extends TestCase
         
         EPStatement stmtMapInsert = epService.getEPAdministrator().createEPL("insert into MyConfiguredMap select sb as bean, s0Arr as beanarray from BeanSourceEvent");
         stmtMapInsert.addListener(listener);
-        epService.getEPRuntime().sendEvent(event);
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.string,beanarray[0].id".split(","), new Object[] {"E1", 2});
+        epService.getEPRuntime().sendEvent(theEvent);
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "bean.theString,beanarray[0].id".split(","), new Object[] {"E1", 2});
         stmtMapInsert.destroy();
     }
 
     public void testSchemaCopyProperties() {
-        epService.getEPAdministrator().createEPL("create schema BaseOne (prop1 String, prop2 int)");
-        epService.getEPAdministrator().createEPL("create schema BaseTwo (prop3 long)");
+        runAssertionSchemaCopyProperties(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionSchemaCopyProperties(EventRepresentationEnum.DEFAULT);
+        runAssertionSchemaCopyProperties(EventRepresentationEnum.MAP);
+    }
+
+    private void runAssertionSchemaCopyProperties(EventRepresentationEnum eventRepresentationEnum) {
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema BaseOne (prop1 String, prop2 int)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema BaseTwo (prop3 long)");
 
         // test define and send
-        epService.getEPAdministrator().createEPL("create schema E1 () copyfrom BaseOne");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema E1 () copyfrom BaseOne");
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("select * from E1");
         stmtOne.addListener(listener);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtOne.getEventType().getUnderlyingType());
         assertEquals(String.class, stmtOne.getEventType().getPropertyType("prop1"));
         assertEquals(Integer.class, stmtOne.getEventType().getPropertyType("prop2"));
 
-        Map<String, Object> eventE1 = new HashMap<String, Object>();
+        Map<String, Object> eventE1 = new LinkedHashMap<String, Object>();
         eventE1.put("prop1", "v1");
         eventE1.put("prop2", 2);
-        epService.getEPRuntime().sendEvent(eventE1, "E1");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(eventE1.values().toArray(), "E1");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(eventE1, "E1");
+        }
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "prop1,prop2".split(","), new Object[]{"v1", 2});
 
         // test two copy-from types
-        epService.getEPAdministrator().createEPL("create schema E2 () copyfrom BaseOne, BaseTwo");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema E2 () copyfrom BaseOne, BaseTwo");
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL("select * from E2");
         assertEquals(String.class, stmtTwo.getEventType().getPropertyType("prop1"));
         assertEquals(Integer.class, stmtTwo.getEventType().getPropertyType("prop2"));
@@ -126,33 +140,42 @@ public class TestSchema extends TestCase
         def.put("d", "BaseTwo[]");
         epService.getEPAdministrator().getConfiguration().addEventType("MyType", def);
 
-        epService.getEPAdministrator().createEPL("create schema E3(e long, f BaseOne) copyfrom MyType");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema E3(e long, f BaseOne) copyfrom MyType");
         EPStatement stmtThree = epService.getEPAdministrator().createEPL("select * from E3");
         assertEquals(String.class, stmtThree.getEventType().getPropertyType("a"));
         assertEquals(String.class, stmtThree.getEventType().getPropertyType("b"));
-        assertEquals(Map.class, stmtThree.getEventType().getPropertyType("c"));
-        assertEquals(Map[].class, stmtThree.getEventType().getPropertyType("d"));
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            assertEquals(Object[].class, stmtThree.getEventType().getPropertyType("c"));
+            assertEquals(Object[][].class, stmtThree.getEventType().getPropertyType("d"));
+            assertEquals(Object[].class, stmtThree.getEventType().getPropertyType("f"));
+        }
+        else {
+            assertEquals(Map.class, stmtThree.getEventType().getPropertyType("c"));
+            assertEquals(Map[].class, stmtThree.getEventType().getPropertyType("d"));
+            assertEquals(Map.class, stmtThree.getEventType().getPropertyType("f"));
+        }
         assertEquals(Long.class, stmtThree.getEventType().getPropertyType("e"));
-        assertEquals(Map.class, stmtThree.getEventType().getPropertyType("f"));
 
         // invalid tests
-        tryInvalid("create schema E4(a long) copyFrom MyType",
-                "Error starting statement: Type by name 'MyType' contributes property 'a' defined as 'java.lang.String' which overides the same property of type 'java.lang.Long' [create schema E4(a long) copyFrom MyType]");
-        tryInvalid("create schema E4(c BaseTwo) copyFrom MyType",
-                "Error starting statement: Property by name 'c' is defined twice by adding type 'MyType' [create schema E4(c BaseTwo) copyFrom MyType]");
-        tryInvalid("create schema E4(c BaseTwo) copyFrom XYZ",
-                "Error starting statement: Type by name 'XYZ' could not be located [create schema E4(c BaseTwo) copyFrom XYZ]");
-        tryInvalid("create schema E4 as " + SupportBean.class.getName() + " copyFrom XYZ",
-                "Error starting statement: Copy-from types are not allowed with class-provided types [create schema E4 as com.espertech.esper.support.bean.SupportBean copyFrom XYZ]");
-        tryInvalid("create variant schema E4(c BaseTwo) copyFrom XYZ",
-                "Error starting statement: Copy-from types are not allowed with variant types [create variant schema E4(c BaseTwo) copyFrom XYZ]");
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create schema E4(a long) copyFrom MyType",
+                "Error starting statement: Type by name 'MyType' contributes property 'a' defined as 'java.lang.String' which overides the same property of type 'java.lang.Long' [");
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create schema E4(c BaseTwo) copyFrom MyType",
+                "Error starting statement: Property by name 'c' is defined twice by adding type 'MyType' [");
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create schema E4(c BaseTwo) copyFrom XYZ",
+                "Error starting statement: Type by name 'XYZ' could not be located [");
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create schema E4 as " + SupportBean.class.getName() + " copyFrom XYZ",
+                "Error starting statement: Copy-from types are not allowed with class-provided types [");
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create variant schema E4(c BaseTwo) copyFrom XYZ",
+                "Error starting statement: Copy-from types are not allowed with variant types [");
 
         // test SODA
-        String createEPL = "create schema EX as () copyFrom BaseOne, BaseTwo";
+        String createEPL = eventRepresentationEnum.getAnnotationText() + " create schema EX as () copyFrom BaseOne, BaseTwo";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(createEPL);
-        assertEquals(createEPL, model.toEPL());
+        assertEquals(createEPL.trim(), model.toEPL());
         EPStatement stmt = epService.getEPAdministrator().create(model);
-        assertEquals(createEPL, stmt.getText());
+        assertEquals(createEPL.trim(), stmt.getText());
+
+        epService.initialize();
     }
     
     public void testConfiguredNotRemoved() throws Exception {
@@ -190,24 +213,32 @@ public class TestSchema extends TestCase
     }
 
     public void testInvalid() {
-        tryInvalid("create schema MyEventType as (col1 xxxx)",
-                    "Error starting statement: Nestable map type configuration encountered an unexpected property type name 'xxxx' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map type [create schema MyEventType as (col1 xxxx)]");
+        runAssertionInvalid(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionInvalid(EventRepresentationEnum.MAP);
+        runAssertionInvalid(EventRepresentationEnum.DEFAULT);
+    }
 
-        tryInvalid("create schema MyEventType as (col1 int, col1 string)",
-                    "Error starting statement: Duplicate column name 'col1' [create schema MyEventType as (col1 int, col1 string)]");
+    private void runAssertionInvalid(EventRepresentationEnum eventRepresentationEnum) {
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create schema MyEventType as (col1 xxxx)",
+                    "Error starting statement: Nestable type configuration encountered an unexpected property type name 'xxxx' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map or ObjectArray type [");
 
-        epService.getEPAdministrator().createEPL("create schema MyEventType as (col1 string)");
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create schema MyEventType as (col1 int, col1 string)",
+                    "Error starting statement: Duplicate column name 'col1' [");
+
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyEventType as (col1 string)");
         tryInvalid("create schema MyEventType as (col1 string, col2 string)",
-                    "Error starting statement: Event type named 'MyEventType' has already been declared with differing column name or type information: Type by name 'MyEventType' expects 1 properties but receives 2 properties [create schema MyEventType as (col1 string, col2 string)]");
+                    "Error starting statement: Event type named 'MyEventType' has already been declared with differing column name or type information: Type by name 'MyEventType' expects 1 properties but receives 2 properties [");
 
-        tryInvalid("create schema MyEventType as () inherit ABC",
-                    "Error in expression: Expected 'inherits', 'starttimestamp', 'endtimestamp' or 'copyfrom' keyword after create-schema clause but encountered 'inherit' [create schema MyEventType as () inherit ABC]");
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create schema MyEventType as () inherit ABC",
+                    "Error in expression: Expected 'inherits', 'starttimestamp', 'endtimestamp' or 'copyfrom' keyword after create-schema clause but encountered 'inherit' [");
 
-        tryInvalid("create schema MyEventType as () inherits ABC",
-                    "Error starting statement: Map supertype by name 'ABC' could not be found [create schema MyEventType as () inherits ABC]");
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create schema MyEventType as () inherits ABC",
+                    "Error starting statement: Supertype by name 'ABC' could not be found [");
 
-        tryInvalid("create schema MyEventType as () inherits",
-                    "Incorrect syntax near 'inherits' expecting an identifier but found end of input at line 1 column 32 [create schema MyEventType as () inherits]");
+        tryInvalid(eventRepresentationEnum.getAnnotationText() + " create schema MyEventType as () inherits",
+                    "Incorrect syntax near 'inherits' expecting an identifier but found end of input at line 1 column ");
+
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyEventType", true);
     }
 
     public void testDestroySameType() {
@@ -223,35 +254,48 @@ public class TestSchema extends TestCase
         assertFalse(epService.getEPAdministrator().getConfiguration().isEventTypeExists("MyEventType"));
     }
 
-    public void testColDefPlain() throws Exception
+    public void testColDefPlain() throws Exception {
+        runAssertionColDefPlain(EventRepresentationEnum.DEFAULT);
+        runAssertionColDefPlain(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionColDefPlain(EventRepresentationEnum.MAP);
+    }
+
+    private void runAssertionColDefPlain(EventRepresentationEnum eventRepresentationEnum) throws Exception
     {
-        EPStatement stmtCreate = epService.getEPAdministrator().createEPL("create schema MyEventType as (col1 string, col2 int, sbean " + SupportBean.class.getName() + ", col3.col4 int)");
+        EPStatement stmtCreate = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyEventType as (col1 string, col2 int, sbean " + SupportBean.class.getName() + ", col3.col4 int)");
         assertTypeColDef(stmtCreate.getEventType());
-        EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select * from MyEventType");
+        EPStatement stmtSelect = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " select * from MyEventType");
         assertTypeColDef(stmtSelect.getEventType());
 
         stmtSelect.destroy();
         stmtCreate.destroy();
 
         // destroy and create differently 
-        stmtCreate = epService.getEPAdministrator().createEPL("create schema MyEventType as (col3 string, col4 int)");
+        stmtCreate = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyEventType as (col3 string, col4 int)");
         assertEquals(Integer.class, stmtCreate.getEventType().getPropertyType("col4"));
         assertEquals(2, stmtCreate.getEventType().getPropertyDescriptors().length);
 
         stmtCreate.stop();
 
         // destroy and create differently
-        stmtCreate = epService.getEPAdministrator().createEPL("create schema MyEventType as (col5 string, col6 int)");
+        stmtCreate = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyEventType as (col5 string, col6 int)");
+        assertEquals(stmtCreate.getEventType().getUnderlyingType(), eventRepresentationEnum.getOutputClass());
         assertEquals(Integer.class, stmtCreate.getEventType().getPropertyType("col6"));
         assertEquals(2, stmtCreate.getEventType().getPropertyDescriptors().length);
-        stmtSelect = epService.getEPAdministrator().createEPL("select * from MyEventType");
+        stmtSelect = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " select * from MyEventType");
         stmtSelect.addListener(listener);
+        assertEquals(stmtSelect.getEventType().getUnderlyingType(), eventRepresentationEnum.getOutputClass());
 
         // send event
-        Map<String, Object> data = new HashMap<String, Object>();
+        Map<String, Object> data = new LinkedHashMap<String, Object>();
         data.put("col5", "abc");
         data.put("col6", 1);
-        epService.getEPRuntime().sendEvent(data, "MyEventType");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(data.values().toArray(), "MyEventType");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(data, "MyEventType");
+        }
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col5,col6".split(","), new Object[]{"abc", 1});
         
         // assert type information
@@ -262,6 +306,22 @@ public class TestSchema extends TestCase
         assertFalse(typeSPI.getMetadata().isApplicationPreConfigured());
         assertFalse(typeSPI.getMetadata().isApplicationPreConfiguredStatic());
         assertEquals(typeSPI.getName(), typeSPI.getMetadata().getPrimaryName());
+
+        // test non-enum create-schema
+        String epl = "create" + eventRepresentationEnum.getOutputTypeCreateSchemaName() + " schema MyEventTypeTwo as (col1 string, col2 int, sbean " + SupportBean.class.getName() + ", col3.col4 int)";
+        EPStatement stmtCreateTwo = epService.getEPAdministrator().createEPL(epl);
+        assertTypeColDef(stmtCreateTwo.getEventType());
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtCreateTwo.getEventType().getUnderlyingType());
+        stmtCreateTwo.destroy();
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyEventTypeTwo", true);
+
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
+        assertEquals(model.toEPL(), epl);
+        stmtCreateTwo = epService.getEPAdministrator().create(model);
+        assertTypeColDef(stmtCreateTwo.getEventType());
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtCreateTwo.getEventType().getUnderlyingType());
+
+        epService.initialize();
     }
 
     public void testModelPOJO() throws Exception
@@ -281,7 +341,7 @@ public class TestSchema extends TestCase
         stmtSelectTwo.addListener(listener);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
-        EPAssertionUtil.assertPropsPerRow(listener.getNewDataListFlattened(), "string,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E1", 2}});
+        EPAssertionUtil.assertPropsPerRow(listener.getNewDataListFlattened(), "theString,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E1", 2}});
 
         // assert type information
         EventTypeSPI typeSPI = (EventTypeSPI) stmtSelectOne.getEventType();
@@ -293,16 +353,23 @@ public class TestSchema extends TestCase
         assertEquals(typeSPI.getName(), typeSPI.getMetadata().getPrimaryName());
     }
 
-    public void testNestableMapArray() throws Exception
+    public void testNestableMapArray() throws Exception {
+        runAssertionNestableMapArray(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionNestableMapArray(EventRepresentationEnum.MAP);
+        runAssertionNestableMapArray(EventRepresentationEnum.DEFAULT);
+    }
+
+    public void runAssertionNestableMapArray(EventRepresentationEnum eventRepresentationEnum) throws Exception
     {
-        EPStatement stmtInner = epService.getEPAdministrator().createEPL("create schema MyInnerType as (col1 string[], col2 int[])");
+        EPStatement stmtInner = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyInnerType as (col1 string[], col2 int[])");
         EventType inner = stmtInner.getEventType();
         assertEquals(String[].class, inner.getPropertyType("col1"));
         assertTrue(inner.getPropertyDescriptor("col1").isIndexed());
         assertEquals(Integer[].class, inner.getPropertyType("col2"));
         assertTrue(inner.getPropertyDescriptor("col2").isIndexed());
+        assertEquals(eventRepresentationEnum.getOutputClass(), inner.getUnderlyingType());
 
-        EPStatement stmtOuter = epService.getEPAdministrator().createEPL("create schema MyOuterType as (col1 MyInnerType, col2 MyInnerType[])");
+        EPStatement stmtOuter = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyOuterType as (col1 MyInnerType, col2 MyInnerType[])");
         FragmentEventType type = stmtOuter.getEventType().getFragmentType("col1");
         assertEquals("MyInnerType", type.getFragmentType().getName());
         assertFalse(type.isIndexed());
@@ -314,15 +381,27 @@ public class TestSchema extends TestCase
         
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select * from MyOuterType");
         stmtSelect.addListener(listener);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtSelect.getEventType().getUnderlyingType());
 
-        Map<String, Object> innerData = new HashMap<String, Object>();
-        innerData.put("col1", "abc,def".split(","));
-        innerData.put("col2", new int[] {1, 2});
-        Map<String, Object> outerData = new HashMap<String, Object>();
-        outerData.put("col1", innerData);
-        outerData.put("col2", new Map[] {innerData, innerData});
-        epService.getEPRuntime().sendEvent(outerData, "MyOuterType");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            Object[] innerData = new Object[] {"abc,def".split(","), new int[] {1, 2}};
+            Object[] outerData = new Object[] {innerData, new Object[] {innerData, innerData}};
+            epService.getEPRuntime().sendEvent(outerData, "MyOuterType");
+        }
+        else {
+            Map<String, Object> innerData = new HashMap<String, Object>();
+            innerData.put("col1", "abc,def".split(","));
+            innerData.put("col2", new int[] {1, 2});
+            Map<String, Object> outerData = new HashMap<String, Object>();
+            outerData.put("col1", innerData);
+            outerData.put("col2", new Map[]{innerData, innerData});
+            epService.getEPRuntime().sendEvent(outerData, "MyOuterType");
+        }
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "col1.col1[1],col2[1].col2[1]".split(","), new Object[]{"def", 2});
+
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyInnerType", true);
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyOuterType", true);
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testInherit() throws Exception
@@ -395,7 +474,7 @@ public class TestSchema extends TestCase
             fail();
         }
         catch (EPStatementException ex) {
-            assertEquals(message, ex.getMessage());
+            assertTrue("Expected:\n" + message + "\nActual:\n" + ex.getMessage(), ex.getMessage().startsWith(message));
         }
     }
 

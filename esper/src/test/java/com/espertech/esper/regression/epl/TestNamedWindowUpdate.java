@@ -11,14 +11,18 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import com.espertech.esper.support.bean.*;
-import junit.framework.TestCase;
-import com.espertech.esper.client.*;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanAbstractSub;
+import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
+import junit.framework.TestCase;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class TestNamedWindowUpdate extends TestCase
 {
@@ -49,8 +53,8 @@ public class TestNamedWindowUpdate extends TestCase
         String epl = "@Name(\"Self Update\")\n" +
                 "on SupportBean_A c\n" +
                 "update MyWindow s\n" +
-                "set intPrimitive = (select intPrimitive from MyWindow t where t.string = c.id) + 1\n" +
-                "where s.string = c.id";
+                "set intPrimitive = (select intPrimitive from MyWindow t where t.theString = c.id) + 1\n" +
+                "where s.theString = c.id";
         epService.getEPAdministrator().createEPL(epl);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -59,18 +63,18 @@ public class TestNamedWindowUpdate extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
         
-        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), "string,intPrimitive".split(","), new Object[][]{{"E1", 3}, {"E2", 7}});
+        EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), "theString,intPrimitive".split(","), new Object[][]{{"E1", 3}, {"E2", 7}});
     }
 
     public void testMultipleDataWindowIntersect() {
-        String stmtTextCreate = "create window MyWindow.std:unique(string).win:length(2) as select * from SupportBean";
+        String stmtTextCreate = "create window MyWindow.std:unique(theString).win:length(2) as select * from SupportBean";
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
         String stmtTextInsertOne = "insert into MyWindow select * from SupportBean";
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
-        String stmtTextUpdate = "on SupportBean_A update MyWindow set intPrimitive=intPrimitive*100 where string=id";
+        String stmtTextUpdate = "on SupportBean_A update MyWindow set intPrimitive=intPrimitive*100 where theString=id";
         epService.getEPAdministrator().createEPL(stmtTextUpdate);
         
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
@@ -82,10 +86,10 @@ public class TestNamedWindowUpdate extends TestCase
         assertEquals(1, newevents.length);
         EPAssertionUtil.assertProps(newevents[0], "intPrimitive".split(","), new Object[]{300});
         assertEquals(2, oldevents.length);
-        oldevents = EPAssertionUtil.sort(oldevents, "string");
-        EPAssertionUtil.assertPropsPerRow(oldevents, "string,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E2", 3}});
+        oldevents = EPAssertionUtil.sort(oldevents, "theString");
+        EPAssertionUtil.assertPropsPerRow(oldevents, "theString,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E2", 3}});
 
-        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), "string,intPrimitive".split(","), new Object[][]{{"E2", 300}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), "theString,intPrimitive".split(","), new Object[][]{{"E2", 300}});
     }
     
     public void testMultipleDataWindowIntersectOnUpdate() {
@@ -100,40 +104,45 @@ public class TestNamedWindowUpdate extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL("select count(*) as cnt from S2Win");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(createEvent("AComp", 3.0, 0.0), "S2");
+        createSendEvent(epService, "S2", "AComp", 3.0, 0.0);
         assertEquals(1L, listener.assertOneGetNewAndReset().get("cnt"));
         EPAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][]{{"AComp", 3.0, 0.0}});
 
-        epService.getEPRuntime().sendEvent(createEvent("AComp", 6.0, 0.0), "S2");
+        createSendEvent(epService, "S2", "AComp", 6.0, 0.0);
         assertEquals(1L, listener.assertOneGetNewAndReset().get("cnt"));
         EPAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][]{{"AComp", 3.0, 9.0}});
 
-        epService.getEPRuntime().sendEvent(createEvent("AComp", 5.0, 0.0), "S2");
+        createSendEvent(epService, "S2", "AComp", 5.0, 0.0);
         assertEquals(1L, listener.assertOneGetNewAndReset().get("cnt"));
         EPAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][]{{"AComp", 3.0, 8.0}});
 
-        epService.getEPRuntime().sendEvent(createEvent("BComp", 4.0, 0.0), "S2");
+        createSendEvent(epService, "S2", "BComp", 4.0, 0.0);
         assertEquals(2L, listener.assertOneGetNewAndReset().get("cnt"));
         EPAssertionUtil.assertPropsPerRow(stmtWin.iterator(), fields, new Object[][]{{"AComp", 3.0, 7.0}, {"BComp", 4.0, 0.0}});
     }
 
-    private HashMap<String, Object> createEvent(String company, double value, double total) {
-        HashMap<String, Object> map = new HashMap<String, Object>();
+    private void createSendEvent(EPServiceProvider engine, String typeName, String company, double value, double total) {
+        HashMap<String, Object> map = new LinkedHashMap<String, Object>();
         map.put("company", company);
         map.put("value", value);
         map.put("total", total);
-        return map;
+        if (EventRepresentationEnum.getEngineDefault(epService).isObjectArrayEvent()) {
+            engine.getEPRuntime().sendEvent(map.values().toArray(), typeName);
+        }
+        else {
+            engine.getEPRuntime().sendEvent(map, typeName);
+        }
     }
 
     public void testMultipleDataWindowUnion() {
-        String stmtTextCreate = "create window MyWindow.std:unique(string).win:length(2) retain-union as select * from SupportBean";
+        String stmtTextCreate = "create window MyWindow.std:unique(theString).win:length(2) retain-union as select * from SupportBean";
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
         String stmtTextInsertOne = "insert into MyWindow select * from SupportBean";
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
-        String stmtTextUpdate = "on SupportBean_A update MyWindow mw set mw.intPrimitive=intPrimitive*100 where string=id";
+        String stmtTextUpdate = "on SupportBean_A update MyWindow mw set mw.intPrimitive=intPrimitive*100 where theString=id";
         epService.getEPAdministrator().createEPL(stmtTextUpdate);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
@@ -145,10 +154,10 @@ public class TestNamedWindowUpdate extends TestCase
         assertEquals(1, newevents.length);
         EPAssertionUtil.assertProps(newevents[0], "intPrimitive".split(","), new Object[]{300});
         assertEquals(1, oldevents.length);
-        EPAssertionUtil.assertPropsPerRow(oldevents, "string,intPrimitive".split(","), new Object[][]{{"E2", 3}});
+        EPAssertionUtil.assertPropsPerRow(oldevents, "theString,intPrimitive".split(","), new Object[][]{{"E2", 3}});
 
-        EventBean[] events = EPAssertionUtil.sort(stmtCreate.iterator(), "string");
-        EPAssertionUtil.assertPropsPerRow(events, "string,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E2", 300}});
+        EventBean[] events = EPAssertionUtil.sort(stmtCreate.iterator(), "theString");
+        EPAssertionUtil.assertPropsPerRow(events, "theString,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E2", 300}});
     }
 
     public void testSubclass()
@@ -163,7 +172,7 @@ public class TestNamedWindowUpdate extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create update
-        String stmtTextUpdate = "on " + SupportBean.class.getName() + " update MyWindow set v1=string, v2=string";
+        String stmtTextUpdate = "on " + SupportBean.class.getName() + " update MyWindow set v1=theString, v2=theString";
         epService.getEPAdministrator().createEPL(stmtTextUpdate);
         
         epService.getEPRuntime().sendEvent(new SupportBeanAbstractSub("value2"));

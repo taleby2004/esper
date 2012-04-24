@@ -87,16 +87,16 @@ public class TestExprLikeNode extends TestCase
 
     public void testToExpressionString() throws Exception
     {
-        assertEquals("s0.string like \"%abc__\"", likeNodeNormal.toExpressionString());
-        assertEquals("s0.string not like \"%abc__\"", likeNodeNot.toExpressionString());
-        assertEquals("s0.string like \"%abc__\" escape \"!\"", likeNodeNormalEscaped.toExpressionString());
+        assertEquals("s0.theString like \"%abc__\"", likeNodeNormal.toExpressionString());
+        assertEquals("s0.theString not like \"%abc__\"", likeNodeNot.toExpressionString());
+        assertEquals("s0.theString like \"%abc__\" escape \"!\"", likeNodeNormalEscaped.toExpressionString());
     }
 
     private EventBean[] makeEvent(String stringValue)
     {
-        SupportBean event = new SupportBean();
-        event.setString(stringValue);
-        return new EventBean[] {SupportEventBeanFactory.createObject(event)};
+        SupportBean theEvent = new SupportBean();
+        theEvent.setTheString(stringValue);
+        return new EventBean[] {SupportEventBeanFactory.createObject(theEvent)};
     }
 
     private void tryInvalidValidate(ExprLikeNode exprLikeRegexpNode) throws Exception

@@ -17,10 +17,10 @@ public interface InternalEventRouteDest
 {
     /**
      * Route the event such that the event is processed as required.
-     * @param event to route
+     * @param theEvent to route
      * @param statementHandle provides statement resources
      */
-    public void route(EventBean event, EPStatementHandle statementHandle, boolean addToFront);
+    public void route(EventBean theEvent, EPStatementHandle statementHandle, boolean addToFront);
 
     public void setInternalEventRouter(InternalEventRouter internalEventRouter);
 

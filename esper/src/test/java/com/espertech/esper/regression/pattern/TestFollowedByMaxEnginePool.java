@@ -48,10 +48,10 @@ public class TestFollowedByMaxEnginePool extends TestCase implements SupportBean
     {
         initService(4L, true);
 
-        String expressionOne = "@Name('S1') select * from pattern [every a=SupportBean(string like 'A%') -[2]> b=SupportBean_A(id=a.string)]";
+        String expressionOne = "@Name('S1') select * from pattern [every a=SupportBean(theString like 'A%') -[2]> b=SupportBean_A(id=a.theString)]";
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(expressionOne);
 
-        String expressionTwo = "@Name('S2') select * from pattern [every a=SupportBean(string like 'B%') -> b=SupportBean_B(id=a.string)]";
+        String expressionTwo = "@Name('S2') select * from pattern [every a=SupportBean(theString like 'B%') -> b=SupportBean_B(id=a.theString)]";
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL(expressionTwo);
 
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 0));
@@ -88,10 +88,10 @@ public class TestFollowedByMaxEnginePool extends TestCase implements SupportBean
     {
         initService(4, true);
 
-        String expressionOne = "@Name('S1') select * from pattern [every a=SupportBean(string like 'A%') -> b=SupportBean_A(id=a.string)]";
+        String expressionOne = "@Name('S1') select * from pattern [every a=SupportBean(theString like 'A%') -> b=SupportBean_A(id=a.theString)]";
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(expressionOne);
 
-        String expressionTwo = "@Name('S2') select * from pattern [every a=SupportBean(string like 'B%') -> b=SupportBean_B(id=a.string)]";
+        String expressionTwo = "@Name('S2') select * from pattern [every a=SupportBean(theString like 'B%') -> b=SupportBean_B(id=a.theString)]";
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL(expressionTwo);
 
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 0));

@@ -12,7 +12,6 @@
 package com.espertech.esper.rowregex;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 
 import java.util.ArrayList;
 
@@ -46,7 +45,7 @@ public class RegexPartitionStateRepoNoGroup implements RegexPartitionStateRepo
         this.hasInterval = hasInterval;
     }
 
-    public void removeState(MultiKeyUntyped partitionKey) {
+    public void removeState(Object partitionKey) {
         // not an operation
     }
 
@@ -76,12 +75,12 @@ public class RegexPartitionStateRepoNoGroup implements RegexPartitionStateRepo
         singletonState.removeEventFromPrev(oldEvents);
     }
 
-    public RegexPartitionState getState(EventBean event, boolean collect)
+    public RegexPartitionState getState(EventBean theEvent, boolean collect)
     {
         return singletonState;
     }
 
-    public RegexPartitionState getState(MultiKeyUntyped key)
+    public RegexPartitionState getState(Object key)
     {
         return singletonState;
     }

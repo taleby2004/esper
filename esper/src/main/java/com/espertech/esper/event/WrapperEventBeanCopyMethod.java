@@ -38,9 +38,9 @@ public class WrapperEventBeanCopyMethod implements EventBeanCopyMethod
         this.underlyingCopyMethod = underlyingCopyMethod;
     }
 
-    public EventBean copy(EventBean event)
+    public EventBean copy(EventBean theEvent)
     {
-        DecoratingEventBean decorated = (DecoratingEventBean) event;
+        DecoratingEventBean decorated = (DecoratingEventBean) theEvent;
         EventBean decoratedUnderlying = decorated.getUnderlyingEvent();
         EventBean copiedUnderlying = underlyingCopyMethod.copy(decoratedUnderlying);
         if (copiedUnderlying == null)

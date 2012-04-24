@@ -42,7 +42,7 @@ public abstract class BaseSubscription implements Subscription, FilterHandleCall
      */
     protected String subscriptionName;
 
-    public abstract void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches);
+    public abstract void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches);
 
     /**
      * Ctor, assigns default name.

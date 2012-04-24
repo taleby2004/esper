@@ -133,8 +133,10 @@ public class EventTypeIndexBuilder
         FilterHandleSetNode rootNode = eventTypeIndex.get(eventType);
 
         // Now remove from tree
-        IndexTreeBuilder treeBuilder = new IndexTreeBuilder();
-        treeBuilder.remove(eventType, filterCallback, pair.getSecond(), rootNode);
+        if (rootNode != null) {
+            IndexTreeBuilder treeBuilder = new IndexTreeBuilder();
+            treeBuilder.remove(eventType, filterCallback, pair.getSecond(), rootNode);
+        }
 
         // Remove from callbacks list
         callbacksLock.lock();

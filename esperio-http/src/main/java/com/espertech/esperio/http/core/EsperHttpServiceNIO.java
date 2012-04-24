@@ -33,8 +33,8 @@ public class EsperHttpServiceNIO extends EsperHttpServiceBase {
     }
 
     public void start(EPServiceProviderSPI engine) {
-        HttpParams params = new BasicHttpParams();
-        params
+        HttpParams parameters = new BasicHttpParams();
+        parameters
             .setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
             .setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
             .setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
@@ -51,7 +51,7 @@ public class EsperHttpServiceNIO extends EsperHttpServiceBase {
                 httpproc,
                 new DefaultHttpResponseFactory(),
                 new DefaultConnectionReuseStrategy(),
-                params);
+                parameters);
 
         // Set up request handlers
         HttpRequestHandlerRegistry reqistry = setupRegistry(engine);
@@ -61,9 +61,9 @@ public class EsperHttpServiceNIO extends EsperHttpServiceBase {
         // Provide an event logger
         handler.setEventListener(new EventLogger());
 
-        IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(handler, params);
+        IOEventDispatch ioEventDispatch = new DefaultServerIOEventDispatch(handler, parameters);
         try {
-            ioReactor = new DefaultListeningIOReactor(2, params);
+            ioReactor = new DefaultListeningIOReactor(2, parameters);
             ioReactor.listen(new InetSocketAddress(this.getServiceConfig().getPort()));
         }
         catch (IOException e) {

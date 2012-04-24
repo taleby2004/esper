@@ -130,7 +130,6 @@ public class NamedWindowRootViewInstance extends ViewSupport
                 if (rootView.isChildBatching()) {
                     table.add(newData);
                 }
-                table.remove(oldData);
             }
 
             // Update child views

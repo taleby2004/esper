@@ -26,8 +26,8 @@ public interface JSONEventRenderer
     /**
      * Render a given event in the JSON format.
      * @param title the JSON root title
-     * @param event the event to render
+     * @param theEvent the event to render
      * @return JSON formatted text
      */
-    public String render(String title, EventBean event);
+    public String render(String title, EventBean theEvent);
 }

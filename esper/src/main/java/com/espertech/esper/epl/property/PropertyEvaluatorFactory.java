@@ -11,10 +11,7 @@
 
 package com.espertech.esper.epl.property;
 
-import com.espertech.esper.client.EventBeanFactory;
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.FragmentEventType;
+import com.espertech.esper.client.*;
 import com.espertech.esper.epl.core.*;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.*;
@@ -57,7 +54,8 @@ public class PropertyEvaluatorFactory
                                                   String statementId,
                                                   String statementName,
                                                   Annotation[] annotations,
-                                                  Collection<Integer> assignedTypeNumberStack)
+                                                  Collection<Integer> assignedTypeNumberStack,
+                                                  ConfigurationInformation configuration)
             throws ExprValidationException
     {
         int length = spec.getAtoms().size();
@@ -248,7 +246,7 @@ public class PropertyEvaluatorFactory
             Arrays.fill(isIStreamOnly, true);
             StreamTypeService streamTypeService = new StreamTypeServiceImpl(whereTypes, whereStreamNames, isIStreamOnly, engineURI, false);
 
-            SelectExprProcessor selectExpr = SelectExprProcessorFactory.getProcessor(assignedTypeNumberStack, cumulativeSelectClause, false, null, null, streamTypeService, eventAdapterService, null, null, null, methodResolutionService, validateContext, variableService, timeProvider, engineURI, statementId, statementName, annotations, null);
+            SelectExprProcessor selectExpr = SelectExprProcessorFactory.getProcessor(assignedTypeNumberStack, cumulativeSelectClause, false, null, null, streamTypeService, eventAdapterService, null, null, null, methodResolutionService, validateContext, variableService, timeProvider, engineURI, statementId, statementName, annotations, null, configuration, null);
             return new PropertyEvaluatorSelect(selectExpr, accumulative);
         }
     }

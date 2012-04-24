@@ -38,15 +38,15 @@ public class NamedWindowOnMergeActionIns extends NamedWindowOnMergeAction {
     }
 
     public void apply(EventBean matchingEvent, EventBean[] eventsPerStream, OneEventCollection newData, OneEventCollection oldData, ExprEvaluatorContext exprEvaluatorContext) {
-        EventBean event = insertHelper.process(eventsPerStream, true, true, exprEvaluatorContext);
+        EventBean theEvent = insertHelper.process(eventsPerStream, true, true, exprEvaluatorContext);
         if (internalEventRouter == null) {
-            newData.add(event);
+            newData.add(theEvent);
             return;
         }
 
         if (audit) {
-            AuditPath.auditInsertInto(internalEventRouteDest.getEngineURI(), statementHandle.getStatementName(), event);
+            AuditPath.auditInsertInto(internalEventRouteDest.getEngineURI(), statementHandle.getStatementName(), theEvent);
         }
-        internalEventRouter.route(event, statementHandle, internalEventRouteDest, exprEvaluatorContext, false);
+        internalEventRouter.route(theEvent, statementHandle, internalEventRouteDest, exprEvaluatorContext, false);
     }
 }

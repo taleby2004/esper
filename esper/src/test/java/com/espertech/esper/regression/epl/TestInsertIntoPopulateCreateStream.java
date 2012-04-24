@@ -14,6 +14,7 @@ package com.espertech.esper.regression.epl;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.Collections;
@@ -36,34 +37,55 @@ public class TestInsertIntoPopulateCreateStream extends TestCase
         listener = null;
     }
 
-    public void testCreateStream()
+    public void testCreateStream() {
+        runAssertionCreateStream(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionCreateStream(EventRepresentationEnum.MAP);
+        runAssertionCreateStream(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionCreateStream(EventRepresentationEnum eventRepresentationEnum)
     {
-        epService.getEPAdministrator().createEPL("create schema MyEvent(myId int)");
-        epService.getEPAdministrator().createEPL("create schema CompositeEvent(c1 MyEvent, c2 MyEvent, rule string)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyEvent(myId int)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema CompositeEvent(c1 MyEvent, c2 MyEvent, rule string)");
         epService.getEPAdministrator().createEPL("insert into MyStream select c, 'additionalValue' as value from MyEvent c");
         epService.getEPAdministrator().createEPL("insert into CompositeEvent select e1.c as c1, e2.c as c2, '4' as rule " +
                 "from pattern [e1=MyStream -> e2=MyStream]");
-        epService.getEPAdministrator().createEPL("@Name('Target') select * from CompositeEvent");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " @Name('Target') select * from CompositeEvent");
         epService.getEPAdministrator().getStatement("Target").addListener(listener);
 
-        epService.getEPRuntime().sendEvent(makeEvent(10), "MyEvent");
-        epService.getEPRuntime().sendEvent(makeEvent(11), "MyEvent");
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(10, event.get("c1.myId"));
-        assertEquals(11, event.get("c2.myId"));
-        assertEquals("4", event.get("rule"));
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(makeEvent(10).values().toArray(), "MyEvent");
+            epService.getEPRuntime().sendEvent(makeEvent(11).values().toArray(), "MyEvent");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(makeEvent(10), "MyEvent");
+            epService.getEPRuntime().sendEvent(makeEvent(11), "MyEvent");
+        }
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(10, theEvent.get("c1.myId"));
+        assertEquals(11, theEvent.get("c2.myId"));
+        assertEquals("4", theEvent.get("rule"));
+
+        epService.initialize();
     }
 
-    public void testCreateStreamTwo()
+    public void testCreateStreamTwo() {
+        runAssertionCreateStreamTwo(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionCreateStreamTwo(EventRepresentationEnum.MAP);
+        runAssertionCreateStreamTwo(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionCreateStreamTwo(EventRepresentationEnum eventRepresentationEnum)
     {
-        epService.getEPAdministrator().createEPL("create schema MyEvent(myId int)");
-        epService.getEPAdministrator().createEPL("create schema AllMyEvent as (myEvent MyEvent, class String, reverse boolean)");
-        epService.getEPAdministrator().createEPL("create schema SuspectMyEvent as (myEvent MyEvent, class String)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyEvent(myId int)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema AllMyEvent as (myEvent MyEvent, class String, reverse boolean)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema SuspectMyEvent as (myEvent MyEvent, class String)");
 
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("insert into AllMyEvent " +
                                                  "select c as myEvent, 'test' as class, false as reverse " +
                                                  "from MyEvent(myId=1) c");
         stmtOne.addListener(listener);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtOne.getEventType().getUnderlyingType());
 
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL("insert into SuspectMyEvent " +
                                                  "select c.myEvent as myEvent, class " +
@@ -71,7 +93,12 @@ public class TestInsertIntoPopulateCreateStream extends TestCase
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmtTwo.addListener(listenerTwo);
 
-        epService.getEPRuntime().sendEvent(makeEvent(1), "MyEvent");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(makeEvent(1).values().toArray(), "MyEvent");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(makeEvent(1), "MyEvent");
+        }
         
         EventBean resultOne = listener.assertOneGetNewAndReset();
         assertTrue(resultOne.get("myEvent") instanceof EventBean);
@@ -82,6 +109,8 @@ public class TestInsertIntoPopulateCreateStream extends TestCase
         assertTrue(resultTwo.get("myEvent") instanceof EventBean);
         assertEquals(1, ((EventBean)resultTwo.get("myEvent")).get("myId"));
         assertNotNull(stmtTwo.getEventType().getFragmentType("myEvent"));
+
+        epService.initialize();
     }
 
     private Map<String, Object> makeEvent(int myId) {

@@ -61,10 +61,10 @@ public class TestViewTimeBatch extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendTimer(4000);
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "theString".split(","), new Object[]{"E1"});
 
         sendTimer(5000);
-        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), "string".split(","), new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), "theString".split(","), new Object[]{"E1"});
 
         sendTimer(5999);
         assertFalse(listener.getAndClearIsInvoked());
@@ -78,8 +78,8 @@ public class TestViewTimeBatch extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }    
 }

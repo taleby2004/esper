@@ -29,9 +29,9 @@ public class ResultSetProcessorSimpleTransform implements TransformEventMethod
         newData = new EventBean[1];
     }
 
-    public EventBean transform(EventBean event)
+    public EventBean transform(EventBean theEvent)
     {
-        newData[0] = event;
+        newData[0] = theEvent;
         UniformPair<EventBean[]> pair = resultSetProcessor.processViewResult(newData, null, true);
         return pair.getFirst()[0];
     }

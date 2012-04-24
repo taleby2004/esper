@@ -14,10 +14,12 @@ package com.espertech.esper.epl.datetime.interval;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.Pair;
+import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
+import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.datetime.eval.DatetimeMethodEnum;
 import com.espertech.esper.epl.datetime.eval.ExprDotNodeFilterAnalyzerDTIntervalDesc;
 import com.espertech.esper.epl.expression.*;
-import com.espertech.esper.type.RelationalOpEnum;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.util.Calendar;
@@ -26,7 +28,7 @@ import java.util.List;
 
 public class IntervalOpImpl implements IntervalOp {
 
-    private final ExprEvaluator evaluatorTimestamp;
+    private ExprEvaluator evaluatorTimestamp;
 
     private Integer parameterStreamNum;
     private String parameterPropertyStart;
@@ -34,7 +36,7 @@ public class IntervalOpImpl implements IntervalOp {
 
     private final IntervalOpEval intervalOpEval;
 
-    public IntervalOpImpl(DatetimeMethodEnum method, String methodNameUse, EventType[] typesPerStream, List<ExprNode> expressions)
+    public IntervalOpImpl(DatetimeMethodEnum method, String methodNameUse, StreamTypeService streamTypeService, List<ExprNode> expressions)
         throws ExprValidationException {
 
         ExprEvaluator evaluatorEndTimestamp = null;
@@ -43,7 +45,7 @@ public class IntervalOpImpl implements IntervalOp {
         if (expressions.get(0) instanceof ExprStreamUnderlyingNode) {
             ExprStreamUnderlyingNode und = (ExprStreamUnderlyingNode) expressions.get(0);
             parameterStreamNum = und.getStreamId();
-            EventType type = typesPerStream[parameterStreamNum];
+            EventType type = streamTypeService.getEventTypes()[parameterStreamNum];
             parameterPropertyStart = type.getStartTimestampPropertyName();
             if (parameterPropertyStart == null) {
                 throw new ExprValidationException("For date-time method '" + methodNameUse + "' the first parameter is event type '" + type.getName() + "', however no timestamp property has been defined for this event type");
@@ -66,15 +68,44 @@ public class IntervalOpImpl implements IntervalOp {
             evaluatorTimestamp = expressions.get(0).getExprEvaluator();
             timestampType = evaluatorTimestamp.getType();
 
+            String unresolvedPropertyName = null;
             if (expressions.get(0) instanceof ExprIdentNode) {
                 ExprIdentNode identNode = (ExprIdentNode) expressions.get(0);
                 parameterStreamNum = identNode.getStreamId();
                 parameterPropertyStart = identNode.getResolvedPropertyName();
                 parameterPropertyEnd = parameterPropertyStart;
+                unresolvedPropertyName = identNode.getUnresolvedPropertyName();
             }
 
             if (!JavaClassHelper.isDatetimeClass(evaluatorTimestamp.getType())) {
-                throw new ExprValidationException("For date-time method '" + methodNameUse + "' the first parameter expression returns '" + evaluatorTimestamp.getType() + "', however requires a Date, Calendar, Long-type return value or event (with timestamp)");
+                // ident node may represent a fragment
+                if (unresolvedPropertyName != null) {
+                    Pair<PropertyResolutionDescriptor, String> propertyDesc = ExprIdentNodeUtil.getTypeFromStream(streamTypeService, unresolvedPropertyName, false, true);
+                    if (propertyDesc.getFirst().getFragmentEventType() != null) {
+                        EventType type = propertyDesc.getFirst().getFragmentEventType().getFragmentType();
+                        parameterPropertyStart = type.getStartTimestampPropertyName();
+                        if (parameterPropertyStart == null) {
+                            throw new ExprValidationException("For date-time method '" + methodNameUse + "' the first parameter is event type '" + type.getName() + "', however no timestamp property has been defined for this event type");
+                        }
+
+                        timestampType = type.getPropertyType(parameterPropertyStart);
+                        EventPropertyGetter getterFragment = streamTypeService.getEventTypes()[parameterStreamNum].getGetter(unresolvedPropertyName);
+                        EventPropertyGetter getterStartTimestamp = type.getGetter(parameterPropertyStart);
+                        evaluatorTimestamp = new ExprEvaluatorStreamLongPropFragment(parameterStreamNum, getterFragment, getterStartTimestamp);
+
+                        if (type.getEndTimestampPropertyName() != null) {
+                            parameterPropertyEnd = type.getEndTimestampPropertyName();
+                            EventPropertyGetter getterEndTimestamp = type.getGetter(type.getEndTimestampPropertyName());
+                            evaluatorEndTimestamp = new ExprEvaluatorStreamLongPropFragment(parameterStreamNum, getterFragment, getterEndTimestamp);
+                        }
+                        else {
+                            parameterPropertyEnd = parameterPropertyStart;
+                        }
+                    }
+                }
+                else {
+                    throw new ExprValidationException("For date-time method '" + methodNameUse + "' the first parameter expression returns '" + evaluatorTimestamp.getType() + "', however requires a Date, Calendar, Long-type return value or event (with timestamp)");
+                }
             }
         }
 

@@ -24,8 +24,8 @@ public class DynaLatencySpikeMonitor
     {
         admin = EPServiceProviderManager.getDefaultProvider().getEPAdministrator();
 
-        String event = LatencyLimit.class.getName();
-        EPStatement latencyAlert = admin.createPattern("every newlimit=" + event);
+        String theEvent = LatencyLimit.class.getName();
+        EPStatement latencyAlert = admin.createPattern("every newlimit=" + theEvent);
 
         latencyAlert.addListener(new UpdateListener() {
             public void update(EventBean[] newEvents, EventBean[] oldEvents)
@@ -52,8 +52,8 @@ public class DynaLatencySpikeMonitor
         spikeLatencyAlert.addListener(new LatencySpikeListener());
 
         // Stop pattern when the threshold changes
-        String event = LatencyLimit.class.getName();
-        EPStatement stopPattern = admin.createPattern(event + "(" + filter + ")");
+        String theEvent = LatencyLimit.class.getName();
+        EPStatement stopPattern = admin.createPattern(theEvent + "(" + filter + ")");
 
         stopPattern.addListener(new UpdateListener() {
             public void update(EventBean[] newEvents, EventBean[] oldEvents)

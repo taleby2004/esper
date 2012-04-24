@@ -11,6 +11,7 @@
 
 package com.espertech.esper.util;
 
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import junit.framework.TestCase;
 
 import java.util.Set;
@@ -20,6 +21,39 @@ import java.util.Arrays;
 
 public class TestCollectionUtil extends TestCase
 {
+    public void testAddArray() {
+        tryAddStringArr("b,a".split(","), CollectionUtil.addArrays(new String[] {"b"}, new String[] {"a"}));
+        tryAddStringArr("a".split(","), CollectionUtil.addArrays(null, new String[] {"a"}));
+        tryAddStringArr("b".split(","), CollectionUtil.addArrays(new String[] {"b"}, null));
+        tryAddStringArr("a,b,c,d".split(","), CollectionUtil.addArrays(new String[] {"a", "b"}, new String[] {"c", "d"}));
+        assertEquals(null, CollectionUtil.addArrays(null, null));
+
+        Object result = CollectionUtil.addArrays(new int[] {1,2}, new int[] {3,4});
+        EPAssertionUtil.assertEqualsExactOrder(new int[] {1,2,3,4}, (int[]) result);
+
+        try {
+            CollectionUtil.addArrays("a", null);
+            fail();
+        }
+        catch (IllegalArgumentException ex) {
+            assertEquals("Parameter is not an array: a", ex.getMessage());
+        }
+
+        try {
+            CollectionUtil.addArrays(null, "b");
+            fail();
+        }
+        catch (IllegalArgumentException ex) {
+            assertEquals("Parameter is not an array: b", ex.getMessage());
+        }
+    }
+
+    private void tryAddStringArr(String[] expected, Object result) {
+        assertTrue(result.getClass().isArray());
+        assertEquals(String.class, result.getClass().getComponentType());
+        EPAssertionUtil.assertEqualsExactOrder(expected, (String[]) result);
+    }
+
     public void testCopySort() {
         Object[][] testdata = new Object[][] {
                 {new String[]{"a", "b"}, new String[] {"a", "b"}},

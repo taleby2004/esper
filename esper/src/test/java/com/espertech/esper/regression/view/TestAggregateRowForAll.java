@@ -60,7 +60,7 @@ public class TestAggregateRowForAll extends TestCase
         String viewExpr = "select irstream sum(longBoxed) as mySum " +
                           "from " + SupportBeanString.class.getName() + ".win:time(10) as one, " +
                                     SupportBean.class.getName() + ".win:time(10 sec) as two " +
-                          "where one.string = two.string";
+                          "where one.theString = two.theString";
 
         selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
@@ -117,32 +117,32 @@ public class TestAggregateRowForAll extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportPriceEvent(1, "A"));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("A", event.get("sym"));
-        assertEquals(1.0, event.get("avgp"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("A", theEvent.get("sym"));
+        assertEquals(1.0, theEvent.get("avgp"));
 
         epService.getEPRuntime().sendEvent(new SupportPriceEvent(2, "B"));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("B", event.get("sym"));
-        assertEquals(1.5, event.get("avgp"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("B", theEvent.get("sym"));
+        assertEquals(1.5, theEvent.get("avgp"));
 
         epService.getEPRuntime().sendEvent(new SupportPriceEvent(9, "A"));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("A", event.get("sym"));
-        assertEquals((1 + 2 + 9) / 3.0, event.get("avgp"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("A", theEvent.get("sym"));
+        assertEquals((1 + 2 + 9) / 3.0, theEvent.get("avgp"));
 
         epService.getEPRuntime().sendEvent(new SupportPriceEvent(18, "B"));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("B", event.get("sym"));
-        assertEquals((1 + 2 + 9 + 18) / 4.0, event.get("avgp"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("B", theEvent.get("sym"));
+        assertEquals((1 + 2 + 9 + 18) / 4.0, theEvent.get("avgp"));
 
         epService.getEPRuntime().sendEvent(new SupportPriceEvent(5, "A"));
-        event = listener.getLastNewData()[0];
-        assertEquals("A", event.get("sym"));
-        assertEquals((2 + 9 + 18 + 5) / 4.0, event.get("avgp"));
-        event = listener.getLastOldData()[0];
-        assertEquals("A", event.get("sym"));
-        assertEquals((5 + 2 + 9 + 18) / 4.0, event.get("avgp"));
+        theEvent = listener.getLastNewData()[0];
+        assertEquals("A", theEvent.get("sym"));
+        assertEquals((2 + 9 + 18 + 5) / 4.0, theEvent.get("avgp"));
+        theEvent = listener.getLastOldData()[0];
+        assertEquals("A", theEvent.get("sym"));
+        assertEquals((5 + 2 + 9 + 18) / 4.0, theEvent.get("avgp"));
     }
 
     public void testSelectStarStdGroupBy() {
@@ -239,15 +239,15 @@ public class TestAggregateRowForAll extends TestCase
     }
 
     private Object sendEvent(String symbol, double price) {
-        Object event = new SupportMarketDataBean(symbol, price, null, null);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        Object theEvent = new SupportMarketDataBean(symbol, price, null, null);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
     private void sendEvent(long longBoxed, int intBoxed, short shortBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(JOIN_KEY);
+        bean.setTheString(JOIN_KEY);
         bean.setLongBoxed(longBoxed);
         bean.setIntBoxed(intBoxed);
         bean.setShortBoxed(shortBoxed);

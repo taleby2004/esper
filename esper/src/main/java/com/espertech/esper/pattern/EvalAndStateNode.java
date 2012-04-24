@@ -12,7 +12,10 @@ package com.espertech.esper.pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class represents the state of an "and" operator in the evaluation state tree.
@@ -36,7 +39,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
         super(parentNode, null);
 
         this.evalAndNode = evalAndNode;
-        this.activeChildNodes = new LinkedList<EvalStateNode>();
+        this.activeChildNodes = new ArrayList<EvalStateNode>();
         this.eventsPerChild = new HashMap<EvalStateNode, List<MatchedEventMap>>();
 
         // In an "and" expression we need to create a state for all child listeners
@@ -95,7 +98,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
         List<MatchedEventMap> eventList = eventsPerChild.get(fromNode);
         if (eventList == null)
         {
-            eventList = new LinkedList<MatchedEventMap>();
+            eventList = new ArrayList<MatchedEventMap>();
             eventsPerChild.put(fromNode, eventList);
         }
         eventList.add(matchEvent);
@@ -129,9 +132,9 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
         }
 
         // Send results to parent
-        for (MatchedEventMap event : result)
+        for (MatchedEventMap theEvent : result)
         {
-            this.getParentEvaluator().evaluateTrue(event, this, quitted);
+            this.getParentEvaluator().evaluateTrue(theEvent, this, quitted);
         }
     }
 
@@ -169,7 +172,7 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
         }
 
         // Recusively generate MatchedEventMap instances for all accumulated events
-        List<MatchedEventMap> results = new LinkedList<MatchedEventMap>();
+        List<MatchedEventMap> results = new ArrayList<MatchedEventMap>();
         generateMatchEvents(listArray, 0, results, matchEvent);
 
         return results;
@@ -190,10 +193,10 @@ public final class EvalAndStateNode extends EvalStateNode implements Evaluator
     {
         List<MatchedEventMap> events = eventList.get(index);
 
-        for (MatchedEventMap event : events)
+        for (MatchedEventMap theEvent : events)
         {
             MatchedEventMap current = matchEvent.shallowCopy();
-            current.merge(event);
+            current.merge(theEvent);
 
             // If this is the very last list in the array of lists, add accumulated MatchedEventMap events to result
             if ((index + 1) == eventList.size())

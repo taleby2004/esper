@@ -85,22 +85,22 @@ public class TestFilterStreamSpecRaw extends TestCase
 
     public void testEqualsAndLess() throws Exception
     {
-        FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() + "(string='a' and intPrimitive<9)");
+        FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() + "(theString='a' and intPrimitive<9)");
         FilterSpecCompiled spec = compile(raw);
         assertEquals(2, spec.getParameters().size());
-        Map<String, FilterSpecParam> params = mapParameters(spec.getParameters());
+        Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
-        assertEquals(FilterOperator.EQUAL, params.get("string").getFilterOperator());
-        assertEquals("a", getConstant(params.get("string")));
+        assertEquals(FilterOperator.EQUAL, parameters.get("theString").getFilterOperator());
+        assertEquals("a", getConstant(parameters.get("theString")));
 
-        assertEquals(FilterOperator.LESS, params.get("intPrimitive").getFilterOperator());
-        assertEquals(9, getConstant(params.get("intPrimitive")));
+        assertEquals(FilterOperator.LESS, parameters.get("intPrimitive").getFilterOperator());
+        assertEquals(9, getConstant(parameters.get("intPrimitive")));
     }
 
-    private Map<String, FilterSpecParam> mapParameters(ArrayDeque<FilterSpecParam> params)
+    private Map<String, FilterSpecParam> mapParameters(ArrayDeque<FilterSpecParam> parameters)
     {
         Map<String, FilterSpecParam> map = new HashMap<String, FilterSpecParam>();
-        for (FilterSpecParam param : params)
+        for (FilterSpecParam param : parameters)
         {
             map.put(param.getLookupable().getExpression(), param);
         }
@@ -110,46 +110,46 @@ public class TestFilterStreamSpecRaw extends TestCase
     public void testCommaAndCompar() throws Exception
     {
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() +
-                "(doubleBoxed>1.11, doublePrimitive>=9.11 and intPrimitive<=9, string || 'a' = 'sa')");
+                "(doubleBoxed>1.11, doublePrimitive>=9.11 and intPrimitive<=9, theString || 'a' = 'sa')");
         FilterSpecCompiled spec = compile(raw);
         assertEquals(4, spec.getParameters().size());
-        Map<String, FilterSpecParam> params = mapParameters(spec.getParameters());
+        Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
-        assertEquals(FilterOperator.GREATER, params.get("doubleBoxed").getFilterOperator());
-        assertEquals(1.11, getConstant(params.get("doubleBoxed")));
+        assertEquals(FilterOperator.GREATER, parameters.get("doubleBoxed").getFilterOperator());
+        assertEquals(1.11, getConstant(parameters.get("doubleBoxed")));
 
-        assertEquals(FilterOperator.GREATER_OR_EQUAL, params.get("doublePrimitive").getFilterOperator());
-        assertEquals(9.11, getConstant(params.get("doublePrimitive")));
+        assertEquals(FilterOperator.GREATER_OR_EQUAL, parameters.get("doublePrimitive").getFilterOperator());
+        assertEquals(9.11, getConstant(parameters.get("doublePrimitive")));
 
-        assertEquals(FilterOperator.LESS_OR_EQUAL, params.get("intPrimitive").getFilterOperator());
-        assertEquals(9, getConstant(params.get("intPrimitive")));
+        assertEquals(FilterOperator.LESS_OR_EQUAL, parameters.get("intPrimitive").getFilterOperator());
+        assertEquals(9, getConstant(parameters.get("intPrimitive")));
 
-        assertEquals(FilterOperator.BOOLEAN_EXPRESSION, params.get(FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION).getFilterOperator());
-        assertTrue(params.get(FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION) instanceof FilterSpecParamExprNode);
+        assertEquals(FilterOperator.BOOLEAN_EXPRESSION, parameters.get(FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION).getFilterOperator());
+        assertTrue(parameters.get(FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION) instanceof FilterSpecParamExprNode);
     }
 
     public void testNestedAnd() throws Exception
     {
         FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() +
-                "((doubleBoxed=1 and doublePrimitive=2) and (intPrimitive=3 and (string like '%_a' and string = 'a')))");
+                "((doubleBoxed=1 and doublePrimitive=2) and (intPrimitive=3 and (theString like '%_a' and theString = 'a')))");
         FilterSpecCompiled spec = compile(raw);
         assertEquals(5, spec.getParameters().size());
-        Map<String, FilterSpecParam> params = mapParameters(spec.getParameters());
+        Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
-        assertEquals(FilterOperator.EQUAL, params.get("doubleBoxed").getFilterOperator());
-        assertEquals(1.0, getConstant(params.get("doubleBoxed")));
+        assertEquals(FilterOperator.EQUAL, parameters.get("doubleBoxed").getFilterOperator());
+        assertEquals(1.0, getConstant(parameters.get("doubleBoxed")));
 
-        assertEquals(FilterOperator.EQUAL, params.get("doublePrimitive").getFilterOperator());
-        assertEquals(2.0, getConstant(params.get("doublePrimitive")));
+        assertEquals(FilterOperator.EQUAL, parameters.get("doublePrimitive").getFilterOperator());
+        assertEquals(2.0, getConstant(parameters.get("doublePrimitive")));
 
-        assertEquals(FilterOperator.EQUAL, params.get("intPrimitive").getFilterOperator());
-        assertEquals(3, getConstant(params.get("intPrimitive")));
+        assertEquals(FilterOperator.EQUAL, parameters.get("intPrimitive").getFilterOperator());
+        assertEquals(3, getConstant(parameters.get("intPrimitive")));
 
-        assertEquals(FilterOperator.EQUAL, params.get("string").getFilterOperator());
-        assertEquals("a", getConstant(params.get("string")));
+        assertEquals(FilterOperator.EQUAL, parameters.get("theString").getFilterOperator());
+        assertEquals("a", getConstant(parameters.get("theString")));
 
-        assertEquals(FilterOperator.BOOLEAN_EXPRESSION, params.get(FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION).getFilterOperator());
-        assertTrue(params.get(FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION) instanceof FilterSpecParamExprNode);
+        assertEquals(FilterOperator.BOOLEAN_EXPRESSION, parameters.get(FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION).getFilterOperator());
+        assertTrue(parameters.get(FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION) instanceof FilterSpecParamExprNode);
     }
 
     public void testIn() throws Exception
@@ -169,11 +169,11 @@ public class TestFilterStreamSpecRaw extends TestCase
 
     public void testNotIn() throws Exception
     {
-        FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() + "(string not in (\"a\"))");
+        FilterStreamSpecRaw raw = makeSpec("select * from " + SupportBean.class.getName() + "(theString not in (\"a\"))");
         FilterSpecCompiled spec = compile(raw);
         assertEquals(1, spec.getParameters().size());
 
-        assertEquals("string", spec.getParameters().getFirst().getLookupable().getExpression());
+        assertEquals("theString", spec.getParameters().getFirst().getLookupable().getExpression());
         assertEquals(FilterOperator.NOT_IN_LIST_OF_VALUES, spec.getParameters().getFirst().getFilterOperator());
         FilterSpecParamIn inParam = (FilterSpecParamIn) spec.getParameters().getFirst();
         assertEquals(1, inParam.getListOfValues().size());
@@ -186,25 +186,25 @@ public class TestFilterStreamSpecRaw extends TestCase
                 "(intBoxed in [1:5] and doubleBoxed in (2:6) and floatBoxed in (3:7] and byteBoxed in [0:1))");
         FilterSpecCompiled spec = compile(raw);
         assertEquals(4, spec.getParameters().size());
-        Map<String, FilterSpecParam> params = mapParameters(spec.getParameters());
+        Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
-        assertEquals(FilterOperator.RANGE_CLOSED, params.get("intBoxed").getFilterOperator());
-        FilterSpecParamRange rangeParam = (FilterSpecParamRange) params.get("intBoxed");
+        assertEquals(FilterOperator.RANGE_CLOSED, parameters.get("intBoxed").getFilterOperator());
+        FilterSpecParamRange rangeParam = (FilterSpecParamRange) parameters.get("intBoxed");
         assertEquals(1.0, getConstant(rangeParam.getMin()));
         assertEquals(5.0, getConstant(rangeParam.getMax()));
 
-        assertEquals(FilterOperator.RANGE_OPEN, params.get("doubleBoxed").getFilterOperator());
-        rangeParam = (FilterSpecParamRange) params.get("doubleBoxed");
+        assertEquals(FilterOperator.RANGE_OPEN, parameters.get("doubleBoxed").getFilterOperator());
+        rangeParam = (FilterSpecParamRange) parameters.get("doubleBoxed");
         assertEquals(2.0, getConstant(rangeParam.getMin()));
         assertEquals(6.0, getConstant(rangeParam.getMax()));
 
-        assertEquals(FilterOperator.RANGE_HALF_CLOSED, params.get("floatBoxed").getFilterOperator());
-        rangeParam = (FilterSpecParamRange) params.get("floatBoxed");
+        assertEquals(FilterOperator.RANGE_HALF_CLOSED, parameters.get("floatBoxed").getFilterOperator());
+        rangeParam = (FilterSpecParamRange) parameters.get("floatBoxed");
         assertEquals(3.0, getConstant(rangeParam.getMin()));
         assertEquals(7.0, getConstant(rangeParam.getMax()));
 
-        assertEquals(FilterOperator.RANGE_HALF_OPEN, params.get("byteBoxed").getFilterOperator());
-        rangeParam = (FilterSpecParamRange) params.get("byteBoxed");
+        assertEquals(FilterOperator.RANGE_HALF_OPEN, parameters.get("byteBoxed").getFilterOperator());
+        rangeParam = (FilterSpecParamRange) parameters.get("byteBoxed");
         assertEquals(0.0, getConstant(rangeParam.getMin()));
         assertEquals(1.0, getConstant(rangeParam.getMax()));
     }
@@ -215,25 +215,25 @@ public class TestFilterStreamSpecRaw extends TestCase
                 "(intBoxed not in [1:5] and doubleBoxed not in (2:6) and floatBoxed not in (3:7] and byteBoxed not in [0:1))");
         FilterSpecCompiled spec = compile(raw);
         assertEquals(4, spec.getParameters().size());
-        Map<String, FilterSpecParam> params = mapParameters(spec.getParameters());
+        Map<String, FilterSpecParam> parameters = mapParameters(spec.getParameters());
 
-        assertEquals(FilterOperator.NOT_RANGE_CLOSED, params.get("intBoxed").getFilterOperator());
-        FilterSpecParamRange rangeParam = (FilterSpecParamRange) params.get("intBoxed");
+        assertEquals(FilterOperator.NOT_RANGE_CLOSED, parameters.get("intBoxed").getFilterOperator());
+        FilterSpecParamRange rangeParam = (FilterSpecParamRange) parameters.get("intBoxed");
         assertEquals(1.0, getConstant(rangeParam.getMin()));
         assertEquals(5.0, getConstant(rangeParam.getMax()));
 
-        assertEquals(FilterOperator.NOT_RANGE_OPEN, params.get("doubleBoxed").getFilterOperator());
-        rangeParam = (FilterSpecParamRange) params.get("doubleBoxed");
+        assertEquals(FilterOperator.NOT_RANGE_OPEN, parameters.get("doubleBoxed").getFilterOperator());
+        rangeParam = (FilterSpecParamRange) parameters.get("doubleBoxed");
         assertEquals(2.0, getConstant(rangeParam.getMin()));
         assertEquals(6.0, getConstant(rangeParam.getMax()));
 
-        assertEquals(FilterOperator.NOT_RANGE_HALF_CLOSED, params.get("floatBoxed").getFilterOperator());
-        rangeParam = (FilterSpecParamRange) params.get("floatBoxed");
+        assertEquals(FilterOperator.NOT_RANGE_HALF_CLOSED, parameters.get("floatBoxed").getFilterOperator());
+        rangeParam = (FilterSpecParamRange) parameters.get("floatBoxed");
         assertEquals(3.0, getConstant(rangeParam.getMin()));
         assertEquals(7.0, getConstant(rangeParam.getMax()));
 
-        assertEquals(FilterOperator.NOT_RANGE_HALF_OPEN, params.get("byteBoxed").getFilterOperator());
-        rangeParam = (FilterSpecParamRange) params.get("byteBoxed");
+        assertEquals(FilterOperator.NOT_RANGE_HALF_OPEN, parameters.get("byteBoxed").getFilterOperator());
+        rangeParam = (FilterSpecParamRange) parameters.get("byteBoxed");
         assertEquals(0.0, getConstant(rangeParam.getMin()));
         assertEquals(1.0, getConstant(rangeParam.getMax()));
     }

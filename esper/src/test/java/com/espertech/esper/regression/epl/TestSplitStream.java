@@ -17,6 +17,7 @@ import com.espertech.esper.client.soda.*;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.Collections;
@@ -73,11 +74,17 @@ public class TestSplitStream extends TestCase
         }
     }
 
-    public void testSplitPremptiveNamedWindow()
+    public void testSplitPremptiveNamedWindow() {
+        runAssertionSplitPremptiveNamedWindow(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionSplitPremptiveNamedWindow(EventRepresentationEnum.MAP);
+        runAssertionSplitPremptiveNamedWindow(EventRepresentationEnum.DEFAULT);
+    }
+
+    public void runAssertionSplitPremptiveNamedWindow(EventRepresentationEnum eventRepresentationEnum)
     {
-        epService.getEPAdministrator().createEPL("create schema TypeTwo(col2 int)");
-        epService.getEPAdministrator().createEPL("create schema TypeTrigger(trigger int)");
-        epService.getEPAdministrator().createEPL("create window WinTwo.win:keepall() as TypeTwo");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TypeTwo(col2 int)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TypeTrigger(trigger int)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create window WinTwo.win:keepall() as TypeTwo");
 
         String stmtOrigText = "on TypeTrigger " +
                     "insert into OtherStream select 1 " +
@@ -92,9 +99,16 @@ public class TestSplitStream extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
 
         // fire trigger
-        epService.getEPRuntime().getEventSender("TypeTrigger").sendEvent(new HashMap());
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().getEventSender("TypeTrigger").sendEvent(new Object[0]);
+        }
+        else {
+            epService.getEPRuntime().getEventSender("TypeTrigger").sendEvent(new HashMap());
+        }
 
         assertEquals(2, listener.assertOneGetNewAndReset().get("col2"));
+
+        epService.initialize();
     }
 
     public void test1SplitDefault()
@@ -189,8 +203,8 @@ public class TestSplitStream extends TestCase
     public void test2SplitNoDefaultOutputAll()
     {
         String stmtOrigText = "on SupportBean " +
-                              "insert into AStream select string where intPrimitive=1 " +
-                              "insert into BStream select string where intPrimitive=1 or intPrimitive=2 " +
+                              "insert into AStream select theString where intPrimitive=1 " +
+                              "insert into BStream select theString where intPrimitive=1 or intPrimitive=2 " +
                               "output all";
         EPStatement stmtOrig = epService.getEPAdministrator().createEPL(stmtOrigText);
         stmtOrig.addListener(listener);
@@ -217,13 +231,13 @@ public class TestSplitStream extends TestCase
 
         sendSupportBean("E4", -999);
         assertReceivedEach(new String[] {null, null});
-        assertEquals("E4", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E4", listener.assertOneGetNewAndReset().get("theString"));
 
         stmtOrig.destroy();
         stmtOrigText = "on SupportBean " +
-                              "insert into AStream select string || '_1' as string where intPrimitive in (1, 2) " +
-                              "insert into BStream select string || '_2' as string where intPrimitive in (2, 3) " +
-                              "insert into CStream select string || '_3' as string " +
+                              "insert into AStream select theString || '_1' as theString where intPrimitive in (1, 2) " +
+                              "insert into BStream select theString || '_2' as theString where intPrimitive in (2, 3) " +
+                              "insert into CStream select theString || '_3' as theString " +
                               "output all";
         stmtOrig = epService.getEPAdministrator().createEPL(stmtOrigText);
         stmtOrig.addListener(listener);
@@ -251,9 +265,9 @@ public class TestSplitStream extends TestCase
     public void test3And4SplitDefaultOutputFirst()
     {
         String stmtOrigText = "on SupportBean as mystream " +
-                              "insert into AStream select mystream.string||'_1' as string where intPrimitive=1 " +
-                              "insert into BStream select mystream.string||'_2' as string where intPrimitive=2 " +
-                              "insert into CStream select string||'_3' as string";
+                              "insert into AStream select mystream.theString||'_1' as theString where intPrimitive=1 " +
+                              "insert into BStream select mystream.theString||'_2' as theString where intPrimitive=2 " +
+                              "insert into CStream select theString||'_3' as theString";
         EPStatement stmtOrig = epService.getEPAdministrator().createEPL(stmtOrigText);
         stmtOrig.addListener(listener);
 
@@ -284,10 +298,10 @@ public class TestSplitStream extends TestCase
         assertFalse(listener.isInvoked());
 
         stmtOrigText = "on SupportBean " +
-                              "insert into AStream select string||'_1' as string where intPrimitive=10 " +
-                              "insert into BStream select string||'_2' as string where intPrimitive=20 " +
-                              "insert into CStream select string||'_3' as string where intPrimitive<0 " +
-                              "insert into DStream select string||'_4' as string";
+                              "insert into AStream select theString||'_1' as theString where intPrimitive=10 " +
+                              "insert into BStream select theString||'_2' as theString where intPrimitive=20 " +
+                              "insert into CStream select theString||'_3' as theString where intPrimitive<0 " +
+                              "insert into DStream select theString||'_4' as theString";
         stmtOrig.destroy();
         stmtOrig = epService.getEPAdministrator().createEPL(stmtOrigText);
         stmtOrig.addListener(listener);
@@ -318,7 +332,7 @@ public class TestSplitStream extends TestCase
         {
             if (stringValue[i] != null)
             {
-                assertEquals(stringValue[i], listeners[i].assertOneGetNewAndReset().get("string"));
+                assertEquals(stringValue[i], listeners[i].assertOneGetNewAndReset().get("theString"));
             }
             else
             {
@@ -337,7 +351,7 @@ public class TestSplitStream extends TestCase
             }
             assertFalse(listeners[i].isInvoked());
         }
-        assertEquals(stringValue, listeners[index].assertOneGetNewAndReset().get("string"));
+        assertEquals(stringValue, listeners[index].assertOneGetNewAndReset().get("theString"));
     }
 
     private void assertReceivedNone()
@@ -348,10 +362,10 @@ public class TestSplitStream extends TestCase
         }
     }
 
-    private SupportBean sendSupportBean(String string, int intPrimitive)
+    private SupportBean sendSupportBean(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
@@ -383,7 +397,7 @@ public class TestSplitStream extends TestCase
 
         sendSupportBean("E4", -999);
         assertReceivedNone();
-        assertEquals("E4", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E4", listener.assertOneGetNewAndReset().get("theString"));
 
         stmtOrig.destroy();
         stmtOne.destroy();

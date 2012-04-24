@@ -66,7 +66,7 @@ public class TestVirtualDataWindow extends TestCase {
         epService.getEPAdministrator().createEPL("insert into MyVDW select * from SupportBean");
 
         // test straight consume
-        String[] fields = "string,intPrimitive".split(",");
+        String[] fields = "theString,intPrimitive".split(",");
         EPStatement stmtConsume = epService.getEPAdministrator().createEPL("select irstream * from MyVDW");
         stmtConsume.addListener(listener);
 
@@ -106,9 +106,9 @@ public class TestVirtualDataWindow extends TestCase {
 
         String[] fieldsMerge = "col1,col2".split(",");
         EPStatement stmtMerge = epService.getEPAdministrator().createEPL("on SupportBean sb merge MyVDW vdw " +
-                "where col1 = string " +
+                "where col1 = theString " +
                 "when matched then update set col2 = 'xxx'" +
-                "when not matched then insert select string as col1, 'abc' as col2");
+                "when not matched then insert select theString as col1, 'abc' as col2");
         stmtMerge.addListener(listener);
         SupportUpdateListener listenerConsume = new SupportUpdateListener();
         epService.getEPAdministrator().createEPL("select * from MyVDW").addListener(listenerConsume);
@@ -141,7 +141,7 @@ public class TestVirtualDataWindow extends TestCase {
         assertFalse(stmtWindow.iterator().hasNext());
 
         // test data window aggregation (rows not included in aggregation)
-        EPStatement stmtAggregate = epService.getEPAdministrator().createEPL("select window(string) as val0 from MyVDW");
+        EPStatement stmtAggregate = epService.getEPAdministrator().createEPL("select window(theString) as val0 from MyVDW");
         stmtAggregate.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 100));
@@ -167,7 +167,7 @@ public class TestVirtualDataWindow extends TestCase {
         assertEquals("MyVDW", window.getContext().getNamedWindowName());
 
         // test no-criteria join
-        String[] fields = "st0.id,vdw.string,vdw.intPrimitive".split(",");
+        String[] fields = "st0.id,vdw.theString,vdw.intPrimitive".split(",");
         EPStatement stmtJoinAll = epService.getEPAdministrator().createEPL("select * from MyVDW vdw, SupportBean_ST0.std:lastevent() st0");
         stmtJoinAll.addListener(listener);
         assertIndexSpec(window.getLastRequestedIndex(), "", "");
@@ -178,9 +178,9 @@ public class TestVirtualDataWindow extends TestCase {
         stmtJoinAll.destroy();
 
         // test single-criteria join
-        EPStatement stmtJoinSingle = epService.getEPAdministrator().createEPL("select * from MyVDW vdw, SupportBean_ST0.std:lastevent() st0 where vdw.string = st0.id");
+        EPStatement stmtJoinSingle = epService.getEPAdministrator().createEPL("select * from MyVDW vdw, SupportBean_ST0.std:lastevent() st0 where vdw.theString = st0.id");
         stmtJoinSingle.addListener(listener);
-        assertIndexSpec(window.getLastRequestedIndex(), "string=(String)", "");
+        assertIndexSpec(window.getLastRequestedIndex(), "theString=(String)", "");
 
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("E1", 0));
         EPAssertionUtil.assertEqualsExactOrder(new Object[]{"E1"}, window.getLastAccessKeys());
@@ -191,13 +191,13 @@ public class TestVirtualDataWindow extends TestCase {
         stmtJoinSingle.destroy();
 
         // test multi-criteria join
-        EPStatement stmtJoinMulti = epService.getEPAdministrator().createEPL("select vdw.string from MyVDW vdw, SupportBeanRange.std:lastevent() st0 " +
-                "where vdw.string = st0.id and longPrimitive = keyLong and intPrimitive between rangeStart and rangeEnd");
+        EPStatement stmtJoinMulti = epService.getEPAdministrator().createEPL("select vdw.theString from MyVDW vdw, SupportBeanRange.std:lastevent() st0 " +
+                "where vdw.theString = st0.id and longPrimitive = keyLong and intPrimitive between rangeStart and rangeEnd");
         stmtJoinMulti.addListener(listener);
-        assertIndexSpec(window.getLastRequestedIndex(), "string=(String)|longPrimitive=(Long)", "intPrimitive[,](Integer)");
+        assertIndexSpec(window.getLastRequestedIndex(), "theString=(String)|longPrimitive=(Long)", "intPrimitive[,](Integer)");
 
         epService.getEPRuntime().sendEvent(SupportBeanRange.makeKeyLong("S1", 50L, 80, 120));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "vdw.string".split(","), new Object[]{"S1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "vdw.theString".split(","), new Object[]{"S1"});
         EPAssertionUtil.assertEqualsExactOrder(new Object[]{"S1", 50L, new VirtualDataWindowKeyRange(80, 120)}, window.getLastAccessKeys());
 
         // destroy

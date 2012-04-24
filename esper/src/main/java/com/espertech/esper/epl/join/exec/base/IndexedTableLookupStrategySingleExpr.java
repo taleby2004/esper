@@ -48,9 +48,9 @@ public class IndexedTableLookupStrategySingleExpr implements JoinExecTableLookup
         return index;
     }
 
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
     {
-        eventsPerStream[streamNum] = event;
+        eventsPerStream[streamNum] = theEvent;
         Object key = exprEvaluator.evaluate(eventsPerStream, true, exprEvaluatorContext);
         return index.lookup(key);
     }

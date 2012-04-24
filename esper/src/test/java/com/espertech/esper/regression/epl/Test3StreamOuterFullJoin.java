@@ -22,6 +22,7 @@ import com.espertech.esper.support.bean.SupportBean_S1;
 import com.espertech.esper.support.bean.SupportBean_S2;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayHandlingUtil;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 public class Test3StreamOuterFullJoin extends TestCase
@@ -45,11 +46,17 @@ public class Test3StreamOuterFullJoin extends TestCase
         updateListener = null;
     }
 
-    public void testFullJoin_2sides_multicolumn()
+    public void testFullJoin_2sides_multicolumn() {
+        runAssertionFullJoin_2sides_multicolumn(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionFullJoin_2sides_multicolumn(EventRepresentationEnum.MAP);
+        runAssertionFullJoin_2sides_multicolumn(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionFullJoin_2sides_multicolumn(EventRepresentationEnum eventRepresentationEnum)
     {
         String fields[] = "s0.id, s0.p00, s0.p01, s1.id, s1.p10, s1.p11, s2.id, s2.p20, s2.p21".split(",");
 
-        String joinStatement = "select * from " +
+        String joinStatement = eventRepresentationEnum.getAnnotationText() + " select * from " +
                                   EVENT_S0 + ".win:length(1000) as s0 " +
             " full outer join " + EVENT_S1 + ".win:length(1000) as s1 on s0.p00 = s1.p10 and s0.p01 = s1.p11" +
             " full outer join " + EVENT_S2 + ".win:length(1000) as s2 on s0.p00 = s2.p20 and s0.p01 = s2.p21";
@@ -107,6 +114,8 @@ public class Test3StreamOuterFullJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_S2(25, "A_2", "B_3"));
         EPAssertionUtil.assertProps(updateListener.assertOneGetNewAndReset(), fields, new Object[]{null, null, null, null, null, null, 25, "A_2", "B_3"});
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testFullJoin_2sides()
@@ -481,9 +490,9 @@ public class Test3StreamOuterFullJoin extends TestCase
         EPAssertionUtil.assertSameAnyOrder(expected, getAndResetNewEvents());
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendEventsAndReset(Object[] events)

@@ -66,9 +66,9 @@ public class PropertyCompositeEventTable implements EventTable
         {
             return;
         }
-        for (EventBean event : events)
+        for (EventBean theEvent : events)
         {
-            add(event);
+            add(theEvent);
         }
     }
 
@@ -83,20 +83,20 @@ public class PropertyCompositeEventTable implements EventTable
         {
             return;
         }
-        for (EventBean event : events)
+        for (EventBean theEvent : events)
         {
-            remove(event);
+            remove(theEvent);
         }
     }
 
-    private void add(EventBean event)
+    private void add(EventBean theEvent)
     {
-        chain.enter(event, index);
+        chain.enter(theEvent, index);
     }
 
-    private void remove(EventBean event)
+    private void remove(EventBean theEvent)
     {
-        chain.remove(event, index);
+        chain.remove(theEvent, index);
     }
 
     public boolean isEmpty()

@@ -357,8 +357,8 @@ public class TestLegacyBeanEvents extends TestCase
         statement.addListener(listener);
         EventType eventType = statement.getEventType();
 
-        SupportLegacyBeanInt event = new SupportLegacyBeanInt(10);
-        epService.getEPRuntime().sendEvent(event);
+        SupportLegacyBeanInt theEvent = new SupportLegacyBeanInt(10);
+        epService.getEPRuntime().sendEvent(theEvent);
 
         for (String name : new String[] {"intPrimitive", "explicitFInt", "explicitMGetInt", "explicitMReadInt"})
         {
@@ -387,8 +387,8 @@ public class TestLegacyBeanEvents extends TestCase
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
-        SupportBeanFinal event = new SupportBeanFinal(10);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBeanFinal theEvent = new SupportBeanFinal(10);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertEquals(10, listener.getLastNewData()[0].get("intPrimitive"));
 
         epService.destroy();

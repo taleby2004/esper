@@ -53,9 +53,9 @@ public interface VirtualDataWindow {
      *     <li>Stop/Destroy of an index.</li>
      *     <li>Destroy of the virtual data window.</li>
      * </ul>
-     * @param event to handle
+     * @param theEvent to handle
      */
-    public void handleEvent(VirtualDataWindowEvent event);
+    public void handleEvent(VirtualDataWindowEvent theEvent);
 
     /**
      * This method is invoked when events are inserted-into or removed-from the

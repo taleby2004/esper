@@ -59,7 +59,7 @@ public class TestAggregateRowForAllHaving extends TestCase
         String viewExpr = "select irstream sum(longBoxed) as mySum " +
                           "from " + SupportBeanString.class.getName() + ".win:time(10 seconds) as one, " +
                                     SupportBean.class.getName() + ".win:time(10 seconds) as two " +
-                          "where one.string = two.string " +
+                          "where one.theString = two.theString " +
                           "having sum(longBoxed) > 10";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
@@ -125,15 +125,15 @@ public class TestAggregateRowForAllHaving extends TestCase
     }
 
     private Object sendEvent(String symbol, double price) {
-        Object event = new SupportMarketDataBean(symbol, price, null, null);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        Object theEvent = new SupportMarketDataBean(symbol, price, null, null);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
     private void sendEvent(long longBoxed, int intBoxed, short shortBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(JOIN_KEY);
+        bean.setTheString(JOIN_KEY);
         bean.setLongBoxed(longBoxed);
         bean.setIntBoxed(intBoxed);
         bean.setShortBoxed(shortBoxed);

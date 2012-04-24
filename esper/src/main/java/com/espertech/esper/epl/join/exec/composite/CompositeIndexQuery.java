@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.Set;
 
 public interface CompositeIndexQuery {
-    public void add(EventBean event, Map value, Set<EventBean> result);
+    public void add(EventBean theEvent, Map value, Set<EventBean> result);
     public void add(EventBean[] eventsPerStream, Map value, Collection<EventBean> result);
-    public Set<EventBean> get(EventBean event, Map parent, ExprEvaluatorContext context);
+    public Set<EventBean> get(EventBean theEvent, Map parent, ExprEvaluatorContext context);
     public Collection<EventBean> get(EventBean eventsPerStream[], Map parent, ExprEvaluatorContext context);
     public void setNext(CompositeIndexQuery next);
 }

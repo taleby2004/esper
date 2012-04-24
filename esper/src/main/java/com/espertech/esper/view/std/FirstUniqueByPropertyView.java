@@ -11,6 +11,7 @@ package com.espertech.esper.view.std;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -40,7 +41,7 @@ public final class FirstUniqueByPropertyView extends ViewSupport implements Clon
     private final ExprEvaluator[] uniqueCriteriaEval;
     private final int numKeys;
     private EventBean[] eventsPerStream = new EventBean[1];
-    private final Map<MultiKey<Object>, EventBean> firstEvents = new LinkedHashMap<MultiKey<Object>, EventBean>();
+    private final Map<Object, EventBean> firstEvents = new LinkedHashMap<Object, EventBean>();
     private final ExprEvaluatorContext exprEvaluatorContext;
 
     /**
@@ -86,7 +87,7 @@ public final class FirstUniqueByPropertyView extends ViewSupport implements Clon
             for (EventBean newEvent : newData)
             {
                 // Obtain unique value
-                MultiKey<Object> key = getUniqueKey(newEvent);
+                Object key = getUniqueKey(newEvent);
 
                 // already-seen key
                 if (firstEvents.containsKey(key))
@@ -114,7 +115,7 @@ public final class FirstUniqueByPropertyView extends ViewSupport implements Clon
             for (EventBean oldEvent : oldData)
             {
                 // Obtain unique value
-                MultiKey<Object> key = getUniqueKey(oldEvent);
+                Object key = getUniqueKey(oldEvent);
 
                 // If the old event is the current unique event, remove and post as old data
                 EventBean lastValue = firstEvents.get(key);
@@ -153,15 +154,19 @@ public final class FirstUniqueByPropertyView extends ViewSupport implements Clon
         return this.getClass().getName() + " uniqueCriteria=" + Arrays.toString(uniqueCriteria);
     }
 
-    private MultiKey<Object> getUniqueKey(EventBean event)
+    private Object getUniqueKey(EventBean theEvent)
     {
+        eventsPerStream[0] = theEvent;
+        if (numKeys == 1) {
+            return uniqueCriteriaEval[0].evaluate(eventsPerStream, true, exprEvaluatorContext);
+        }
+
         Object[] values = new Object[numKeys];
-        eventsPerStream[0] = event;
         for (int i = 0; i < numKeys; i++)
         {
             values[i] = uniqueCriteriaEval[i].evaluate(eventsPerStream, true, exprEvaluatorContext);
         }
-        return new MultiKey<Object>(values);
+        return new MultiKeyUntyped(values);
     }
 
     /**

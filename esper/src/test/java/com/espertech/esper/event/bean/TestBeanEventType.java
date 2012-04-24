@@ -50,6 +50,31 @@ public class TestBeanEventType extends TestCase
         eventNested = new BeanEventBean(objCombined, eventTypeNested);
     }
 
+    public void testCopyMethod() {
+        String[] copyFields = "myString".split(",");
+        assertTrue(eventTypeSimple.getCopyMethod(copyFields) instanceof BeanEventBeanSerializableCopyMethod);
+
+        BeanEventType nonSerializable = new BeanEventType(null, 0, NonSerializableNonCopyable.class, SupportEventAdapterService.getService(), null);
+        assertNull(nonSerializable.getCopyMethod(copyFields));
+        
+        ConfigurationEventTypeLegacy config = new ConfigurationEventTypeLegacy();
+        config.setCopyMethod("myCopyMethod");
+        nonSerializable = new BeanEventType(null, 0, NonSerializableNonCopyable.class, SupportEventAdapterService.getService(), config);
+        try {
+            nonSerializable.getCopyMethod(copyFields);   // also logs error
+            fail();
+        }
+        catch (EPException ex) {
+            // expected
+        }
+        
+        BeanEventType myCopyable = new BeanEventType(null, 0, MyCopyable.class, SupportEventAdapterService.getService(), config);
+        assertTrue(myCopyable.getCopyMethod(copyFields) instanceof BeanEventBeanConfiguredCopyMethod);   // also logs error
+
+        BeanEventType myCopyableAndSer = new BeanEventType(null, 0, MyCopyableAndSerializable.class, SupportEventAdapterService.getService(), config);
+        assertTrue(myCopyableAndSer.getCopyMethod(copyFields) instanceof BeanEventBeanConfiguredCopyMethod);   // also logs error
+    }
+
     public void testFragments()
     {
         FragmentEventType nestedTypeFragment = eventTypeComplex.getFragmentType("nested");
@@ -85,8 +110,8 @@ public class TestBeanEventType extends TestCase
 
         EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
                 new EventPropertyDescriptor("simpleProperty", String.class, null, false, false, false, false, false),
-                new EventPropertyDescriptor("mapProperty", Map.class, null, false, false, false, true, false),
-                new EventPropertyDescriptor("mapped", String.class, null, false, true, false, true, false),
+                new EventPropertyDescriptor("mapProperty", Map.class, String.class, false, false, false, true, false),
+                new EventPropertyDescriptor("mapped", String.class, Object.class, false, true, false, true, false),
                 new EventPropertyDescriptor("indexed", int.class, null, true, false, true, false, false),
                 new EventPropertyDescriptor("nested", SupportBeanComplexProps.SupportBeanSpecialGetterNested.class, null, false, false, false, false, true),
                 new EventPropertyDescriptor("arrayProperty", int[].class, int.class, false, false, true, false, false),
@@ -385,4 +410,47 @@ public class TestBeanEventType extends TestCase
         }
     }
 
+    public static class NonSerializableNonCopyable {
+        private String myString;
+
+        public String getMyString() {
+            return myString;
+        }
+
+        public void setMyString(String myString) {
+            this.myString = myString;
+        }
+    }
+
+    public static class MyCopyable {
+        private String myString;
+
+        public String getMyString() {
+            return myString;
+        }
+
+        public void setMyString(String myString) {
+            this.myString = myString;
+        }
+
+        public MyCopyable myCopyMethod() {
+            return this;
+        }
+    }
+
+    public static class MyCopyableAndSerializable implements Serializable {
+        private String myString;
+
+        public String getMyString() {
+            return myString;
+        }
+
+        public void setMyString(String myString) {
+            this.myString = myString;
+        }
+
+        public MyCopyableAndSerializable myCopyMethod() {
+            return this;
+        }
+    }
 }

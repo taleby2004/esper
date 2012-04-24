@@ -41,69 +41,69 @@ public class TestPatternEventProperties extends TestCase
     {
         setupSimplePattern("*");
 
-        Object event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
         EventBean eventBean = updateListener.assertOneGetNewAndReset();
-        assertSame(event, eventBean.get("a"));
+        assertSame(theEvent, eventBean.get("a"));
     }
 
     public void testWildcardOrPattern()
     {
         setupOrPattern("*");
 
-        Object event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
         EventBean eventBean = updateListener.assertOneGetNewAndReset();
-        assertSame(event, eventBean.get("a"));
+        assertSame(theEvent, eventBean.get("a"));
         assertNull(eventBean.get("b"));
 
-        event = SupportBeanComplexProps.makeDefaultBean();
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = SupportBeanComplexProps.makeDefaultBean();
+        epService.getEPRuntime().sendEvent(theEvent);
         eventBean = updateListener.assertOneGetNewAndReset();
-        assertSame(event, eventBean.get("b"));
+        assertSame(theEvent, eventBean.get("b"));
         assertNull(eventBean.get("a"));
     }
 
     public void testPropertiesSimplePattern()
     {
-        setupSimplePattern("a, a as myEvent, a.intPrimitive as myInt, a.string");
+        setupSimplePattern("a, a as myEvent, a.intPrimitive as myInt, a.theString");
 
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(1);
-        event.setString("test");
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(1);
+        theEvent.setTheString("test");
+        epService.getEPRuntime().sendEvent(theEvent);
 
         EventBean eventBean = updateListener.assertOneGetNewAndReset();
-        assertSame(event, eventBean.get("a"));
-        assertSame(event, eventBean.get("myEvent"));
+        assertSame(theEvent, eventBean.get("a"));
+        assertSame(theEvent, eventBean.get("myEvent"));
         assertEquals(1, eventBean.get("myInt"));
-        assertEquals("test", eventBean.get("a.string"));
+        assertEquals("test", eventBean.get("a.theString"));
     }
 
     public void testPropertiesOrPattern()
     {
         setupOrPattern("a, a as myAEvent, b, b as myBEvent, a.intPrimitive as myInt, " +
-                "a.string, b.simpleProperty as simple, b.indexed[0] as indexed, b.nested.nestedValue as nestedVal");
+                "a.theString, b.simpleProperty as simple, b.indexed[0] as indexed, b.nested.nestedValue as nestedVal");
 
-        Object event = SupportBeanComplexProps.makeDefaultBean();
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = SupportBeanComplexProps.makeDefaultBean();
+        epService.getEPRuntime().sendEvent(theEvent);
         EventBean eventBean = updateListener.assertOneGetNewAndReset();
-        assertSame(event, eventBean.get("b"));
+        assertSame(theEvent, eventBean.get("b"));
         assertEquals("simple", eventBean.get("simple"));
         assertEquals(1, eventBean.get("indexed"));
         assertEquals("nestedValue", eventBean.get("nestedVal"));
         assertNull(eventBean.get("a"));
         assertNull(eventBean.get("myAEvent"));
         assertNull(eventBean.get("myInt"));
-        assertNull(eventBean.get("a.string"));
+        assertNull(eventBean.get("a.theString"));
 
         SupportBean eventTwo = new SupportBean();
         eventTwo.setIntPrimitive(2);
-        eventTwo.setString("test2");
+        eventTwo.setTheString("test2");
         epService.getEPRuntime().sendEvent(eventTwo);
         eventBean = updateListener.assertOneGetNewAndReset();
         assertEquals(2, eventBean.get("myInt"));
-        assertEquals("test2", eventBean.get("a.string"));
+        assertEquals("test2", eventBean.get("a.theString"));
         assertNull(eventBean.get("b"));
         assertNull(eventBean.get("myBEvent"));
         assertNull(eventBean.get("simple"));

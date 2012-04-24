@@ -34,22 +34,22 @@ public class EventTypeAssertionUtil
         assertConsistencyRecursive(eventType, new HashSet<EventType>());
     }
 
-    public static String print(EventBean event)
+    public static String print(EventBean theEvent)
     {
         StringWriter writer = new StringWriter();
-        print(event, writer, 0, new Stack<String>());
+        print(theEvent, writer, 0, new Stack<String>());
         return writer.toString();
     }
 
-    private static void print(EventBean event, StringWriter writer, int indent, Stack<String> propertyStack)
+    private static void print(EventBean theEvent, StringWriter writer, int indent, Stack<String> propertyStack)
     {
         writeIndent(writer, indent);
         writer.append("Properties : \n");
-        printProperties(event, writer, indent + 2, propertyStack);
+        printProperties(theEvent, writer, indent + 2, propertyStack);
 
         // count fragments
         int countFragments = 0;
-        for (EventPropertyDescriptor desc : event.getEventType().getPropertyDescriptors())
+        for (EventPropertyDescriptor desc : theEvent.getEventType().getPropertyDescriptors())
         {
             if (desc.isFragment())
             {
@@ -63,7 +63,7 @@ public class EventTypeAssertionUtil
 
         writeIndent(writer, indent);
         writer.append("Fragments : (" + countFragments + ") \n");
-        for (EventPropertyDescriptor desc : event.getEventType().getPropertyDescriptors())
+        for (EventPropertyDescriptor desc : theEvent.getEventType().getPropertyDescriptors())
         {
             if (!desc.isFragment())
             {
@@ -84,7 +84,7 @@ public class EventTypeAssertionUtil
                         writeIndent(writer, indent + 4);
                         writer.append("bean #");
                         writer.append(Integer.toString(count));
-                        EventBean result = (EventBean) event.getFragment(desc.getPropertyName() + "[" + count + "]");
+                        EventBean result = (EventBean) theEvent.getFragment(desc.getPropertyName() + "[" + count + "]");
                         if (result == null)
                         {
                             writer.append("(null EventBean)\n");
@@ -107,7 +107,7 @@ public class EventTypeAssertionUtil
             }
             else
             {
-                Object fragment = event.getFragment(desc.getPropertyName());
+                Object fragment = theEvent.getFragment(desc.getPropertyName());
                 if (fragment == null)
                 {
                     writer.append("(null)\n");
@@ -122,7 +122,7 @@ public class EventTypeAssertionUtil
                     writer.append("...\n");
 
                     // prevent getThis() loops
-                    if (fragmentBean.getEventType() == event.getEventType())
+                    if (fragmentBean.getEventType() == theEvent.getEventType())
                     {
                         writeIndent(writer, indent + 2);
                         writer.append("Skipping");
@@ -330,9 +330,9 @@ public class EventTypeAssertionUtil
                 Assert.assertTrue(failedMessage, fragment instanceof EventBean[]);
                 EventBean[] events = (EventBean[]) fragment;
                 Assert.assertTrue(failedMessage, events.length > 0);
-                for (EventBean event : events)
+                for (EventBean theEvent : events)
                 {
-                    assertConsistencyRecusive(event, alreadySeenTypes);
+                    assertConsistencyRecusive(theEvent, alreadySeenTypes);
                 }
             }
         }

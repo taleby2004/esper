@@ -22,8 +22,8 @@ public interface EventEvaluator
     /**
      * Perform the matching of an event based on the event property values,
      * adding any callbacks for matches found to the matches list.
-     * @param event is the event object wrapper to obtain event property values from
+     * @param theEvent is the event object wrapper to obtain event property values from
      * @param matches accumulates the matching filter callbacks
      */
-    public void matchEvent(EventBean event, Collection<FilterHandle> matches);
+    public void matchEvent(EventBean theEvent, Collection<FilterHandle> matches);
 }

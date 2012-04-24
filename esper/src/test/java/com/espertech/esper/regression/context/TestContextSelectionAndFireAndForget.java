@@ -47,7 +47,7 @@ public class TestContextSelectionAndFireAndForget extends TestCase {
 
     public void testInvalid() {
 
-        epService.getEPAdministrator().createEPL("create context SegmentedSB as partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("create context SegmentedSB as partition by theString from SupportBean");
         epService.getEPAdministrator().createEPL("create context SegmentedS0 as partition by p00 from SupportBean_S0");
         epService.getEPAdministrator().createEPL("context SegmentedSB create window WinSB.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("context SegmentedS0 create window WinS0.win:keepall() as SupportBean_S0");
@@ -64,7 +64,7 @@ public class TestContextSelectionAndFireAndForget extends TestCase {
                 "Error executing statement: Number of context partition selectors does not match the number of named windows in the from-clause [select * from WinSB, WinS1]");
 
         // test join
-        epService.getEPAdministrator().createEPL("create context PartitionedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("create context PartitionedByString partition by theString from SupportBean");
         epService.getEPAdministrator().createEPL("context PartitionedByString create window MyWindowOne.win:keepall() as SupportBean");
 
         epService.getEPAdministrator().createEPL("create context PartitionedByP00 partition by p00 from SupportBean_S0");
@@ -76,11 +76,11 @@ public class TestContextSelectionAndFireAndForget extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "G1"));
 
         try {
-            runQueryAll("select mw1.intPrimitive as c1, mw2.id as c2 from MyWindowOne mw1, MyWindowTwo mw2 where mw1.string = mw2.p00", "c1,c2",
+            runQueryAll("select mw1.intPrimitive as c1, mw2.id as c2 from MyWindowOne mw1, MyWindowTwo mw2 where mw1.theString = mw2.p00", "c1,c2",
                 new Object[][]{{10, 2}, {11, 1}}, 2);
         }
         catch (EPStatementException ex) {
-            assertEquals(ex.getMessage(), "Error executing statement: Joins against named windows that are under context are not supported [select mw1.intPrimitive as c1, mw2.id as c2 from MyWindowOne mw1, MyWindowTwo mw2 where mw1.string = mw2.p00]");
+            assertEquals(ex.getMessage(), "Error executing statement: Joins against named windows that are under context are not supported [select mw1.intPrimitive as c1, mw2.id as c2 from MyWindowOne mw1, MyWindowTwo mw2 where mw1.theString = mw2.p00]");
         }
     }
 
@@ -89,7 +89,7 @@ public class TestContextSelectionAndFireAndForget extends TestCase {
 
     public void testContextNamedWindowQuery() {
 
-        epService.getEPAdministrator().createEPL("create context PartitionedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("create context PartitionedByString partition by theString from SupportBean");
         epService.getEPAdministrator().createEPL("context PartitionedByString create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
 
@@ -141,16 +141,16 @@ public class TestContextSelectionAndFireAndForget extends TestCase {
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 5));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
 
-        runQueryAll("select string as c1, sum(intPrimitive) as c2 from MyWindow group by string", "c1,c2", new Object[][]{{"E1", 5}, {"E2", -2}, {"E3", 10}}, 1);
-        runQuery("select string as c1, sum(intPrimitive) as c2 from MyWindow group by string", "c1,c2", new Object[][]{{"E1", 3}, {"E3", 5}},
+        runQueryAll("select theString as c1, sum(intPrimitive) as c2 from MyWindow group by theString", "c1,c2", new Object[][]{{"E1", 5}, {"E2", -2}, {"E3", 10}}, 1);
+        runQuery("select theString as c1, sum(intPrimitive) as c2 from MyWindow group by theString", "c1,c2", new Object[][]{{"E1", 3}, {"E3", 5}},
                 new ContextPartitionSelector[] {new SupportSelectorById(Collections.singleton(2))});
 
-        runQuery("context NestedContext select context.ACtx.s0.p00 as c1, context.BCtx.label as c2, string as c3, sum(intPrimitive) as c4 from MyWindow group by string", "c1,c2,c3,c4", new Object[][]{{"S0_1", "grp3", "E1", 3}, {"S0_1", "grp3", "E3", 5}},
+        runQuery("context NestedContext select context.ACtx.s0.p00 as c1, context.BCtx.label as c2, theString as c3, sum(intPrimitive) as c4 from MyWindow group by theString", "c1,c2,c3,c4", new Object[][]{{"S0_1", "grp3", "E1", 3}, {"S0_1", "grp3", "E3", 5}},
                 new ContextPartitionSelector[] {new SupportSelectorById(Collections.singleton(2))});
     }
 
     public void testIterateStatement() {
-        epService.getEPAdministrator().createEPL("create context PartitionedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("create context PartitionedByString partition by theString from SupportBean");
         String[] fields = "c0,c1".split(",");
         EPStatement stmt = epService.getEPAdministrator().createEPL("@Name('StmtOne') context PartitionedByString select context.key1 as c0, sum(intPrimitive) as c1 from SupportBean.win:length(5)");
 

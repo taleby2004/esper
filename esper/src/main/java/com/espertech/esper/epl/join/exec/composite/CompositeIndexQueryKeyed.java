@@ -58,14 +58,14 @@ public class CompositeIndexQueryKeyed implements CompositeIndexQuery {
         this.next = next;
     }
 
-    public Set<EventBean> get(EventBean event, Map parent, ExprEvaluatorContext context) {
-        events[lookupStream] = event;
+    public Set<EventBean> get(EventBean theEvent, Map parent, ExprEvaluatorContext context) {
+        events[lookupStream] = theEvent;
         MultiKeyUntyped mk = EventBeanUtility.getMultiKey(events, evaluators, context, keyCoercionTypes);
         Map innerIndex = (Map) parent.get(mk);
         if (innerIndex == null) {
             return null;
         }
-        return next.get(event, innerIndex, context);
+        return next.get(theEvent, innerIndex, context);
     }
 
     public Collection<EventBean> get(EventBean[] eventsPerStream, Map parent, ExprEvaluatorContext context) {
@@ -87,7 +87,7 @@ public class CompositeIndexQueryKeyed implements CompositeIndexQuery {
         return next.get(eventsPerStream, innerIndex, context);
     }
 
-    public void add(EventBean event, Map value, Set<EventBean> result) {
+    public void add(EventBean theEvent, Map value, Set<EventBean> result) {
         throw new UnsupportedOperationException();
     }
 

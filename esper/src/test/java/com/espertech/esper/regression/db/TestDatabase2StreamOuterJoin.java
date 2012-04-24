@@ -103,7 +103,7 @@ public class TestDatabase2StreamOuterJoin extends TestCase
                 SupportBean.class.getName() + " as s0 " +
                 " left outer join " +
                 " sql:MyDB ['select " + TestDatabase2StreamOuterJoin.ALL_FIELDS + " from mytesttable where ${s0.intPrimitive} = mytesttable.mybigint'] as s1 " +
-                "on string = myvarchar";
+                "on theString = myvarchar";
 
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
@@ -136,7 +136,7 @@ public class TestDatabase2StreamOuterJoin extends TestCase
         String[] fields = "MyInt,myint".split(",");
         String stmtText = "select s0.intPrimitive as MyInt, " + TestDatabase2StreamOuterJoin.ALL_FIELDS + " from " +
                 " sql:MyDB ['select " + TestDatabase2StreamOuterJoin.ALL_FIELDS + " from mytesttable where ${s0.intPrimitive} = mytesttable.mybigint'] as s1 right outer join " +
-                SupportBean.class.getName() + " as s0 on string = myvarchar";
+                SupportBean.class.getName() + " as s0 on theString = myvarchar";
 
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
@@ -171,7 +171,7 @@ public class TestDatabase2StreamOuterJoin extends TestCase
                 SupportBean.class.getName() + ".win:keepall() as s0 " +
                 " right outer join " +
                 " sql:MyDB ['select myvarchar MyVarChar from mytesttable'] as s1 " +
-                "on string = MyVarChar";
+                "on theString = MyVarChar";
 
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
@@ -222,18 +222,18 @@ public class TestDatabase2StreamOuterJoin extends TestCase
         assertReceived(received, null, null, null, null, null, null, null, null, null);
     }
 
-    private void assertReceived(EventBean event, Long mybigint, Integer myint, String myvarchar, String mychar, Boolean mybool, BigDecimal mynumeric, BigDecimal mydecimal, Double mydouble, Double myreal)
+    private void assertReceived(EventBean theEvent, Long mybigint, Integer myint, String myvarchar, String mychar, Boolean mybool, BigDecimal mynumeric, BigDecimal mydecimal, Double mydouble, Double myreal)
     {
-        assertEquals(mybigint, event.get("mybigint"));
-        assertEquals(myint, event.get("myint"));
-        assertEquals(myvarchar, event.get("myvarchar"));
-        assertEquals(mychar, event.get("mychar"));
-        assertEquals(mybool, event.get("mybool"));
-        assertEquals(mynumeric, event.get("mynumeric"));
-        assertEquals(mydecimal, event.get("mydecimal"));
-        assertEquals(mydouble, event.get("mydouble"));
-        Object r = event.get("myreal");
-        assertEquals(myreal, event.get("myreal"));
+        assertEquals(mybigint, theEvent.get("mybigint"));
+        assertEquals(myint, theEvent.get("myint"));
+        assertEquals(myvarchar, theEvent.get("myvarchar"));
+        assertEquals(mychar, theEvent.get("mychar"));
+        assertEquals(mybool, theEvent.get("mybool"));
+        assertEquals(mynumeric, theEvent.get("mynumeric"));
+        assertEquals(mydecimal, theEvent.get("mydecimal"));
+        assertEquals(mydouble, theEvent.get("mydouble"));
+        Object r = theEvent.get("myreal");
+        assertEquals(myreal, theEvent.get("myreal"));
     }
 
     private void sendEvent(int intPrimitive)
@@ -243,11 +243,11 @@ public class TestDatabase2StreamOuterJoin extends TestCase
         epService.getEPRuntime().sendEvent(bean);
     }
 
-    private void sendEvent(int intPrimitive, String string)
+    private void sendEvent(int intPrimitive, String theString)
     {
         SupportBean bean = new SupportBean();
         bean.setIntPrimitive(intPrimitive);
-        bean.setString(string);
+        bean.setTheString(theString);
         epService.getEPRuntime().sendEvent(bean);
     }
 }

@@ -23,9 +23,9 @@ public class SupportNamedWindowObserver implements NamedWindowLifecycleObserver
 {
     private List<NamedWindowLifecycleEvent> events = new ArrayList<NamedWindowLifecycleEvent>();
 
-    public void observe(NamedWindowLifecycleEvent event)
+    public void observe(NamedWindowLifecycleEvent theEvent)
     {
-        events.add(event);
+        events.add(theEvent);
     }
 
     public List<NamedWindowLifecycleEvent> getEvents()
@@ -36,8 +36,8 @@ public class SupportNamedWindowObserver implements NamedWindowLifecycleObserver
     public NamedWindowLifecycleEvent getFirstAndReset()
     {
         Assert.assertEquals(1, events.size());
-        NamedWindowLifecycleEvent event = events.get(0);
+        NamedWindowLifecycleEvent theEvent = events.get(0);
         events.clear();
-        return event;
+        return theEvent;
     }
 }

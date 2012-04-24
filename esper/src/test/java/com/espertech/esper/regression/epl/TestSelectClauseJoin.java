@@ -41,8 +41,8 @@ public class TestSelectClauseJoin extends TestCase
         String eventB = SupportBean.class.getName();
 
         String joinStatement = "select s0.doubleBoxed, s1.intPrimitive*s1.intBoxed/2.0 as div from " +
-            eventA + "(string='s0').win:length(3) as s0," +
-            eventB + "(string='s1').win:length(3) as s1" +
+            eventA + "(theString='s0').win:length(3) as s0," +
+            eventB + "(theString='s1').win:length(3) as s1" +
             " where s0.doubleBoxed = s1.doubleBoxed";
 
         EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
@@ -63,15 +63,15 @@ public class TestSelectClauseJoin extends TestCase
         assertEquals(3d, newEvents[0].get("div"));
 
         Iterator<EventBean> iterator = joinView.iterator();
-        EventBean event = iterator.next();
-        assertEquals(1d, event.get("s0.doubleBoxed"));
-        assertEquals(3d, event.get("div"));
+        EventBean theEvent = iterator.next();
+        assertEquals(1d, theEvent.get("s0.doubleBoxed"));
+        assertEquals(3d, theEvent.get("div"));
     }
 
     private void sendEvent(String s, double doubleBoxed, int intPrimitive, int intBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(s);
+        bean.setTheString(s);
         bean.setDoubleBoxed(doubleBoxed);
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);

@@ -46,13 +46,13 @@ public class JMSSubscription extends BaseSubscription
         this.jmsMessageMarshaller = jmsMessageMarshaller;
     }
 
-    public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches) {
+    public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches) {
 
         if (!(adapter instanceof JMSOutputAdapter))
         {
             return;
         }
-        ((JMSOutputAdapter) (adapter)).send(event, jmsMessageMarshaller);
+        ((JMSOutputAdapter) (adapter)).send(theEvent, jmsMessageMarshaller);
     }
 
     public boolean isSubSelect()

@@ -12,7 +12,6 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
@@ -30,21 +29,21 @@ public class AggSvcGroupAllAccessOnlyImpl implements AggregationService, Aggrega
         this.accesses = accesses;
     }
 
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped groupKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyEnter(EventBean[] eventsPerStream, Object groupKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         for (AggregationAccess access : accesses) {
             access.applyEnter(eventsPerStream);
         }
     }
 
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped groupKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyLeave(EventBean[] eventsPerStream, Object groupKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         for (AggregationAccess access : accesses) {
             access.applyLeave(eventsPerStream);
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId)
+    public void setCurrentAccess(Object groupKey, int agentInstanceId)
     {
         // no implementation required
     }

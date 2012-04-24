@@ -47,9 +47,9 @@ public class StockTickerMain implements Runnable
         log.info("Generating " + stream.size() + " events");
 
         log.info("Sending " + stream.size() + " limit and tick events");
-        for (Object event : stream)
+        for (Object theEvent : stream)
         {
-            epService.getEPRuntime().sendEvent(event);
+            epService.getEPRuntime().sendEvent(theEvent);
 
             if (continuousSimulation) {
                 try {

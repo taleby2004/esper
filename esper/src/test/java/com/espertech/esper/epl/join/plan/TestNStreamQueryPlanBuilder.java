@@ -45,7 +45,7 @@ public class TestNStreamQueryPlanBuilder extends TestCase
         queryGraph.addStrictEquals(4, "p41", null, 3, "p31", null);
         queryGraph.addStrictEquals(4, "p42", null, 2, "p21", null);
 
-        dependencyGraph = new DependencyGraph(5);
+        dependencyGraph = new DependencyGraph(5, false);
     }
 
     public void testBuild()
@@ -138,7 +138,7 @@ public class TestNStreamQueryPlanBuilder extends TestCase
 
     public void testIsDependencySatisfied()
     {
-        DependencyGraph graph = new DependencyGraph(3);
+        DependencyGraph graph = new DependencyGraph(3, false);
         graph.addDependency(1, 0);
         graph.addDependency(2, 0);
 
@@ -146,7 +146,7 @@ public class TestNStreamQueryPlanBuilder extends TestCase
         assertFalse(NStreamQueryPlanBuilder.isDependencySatisfied(1, new int[] {0, 2}, graph));
         assertFalse(NStreamQueryPlanBuilder.isDependencySatisfied(2, new int[] {0, 1}, graph));
 
-        graph = new DependencyGraph(5);
+        graph = new DependencyGraph(5, false);
         graph.addDependency(4, 1);
         graph.addDependency(4, 2);
         graph.addDependency(2, 0);

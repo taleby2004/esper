@@ -56,14 +56,14 @@ public class TestTimestampExpr extends TestCase
 
         sendTimer(100);
         epService.getEPRuntime().sendEvent(new SupportBean());
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {100l, 100l, 101l});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {100l, 100l, 101l});
 
         sendTimer(999);
         epService.getEPRuntime().sendEvent(new SupportBean());
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {999l, 999l, 1000l});
-        assertEquals(event.get("current_timestamp()"), event.get("t0"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[]{999l, 999l, 1000l});
+        assertEquals(theEvent.get("current_timestamp()"), theEvent.get("t0"));
     }
 
     public void testGetTimestamp_OM() throws Exception
@@ -84,8 +84,8 @@ public class TestTimestampExpr extends TestCase
 
         sendTimer(777);
         epService.getEPRuntime().sendEvent(new SupportBean());
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {777l});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {777l});
     }
 
     public void testGetTimestamp_Compile() throws Exception
@@ -104,22 +104,22 @@ public class TestTimestampExpr extends TestCase
 
         sendTimer(777);
         epService.getEPRuntime().sendEvent(new SupportBean());
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertResults(event, new Object[] {777l});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new Object[] {777l});
     }
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
-    private void assertResults(EventBean event, Object[] result)
+    private void assertResults(EventBean theEvent, Object[] result)
     {
         for (int i = 0; i < result.length; i++)
         {
-            assertEquals("failed for index " + i, result[i], event.get("t" + i));
+            assertEquals("failed for index " + i, result[i], theEvent.get("t" + i));
         }
     }
 }

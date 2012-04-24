@@ -46,7 +46,7 @@ public class TestLikeRegexpExpr extends TestCase
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean where string regexp \"*any*\"");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean where theString regexp \"*any*\"");
         stmt.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
@@ -105,12 +105,12 @@ public class TestLikeRegexpExpr extends TestCase
 
         runLikeRegexStringAndNull();
 
-        String epl = "select * from " + SupportBean.class.getName() + "(string not like \"foo%\")";
+        String epl = "select * from " + SupportBean.class.getName() + "(theString not like \"foo%\")";
         EPPreparedStatement eps = epService.getEPAdministrator().prepareEPL(epl);
         EPStatement statement = epService.getEPAdministrator().create(eps);
         assertEquals(epl, statement.getText());
 
-        epl = "select * from " + SupportBean.class.getName() + "(string not regexp \"foo\")";
+        epl = "select * from " + SupportBean.class.getName() + "(theString not regexp \"foo\")";
         eps = epService.getEPAdministrator().prepareEPL(epl);
         statement = epService.getEPAdministrator().create(eps);
         assertEquals(epl, statement.getText());
@@ -208,12 +208,12 @@ public class TestLikeRegexpExpr extends TestCase
 
     private void assertReceived(Object[][] objects)
     {
-        EventBean event = testListener.assertOneGetNewAndReset();
+        EventBean theEvent = testListener.assertOneGetNewAndReset();
         for (int i = 0; i < objects.length; i++)
         {
             String key = (String) objects[i][0];
             Object result = objects[i][1];
-            assertEquals("key=" + key + " result=" + result, result, event.get(key));
+            assertEquals("key=" + key + " result=" + result, result, theEvent.get(key));
         }
     }
 

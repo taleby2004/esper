@@ -56,12 +56,12 @@ public class ResultDeliveryStrategyObjectArr implements ResultDeliveryStrategy
             oldData = convert(result.getSecond());
         }
 
-        Object[] params = new Object[] {newData, oldData};
+        Object[] parameters = new Object[] {newData, oldData};
         try {
-            fastMethod.invoke(subscriber, params);
+            fastMethod.invoke(subscriber, parameters);
         }
         catch (InvocationTargetException e) {
-            ResultDeliveryStrategyImpl.handle(statementName, log, e, params, subscriber, fastMethod);
+            ResultDeliveryStrategyImpl.handle(statementName, log, e, parameters, subscriber, fastMethod);
         }
     }
 

@@ -119,9 +119,9 @@ public class TestExprCaseNode extends TestCase
 
     private EventBean[] makeEvent(int intPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        return new EventBean[] {SupportEventBeanFactory.createObject(event)};
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        return new EventBean[] {SupportEventBeanFactory.createObject(theEvent)};
     }
 
      private static final Log log = LogFactory.getLog(TestExprCaseNode.class);

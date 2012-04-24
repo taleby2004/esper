@@ -44,10 +44,10 @@ public class StmtNamedWindowUpdateCallable implements Callable<StmtNamedWindowUp
             Random random = new Random();
             for (int loop = 0; loop < numRepeats; loop++)
             {
-                String string = Integer.toString(Math.abs(random.nextInt()) % TestMTStmtNamedWindowUpdate.NUM_STRINGS);
+                String theString = Integer.toString(Math.abs(random.nextInt()) % TestMTStmtNamedWindowUpdate.NUM_STRINGS);
                 int intPrimitive = Math.abs(random.nextInt()) % TestMTStmtNamedWindowUpdate.NUM_INTS;
                 int doublePrimitive = Math.abs(random.nextInt()) % 10;
-                sendEvent(string, intPrimitive, doublePrimitive);
+                sendEvent(theString, intPrimitive, doublePrimitive);
             }
         }
         catch (Exception ex)
@@ -59,13 +59,13 @@ public class StmtNamedWindowUpdateCallable implements Callable<StmtNamedWindowUp
         return new UpdateResult(end - start, updates);
     }
 
-    private void sendEvent(String string, int intPrimitive, double doublePrimitive)
+    private void sendEvent(String theString, int intPrimitive, double doublePrimitive)
     {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setBoolPrimitive(false);
         bean.setDoublePrimitive(doublePrimitive);
         engine.sendEvent(bean);
-        updates.add(new UpdateItem(string, intPrimitive, doublePrimitive));
+        updates.add(new UpdateItem(theString, intPrimitive, doublePrimitive));
     }
 
     public static class UpdateResult {
@@ -87,18 +87,18 @@ public class StmtNamedWindowUpdateCallable implements Callable<StmtNamedWindowUp
     }
 
     public static class UpdateItem {
-        private String string;
+        private String theString;
         private int intval;
         private double doublePrimitive;
 
-        public UpdateItem(String string, int intval, double doublePrimitive) {
-            this.string = string;
+        public UpdateItem(String theString, int intval, double doublePrimitive) {
+            this.theString = theString;
             this.intval = intval;
             this.doublePrimitive = doublePrimitive;
         }
 
-        public String getString() {
-            return string;
+        public String getTheString() {
+            return theString;
         }
 
         public int getIntval() {

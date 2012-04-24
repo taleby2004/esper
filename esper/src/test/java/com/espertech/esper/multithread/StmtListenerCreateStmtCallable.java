@@ -85,9 +85,9 @@ public class StmtListenerCreateStmtCallable implements Callable
         {
             for (int i = 0; i < numRepeats; i++)
             {
-                SupportMarketDataBean event = new SupportMarketDataBean("", 0, (long) numThread, null);
-                engine.getEPRuntime().route(event);
-                routed.add(event);
+                SupportMarketDataBean theEvent = new SupportMarketDataBean("", 0, (long) numThread, null);
+                engine.getEPRuntime().route(theEvent);
+                routed.add(theEvent);
             }
         }
     }

@@ -19,7 +19,7 @@ import java.util.Collection;
 import java.util.Set;
 
 public interface SortedAccessStrategy {
-    public Set<EventBean> lookup(EventBean event, PropertySortedEventTable index, ExprEvaluatorContext context);
+    public Set<EventBean> lookup(EventBean theEvent, PropertySortedEventTable index, ExprEvaluatorContext context);
     public Collection<EventBean> lookup(EventBean[] eventsPerStream, PropertySortedEventTable index, ExprEvaluatorContext context);
     public String toQueryPlan();
 }

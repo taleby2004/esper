@@ -90,11 +90,9 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
 
         initialize(false);
 
-        if (optionalLegacyDef != null) {
-            startTimestampPropertyName = optionalLegacyDef.getStartTimestampPropertyName();
-            endTimestampPropertyName = optionalLegacyDef.getEndTimestampPropertyName();
-            EventTypeUtility.validateTimestampProperties(this, startTimestampPropertyName, endTimestampPropertyName);
-        }
+        EventTypeUtility.TimestampPropertyDesc desc = EventTypeUtility.validatedDetermineTimestampProps(this, optionalLegacyDef == null ? null : optionalLegacyDef.getStartTimestampPropertyName(), optionalLegacyDef == null ? null : optionalLegacyDef.getEndTimestampPropertyName(), superTypes);
+        startTimestampPropertyName = desc.getStart();
+        endTimestampPropertyName = desc.getEnd();
     }
 
     public String getStartTimestampPropertyName() {
@@ -412,6 +410,18 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                     // We do not yet allow to fragment maps entries.
                     // Class genericType = JavaClassHelper.getGenericReturnTypeMap(desc.getReadMethod(), desc.getAccessorField());
                     isFragment = false;
+
+                    if (desc.getReadMethod() != null)
+                    {
+                        componentType = JavaClassHelper.getGenericReturnTypeMap(desc.getReadMethod(), false);
+                    }
+                    else if (desc.getAccessorField() != null)
+                    {
+                        componentType = JavaClassHelper.getGenericFieldTypeMap(desc.getAccessorField(), false);
+                    }
+                    else {
+                        componentType = Object.class;
+                    }
                 }
                 else if (type.isArray())
                 {
@@ -462,7 +472,7 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
                 mappedPropertyDescriptors.put(propertyName, desc);
 
                 underlyingType = desc.getReturnType();
-                componentType = null;
+                componentType = Object.class;
                 isRequiresIndex = false;
                 isRequiresMapkey = desc.getReadMethod().getParameterTypes().length > 0;
                 isIndexed = false;
@@ -862,12 +872,12 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
 
     public EventBeanCopyMethod getCopyMethod(String[] properties)
     {
-        if (JavaClassHelper.isImplementsInterface(clazz, Serializable.class))
-        {
-            return new BeanEventBeanSerializableCopyMethod(this, eventAdapterService);
-        }
         if (copyMethodName == null)
         {
+            if (JavaClassHelper.isImplementsInterface(clazz, Serializable.class))
+            {
+                return new BeanEventBeanSerializableCopyMethod(this, eventAdapterService);
+            }
             return null;
         }
         Method method = null;
@@ -881,7 +891,11 @@ public class BeanEventType implements EventTypeSPI, NativeEventType
         }
         if (method == null)
         {
-            log.error("Configured copy-method for class '" + clazz.getName() + " not found by name '" + copyMethodName + "'");
+            if (JavaClassHelper.isImplementsInterface(clazz, Serializable.class))
+            {
+                return new BeanEventBeanSerializableCopyMethod(this, eventAdapterService);
+            }
+            throw new EPException("Configured copy-method for class '" + clazz.getName() + " not found by name '" + copyMethodName + "' and class does not implement Serializable");
         }
         return new BeanEventBeanConfiguredCopyMethod(this, eventAdapterService, fastClass.getMethod(method));
     }

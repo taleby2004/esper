@@ -23,6 +23,8 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Collections;
+
 public class TestOrderByRowForAll extends TestCase
 {
 	private static final Log log = LogFactory.getLog(TestOrderByRowForAll.class);
@@ -41,7 +43,7 @@ public class TestOrderByRowForAll extends TestCase
         String statementString = "select sum(price) as sumPrice from " +
     	            SupportMarketDataBean.class.getName() + ".win:length(10) as one, " +
     	            SupportBeanString.class.getName() + ".win:length(100) as two " +
-                    "where one.symbol = two.string " +
+                    "where one.symbol = two.theString " +
                     "order by price";
         EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         sendJoinEvents();
@@ -53,6 +55,12 @@ public class TestOrderByRowForAll extends TestCase
 
         sendEvent("KGB", 75);
         EPAssertionUtil.assertPropsPerRow(statement.iterator(), fields, new Object[][]{{289d}});
+
+        // JIRA ESPER-644 Infinite loop when restarting a statement
+        epService.getEPAdministrator().getConfiguration().addEventType("FB", Collections.<String, Object>singletonMap("timeTaken", double.class));
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select avg(timeTaken) as timeTaken from FB order by timeTaken desc");
+        stmt.stop();
+        stmt.start();
     }
 
     private void sendEvent(String symbol, double price)

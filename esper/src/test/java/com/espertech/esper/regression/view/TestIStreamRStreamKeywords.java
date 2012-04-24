@@ -50,14 +50,14 @@ public class TestIStreamRStreamKeywords extends TestCase
         EPStatement statement = epService.getEPAdministrator().createEPL(stmtText);
         statement.addListener(testListener);
 
-        Object event = sendEvent("a");
+        Object theEvent = sendEvent("a");
         sendEvent("b");
         sendEvent("c");
         assertFalse(testListener.isInvoked());
 
         sendEvent("d");
         assertTrue(testListener.isInvoked());
-        assertSame(event, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
+        assertSame(theEvent, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
         assertNull(testListener.getLastOldData());  // receive no more old data
     }
 
@@ -99,14 +99,14 @@ public class TestIStreamRStreamKeywords extends TestCase
         EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(testListener);
 
-        Object event = sendEvent("a");
+        Object theEvent = sendEvent("a");
         assertFalse(testListener.isInvoked());
 
         sendEvents(new String[] {"a", "b"});
         assertFalse(testListener.isInvoked());
 
         sendEvent("d");
-        assertSame(event, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
+        assertSame(theEvent, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
         assertNull(testListener.getLastOldData());  // receive no more old data
         testListener.reset();
     }
@@ -124,14 +124,14 @@ public class TestIStreamRStreamKeywords extends TestCase
         EPStatement statement = epService.getEPAdministrator().create(model);
         statement.addListener(testListener);
 
-        Object event = sendEvent("a");
+        Object theEvent = sendEvent("a");
         assertFalse(testListener.isInvoked());
 
         sendEvents(new String[] {"a", "b"});
         assertFalse(testListener.isInvoked());
 
         sendEvent("d");
-        assertSame(event, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
+        assertSame(theEvent, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
         assertNull(testListener.getLastOldData());  // receive no more old data
         testListener.reset();
     }
@@ -145,14 +145,14 @@ public class TestIStreamRStreamKeywords extends TestCase
                 "select rstream * from " + SupportBean.class.getName() + ".win:length(3)");
         statement.addListener(testListener);
 
-        Object event = sendEvent("a");
+        Object theEvent = sendEvent("a");
         assertFalse(testListener.isInvoked());
 
         sendEvents(new String[] {"a", "b"});
         assertFalse(testListener.isInvoked());
 
         sendEvent("d");
-        assertSame(event, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
+        assertSame(theEvent, testListener.getLastNewData()[0].getUnderlying());    // receive 'a' as new data
         assertNull(testListener.getLastOldData());  // receive no more old data
         testListener.reset();
     }
@@ -164,7 +164,7 @@ public class TestIStreamRStreamKeywords extends TestCase
 
         EPStatement statement = epService.getEPAdministrator().createEPL(
                 "insert into NextStream " +
-                "select rstream s0.string as string from " + SupportBean.class.getName() + ".win:length(3) as s0");
+                "select rstream s0.theString as theString from " + SupportBean.class.getName() + ".win:length(3) as s0");
         statement.addListener(testListener);
 
         statement = epService.getEPAdministrator().createEPL("select * from NextStream");
@@ -172,7 +172,7 @@ public class TestIStreamRStreamKeywords extends TestCase
 
         sendEvent("a");
         assertFalse(testListener.isInvoked());
-        assertEquals("a", testListenerInsertInto.assertOneGetNewAndReset().get("string"));    // insert into unchanged
+        assertEquals("a", testListenerInsertInto.assertOneGetNewAndReset().get("theString"));    // insert into unchanged
 
         sendEvents(new String[] {"b", "c"});
         assertFalse(testListener.isInvoked());
@@ -180,9 +180,9 @@ public class TestIStreamRStreamKeywords extends TestCase
         testListenerInsertInto.reset();
 
         sendEvent("d");
-        assertSame("a", testListener.getLastNewData()[0].get("string"));    // receive 'a' as new data
+        assertSame("a", testListener.getLastNewData()[0].get("theString"));    // receive 'a' as new data
         assertNull(testListener.getLastOldData());  // receive no more old data
-        assertEquals("d", testListenerInsertInto.getLastNewData()[0].get("string"));    // insert into unchanged
+        assertEquals("d", testListenerInsertInto.getLastNewData()[0].get("theString"));    // insert into unchanged
         assertNull(testListenerInsertInto.getLastOldData());  // receive no old data in insert into
         testListener.reset();
     }
@@ -194,7 +194,7 @@ public class TestIStreamRStreamKeywords extends TestCase
 
         EPStatement statement = epService.getEPAdministrator().createEPL(
                 "insert rstream into NextStream " +
-                "select rstream s0.string as string from " + SupportBean.class.getName() + ".win:length(3) as s0");
+                "select rstream s0.theString as theString from " + SupportBean.class.getName() + ".win:length(3) as s0");
         statement.addListener(testListener);
 
         statement = epService.getEPAdministrator().createEPL("select * from NextStream");
@@ -209,9 +209,9 @@ public class TestIStreamRStreamKeywords extends TestCase
         assertFalse(testListenerInsertInto.isInvoked());
 
         sendEvent("d");
-        assertSame("a", testListener.getLastNewData()[0].get("string"));    // receive 'a' as new data
+        assertSame("a", testListener.getLastNewData()[0].get("theString"));    // receive 'a' as new data
         assertNull(testListener.getLastOldData());  // receive no more old data
-        assertEquals("a", testListenerInsertInto.getLastNewData()[0].get("string"));    // insert into unchanged
+        assertEquals("a", testListenerInsertInto.getLastNewData()[0].get("theString"));    // insert into unchanged
         assertNull(testListener.getLastOldData());  // receive no old data in insert into
         testListener.reset();
     }
@@ -223,8 +223,8 @@ public class TestIStreamRStreamKeywords extends TestCase
 
         EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select rstream s1.intPrimitive as aID, s2.intPrimitive as bID " +
-                "from " + SupportBean.class.getName() + "(string='a').win:length(2) as s1, "
-                        + SupportBean.class.getName() + "(string='b').win:keepall() as s2" +
+                "from " + SupportBean.class.getName() + "(theString='a').win:length(2) as s1, "
+                        + SupportBean.class.getName() + "(theString='b').win:keepall() as s2" +
                 " where s1.intPrimitive = s2.intPrimitive");
         statement.addListener(testListener);
 
@@ -251,11 +251,11 @@ public class TestIStreamRStreamKeywords extends TestCase
                 "select istream * from " + SupportBean.class.getName() + ".win:length(1)");
         statement.addListener(testListener);
 
-        Object event = sendEvent("a");
-        assertSame(event, testListener.assertOneGetNewAndReset().getUnderlying());
+        Object theEvent = sendEvent("a");
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().getUnderlying());
 
-        event = sendEvent("b");
-        assertSame(event, testListener.getLastNewData()[0].getUnderlying());
+        theEvent = sendEvent("b");
+        assertSame(theEvent, testListener.getLastNewData()[0].getUnderlying());
         assertNull(testListener.getLastOldData()); // receive no old data, just istream events
         testListener.reset();
     }
@@ -267,20 +267,20 @@ public class TestIStreamRStreamKeywords extends TestCase
 
         EPStatement statement = epService.getEPAdministrator().createEPL(
                 "insert rstream into NextStream " +
-                "select istream a.string as string from " + SupportBean.class.getName() + ".win:length(1) as a");
+                "select istream a.theString as theString from " + SupportBean.class.getName() + ".win:length(1) as a");
         statement.addListener(testListener);
 
         statement = epService.getEPAdministrator().createEPL("select * from NextStream");
         statement.addListener(testListenerInsertInto);
 
         sendEvent("a");
-        assertEquals("a", testListener.assertOneGetNewAndReset().get("string"));
+        assertEquals("a", testListener.assertOneGetNewAndReset().get("theString"));
         assertFalse(testListenerInsertInto.isInvoked());
 
         sendEvent("b");
-        assertEquals("b", testListener.getLastNewData()[0].get("string"));
+        assertEquals("b", testListener.getLastNewData()[0].get("theString"));
         assertNull(testListener.getLastOldData());
-        assertEquals("a", testListenerInsertInto.getLastNewData()[0].get("string"));
+        assertEquals("a", testListenerInsertInto.getLastNewData()[0].get("theString"));
         assertNull(testListenerInsertInto.getLastOldData());
     }
 
@@ -291,8 +291,8 @@ public class TestIStreamRStreamKeywords extends TestCase
 
         EPStatement statement = epService.getEPAdministrator().createEPL(
                 "select istream s1.intPrimitive as aID, s2.intPrimitive as bID " +
-                "from " + SupportBean.class.getName() + "(string='a').win:length(2) as s1, "
-                        + SupportBean.class.getName() + "(string='b').win:keepall() as s2" +
+                "from " + SupportBean.class.getName() + "(theString='a').win:length(2) as s1, "
+                        + SupportBean.class.getName() + "(theString='b').win:keepall() as s2" +
                 " where s1.intPrimitive = s2.intPrimitive");
         statement.addListener(testListener);
 
@@ -325,10 +325,10 @@ public class TestIStreamRStreamKeywords extends TestCase
 
     private Object sendEvent(String stringValue, int intPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setString(stringValue);
-        event.setIntPrimitive(intPrimitive);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean theEvent = new SupportBean();
+        theEvent.setTheString(stringValue);
+        theEvent.setIntPrimitive(intPrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 }

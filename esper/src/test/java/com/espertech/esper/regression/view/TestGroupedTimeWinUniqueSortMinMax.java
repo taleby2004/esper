@@ -32,8 +32,8 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
         return config;
     }
 
-    private void logEvent (Object event) {
-        log.info("Sending " + event);
+    private void logEvent (Object theEvent) {
+        log.info("Sending " + theEvent);
     }
 
     public void testSensorQuery() throws Exception {
@@ -61,11 +61,11 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
         events.add(new Sensor("Temperature", "Device2", 65.0, 98.5));
         events.add(new Sensor("Temperature", "Device1", 62.0, 95.3));
         events.add(new Sensor("Temperature", "Device2", 71.3, 99.3));
-        for (Sensor event : events) {
-            logEvent (event);
-            runtime.sendEvent(event);
+        for (Sensor theEvent : events) {
+            logEvent (theEvent);
+            runtime.sendEvent(theEvent);
         }
-        Map lastEvent = (Map) listener.getLastEvent();
+        EventBean lastEvent = listener.getLastEventBean();
         assertTrue (lastEvent != null);
         assertEquals (62.0,lastEvent.get("lowMeasurement"));
         assertEquals ("Device1",lastEvent.get("deviceOfLow"));
@@ -130,6 +130,7 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
     class MatchListener implements UpdateListener {
         private int count = 0;
         private Object lastEvent = null;
+        private EventBean lastEventBean = null;
 
         public void update(EventBean[] newEvents, EventBean[] oldEvents) {
             log.info("New events.................");
@@ -144,6 +145,7 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
                     }
                     count++;
                     lastEvent = e.getUnderlying();
+                    lastEventBean = e;
                 }
             }
             log.info("Removing events.................");
@@ -168,6 +170,10 @@ public class TestGroupedTimeWinUniqueSortMinMax extends TestCase {
 
         public Object getLastEvent() {
             return lastEvent;
+        }
+
+        public EventBean getLastEventBean() {
+            return lastEventBean;
         }
     }
 

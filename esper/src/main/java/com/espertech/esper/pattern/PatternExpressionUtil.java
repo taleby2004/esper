@@ -27,10 +27,14 @@ public class PatternExpressionUtil
 {
     private static Log log = LogFactory.getLog(PatternExpressionUtil.class);
 
-    public static MultiKeyUntyped getKeys(MatchedEventMap currentState, EvalEveryDistinctNode everyDistinctNode)
+    public static Object getKeys(MatchedEventMap currentState, EvalEveryDistinctNode everyDistinctNode)
     {
         EventBean[] eventsPerStream = everyDistinctNode.getFactoryNode().getConvertor().convert(currentState);
         ExprEvaluator[] expressions = everyDistinctNode.getFactoryNode().getExpressionsArray();
+        if (expressions.length == 1) {
+            return expressions[0].evaluate(eventsPerStream, true, everyDistinctNode.getContext().getAgentInstanceContext());
+        }
+
         Object[] keys = new Object[expressions.length];
         for (int i = 0; i < keys.length; i++)
         {

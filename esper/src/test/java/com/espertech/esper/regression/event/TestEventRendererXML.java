@@ -36,7 +36,7 @@ public class TestEventRendererXML extends TestCase
     public void testRenderSimple()
     {
         SupportBean bean = new SupportBean();
-        bean.setString("a\nc");
+        bean.setTheString("a\nc");
         bean.setIntPrimitive(1);
         bean.setIntBoxed(992);
         bean.setCharPrimitive('x');
@@ -60,7 +60,7 @@ public class TestEventRendererXML extends TestCase
                 "  <intPrimitive>1</intPrimitive>\n" +
                 "  <longPrimitive>0</longPrimitive>\n" +
                 "  <shortPrimitive>0</shortPrimitive>\n" +
-                "  <string>a\\u000ac</string>\n" +
+                "  <theString>a\\u000ac</theString>\n" +
                 "  <this>\n" +
                 "    <boolPrimitive>false</boolPrimitive>\n" +
                 "    <bytePrimitive>0</bytePrimitive>\n" +
@@ -72,14 +72,14 @@ public class TestEventRendererXML extends TestCase
                 "    <intPrimitive>1</intPrimitive>\n" +
                 "    <longPrimitive>0</longPrimitive>\n" +
                 "    <shortPrimitive>0</shortPrimitive>\n" +
-                "    <string>a\\u000ac</string>\n" +
+                "    <theString>a\\u000ac</theString>\n" +
                 "  </this>\n" +
                 "</supportBean>";
         assertEquals(removeNewline(expected), removeNewline(result));
 
         result = epService.getEPRuntime().getEventRenderer().renderXML("supportBean", statement.iterator().next(), new XMLRenderingOptions().setDefaultAsAttribute(true));
         // System.out.println(result);
-        expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <supportBean boolPrimitive=\"false\" bytePrimitive=\"0\" charPrimitive=\"x\" doublePrimitive=\"0.0\" enumValue=\"ENUM_VALUE_2\" floatPrimitive=\"0.0\" intBoxed=\"992\" intPrimitive=\"1\" longPrimitive=\"0\" shortPrimitive=\"0\" string=\"a\\u000ac\"> <this boolPrimitive=\"false\" bytePrimitive=\"0\" charPrimitive=\"x\" doublePrimitive=\"0.0\" enumValue=\"ENUM_VALUE_2\" floatPrimitive=\"0.0\" intBoxed=\"992\" intPrimitive=\"1\" longPrimitive=\"0\" shortPrimitive=\"0\" string=\"a\\u000ac\"/> </supportBean>";
+        expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <supportBean boolPrimitive=\"false\" bytePrimitive=\"0\" charPrimitive=\"x\" doublePrimitive=\"0.0\" enumValue=\"ENUM_VALUE_2\" floatPrimitive=\"0.0\" intBoxed=\"992\" intPrimitive=\"1\" longPrimitive=\"0\" shortPrimitive=\"0\" theString=\"a\\u000ac\"> <this boolPrimitive=\"false\" bytePrimitive=\"0\" charPrimitive=\"x\" doublePrimitive=\"0.0\" enumValue=\"ENUM_VALUE_2\" floatPrimitive=\"0.0\" intBoxed=\"992\" intPrimitive=\"1\" longPrimitive=\"0\" shortPrimitive=\"0\" theString=\"a\\u000ac\"/> </supportBean>";
         assertEquals(removeNewline(expected), removeNewline(result));
     }
 
@@ -169,12 +169,12 @@ public class TestEventRendererXML extends TestCase
         EPStatement statement = epService.getEPAdministrator().createEPL("select java.sql.Date.valueOf(\"2010-01-31\") as mySqlDate from SupportBean");
         epService.getEPRuntime().sendEvent(new SupportBean());
 
-        EventBean event = statement.iterator().next();
-        assertEquals(java.sql.Date.valueOf("2010-01-31"), event.get("mySqlDate"));
+        EventBean theEvent = statement.iterator().next();
+        assertEquals(java.sql.Date.valueOf("2010-01-31"), theEvent.get("mySqlDate"));
         EventPropertyGetter getter = statement.getEventType().getGetter("mySqlDate");
-        assertEquals(java.sql.Date.valueOf("2010-01-31"), getter.get(event));
+        assertEquals(java.sql.Date.valueOf("2010-01-31"), getter.get(theEvent));
         
-        String result = epService.getEPRuntime().getEventRenderer().renderXML("testsqldate", event);
+        String result = epService.getEPRuntime().getEventRenderer().renderXML("testsqldate", theEvent);
 
         // System.out.println(result);
         String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <testsqldate> <mySqlDate>2010-01-31</mySqlDate> </testsqldate>";

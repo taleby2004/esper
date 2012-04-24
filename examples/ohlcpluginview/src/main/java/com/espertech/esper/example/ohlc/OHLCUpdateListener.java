@@ -24,13 +24,13 @@ public class OHLCUpdateListener implements StatementAwareUpdateListener
         }
     }
 
-    private String getProperties(EventBean event)
+    private String getProperties(EventBean theEvent)
     {
         StringBuilder buf = new StringBuilder();
 
-        for (String name : event.getEventType().getPropertyNames())
+        for (String name : theEvent.getEventType().getPropertyNames())
         {
-            Object value = event.get(name);
+            Object value = theEvent.get(name);
             buf.append(name);
             buf.append("=");
 

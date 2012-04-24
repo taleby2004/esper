@@ -10,7 +10,7 @@ package com.espertech.esper.view.std;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
@@ -37,8 +37,8 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
     private EventBean[] eventsPerStream = new EventBean[1];
     private String[] propertyNames;
 
-    private final Map<MultiKey<Object>, GroupByViewAgedEntry> subViewsPerKey = new HashMap<MultiKey<Object>, GroupByViewAgedEntry>();
-    private final HashMap<GroupByViewAgedEntry, Pair<List<EventBean>, List<EventBean>>> groupedEvents = new HashMap<GroupByViewAgedEntry, Pair<List<EventBean>, List<EventBean>>>();
+    private final Map<Object, GroupByViewAgedEntry> subViewsPerKey = new HashMap<Object, GroupByViewAgedEntry>();
+    private final HashMap<GroupByViewAgedEntry, Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>>> groupedEvents = new HashMap<GroupByViewAgedEntry, Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>>>();
     private Long nextSweepTime = null;
 
     /**
@@ -102,16 +102,10 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         // Algorithm for single new event
         if ((newData != null) && (oldData == null) && (newData.length == 1))
         {
-            EventBean event = newData[0];
-            EventBean[] newDataToPost = new EventBean[] {event};
+            EventBean theEvent = newData[0];
+            EventBean[] newDataToPost = new EventBean[] {theEvent};
 
-            Object[] groupByValues = new Object[criteriaExpressions.length];
-            eventsPerStream[0] = event;
-            for (int i = 0; i < criteriaEvaluators.length; i++)
-            {
-                groupByValues[i] = criteriaEvaluators[i].evaluate(eventsPerStream, true, agentInstanceContext);
-            }
-            MultiKey<Object> groupByValuesKey = new MultiKey<Object>(groupByValues);
+            Object groupByValuesKey = getGroupKey(theEvent);
 
             // Get child views that belong to this group-by value combination
             GroupByViewAgedEntry subViews = this.subViewsPerKey.get(groupByValuesKey);
@@ -119,7 +113,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
             // If this is a new group-by value, the list of subviews is null and we need to make clone sub-views
             if (subViews == null)
             {
-                List<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey.getArray(), agentInstanceContext);
+                Collection<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey, agentInstanceContext);
                 subViews = new GroupByViewAgedEntry(subviewsList, currentTime);
                 subViewsPerKey.put(groupByValuesKey, subViews);
             }
@@ -150,7 +144,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
             }
 
             // Update child views
-            for (Map.Entry<GroupByViewAgedEntry, Pair<List<EventBean>, List<EventBean>>> entry : groupedEvents.entrySet())
+            for (Map.Entry<GroupByViewAgedEntry, Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>>> entry : groupedEvents.entrySet())
             {
                 EventBean[] newEvents = EventBeanUtility.toArray(entry.getValue().getFirst());
                 EventBean[] oldEvents = EventBeanUtility.toArray(entry.getValue().getSecond());
@@ -161,16 +155,9 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         }
     }
 
-    private void handleEvent(EventBean event, boolean isNew)
+    private void handleEvent(EventBean theEvent, boolean isNew)
     {
-        // Get values for group-by, construct MultiKey
-        Object[] groupByValues = new Object[criteriaExpressions.length];
-        eventsPerStream[0] = event;
-        for (int i = 0; i < criteriaEvaluators.length; i++)
-        {
-            groupByValues[i] = criteriaEvaluators[i].evaluate(eventsPerStream, true, agentInstanceContext);
-        }
-        MultiKey<Object> groupByValuesKey = new MultiKey<Object>(groupByValues);
+        Object groupByValuesKey = getGroupKey(theEvent);
 
         // Get child views that belong to this group-by value combination
         GroupByViewAgedEntry subViews = this.subViewsPerKey.get(groupByValuesKey);
@@ -178,7 +165,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         // If this is a new group-by value, the list of subviews is null and we need to make clone sub-views
         if (subViews == null)
         {
-            List<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey.getArray(), agentInstanceContext);
+            Collection<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey, agentInstanceContext);
             long currentTime = agentInstanceContext.getStatementContext().getTimeProvider().getTime();
             subViews = new GroupByViewAgedEntry(subviewsList, currentTime);
             subViewsPerKey.put(groupByValuesKey, subViews);
@@ -188,23 +175,23 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         }
 
         // Construct a pair of lists to hold the events for the grouped value if not already there
-        Pair<List<EventBean>, List<EventBean>> pair = groupedEvents.get(subViews);
+        Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>> pair = groupedEvents.get(subViews);
         if (pair == null)
         {
-            LinkedList<EventBean> listNew = new LinkedList<EventBean>();
-            LinkedList<EventBean> listOld = new LinkedList<EventBean>();
-            pair = new Pair<List<EventBean>, List<EventBean>>(listNew, listOld);
+            ArrayDeque<EventBean> listNew = new ArrayDeque<EventBean>();
+            ArrayDeque<EventBean> listOld = new ArrayDeque<EventBean>();
+            pair = new Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>>(listNew, listOld);
             groupedEvents.put(subViews, pair);
         }
 
         // Add event to a child view event list for later child update that includes new and old events
         if (isNew)
         {
-            pair.getFirst().add(event);
+            pair.getFirst().add(theEvent);
         }
         else
         {
-            pair.getSecond().add(event);
+            pair.getSecond().add(theEvent);
         }
     }
 
@@ -220,8 +207,8 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
 
     private void sweep(long currentTime)
     {
-        ArrayDeque<MultiKey<Object>> removed = new ArrayDeque<MultiKey<Object>>();
-        for (Map.Entry<MultiKey<Object>, GroupByViewAgedEntry> entry : subViewsPerKey.entrySet())
+        ArrayDeque<Object> removed = new ArrayDeque<Object>();
+        for (Map.Entry<Object, GroupByViewAgedEntry> entry : subViewsPerKey.entrySet())
         {
             long age = currentTime - entry.getValue().getLastUpdateTime();
             if (age > reclaimMaxAge)
@@ -230,7 +217,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
             }
         }
 
-        for (MultiKey<Object> key : removed)
+        for (Object key : removed)
         {
             GroupByViewAgedEntry entry = subViewsPerKey.remove(key);
             for (View view : entry.getSubviews()) {
@@ -257,6 +244,21 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
                 recursiveMergeViewRemove(child);
             }
         }
+    }
+
+    private Object getGroupKey(EventBean theEvent)
+    {
+        eventsPerStream[0] = theEvent;
+        if (criteriaEvaluators.length == 1) {
+            return criteriaEvaluators[0].evaluate(eventsPerStream, true, agentInstanceContext);
+        }
+
+        Object[] values = new Object[criteriaEvaluators.length];
+        for (int i = 0; i < criteriaEvaluators.length; i++)
+        {
+            values[i] = criteriaEvaluators[i].evaluate(eventsPerStream, true, agentInstanceContext);
+        }
+        return new MultiKeyUntyped(values);
     }
 
     private static final Log log = LogFactory.getLog(GroupByViewReclaimAged.class);

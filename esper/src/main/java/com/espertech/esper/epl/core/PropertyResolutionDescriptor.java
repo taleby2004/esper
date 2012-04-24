@@ -9,6 +9,7 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.FragmentEventType;
 
 /**
  * Encapsulates the result of resolving a property and optional stream name against a supplied list of streams
@@ -21,6 +22,7 @@ public class PropertyResolutionDescriptor
     private String propertyName;
     private int streamNum;
     private Class propertyType;
+    private FragmentEventType fragmentEventType;
 
     /**
      * Ctor.
@@ -30,13 +32,14 @@ public class PropertyResolutionDescriptor
      * @param streamNum is the number offset of the stream
      * @param propertyType is the type of the property
      */
-    public PropertyResolutionDescriptor(String streamName, EventType streamEventType, String propertyName, int streamNum, Class propertyType)
+    public PropertyResolutionDescriptor(String streamName, EventType streamEventType, String propertyName, int streamNum, Class propertyType, FragmentEventType fragmentEventType)
     {
         this.streamName = streamName;
         this.streamEventType = streamEventType;
         this.propertyName = propertyName;
         this.streamNum = streamNum;
         this.propertyType = propertyType;
+        this.fragmentEventType = fragmentEventType;
     }
 
     /**
@@ -82,5 +85,9 @@ public class PropertyResolutionDescriptor
     public Class getPropertyType()
     {
         return propertyType;
+    }
+
+    public FragmentEventType getFragmentEventType() {
+        return fragmentEventType;
     }
 }

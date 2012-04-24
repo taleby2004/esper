@@ -34,7 +34,7 @@ public class TestTimeBatchViewFactory extends TestCase
         tryParameter(new Object[] {new Float(1.1f)}, 1100, null);
         tryParameter(new Object[] {99.9d, 364466464L}, 99900, 364466464L);
 
-        tryInvalidParameter("string");
+        tryInvalidParameter("theString");
         tryInvalidParameter(true);
         tryInvalidParameter(0);
     }

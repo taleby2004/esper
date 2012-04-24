@@ -75,10 +75,10 @@ public class TestTicksFalloffStatement extends TestCase {
     {
         assertTrue(listener.isInvoked());
         assertEquals(1, listener.getLastNewData().length);
-        EventBean event = listener.getLastNewData()[0];
-        assertEquals(feedEnum, event.get("feed"));
-        assertEquals(average, event.get("avgCnt"));
-        assertEquals(count, event.get("feedCnt"));
+        EventBean theEvent = listener.getLastNewData()[0];
+        assertEquals(feedEnum, theEvent.get("feed"));
+        assertEquals(average, theEvent.get("avgCnt"));
+        assertEquals(count, theEvent.get("feedCnt"));
         listener.reset();
     }
 

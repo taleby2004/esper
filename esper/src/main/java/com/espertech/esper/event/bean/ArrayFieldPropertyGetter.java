@@ -12,6 +12,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventPropertyGetterAndIndexed;
+import com.espertech.esper.event.vaevent.PropertyUtility;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -60,15 +61,15 @@ public class ArrayFieldPropertyGetter extends BaseNativePropertyGetter implement
         }
         catch (ClassCastException e)
         {
-            throw new PropertyAccessException("Mismatched getter instance to event bean type");
+            throw PropertyUtility.getMismatchException(field, object, e);
         }
         catch (IllegalAccessException e)
         {
-            throw new PropertyAccessException(e);
+            throw PropertyUtility.getIllegalAccessException(field, e);
         }
         catch (IllegalArgumentException e)
         {
-            throw new PropertyAccessException(e);
+            throw PropertyUtility.getIllegalArgumentException(field, e);
         }
     }
 

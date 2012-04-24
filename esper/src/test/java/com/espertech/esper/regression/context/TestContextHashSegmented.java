@@ -13,7 +13,6 @@ package com.espertech.esper.regression.context;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.context.*;
-import com.espertech.esper.client.deploy.DeploymentResult;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
@@ -24,6 +23,7 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.AgentInstanceAssertionUtil;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -53,12 +53,18 @@ public class TestContextHashSegmented extends TestCase {
     }
 
     public void testScoringUseCase() throws Exception {
+        runAssertionScoringUseCase(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionScoringUseCase(EventRepresentationEnum.MAP);
+        runAssertionScoringUseCase(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionScoringUseCase(EventRepresentationEnum eventRepresentationEnum) throws Exception {
         String[] fields = "userId,keyword,sumScore".split(",");
         String epl =
-                "create schema ScoreCycle (userId string, keyword string, productId string, score long);\n" +
-                "create schema UserKeywordTotalStream (userId string, keyword string, sumScore long);\n" +
+                eventRepresentationEnum.getAnnotationText() + " create schema ScoreCycle (userId string, keyword string, productId string, score long);\n" +
+                eventRepresentationEnum.getAnnotationText() + " create schema UserKeywordTotalStream (userId string, keyword string, sumScore long);\n" +
                 "\n" +
-                "create context HashByUserCtx as " +
+                eventRepresentationEnum.getAnnotationText() + " create context HashByUserCtx as " +
                         "coalesce by consistent_hash_crc32(userId) from ScoreCycle, " +
                         "consistent_hash_crc32(userId) from UserKeywordTotalStream " +
                         "granularity 1000000;\n" +
@@ -75,26 +81,28 @@ public class TestContextHashSegmented extends TestCase {
         epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(epl);
         epService.getEPAdministrator().getStatement("outOne").addListener(listener);
 
-        epService.getEPRuntime().sendEvent(makeScoreEvent("Pete", "K1", "P1", 100), "ScoreCycle");
+        makeSendScoreEvent("ScoreCycle", eventRepresentationEnum, "Pete", "K1", "P1", 100);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"Pete", "K1", 100L});
 
-        epService.getEPRuntime().sendEvent(makeScoreEvent("Pete", "K1", "P2", 15), "ScoreCycle");
+        makeSendScoreEvent("ScoreCycle", eventRepresentationEnum, "Pete", "K1", "P2", 15);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"Pete", "K1", 115L});
 
-        epService.getEPRuntime().sendEvent(makeScoreEvent("Joe", "K1", "P2", 30), "ScoreCycle");
+        makeSendScoreEvent("ScoreCycle", eventRepresentationEnum, "Joe", "K1", "P2", 30);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"Joe", "K1", 30L});
 
-        epService.getEPRuntime().sendEvent(makeScoreEvent("Joe", "K2", "P1", 40), "ScoreCycle");
+        makeSendScoreEvent("ScoreCycle", eventRepresentationEnum, "Joe", "K2", "P1", 40);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"Joe", "K2", 40L});
 
-        epService.getEPRuntime().sendEvent(makeScoreEvent("Joe", "K1", "P1", 20), "ScoreCycle");
+        makeSendScoreEvent("ScoreCycle", eventRepresentationEnum, "Joe", "K1", "P1", 20);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"Joe", "K1", 50L});
+
+        epService.initialize();
     }
 
     public void testContextPartitionSelection() {
         String[] fields = "c0,c1,c2".split(",");
-        epService.getEPAdministrator().createEPL("create context MyCtx as coalesce consistent_hash_crc32(string) from SupportBean granularity 16 preallocate");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, string as c1, sum(intPrimitive) as c2 from SupportBean.win:keepall() group by string");
+        epService.getEPAdministrator().createEPL("create context MyCtx as coalesce consistent_hash_crc32(theString) from SupportBean granularity 16 preallocate");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, theString as c1, sum(intPrimitive) as c2 from SupportBean.win:keepall() group by theString");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), stmt.safeIterator(), fields, new Object[][]{{5, "E1", 1}});
@@ -178,7 +186,7 @@ public class TestContextHashSegmented extends TestCase {
         String ctx = "HashSegmentedContext";
         String eplCtx = "@Name('context') create context " + ctx + " as " +
                 "coalesce " +
-                " consistent_hash_crc32(string) from SupportBean(intPrimitive > 10) " +
+                " consistent_hash_crc32(theString) from SupportBean(intPrimitive > 10) " +
                 "granularity 4 " +
                 "preallocate";
         epService.getEPAdministrator().createEPL(eplCtx);
@@ -208,8 +216,8 @@ public class TestContextHashSegmented extends TestCase {
     }
 
     public void testHashSegmentedManyArg() {
-        tryHash("consistent_hash_crc32(string, intPrimitive)");
-        tryHash("hash_code(string, intPrimitive)");
+        tryHash("consistent_hash_crc32(theString, intPrimitive)");
+        tryHash("hash_code(theString, intPrimitive)");
     }
 
     private void tryHash(String hashFunc) {
@@ -244,7 +252,7 @@ public class TestContextHashSegmented extends TestCase {
         String ctx = "HashSegmentedContext";
         String eplCtx = "@Name('context') create context " + ctx + " as " +
                 "coalesce " +
-                " consistent_hash_crc32(string) from SupportBean, " +
+                " consistent_hash_crc32(theString) from SupportBean, " +
                 " consistent_hash_crc32(p00) from SupportBean_S0 " +
                 "granularity 4 " +
                 "preallocate";
@@ -252,7 +260,7 @@ public class TestContextHashSegmented extends TestCase {
         HashCodeFuncGranularCRC32 codeFunc = new HashCodeFuncGranularCRC32(4);
 
         String eplStmt = "context " + ctx + " " +
-                "select context.name as c0, intPrimitive as c1, id as c2 from SupportBean.win:keepall() as t1, SupportBean_S0.win:keepall() as t2 where t1.string = t2.p00";
+                "select context.name as c0, intPrimitive as c1, id as c2 from SupportBean.win:keepall() as t1, SupportBean_S0.win:keepall() as t2 where t1.theString = t2.p00";
         EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplStmt);
         statement.addListener(listener);
 
@@ -291,13 +299,13 @@ public class TestContextHashSegmented extends TestCase {
         FilterServiceSPI filterSPI = (FilterServiceSPI) spi.getFilterService();
         String ctx = "HashSegmentedContext";
         String eplCtx = "@Name('context') create context " + ctx + " as " +
-                "coalesce consistent_hash_crc32(string) from SupportBean " +
+                "coalesce consistent_hash_crc32(theString) from SupportBean " +
                 "granularity 4 " +
                 "preallocate";
         epService.getEPAdministrator().createEPL(eplCtx);
 
         String eplStmt = "context " + ctx + " " +
-                "select context.name as c0, string as c1, sum(intPrimitive) as c2 from SupportBean.win:keepall() group by string";
+                "select context.name as c0, theString as c1, sum(intPrimitive) as c2 from SupportBean.win:keepall() group by theString";
         EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplStmt);
         statement.addListener(listener);
         assertEquals(4, filterSPI.getFilterCountApprox());
@@ -318,12 +326,12 @@ public class TestContextHashSegmented extends TestCase {
 
         // test with Java-hashCode String hash
         epService.getEPAdministrator().createEPL("@Name('context') create context " + ctx + " " +
-                "coalesce hash_code(string) from SupportBean " +
+                "coalesce hash_code(theString) from SupportBean " +
                 "granularity 6 " +
                 "preallocate");
 
         statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context " + ctx + " " +
-                "select context.name as c0, string as c1, sum(intPrimitive) as c2 from SupportBean.win:keepall() group by string");
+                "select context.name as c0, theString as c1, sum(intPrimitive) as c2 from SupportBean.win:keepall() group by theString");
         statement.addListener(listener);
         assertEquals(6, filterSPI.getFilterCountApprox());
         AgentInstanceAssertionUtil.assertInstanceCounts(statement.getStatementContext(), 6, 0, 0, 0);
@@ -333,11 +341,11 @@ public class TestContextHashSegmented extends TestCase {
 
         // test no pre-allocate
         epService.getEPAdministrator().createEPL("@Name('context') create context " + ctx + " " +
-                "coalesce hash_code(string) from SupportBean " +
+                "coalesce hash_code(theString) from SupportBean " +
                 "granularity 16 ");
 
         statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context " + ctx + " " +
-                "select context.name as c0, string as c1, sum(intPrimitive) as c2 from SupportBean.win:keepall() group by string");
+                "select context.name as c0, theString as c1, sum(intPrimitive) as c2 from SupportBean.win:keepall() group by theString");
         statement.addListener(listener);
         assertEquals(1, filterSPI.getFilterCountApprox());
         AgentInstanceAssertionUtil.assertInstanceCounts(statement.getStatementContext(), 0, 0, 0, 0);
@@ -402,8 +410,8 @@ public class TestContextHashSegmented extends TestCase {
         EPAssertionUtil.assertEqualsAnyOrder(expected, result);
     }
 
-    private SupportBean makeBean(String string, int intPrimitive, long longPrimitive) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private SupportBean makeBean(String theString, int intPrimitive, long longPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
         return bean;
     }
@@ -420,8 +428,8 @@ public class TestContextHashSegmented extends TestCase {
                 "preallocate";
         epService.getEPAdministrator().createEPL(eplCtx);
 
-        String eplStmt = "context HashSegmentedContext select context.id as c1, myHash(*) as c2, mySecond(*, string) as c3, "
-            + this.getClass().getSimpleName() + ".mySecondFunc(*, string) as c4 from SupportBean";
+        String eplStmt = "context HashSegmentedContext select context.id as c1, myHash(*) as c2, mySecond(*, theString) as c3, "
+            + this.getClass().getSimpleName() + ".mySecondFunc(*, theString) as c4 from SupportBean";
         EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplStmt);
         statement.addListener(listener);
 
@@ -445,13 +453,18 @@ public class TestContextHashSegmented extends TestCase {
         return text;
     }
 
-    private Map<String, Object> makeScoreEvent(String userId, String keyword, String productId, long score) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("userId", userId);
-        event.put("productId", productId);
-        event.put("keyword", keyword);
-        event.put("score", score);
-        return event;
+    private void makeSendScoreEvent(String typeName, EventRepresentationEnum eventRepresentationEnum, String userId, String keyword, String productId, long score) {
+        Map<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("userId", userId);
+        theEvent.put("keyword", keyword);
+        theEvent.put("productId", productId);
+        theEvent.put("score", score);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), typeName);
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, typeName);
+        }
     }
 
     public interface HashCodeFunc {

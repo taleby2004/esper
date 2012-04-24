@@ -59,15 +59,15 @@ public class IndexedTableLookupStrategySingle implements JoinExecTableLookupStra
         return index;
     }
 
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
     {
-        Object key = getKey(event);
+        Object key = getKey(theEvent);
         return index.lookup(key);
     }
 
-    private Object getKey(EventBean event)
+    private Object getKey(EventBean theEvent)
     {
-        return propertyGetter.get(event);
+        return propertyGetter.get(theEvent);
     }
 
     public String toString()

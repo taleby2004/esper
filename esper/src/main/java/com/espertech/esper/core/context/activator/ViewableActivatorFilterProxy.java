@@ -64,9 +64,9 @@ public class ViewableActivatorFilterProxy implements ViewableActivator {
                     return statementId;
                 }
 
-                public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+                public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
                 {
-                    EventBean[] result = filterSpec.getOptionalPropertyEvaluator().getProperty(event, agentInstanceContext);
+                    EventBean[] result = filterSpec.getOptionalPropertyEvaluator().getProperty(theEvent, agentInstanceContext);
                     if (result == null)
                     {
                         return;
@@ -89,9 +89,9 @@ public class ViewableActivatorFilterProxy implements ViewableActivator {
                     return statementId;
                 }
 
-                public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+                public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
                 {
-                    eventStream.insert(event);
+                    eventStream.insert(theEvent);
                 }
                 public boolean isSubSelect()
                 {

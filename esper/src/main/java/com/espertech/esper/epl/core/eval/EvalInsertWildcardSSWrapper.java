@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EvalInsertWildcardSSWrapper extends EvalBase implements SelectExprProcessor {
+public class EvalInsertWildcardSSWrapper extends EvalBaseMap implements SelectExprProcessor {
 
     private static final Log log = LogFactory.getLog(EvalInsertWildcardSSWrapper.class);
 
@@ -48,10 +48,10 @@ public class EvalInsertWildcardSSWrapper extends EvalBase implements SelectExprP
             }
         }
 
-        EventBean event = eventsPerStream[0];
+        EventBean theEvent = eventsPerStream[0];
 
         // Using a wrapper bean since we cannot use the same event type else same-type filters match.
         // Wrapping it even when not adding properties is very inexpensive.
-        return super.getEventAdapterService().adapterForTypedWrapper(event, props, super.getResultEventType());
+        return super.getEventAdapterService().adapterForTypedWrapper(theEvent, props, super.getResultEventType());
     }
 }

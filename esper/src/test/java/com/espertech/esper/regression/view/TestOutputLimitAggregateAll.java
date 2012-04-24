@@ -60,7 +60,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol";
+                            "SupportBean.win:keepall() where theString=symbol";
         runAssertion12(stmtText, "none");
     }
 
@@ -76,7 +76,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             " having sum(price) > 100";
         runAssertion34(stmtText, "none");
     }
@@ -93,7 +93,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "output every 1 seconds";
         runAssertion56(stmtText, "default");
     }
@@ -111,7 +111,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "having sum(price) > 100" +
                             "output every 1 seconds";
         runAssertion78(stmtText, "default");
@@ -129,7 +129,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "output all every 1 seconds";
         runAssertion56(stmtText, "all");
     }
@@ -147,7 +147,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "having sum(price) > 100" +
                             "output all every 1 seconds";
         runAssertion78(stmtText, "all");
@@ -165,7 +165,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "output last every 1 seconds";
         runAssertion13_14(stmtText, "last");
     }
@@ -183,7 +183,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     {
         String stmtText = "select symbol, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "having sum(price) > 100 " +
                             "output last every 1 seconds";
         runAssertion15_16(stmtText, "last");
@@ -385,7 +385,7 @@ public class TestOutputLimitAggregateAll extends TestCase
 
         String viewExpr = "select symbol, avg(price) as avgPrice " +
                           "from " + SupportMarketDataBean.class.getName() + ".win:time(3 sec) as md, " +
-                          SupportBean.class.getName() + ".win:keepall() as s where s.string = md.symbol " +
+                          SupportBean.class.getName() + ".win:keepall() as s where s.theString = md.symbol " +
                           "having avg(price) > 10" +
                           "output every 1 seconds";
         EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
@@ -495,7 +495,7 @@ public class TestOutputLimitAggregateAll extends TestCase
         sendTimer(0);
         String selectStmt = "select symbol, sum(price) as sumprice from " + SupportMarketDataBean.class.getName() +
                 ".win:time(10 seconds) as m, " + SupportBean.class.getName() +
-                ".win:keepall() as s where s.string = m.symbol output snapshot every 1 seconds order by symbol asc";
+                ".win:keepall() as s where s.theString = m.symbol output snapshot every 1 seconds order by symbol asc";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(selectStmt);
         stmt.addListener(listener);
@@ -772,7 +772,7 @@ public class TestOutputLimitAggregateAll extends TestCase
     private void sendEvent(long longBoxed, int intBoxed, short shortBoxed)
 	{
 	    SupportBean bean = new SupportBean();
-	    bean.setString(JOIN_KEY);
+	    bean.setTheString(JOIN_KEY);
 	    bean.setLongBoxed(longBoxed);
 	    bean.setIntBoxed(intBoxed);
 	    bean.setShortBoxed(shortBoxed);
@@ -791,8 +791,8 @@ public class TestOutputLimitAggregateAll extends TestCase
 
     private void sendTimeEventRelative(int timeIncrement){
         currentTime += timeIncrement;
-        CurrentTimeEvent event = new CurrentTimeEvent(currentTime);
-        epService.getEPRuntime().sendEvent(event);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(currentTime);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
 	private SupportUpdateListener createStmtAndListenerJoin(String viewExpr) {
@@ -823,8 +823,8 @@ public class TestOutputLimitAggregateAll extends TestCase
 
     private void sendTimer(long time)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

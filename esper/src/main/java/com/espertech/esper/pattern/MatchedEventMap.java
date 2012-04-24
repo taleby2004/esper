@@ -10,7 +10,7 @@ package com.espertech.esper.pattern;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.*;
+import java.util.Map;
 
 /**
  * Collection for internal use similar to the MatchedEventMap class in the client package
@@ -23,30 +23,30 @@ public interface MatchedEventMap
     /**
      * Add an event to the collection identified by the given tag.
      * @param tag is an identifier to retrieve the event from
-     * @param event is the event object or array of event object to be added
+     * @param theEvent is the event object or array of event object to be added
      */
-    public void add(final String tag, final Object event);
+    public void add(final int tag, final Object theEvent);
 
     /**
      * Returns a map containing the events where the key is the event tag string and the value is the event
      * instance.
      * @return Map containing event instances
      */
-    public Map getMatchingEvents();
+    public Object[] getMatchingEvents();
 
     /**
      * Returns a single event instance given the tag identifier, or null if the tag could not be located.
      * @param tag is the identifier to look for
      * @return event instances for the tag
      */
-    public EventBean getMatchingEvent(final String tag);
+    public EventBean getMatchingEvent(final int tag);
 
     /**
      * Returns the object for the matching event, be it the event bean array or the event bean.
      * @param tag is the tag to return the object for
      * @return event bean or event bean array
      */
-    public Object getMatchingEventAsObject(final String tag);
+    public Object getMatchingEventAsObject(final int tag);
 
     /**
      * Make a shallow copy of this collection.
@@ -60,4 +60,12 @@ public interface MatchedEventMap
      * @param other is the other instance to merge in.
      */
     public void merge(final MatchedEventMap other);
+
+    public Map<String,Object> getMatchingEventsAsMap();
+
+    public EventBean getMatchingEventByTag(String resultEventAsName);
+
+    public Object getMatchingEventAsObjectByTag(String key);
+
+    public MatchedEventMapMeta getMeta();
 }

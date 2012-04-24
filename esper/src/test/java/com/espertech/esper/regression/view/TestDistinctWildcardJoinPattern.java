@@ -15,9 +15,9 @@ import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.SupportSubscriberMRD;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportSubscriberMRD;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,13 +48,13 @@ public class TestDistinctWildcardJoinPattern extends TestCase
                 "SupportBean(intPrimitive=0) as fooB unidirectional " +
                 "inner join " +
                 "pattern [" +
-                "every-distinct(fooA.string) fooA=SupportBean(intPrimitive=1)" +
+                "every-distinct(fooA.theString) fooA=SupportBean(intPrimitive=1)" +
                 "->" +
-                "every-distinct(wooA.string) wooA=SupportBean(intPrimitive=2)" +
+                "every-distinct(wooA.theString) wooA=SupportBean(intPrimitive=2)" +
                 " where timer:within(1 hour)" +
                 "].win:time(1 hour) as fooWooPair " +
                 "on fooB.longPrimitive = fooWooPair.fooA.longPrimitive" +
-                " order by fooWooPair.wooA.string asc";
+                " order by fooWooPair.wooA.theString asc";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.setSubscriber(subscriber);
@@ -75,18 +75,18 @@ public class TestDistinctWildcardJoinPattern extends TestCase
         assertEquals(1, subscriber.getInsertStreamList().size());
         Object[][] inserted = subscriber.getInsertStreamList().get(0);
         assertEquals(2, inserted.length);
-        assertEquals("Query", ((SupportBean)inserted[0][0]).getString());
-        assertEquals("Query", ((SupportBean)inserted[1][0]).getString());
+        assertEquals("Query", ((SupportBean)inserted[0][0]).getTheString());
+        assertEquals("Query", ((SupportBean)inserted[1][0]).getTheString());
         Map mapOne = (Map) inserted[0][1];
-        assertEquals("E2", ((EventBean)mapOne.get("wooA")).get("string"));
-        assertEquals("E1", ((EventBean)mapOne.get("fooA")).get("string"));
+        assertEquals("E2", ((EventBean)mapOne.get("wooA")).get("theString"));
+        assertEquals("E1", ((EventBean)mapOne.get("fooA")).get("theString"));
         Map mapTwo = (Map) inserted[1][1];
-        assertEquals("E3", ((EventBean)mapTwo.get("wooA")).get("string"));
-        assertEquals("E1", ((EventBean)mapTwo.get("fooA")).get("string"));
+        assertEquals("E3", ((EventBean)mapTwo.get("wooA")).get("theString"));
+        assertEquals("E1", ((EventBean)mapTwo.get("fooA")).get("theString"));
     }
 
-    private void sendEvent(String string, int intPrimitive, long longPrimitive) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private void sendEvent(String theString, int intPrimitive, long longPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
         epService.getEPRuntime().sendEvent(bean);
     }

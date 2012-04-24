@@ -29,8 +29,8 @@ public class PrinterOutputStream implements OutputStream {
 
     public void output(List<TxnEventBase> bucket) throws IOException {
         log.info(".output Start of bucket, " + bucket.size() + " items");
-        for(TxnEventBase event:bucket) {
-            os.println(event.toString());
+        for(TxnEventBase theEvent : bucket) {
+            os.println(theEvent .toString());
         }
         log.info(".output End of bucket");
     }

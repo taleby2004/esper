@@ -11,12 +11,16 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import junit.framework.TestCase;
-import com.espertech.esper.client.*;
-import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
+import junit.framework.TestCase;
 
 import java.util.HashMap;
 
@@ -39,12 +43,18 @@ public class TestNamedWindowProcessingOrder extends TestCase
     }
 
     public void testDispatchBackQueue() {
-        epService.getEPAdministrator().createEPL("create schema StartValueEvent as (dummy string)");
-        epService.getEPAdministrator().createEPL("create schema TestForwardEvent as (prop1 string)");
-        epService.getEPAdministrator().createEPL("create schema TestInputEvent as (dummy string)");
+        runAssertionDispatchBackQueue(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionDispatchBackQueue(EventRepresentationEnum.DEFAULT);
+        runAssertionDispatchBackQueue(EventRepresentationEnum.MAP);
+    }
+
+    public void runAssertionDispatchBackQueue(EventRepresentationEnum eventRepresentationEnum) {
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema StartValueEvent as (dummy string)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TestForwardEvent as (prop1 string)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TestInputEvent as (dummy string)");
         epService.getEPAdministrator().createEPL("insert into TestForwardEvent select'V1' as prop1 from TestInputEvent");
 
-        epService.getEPAdministrator().createEPL("create window NamedWin.std:unique(prop1) (prop1 string, prop2 string)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create window NamedWin.std:unique(prop1) (prop1 string, prop2 string)");
 
         epService.getEPAdministrator().createEPL("insert into NamedWin select 'V1' as prop1, 'O1' as prop2 from StartValueEvent");
 
@@ -53,13 +63,26 @@ public class TestNamedWindowProcessingOrder extends TestCase
         String[] fields = "prop1,prop2".split(",");
         String eplSelect = "select irstream prop1, prop2 from NamedWin";
         epService.getEPAdministrator().createEPL(eplSelect).addListener(listener);
-        
-        epService.getEPRuntime().sendEvent(new HashMap<String, String>(), "StartValueEvent");
+
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {"dummyValue"}, "StartValueEvent");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(new HashMap<String, String>(), "StartValueEvent");
+        }
+
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"V1", "O1"});
 
-        epService.getEPRuntime().sendEvent(new HashMap<String, String>(), "TestInputEvent");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {"dummyValue"}, "TestInputEvent");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(new HashMap<String, String>(), "TestInputEvent");
+        }
         EPAssertionUtil.assertProps(listener.getLastOldData()[0], fields, new Object[]{"V1", "O1"});
         EPAssertionUtil.assertProps(listener.getAndResetLastNewData()[0], fields, new Object[]{"V1", "U1"});
+
+        epService.initialize();
     }
 
     public void testOrderedDeleteAndSelect()
@@ -71,10 +94,10 @@ public class TestNamedWindowProcessingOrder extends TestCase
         stmtText = "insert into MyWindow select * from Event";
         epService.getEPAdministrator().createEPL(stmtText);
 
-        stmtText = "on MyWindow e delete from MyWindow win where win.string=e.string and e.intPrimitive = 7";
+        stmtText = "on MyWindow e delete from MyWindow win where win.theString=e.theString and e.intPrimitive = 7";
         epService.getEPAdministrator().createEPL(stmtText);
 
-        stmtText = "on MyWindow e delete from MyWindow win where win.string=e.string and e.intPrimitive = 5";
+        stmtText = "on MyWindow e delete from MyWindow win where win.theString=e.theString and e.intPrimitive = 5";
         epService.getEPAdministrator().createEPL(stmtText);
 
         stmtText = "on MyWindow e insert into ResultStream select e.* from MyWindow";
@@ -88,12 +111,12 @@ public class TestNamedWindowProcessingOrder extends TestCase
         assertFalse("E1", listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 8));
-        assertEquals("E2", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E2", listener.assertOneGetNewAndReset().get("theString"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 5));
         assertFalse("E3", listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 6));
-        assertEquals("E4", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E4", listener.assertOneGetNewAndReset().get("theString"));
     }
 }

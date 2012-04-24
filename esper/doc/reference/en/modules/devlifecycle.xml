@@ -64,7 +64,7 @@
 			<title>@Audit Annotation</title>
 			
 			<para>
-				Use the <literal>@Audit</literal> annotation to have the engine output detailed information about statement processing. The engine reports, at INFO level, the information under log name <literal>com.espertech.esper.util.AuditPath</literal>. You may define an output format for audit information via configuration.
+				Use the <literal>@Audit</literal> annotation to have the engine output detailed information about statement processing. The engine reports, at INFO level, the information under log name <literal>com.espertech.esper.audit</literal>. You may define an output format for audit information via configuration.
 			</para>
 			
 			<para>

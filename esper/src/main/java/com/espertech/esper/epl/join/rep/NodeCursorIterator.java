@@ -102,8 +102,8 @@ public class NodeCursorIterator implements Iterator<Cursor>
         currentIterator = null;
     }
 
-    private Cursor makeCursor(EventBean event)
+    private Cursor makeCursor(EventBean theEvent)
     {
-        return new Cursor(event, stream, currentNode);
+        return new Cursor(theEvent, stream, currentNode);
     }
 }

@@ -66,11 +66,11 @@ public class TestExprStreamUnderlyingNode extends TestCase
 
     public void testEvaluate() throws Exception
     {
-        EventBean event = makeEvent(10);
-        EventBean[] events = new EventBean[] {event};
+        EventBean theEvent = makeEvent(10);
+        EventBean[] events = new EventBean[] {theEvent};
 
         node.validate(ExprValidationContextFactory.make(streamTypeService));
-        assertEquals(event.getUnderlying(), node.evaluate(events, false, null));
+        assertEquals(theEvent.getUnderlying(), node.evaluate(events, false, null));
     }
 
     public void testEqualsNode() throws Exception
@@ -82,9 +82,9 @@ public class TestExprStreamUnderlyingNode extends TestCase
 
     protected static EventBean makeEvent(int intPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        return SupportEventBeanFactory.createObject(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        return SupportEventBeanFactory.createObject(theEvent);
     }
 
     private void tryInvalidValidate(ExprStreamUnderlyingNode node)

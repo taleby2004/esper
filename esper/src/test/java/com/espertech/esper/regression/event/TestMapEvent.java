@@ -25,6 +25,7 @@ import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -70,7 +71,7 @@ public class TestMapEvent extends TestCase
         EventType mapType = epService.getEPAdministrator().getConfiguration().getEventType("MyMap");
 
         SupportUpdateListener listener = new SupportUpdateListener();
-        epService.getEPAdministrator().createEPL("select lev0name.lev1name.sb.string as val from MyMap").addListener(listener);
+        epService.getEPAdministrator().createEPL("select lev0name.lev1name.sb.theString as val from MyMap").addListener(listener);
 
         Map<String, Object> lev2data = new HashMap<String, Object>();
         lev2data.put("sb", eventAdapterService.adapterForTypedBean(new SupportBean("E1", 0), supportBeanType));
@@ -81,6 +82,14 @@ public class TestMapEvent extends TestCase
         
         epService.getEPRuntime().sendEvent(lev0data, "MyMap");
         assertEquals("E1", listener.assertOneGetNewAndReset().get("val"));
+
+        try {
+            epService.getEPRuntime().sendEvent(new Object[0], "MyMap");
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals("Event type named 'MyMap' has not been defined or is not a Object-array event type, the name 'MyMap' refers to a java.util.Map event type", ex.getMessage());
+        }
     }
 
     public void testMetadata()

@@ -50,19 +50,19 @@ public class TestMTStmtNamedWindowDelete extends TestCase
     public void testNamedWindow() throws Exception
     {
         EPStatement stmtWindow = engine.getEPAdministrator().createEPL(
-                "create window MyWindow.win:keepall() as select string, longPrimitive from " + SupportBean.class.getName());
+                "create window MyWindow.win:keepall() as select theString, longPrimitive from " + SupportBean.class.getName());
         listenerWindow = new SupportMTUpdateListener();
         stmtWindow.addListener(listenerWindow);
 
         engine.getEPAdministrator().createEPL(
-                "insert into MyWindow(string, longPrimitive) " +
+                "insert into MyWindow(theString, longPrimitive) " +
                 " select symbol, volume \n" +
                 " from " + SupportMarketDataBean.class.getName());
 
-        String stmtTextDelete = "on " + SupportBean_A.class.getName() + " as s0 delete from MyWindow as win where win.string = s0.id";
+        String stmtTextDelete = "on " + SupportBean_A.class.getName() + " as s0 delete from MyWindow as win where win.theString = s0.id";
         engine.getEPAdministrator().createEPL(stmtTextDelete);
 
-        EPStatement stmtConsumer = engine.getEPAdministrator().createEPL("select irstream string, longPrimitive from MyWindow");
+        EPStatement stmtConsumer = engine.getEPAdministrator().createEPL("select irstream theString, longPrimitive from MyWindow");
         listenerConsumer = new SupportMTUpdateListener();
         stmtConsumer.addListener(listenerConsumer);
 
@@ -98,7 +98,7 @@ public class TestMTStmtNamedWindowDelete extends TestCase
         String[] receivedIds = new String[newEvents.length];
         for (int i = 0; i < newEvents.length; i++)
         {
-            receivedIds[i] = (String) newEvents[i].get("string");
+            receivedIds[i] = (String) newEvents[i].get("theString");
         }
         assertEquals(receivedIds.length, expectedIds.length);
 

@@ -202,8 +202,8 @@ public class ExprNodeUtility {
         try
         {
             Pair<Class, EngineImportSingleRowDesc> classMethodPair = validationContext.getMethodResolutionService().resolveSingleRow(functionName);
-            List<ExprNode> params = Collections.singletonList((ExprNode) new ExprConstantNodeImpl(parse.getArgString()));
-            List<ExprChainedSpec> chain = Collections.singletonList(new ExprChainedSpec(classMethodPair.getSecond().getMethodName(), params, false));
+            List<ExprNode> parameters = Collections.singletonList((ExprNode) new ExprConstantNodeImpl(parse.getArgString()));
+            List<ExprChainedSpec> chain = Collections.singletonList(new ExprChainedSpec(classMethodPair.getSecond().getMethodName(), parameters, false));
             ExprNode result = new ExprPlugInSingleRowNode(functionName, classMethodPair.getFirst(), chain, classMethodPair.getSecond());
 
             // Validate
@@ -354,10 +354,16 @@ public class ExprNodeUtility {
         }
         else if (indexLastSingleQuote != -1)
         {
+            if (indexLastSingleQuote == indexFirstSingleQuote) {
+                return null;
+            }
             endArg = indexLastSingleQuote;
         }
         else
         {
+            if (indexLastDoubleQuote == indexFirstDoubleQuote) {
+                return null;
+            }
             endArg = indexLastDoubleQuote;
         }
         String argument = property.substring(startArg + 1, endArg);
@@ -497,8 +503,25 @@ public class ExprNodeUtility {
         ExprNodeSummaryVisitor summaryVisitor = new ExprNodeSummaryVisitor();
         expression.accept(summaryVisitor);
         if (summaryVisitor.isHasAggregation() || summaryVisitor.isHasSubselect() || summaryVisitor.isHasStreamSelect() || summaryVisitor.isHasPreviousPrior()) {
-            throw new ExprValidationException("Invalid " + expressionTextualName + ": Aggregation, sub-select, previous or prior functions are not supported in this context");
+            throw new ExprValidationException("Invalid expression '" + expressionTextualName + "': Aggregation, sub-select, previous or prior functions are not supported in this context");
         }
+    }
+
+    public static ExprNode validateSimpleGetSubtree(ExprNode expression, StatementContext statementContext, EventType optionalEventType)
+        throws ExprValidationException {
+
+        ExprNodeUtility.validatePlainExpression(expression.toExpressionString(), expression);
+
+        StreamTypeServiceImpl streamTypes;
+        if (optionalEventType != null) {
+            streamTypes = new StreamTypeServiceImpl(optionalEventType, null, true, statementContext.getEngineURI());
+        }
+        else {
+            streamTypes = new StreamTypeServiceImpl(statementContext.getEngineURI(), false);
+        }
+
+        ExprValidationContext validationContext = new ExprValidationContext(streamTypes, statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), new ExprEvaluatorContextStatement(statementContext), statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
+        return ExprNodeUtility.getValidatedSubtree(expression, validationContext);
     }
 
     /**

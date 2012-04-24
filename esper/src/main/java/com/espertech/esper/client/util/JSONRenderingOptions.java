@@ -17,6 +17,7 @@ package com.espertech.esper.client.util;
 public class JSONRenderingOptions
 {
     private boolean preventLooping;
+    private EventPropertyRenderer renderer;
 
     /**
      * Ctor.
@@ -52,5 +53,13 @@ public class JSONRenderingOptions
     {
         this.preventLooping = preventLooping;
         return this;
+    }
+
+    public EventPropertyRenderer getRenderer() {
+        return renderer;
+    }
+
+    public void setRenderer(EventPropertyRenderer renderer) {
+        this.renderer = renderer;
     }
 }

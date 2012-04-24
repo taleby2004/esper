@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.List;
 import java.util.Map;
 
-public class EvalSelectStreamWUnderlying extends EvalSelectStreamBase implements SelectExprProcessor {
+public class EvalSelectStreamWUnderlying extends EvalSelectStreamBaseMap implements SelectExprProcessor {
 
     private static final Log log = LogFactory.getLog(EvalSelectStreamWUnderlying.class);
 
@@ -69,34 +69,34 @@ public class EvalSelectStreamWUnderlying extends EvalSelectStreamBase implements
             }
         }
 
-        EventBean event = null;
+        EventBean theEvent = null;
         if (underlyingIsFragmentEvent)
         {
             EventBean eventBean = eventsPerStream[underlyingStreamNumber];
-            event = (EventBean) eventBean.getFragment(unnamedStreams.get(0).getStreamSelected().getStreamName());
+            theEvent = (EventBean) eventBean.getFragment(unnamedStreams.get(0).getStreamSelected().getStreamName());
         }
         else if (underlyingPropertyEventGetter != null)
         {
             Object value = underlyingPropertyEventGetter.get(eventsPerStream[underlyingStreamNumber]);
             if (value != null)
             {
-                event = super.getSelectExprContext().getEventAdapterService().adapterForBean(value);
+                theEvent = super.getSelectExprContext().getEventAdapterService().adapterForBean(value);
             }
         }
         else if (underlyingExprEvaluator != null) {
             Object value = underlyingExprEvaluator.evaluate(eventsPerStream, true, exprEvaluatorContext);
             if (value != null)
             {
-                event = super.getSelectExprContext().getEventAdapterService().adapterForBean(value);
+                theEvent = super.getSelectExprContext().getEventAdapterService().adapterForBean(value);
             }
         }
         else
         {
-            event = eventsPerStream[underlyingStreamNumber];
+            theEvent = eventsPerStream[underlyingStreamNumber];
         }
 
         // Using a wrapper bean since we cannot use the same event type else same-type filters match.
         // Wrapping it even when not adding properties is very inexpensive.
-        return super.getSelectExprContext().getEventAdapterService().adapterForTypedWrapper(event, props, super.getResultEventType());
+        return super.getSelectExprContext().getEventAdapterService().adapterForTypedWrapper(theEvent, props, super.getResultEventType());
     }
 }

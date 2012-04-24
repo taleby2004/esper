@@ -90,9 +90,9 @@ public class TestExprInNode extends TestCase
 
     private EventBean[] makeEvent(int intPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        return new EventBean[] {SupportEventBeanFactory.createObject(event)};
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        return new EventBean[] {SupportEventBeanFactory.createObject(theEvent)};
     }
 
     private void tryInvalidValidate(ExprInNode exprInNode) throws Exception

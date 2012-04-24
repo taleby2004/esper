@@ -265,8 +265,8 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
         }
 
         // Determine if any of the multi-var streams are referenced in the measures (non-aggregated only)
-        for (ExprIdentNode ref : streamRefVisitorNonAgg.getExprProperties()) {
-            String rootPropName = ref.getResolvedPropertyNameRoot();
+        for (ExprIdentNode identNode : streamRefVisitorNonAgg.getExprProperties()) {
+            String rootPropName = identNode.getResolvedPropertyNameRoot();
             if (variablesMultiple.contains(rootPropName) || (rootPropName == null)) {
                 measureReferencesMultivar = true;
                 break;
@@ -308,7 +308,7 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
             String message = e.getMessage();
             if (!variablesMultiple.isEmpty())
             {
-                message += ", ensure that grouped variables (variables " + grouped + ") are accessed via index (i.e. variable[0].string) or appear within an aggregation";
+                message += ", ensure that grouped variables (variables " + grouped + ") are accessed via index (i.e. variable[0].property) or appear within an aggregation";
             }
             if (!variablesSingle.isEmpty())
             {

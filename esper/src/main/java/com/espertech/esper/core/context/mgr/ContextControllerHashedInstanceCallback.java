@@ -15,5 +15,5 @@ import com.espertech.esper.client.EventBean;
 
 public interface ContextControllerHashedInstanceCallback {
 
-    public void create(int id, EventBean event);
+    public void create(int id, EventBean theEvent);
 }

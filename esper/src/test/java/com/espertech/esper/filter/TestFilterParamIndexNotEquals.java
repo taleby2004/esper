@@ -52,7 +52,7 @@ public class TestFilterParamIndexNotEquals extends TestCase
 
     public void testString()
     {
-        FilterParamIndexNotEquals index = new FilterParamIndexNotEquals(makeLookupable("string"));
+        FilterParamIndexNotEquals index = new FilterParamIndexNotEquals(makeLookupable("theString"));
 
         index.put("hello", testEvaluator);
         index.put("test", testEvaluator);
@@ -72,7 +72,7 @@ public class TestFilterParamIndexNotEquals extends TestCase
 
     private void verifyString(FilterParamIndexBase index, String testValue, int numExpected)
     {
-        testBean.setString(testValue);
+        testBean.setTheString(testValue);
         index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }

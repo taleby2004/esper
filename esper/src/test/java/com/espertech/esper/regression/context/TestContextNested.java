@@ -53,7 +53,7 @@ public class TestContextNested extends TestCase {
 
         String[] fields = "c0,c1,c2,c3".split(",");
         EPStatement stmt = epService.getEPAdministrator().createEPL("@Name('StmtOne') context NestedContext " +
-                "select context.ACtx.s0.p00 as c0, context.BCtx.label as c1, string as c2, sum(intPrimitive) as c3 from SupportBean.win:length(5) group by string");
+                "select context.ACtx.s0.p00 as c0, context.BCtx.label as c1, theString as c2, sum(intPrimitive) as c3 from SupportBean.win:length(5) group by theString");
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "S0_1"));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -136,7 +136,7 @@ public class TestContextNested extends TestCase {
         tryInvalid(epl, "Error starting statement: Context by name 'EightToNine' has already been declared within nested context 'ABC' [");
 
         // validate statement added to nested context
-        epl = "create context ABC context EightToNine as start (0, 8, *, *, *) end (0, 9, *, *, *), context PartCtx as partition by string from SupportBean";
+        epl = "create context ABC context EightToNine as start (0, 8, *, *, *) end (0, 9, *, *, *), context PartCtx as partition by theString from SupportBean";
         epService.getEPAdministrator().createEPL(epl);
         epl = "context ABC select * from SupportBean_S0";
         tryInvalid(epl, "Error starting statement: Segmented context 'PartCtx' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement [");
@@ -160,7 +160,7 @@ public class TestContextNested extends TestCase {
 
         epService.getEPAdministrator().createEPL("create context NestedContext " +
                 "context EightToNine as start (0, 8, *, *, *) end (0, 9, *, *, *), " +
-                "context SegByString partition by string from SupportBean");
+                "context SegByString partition by theString from SupportBean");
 
         SupportUpdateListener listener = new SupportUpdateListener();
         String[] fields = "c0,c1,c2".split(",");
@@ -184,14 +184,14 @@ public class TestContextNested extends TestCase {
         sendTimeEvent("2002-05-1T8:00:00.000");
 
         String eplCtx = "create context NestedContext as " +
-                "context SegByString as partition by string from SupportBean(intPrimitive > 0), " +
+                "context SegByString as partition by theString from SupportBean(intPrimitive > 0), " +
                 "context InitCtx initiated by SupportBean_S0 as s0 terminated after 60 seconds";
         EPStatement stmtCtx = epService.getEPAdministrator().createEPL(eplCtx);
 
         SupportUpdateListener listener = new SupportUpdateListener();
         String[] fields = "c0,c1,c2".split(",");
         EPStatementSPI stmtUser = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select " +
-                "context.InitCtx.s0.p00 as c0, string as c1, sum(intPrimitive) as c2 from SupportBean group by string");
+                "context.InitCtx.s0.p00 as c0, theString as c1, sum(intPrimitive) as c2 from SupportBean group by theString");
         stmtUser.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -225,7 +225,7 @@ public class TestContextNested extends TestCase {
         SupportUpdateListener listener = new SupportUpdateListener();
         String[] fields = "c0,c1,c2,c3".split(",");
         EPStatementSPI stmtUser = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select " +
-                "context.ByCat.label as c0, context.InitCtx.a.p00 as c1, context.InitCtx.b.p10 as c2, sum(intPrimitive) as c3 from SupportBean group by string");
+                "context.ByCat.label as c0, context.InitCtx.a.p00 as c1, context.InitCtx.b.p10 as c2, sum(intPrimitive) as c3 from SupportBean group by theString");
         stmtUser.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -273,7 +273,7 @@ public class TestContextNested extends TestCase {
         // Test partitioned context
         //
         String eplCtxOne = "create context NestedContext as " +
-                "context SegByString as partition by string from SupportBean, " +
+                "context SegByString as partition by theString from SupportBean, " +
                 "context SegByInt as partition by intPrimitive from SupportBean, " +
                 "context SegByLong as partition by longPrimitive from SupportBean ";
         EPStatement stmtCtxOne = epService.getEPAdministrator().createEPL(eplCtxOne);
@@ -305,14 +305,14 @@ public class TestContextNested extends TestCase {
         // Test partitioned context
         //
         String eplCtxTwo = "create context NestedContext as " +
-                "context HashOne coalesce by hash_code(string) from SupportBean granularity 10, " +
+                "context HashOne coalesce by hash_code(theString) from SupportBean granularity 10, " +
                 "context HashTwo coalesce by hash_code(intPrimitive) from SupportBean granularity 10";
         EPStatement stmtCtxTwo = epService.getEPAdministrator().createEPL(eplCtxTwo);
 
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         String[] fieldsTwo = "c1,c2".split(",");
         EPStatementSPI stmtUserTwo = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select " +
-                "string as c1, count(*) as c2 from SupportBean");
+                "theString as c1, count(*) as c2 from SupportBean");
         stmtUserTwo.addListener(listenerTwo);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
@@ -330,14 +330,14 @@ public class TestContextNested extends TestCase {
         // Test partitioned context
         //
         String eplCtxThree = "create context NestedContext as " +
-                "context InitOne initiated by SupportBean(string like 'I%') as sb0 terminated after 10 sec, " +
+                "context InitOne initiated by SupportBean(theString like 'I%') as sb0 terminated after 10 sec, " +
                 "context InitTwo initiated by SupportBean(intPrimitive > 0) as sb1 terminated after 10 sec";
         EPStatement stmtCtxThree = epService.getEPAdministrator().createEPL(eplCtxThree);
 
         SupportUpdateListener listenerThree = new SupportUpdateListener();
         String[] fieldsThree = "c1,c2".split(",");
         EPStatementSPI stmtUserThree = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select " +
-                "string as c1, count(*) as c2 from SupportBean");
+                "theString as c1, count(*) as c2 from SupportBean");
         stmtUserThree.addListener(listenerThree);
 
         epService.getEPRuntime().sendEvent(new SupportBean("I1", 1));
@@ -459,7 +459,7 @@ public class TestContextNested extends TestCase {
 
         String eplCtx = "create context NestedContext as " +
                 "context InitCtx initiated by SupportBean_S0(id > 0) as s0 terminated after 10 seconds, " +
-                "context SegmCtx as partition by string from SupportBean(intPrimitive > 0)";
+                "context SegmCtx as partition by theString from SupportBean(intPrimitive > 0)";
         EPStatement stmtCtx = epService.getEPAdministrator().createEPL(eplCtx);
 
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -524,7 +524,7 @@ public class TestContextNested extends TestCase {
         String eplCtx = "create context NestedContext as " +
                 "context EightToNine as start (0, 8, *, *, *) end (0, 9, *, *, *), " +
                 "context ByCat as group intPrimitive < 0 as g1, group intPrimitive = 0 as g2, group intPrimitive > 0 as g3 from SupportBean, " +
-                "context SegmentedByString as partition by string from SupportBean";
+                "context SegmentedByString as partition by theString from SupportBean";
         EPStatement stmtCtx = epService.getEPAdministrator().createEPL(eplCtx);
 
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -568,7 +568,7 @@ public class TestContextNested extends TestCase {
         SupportUpdateListener listener = new SupportUpdateListener();
         String[] fields = "c1,c2".split(",");
         EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select " +
-                "string as c1, count(*) as c2 from SupportBean group by string");
+                "theString as c1, count(*) as c2 from SupportBean group by theString");
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
@@ -605,13 +605,13 @@ public class TestContextNested extends TestCase {
 
         EPStatement stmtCtx = epService.getEPAdministrator().createEPL("create context NestedContext " +
                 "context ByCat group intPrimitive < 0 and intPrimitive != -9999 as g1, group intPrimitive = 0 as g2, group intPrimitive > 0 as g3 from SupportBean, " +
-                "context InitGrd initiated by SupportBean(string like 'init%') as sb terminated after 10 seconds");
+                "context InitGrd initiated by SupportBean(theString like 'init%') as sb terminated after 10 seconds");
         assertEquals(0, spi.getSchedulingService().getScheduleHandleCount());
 
         SupportUpdateListener listener = new SupportUpdateListener();
         String[] fields = "c1,c2,c3".split(",");
         EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select " +
-                "context.ByCat.label as c1, context.InitGrd.sb.string as c2, count(*) as c3 from SupportBean");
+                "context.ByCat.label as c1, context.InitGrd.sb.theString as c2, count(*) as c3 from SupportBean");
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
@@ -652,7 +652,7 @@ public class TestContextNested extends TestCase {
 
         EPStatement stmtCtx = epService.getEPAdministrator().createEPL("create context NestedContext " +
                 "context EightToNine as start (0, 8, *, *, *) end (0, 9, *, *, *), " +
-                "context SegmentedByAString partition by string from SupportBean");
+                "context SegmentedByAString partition by theString from SupportBean");
         assertEquals(0, spi.getSchedulingService().getScheduleHandleCount());
 
         SupportUpdateListener listener = new SupportUpdateListener();
@@ -732,7 +732,7 @@ public class TestContextNested extends TestCase {
         sendTimeEvent("2002-05-1T7:00:00.000");
 
         EPStatement stmtCtx = epService.getEPAdministrator().createEPL("create context NestedContext " +
-                "context SegmentedByAString partition by string from SupportBean, " +
+                "context SegmentedByAString partition by theString from SupportBean, " +
                 "context EightToNine as start (0, 8, *, *, *) end (0, 9, *, *, *)");
         assertEquals(0, filterSPI.getFilterCountApprox());
         assertEquals(0, spi.getSchedulingService().getScheduleHandleCount());
@@ -817,7 +817,7 @@ public class TestContextNested extends TestCase {
 
         EPStatement stmtCtx = epService.getEPAdministrator().createEPL("create context NestedContext " +
                 "context EightToNine as start (0, 8, *, *, *) end (0, 9, *, *, *), " +
-                "context SegmentedByAString partition by string from SupportBean");
+                "context SegmentedByAString partition by theString from SupportBean");
 
         SupportUpdateListener listener = new SupportUpdateListener();
         String[] fields = "c0,c1,c2,c3,c4,c5,c6,c7".split(",");
@@ -887,18 +887,18 @@ public class TestContextNested extends TestCase {
 
         EPStatement stmtCtx = epService.getEPAdministrator().createEPL("create context NestedContext " +
                 "context EightToNine as start (0, 8, *, *, *) end (0, 9, *, *, *), " +
-                "context SegmentedByAString partition by string from SupportBean");
+                "context SegmentedByAString partition by theString from SupportBean");
 
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         String[] fields = "c0,c1".split(",");
-        EPStatementSPI statementOne = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select string as c0, count(*) as c1 from SupportBean");
+        EPStatementSPI statementOne = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select theString as c0, count(*) as c1 from SupportBean");
         statementOne.addListener(listenerOne);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1L});
 
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
-        EPStatementSPI statementTwo = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select string as c0, sum(intPrimitive) as c1 from SupportBean");
+        EPStatementSPI statementTwo = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select theString as c0, sum(intPrimitive) as c1 from SupportBean");
         statementTwo.addListener(listenerTwo);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 20));
@@ -910,7 +910,7 @@ public class TestContextNested extends TestCase {
         EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), fields, new Object[]{"E2", 30});
 
         SupportUpdateListener listenerThree = new SupportUpdateListener();
-        EPStatementSPI statementThree = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select string as c0, min(intPrimitive) as c1 from SupportBean");
+        EPStatementSPI statementThree = (EPStatementSPI) epService.getEPAdministrator().createEPL("context NestedContext select theString as c0, min(intPrimitive) as c1 from SupportBean");
         statementThree.addListener(listenerThree);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 40));
@@ -961,14 +961,14 @@ public class TestContextNested extends TestCase {
         assertFalse(listener.isInvoked());
     }
 
-    private Object makeEvent(String string, int intPrimitive, long longPrimitive) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private Object makeEvent(String theString, int intPrimitive, long longPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
         return bean;
     }
 
-    private Object makeEvent(String string, int intPrimitive, long longPrimitive, boolean boolPrimitive) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private Object makeEvent(String theString, int intPrimitive, long longPrimitive, boolean boolPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
         bean.setBoolPrimitive(boolPrimitive);
         return bean;

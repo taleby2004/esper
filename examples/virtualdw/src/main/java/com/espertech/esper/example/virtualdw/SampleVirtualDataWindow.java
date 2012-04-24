@@ -33,7 +33,7 @@ public class SampleVirtualDataWindow implements VirtualDataWindow {
         // This sample does not need to clean up resources.
     }
 
-    public void handleEvent(VirtualDataWindowEvent event) {
+    public void handleEvent(VirtualDataWindowEvent theEvent) {
     }
 
     public Iterator<EventBean> iterator() {

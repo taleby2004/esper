@@ -48,6 +48,10 @@ public class EPStatementStartMethodFactory
         {
             return new EPStatementStartMethodCreateIndex(statementSpec, services, statementContext);
         }
+        else if (statementSpec.getCreateGraphDesc() != null)
+        {
+            return new EPStatementStartMethodCreateGraph(statementSpec, services, statementContext);
+        }
         else if (statementSpec.getCreateSchemaDesc() != null)
         {
             return new EPStatementStartMethodCreateSchema(statementSpec, services, statementContext);

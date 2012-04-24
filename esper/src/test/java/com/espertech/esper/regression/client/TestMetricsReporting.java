@@ -15,13 +15,13 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.metric.EngineMetric;
 import com.espertech.esper.client.metric.StatementMetric;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriber;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.ArrayHandlingUtil;
-import com.espertech.esper.support.util.SupportSubscriber;
 import junit.framework.TestCase;
 
 import java.lang.management.ManagementFactory;
@@ -85,7 +85,7 @@ public class TestMetricsReporting extends TestCase
                 "" +
                 "@Name('M') on SupportBean oe\n" +
                 "  merge SupportBeanWindow pw\n" +
-                "  where pw.string = oe.string\n" +
+                "  where pw.theString = oe.theString\n" +
                 "  when not matched \n" +
                 "    then insert select *\n" +
                 "  when matched and oe.intPrimitive=1\n" +
@@ -101,8 +101,8 @@ public class TestMetricsReporting extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
         EventBean[] received = ArrayHandlingUtil.reorder("statementName", listener.getNewDataListFlattened());
-        for (EventBean event : received) {
-            System.out.println(event.get("statementName") + " = " + event.get("numInput"));
+        for (EventBean theEvent : received) {
+            System.out.println(theEvent.get("statementName") + " = " + theEvent.get("numInput"));
         }
         EPAssertionUtil.assertPropsPerRow(received, fields, new Object[][]{{"A", 2L}, {"B1", 1L}, {"B2", 1L}, {"C", 2L}, {"D", 2L}, {"M", 1L}, {"W", 1L}});
 
@@ -134,16 +134,16 @@ public class TestMetricsReporting extends TestCase
         epService.getEPAdministrator().createEPL("select * from pattern[timer:interval(5 sec)]");
 
         sendTimer(11000);
-        EventBean event = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(event, engineFields, new Object[]{"MyURI", 11000L, 1L, 1L, 1L});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        EPAssertionUtil.assertProps(theEvent, engineFields, new Object[]{"MyURI", 11000L, 1L, 1L, 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean());
         epService.getEPRuntime().sendEvent(new SupportBean());
 
         sendTimer(20000);
         sendTimer(21000);
-        event = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(event, engineFields, new Object[]{"MyURI", 21000L, 4L, 3L, 0L});
+        theEvent = listener.assertOneGetNewAndReset();
+        EPAssertionUtil.assertProps(theEvent, engineFields, new Object[]{"MyURI", 21000L, 4L, 3L, 0L});
     }
 
     public void testStatementGroups()

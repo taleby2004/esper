@@ -54,15 +54,15 @@ public class TestNamedWindowIndexFAFPerf extends TestCase
 
         // drop index, create multikey btree
         idx.destroy();
-        idx = epService.getEPAdministrator().createEPL("create index idx2 on MyWindow(intPrimitive btree, string btree)");
+        idx = epService.getEPAdministrator().createEPL("create index idx2 on MyWindow(intPrimitive btree, theString btree)");
 
-        String eplIdx2One = "select intPrimitive as sumi from MyWindow where intPrimitive = 5501 and string = 'A'";
+        String eplIdx2One = "select intPrimitive as sumi from MyWindow where intPrimitive = 5501 and theString = 'A'";
         runFAFAssertion(eplIdx2One, 5501);
 
-        String eplIdx2Two = "select sum(intPrimitive) as sumi from MyWindow where intPrimitive in [5000:5004) and string = 'A'";
+        String eplIdx2Two = "select sum(intPrimitive) as sumi from MyWindow where intPrimitive in [5000:5004) and theString = 'A'";
         runFAFAssertion(eplIdx2Two, 5000+5001+5003+5002);
 
-        String eplIdx2Three = "select sum(intPrimitive) as sumi from MyWindow where intPrimitive=5001 and string between 'A' and 'B'";
+        String eplIdx2Three = "select sum(intPrimitive) as sumi from MyWindow where intPrimitive=5001 and theString between 'A' and 'B'";
         runFAFAssertion(eplIdx2Three, 5001);
     }
 
@@ -86,7 +86,7 @@ public class TestNamedWindowIndexFAFPerf extends TestCase
         // create window one
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
-        epService.getEPAdministrator().createEPL("create index idx1 on MyWindow(string hash, intPrimitive btree)");
+        epService.getEPAdministrator().createEPL("create index idx1 on MyWindow(theString hash, intPrimitive btree)");
 
         // insert X rows
         int maxRows = 10000;   //for performance testing change to int maxRows = 100000;
@@ -94,26 +94,26 @@ public class TestNamedWindowIndexFAFPerf extends TestCase
             epService.getEPRuntime().sendEvent(new SupportBean("A", i));
         }
 
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive not in [3:9997]", 1+2+9998+9999);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive not in [3:9997)", 1+2+9997+9998+9999);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive not in (3:9997]", 1+2+3+9998+9999);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive not in (3:9997)", 1+2+3+9997+9998+9999);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'B' and intPrimitive not in (3:9997)", null);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive between 200 and 202", 603);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive between 202 and 199", 199+200+201+202);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive >= 200 and intPrimitive <= 202", 603);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive >= 202 and intPrimitive <= 200", null);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive > 9997", 9998 + 9999);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive >= 9997", 9997 + 9998 + 9999);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive < 5", 4+3+2+1);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive <= 5", 5+4+3+2+1);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive in [200:202]", 603);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive in [200:202)", 401);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive in (200:202]", 403);
-        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where string = 'A' and intPrimitive in (200:202)", 201);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive not in [3:9997]", 1+2+9998+9999);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive not in [3:9997)", 1+2+9997+9998+9999);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive not in (3:9997]", 1+2+3+9998+9999);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive not in (3:9997)", 1+2+3+9997+9998+9999);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'B' and intPrimitive not in (3:9997)", null);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive between 200 and 202", 603);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive between 202 and 199", 199+200+201+202);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive >= 200 and intPrimitive <= 202", 603);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive >= 202 and intPrimitive <= 200", null);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive > 9997", 9998 + 9999);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive >= 9997", 9997 + 9998 + 9999);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive < 5", 4+3+2+1);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive <= 5", 5+4+3+2+1);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive in [200:202]", 603);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive in [200:202)", 401);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive in (200:202]", 403);
+        runFAFAssertion("select sum(intPrimitive) as sumi from MyWindow where theString = 'A' and intPrimitive in (200:202)", 201);
 
         // test no value returned
-        EPOnDemandPreparedQuery query = epService.getEPRuntime().prepareQuery("select * from MyWindow where string = 'A' and intPrimitive < 0");
+        EPOnDemandPreparedQuery query = epService.getEPRuntime().prepareQuery("select * from MyWindow where theString = 'A' and intPrimitive < 0");
         EPOnDemandQueryResult result = query.execute();
         assertEquals(0, result.getArray().length);
     }
@@ -164,7 +164,7 @@ public class TestNamedWindowIndexFAFPerf extends TestCase
         // create window one
         String stmtTextCreateOne = "create window MyWindowOne.win:keepall() as (f1 string, f2 int)";
         epService.getEPAdministrator().createEPL(stmtTextCreateOne);
-        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2) select string, intPrimitive from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2) select theString, intPrimitive from SupportBean");
         epService.getEPAdministrator().createEPL("create index MyWindowOneIndex on MyWindowOne(f1)");
 
         // insert X rows

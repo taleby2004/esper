@@ -70,13 +70,13 @@ public class TestNamedWindowSubqFilteredCorrel extends TestCase
 
         EPStatement indexStmt = null;
         if (createExplicitIndex) {
-            indexStmt = epService.getEPAdministrator().createEPL("create index MyIndex on SupportWindow(string)");
+            indexStmt = epService.getEPAdministrator().createEPL("create index MyIndex on SupportWindow(theString)");
         }
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", -2));
 
-        String consumeEpl = "select (select intPrimitive from SupportWindow(intPrimitive<0) sw where s0.p00=sw.string) as val from S0 s0";
+        String consumeEpl = "select (select intPrimitive from SupportWindow(intPrimitive<0) sw where s0.p00=sw.theString) as val from S0 s0";
         if (disableIndexShareConsumer) {
             consumeEpl = "@Hint('disable_window_subquery_indexshare') " + consumeEpl;
         }

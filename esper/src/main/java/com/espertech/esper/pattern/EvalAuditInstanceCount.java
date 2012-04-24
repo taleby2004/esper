@@ -11,6 +11,7 @@
 
 package com.espertech.esper.pattern;
 
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.util.AuditPath;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -62,8 +63,6 @@ public class EvalAuditInstanceCount {
         }
 
         StringWriter writer = new StringWriter();
-
-        writer.write("pattern-instance ");
         EvalAuditStateNode.writePatternExpr(current, patternExpression, writer);
 
         if (added) {
@@ -73,6 +72,6 @@ public class EvalAuditInstanceCount {
             writer.write(" decreased to " + count);
         }
 
-        AuditPath.auditLog(engineURI, statementName, writer.toString());
+        AuditPath.auditLog(engineURI, statementName, AuditEnum.PATTERNINSTANCES, writer.toString());
     }
 }

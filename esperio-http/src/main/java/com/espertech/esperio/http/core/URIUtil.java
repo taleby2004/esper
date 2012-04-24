@@ -8,20 +8,20 @@ import java.io.UnsupportedEncodingException;
 
 public class URIUtil {
 
-    public static URI withQuery(URI uri, String... params) {
+    public static URI withQuery(URI uri, String... parameters) {
         Map<String, String> map = new LinkedHashMap<String, String>();
-        for (int i = 0; i < params.length; i += 2) {
-            String key = params[i];
-            String val = i + 1 < params.length ? params[i + 1] : "";
+        for (int i = 0; i < parameters.length; i += 2) {
+            String key = parameters[i];
+            String val = i + 1 < parameters.length ? parameters[i + 1] : "";
             map.put(key, val);
         }
         return withQuery(uri, map);
     }
 
-    public static URI withQuery(URI uri, Map<String, String> params) {
+    public static URI withQuery(URI uri, Map<String, String> parameters) {
         StringBuilder query = new StringBuilder();
         char separator = '?';
-        for (Map.Entry<String, String> param : params.entrySet()) {
+        for (Map.Entry<String, String> param : parameters.entrySet()) {
             query.append(separator);
             separator = '&';
             try {

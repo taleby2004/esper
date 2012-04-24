@@ -41,7 +41,7 @@ public class TestViewExpressionWindow extends TestCase
 
     public void testLengthWindow()
     {
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.win:expr(current_count <= 2)");
         stmt.addListener(listener);
         
@@ -61,7 +61,7 @@ public class TestViewExpressionWindow extends TestCase
     {
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr(oldest_timestamp > newest_timestamp - 2000)");
         stmt.addListener(listener);
 
@@ -113,7 +113,7 @@ public class TestViewExpressionWindow extends TestCase
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         epService.getEPAdministrator().createEPL("create variable boolean KEEP = true");
 
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr(KEEP)");
         stmt.addListener(listener);
 
@@ -149,7 +149,7 @@ public class TestViewExpressionWindow extends TestCase
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         epService.getEPAdministrator().createEPL("create variable long SIZE = 1000");
 
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr(newest_timestamp - oldest_timestamp < SIZE)");
         stmt.addListener(listener);
 
@@ -177,7 +177,7 @@ public class TestViewExpressionWindow extends TestCase
     public void testUDFBuiltin()
     {
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("udf", LocalUDF.class.getName(), "evaluateExpiryUDF");
-        epService.getEPAdministrator().createEPL("select * from SupportBean.win:expr(udf(string, view_reference, expired_count))");
+        epService.getEPAdministrator().createEPL("select * from SupportBean.win:expr(udf(theString, view_reference, expired_count))");
 
         LocalUDF.setResult(true);
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
@@ -215,7 +215,7 @@ public class TestViewExpressionWindow extends TestCase
     public void testNamedWindowDelete() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
         
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("create window NW.win:expr(true) as SupportBean");
         stmt.addListener(listener);
 
@@ -227,7 +227,7 @@ public class TestViewExpressionWindow extends TestCase
         listener.reset();
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E2"}, {"E3"}});
 
-        epService.getEPAdministrator().createEPL("on SupportBean_A delete from NW where string = id");
+        epService.getEPAdministrator().createEPL("on SupportBean_A delete from NW where theString = id");
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E3"}});
         EPAssertionUtil.assertProps(listener.assertOneGetOldAndReset(), fields, new Object[]{"E2"});
@@ -235,7 +235,7 @@ public class TestViewExpressionWindow extends TestCase
 
     public void testPrev() {
         String[] fields = new String[] {"val0"};
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select prev(1, string) as val0 from SupportBean.win:expr(true)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select prev(1, theString) as val0 from SupportBean.win:expr(true)");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -247,8 +247,8 @@ public class TestViewExpressionWindow extends TestCase
 
     public void testAggregation() {
         // Test ungrouped
-        String[] fields = new String[] {"string"};
-        EPStatement stmtUngrouped = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.win:expr(sum(intPrimitive) < 10)");
+        String[] fields = new String[] {"theString"};
+        EPStatement stmtUngrouped = epService.getEPAdministrator().createEPL("select irstream theString from SupportBean.win:expr(sum(intPrimitive) < 10)");
         stmtUngrouped.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -290,7 +290,7 @@ public class TestViewExpressionWindow extends TestCase
         stmtUngrouped.destroy();
 
         // Test grouped
-        EPStatement stmtGrouped = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.std:groupwin(intPrimitive).win:expr(sum(longPrimitive) < 10)");
+        EPStatement stmtGrouped = epService.getEPAdministrator().createEPL("select irstream theString from SupportBean.std:groupwin(intPrimitive).win:expr(sum(longPrimitive) < 10)");
         stmtGrouped.addListener(listener);
 
         sendEvent("E1", 1, 5);
@@ -325,7 +325,7 @@ public class TestViewExpressionWindow extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 8));
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields, new Object[][]{{"E2"}}, null);
 
-        epService.getEPAdministrator().createEPL("on SupportBean_A delete from NW where string = id");
+        epService.getEPAdministrator().createEPL("on SupportBean_A delete from NW where theString = id");
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields, null, new Object[][]{{"E2"}});
 
@@ -336,8 +336,8 @@ public class TestViewExpressionWindow extends TestCase
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields, new Object[][]{{"E4"}}, new Object[][]{{"E1"}});
     }
 
-    private void sendEvent(String string, int intPrimitive, long longPrimitive) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private void sendEvent(String theString, int intPrimitive, long longPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
         epService.getEPRuntime().sendEvent(bean);
     }

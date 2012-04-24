@@ -70,7 +70,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
 
         // validate input criteria met for this footprint
         if (footprint.getInput() != DotMethodFPInputEnum.ANY) {
-            String message = "Invalid input for built-in enumeration method '" + enumMethodUsedName + "' and " + footprint.getParams().length + "-parameter footprint, expecting collection of ";
+            String message = "Invalid input for built-in enumeration method '" + enumMethodUsedName + "' and " + footprint.getParameters().length + "-parameter footprint, expecting collection of ";
             String received = " as input, received " + typeInfo.toTypeName();
             if (footprint.getInput() == DotMethodFPInputEnum.EVENTCOLL && typeInfo.getEventTypeColl() == null) {
                 throw new ExprValidationException(message + "events" + received);
@@ -210,7 +210,7 @@ public abstract class ExprDotEvalEnumMethodBase implements ExprDotEvalEnumMethod
         }
 
         ExprEvaluator filterEvaluator = filter.getExprEvaluator();
-        DotMethodFPParamTypeEnum expectedType = footprint.getParams()[parameterNum].getType();
+        DotMethodFPParamTypeEnum expectedType = footprint.getParameters()[parameterNum].getType();
         // Lambda-methods don't use a specific expected return-type, so passing null for type is fine.
         DotMethodUtil.validateSpecificType(enumMethodUsedName, DotMethodTypeEnum.ENUM, expectedType, null, filterEvaluator.getType(), parameterNum, filter);
 

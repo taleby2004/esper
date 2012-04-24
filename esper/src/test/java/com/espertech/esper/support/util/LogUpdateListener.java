@@ -26,14 +26,14 @@ public class LogUpdateListener implements UpdateListener
 
     public void update(EventBean[] newEvents, EventBean[] oldEvents)
     {
-        EventBean event = newEvents[0];
+        EventBean theEvent = newEvents[0];
         if (fieldNameLogged == null)
         {
-            ThreadLogUtil.trace("listener received, " + " listener=" + this + " eventUnderlying=" + Integer.toHexString(event.getUnderlying().hashCode()));
+            ThreadLogUtil.trace("listener received, " + " listener=" + this + " eventUnderlying=" + Integer.toHexString(theEvent.getUnderlying().hashCode()));
         }
         else
         {
-            ThreadLogUtil.trace("listener received, " + " listener=" + this + " eventUnderlying=" + Integer.toHexString(event.get("a").hashCode()));
+            ThreadLogUtil.trace("listener received, " + " listener=" + this + " eventUnderlying=" + Integer.toHexString(theEvent.get("a").hashCode()));
         }
     }
 }

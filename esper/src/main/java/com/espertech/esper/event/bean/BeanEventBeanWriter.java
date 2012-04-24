@@ -34,11 +34,11 @@ public class BeanEventBeanWriter implements EventBeanWriter
         this.writers = writers;
     }
 
-    public void write(Object[] values, EventBean event)
+    public void write(Object[] values, EventBean theEvent)
     {
         for (int i = 0; i < values.length; i++)
         {
-            writers[i].write(values[i], event);
+            writers[i].write(values[i], theEvent);
         }
     }
 }

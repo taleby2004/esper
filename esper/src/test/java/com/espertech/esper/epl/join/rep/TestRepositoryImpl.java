@@ -36,7 +36,7 @@ public class TestRepositoryImpl extends TestCase
         Iterator<Cursor> it = repository.getCursors(0);
         assertTrue(it.hasNext());
         Cursor cursor = it.next();
-        assertSame(s0Event, cursor.getEvent());
+        assertSame(s0Event, cursor.getTheEvent());
         assertSame(0, cursor.getStream());
 
         assertFalse(it.hasNext());

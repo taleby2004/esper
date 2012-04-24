@@ -57,9 +57,9 @@ public class TestRFIDTagsPerSensorStmt extends TestCase
     {
         assertTrue(listener.isInvoked());
         assertEquals(1, listener.getLastNewData().length);
-        EventBean event = listener.getLastNewData()[0];
-        assertEquals(sensorId, event.get("sensorId"));
-        assertEquals(numTags, event.get("numTagsPerSensor"));
+        EventBean theEvent = listener.getLastNewData()[0];
+        assertEquals(sensorId, theEvent.get("sensorId"));
+        assertEquals(numTags, theEvent.get("numTagsPerSensor"));
         listener.reset();
     }
 }

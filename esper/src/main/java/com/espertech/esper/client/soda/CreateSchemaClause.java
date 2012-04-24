@@ -24,7 +24,7 @@ public class CreateSchemaClause implements Serializable
     private Set<String> types;
     private List<SchemaColumnDesc> columns;
     private Set<String> inherits;
-    private boolean variant;
+    private CreateSchemaClauseTypeDef typeDefinition;
     private String startTimestampPropertyName;
     private String endTimestampPropertyName;
     private Set<String> copyFrom;
@@ -39,13 +39,13 @@ public class CreateSchemaClause implements Serializable
      * Ctor.
      * @param schemaName name of type
      * @param types are for model-after, could be multiple when declaring a variant stream, or a single fully-qualified class name
-     * @param variant true for variant stream
+     * @param typeDefinition
      */
-    public CreateSchemaClause(String schemaName, Set<String> types, boolean variant)
+    public CreateSchemaClause(String schemaName, Set<String> types, CreateSchemaClauseTypeDef typeDefinition)
     {
         this.schemaName = schemaName;
         this.types = types;
-        this.variant = variant;
+        this.typeDefinition = typeDefinition;
     }
 
     /**
@@ -65,17 +65,17 @@ public class CreateSchemaClause implements Serializable
      * Ctor.
      * @param schemaName name of type
      * @param types are for model-after, could be multiple when declaring a variant stream, or a single fully-qualified class name
-     * @param variant true for variant stream
+     * @param typeDefinition for variant streams, map or object array
      * @param columns column definition
      * @param inherits inherited types, if any
      */
-    public CreateSchemaClause(String schemaName, Set<String> types, List<SchemaColumnDesc> columns, Set<String> inherits, boolean variant)
+    public CreateSchemaClause(String schemaName, Set<String> types, List<SchemaColumnDesc> columns, Set<String> inherits, CreateSchemaClauseTypeDef typeDefinition)
     {
         this.schemaName = schemaName;
         this.types = types;
         this.columns = columns;
         this.inherits = inherits;
-        this.variant = variant;
+        this.typeDefinition = typeDefinition;
     }
 
     /**
@@ -150,22 +150,12 @@ public class CreateSchemaClause implements Serializable
         this.inherits = inherits;
     }
 
-    /**
-     * Returns true for variant stream type, or false for regular event type.
-     * @return indicator
-     */
-    public boolean isVariant()
-    {
-        return variant;
+    public CreateSchemaClauseTypeDef getTypeDefinition() {
+        return typeDefinition;
     }
 
-    /**
-     * Set true for variant stream type, or false for regular event type.
-     * @param variant indicator
-     */
-    public void setVariant(boolean variant)
-    {
-        this.variant = variant;
+    public void setTypeDefinition(CreateSchemaClauseTypeDef typeDefinition) {
+        this.typeDefinition = typeDefinition;
     }
 
     /**
@@ -223,8 +213,8 @@ public class CreateSchemaClause implements Serializable
     public void toEPL(StringWriter writer)
     {
         writer.append("create");
-        if (variant) {
-            writer.append(" variant");
+        if (typeDefinition != null) {
+            typeDefinition.write(writer);
         }
         writer.append(" schema ");
         writer.append(schemaName);

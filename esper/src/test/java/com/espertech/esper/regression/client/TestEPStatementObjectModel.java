@@ -53,9 +53,9 @@ public class TestEPStatementObjectModel extends TestCase
         EPStatement stmt = epService.getEPAdministrator().create(model, "s1");
         stmt.addListener(listener);
 
-        Object event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
-        assertEquals(event, listener.assertOneGetNewAndReset().getUnderlying());
+        Object theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
+        assertEquals(theEvent, listener.assertOneGetNewAndReset().getUnderlying());
 
         List<Expression> expressions = SODAAnalyzer.analyzeModelExpressions(model);
         assertEquals(0, expressions.size());
@@ -100,9 +100,9 @@ public class TestEPStatementObjectModel extends TestCase
         EPStatement stmt = epService.getEPAdministrator().create(model, "s1");
         stmt.addListener(listener);
 
-        Object event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
-        assertEquals(event, listener.assertOneGetNewAndReset().getUnderlying());
+        Object theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
+        assertEquals(theEvent, listener.assertOneGetNewAndReset().getUnderlying());
         assertEquals(stmtText, stmt.getText());
         assertEquals("s1", stmt.getName());
     }

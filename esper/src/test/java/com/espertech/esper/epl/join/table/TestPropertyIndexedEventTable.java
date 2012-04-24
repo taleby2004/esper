@@ -33,7 +33,7 @@ public class TestPropertyIndexedEventTable extends TestCase
 
     public void setUp()
     {
-        propertyNames = new String[] { "intPrimitive", "string" };
+        propertyNames = new String[] { "intPrimitive", "theString" };
         eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(1, eventType, propertyNames);
         index = (PropertyIndexedEventTable) factory.makeEventTable();
@@ -74,10 +74,10 @@ public class TestPropertyIndexedEventTable extends TestCase
     public void testAdd()
     {
         // Add event without these properties should fail
-        EventBean event = SupportEventBeanFactory.createObject(new SupportBean_A("d"));
+        EventBean theEvent = SupportEventBeanFactory.createObject(new SupportBean_A("d"));
         try
         {
-            index.add(new EventBean[] {event});
+            index.add(new EventBean[] {theEvent});
             TestCase.fail();
         }
         catch (PropertyAccessException ex)
@@ -167,7 +167,7 @@ public class TestPropertyIndexedEventTable extends TestCase
     {
         SupportBean bean = new SupportBean();
         bean.setIntPrimitive(intValue);
-        bean.setString(stringValue);
+        bean.setTheString(stringValue);
         return SupportEventBeanFactory.createObject(bean);
     }
 }

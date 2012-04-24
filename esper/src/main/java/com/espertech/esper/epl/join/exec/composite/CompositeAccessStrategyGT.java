@@ -28,14 +28,14 @@ public class CompositeAccessStrategyGT extends CompositeAccessStrategyRelOpBase 
         super(isNWOnTrigger, lookupStream, numStreams, key, coercionType);
     }
 
-    public Set<EventBean> lookup(EventBean event, Map parent, Set<EventBean> result, CompositeIndexQuery next, ExprEvaluatorContext context) {
+    public Set<EventBean> lookup(EventBean theEvent, Map parent, Set<EventBean> result, CompositeIndexQuery next, ExprEvaluatorContext context) {
         TreeMap index = (TreeMap) parent;
-        Object comparable = super.evaluateLookup(event, context);
+        Object comparable = super.evaluateLookup(theEvent, context);
         if (comparable == null) {
             return null;
         }
         comparable = EventBeanUtility.coerce(comparable, coercionType);
-        return CompositeIndexQueryRange.handle(event, index.tailMap(comparable, false), null, result, next);
+        return CompositeIndexQueryRange.handle(theEvent, index.tailMap(comparable, false), null, result, next);
     }
 
     public Collection<EventBean> lookup(EventBean[] eventPerStream, Map parent, Collection<EventBean> result, CompositeIndexQuery next, ExprEvaluatorContext context) {

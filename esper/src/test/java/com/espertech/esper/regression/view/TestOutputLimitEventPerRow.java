@@ -56,24 +56,24 @@ public class TestOutputLimitEventPerRow extends TestCase
 
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
 
-        String stmtText = "select string, longPrimitive, sum(intPrimitive) as value from MyWindow group by string having sum(intPrimitive) > 20 output first every 2 events";
+        String stmtText = "select theString, longPrimitive, sum(intPrimitive) as value from MyWindow group by theString having sum(intPrimitive) > 20 output first every 2 events";
         tryOutputFirstHaving(stmtText);
 
-        String stmtTextJoin = "select string, longPrimitive, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.string " +
-                "group by string having sum(intPrimitive) > 20 output first every 2 events";
+        String stmtTextJoin = "select theString, longPrimitive, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.theString " +
+                "group by theString having sum(intPrimitive) > 20 output first every 2 events";
         tryOutputFirstHaving(stmtTextJoin);
 
-        String stmtTextOrder = "select string, longPrimitive, sum(intPrimitive) as value from MyWindow group by string having sum(intPrimitive) > 20 output first every 2 events order by string asc";
+        String stmtTextOrder = "select theString, longPrimitive, sum(intPrimitive) as value from MyWindow group by theString having sum(intPrimitive) > 20 output first every 2 events order by theString asc";
         tryOutputFirstHaving(stmtTextOrder);
 
-        String stmtTextOrderJoin = "select string, longPrimitive, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.string " +
-                "group by string having sum(intPrimitive) > 20 output first every 2 events order by string asc";
+        String stmtTextOrderJoin = "select theString, longPrimitive, sum(intPrimitive) as value from MyWindow mv, SupportBean_A.win:keepall() a where a.id = mv.theString " +
+                "group by theString having sum(intPrimitive) > 20 output first every 2 events order by theString asc";
         tryOutputFirstHaving(stmtTextOrderJoin);
     }
 
     private void tryOutputFirstHaving(String statementText) {
-        String[] fields = "string,longPrimitive,value".split(",");
-        String[] fieldsLimited = "string,value".split(",");
+        String[] fields = "theString,longPrimitive,value".split(",");
+        String[] fieldsLimited = "theString,value".split(",");
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
         epService.getEPAdministrator().createEPL("on MarketData md delete from MyWindow mw where mw.intPrimitive = md.price");
@@ -149,7 +149,7 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                           "group by symbol";
         runAssertion12(stmtText, "none");
     }
@@ -167,7 +167,7 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "having sum(price) > 50";
         runAssertion34(stmtText, "none");
@@ -186,7 +186,7 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "output every 1 seconds";
         runAssertion56(stmtText, "default");
@@ -206,7 +206,7 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "having sum(price) > 50" +
                             "output every 1 seconds";
@@ -227,7 +227,7 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "output all every 1 seconds " +
                             "order by symbol";
@@ -248,7 +248,7 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "having sum(price) > 50 " +
                             "output all every 1 seconds";
@@ -269,7 +269,7 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "output last every 1 seconds " +
                             "order by symbol";
@@ -290,7 +290,7 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "having sum(price) > 50 " +
                             "output last every 1 seconds";
@@ -310,7 +310,7 @@ public class TestOutputLimitEventPerRow extends TestCase
     {
         String stmtText = "select symbol, volume, sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "group by symbol " +
                             "output first every 1 seconds";
         runAssertion17(stmtText, "first");
@@ -552,7 +552,7 @@ public class TestOutputLimitEventPerRow extends TestCase
         String viewExpr = "select irstream symbol, volume, sum(price) as sumprice" +
                           " from " + SupportMarketDataBean.class.getName() + ".win:time(10 sec) as s0," +
                           SupportBean.class.getName() + ".win:keepall() as s1 " +
-                          "where s0.symbol = s1.string " +
+                          "where s0.symbol = s1.theString " +
                           "group by symbol " +
                           "having sum(price) >= 10 " +
                           "output every 3 events";
@@ -570,7 +570,7 @@ public class TestOutputLimitEventPerRow extends TestCase
 
         String viewExpr = "select irstream symbol, volume, max(price) as maxVol" +
                           " from " + SupportMarketDataBean.class.getName() + ".ext:sort(1, volume) as s0," +
-                          SupportBean.class.getName() + ".win:keepall() as s1 where s1.string = s0.symbol " +
+                          SupportBean.class.getName() + ".win:keepall() as s1 where s1.theString = s0.symbol " +
                           "group by symbol output every 1 seconds";
         EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);
@@ -644,7 +644,7 @@ public class TestOutputLimitEventPerRow extends TestCase
         sendTimer(0);
         String selectStmt = "select symbol, volume, sum(price) as sumprice from " + SupportMarketDataBean.class.getName() +
                 ".win:time(10 seconds) as m, " + SupportBean.class.getName() +
-                ".win:keepall() as s where s.string = m.symbol group by symbol output snapshot every 1 seconds order by symbol, volume asc";
+                ".win:keepall() as s where s.theString = m.symbol group by symbol output snapshot every 1 seconds order by symbol, volume asc";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(selectStmt);
         stmt.addListener(listener);
@@ -801,7 +801,7 @@ public class TestOutputLimitEventPerRow extends TestCase
 	                      "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
 	                                SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
 	                      "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-	                      "  and one.string = two.symbol " +
+	                      "  and one.theString = two.symbol " +
 	                      "group by symbol " +
 	                      "output every 2 events";
 
@@ -836,7 +836,7 @@ public class TestOutputLimitEventPerRow extends TestCase
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-                          "  and one.string = two.symbol " +
+                          "  and one.theString = two.symbol " +
                           "group by symbol " +
                           "output all every 2 events";
 
@@ -856,7 +856,7 @@ public class TestOutputLimitEventPerRow extends TestCase
 	                      "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
 	                                SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
 	                      "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-	                      "  and one.string = two.symbol " +
+	                      "  and one.theString = two.symbol " +
 	                      "group by symbol " +
 	                      "output last every 2 events";
 
@@ -876,7 +876,7 @@ public class TestOutputLimitEventPerRow extends TestCase
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-                          "  and one.string = two.symbol " +
+                          "  and one.theString = two.symbol " +
                           "group by symbol " +
                           "output last every 2 events";
 
@@ -1045,15 +1045,15 @@ public class TestOutputLimitEventPerRow extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
-    private void sendBeanEvent(String string, long longPrimitive, int intPrimitive)
+    private void sendBeanEvent(String theString, long longPrimitive, int intPrimitive)
 	{
         SupportBean b = new SupportBean();
-        b.setString(string);
+        b.setTheString(theString);
         b.setLongPrimitive(longPrimitive);
         b.setIntPrimitive(intPrimitive);
 	    epService.getEPRuntime().sendEvent(b);

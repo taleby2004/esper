@@ -84,7 +84,7 @@ public class TestAggregateRowPerEvent extends TestCase
         String viewExpr = "select irstream longPrimitive, sum(longBoxed) as mySum " +
                           "from " + SupportBeanString.class.getName() + ".win:length(3) as one, " +
                                     SupportBean.class.getName() + ".win:length(3) as two " +
-                          "where one.string = two.string";
+                          "where one.theString = two.theString";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
@@ -170,7 +170,7 @@ public class TestAggregateRowPerEvent extends TestCase
     private void sendEvent(long longBoxed, int intBoxed, short shortBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(JOIN_KEY);
+        bean.setTheString(JOIN_KEY);
         bean.setLongBoxed(longBoxed);
         bean.setIntBoxed(intBoxed);
         bean.setShortBoxed(shortBoxed);
@@ -189,10 +189,10 @@ public class TestAggregateRowPerEvent extends TestCase
         sendEvent(longBoxed, 0, (short)0);
     }
 
-    private void sendEvent(String string, int intPrimitive, int intBoxed) {
-        SupportBean event = new SupportBean(string, intPrimitive);
-        event.setIntBoxed(intBoxed);
-        epService.getEPRuntime().sendEvent(event);
+    private void sendEvent(String theString, int intPrimitive, int intBoxed) {
+        SupportBean theEvent = new SupportBean(theString, intPrimitive);
+        theEvent.setIntBoxed(intBoxed);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private static final Log log = LogFactory.getLog(TestAggregateRowPerEvent.class);

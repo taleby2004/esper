@@ -87,7 +87,7 @@ public class MethodPollingExecStrategy implements PollExecStrategy
                                 continue;
                             }
 
-                            EventBean event;
+                            EventBean theEvent;
                             if (useMapType)
                             {
                                 if (!(value instanceof Map))
@@ -96,14 +96,14 @@ public class MethodPollingExecStrategy implements PollExecStrategy
                                     continue;
                                 }
                                 Map mapValues = (Map) value;
-                                event = eventAdapterService.adapterForTypedMap(mapValues, eventType);
+                                theEvent = eventAdapterService.adapterForTypedMap(mapValues, eventType);
                             }
                             else
                             {
-                                event = eventAdapterService.adapterForBean(value);
+                                theEvent = eventAdapterService.adapterForBean(value);
                             }
 
-                            rowResult.add(event);
+                            rowResult.add(theEvent);
                         }
                     }
                 }
@@ -111,7 +111,7 @@ public class MethodPollingExecStrategy implements PollExecStrategy
                 {
                     rowResult = new LinkedList<EventBean>();
 
-                    EventBean event;
+                    EventBean theEvent;
                     if (useMapType)
                     {
                         if (!(invocationResult instanceof Map))
@@ -121,14 +121,14 @@ public class MethodPollingExecStrategy implements PollExecStrategy
                         else
                         {
                             Map mapValues = (Map) invocationResult;
-                            event = eventAdapterService.adapterForTypedMap(mapValues, eventType);
-                            rowResult.add(event);
+                            theEvent = eventAdapterService.adapterForTypedMap(mapValues, eventType);
+                            rowResult.add(theEvent);
                         }
                     }
                     else
                     {
-                        event = eventAdapterService.adapterForBean(invocationResult);
-                        rowResult.add(event);
+                        theEvent = eventAdapterService.adapterForBean(invocationResult);
+                        rowResult.add(theEvent);
                     }
                 }
             }

@@ -20,11 +20,13 @@ import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanRange;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class TestPerfNamedWindowSubquery extends TestCase
 {
@@ -64,7 +66,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         epService.getEPAdministrator().createEPL(createEpl);
 
         if (buildIndex) {
-            epService.getEPAdministrator().createEPL("create index idx1 on MyWindow(string hash, intPrimitive btree)");
+            epService.getEPAdministrator().createEPL("create index idx1 on MyWindow(theString hash, intPrimitive btree)");
         }
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
 
@@ -77,7 +79,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
 
         // single-field compare
         String[] fields = "val".split(",");
-        String eplSingle = "select (select intPrimitive from MyWindow where string = 'E9734') as val from SupportBeanRange sbr";
+        String eplSingle = "select (select intPrimitive from MyWindow where theString = 'E9734') as val from SupportBeanRange sbr";
         EPStatement stmtSingle = epService.getEPAdministrator().createEPL(eplSingle);
         stmtSingle.addListener(listener);
 
@@ -91,7 +93,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         stmtSingle.destroy();
 
         // two-field compare
-        String eplTwoHash = "select (select intPrimitive from MyWindow where string = 'E9736' and intPrimitive = 9736) as val from SupportBeanRange sbr";
+        String eplTwoHash = "select (select intPrimitive from MyWindow where theString = 'E9736' and intPrimitive = 9736) as val from SupportBeanRange sbr";
         EPStatement stmtTwoHash = epService.getEPAdministrator().createEPL(eplTwoHash);
         stmtTwoHash.addListener(listener);
 
@@ -122,7 +124,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
         stmtSingleBtree.destroy();
 
         // range compare composite
-        String eplComposite = "select (select intPrimitive from MyWindow where string = 'E9738' and intPrimitive between 9738 and 9738) as val from SupportBeanRange sbr";
+        String eplComposite = "select (select intPrimitive from MyWindow where theString = 'E9738' and intPrimitive between 9738 and 9738) as val from SupportBeanRange sbr";
         EPStatement stmtComposite = epService.getEPAdministrator().createEPL(eplComposite);
         stmtComposite.addListener(listener);
 
@@ -156,18 +158,18 @@ public class TestPerfNamedWindowSubquery extends TestCase
         epService.getEPAdministrator().createEPL(createEpl);
 
         if (buildIndex) {
-            epService.getEPAdministrator().createEPL("create index idx1 on MyWindow(string hash, intPrimitive btree)");
+            epService.getEPAdministrator().createEPL("create index idx1 on MyWindow(theString hash, intPrimitive btree)");
         }
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
 
         // preload
         for (int i = 0; i < 10000; i++) {
-            String string = i < 5000 ? "A" : "B";
-            epService.getEPRuntime().sendEvent(new SupportBean(string, i));
+            String theString = i < 5000 ? "A" : "B";
+            epService.getEPRuntime().sendEvent(new SupportBean(theString, i));
         }
 
         String[] fields = "cols.mini,cols.maxi".split(",");
-        String queryEpl = "select (select min(intPrimitive) as mini, max(intPrimitive) as maxi from MyWindow where string = sbr.key and intPrimitive between sbr.rangeStart and sbr.rangeEnd) as cols from SupportBeanRange sbr";
+        String queryEpl = "select (select min(intPrimitive) as mini, max(intPrimitive) as maxi from MyWindow where theString = sbr.key and intPrimitive between sbr.rangeStart and sbr.rangeEnd) as cols from SupportBeanRange sbr";
         EPStatement stmt = epService.getEPAdministrator().createEPL(queryEpl);
         stmt.addListener(listener);
 
@@ -242,7 +244,7 @@ public class TestPerfNamedWindowSubquery extends TestCase
 
         String[] fields = "cols.mini,cols.maxi".split(",");
         String queryEpl = "select (select min(intPrimitive) as mini, max(intPrimitive) as maxi from MyWindow " +
-                "where string = sbr.key and intPrimitive between sbr.rangeStart and sbr.rangeEnd) as cols from SupportBeanRange sbr";
+                "where theString = sbr.key and intPrimitive between sbr.rangeStart and sbr.rangeEnd) as cols from SupportBeanRange sbr";
         EPStatement stmt = epService.getEPAdministrator().createEPL(queryEpl);
         stmt.addListener(listener);
 
@@ -290,10 +292,10 @@ public class TestPerfNamedWindowSubquery extends TestCase
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
 
         if (createExplicitIndex) {
-            epService.getEPAdministrator().createEPL("create index MyIndex on MyWindow (string)");
+            epService.getEPAdministrator().createEPL("create index MyIndex on MyWindow (theString)");
         }
 
-        String consumeEpl = "select e0, (select string from MyWindow where intPrimitive = es.e1 and string = es.e2) as val from EventSchema as es";
+        String consumeEpl = "select e0, (select theString from MyWindow where intPrimitive = es.e1 and theString = es.e2) as val from EventSchema as es";
         if (disableIndexShareConsumer) {
             consumeEpl = "@Hint('disable_window_subquery_indexshare') " + consumeEpl;
         }
@@ -325,10 +327,15 @@ public class TestPerfNamedWindowSubquery extends TestCase
     }
 
     private void sendEvent(String e0, int e1, String e2) {
-        HashMap<String, Object> event = new HashMap<String, Object>();
-        event.put("e0", e0);
-        event.put("e1", e1);
-        event.put("e2", e2);
-        epService.getEPRuntime().sendEvent(event, "EventSchema");
+        HashMap<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("e0", e0);
+        theEvent.put("e1", e1);
+        theEvent.put("e2", e2);
+        if (EventRepresentationEnum.getEngineDefault(epService).isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), "EventSchema");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "EventSchema");
+        }
     }
 }

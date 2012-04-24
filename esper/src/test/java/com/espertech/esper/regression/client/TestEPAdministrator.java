@@ -140,7 +140,7 @@ public class TestEPAdministrator extends TestCase
         }
 
         // create a forth statement with the same name
-        stmt = "select string from " + SupportBean.class.getName();
+        stmt = "select theString from " + SupportBean.class.getName();
         EPStatement stmtFour = epService.getEPAdministrator().createEPL(stmt, "s1");
         assertEquals("s1--1", stmtFour.getName());
         assertEquals(stmt, stmtFour.getText());

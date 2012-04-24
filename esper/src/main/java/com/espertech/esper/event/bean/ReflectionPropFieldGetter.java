@@ -11,6 +11,7 @@ package com.espertech.esper.event.bean;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.vaevent.PropertyUtility;
 import com.espertech.esper.util.JavaClassHelper;
 
 import java.lang.reflect.Field;
@@ -41,11 +42,11 @@ public final class ReflectionPropFieldGetter extends BaseNativePropertyGetter im
         }
         catch (IllegalArgumentException e)
         {
-            throw new PropertyAccessException("Mismatched getter instance to event bean type");
+            throw PropertyUtility.getIllegalArgumentException(field, e);
         }
         catch (IllegalAccessException e)
         {
-            throw new PropertyAccessException(e);
+            throw PropertyUtility.getIllegalAccessException(field, e);
         }
     }
 

@@ -24,7 +24,7 @@ public class CEPProvider {
 
         public void registerStatement(String statement, String statementID);
 
-        public void sendEvent(Object event);
+        public void sendEvent(Object theEvent);
     }
 
     public static ICEPProvider getCEPProvider() {
@@ -101,8 +101,8 @@ public class CEPProvider {
             }
         }
 
-        public void sendEvent(Object event) {
-            epRuntime.sendEvent(event);
+        public void sendEvent(Object theEvent) {
+            epRuntime.sendEvent(theEvent);
         }
     }
 

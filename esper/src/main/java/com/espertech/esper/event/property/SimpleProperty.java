@@ -8,17 +8,20 @@
  **************************************************************************************/
 package com.espertech.esper.event.property;
 
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventPropertyType;
 import com.espertech.esper.event.EventTypeUtility;
+import com.espertech.esper.event.arr.ObjectArrayEventPropertyGetter;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
+import com.espertech.esper.event.arr.ObjectArrayPropertyGetterDefaultObjectArray;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.InternalEventPropDescriptor;
 import com.espertech.esper.event.map.MapEventPropertyGetter;
 import com.espertech.esper.event.map.MapEventType;
+import com.espertech.esper.event.map.MapPropertyGetterDefaultNoFragment;
 import com.espertech.esper.event.xml.*;
 
 import java.io.StringWriter;
@@ -117,6 +120,17 @@ public class SimpleProperty extends PropertyBase
                     return Map.class;
                 }
             }
+            if (eventType instanceof ObjectArrayEventType)
+            {
+                if (isArray)
+                {
+                    return Object[][].class;
+                }
+                else
+                {
+                    return Object[].class;
+                }
+            }
         }
         String message = "Nestable map type configuration encountered an unexpected value type of '"
             + def.getClass() + " for property '" + propertyNameAtomic + "', expected Map or Class";
@@ -135,37 +149,7 @@ public class SimpleProperty extends PropertyBase
         {
             return null;
         }
-
-        final String propertyName = this.getPropertyNameAtomic();
-        return new MapEventPropertyGetter()
-        {
-            public Object getMap(Map<String, Object> map) throws PropertyAccessException
-            {
-                return map.get(propertyName);
-            }
-
-            public boolean isMapExistsProperty(Map<String, Object> map)
-            {
-                return map.containsKey(propertyName);
-            }
-
-            public Object get(EventBean eventBean) throws PropertyAccessException
-            {
-                Map map = (Map) eventBean.getUnderlying();
-                return map.get(propertyName);
-            }
-
-            public boolean isExistsProperty(EventBean eventBean)
-            {
-                Map map = (Map) eventBean.getUnderlying();
-                return map.containsKey(propertyName);
-            }
-
-            public Object getFragment(EventBean eventBean)
-            {
-                return null;
-            }
-        };
+        return new MapPropertyGetterDefaultNoFragment(propertyNameAtomic, eventAdapterService);
     }
 
     public void toPropertyEPL(StringWriter writer)
@@ -216,5 +200,18 @@ public class SimpleProperty extends PropertyBase
     public boolean isDynamic()
     {
         return false;
+    }
+
+    public ObjectArrayEventPropertyGetter getGetterObjectArray(Map<String, Integer> indexPerProperty, Map<String, Object> nestableTypes, EventAdapterService eventAdapterService) {
+        // The simple, none-dynamic property needs a definition of the map contents else no property
+        if (nestableTypes == null)
+        {
+            return null;
+        }
+        Integer propertyIndex = indexPerProperty.get(propertyNameAtomic);
+        if (propertyIndex == null) {
+            return null;
+        }
+        return new ObjectArrayPropertyGetterDefaultObjectArray(propertyIndex, null, eventAdapterService);
     }
 }

@@ -122,9 +122,9 @@ public class EventRowRegexHelper
 
         // assign node num as a counter
         int nodeNumberFlat = 0;
-        for (RegexNFAStateBase base : strand.getAllStates())
+        for (RegexNFAStateBase theBase : strand.getAllStates())
         {
-            base.setNodeNumFlat(nodeNumberFlat++);
+            theBase.setNodeNumFlat(nodeNumberFlat++);
         }
 
         return new RegexNFAStrandResult(new ArrayList<RegexNFAState>(strand.getStartStates()), strand.getAllStates());

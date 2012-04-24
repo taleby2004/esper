@@ -106,8 +106,8 @@ public class TestMTStmtNamedWindowMultiple extends TestCase
                     String orderId = orderIds[random.nextInt(orderIds.length)];
                     for (int j = 0; j < numUsers; j++)
                     {
-                        OrderCancelEvent event = new OrderCancelEvent("user" + j, orderId);
-                        engine.getEPRuntime().sendEvent(event);
+                        OrderCancelEvent theEvent = new OrderCancelEvent("user" + j, orderId);
+                        engine.getEPRuntime().sendEvent(theEvent);
                     }
                 }
                 else
@@ -115,8 +115,8 @@ public class TestMTStmtNamedWindowMultiple extends TestCase
                     String orderId = orderIds[random.nextInt(orderIds.length)];
                     for (int j = 0; j < numUsers; j++)
                     {
-                        OrderEvent event = new OrderEvent("user" + j, orderId, 1000, "B");
-                        engine.getEPRuntime().sendEvent(event);
+                        OrderEvent theEvent = new OrderEvent("user" + j, orderId, 1000, "B");
+                        engine.getEPRuntime().sendEvent(theEvent);
                     }
                 }
             }

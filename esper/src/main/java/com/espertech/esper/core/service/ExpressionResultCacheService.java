@@ -61,11 +61,11 @@ public class ExpressionResultCacheService {
 
     public ExpressionResultCacheEntry<EventBean, Collection<EventBean>> getPropertyColl(String propertyNameFullyQualified, EventBean reference) {
         initPropertyCollCache();
-        SoftReference<ExpressionResultCacheEntry<EventBean, Collection<EventBean>>> ref = collPropertyCache.get(propertyNameFullyQualified);
-        if (ref == null) {
+        SoftReference<ExpressionResultCacheEntry<EventBean, Collection<EventBean>>> cacheRef = collPropertyCache.get(propertyNameFullyQualified);
+        if (cacheRef == null) {
             return null;
         }
-        ExpressionResultCacheEntry<EventBean, Collection<EventBean>> entry = ref.get();
+        ExpressionResultCacheEntry<EventBean, Collection<EventBean>> entry = cacheRef.get();
         if (entry == null) {
             return null;
         }
@@ -82,11 +82,11 @@ public class ExpressionResultCacheService {
 
     public ExpressionResultCacheEntry<EventBean[], Object> getDeclaredExpressionLastValue(Object node, EventBean[] eventsPerStream) {
         initExprDeclaredCacheObject();
-        SoftReference<ExpressionResultCacheEntry<EventBean[], Object>> ref = this.exprDeclCacheObject.get(node);
-        if (ref == null) {
+        SoftReference<ExpressionResultCacheEntry<EventBean[], Object>> cacheRef = this.exprDeclCacheObject.get(node);
+        if (cacheRef == null) {
             return null;
         }
-        ExpressionResultCacheEntry<EventBean[], Object> entry = ref.get();
+        ExpressionResultCacheEntry<EventBean[], Object> entry = cacheRef.get();
         if (entry == null) {
             return null;
         }
@@ -111,11 +111,11 @@ public class ExpressionResultCacheService {
 
     public ExpressionResultCacheEntry<EventBean[], Collection<EventBean>> getDeclaredExpressionLastColl(Object node, EventBean[] eventsPerStream) {
         initExprDeclaredCacheCollection();
-        SoftReference<ExpressionResultCacheEntry<EventBean[], Collection<EventBean>>> ref = this.exprDeclCacheCollection.get(node);
-        if (ref == null) {
+        SoftReference<ExpressionResultCacheEntry<EventBean[], Collection<EventBean>>> cacheRef = this.exprDeclCacheCollection.get(node);
+        if (cacheRef == null) {
             return null;
         }
-        ExpressionResultCacheEntry<EventBean[], Collection<EventBean>> entry = ref.get();
+        ExpressionResultCacheEntry<EventBean[], Collection<EventBean>> entry = cacheRef.get();
         if (entry == null) {
             return null;
         }
@@ -140,11 +140,11 @@ public class ExpressionResultCacheService {
 
     public ExpressionResultCacheEntry<Long[], Object> getEnumerationMethodLastValue(Object node) {
         initEnumMethodCache();
-        SoftReference<ExpressionResultCacheEntry<Long[], Object>> ref = enumMethodCache.get(node);
-        if (ref == null) {
+        SoftReference<ExpressionResultCacheEntry<Long[], Object>> cacheRef = enumMethodCache.get(node);
+        if (cacheRef == null) {
             return null;
         }
-        ExpressionResultCacheEntry<Long[], Object> entry = ref.get();
+        ExpressionResultCacheEntry<Long[], Object> entry = cacheRef.get();
         if (entry == null) {
             return null;
         }

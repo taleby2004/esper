@@ -68,9 +68,9 @@ public class TestExprPriorNode extends TestCase
 
     private EventBean makeEvent(double doublePrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setDoublePrimitive(doublePrimitive);
-        return SupportEventBeanFactory.createObject(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setDoublePrimitive(doublePrimitive);
+        return SupportEventBeanFactory.createObject(theEvent);
     }
 
     private void tryInvalidValidate(ExprPriorNode exprPriorNode) throws Exception

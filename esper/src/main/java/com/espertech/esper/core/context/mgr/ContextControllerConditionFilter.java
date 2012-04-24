@@ -47,8 +47,8 @@ public class ContextControllerConditionFilter implements ContextControllerCondit
                 return agentInstanceContext.getStatementContext().getStatementId();
             }
 
-            public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches) {
-                filterMatchFound(event);
+            public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches) {
+                filterMatchFound(theEvent);
             }
 
             public boolean isSubSelect() {
@@ -68,12 +68,12 @@ public class ContextControllerConditionFilter implements ContextControllerCondit
         }
     }
 
-    private void filterMatchFound(EventBean event) {
+    private void filterMatchFound(EventBean theEvent) {
         Map<String, Object> props = Collections.emptyMap();
         if (endpointFilterSpec.getOptionalFilterAsName() != null) {
-            props = Collections.<String, Object>singletonMap(endpointFilterSpec.getOptionalFilterAsName(), event);
+            props = Collections.<String, Object>singletonMap(endpointFilterSpec.getOptionalFilterAsName(), theEvent);
         }
-        callback.rangeNotification(props, this, event, null);
+        callback.rangeNotification(props, this, theEvent, null);
     }
 
     public void deactivate() {

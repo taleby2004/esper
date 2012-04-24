@@ -19,12 +19,10 @@ import com.espertech.esper.support.bean.SupportBean_ST0_Container;
 import com.espertech.esper.support.bean.SupportCollection;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TestEnumExceptIntersectUnion extends TestCase {
 
@@ -210,19 +208,33 @@ public class TestEnumExceptIntersectUnion extends TestCase {
     }
 
     public void testInheritance() {
-        epService.getEPAdministrator().createEPL("create schema BaseEvent as (b1 string)");
-        epService.getEPAdministrator().createEPL("create schema SubEvent as (s1 string) inherits BaseEvent");
-        epService.getEPAdministrator().createEPL("create schema OuterEvent as (bases BaseEvent[], subs SubEvent[])");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select bases.union(subs) as val from OuterEvent");
+        runAssertionInheritance(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionInheritance(EventRepresentationEnum.MAP);
+        runAssertionInheritance(EventRepresentationEnum.DEFAULT);
+    }
+
+    public void runAssertionInheritance(EventRepresentationEnum eventRepresentationEnum) {
+
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema BaseEvent as (b1 string)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema SubEvent as (s1 string) inherits BaseEvent");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema OuterEvent as (bases BaseEvent[], subs SubEvent[])");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " select bases.union(subs) as val from OuterEvent");
         stmt.addListener(listener);
 
-        Map<String, Object> baseEvent = makeMap("b1", "b10");
-        Map<String, Object> subEvent = makeMap("s1", "s10");
-        Map<String, Object> outerEvent = makeMap("bases", new Map[] {baseEvent}, "subs", new Map[] {subEvent});
-        epService.getEPRuntime().sendEvent(outerEvent, "OuterEvent");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {new Object[][] {{"b10"}}, new Object[][] {{"b10", "s10"}}}, "OuterEvent");
+        }
+        else {
+            Map<String, Object> baseEvent = makeMap("b1", "b10");
+            Map<String, Object> subEvent = makeMap("s1", "s10");
+            Map<String, Object> outerEvent = makeMap("bases", new Map[] {baseEvent}, "subs", new Map[] {subEvent});
+            epService.getEPRuntime().sendEvent(outerEvent, "OuterEvent");
+        }
 
-        Collection maps = (Collection) listener.assertOneGetNewAndReset().get("val");
-        assertEquals(2, maps.size());
+        Collection result = (Collection) listener.assertOneGetNewAndReset().get("val");
+        assertEquals(2, result.size());
+
+        epService.initialize();
     }
 
     private void tryInvalid(String epl, String message) {
@@ -237,7 +249,7 @@ public class TestEnumExceptIntersectUnion extends TestCase {
     }
 
     private Map<String, Object> makeMap(String key, Object value) {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new LinkedHashMap<String, Object>();
         map.put(key, value);
         return map;
     }

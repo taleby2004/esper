@@ -21,20 +21,19 @@ import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
 import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterSpecLookupable;
 import com.espertech.esper.filter.FilterValueSetParam;
+import com.espertech.esper.pattern.MatchedEventMapMeta;
 import com.espertech.esper.schedule.ScheduleSlot;
 import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.schedule.TimeProvider;
 
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ContextControllerInitTermFactory extends ContextControllerFactoryBase implements ContextControllerFactory {
 
     private final ContextDetailInitiatedTerminated detail;
 
     private Map<String, Object> contextBuiltinProps;
+    private MatchedEventMapMeta matchedEventMapMeta;
 
     public ContextControllerInitTermFactory(ContextControllerFactoryContext factoryContext, ContextDetailInitiatedTerminated detail) {
         super(factoryContext);
@@ -43,12 +42,18 @@ public class ContextControllerInitTermFactory extends ContextControllerFactoryBa
 
     public void validateFactory() throws ExprValidationException {
         contextBuiltinProps = ContextPropertyEventType.getInitiatedTerminatedType();
-        ContextPropertyEventType.addEndpointTypes(factoryContext.getContextName(), detail.getStart(), contextBuiltinProps);
-        ContextPropertyEventType.addEndpointTypes(factoryContext.getContextName(), detail.getEnd(), contextBuiltinProps);
+        LinkedHashSet<String> allTags = new LinkedHashSet<String>();
+        ContextPropertyEventType.addEndpointTypes(factoryContext.getContextName(), detail.getStart(), contextBuiltinProps, allTags);
+        ContextPropertyEventType.addEndpointTypes(factoryContext.getContextName(), detail.getEnd(), contextBuiltinProps, allTags);
+        matchedEventMapMeta = new MatchedEventMapMeta(allTags, false);
     }
 
     public Map<String, Object> getContextBuiltinProps() {
         return contextBuiltinProps;
+    }
+
+    public MatchedEventMapMeta getMatchedEventMapMeta() {
+        return matchedEventMapMeta;
     }
 
     public ContextControllerStatementCtxCache validateStatement(ContextControllerStatementBase statement) {

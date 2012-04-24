@@ -40,7 +40,7 @@ public class StmtInsertIntoCallable implements Callable
             for (int loop = 0; loop < numRepeats; loop++)
             {
                 SupportBean eventOne = new SupportBean();
-                eventOne.setString("E1_" + threadKey);
+                eventOne.setTheString("E1_" + threadKey);
                 engine.getEPRuntime().sendEvent(eventOne);
 
                 SupportMarketDataBean eventTwo = new SupportMarketDataBean("E2_" + threadKey, 0d, null, null);

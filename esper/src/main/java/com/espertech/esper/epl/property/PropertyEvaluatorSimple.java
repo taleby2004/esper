@@ -47,11 +47,11 @@ public class PropertyEvaluatorSimple implements PropertyEvaluator
         this.expressionText = expressionText;
     }
 
-    public EventBean[] getProperty(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
+    public EventBean[] getProperty(EventBean theEvent, ExprEvaluatorContext exprEvaluatorContext)
     {
         try
         {
-            Object result = containedEventEval.getFragment(event, new EventBean[] {event}, exprEvaluatorContext);
+            Object result = containedEventEval.getFragment(theEvent, new EventBean[] {theEvent}, exprEvaluatorContext);
 
             EventBean[] rows;
             if (fragmentEventType.isIndexed())
@@ -67,12 +67,12 @@ public class PropertyEvaluatorSimple implements PropertyEvaluator
             {
                 return rows;
             }
-            return ExprNodeUtility.applyFilterExpression(filter, event, (EventBean[]) result, exprEvaluatorContext);
+            return ExprNodeUtility.applyFilterExpression(filter, theEvent, (EventBean[]) result, exprEvaluatorContext);
         }
         catch (RuntimeException ex)
         {
             log.error("Unexpected error evaluating property expression for event of type '" +
-                    event.getEventType().getName() +
+                    theEvent.getEventType().getName() +
                     "' and property '" +
                     expressionText + "': " + ex.getMessage(), ex);
         }

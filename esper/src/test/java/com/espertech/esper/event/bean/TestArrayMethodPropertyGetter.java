@@ -17,7 +17,6 @@ import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventAdapterService;
-import com.espertech.esper.event.bean.ArrayMethodPropertyGetter;
 
 import java.lang.reflect.Method;
 
@@ -25,13 +24,13 @@ public class TestArrayMethodPropertyGetter extends TestCase
 {
     private ArrayMethodPropertyGetter getter;
     private ArrayMethodPropertyGetter getterOutOfBounds;
-    private EventBean event;
+    private EventBean theEvent;
     private SupportBeanComplexProps bean;
 
     public void setUp() throws Exception
     {
         bean = SupportBeanComplexProps.makeDefaultBean();
-        event = SupportEventBeanFactory.createObject(bean);
+        theEvent = SupportEventBeanFactory.createObject(bean);
         getter = makeGetter(0);
         getterOutOfBounds = makeGetter(Integer.MAX_VALUE);
     }
@@ -51,10 +50,10 @@ public class TestArrayMethodPropertyGetter extends TestCase
 
     public void testGet()
     {
-        assertEquals(bean.getArrayProperty()[0], getter.get(event));
-        assertEquals(bean.getArrayProperty()[0], getter.get(event, 0));
+        assertEquals(bean.getArrayProperty()[0], getter.get(theEvent));
+        assertEquals(bean.getArrayProperty()[0], getter.get(theEvent, 0));
 
-        assertNull(getterOutOfBounds.get(event));
+        assertNull(getterOutOfBounds.get(theEvent));
 
         try
         {

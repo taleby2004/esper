@@ -35,7 +35,7 @@ public class TestIndexTreeBuilder extends TestCase
         SupportBean testBean = new SupportBean();
         testBean.setIntPrimitive(50);
         testBean.setDoublePrimitive(0.5);
-        testBean.setString("jack");
+        testBean.setTheString("jack");
         testBean.setLongPrimitive(10);
         testBean.setShortPrimitive((short) 20);
 
@@ -113,7 +113,7 @@ public class TestIndexTreeBuilder extends TestCase
 
         // Add an filterSpec against double and string
         filterSpec = makeFilterValues("doublePrimitive", FilterOperator.LESS, 1.1,
-                                    "string", FilterOperator.EQUAL, "jack");
+                                    "theString", FilterOperator.EQUAL, "jack");
         builder.add(filterSpec, testFilterCallback[5], topNode);
         assertTrue(topNode.getIndizes().size() == 3);
         assertTrue(topNode.getIndizes().get(0).size() == 2);
@@ -128,7 +128,7 @@ public class TestIndexTreeBuilder extends TestCase
         matches.clear();
 
         filterSpec = makeFilterValues("doublePrimitive", FilterOperator.LESS, 1.1,
-                                    "string", FilterOperator.EQUAL, "beta");
+                                    "theString", FilterOperator.EQUAL, "beta");
         builder.add(filterSpec, testFilterCallback[6], topNode);
 
         topNode.matchEvent(eventBean, matches);
@@ -136,7 +136,7 @@ public class TestIndexTreeBuilder extends TestCase
         matches.clear();
 
         filterSpec = makeFilterValues("doublePrimitive", FilterOperator.LESS, 1.1,
-                                    "string", FilterOperator.EQUAL, "jack");
+                                    "theString", FilterOperator.EQUAL, "jack");
         builder.add(filterSpec, testFilterCallback[7], topNode);
         assertTrue(nextLevelSetNode.getIndizes().size() == 1);
         FilterHandleSetNode nodeTwo = (FilterHandleSetNode) nextLevelSetNode.getIndizes().get(0).get("jack");
@@ -147,7 +147,7 @@ public class TestIndexTreeBuilder extends TestCase
         matches.clear();
 
         // Try depth first
-        filterSpec = makeFilterValues("string", FilterOperator.EQUAL, "jack",
+        filterSpec = makeFilterValues("theString", FilterOperator.EQUAL, "jack",
                                     "longPrimitive", FilterOperator.EQUAL, 10L,
                                     "shortPrimitive", FilterOperator.EQUAL, (short) 20);
         builder.add(filterSpec, testFilterCallback[8], topNode);
@@ -158,15 +158,15 @@ public class TestIndexTreeBuilder extends TestCase
 
         // Add an filterSpec in the middle
         filterSpec = makeFilterValues("longPrimitive", FilterOperator.EQUAL, 10L,
-                                    "string", FilterOperator.EQUAL, "jack");
+                                    "theString", FilterOperator.EQUAL, "jack");
         builder.add(filterSpec, testFilterCallback[9], topNode);
 
         filterSpec = makeFilterValues("longPrimitive", FilterOperator.EQUAL, 10L,
-                                    "string", FilterOperator.EQUAL, "jim");
+                                    "theString", FilterOperator.EQUAL, "jim");
         builder.add(filterSpec, testFilterCallback[10], topNode);
 
         filterSpec = makeFilterValues("longPrimitive", FilterOperator.EQUAL, 10L,
-                                    "string", FilterOperator.EQUAL, "joe");
+                                    "theString", FilterOperator.EQUAL, "joe");
         builder.add(filterSpec, testFilterCallback[11], topNode);
 
         topNode.matchEvent(eventBean, matches);
@@ -197,24 +197,24 @@ public class TestIndexTreeBuilder extends TestCase
 
         // Add a depth-first filterSpec
         FilterValueSet filterSpecOne = makeFilterValues(
-                "string", FilterOperator.EQUAL, "jack",
+                "theString", FilterOperator.EQUAL, "jack",
                 "longPrimitive", FilterOperator.EQUAL, 10L,
                 "shortPrimitive", FilterOperator.EQUAL, (short) 20);
         IndexTreePath pathAddedToOne = builder.add(filterSpecOne, testFilterCallback[1], top);
 
         FilterValueSet filterSpecTwo = makeFilterValues(
-                "string", FilterOperator.EQUAL, "jack",
+                "theString", FilterOperator.EQUAL, "jack",
                 "longPrimitive", FilterOperator.EQUAL, 10L,
                 "shortPrimitive", FilterOperator.EQUAL, (short) 20);
         IndexTreePath pathAddedToTwo = builder.add(filterSpecTwo, testFilterCallback[2], top);
 
         FilterValueSet filterSpecThree = makeFilterValues(
-                "string", FilterOperator.EQUAL, "jack",
+                "theString", FilterOperator.EQUAL, "jack",
                 "longPrimitive", FilterOperator.EQUAL, 10L);
         IndexTreePath pathAddedToThree = builder.add(filterSpecThree, testFilterCallback[3], top);
 
         FilterValueSet filterSpecFour = makeFilterValues(
-                "string", FilterOperator.EQUAL, "jack");
+                "theString", FilterOperator.EQUAL, "jack");
         IndexTreePath pathAddedToFour = builder.add(filterSpecFour, testFilterCallback[4], top);
 
         FilterValueSet filterSpecFive = makeFilterValues(

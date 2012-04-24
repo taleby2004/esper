@@ -8,11 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.event.map;
 
-import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventPropertyGetterIndexed;
-import com.espertech.esper.client.PropertyAccessException;
-
-import java.util.Map;
 
 /**
  * Property getter for Map-underlying events.

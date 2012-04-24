@@ -21,10 +21,10 @@ public class SupportFilterHandle implements FilterHandleCallback
     private int countInvoked;
     private EventBean lastEvent;
 
-    public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+    public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
     {
         countInvoked++;
-        lastEvent = event;
+        lastEvent = theEvent;
     }
 
     public boolean isSubSelect()

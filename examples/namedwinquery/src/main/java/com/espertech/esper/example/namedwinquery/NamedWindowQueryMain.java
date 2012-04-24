@@ -80,9 +80,9 @@ public class NamedWindowQueryMain
         log.info("Completed generating sensor events");
 
         log.info("Sending " + events.size() + " sensor events into engine");
-        for (Map<String, Object> event : events)
+        for (Map<String, Object> theEvent : events)
         {
-            epService.getEPRuntime().sendEvent(event, "SensorEvent");
+            epService.getEPRuntime().sendEvent(theEvent, "SensorEvent");
         }
         log.info("Completed sending sensor events");
 

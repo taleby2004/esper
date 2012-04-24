@@ -13,6 +13,7 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriber;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.soda.Expressions;
@@ -22,7 +23,7 @@ import com.espertech.esper.support.bean.SupportBeanCopyMethod;
 import com.espertech.esper.support.bean.SupportBeanErrorTestingOne;
 import com.espertech.esper.support.bean.SupportBeanReadOnly;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportSubscriber;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -97,8 +98,8 @@ public class TestUpdate extends TestCase
                    "Error starting statement: Property 'abc' is not available for write access [update istream MyXmlEvent set abc=1]");
         tryInvalid("update istream SupportBeanErrorTestingOne set value='1'",
                    "Error starting statement: The update-clause requires the underlying event representation to support copy (via Serializable by default) [update istream SupportBeanErrorTestingOne set value='1']");
-        tryInvalid("update istream SupportBean set longPrimitive=(select p0 from MyMapType.std:lastevent() where string=p3)",
-                   "Error starting statement: Property named 'string' must be prefixed by a stream name, use the stream name itself or use the as-clause to name the stream with the property in the format \"stream.property\" [update istream SupportBean set longPrimitive=(select p0 from MyMapType.std:lastevent() where string=p3)]");
+        tryInvalid("update istream SupportBean set longPrimitive=(select p0 from MyMapType.std:lastevent() where theString=p3)",
+                   "Error starting statement: Property named 'theString' must be prefixed by a stream name, use the stream name itself or use the as-clause to name the stream with the property in the format \"stream.property\" [update istream SupportBean set longPrimitive=(select p0 from MyMapType.std:lastevent() where theString=p3)]");
         tryInvalid("update istream XYZ.GYH set a=1",
                    "Failed to resolve event type: Event type or class named 'XYZ.GYH' was not found [update istream XYZ.GYH set a=1]");
     }
@@ -110,13 +111,13 @@ public class TestUpdate extends TestCase
         stmtInsert.addListener(listenerInsert);
 
         SupportUpdateListener listenerUpdate = new SupportUpdateListener();
-        EPStatement stmtUpdOne = epService.getEPAdministrator().createEPL("update istream MyStream set intPrimitive=10, string='O_' || string where intPrimitive=1");
+        EPStatement stmtUpdOne = epService.getEPAdministrator().createEPL("update istream MyStream set intPrimitive=10, theString='O_' || theString where intPrimitive=1");
         stmtUpdOne.addListener(listenerUpdate);
 
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select * from MyStream");
         stmtSelect.addListener(listener);
 
-        String[] fields = "string,intPrimitive".split(",");
+        String[] fields = "theString,intPrimitive".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 9));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 9});
         EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), fields, new Object[]{"E1", 9});
@@ -233,24 +234,30 @@ public class TestUpdate extends TestCase
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{20, 0, 102});
         EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), fields, new Object[]{20, 0, 102});
     }
-    
-    public void testFieldsWithPriority() throws Exception
+
+    public void testFieldsWithPriority() throws Exception {
+        runAssertionFieldsWithPriority(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionFieldsWithPriority(EventRepresentationEnum.MAP);
+        runAssertionFieldsWithPriority(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionFieldsWithPriority(EventRepresentationEnum eventRepresentationEnum) throws Exception
     {
-        epService.getEPAdministrator().createEPL("insert into MyStream select string, intPrimitive from SupportBean(string not like 'Z%')");
-        epService.getEPAdministrator().createEPL("insert into MyStream select 'AX'||string as string, intPrimitive from SupportBean(string like 'Z%')");
-        epService.getEPAdministrator().createEPL("@Name('a') @Priority(12) update istream MyStream set intPrimitive=-2 where intPrimitive=-1");
-        epService.getEPAdministrator().createEPL("@Name('b') @Priority(11) update istream MyStream set intPrimitive=-1 where string like 'D%'");
-        epService.getEPAdministrator().createEPL("@Name('c') @Priority(9) update istream MyStream set intPrimitive=9 where string like 'A%'");
-        epService.getEPAdministrator().createEPL("@Name('d') @Priority(8) update istream MyStream set intPrimitive=8 where string like 'A%' or string like 'C%'");
-        epService.getEPAdministrator().createEPL("@Name('e') @Priority(10) update istream MyStream set intPrimitive=10 where string like 'A%'");
-        epService.getEPAdministrator().createEPL("@Name('f') @Priority(7) update istream MyStream set intPrimitive=7 where string like 'A%' or string like 'C%'");
-        epService.getEPAdministrator().createEPL("@Name('g') @Priority(6) update istream MyStream set intPrimitive=6 where string like 'A%'");
-        epService.getEPAdministrator().createEPL("@Name('h') @Drop update istream MyStream set intPrimitive=6 where string like 'B%'");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " insert into MyStream select theString, intPrimitive from SupportBean(theString not like 'Z%')");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " insert into MyStream select 'AX'||theString as theString, intPrimitive from SupportBean(theString like 'Z%')");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " @Name('a') @Priority(12) update istream MyStream set intPrimitive=-2 where intPrimitive=-1");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " @Name('b') @Priority(11) update istream MyStream set intPrimitive=-1 where theString like 'D%'");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " @Name('c') @Priority(9) update istream MyStream set intPrimitive=9 where theString like 'A%'");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " @Name('d') @Priority(8) update istream MyStream set intPrimitive=8 where theString like 'A%' or theString like 'C%'");
+        epService.getEPAdministrator().createEPL(" @Name('e') @Priority(10) update istream MyStream set intPrimitive=10 where theString like 'A%'");
+        epService.getEPAdministrator().createEPL(" @Name('f') @Priority(7) update istream MyStream set intPrimitive=7 where theString like 'A%' or theString like 'C%'");
+        epService.getEPAdministrator().createEPL(" @Name('g') @Priority(6) update istream MyStream set intPrimitive=6 where theString like 'A%'");
+        epService.getEPAdministrator().createEPL(" @Name('h') @Drop update istream MyStream set intPrimitive=6 where theString like 'B%'");
 
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select * from MyStream where intPrimitive > 0");
         stmtSelect.addListener(listener);
 
-        String[] fields = "string,intPrimitive".split(",");
+        String[] fields = "theString,intPrimitive".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 0));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"A1", 10});
 
@@ -266,6 +273,7 @@ public class TestUpdate extends TestCase
         stmtSelect.stop();
         stmtSelect = epService.getEPAdministrator().createEPL("select * from MyStream");
         stmtSelect.addListener(listener);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtSelect.getEventType().getUnderlyingType());
 
         epService.getEPRuntime().sendEvent(new SupportBean("D1", -2));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"D1", -2});
@@ -283,6 +291,8 @@ public class TestUpdate extends TestCase
         epService.getEPAdministrator().getStatement("g").stop();
         epService.getEPRuntime().sendEvent(new SupportBean("Z3", 0));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"AXZ3", 0});
+
+        epService.initialize();
     }
 
     public void testInsertDirectBeanTypeInheritance() throws Exception
@@ -368,11 +378,11 @@ public class TestUpdate extends TestCase
         EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), fields, new Object[]{"E1", "oldvalue"});
         EPAssertionUtil.assertProps(listenerWindowSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", "newvalue"});
 
-        epService.getEPAdministrator().createEPL("on SupportBean(string='A') select win.* from AWindow as win").addListener(listenerOnSelect);
+        epService.getEPAdministrator().createEPL("on SupportBean(theString='A') select win.* from AWindow as win").addListener(listenerOnSelect);
         epService.getEPRuntime().sendEvent(new SupportBean("A", 0));
         EPAssertionUtil.assertProps(listenerOnSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", "newvalue"});
 
-        epService.getEPAdministrator().createEPL("on SupportBean(string='B') insert into MyOtherStream select win.* from AWindow as win").addListener(listenerOnSelect);
+        epService.getEPAdministrator().createEPL("on SupportBean(theString='B') insert into MyOtherStream select win.* from AWindow as win").addListener(listenerOnSelect);
         epService.getEPRuntime().sendEvent(new SupportBean("B", 1));
         EPAssertionUtil.assertProps(listenerOnSelect.assertOneGetNewAndReset(), fields, new Object[]{"E1", "newvalue"});
 
@@ -385,7 +395,7 @@ public class TestUpdate extends TestCase
 
     public void testTypeWidener()
     {
-        String[] fields = "string,longBoxed,intBoxed".split(",");
+        String[] fields = "theString,longBoxed,intBoxed".split(",");
         epService.getEPAdministrator().createEPL("insert into AStream select * from SupportBean");
         epService.getEPAdministrator().createEPL("update istream AStream set longBoxed=intBoxed, intBoxed=null");
         epService.getEPAdministrator().createEPL("select * from AStream").addListener(listener);
@@ -444,7 +454,7 @@ public class TestUpdate extends TestCase
         stmtSelect.addListener(listener);
         epService.getEPAdministrator().createEPL("update istream SupportBean set intPrimitive=999");
 
-        fields = "string,intPrimitive".split(",");
+        fields = "theString,intPrimitive".split(",");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 999});
 
@@ -525,19 +535,19 @@ public class TestUpdate extends TestCase
         epService.getEPAdministrator().createEPL("select * from ABCStream").addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "valOne,valTwo,string".split(","), new Object[]{987, 123, "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "valOne,valTwo,theString".split(","), new Object[]{987, 123, "E1"});
 
         stmtUpd.destroy();
-        stmtUpd = epService.getEPAdministrator().createEPL("update istream ABCStream set string = 'A'");
+        stmtUpd = epService.getEPAdministrator().createEPL("update istream ABCStream set theString = 'A'");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 0));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "valOne,valTwo,string".split(","), new Object[]{1, 2, "A"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "valOne,valTwo,theString".split(","), new Object[]{1, 2, "A"});
 
         stmtUpd.destroy();
-        stmtUpd = epService.getEPAdministrator().createEPL("update istream ABCStream set string = 'B', valOne = 555");
+        stmtUpd = epService.getEPAdministrator().createEPL("update istream ABCStream set theString = 'B', valOne = 555");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 0));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "valOne,valTwo,string".split(","), new Object[]{555, 2, "B"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "valOne,valTwo,theString".split(","), new Object[]{555, 2, "B"});
     }
 
     public void testCopyMethod()
@@ -561,9 +571,9 @@ public class TestUpdate extends TestCase
         type.put("w0", int.class);
         epService.getEPAdministrator().getConfiguration().addEventType("MyMapTypeWhere", type);
 
-        String[] fields = "string,intPrimitive".split(",");
+        String[] fields = "theString,intPrimitive".split(",");
         epService.getEPAdministrator().createEPL("insert into ABCStream select * from SupportBean");
-        EPStatement stmtUpd = epService.getEPAdministrator().createEPL("update istream ABCStream set string = (select s0 from MyMapTypeSelect.std:lastevent()) where intPrimitive in (select w0 from MyMapTypeWhere.win:keepall())");
+        EPStatement stmtUpd = epService.getEPAdministrator().createEPL("update istream ABCStream set theString = (select s0 from MyMapTypeSelect.std:lastevent()) where intPrimitive in (select w0 from MyMapTypeWhere.win:keepall())");
         epService.getEPAdministrator().createEPL("select * from ABCStream").addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
@@ -586,7 +596,7 @@ public class TestUpdate extends TestCase
 
         // test correlated subquery
         stmtUpd.destroy();
-        stmtUpd = epService.getEPAdministrator().createEPL("update istream ABCStream set intPrimitive = (select s1 from MyMapTypeSelect.win:keepall() where s0 = ABCStream.string)");
+        stmtUpd = epService.getEPAdministrator().createEPL("update istream ABCStream set intPrimitive = (select s1 from MyMapTypeSelect.win:keepall() where s0 = ABCStream.theString)");
 
         // note that this will log an error (int primitive set to null), which is good, and leave the value unchanged
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 8));
@@ -598,7 +608,7 @@ public class TestUpdate extends TestCase
 
         // test correlated with as-clause
         stmtUpd.destroy();
-        epService.getEPAdministrator().createEPL("update istream ABCStream as mystream set intPrimitive = (select s1 from MyMapTypeSelect.win:keepall() where s0 = mystream.string)");
+        epService.getEPAdministrator().createEPL("update istream ABCStream as mystream set intPrimitive = (select s1 from MyMapTypeSelect.win:keepall() where s0 = mystream.theString)");
 
         // note that this will log an error (int primitive set to null), which is good, and leave the value unchanged
         epService.getEPRuntime().sendEvent(new SupportBean("E8", 111));
@@ -637,11 +647,11 @@ public class TestUpdate extends TestCase
             listeners[i] = new SupportUpdateListener();
         }
         
-        String[] fields = "string,intPrimitive,value1".split(",");
+        String[] fields = "theString,intPrimitive,value1".split(",");
         epService.getEPAdministrator().createEPL("insert into ABCStream select *, 'orig' as value1 from SupportBean").addListener(listenerInsert);
-        epService.getEPAdministrator().createEPL("@Name('A') update istream ABCStream set string='A', value1='a' where intPrimitive in (1,2)").addListener(listeners[0]);
-        epService.getEPAdministrator().createEPL("@Name('B') update istream ABCStream set string='B', value1='b' where intPrimitive in (1,3)").addListener(listeners[1]);
-        epService.getEPAdministrator().createEPL("@Name('C') update istream ABCStream set string='C', value1='c' where intPrimitive in (2,3)").addListener(listeners[2]);
+        epService.getEPAdministrator().createEPL("@Name('A') update istream ABCStream set theString='A', value1='a' where intPrimitive in (1,2)").addListener(listeners[0]);
+        epService.getEPAdministrator().createEPL("@Name('B') update istream ABCStream set theString='B', value1='b' where intPrimitive in (1,3)").addListener(listeners[1]);
+        epService.getEPAdministrator().createEPL("@Name('C') update istream ABCStream set theString='C', value1='c' where intPrimitive in (2,3)").addListener(listeners[2]);
         epService.getEPAdministrator().createEPL("select * from ABCStream").addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -684,15 +694,15 @@ public class TestUpdate extends TestCase
             listeners[i] = new SupportUpdateListener();
         }
 
-        String[] fields = "string,intPrimitive,value1".split(",");
+        String[] fields = "theString,intPrimitive,value1".split(",");
         epService.getEPAdministrator().createEPL("insert into ABCStream select *, 'orig' as value1 from SupportBean").addListener(listenerInsert);
         epService.getEPAdministrator().createEPL("select * from ABCStream").addListener(listener);
 
-        epService.getEPAdministrator().createEPL("@Name('A') update istream ABCStream set string='A', value1='a'");
-        epService.getEPAdministrator().createEPL("@Name('B') update istream ABCStream set string='B', value1='b'").addListener(listeners[1]);
-        epService.getEPAdministrator().createEPL("@Name('C') update istream ABCStream set string='C', value1='c'");
-        epService.getEPAdministrator().createEPL("@Name('D') update istream ABCStream set string='D', value1='d'").addListener(listeners[3]);
-        epService.getEPAdministrator().createEPL("@Name('E') update istream ABCStream set string='E', value1='e'");
+        epService.getEPAdministrator().createEPL("@Name('A') update istream ABCStream set theString='A', value1='a'");
+        epService.getEPAdministrator().createEPL("@Name('B') update istream ABCStream set theString='B', value1='b'").addListener(listeners[1]);
+        epService.getEPAdministrator().createEPL("@Name('C') update istream ABCStream set theString='C', value1='c'");
+        epService.getEPAdministrator().createEPL("@Name('D') update istream ABCStream set theString='D', value1='d'").addListener(listeners[3]);
+        epService.getEPAdministrator().createEPL("@Name('E') update istream ABCStream set theString='E', value1='e'");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
         EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), fields, new Object[]{"E4", 4, "orig"});

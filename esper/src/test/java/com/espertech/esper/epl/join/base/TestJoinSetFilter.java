@@ -47,12 +47,12 @@ public class TestJoinSetFilter extends TestCase
         assertSame(pairOne, eventSet.iterator().next().getArray());
     }
 
-    private EventBean makeEvent(int intPrimitive, int intBoxed, String string)
+    private EventBean makeEvent(int intPrimitive, int intBoxed, String theStringValue)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        event.setIntBoxed(intBoxed);
-        event.setString(string);
-        return SupportEventBeanFactory.createObject(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        theEvent.setIntBoxed(intBoxed);
+        theEvent.setTheString(theStringValue);
+        return SupportEventBeanFactory.createObject(theEvent);
     }
 }

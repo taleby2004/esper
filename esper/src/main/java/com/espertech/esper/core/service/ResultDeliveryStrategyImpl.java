@@ -94,12 +94,12 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
                 countOld = count(result.getSecond());
             }
 
-            Object[] params = new Object[] {countNew, countOld};
+            Object[] parameters = new Object[] {countNew, countOld};
             try {
-                startFastMethod.invoke(subscriber, params);
+                startFastMethod.invoke(subscriber, parameters);
             }
             catch (InvocationTargetException e) {
-                handle(statementName, log, e, params, subscriber, startFastMethod);
+                handle(statementName, log, e, parameters, subscriber, startFastMethod);
             }
             catch (Throwable t) {
                 handleThrowable(log, t, null, subscriber, startFastMethod);
@@ -116,18 +116,18 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
 
         if ((newData != null) && (newData.length > 0)) {
             for (int i = 0; i < newData.length; i++) {
-                EventBean event = newData[i];
-                if (event instanceof NaturalEventBean) {
-                    NaturalEventBean natural = (NaturalEventBean) event;
-                    Object[] params = deliveryConvertor.convertRow(natural.getNatural());
+                EventBean theEvent = newData[i];
+                if (theEvent instanceof NaturalEventBean) {
+                    NaturalEventBean natural = (NaturalEventBean) theEvent;
+                    Object[] parameters = deliveryConvertor.convertRow(natural.getNatural());
                     try {
-                        updateFastMethod.invoke(subscriber, params);
+                        updateFastMethod.invoke(subscriber, parameters);
                     }
                     catch (InvocationTargetException e) {
-                        handle(statementName, log, e, params, subscriber, updateFastMethod);
+                        handle(statementName, log, e, parameters, subscriber, updateFastMethod);
                     }
                     catch (Throwable t) {
-                        handleThrowable(log, t, params, subscriber, updateFastMethod);
+                        handleThrowable(log, t, parameters, subscriber, updateFastMethod);
                     }
                 }
             }
@@ -135,18 +135,18 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
 
         if ((updateRStreamFastMethod != null) && (oldData != null) && (oldData.length > 0)) {
             for (int i = 0; i < oldData.length; i++) {
-                EventBean event = oldData[i];
-                if (event instanceof NaturalEventBean) {
-                    NaturalEventBean natural = (NaturalEventBean) event;
-                    Object[] params = deliveryConvertor.convertRow(natural.getNatural());
+                EventBean theEvent = oldData[i];
+                if (theEvent instanceof NaturalEventBean) {
+                    NaturalEventBean natural = (NaturalEventBean) theEvent;
+                    Object[] parameters = deliveryConvertor.convertRow(natural.getNatural());
                     try {
-                        updateRStreamFastMethod.invoke(subscriber, params);
+                        updateRStreamFastMethod.invoke(subscriber, parameters);
                     }
                     catch (InvocationTargetException e) {
-                        handle(statementName, log, e, params, subscriber, updateRStreamFastMethod);
+                        handle(statementName, log, e, parameters, subscriber, updateRStreamFastMethod);
                     }
                     catch (Throwable t) {
-                        handleThrowable(log, t, params, subscriber, updateRStreamFastMethod);
+                        handleThrowable(log, t, parameters, subscriber, updateRStreamFastMethod);
                     }
                 }
             }
@@ -169,13 +169,13 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
      * Handle the exception, displaying a nice message and converting to {@link EPException}.
      * @param logger is the logger to use for error logging
      * @param e is the exception
-     * @param params the method parameters
+     * @param parameters the method parameters
      * @param subscriber the object to deliver to
      * @param method the method to call
      * @throws EPException converted from the passed invocation exception
      */
-    protected static void handle(String statementName, Log logger, InvocationTargetException e, Object[] params, Object subscriber, FastMethod method) {
-        String message = JavaClassHelper.getMessageInvocationTarget(statementName, method.getJavaMethod(), subscriber.getClass().getName(), params, e);
+    protected static void handle(String statementName, Log logger, InvocationTargetException e, Object[] parameters, Object subscriber, FastMethod method) {
+        String message = JavaClassHelper.getMessageInvocationTarget(statementName, method.getJavaMethod(), subscriber.getClass().getName(), parameters, e);
         logger.error(message, e.getTargetException());
     }
 
@@ -183,15 +183,15 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
      * Handle the exception, displaying a nice message and converting to {@link EPException}.
      * @param logger is the logger to use for error logging
      * @param t is the throwable
-     * @param params the method parameters
+     * @param parameters the method parameters
      * @param subscriber the object to deliver to
      * @param method the method to call
      * @throws EPException converted from the passed invocation exception
      */
-    protected static void handleThrowable(Log logger, Throwable t, Object[] params, Object subscriber, FastMethod method) {
+    protected static void handleThrowable(Log logger, Throwable t, Object[] parameters, Object subscriber, FastMethod method) {
         String message = "Unexpected exception when invoking method '" + method.getName() +
                 "' on subscriber class '" + subscriber.getClass().getSimpleName() +
-                "' for parameters " + ((params == null) ? "null" : Arrays.toString(params)) +
+                "' for parameters " + ((parameters == null) ? "null" : Arrays.toString(parameters)) +
                 " : " + t.getClass().getSimpleName() + " : " + t.getMessage();
         logger.error(message, t);
     }
@@ -204,8 +204,8 @@ public class ResultDeliveryStrategyImpl implements ResultDeliveryStrategy
         int count = 0;
         for (int i = 0; i < events.length; i++)
         {
-            EventBean event = events[i];
-            if (event instanceof NaturalEventBean)
+            EventBean theEvent = events[i];
+            if (theEvent instanceof NaturalEventBean)
             {
                 count++;
             }

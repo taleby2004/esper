@@ -8,10 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.PropertyAccessException;
 
 /**
@@ -22,7 +21,7 @@ public class RevisionEventBeanDeclared implements EventBean
     private final RevisionEventType revisionEventType;
     private final EventBean underlyingFullOrDelta;
 
-    private MultiKeyUntyped key;
+    private Object key;
     private EventBean lastBaseEvent;
     private RevisionBeanHolder[] holders;
     private boolean isLatest;
@@ -60,7 +59,7 @@ public class RevisionEventBeanDeclared implements EventBean
      * Sets the key value.
      * @param key value
      */
-    public void setKey(MultiKeyUntyped key)
+    public void setKey(Object key)
     {
         this.key = key;
     }
@@ -105,7 +104,7 @@ public class RevisionEventBeanDeclared implements EventBean
      * Returns the key.
      * @return key
      */
-    public MultiKeyUntyped getKey()
+    public Object getKey()
     {
         return key;
     }
@@ -151,16 +150,16 @@ public class RevisionEventBeanDeclared implements EventBean
 
     /**
      * Returns a versioned value.
-     * @param params getter parameters
+     * @param parameters getter parameters
      * @return value
      */
-    public Object getVersionedValue(RevisionGetterParameters params)
+    public Object getVersionedValue(RevisionGetterParameters parameters)
     {
         RevisionBeanHolder holderMostRecent = null;
 
         if (holders != null)
         {
-            for (int numSet : params.getPropertyGroups())
+            for (int numSet : parameters.getPropertyGroups())
             {
                 RevisionBeanHolder holder = holders[numSet];
                 if (holder != null)
@@ -183,9 +182,9 @@ public class RevisionEventBeanDeclared implements EventBean
         // none found, use last full event
         if (holderMostRecent == null)
         {
-            return params.getBaseGetter().get(lastBaseEvent);
+            return parameters.getBaseGetter().get(lastBaseEvent);
         }
 
-        return holderMostRecent.getValueForProperty(params.getPropertyNumber());
+        return holderMostRecent.getValueForProperty(parameters.getPropertyNumber());
     }
 }

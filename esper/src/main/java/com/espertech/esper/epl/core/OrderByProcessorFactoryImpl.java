@@ -8,15 +8,13 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.OrderByItem;
-import com.espertech.esper.util.MultiKeyCollatingComparator;
-import com.espertech.esper.util.MultiKeyComparator;
+import com.espertech.esper.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -34,7 +32,7 @@ public class OrderByProcessorFactoryImpl implements OrderByProcessorFactory {
 	private final OrderByElement[] orderBy;
 	private final ExprEvaluator[] groupByNodes;
 	private final boolean needsGroupByKeys;
-	private final Comparator<MultiKeyUntyped> comparator;
+	private final Comparator<Object> comparator;
 
 	/**
 	 * Ctor.
@@ -78,7 +76,7 @@ public class OrderByProcessorFactoryImpl implements OrderByProcessorFactory {
         return needsGroupByKeys;
     }
 
-    public Comparator<MultiKeyUntyped> getComparator() {
+    public Comparator<Object> getComparator() {
         return comparator;
     }
 
@@ -89,9 +87,9 @@ public class OrderByProcessorFactoryImpl implements OrderByProcessorFactory {
      * @return comparator
      * @throws com.espertech.esper.epl.expression.ExprValidationException if the return type of order items cannot be determined
      */
-    protected static Comparator<MultiKeyUntyped> getComparator(OrderByElement[] orderBy, boolean isSortUsingCollator) throws ExprValidationException
+    protected static Comparator<Object> getComparator(OrderByElement[] orderBy, boolean isSortUsingCollator) throws ExprValidationException
     {
-        Comparator<MultiKeyUntyped> comparator;
+        Comparator<Object> comparator;
 
         if (isSortUsingCollator)
         {
@@ -111,16 +109,31 @@ public class OrderByProcessorFactoryImpl implements OrderByProcessorFactory {
 
             if (!hasStringTypes)
             {
-                comparator = new MultiKeyComparator(getIsDescendingValues(orderBy));
+                if (orderBy.length > 1) {
+                    comparator = new MultiKeyCastingComparator(new MultiKeyComparator(getIsDescendingValues(orderBy)));
+                }
+                else {
+                    comparator = new ObjectComparator(getIsDescendingValues(orderBy)[0]);
+                }
             }
             else
             {
-                comparator = new MultiKeyCollatingComparator(getIsDescendingValues(orderBy), stringTypes);
+                if (orderBy.length > 1) {
+                    comparator = new MultiKeyCastingComparator(new MultiKeyCollatingComparator(getIsDescendingValues(orderBy), stringTypes));
+                }
+                else {
+                    comparator = new ObjectCollatingComparator(getIsDescendingValues(orderBy)[0]);
+                }
             }
         }
         else
         {
-            comparator = new MultiKeyComparator(getIsDescendingValues(orderBy));
+            if (orderBy.length > 1) {
+                comparator = new MultiKeyCastingComparator(new MultiKeyComparator(getIsDescendingValues(orderBy)));
+            }
+            else {
+                comparator = new ObjectComparator(getIsDescendingValues(orderBy)[0]);
+            }
         }
 
         return comparator;

@@ -90,7 +90,7 @@ public class RepositoryImpl implements Repository
         Node leafNode = new Node(resultStream);
         leafNode.setEvents(lookupResults);
         leafNode.setParent(cursor.getNode());
-        leafNode.setParentEvent(cursor.getEvent());
+        leafNode.setParentEvent(cursor.getTheEvent());
 
         List<Node> nodes = nodesPerStream[resultStream];
         if (nodes == null)

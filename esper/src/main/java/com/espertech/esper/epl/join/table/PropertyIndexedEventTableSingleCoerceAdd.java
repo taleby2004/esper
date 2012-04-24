@@ -24,9 +24,9 @@ public class PropertyIndexedEventTableSingleCoerceAdd extends PropertyIndexedEve
         this.coercionType = coercionType;
     }
 
-    protected Object getKey(EventBean event)
+    protected Object getKey(EventBean theEvent)
     {
-        Object keyValue = super.getKey(event);
+        Object keyValue = super.getKey(theEvent);
         if ((keyValue != null) && (!keyValue.getClass().equals(coercionType)))
         {
             if (keyValue instanceof Number)

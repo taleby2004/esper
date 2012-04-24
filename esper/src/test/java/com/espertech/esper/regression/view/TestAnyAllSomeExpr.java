@@ -52,7 +52,7 @@ public class TestAnyAllSomeExpr extends TestCase
                           "intPrimitive != all (1, intBoxed) as neq, " +
                           "intPrimitive <> all (1, intBoxed) as sqlneq, " +
                           "not intPrimitive = all (1, intBoxed) as nneq " +
-                          "from SupportBean(string like \"E%\")";
+                          "from SupportBean(theString like \"E%\")";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -200,7 +200,7 @@ public class TestAnyAllSomeExpr extends TestCase
         String stmtText = "select " +
             "intBoxed >= all ({doubleBoxed, longBoxed}) as vall, " +
             "intBoxed >= any ({doubleBoxed, longBoxed}) as vany " +
-            " from SupportBean(string like 'E%')";
+            " from SupportBean(theString like 'E%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -222,7 +222,7 @@ public class TestAnyAllSomeExpr extends TestCase
         stmtText = "select " +
             "intBoxed >= all (doubleBoxed, longBoxed) as vall, " +
             "intBoxed >= any (doubleBoxed, longBoxed) as vany " +
-            " from SupportBean(string like 'E%')";
+            " from SupportBean(theString like 'E%')";
         stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -280,7 +280,7 @@ public class TestAnyAllSomeExpr extends TestCase
                           "intPrimitive != any (1, intBoxed) as neq, " +
                           "intPrimitive <> any (1, intBoxed) as sqlneq, " +
                           "not intPrimitive = any (1, intBoxed) as nneq " +
-                          " from SupportBean(string like 'E%')";
+                          " from SupportBean(theString like 'E%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -317,7 +317,7 @@ public class TestAnyAllSomeExpr extends TestCase
             "intPrimitive >= all (1, 3, 4) as ge, " +
             "intPrimitive < all (1, 3, 4) as l, " +
             "intPrimitive <= all (1, 3, 4) as le " +
-            " from SupportBean(string like 'E%')";
+            " from SupportBean(theString like 'E%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -346,7 +346,7 @@ public class TestAnyAllSomeExpr extends TestCase
             "intPrimitive >= some (1, 3, 4) as ge, " +
             "intPrimitive < any (1, 3, 4) as l, " +
             "intPrimitive <= some (1, 3, 4) as le " +
-            " from SupportBean(string like 'E%')";
+            " from SupportBean(theString like 'E%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -444,9 +444,9 @@ public class TestAnyAllSomeExpr extends TestCase
         }
     }
 
-    public void sendEvent(String string, Integer intBoxed, Double doubleBoxed, Long longBoxed)
+    public void sendEvent(String theString, Integer intBoxed, Double doubleBoxed, Long longBoxed)
     {
-        SupportBean bean = new SupportBean(string, -1);
+        SupportBean bean = new SupportBean(theString, -1);
         bean.setIntBoxed(intBoxed);
         bean.setDoubleBoxed(doubleBoxed);
         bean.setLongBoxed(longBoxed);

@@ -49,18 +49,18 @@ public class IsolateUnisolateCallable implements Callable
 
                 listenerIsolated.reset();
                 stmt.addListener(listenerIsolated);
-                Object event = new SupportBean();
+                Object theEvent = new SupportBean();
                 //System.out.println("Sensing event : " + event + " by thread " + Thread.currentThread().getId());
-                isolated.getEPRuntime().sendEvent(event);
-                findEvent(listenerIsolated, i, event);
+                isolated.getEPRuntime().sendEvent(theEvent);
+                findEvent(listenerIsolated, i, theEvent);
                 stmt.removeAllListeners();
 
                 isolated.getEPAdministrator().removeStatement(stmt);
 
                 stmt.addListener(listenerUnisolated);
-                event = new SupportBean();
-                engine.getEPRuntime().sendEvent(event);
-                findEvent(listenerUnisolated, i, event);
+                theEvent = new SupportBean();
+                engine.getEPRuntime().sendEvent(theEvent);
+                findEvent(listenerUnisolated, i, theEvent);
                 stmt.removeAllListeners();
             }
         }
@@ -72,7 +72,7 @@ public class IsolateUnisolateCallable implements Callable
         return true;
     }
 
-    private void findEvent(SupportMTUpdateListener listener, int loop, Object event)
+    private void findEvent(SupportMTUpdateListener listener, int loop, Object theEvent)
     {
         String message = "Failed in loop " + loop + " threads " + Thread.currentThread();
         Assert.assertTrue(message, listener.isInvoked());
@@ -81,7 +81,7 @@ public class IsolateUnisolateCallable implements Callable
         for (EventBean[] events : eventBeans)
         {
             Assert.assertEquals(message, 1, events.length);
-            if (events[0].getUnderlying() == event)
+            if (events[0].getUnderlying() == theEvent)
             {
                 found = true;
             }

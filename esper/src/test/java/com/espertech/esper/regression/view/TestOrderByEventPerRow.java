@@ -125,7 +125,7 @@ public class TestOrderByEventPerRow extends TestCase
         String statementString = "select symbol, sum(price) from " +
                                 SupportMarketDataBean.class.getName() + ".win:length(20) as one, " +
                                 SupportBeanString.class.getName() + ".win:length(100) as two " +
-                                "where one.symbol = two.string " +
+                                "where one.symbol = two.theString " +
                                 "group by symbol " +
                                 "output every 6 events " +
                                 "order by sum(price), symbol, volume";
@@ -163,7 +163,7 @@ public class TestOrderByEventPerRow extends TestCase
         String statementString = "select symbol, volume, sum(price) from " +
                                 SupportMarketDataBean.class.getName() + ".win:length(20) as one, " +
                                 SupportBeanString.class.getName() + ".win:length(100) as two " +
-                                "where one.symbol = two.string " +
+                                "where one.symbol = two.theString " +
                                 "group by symbol " +
                                 "output last every 6 events " +
                                 "order by sum(price)";
@@ -210,11 +210,11 @@ public class TestOrderByEventPerRow extends TestCase
 
     public void testIteratorGroupByEventPerRow()
 	{
-        String[] fields = new String[] {"symbol", "string", "sumPrice"};
-        String statementString = "select symbol, string, sum(price) as sumPrice from " +
+        String[] fields = new String[] {"symbol", "theString", "sumPrice"};
+        String statementString = "select symbol, theString, sum(price) as sumPrice from " +
     	            SupportMarketDataBean.class.getName() + ".win:length(10) as one, " +
     	            SupportBeanString.class.getName() + ".win:length(100) as two " +
-                    "where one.symbol = two.string " +
+                    "where one.symbol = two.theString " +
                     "group by symbol " +
                     "order by symbol";
         EPStatement statement = epService.getEPAdministrator().createEPL(statementString);

@@ -41,7 +41,7 @@ public class TestViewExpressionBatch extends TestCase
 
     public void testLengthBatch()
     {
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr_batch(current_count >= 3)");
         stmt.addListener(listener);
         
@@ -75,7 +75,7 @@ public class TestViewExpressionBatch extends TestCase
     {
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr_batch(newest_timestamp - oldest_timestamp > 2000)");
         stmt.addListener(listener);
 
@@ -108,7 +108,7 @@ public class TestViewExpressionBatch extends TestCase
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         epService.getEPAdministrator().createEPL("create variable boolean POST = false");
 
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr_batch(POST)");
         stmt.addListener(listener);
 
@@ -147,7 +147,7 @@ public class TestViewExpressionBatch extends TestCase
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         epService.getEPAdministrator().createEPL("create variable long SIZE = 1000");
 
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from SupportBean.win:expr_batch(newest_timestamp - oldest_timestamp > SIZE)");
         stmt.addListener(listener);
 
@@ -187,7 +187,7 @@ public class TestViewExpressionBatch extends TestCase
     public void testUDFBuiltin()
     {
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("udf", TestViewExpressionWindow.LocalUDF.class.getName(), "evaluateExpiryUDF");
-        epService.getEPAdministrator().createEPL("select * from SupportBean.win:expr_batch(udf(string, view_reference, expired_count))");
+        epService.getEPAdministrator().createEPL("select * from SupportBean.win:expr_batch(udf(theString, view_reference, expired_count))");
 
         TestViewExpressionWindow.LocalUDF.setResult(true);
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
@@ -225,7 +225,7 @@ public class TestViewExpressionBatch extends TestCase
     public void testNamedWindowDelete() {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
         
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmt = epService.getEPAdministrator().createEPL("create window NW.win:expr_batch(current_count > 3) as SupportBean");
         stmt.addListener(listener);
 
@@ -236,7 +236,7 @@ public class TestViewExpressionBatch extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E2"}, {"E3"}});
 
-        epService.getEPAdministrator().createEPL("on SupportBean_A delete from NW where string = id");
+        epService.getEPAdministrator().createEPL("on SupportBean_A delete from NW where theString = id");
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
         EPAssertionUtil.assertPropsPerRow(stmt.iterator(), fields, new Object[][]{{"E1"}, {"E3"}});
 
@@ -249,7 +249,7 @@ public class TestViewExpressionBatch extends TestCase
 
     public void testPrev() {
         String[] fields = new String[] {"val0"};
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select prev(1, string) as val0 from SupportBean.win:expr_batch(current_count > 2)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select prev(1, theString) as val0 from SupportBean.win:expr_batch(current_count > 2)");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -262,7 +262,7 @@ public class TestViewExpressionBatch extends TestCase
 
     public void testEventPropBatch() {
         String[] fields = new String[] {"val0"};
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string as val0 from SupportBean.win:expr_batch(intPrimitive > 0)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream theString as val0 from SupportBean.win:expr_batch(intPrimitive > 0)");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -279,10 +279,10 @@ public class TestViewExpressionBatch extends TestCase
     }
 
     public void testAggregation() {
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
 
         // Test un-grouped
-        EPStatement stmtUngrouped = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.win:expr_batch(sum(intPrimitive) > 100)");
+        EPStatement stmtUngrouped = epService.getEPAdministrator().createEPL("select irstream theString from SupportBean.win:expr_batch(sum(intPrimitive) > 100)");
         stmtUngrouped.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -304,7 +304,7 @@ public class TestViewExpressionBatch extends TestCase
         stmtUngrouped.destroy();
 
         // Test grouped
-        EPStatement stmtGrouped = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.std:groupwin(intPrimitive).win:expr_batch(sum(longPrimitive) > 100)");
+        EPStatement stmtGrouped = epService.getEPAdministrator().createEPL("select irstream theString from SupportBean.std:groupwin(intPrimitive).win:expr_batch(sum(longPrimitive) > 100)");
         stmtGrouped.addListener(listener);
 
         sendEvent("E1", 1, 10);
@@ -342,7 +342,7 @@ public class TestViewExpressionBatch extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 8));
-        epService.getEPAdministrator().createEPL("on SupportBean_A delete from NW where string = id");
+        epService.getEPAdministrator().createEPL("on SupportBean_A delete from NW where theString = id");
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 8));
@@ -352,8 +352,8 @@ public class TestViewExpressionBatch extends TestCase
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetDataListsFlattened(), fields, new Object[][]{{"E1"}, {"E3"}, {"E4"}}, null);
     }
 
-    private void sendEvent(String string, int intPrimitive, long longPrimitive) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private void sendEvent(String theString, int intPrimitive, long longPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
         epService.getEPRuntime().sendEvent(bean);
     }

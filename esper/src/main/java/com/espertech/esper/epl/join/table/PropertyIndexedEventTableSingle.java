@@ -34,12 +34,12 @@ public class PropertyIndexedEventTableSingle implements EventTable
 
     /**
      * Determine multikey for index access.
-     * @param event to get properties from for key
+     * @param theEvent to get properties from for key
      * @return multi key
      */
-    protected Object getKey(EventBean event)
+    protected Object getKey(EventBean theEvent)
     {
-        return propertyGetter.get(event);
+        return propertyGetter.get(theEvent);
     }
 
     /**
@@ -54,9 +54,9 @@ public class PropertyIndexedEventTableSingle implements EventTable
         {
             return;
         }
-        for (EventBean event : events)
+        for (EventBean theEvent : events)
         {
-            add(event);
+            add(theEvent);
         }
     }
 
@@ -71,9 +71,9 @@ public class PropertyIndexedEventTableSingle implements EventTable
         {
             return;
         }
-        for (EventBean event : events)
+        for (EventBean theEvent : events)
         {
-            remove(event);
+            remove(theEvent);
         }
     }
 
@@ -87,9 +87,9 @@ public class PropertyIndexedEventTableSingle implements EventTable
         return propertyIndex.get(key);
     }
 
-    private void add(EventBean event)
+    private void add(EventBean theEvent)
     {
-        Object key = getKey(event);
+        Object key = getKey(theEvent);
 
         Set<EventBean> events = propertyIndex.get(key);
         if (events == null)
@@ -98,12 +98,12 @@ public class PropertyIndexedEventTableSingle implements EventTable
             propertyIndex.put(key, events);
         }
 
-        events.add(event);
+        events.add(theEvent);
     }
 
-    private void remove(EventBean event)
+    private void remove(EventBean theEvent)
     {
-        Object key = getKey(event);
+        Object key = getKey(theEvent);
 
         Set<EventBean> events = propertyIndex.get(key);
         if (events == null)
@@ -111,7 +111,7 @@ public class PropertyIndexedEventTableSingle implements EventTable
             return;
         }
 
-        if (!events.remove(event))
+        if (!events.remove(theEvent))
         {
             // Not an error, its possible that an old-data event is artificial (such as for statistics) and
             // thus did not correspond to a new-data event raised earlier.

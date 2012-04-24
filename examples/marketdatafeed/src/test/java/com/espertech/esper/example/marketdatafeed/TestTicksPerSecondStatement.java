@@ -98,8 +98,8 @@ public class TestTicksPerSecondStatement extends TestCase {
         assertEquals(countFeedB, (long) countPerFeed.get(FeedEnum.FEED_B));
     }
 
-    private void sendEvent(Object event) {
-        epService.getEPRuntime().sendEvent(event);
+    private void sendEvent(Object theEvent) {
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }
 

@@ -26,19 +26,19 @@ import java.util.Map;
  */
 public class WrapperEventBean implements EventBean, DecoratingEventBean
 {
-	private final EventBean event;
+	private final EventBean theEvent;
 	private final Map<String, Object> map;
 	private final EventType eventType;
 
     /**
      * Ctor.
-     * @param event is the wrapped event
+     * @param theEvent is the wrapped event
      * @param properties is zero or more property values that embellish the wrapped event
      * @param eventType is the {@link WrapperEventType}.
      */
-    public WrapperEventBean(EventBean event, Map<String, Object> properties, EventType eventType)
+    public WrapperEventBean(EventBean theEvent, Map<String, Object> properties, EventType eventType)
 	{
-		this.event = event;
+		this.theEvent = theEvent;
 		this.map = properties;
 		this.eventType = eventType;
     }
@@ -63,11 +63,11 @@ public class WrapperEventBean implements EventBean, DecoratingEventBean
         // If wrapper is simply for the underlyingg with no additional properties, then return the underlying type
         if (map.isEmpty())
         {
-            return event.getUnderlying();
+            return theEvent.getUnderlying();
         }
         else
         {
-            return new Pair<Object, Map>(event.getUnderlying(), map);
+            return new Pair<Object, Map>(theEvent.getUnderlying(), map);
         }
     }
 
@@ -87,13 +87,13 @@ public class WrapperEventBean implements EventBean, DecoratingEventBean
 
     public EventBean getUnderlyingEvent()
     {
-        return event;
+        return theEvent;
     }
 
     public String toString()
 	{
         return "WrapperEventBean " +
-        "[event=" + event + "] " +
+        "[event=" + theEvent + "] " +
         "[properties=" + map + "]";
 	}
 

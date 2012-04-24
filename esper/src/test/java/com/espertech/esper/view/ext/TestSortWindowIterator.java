@@ -11,26 +11,27 @@
 
 package com.espertech.esper.view.ext;
 
-import com.espertech.esper.client.scopetest.EPAssertionUtil;
-import junit.framework.TestCase;
-import java.util.*;
-
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.support.event.EventFactoryHelper;
+import com.espertech.esper.util.MultiKeyCastingComparator;
 import com.espertech.esper.util.MultiKeyComparator;
+import junit.framework.TestCase;
+
+import java.util.*;
 
 public class TestSortWindowIterator extends TestCase
 {
     private Map<String, EventBean> events;
-	private SortedMap<MultiKeyUntyped, LinkedList<EventBean>> testMap;
-	private Comparator<MultiKeyUntyped> comparator;
+	private SortedMap<Object, Object> testMap;
+	private Comparator<Object> comparator;
 	
     public void setUp()
     {
         events = EventFactoryHelper.makeEventMap(new String[] {"a", "b", "c", "d", "f", "g"});
-        comparator = new MultiKeyComparator(new boolean[] {false});
-        testMap = new TreeMap<MultiKeyUntyped, LinkedList<EventBean>>(comparator);
+        comparator = new MultiKeyCastingComparator(new MultiKeyComparator(new boolean[] {false}));
+        testMap = new TreeMap<Object, Object>(comparator);
     }
 
     public void testEmpty()

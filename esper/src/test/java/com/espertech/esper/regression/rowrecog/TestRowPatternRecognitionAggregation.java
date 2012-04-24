@@ -45,8 +45,8 @@ public class TestRowPatternRecognitionAggregation extends TestCase {
 
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, " +
-                "       C.string as c_string, " +
+                "  measures A.theString as a_string, " +
+                "       C.theString as c_string, " +
                 "       max(B.value) as maxb, " +
                 "       min(B.value) as minb, " +
                 "       2*min(B.value) as minb2x, " +
@@ -107,8 +107,8 @@ public class TestRowPatternRecognitionAggregation extends TestCase {
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
                 "  partition by cat" +
-                "  measures A.cat as cat, A.string as a_string, " +
-                "       D.string as d_string, " +
+                "  measures A.cat as cat, A.theString as a_string, " +
+                "       D.theString as d_string, " +
                 "       sum(C.value) as sumc, " +
                 "       sum(B.value) as sumb, " +
                 "       sum(B.value + A.value) as sumaplusb, " +

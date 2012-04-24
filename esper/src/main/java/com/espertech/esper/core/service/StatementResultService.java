@@ -83,4 +83,6 @@ public interface StatementResultService
     public void execute();
 
     public String getStatementName();
+
+    public EPStatementListenerSet getStatementListenerSet();
 }

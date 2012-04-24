@@ -9,10 +9,9 @@
 package com.espertech.esper.epl.db;
 
 import com.espertech.esper.epl.join.table.EventTable;
-import com.espertech.esper.collection.MultiKey;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * For use in iteration over historical joins, a {@link DataCache} implementation
@@ -21,25 +20,25 @@ import java.util.HashMap;
  */
 public class DataCacheClearableMap implements DataCache
 {
-    private Map<MultiKey<Object>, EventTable> cache;
+    private Map<Object, EventTable> cache;
 
     /**
      * Ctor.
      */
     public DataCacheClearableMap()
     {
-        this.cache = new HashMap<MultiKey<Object>, EventTable>();
+        this.cache = new HashMap<Object, EventTable>();
     }
 
     public EventTable getCached(Object[] lookupKeys)
     {
-        MultiKey<Object> key = new MultiKey<Object>(lookupKeys);
+        Object key = DataCacheUtil.getLookupKey(lookupKeys);
         return cache.get(key);
     }
 
     public void put(Object[] lookupKeys, EventTable rows)
     {
-        MultiKey<Object> key = new MultiKey<Object>(lookupKeys);
+        Object key = DataCacheUtil.getLookupKey(lookupKeys);
         cache.put(key, rows);
     }
 

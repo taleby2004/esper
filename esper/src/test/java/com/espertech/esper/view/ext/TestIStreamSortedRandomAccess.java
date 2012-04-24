@@ -11,23 +11,24 @@
 
 package com.espertech.esper.view.ext;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.event.SupportEventBeanFactory;
+import com.espertech.esper.util.MultiKeyCastingComparator;
 import com.espertech.esper.util.MultiKeyComparator;
-import com.espertech.esper.view.window.RandomAccessByIndexObserver;
 import com.espertech.esper.view.window.RandomAccessByIndex;
+import com.espertech.esper.view.window.RandomAccessByIndexObserver;
+import junit.framework.TestCase;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.TreeMap;
-
-import junit.framework.TestCase;
 
 public class TestIStreamSortedRandomAccess extends TestCase
 {
-    private IStreamSortedRandomAccess access;
-    private TreeMap<MultiKeyUntyped, LinkedList<EventBean>> sortedEvents;
+    private IStreamSortRankRandomAccess access;
+    private TreeMap<Object, Object> sortedEvents;
     private EventBean[] events;
 
     public void setUp()
@@ -38,8 +39,8 @@ public class TestIStreamSortedRandomAccess extends TestCase
             {
             }
         };
-        access = new IStreamSortedRandomAccess(updateObserver);
-        sortedEvents = new TreeMap<MultiKeyUntyped, LinkedList<EventBean>>(new MultiKeyComparator(new boolean[] {false}));
+        access = new IStreamSortRankRandomAccess(updateObserver);
+        sortedEvents = new TreeMap<Object, Object>(new MultiKeyCastingComparator(new MultiKeyComparator(new boolean[] {false})));
 
         events = new EventBean[100];
         for (int i = 0; i < events.length; i++)
@@ -89,7 +90,6 @@ public class TestIStreamSortedRandomAccess extends TestCase
 
         add("D", events[9]);
         access.refresh(sortedEvents, 9, 10);
-        EventBean event = access.getNewData(5);
         assertSame(events[9], access.getNewData(5));
     }
 
@@ -102,16 +102,16 @@ public class TestIStreamSortedRandomAccess extends TestCase
         assertNull(access.getNewData(events.length));
     }
 
-    private void add(String key, EventBean event)
+    private void add(String key, EventBean theEvent)
     {
-        ((SupportBean)event.getUnderlying()).setString(key);
+        ((SupportBean)theEvent.getUnderlying()).setTheString(key);
         MultiKeyUntyped mkey = new MultiKeyUntyped(new Object[] {key});
-        LinkedList<EventBean> eventList = sortedEvents.get(mkey);
+        List<EventBean> eventList = (List<EventBean>) sortedEvents.get(mkey);
         if (eventList == null)
         {
             eventList = new LinkedList<EventBean>();
         }
-        eventList.addFirst(event);
+        eventList.add(0, theEvent);
         sortedEvents.put(mkey, eventList);
     }
 }

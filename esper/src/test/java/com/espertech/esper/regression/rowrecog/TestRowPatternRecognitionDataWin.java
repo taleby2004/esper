@@ -34,10 +34,10 @@ public class TestRowPatternRecognitionDataWin extends TestCase
         String[] fields = "string,value".split(",");
         String text = "select * from MyEvent " +
                 "match_recognize (" +
-                "  measures A.string as string, A.value as value" +
+                "  measures A.theString as string, A.value as value" +
                 "  all matches pattern (A) " +
                 "  define " +
-                "    A as PREV(A.string, 1) = string" +
+                "    A as PREV(A.theString, 1) = theString" +
                 ")";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -80,7 +80,7 @@ public class TestRowPatternRecognitionDataWin extends TestCase
         String[] fields = "a_string,b_string,c_string".split(",");
         String text = "select * from MyEvent.win:time(5 sec) " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string, C.string as c_string" +
+                "  measures A.theString as a_string, B.theString as b_string, C.theString as c_string" +
                 "  all matches pattern ( A B C ) " +
                 "  define " +
                 "    A as (A.value = 1)," +
@@ -138,12 +138,12 @@ public class TestRowPatternRecognitionDataWin extends TestCase
         String text = "select * from MyEvent.win:time_batch(5 sec) " +
                 "match_recognize (" +
                 "  partition by cat " +
-                "  measures A.string as a_string, B.string as b_string, C.string as c_string" +
+                "  measures A.theString as a_string, B.theString as b_string, C.theString as c_string" +
                 "  all matches pattern ( (A | B) C ) " +
                 "  define " +
-                "    A as A.string like 'A%'," +
-                "    B as B.string like 'B%'," +
-                "    C as C.string like 'C%' and C.value in (A.value, B.value)" +
+                "    A as A.theString like 'A%'," +
+                "    B as B.theString like 'B%'," +
+                "    C as C.theString like 'C%' and C.value in (A.value, B.value)" +
                 ") order by a_string";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -197,8 +197,8 @@ public class TestRowPatternRecognitionDataWin extends TestCase
 
     private void sendTimer(long time, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

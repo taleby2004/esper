@@ -18,6 +18,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.spec.AnnotationDesc;
+import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.SimpleTypeCaster;
 import com.espertech.esper.util.SimpleTypeCasterFactory;
@@ -398,5 +399,9 @@ public class AnnotationUtil
             return strValue;
         }
         return null;
+    }
+
+    public static Annotation[] mergeAnnotations(Annotation[] first, Annotation[] second) {
+        return (Annotation[]) CollectionUtil.addArrays(first, second);
     }
 }

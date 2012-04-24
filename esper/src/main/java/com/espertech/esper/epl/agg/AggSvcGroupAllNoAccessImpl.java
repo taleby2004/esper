@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
@@ -30,7 +29,7 @@ public class AggSvcGroupAllNoAccessImpl extends AggregationServiceBaseUngrouped
         super(evaluators, aggregators);
     }
 
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyEnter(EventBean[] eventsPerStream, Object optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext)
     {
         for (int j = 0; j < evaluators.length; j++)
         {
@@ -39,7 +38,7 @@ public class AggSvcGroupAllNoAccessImpl extends AggregationServiceBaseUngrouped
         }
     }
 
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyLeave(EventBean[] eventsPerStream, Object optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext)
     {
         for (int j = 0; j < evaluators.length; j++)
         {
@@ -48,7 +47,7 @@ public class AggSvcGroupAllNoAccessImpl extends AggregationServiceBaseUngrouped
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId)
+    public void setCurrentAccess(Object groupKey, int agentInstanceId)
     {
         // no action needed - this implementation does not group and the current row is the single group
     }

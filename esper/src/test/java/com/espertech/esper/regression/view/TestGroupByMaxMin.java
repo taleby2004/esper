@@ -124,7 +124,7 @@ public class TestGroupByMaxMin extends TestCase
                           " from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(3) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-                          "  and one.string = two.symbol " +
+                          "  and one.theString = two.symbol " +
                           "group by symbol";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
@@ -173,14 +173,14 @@ public class TestGroupByMaxMin extends TestCase
         assertFalse(testListener.isInvoked());
 
         sendEvent("DELL", 131L);
-        EventBean event = testListener.assertOneGetNewAndReset();
-        assertEquals("DELL", event.get("symbol"));
-        assertEquals(100L, event.get("mymin"));
+        EventBean theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals("DELL", theEvent.get("symbol"));
+        assertEquals(100L, theEvent.get("mymin"));
 
         sendEvent("DELL", 132L);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals("DELL", event.get("symbol"));
-        assertEquals(100L, event.get("mymin"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals("DELL", theEvent.get("symbol"));
+        assertEquals(100L, theEvent.get("mymin"));
 
         sendEvent("DELL", 129L);
         sendEvent("DELL", 125L);
@@ -188,9 +188,9 @@ public class TestGroupByMaxMin extends TestCase
         assertFalse(testListener.isInvoked());
 
         sendEvent("DELL", 170L);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals("DELL", event.get("symbol"));
-        assertEquals(125L, event.get("mymin"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals("DELL", theEvent.get("symbol"));
+        assertEquals(125L, theEvent.get("mymin"));
     }
 
     private void runAssertion(EPStatement selectTestView)

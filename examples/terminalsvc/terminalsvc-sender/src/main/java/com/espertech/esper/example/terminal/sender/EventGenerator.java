@@ -61,27 +61,27 @@ public class EventGenerator
         int outOfOrderCount = 0;
         for (int i = 0; i < termIds.length; i++)
         {
-            BaseTerminalEvent event = null;
+            BaseTerminalEvent theEvent = null;
 
             // With a 1 in 1000 chance send an OutOfOrder
             if (random.nextInt(1000) == 0)
             {
                 outOfOrderCount++;
-                event = new OutOfOrder(new TerminalInfo(termIds[i]));
-                System.out.println("Generated an Checkin followed by " + event.getType() + " event for terminal " + event.getTerm().getId());
+                theEvent = new OutOfOrder(new TerminalInfo(termIds[i]));
+                System.out.println("Generated an Checkin followed by " + theEvent.getType() + " event for terminal " + theEvent.getTerm().getId());
             }
             else if (random.nextBoolean())
             {
                 completedCount++;
-                event = new Completed(new TerminalInfo(termIds[i]));
+                theEvent = new Completed(new TerminalInfo(termIds[i]));
             }
             else
             {
                 cancelledCount++;
-                event = new Cancelled(new TerminalInfo(termIds[i]));
+                theEvent = new Cancelled(new TerminalInfo(termIds[i]));
             }
 
-            eventBatch.add(event);
+            eventBatch.add(theEvent);
         }
 
         System.out.println("Generated " + termIds.length + " Checkin events followed by " +
@@ -97,18 +97,18 @@ public class EventGenerator
             return;
         }
 
-        BaseTerminalEvent event = null;
+        BaseTerminalEvent theEvent = null;
         if (random.nextBoolean())
         {
-            event = new LowPaper(getRandomTermInfo());
+            theEvent = new LowPaper(getRandomTermInfo());
         }
         else
         {
-            event = new OutOfOrder(getRandomTermInfo());
+            theEvent = new OutOfOrder(getRandomTermInfo());
         }
 
-        eventBatch.add(event);
-        System.out.println("Generated " + event.getType() + " event for terminal " + event.getTerm().getId());
+        eventBatch.add(theEvent);
+        System.out.println("Generated " + theEvent.getType() + " event for terminal " + theEvent.getTerm().getId());
     }
 
     // Swap 100 values in the array

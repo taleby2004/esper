@@ -11,13 +11,17 @@
 
 package com.espertech.esper.regression.client;
 
+import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import junit.framework.TestCase;
-import com.espertech.esper.client.*;
-import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.bean.*;
+import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportStmtAwareUpdateListener;
+import com.espertech.esper.util.EventRepresentationEnum;
+import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +30,7 @@ import java.util.Map;
 public class TestSubscriberMgmt extends TestCase
 {
     private EPServiceProvider epService;
-    private final String fields[] = "string,intPrimitive".split(",");
+    private final String fields[] = "theString,intPrimitive".split(",");
 
     public void setUp()
     {
@@ -73,7 +77,7 @@ public class TestSubscriberMgmt extends TestCase
         stmt.setSubscriber(subscriberCreateVariable);
 
         SubscriberMap subscriberSetVariable = new SubscriberMap();
-        String stmtTextSet = "on SupportBean set myvar = string";
+        String stmtTextSet = "on SupportBean set myvar = theString";
         stmt = epService.getEPAdministrator().createEPL(stmtTextSet);
         stmt.setSubscriber(subscriberSetVariable);
 
@@ -82,16 +86,20 @@ public class TestSubscriberMgmt extends TestCase
         EPAssertionUtil.assertPropsMap(subscriberSetVariable.getAndResetIndicate().get(0), fields, new Object[]{"def"});
     }
 
-    public void testNamedWindow()
+    public void testNamedWindow() {
+        runAssertionNamedWindow(EventRepresentationEnum.MAP);
+    }
+
+    private void runAssertionNamedWindow(EventRepresentationEnum eventRepresentationEnum)
     {
         String fields[] = "key,value".split(",");
         SubscriberMap subscriberNamedWindow = new SubscriberMap();
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as key, intPrimitive as value from SupportBean";
+        String stmtTextCreate = eventRepresentationEnum.getAnnotationText() + " create window MyWindow.win:keepall() as select theString as key, intPrimitive as value from SupportBean";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmt.setSubscriber(subscriberNamedWindow);
 
         SubscriberFields subscriberInsertInto = new SubscriberFields();
-        String stmtTextInsertInto = "insert into MyWindow select string as key, intPrimitive as value from SupportBean";
+        String stmtTextInsertInto = "insert into MyWindow select theString as key, intPrimitive as value from SupportBean";
         stmt = epService.getEPAdministrator().createEPL(stmtTextInsertInto);
         stmt.setSubscriber(subscriberInsertInto);
         
@@ -122,7 +130,7 @@ public class TestSubscriberMgmt extends TestCase
     public void testSimpleSelectUpdateOnly()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from " + SupportBean.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString, intPrimitive from " + SupportBean.class.getName());
         stmt.setSubscriber(subscriber);
 
         // get statement, attach listener

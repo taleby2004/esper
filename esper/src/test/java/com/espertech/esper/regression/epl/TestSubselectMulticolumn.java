@@ -47,14 +47,14 @@ public class TestSubselectMulticolumn extends TestCase
 
     public void testInvalid() {
 
-        String epl = "select (select string, sum(intPrimitive) from SupportBean.std:lastevent() as sb) from S0";
-        tryInvalid(epl, "Error starting statement: Subquery with multi-column select requires that either all or none of the selected columns are under aggregation. [select (select string, sum(intPrimitive) from SupportBean.std:lastevent() as sb) from S0]");
+        String epl = "select (select theString, sum(intPrimitive) from SupportBean.std:lastevent() as sb) from S0";
+        tryInvalid(epl, "Error starting statement: Subquery with multi-column select requires that either all or none of the selected columns are under aggregation. [select (select theString, sum(intPrimitive) from SupportBean.std:lastevent() as sb) from S0]");
 
-        epl = "select (select string, string from SupportBean.std:lastevent() as sb) from S0";
-        tryInvalid(epl, "Error starting statement: Column 1 in subquery does not have a unique column name assigned [select (select string, string from SupportBean.std:lastevent() as sb) from S0]");
+        epl = "select (select theString, theString from SupportBean.std:lastevent() as sb) from S0";
+        tryInvalid(epl, "Error starting statement: Column 1 in subquery does not have a unique column name assigned [select (select theString, theString from SupportBean.std:lastevent() as sb) from S0]");
 
-        epl = "select * from S0(p00 = (select string, string from SupportBean.std:lastevent() as sb))";
-        tryInvalid(epl, "Subquery multi-column select is not allowed in this context. [select * from S0(p00 = (select string, string from SupportBean.std:lastevent() as sb))]");
+        epl = "select * from S0(p00 = (select theString, theString from SupportBean.std:lastevent() as sb))";
+        tryInvalid(epl, "Subquery multi-column select is not allowed in this context. [select * from S0(p00 = (select theString, theString from SupportBean.std:lastevent() as sb))]");
 
         epl = "select exists(select sb.* as v1, intPrimitive*2 as v3 from SupportBean.std:lastevent() as sb) as subrow from S0 as s0";
         tryInvalid(epl, "Error starting statement: Subquery multi-column select does not allow wildcard or stream wildcard when selecting multiple columns. [select exists(select sb.* as v1, intPrimitive*2 as v3 from SupportBean.std:lastevent() as sb) as subrow from S0 as s0]");
@@ -65,8 +65,8 @@ public class TestSubselectMulticolumn extends TestCase
         epl = "select (select *, intPrimitive from SupportBean.std:lastevent() as sb) as subrow from S0 as s0";
         tryInvalid(epl, "Error starting statement: Subquery multi-column select does not allow wildcard or stream wildcard when selecting multiple columns. [select (select *, intPrimitive from SupportBean.std:lastevent() as sb) as subrow from S0 as s0]");
 
-        epl = "select * from S0(p00 in (select string, string from SupportBean.std:lastevent() as sb))";
-        tryInvalid(epl, "Subquery multi-column select is not allowed in this context. [select * from S0(p00 in (select string, string from SupportBean.std:lastevent() as sb))]");
+        epl = "select * from S0(p00 in (select theString, theString from SupportBean.std:lastevent() as sb))";
+        tryInvalid(epl, "Subquery multi-column select is not allowed in this context. [select * from S0(p00 in (select theString, theString from SupportBean.std:lastevent() as sb))]");
     }
 
     private void tryInvalid(String epl, String message) {
@@ -82,7 +82,7 @@ public class TestSubselectMulticolumn extends TestCase
     public void testColumnsUncorrelated()
     {
         String stmtText = "select " +
-                "(select string as v1, intPrimitive as v2 from SupportBean.std:lastevent()) as subrow " +
+                "(select theString as v1, intPrimitive as v2 from SupportBean.std:lastevent()) as subrow " +
                 "from S0 as s0";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -118,8 +118,8 @@ public class TestSubselectMulticolumn extends TestCase
         String[] fields = "subrow.v1,subrow.v2".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
-        EventBean event = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(event, fields, new Object[]{null, null});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        EPAssertionUtil.assertProps(theEvent, fields, new Object[]{null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2));
@@ -139,7 +139,7 @@ public class TestSubselectMulticolumn extends TestCase
                 "  window(intPrimitive) as v3, " +
                 "  window(sb.*) as v4 " +
                 "  from SupportBean.win:keepall() sb " +
-                "  where string = s0.p00) as subrow " +
+                "  where theString = s0.p00) as subrow " +
                 "from S0 as s0";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);

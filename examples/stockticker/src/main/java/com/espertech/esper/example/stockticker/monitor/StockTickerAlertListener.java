@@ -34,8 +34,8 @@ public class StockTickerAlertListener implements UpdateListener
 
     public void update(EventBean[] newEvents, EventBean[] oldEvents)
     {
-        Object event =  newEvents[0].get("tick");
-        StockTick tick = (StockTick) event;
+        Object theEvent =  newEvents[0].get("tick");
+        StockTick tick = (StockTick) theEvent;
 
         log.debug(".update Alert for stock=" + tick.getStockSymbol() +
                   "  price=" + tick.getPrice() +

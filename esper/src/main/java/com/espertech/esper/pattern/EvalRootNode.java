@@ -37,7 +37,7 @@ public class EvalRootNode extends EvalNodeBase implements PatternStarter
     public final PatternStopCallback start(PatternMatchCallback callback,
                                            PatternContext context)
     {
-        MatchedEventMap beginState = new MatchedEventMapImpl();
+        MatchedEventMap beginState = new MatchedEventMapImpl(context.getMatchedEventMapMeta());
         return startInternal(callback, context, beginState);
     }
 

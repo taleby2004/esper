@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -22,7 +21,7 @@ import java.util.*;
 public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseGrouped
 {
     // maintain for each group a row of aggregator states that the expression node canb pull the data from via index
-    private Map<MultiKeyUntyped, AggregationMethodRow> aggregatorsPerGroup;
+    private Map<Object, AggregationMethodRow> aggregatorsPerGroup;
 
     // maintain a current row for random access into the aggregator state table
     // (row=groups, columns=expression nodes that have aggregation functions)
@@ -30,7 +29,7 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
 
     private MethodResolutionService methodResolutionService;
 
-    private List<MultiKeyUntyped> removedKeys;
+    private List<Object> removedKeys;
 
     /**
      * Ctor.
@@ -45,8 +44,8 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
     {
         super(evaluators, prototypes);
         this.methodResolutionService = methodResolutionService;
-        this.aggregatorsPerGroup = new HashMap<MultiKeyUntyped, AggregationMethodRow>();
-        removedKeys = new ArrayList<MultiKeyUntyped>();
+        this.aggregatorsPerGroup = new HashMap<Object, AggregationMethodRow>();
+        removedKeys = new ArrayList<Object>();
     }
 
     public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
@@ -54,11 +53,11 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
         aggregatorsPerGroup.clear();
     }
 
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped groupByKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyEnter(EventBean[] eventsPerStream, Object groupByKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         if (!removedKeys.isEmpty())     // we collect removed keys lazily on the next enter to reduce the chance of empty-group queries creating empty aggregators temporarily
         {
-            for (MultiKeyUntyped removedKey : removedKeys)
+            for (Object removedKey : removedKeys)
             {
                 aggregatorsPerGroup.remove(removedKey);
             }
@@ -91,7 +90,7 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
         }
     }
 
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped groupByKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyLeave(EventBean[] eventsPerStream, Object groupByKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         AggregationMethodRow row = aggregatorsPerGroup.get(groupByKey);
 
@@ -124,7 +123,7 @@ public class AggSvcGroupByRefcountedNoAccessImpl extends AggregationServiceBaseG
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey, int agentInstanceId)
+    public void setCurrentAccess(Object groupByKey, int agentInstanceId)
     {
         AggregationMethodRow row = aggregatorsPerGroup.get(groupByKey);
 

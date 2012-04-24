@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.type;
 
-import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.util.SimpleNumberBigDecimalCoercer;
 import com.espertech.esper.util.SimpleNumberBigIntegerCoercer;
 import com.espertech.esper.util.SimpleNumberCoercerFactory;
@@ -48,35 +48,35 @@ public enum MathArithTypeEnum
      */
     MODULO ("%");
 
-    private static Map<MultiKey<Object>, Computer> computers;
+    private static Map<MultiKeyUntyped, Computer> computers;
 
     static
     {
-        computers = new HashMap<MultiKey<Object>, Computer>();
-        computers.put(new MultiKey<Object>(new Object[] {Double.class, ADD}), new AddDouble());
-        computers.put(new MultiKey<Object>(new Object[] {Float.class, ADD}), new AddFloat());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, ADD}), new AddLong());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, ADD}), new AddInt());
-        computers.put(new MultiKey<Object>(new Object[] {BigDecimal.class, ADD}), new AddBigDec());
-        computers.put(new MultiKey<Object>(new Object[] {BigInteger.class, ADD}), new AddBigInt());
-        computers.put(new MultiKey<Object>(new Object[] {Double.class, SUBTRACT}), new SubtractDouble());
-        computers.put(new MultiKey<Object>(new Object[] {Float.class, SUBTRACT}), new SubtractFloat());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, SUBTRACT}), new SubtractLong());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, SUBTRACT}), new SubtractInt());
-        computers.put(new MultiKey<Object>(new Object[] {BigDecimal.class, SUBTRACT}), new SubtractBigDec());
-        computers.put(new MultiKey<Object>(new Object[] {BigInteger.class, SUBTRACT}), new SubtractBigInt());
-        computers.put(new MultiKey<Object>(new Object[] {Double.class, MULTIPLY}), new MultiplyDouble());
-        computers.put(new MultiKey<Object>(new Object[] {Float.class, MULTIPLY}), new MultiplyFloat());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, MULTIPLY}), new MultiplyLong());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, MULTIPLY}), new MultiplyInt());
-        computers.put(new MultiKey<Object>(new Object[] {BigDecimal.class, MULTIPLY}), new MultiplyBigDec());
-        computers.put(new MultiKey<Object>(new Object[] {BigInteger.class, MULTIPLY}), new MultiplyBigInt());
-        computers.put(new MultiKey<Object>(new Object[] {Double.class, MODULO}), new ModuloDouble());
-        computers.put(new MultiKey<Object>(new Object[] {Float.class, MODULO}), new ModuloFloat());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, MODULO}), new ModuloLong());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, MODULO}), new ModuloInt());
-        computers.put(new MultiKey<Object>(new Object[] {BigDecimal.class, MODULO}), new ModuloDouble());
-        computers.put(new MultiKey<Object>(new Object[] {BigInteger.class, MODULO}), new ModuloLong());
+        computers = new HashMap<MultiKeyUntyped, Computer>();
+        computers.put(new MultiKeyUntyped(new Object[] {Double.class, ADD}), new AddDouble());
+        computers.put(new MultiKeyUntyped(new Object[] {Float.class, ADD}), new AddFloat());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, ADD}), new AddLong());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, ADD}), new AddInt());
+        computers.put(new MultiKeyUntyped(new Object[] {BigDecimal.class, ADD}), new AddBigDec());
+        computers.put(new MultiKeyUntyped(new Object[] {BigInteger.class, ADD}), new AddBigInt());
+        computers.put(new MultiKeyUntyped(new Object[] {Double.class, SUBTRACT}), new SubtractDouble());
+        computers.put(new MultiKeyUntyped(new Object[] {Float.class, SUBTRACT}), new SubtractFloat());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, SUBTRACT}), new SubtractLong());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, SUBTRACT}), new SubtractInt());
+        computers.put(new MultiKeyUntyped(new Object[] {BigDecimal.class, SUBTRACT}), new SubtractBigDec());
+        computers.put(new MultiKeyUntyped(new Object[] {BigInteger.class, SUBTRACT}), new SubtractBigInt());
+        computers.put(new MultiKeyUntyped(new Object[] {Double.class, MULTIPLY}), new MultiplyDouble());
+        computers.put(new MultiKeyUntyped(new Object[] {Float.class, MULTIPLY}), new MultiplyFloat());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, MULTIPLY}), new MultiplyLong());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, MULTIPLY}), new MultiplyInt());
+        computers.put(new MultiKeyUntyped(new Object[] {BigDecimal.class, MULTIPLY}), new MultiplyBigDec());
+        computers.put(new MultiKeyUntyped(new Object[] {BigInteger.class, MULTIPLY}), new MultiplyBigInt());
+        computers.put(new MultiKeyUntyped(new Object[] {Double.class, MODULO}), new ModuloDouble());
+        computers.put(new MultiKeyUntyped(new Object[] {Float.class, MODULO}), new ModuloFloat());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, MODULO}), new ModuloLong());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, MODULO}), new ModuloInt());
+        computers.put(new MultiKeyUntyped(new Object[] {BigDecimal.class, MODULO}), new ModuloDouble());
+        computers.put(new MultiKeyUntyped(new Object[] {BigInteger.class, MODULO}), new ModuloLong());
     }
 
     /**
@@ -132,7 +132,7 @@ public enum MathArithTypeEnum
 
         if (this != DIVIDE)
         {
-            MultiKey<Object> key = new MultiKey<Object>(new Object[] {coercedType, this});
+            MultiKeyUntyped key = new MultiKeyUntyped(new Object[] {coercedType, this});
             Computer computer = computers.get(key);
             if (computer == null)
             {
@@ -164,7 +164,7 @@ public enum MathArithTypeEnum
             {
                 return new DivideBigDec(divisionByZeroReturnsNull);
             }
-            return computers.get(new MultiKey<Object>(new Object[] {BigDecimal.class, this}));
+            return computers.get(new MultiKeyUntyped(new Object[] {BigDecimal.class, this}));
         }
         SimpleNumberBigDecimalCoercer convertorOne = SimpleNumberCoercerFactory.getCoercerBigDecimal(typeOne);
         SimpleNumberBigDecimalCoercer convertorTwo = SimpleNumberCoercerFactory.getCoercerBigDecimal(typeTwo);
@@ -191,7 +191,7 @@ public enum MathArithTypeEnum
     {
         if ((typeOne == BigDecimal.class) && (typeTwo == BigDecimal.class))
         {
-            return computers.get(new MultiKey<Object>(new Object[] {BigDecimal.class, this}));
+            return computers.get(new MultiKeyUntyped(new Object[] {BigDecimal.class, this}));
         }
         SimpleNumberBigIntegerCoercer convertorOne = SimpleNumberCoercerFactory.getCoercerBigInteger(typeOne);
         SimpleNumberBigIntegerCoercer convertorTwo = SimpleNumberCoercerFactory.getCoercerBigInteger(typeTwo);

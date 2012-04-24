@@ -83,9 +83,9 @@ public class TestMTStmtSubquery extends TestCase
         assertEquals(totalExpected, resultNewData.length);
 
         Set<Integer> values = new HashSet<Integer>();
-        for (EventBean event : resultNewData)
+        for (EventBean theEvent : resultNewData)
         {
-            values.add((Integer)event.get("value"));
+            values.add((Integer)theEvent.get("value"));
         }
         assertEquals("Unexpected duplicates", totalExpected, values.size());
 

@@ -336,13 +336,13 @@ public class Patterns
     {
         Expression wildcard = new CrontabParameterExpression(ScheduleItemType.WILDCARD);
 
-        List<Expression> params = new ArrayList<Expression>();
-        params.add(minutes == null ? wildcard : Expressions.constant(minutes));
-        params.add(hours == null ? wildcard : Expressions.constant(hours));
-        params.add(daysOfMonth == null ? wildcard : Expressions.constant(daysOfMonth));
-        params.add(month == null ? wildcard : Expressions.constant(month));
-        params.add(daysOfWeek == null ? wildcard : Expressions.constant(daysOfWeek));
-        params.add(seconds == null ? wildcard : Expressions.constant(seconds));
-        return new PatternObserverExpr("timer", "at", params);
+        List<Expression> parameters = new ArrayList<Expression>();
+        parameters.add(minutes == null ? wildcard : Expressions.constant(minutes));
+        parameters.add(hours == null ? wildcard : Expressions.constant(hours));
+        parameters.add(daysOfMonth == null ? wildcard : Expressions.constant(daysOfMonth));
+        parameters.add(month == null ? wildcard : Expressions.constant(month));
+        parameters.add(daysOfWeek == null ? wildcard : Expressions.constant(daysOfWeek));
+        parameters.add(seconds == null ? wildcard : Expressions.constant(seconds));
+        return new PatternObserverExpr("timer", "at", parameters);
     }
 }

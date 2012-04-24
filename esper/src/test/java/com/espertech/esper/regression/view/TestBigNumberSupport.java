@@ -206,8 +206,8 @@ public class TestBigNumberSupport extends TestCase
         assertEquals(BigDecimal.class, stmt.getEventType().getPropertyType("v5"));
 
         sendBigNumEvent(1, 2);
-        EventBean event = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(event, "v1,v2,v3,v4,v5".split(","),
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        EPAssertionUtil.assertProps(theEvent, "v1,v2,v3,v4,v5".split(","),
                 new Object[]{new BigDecimal(3), new BigDecimal(4), new BigDecimal(5d), BigInteger.valueOf(6), new BigDecimal(6d)});
 
         // test aggregation-sum, multiplication and division all together; test for ESPER-340
@@ -238,8 +238,8 @@ public class TestBigNumberSupport extends TestCase
 
         String[] fieldList = fields.split(",");
         sendBigNumEvent(1, 2);
-        EventBean event = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(event, fieldList,
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        EPAssertionUtil.assertProps(theEvent, fieldList,
                 new Object[]{BigInteger.valueOf(1), new BigDecimal(2d),        // sum
                         new BigDecimal(1), new BigDecimal(2),               // avg
                         1d, 2d,               // median

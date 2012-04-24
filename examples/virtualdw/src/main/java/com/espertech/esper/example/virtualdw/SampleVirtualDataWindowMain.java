@@ -4,9 +4,6 @@ import com.espertech.esper.client.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class SampleVirtualDataWindowMain
 {
     private static final Log log = LogFactory.getLog(SampleVirtualDataWindowMain.class);
@@ -29,6 +26,7 @@ public class SampleVirtualDataWindowMain
         log.info("Setting up engine instance.");
 
         Configuration config = new Configuration();
+        config.getEngineDefaults().getEventMeta().setDefaultEventRepresentation(Configuration.EventRepresentation.MAP); // use Map-type events for testing
         config.addPlugInVirtualDataWindow("sample", "samplevdw", SampleVirtualDataWindowFactory.class.getName());
         config.addEventTypeAutoName(SampleVirtualDataWindowMain.class.getPackage().getName());    // import all event classes
 

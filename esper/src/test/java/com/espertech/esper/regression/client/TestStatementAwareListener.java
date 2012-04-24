@@ -88,34 +88,34 @@ public class TestStatementAwareListener extends TestCase
             statement.addListener(updateListeners[i]);
         }        
 
-        Object event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
         for (int i = 0; i < awareListeners.length; i++)
         {
-            assertSame(event, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
-            assertSame(event, awareListeners[i].assertOneGetNewAndReset().getUnderlying());
+            assertSame(theEvent, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
+            assertSame(theEvent, awareListeners[i].assertOneGetNewAndReset().getUnderlying());
         }
 
         statement.removeListener(awareListeners[1]);
-        event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
         for (int i = 0; i < awareListeners.length; i++)
         {
             if(i == 1)
             {
-                assertSame(event, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
+                assertSame(theEvent, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
                 assertFalse(awareListeners[i].isInvoked());
             }
             else
             {
-                assertSame(event, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
-                assertSame(event, awareListeners[i].assertOneGetNewAndReset().getUnderlying());
+                assertSame(theEvent, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
+                assertSame(theEvent, awareListeners[i].assertOneGetNewAndReset().getUnderlying());
             }
         }
 
         statement.removeListener(updateListeners[1]);
-        event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
         for (int i = 0; i < awareListeners.length; i++)
         {
             if(i == 1)
@@ -125,19 +125,19 @@ public class TestStatementAwareListener extends TestCase
             }
             else
             {
-                assertSame(event, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
-                assertSame(event, awareListeners[i].assertOneGetNewAndReset().getUnderlying());
+                assertSame(theEvent, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
+                assertSame(theEvent, awareListeners[i].assertOneGetNewAndReset().getUnderlying());
             }
         }
 
         statement.addListener(updateListeners[1]);
         statement.addListener(awareListeners[1]);
-        event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
         for (int i = 0; i < awareListeners.length; i++)
         {
-            assertSame(event, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
-            assertSame(event, awareListeners[i].assertOneGetNewAndReset().getUnderlying());
+            assertSame(theEvent, updateListeners[i].assertOneGetNewAndReset().getUnderlying());
+            assertSame(theEvent, awareListeners[i].assertOneGetNewAndReset().getUnderlying());
         }
 
         statement.removeAllListeners();
@@ -150,23 +150,23 @@ public class TestStatementAwareListener extends TestCase
     
     public void testUseOnMultipleStmts()
     {
-        EPStatement statementOne = epService.getEPAdministrator().createEPL("select * from Bean(string='A' or string='C')");
-        EPStatement statementTwo = epService.getEPAdministrator().createEPL("select * from Bean(string='B' or string='C')");
+        EPStatement statementOne = epService.getEPAdministrator().createEPL("select * from Bean(theString='A' or theString='C')");
+        EPStatement statementTwo = epService.getEPAdministrator().createEPL("select * from Bean(theString='B' or theString='C')");
 
         SupportStmtAwareUpdateListener awareListener = new SupportStmtAwareUpdateListener();
         statementOne.addListener(awareListener);
         statementTwo.addListener(awareListener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("B", 1));
-        assertEquals("B", awareListener.assertOneGetNewAndReset().get("string"));
+        assertEquals("B", awareListener.assertOneGetNewAndReset().get("theString"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 1));
-        assertEquals("A", awareListener.assertOneGetNewAndReset().get("string"));
+        assertEquals("A", awareListener.assertOneGetNewAndReset().get("theString"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("C", 1));
         assertEquals(2, awareListener.getNewDataList().size());
-        assertEquals("C", awareListener.getNewDataList().get(0)[0].get("string"));
-        assertEquals("C", awareListener.getNewDataList().get(1)[0].get("string"));
+        assertEquals("C", awareListener.getNewDataList().get(0)[0].get("theString"));
+        assertEquals("C", awareListener.getNewDataList().get(1)[0].get("theString"));
         EPStatement stmts[] = awareListener.getStatementList().toArray(new EPStatement[0]);
         EPAssertionUtil.assertEqualsAnyOrder(stmts, new Object[]{statementOne, statementTwo});
     }

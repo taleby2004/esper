@@ -72,7 +72,7 @@ public class TestWhileGuard extends TestCase implements SupportBeanConstants
         epService.getEPAdministrator().getConfiguration().addVariable("myVariable", "boolean", true);
 
         String expression =
-            "select * from pattern [every a=SupportBean(string like 'A%') -> (every b=SupportBean(string like 'B%')) while (myVariable)]";
+            "select * from pattern [every a=SupportBean(theString like 'A%') -> (every b=SupportBean(theString like 'B%')) while (myVariable)]";
 
         EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();

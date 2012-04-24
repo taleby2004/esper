@@ -362,7 +362,7 @@ config.addEventType("MyLegacyEvent", MyLegacyEventClass.class.getName(), legacyD
 </event-type>]]></programlisting>
 
 				<para>
-				  The copy method should be a public method that takes no parameters and returns a new event object. The copy method may not be a static method and may not take parameters.
+				  The copy method should be a public method that takes no parameters and returns a new event object (it may not return <literal>this</literal>). The copy method may not be a static method and may not take parameters.
 				</para>
 			</sect3>
 

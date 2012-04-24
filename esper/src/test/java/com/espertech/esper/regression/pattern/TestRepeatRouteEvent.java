@@ -58,8 +58,8 @@ public class TestRepeatRouteEvent extends TestCase
 
             public void update(EventBean[] newEvents, EventBean[] oldEvents, EPStatement statement, EPServiceProvider epServiceProvider)
             {
-                Node event = getXMLEvent("<root><value>5</value></root>");
-                epServiceProvider.getEPRuntime().route(event);
+                Node theEvent = getXMLEvent("<root><value>5</value></root>");
+                epServiceProvider.getEPRuntime().route(theEvent);
                 epServiceProvider.getEPRuntime().route(new HashMap(), "MyMap");
             }
         });
@@ -119,18 +119,18 @@ public class TestRepeatRouteEvent extends TestCase
 
     private SupportBean sendEvent(int intValue)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intValue);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intValue);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
     private SupportBean routeEvent(int intValue)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intValue);
-        epService.getEPRuntime().route(event);
-        return event;
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intValue);
+        epService.getEPRuntime().route(theEvent);
+        return theEvent;
     }
 
     private Node getXMLEvent(String xml)
@@ -177,8 +177,8 @@ public class TestRepeatRouteEvent extends TestCase
         public void update(EventBean[] newEvents, EventBean[] oldEvents)
         {
             countReceived++;
-            SupportBean event = (SupportBean) (newEvents[0].get("tag"));
-            int numNewEvents = event.getIntPrimitive();
+            SupportBean theEvent = (SupportBean) (newEvents[0].get("tag"));
+            int numNewEvents = theEvent.getIntPrimitive();
 
             for (int i = 0; i < numNewEvents; i++)
             {

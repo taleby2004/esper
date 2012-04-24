@@ -76,11 +76,11 @@ public class TestWeightedAverageViewFactory extends TestCase
         assertTrue(factory.canReuse(new WeightedAverageView(SupportStatementContextFactory.makeAgentInstanceContext(), SupportExprNodeFactory.makeIdentNodeMD("price"), SupportExprNodeFactory.makeIdentNodeMD("volume"), type, null)));
     }
 
-    private void tryInvalidParameter(Object[] params) throws Exception
+    private void tryInvalidParameter(Object[] parameters) throws Exception
     {
         try
         {
-            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
+            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(parameters));
             factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
@@ -90,9 +90,9 @@ public class TestWeightedAverageViewFactory extends TestCase
         }
     }
 
-    private void tryParameter(Object[] params, String fieldNameX, String fieldNameW) throws Exception
+    private void tryParameter(Object[] parameters, String fieldNameX, String fieldNameW) throws Exception
     {
-        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
+        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(parameters));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
         WeightedAverageView view = (WeightedAverageView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldNameX, view.getFieldNameX().toExpressionString());

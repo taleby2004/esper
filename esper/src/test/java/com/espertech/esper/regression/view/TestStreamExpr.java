@@ -11,17 +11,17 @@
 
 package com.espertech.esper.regression.view;
 
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
+import com.espertech.esper.event.MappedEventBean;
+import com.espertech.esper.event.ObjectArrayBackedEventBean;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.support.bean.*;
-import junit.framework.TestCase;
-import com.espertech.esper.client.*;
-import com.espertech.esper.client.soda.EPStatementObjectModel;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
+import junit.framework.TestCase;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -110,10 +110,10 @@ public class TestStreamExpr extends TestCase
 
     public void testInstanceMethodOuterJoin()
     {
-        String textOne = "select symbol, s1.getString() as string from " +
+        String textOne = "select symbol, s1.getTheString() as theString from " +
                             SupportMarketDataBean.class.getName() + ".win:keepall() as s0 " +
                             "left outer join " +
-                            SupportBean.class.getName() + ".win:keepall() as s1 on s0.symbol=s1.string";
+                            SupportBean.class.getName() + ".win:keepall() as s1 on s0.symbol=s1.theString";
 
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
@@ -121,7 +121,7 @@ public class TestStreamExpr extends TestCase
 
         SupportMarketDataBean eventA = new SupportMarketDataBean("ACME", 0, 0L, null);
         epService.getEPRuntime().sendEvent(eventA);
-        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[]{"symbol", "string"}, new Object[]{"ACME", null});
+        EPAssertionUtil.assertProps(listenerOne.assertOneGetNewAndReset(), new String[]{"symbol", "theString"}, new Object[]{"ACME", null});
     }
 
     public void testInstanceMethodStatic()
@@ -137,16 +137,16 @@ public class TestStreamExpr extends TestCase
 
         SupportMarketDataBean eventA = new SupportMarketDataBean("ACME", 0, 0L, null);
         epService.getEPRuntime().sendEvent(eventA);
-        EventBean event = listenerOne.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(event, new String[]{"symbol", "simpleprop"}, new Object[]{"ACME", null});
-        assertNull(event.get("def"));
+        EventBean theEvent = listenerOne.assertOneGetNewAndReset();
+        EPAssertionUtil.assertProps(theEvent, new String[]{"symbol", "simpleprop"}, new Object[]{"ACME", null});
+        assertNull(theEvent.get("def"));
 
         SupportBeanComplexProps eventComplexProps = SupportBeanComplexProps.makeDefaultBean();
         eventComplexProps.setSimpleProperty("ACME");
         epService.getEPRuntime().sendEvent(eventComplexProps);
-        event = listenerOne.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(event, new String[]{"symbol", "simpleprop"}, new Object[]{"ACME", "ACME"});
-        assertNotNull(event.get("def"));
+        theEvent = listenerOne.assertOneGetNewAndReset();
+        EPAssertionUtil.assertProps(theEvent, new String[]{"symbol", "simpleprop"}, new Object[]{"ACME", "ACME"});
+        assertNotNull(theEvent.get("def"));
     }
 
     public void testStreamInstanceMethodAliased()
@@ -160,7 +160,6 @@ public class TestStreamExpr extends TestCase
 
         EventType type = stmtOne.getEventType();
         assertEquals(3, type.getPropertyNames().length);
-        assertEquals(Map.class, type.getUnderlyingType());
         assertEquals(Long.class, type.getPropertyType("volume"));
         assertEquals(String.class, type.getPropertyType("symbol"));
         assertEquals(double.class, type.getPropertyType("pvf"));
@@ -181,7 +180,6 @@ public class TestStreamExpr extends TestCase
 
         EventType type = stmtOne.getEventType();
         assertEquals(2, type.getPropertyNames().length);
-        assertEquals(Map.class, type.getUnderlyingType());
         assertEquals(Long.class, type.getPropertyType("s0.getVolume()"));
         assertEquals(double.class, type.getPropertyType("s0.getPriceTimesVolume(3)"));
 
@@ -206,7 +204,6 @@ public class TestStreamExpr extends TestCase
 
         EventType type = stmtOne.getEventType();
         assertEquals(2, type.getPropertyNames().length);
-        assertEquals(Map.class, type.getUnderlyingType());
         assertEquals(SupportMarketDataBean.class, type.getPropertyType("s0stream"));
         assertEquals(SupportBean.class, type.getPropertyType("s1stream"));
 
@@ -230,7 +227,6 @@ public class TestStreamExpr extends TestCase
 
         type = stmtOne.getEventType();
         assertEquals(2, type.getPropertyNames().length);
-        assertEquals(Map.class, type.getUnderlyingType());
         assertEquals(SupportMarketDataBean.class, type.getPropertyType("s0"));
         assertEquals(SupportBean.class, type.getPropertyType("s1"));
 
@@ -281,10 +277,12 @@ public class TestStreamExpr extends TestCase
         // send event for joins to match on
         SupportMarketDataBean eventA = new SupportMarketDataBean("ACME", 0, 0L, null);
         epService.getEPRuntime().sendEvent(eventA);
-        EventBean event = listenerTwo.assertOneGetNewAndReset();
-        assertTrue(event.getEventType() instanceof BeanEventType);
-        assertTrue (event.getUnderlying() instanceof SupportBean);
-        assertEquals("ACME", event.get("string"));
+        EventBean theEvent = listenerTwo.assertOneGetNewAndReset();
+        assertTrue(theEvent.getEventType() instanceof BeanEventType);
+        assertTrue (theEvent.getUnderlying() instanceof SupportBean);
+        assertEquals("ACME", theEvent.get("theString"));
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testStreamSelectConversionFunctionMap()
@@ -296,10 +294,10 @@ public class TestStreamExpr extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("MapOne", types);
         epService.getEPAdministrator().getConfiguration().addEventType("MapTwo", types);
 
+        // test wrapped
         String textOne = "insert into Stream0 select * from MapOne";
         String textTwo = "insert into Stream0 select " + SupportStaticMethodLib.class.getName() + ".convertEventMap(s0) from MapTwo as s0";
 
-        // Attach listener to feed
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
@@ -317,10 +315,84 @@ public class TestStreamExpr extends TestCase
         values.put("two", "2");
         epService.getEPRuntime().sendEvent(values, "MapTwo");
 
-        EventBean event = listenerTwo.assertOneGetNewAndReset();
-        assertTrue (event.getUnderlying() instanceof Map);
-        assertEquals("1", event.get("one"));
-        assertEquals("|2|", event.get("two"));
+        EventBean theEvent = listenerTwo.assertOneGetNewAndReset();
+        assertTrue (theEvent.getUnderlying() instanceof Map);
+        assertEquals("1", theEvent.get("one"));
+        assertEquals("|2|", theEvent.get("two"));
+
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // test native
+        epService.getEPAdministrator().createEPL("insert into MapOne select " + SupportStaticMethodLib.class.getName() + ".convertEventMap(s0) from MapTwo as s0");
+        EPStatement stmtThree = epService.getEPAdministrator().createEPL("select * from MapOne");
+        stmtThree.addListener(listener);
+
+        Map<String, Object> valuesTwo = new HashMap<String, Object>();
+        valuesTwo.put("one", "3");
+        valuesTwo.put("two", "4");
+        epService.getEPRuntime().sendEvent(valuesTwo, "MapTwo");
+        EventBean eventTwo = listener.assertOneGetNewAndReset();
+        assertTrue (eventTwo.getUnderlying() instanceof Map);
+        assertTrue (eventTwo instanceof MappedEventBean);
+        assertEquals("3", eventTwo.get("one"));
+        assertEquals("|4|", eventTwo.get("two"));
+    }
+
+    public void testStreamSelectConversionFunctionObjectArray()
+    {
+        String[] props = {"one", "two"};
+        Object[] types = {String.class, String.class};
+        epService.getEPAdministrator().getConfiguration().addEventType("OAOne", props, types);
+        epService.getEPAdministrator().getConfiguration().addEventType("OATwo", props, types);
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+
+        // test wrapped
+        String textOne = "insert into Stream0 select * from OAOne";
+        String textTwo = "insert into Stream0 select " + SupportStaticMethodLib.class.getName() + ".convertEventObjectArray(s0) from OATwo as s0";
+
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(textOne);
+        SupportUpdateListener listenerOne = new SupportUpdateListener();
+        stmtOne.addListener(listenerOne);
+        EventType type = stmtOne.getEventType();
+        assertEquals(Object[].class, type.getUnderlyingType());
+
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(textTwo);
+        SupportUpdateListener listenerTwo = new SupportUpdateListener();
+        stmtTwo.addListener(listenerTwo);
+        type = stmtTwo.getEventType();
+        assertEquals(Object[].class, type.getUnderlyingType());
+
+        epService.getEPRuntime().sendEvent(new Object[] {"1", "2"}, "OATwo");
+
+        EventBean theEvent = listenerTwo.assertOneGetNewAndReset();
+        assertTrue (theEvent.getUnderlying() instanceof Object[]);
+        assertEquals("1", theEvent.get("one"));
+        assertEquals("|2|", theEvent.get("two"));
+
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // test native
+        epService.getEPAdministrator().createEPL("insert into OAOne select " + SupportStaticMethodLib.class.getName() + ".convertEventObjectArray(s0) from OATwo as s0");
+        EPStatement stmtThree = epService.getEPAdministrator().createEPL("select * from OAOne");
+        stmtThree.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new Object[] {"3", "4"}, "OATwo");
+        EventBean eventTwo = listener.assertOneGetNewAndReset();
+        assertTrue (eventTwo instanceof ObjectArrayBackedEventBean);
+        assertTrue (eventTwo.getUnderlying() instanceof Object[]);
+        assertEquals("3", eventTwo.get("one"));
+        assertEquals("|4|", eventTwo.get("two"));
+
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // test Object-array with single object-array property, should not convert
+        epService.getEPAdministrator().getConfiguration().addEventType("OAInner", new String[] {"id"}, new Object[] {String.class});
+        epService.getEPAdministrator().getConfiguration().addEventType("OAOuter", new String[] {"inside"}, new Object[] {"OAInner"});
+
+        epService.getEPAdministrator().createEPL("insert into OAOuter select " + this.getClass().getName() + ".getObjectArray() as id from SupportBean").addListener(listener);
+        epService.getEPRuntime().sendEvent(new SupportBean());
+        assertEquals("OAOuter", listener.assertOneGetNew().getEventType().getName());
+        assertEquals("id1", listener.assertOneGetNew().get("inside.id"));
     }
 
     public void testInvalidSelect()
@@ -329,6 +401,10 @@ public class TestStreamExpr extends TestCase
 
         tryInvalid("select s0.abc() from " + SupportBean.class.getName() + " as s0",
                    "Error starting statement: Failed to solve 'abc' to either an date-time or enumeration method, an event property or a method on the event underlying object [select s0.abc() from com.espertech.esper.support.bean.SupportBean as s0]");
+    }
+
+    public static Object[] getObjectArray() {
+        return new Object[] {"id1"};
     }
 
     private void tryInvalid(String clause, String message)

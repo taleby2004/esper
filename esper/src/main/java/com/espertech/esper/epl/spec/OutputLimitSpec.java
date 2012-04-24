@@ -66,6 +66,10 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
         this.andAfterTerminateThenExpressions = andAfterTerminateSetExpressions;
     }
 
+    public OutputLimitSpec(OutputLimitLimitType displayLimit, OutputLimitRateType rateType) {
+        this(null, null, rateType, displayLimit, null, null, null, null, null, null, false, null, null);
+    }
+
     /**
      * Returns the type of output limit.
      * @return limit

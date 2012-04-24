@@ -18,6 +18,7 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.Map;
@@ -25,7 +26,7 @@ import java.util.Map;
 public class TestSubscriberBind extends TestCase
 {
     private EPServiceProvider epService;
-    private final String fields[] = "string,intPrimitive".split(",");
+    private final String fields[] = "theString,intPrimitive".split(",");
 
     public void setUp()
     {
@@ -49,34 +50,43 @@ public class TestSubscriberBind extends TestCase
         stmt.setSubscriber(subscriber);
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("E1", event.get("string"));
-        assertEquals(1, event.get("intPrimitive"));
-        assertTrue(event.getUnderlying() instanceof Pair);
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("E1", theEvent.get("theString"));
+        assertEquals(1, theEvent.get("intPrimitive"));
+        assertTrue(theEvent.getUnderlying() instanceof Pair);
 
         for (String property : stmt.getEventType().getPropertyNames())
         {
             EventPropertyGetter getter = stmt.getEventType().getGetter(property);
-            getter.get(event);
+            getter.get(theEvent);
         }
     }
 
-    public void testOutputLimitNoJoin()
+    public void testOutputLimitNoJoin() {
+        runAssertionOutputLimitNoJoin(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionOutputLimitNoJoin(EventRepresentationEnum.MAP);
+        runAssertionOutputLimitNoJoin(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionOutputLimitNoJoin(EventRepresentationEnum eventRepresentationEnum)
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean output every 2 events");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " select theString, intPrimitive from SupportBean output every 2 events");
         stmt.setSubscriber(subscriber);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmt.getEventType().getUnderlyingType());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         assertEquals(0, subscriber.getAndResetIndicate().size());
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         EPAssertionUtil.assertEqualsExactOrder(new Object[][]{{"E1", 1}, {"E2", 2}}, subscriber.getAndResetIndicate());
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testOutputLimitJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean.win:keepall(), SupportMarketDataBean.win:keepall() where symbol = string output every 2 events");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString, intPrimitive from SupportBean.win:keepall(), SupportMarketDataBean.win:keepall() where symbol = theString output every 2 events");
         stmt.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("E1", 0, 1L, ""));
@@ -89,7 +99,7 @@ public class TestSubscriberBind extends TestCase
     public void testSimpleSelectStatic()
     {
         MySubscriberRowByRowSpecificStatic subscriber = new MySubscriberRowByRowSpecificStatic();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from " + SupportBean.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString, intPrimitive from " + SupportBean.class.getName());
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -100,7 +110,7 @@ public class TestSubscriberBind extends TestCase
     public void testRStreamSelect()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select rstream s0 from SupportBean.std:unique(string) as s0");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select rstream s0 from SupportBean.std:unique(theString) as s0");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -120,7 +130,7 @@ public class TestSubscriberBind extends TestCase
     public void testStreamSelectJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select null, s1, s0 from SupportBean.win:keepall() as s0, SupportMarketDataBean.win:keepall() as s1 where s0.string = s1.symbol");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select null, s1, s0 from SupportBean.win:keepall() as s0, SupportMarketDataBean.win:keepall() as s1 where s0.theString = s1.symbol");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -134,7 +144,7 @@ public class TestSubscriberBind extends TestCase
     public void testStreamWildcardJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string || '<', s1.* as s1, s0.* as s0 from SupportBean.win:keepall() as s0, SupportMarketDataBean.win:keepall() as s1 where s0.string = s1.symbol");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString || '<', s1.* as s1, s0.* as s0 from SupportBean.win:keepall() as s0, SupportMarketDataBean.win:keepall() as s1 where s0.theString = s1.symbol");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -148,7 +158,7 @@ public class TestSubscriberBind extends TestCase
     public void testBindWildcardJoin()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.win:keepall() as s0, SupportMarketDataBean.win:keepall() as s1 where s0.string = s1.symbol");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean.win:keepall() as s0, SupportMarketDataBean.win:keepall() as s1 where s0.theString = s1.symbol");
         stmt.setSubscriber(subscriber);
 
         // send event
@@ -162,7 +172,7 @@ public class TestSubscriberBind extends TestCase
     public void testBindWildcardPlusProperties()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select *, intPrimitive + 2, 'x'||string||'x' from " + SupportBean.class.getName());
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select *, intPrimitive + 2, 'x'||theString||'x' from " + SupportBean.class.getName());
         stmt.setSubscriber(subscriber);
 
         SupportBean s0 = new SupportBean("E1", 100);
@@ -201,7 +211,7 @@ public class TestSubscriberBind extends TestCase
     public void testBindUpdateIRStream()
     {
         MySubscriberRowByRowFull subscriber = new MySubscriberRowByRowFull();
-        String stmtText = "select irstream string, intPrimitive from " + SupportBean.class.getName() + ".win:length_batch(2)";
+        String stmtText = "select irstream theString, intPrimitive from " + SupportBean.class.getName() + ".win:length_batch(2)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.setSubscriber(subscriber);
 
@@ -228,12 +238,19 @@ public class TestSubscriberBind extends TestCase
         EPAssertionUtil.assertEqualsExactOrder(new Object[][]{{"E1", 1}, {"E2", 2}}, subscriber.getAndResetIndicateRStream());
     }
 
-    public void testBindObjectArr()
+    public void testBindObjectArr() {
+        runAssertionBindObjectArr(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionBindObjectArr(EventRepresentationEnum.MAP);
+        runAssertionBindObjectArr(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionBindObjectArr(EventRepresentationEnum eventRepresentationEnum)
     {
         MySubscriberMultirowObjectArr subscriber = new MySubscriberMultirowObjectArr();
-        String stmtText = "select irstream string, intPrimitive from " + SupportBean.class.getName() + ".win:length_batch(2)";
+        String stmtText = eventRepresentationEnum.getAnnotationText() + " select irstream theString, intPrimitive from " + SupportBean.class.getName() + ".win:length_batch(2)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.setSubscriber(subscriber);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmt.getEventType().getUnderlyingType());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         assertEquals(0, subscriber.getIndicateArr().size());
@@ -253,14 +270,23 @@ public class TestSubscriberBind extends TestCase
         assertEquals(2, result.getSecond().length);
         EPAssertionUtil.assertEqualsExactOrder(result.getFirst(), fields, new Object[][]{{"E3", 3}, {"E4", 4}});
         EPAssertionUtil.assertEqualsExactOrder(result.getSecond(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
-    public void testBindMap()
+    public void testBindMap() {
+        runAssertBindMap(EventRepresentationEnum.OBJECTARRAY);
+        runAssertBindMap(EventRepresentationEnum.MAP);
+        runAssertBindMap(EventRepresentationEnum.DEFAULT);
+    }
+
+    public void runAssertBindMap(EventRepresentationEnum eventRepresentationEnum)
     {
         MySubscriberMultirowMap subscriber = new MySubscriberMultirowMap();
-        String stmtText = "select irstream string, intPrimitive from " + SupportBean.class.getName() + ".win:length_batch(2)";
+        String stmtText = eventRepresentationEnum.getAnnotationText() + " select irstream theString, intPrimitive from " + SupportBean.class.getName() + ".win:length_batch(2)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.setSubscriber(subscriber);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmt.getEventType().getUnderlyingType());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         assertEquals(0, subscriber.getIndicateMap().size());
@@ -280,33 +306,44 @@ public class TestSubscriberBind extends TestCase
         assertEquals(2, result.getSecond().length);
         EPAssertionUtil.assertPropsPerRow(result.getFirst(), fields, new Object[][]{{"E3", 3}, {"E4", 4}});
         EPAssertionUtil.assertPropsPerRow(result.getSecond(), fields, new Object[][]{{"E1", 1}, {"E2", 2}});
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
-    public void testWidening()
+    public void testWidening() {
+        runAssertionWidening(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionBindObjectArr(EventRepresentationEnum.MAP);
+        runAssertionBindObjectArr(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionWidening(EventRepresentationEnum eventRepresentationEnum)
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select bytePrimitive, intPrimitive, longPrimitive, floatPrimitive from SupportBean(string='E1')");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " select bytePrimitive, intPrimitive, longPrimitive, floatPrimitive from SupportBean(theString='E1')");
         stmt.setSubscriber(subscriber);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmt.getEventType().getUnderlyingType());
 
         SupportBean bean = new SupportBean();
-        bean.setString("E1");
+        bean.setTheString("E1");
         bean.setBytePrimitive((byte)1);
         bean.setIntPrimitive(2);
         bean.setLongPrimitive(3);
         bean.setFloatPrimitive(4);
         epService.getEPRuntime().sendEvent(bean);
         EPAssertionUtil.assertEqualsExactOrder(new Object[]{1, 2L, 3d, 4d}, subscriber.getAndResetIndicate().get(0));
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testWildcard()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(string='E2')");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(theString='E2')");
         stmt.setSubscriber(subscriber);
 
-        SupportBean event = new SupportBean("E2", 1);
-        epService.getEPRuntime().sendEvent(event);
-        EPAssertionUtil.assertEqualsExactOrder(new Object[]{event}, subscriber.getAndResetIndicate().get(0));
+        SupportBean theEvent = new SupportBean("E2", 1);
+        epService.getEPRuntime().sendEvent(theEvent);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{theEvent}, subscriber.getAndResetIndicate().get(0));
     }
 
     public void testNested()
@@ -315,20 +352,20 @@ public class TestSubscriberBind extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL("select nested, nested.nestedNested from SupportBeanComplexProps");
         stmt.setSubscriber(subscriber);
 
-        SupportBeanComplexProps event = SupportBeanComplexProps.makeDefaultBean();
-        epService.getEPRuntime().sendEvent(event);
-        EPAssertionUtil.assertEqualsExactOrder(new Object[]{event.getNested(), event.getNested().getNestedNested()}, subscriber.getAndResetIndicate().get(0));
+        SupportBeanComplexProps theEvent = SupportBeanComplexProps.makeDefaultBean();
+        epService.getEPRuntime().sendEvent(theEvent);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{theEvent.getNested(), theEvent.getNested().getNestedNested()}, subscriber.getAndResetIndicate().get(0));
     }
 
     public void testEnum()
     {
         MySubscriberRowByRowSpecific subscriber = new MySubscriberRowByRowSpecific();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, supportEnum from SupportBeanWithEnum");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString, supportEnum from SupportBeanWithEnum");
         stmt.setSubscriber(subscriber);
 
-        SupportBeanWithEnum event = new SupportBeanWithEnum("abc", SupportEnum.ENUM_VALUE_1);
-        epService.getEPRuntime().sendEvent(event);
-        EPAssertionUtil.assertEqualsExactOrder(new Object[]{event.getString(), event.getSupportEnum()}, subscriber.getAndResetIndicate().get(0));
+        SupportBeanWithEnum theEvent = new SupportBeanWithEnum("abc", SupportEnum.ENUM_VALUE_1);
+        epService.getEPRuntime().sendEvent(theEvent);
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{theEvent.getTheString(), theEvent.getSupportEnum()}, subscriber.getAndResetIndicate().get(0));
     }
 
     public void testNullType()
@@ -350,24 +387,40 @@ public class TestSubscriberBind extends TestCase
         assertTrue(subscriberNoParams.isCalled());
     }
 
-    public void testObjectArrayDelivery()
+    public void testObjectArrayDelivery() {
+        runAssertionObjectArrayDelivery(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionObjectArrayDelivery(EventRepresentationEnum.DEFAULT);
+        runAssertionObjectArrayDelivery(EventRepresentationEnum.MAP);
+    }
+
+    private void runAssertionObjectArrayDelivery(EventRepresentationEnum eventRepresentationEnum)
     {
         MySubscriberRowByRowObjectArr subscriber = new MySubscriberRowByRowObjectArr();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean.std:unique(string)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " select theString, intPrimitive from SupportBean.std:unique(theString)");
         stmt.setSubscriber(subscriber);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmt.getEventType().getUnderlyingType());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         EPAssertionUtil.assertEqualsAnyOrder(subscriber.getAndResetIndicate().get(0), new Object[]{"E1", 1});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 10));
         EPAssertionUtil.assertEqualsAnyOrder(subscriber.getAndResetIndicate().get(0), new Object[]{"E2", 10});
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
-    public void testRowMapDelivery()
+    public void testRowMapDelivery() {
+        runAssertionRowMapDelivery(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionRowMapDelivery(EventRepresentationEnum.DEFAULT);
+        runAssertionRowMapDelivery(EventRepresentationEnum.MAP);
+    }
+
+    private void runAssertionRowMapDelivery(EventRepresentationEnum eventRepresentationEnum)
     {
         MySubscriberRowByRowMap subscriber = new MySubscriberRowByRowMap();
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string, intPrimitive from SupportBean.std:unique(string)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " select irstream theString, intPrimitive from SupportBean.std:unique(theString)");
         stmt.setSubscriber(subscriber);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmt.getEventType().getUnderlyingType());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         EPAssertionUtil.assertPropsMap(subscriber.getAndResetIndicateIStream().get(0), fields, new Object[]{"E1", 1});
@@ -380,6 +433,8 @@ public class TestSubscriberBind extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
         EPAssertionUtil.assertPropsMap(subscriber.getAndResetIndicateIStream().get(0), fields, new Object[]{"E1", 2});
         EPAssertionUtil.assertPropsMap(subscriber.getAndResetIndicateRStream().get(0), fields, new Object[]{"E1", 1});
+
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
     private static class LocalSubscriberNoParams {

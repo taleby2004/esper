@@ -110,7 +110,7 @@ public class TestViewGroupWithinGroup extends TestCase
 
     private void sendEvent(String symbol, String feed, long volume)
     {
-        SupportMarketDataBean event = new SupportMarketDataBean(symbol, 0, volume, feed);
-        epService.getEPRuntime().sendEvent(event);
+        SupportMarketDataBean theEvent = new SupportMarketDataBean(symbol, 0, volume, feed);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

@@ -16,6 +16,7 @@ import com.espertech.esper.core.service.EPStatementHandle;
 import com.espertech.esper.core.service.StatementAgentInstanceFilterVersion;
 import com.espertech.esper.core.service.StatementAgentInstanceLock;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.filter.FilterFaultHandler;
 
 public class EPStatementAgentInstanceHandle {
     private final EPStatementHandle statementHandle;
@@ -31,6 +32,7 @@ public class EPStatementAgentInstanceHandle {
     private boolean destroyed;
 
     private final int hashCode;
+    private FilterFaultHandler filterFaultHandler;
 
     public EPStatementAgentInstanceHandle(EPStatementHandle statementHandle, StatementAgentInstanceLock statementAgentInstanceLock, int agentInstanceId, StatementAgentInstanceFilterVersion statementFilterVersion) {
         this.statementHandle = statementHandle;
@@ -153,5 +155,13 @@ public class EPStatementAgentInstanceHandle {
         return "EPStatementAgentInstanceHandle{" +
                 "name=" + statementHandle.getStatementName() +
                 '}';
+    }
+
+    public FilterFaultHandler getFilterFaultHandler() {
+        return filterFaultHandler;
+    }
+
+    public void setFilterFaultHandler(FilterFaultHandler filterFaultHandler) {
+        this.filterFaultHandler = filterFaultHandler;
     }
 }

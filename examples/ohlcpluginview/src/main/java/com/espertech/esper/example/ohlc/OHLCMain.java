@@ -100,10 +100,10 @@ public class OHLCMain
             {
                 double price = ((Number) input[i][2]).doubleValue();
                 String timestampTick = (String) input[i][3];
-                OHLCTick event = new OHLCTick(ticker, price, toTime(timestampTick));
+                OHLCTick theEvent = new OHLCTick(ticker, price, toTime(timestampTick));
 
-                log.info("Sending event " + event);
-                epService.getEPRuntime().sendEvent(event);
+                log.info("Sending event " + theEvent);
+                epService.getEPRuntime().sendEvent(theEvent);
             }
         }
     }

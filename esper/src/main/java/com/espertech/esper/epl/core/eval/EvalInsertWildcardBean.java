@@ -15,22 +15,15 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.Map;
 
 public class EvalInsertWildcardBean extends EvalBase implements SelectExprProcessor {
-
-    private static final Log log = LogFactory.getLog(EvalInsertWildcardBean.class);
 
     public EvalInsertWildcardBean(SelectExprContext selectExprContext, EventType resultEventType) {
         super(selectExprContext, resultEventType);
     }
 
-    public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
-    {
-        EventBean event = eventsPerStream[0];
-        return super.getEventAdapterService().adapterForTypedBean(event.getUnderlying(), super.getResultEventType());
+    public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
+        EventBean theEvent = eventsPerStream[0];
+        return super.getEventAdapterService().adapterForTypedBean(theEvent.getUnderlying(), super.getResultEventType());
     }
 }

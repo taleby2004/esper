@@ -16,7 +16,9 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -46,6 +48,26 @@ public class ASTUtil
             }
         }
         return null;
+    }
+
+    public static List<Tree> findAllNodes(Tree parent, int type)
+    {
+        List<Tree> result = null;
+        for (int i = 0; i < parent.getChildCount(); i++)
+        {
+            Tree child = parent.getChild(i);
+            if (child.getType() == type)
+            {
+                if (result == null) {
+                    result = new ArrayList<Tree>();
+                }
+                result.add(child);
+            }
+        }
+        if (result == null) {
+            return Collections.emptyList();
+        }
+        return result;
     }
 
     /**

@@ -1235,16 +1235,16 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      * on read before this implementation will work. Generally, the read determines
      * what must be serialized here, if anything.
      *
-     * @param out  the output stream
+     * @param outStream  the output stream
      * @throws IOException write error
      */
-    protected void doWriteObject(ObjectOutputStream out) throws IOException {
-        out.writeFloat(loadFactor);
-        out.writeInt(data.length);
-        out.writeInt(size);
+    protected void doWriteObject(ObjectOutputStream outStream) throws IOException {
+        outStream.writeFloat(loadFactor);
+        outStream.writeInt(data.length);
+        outStream.writeInt(size);
         for (MapIterator it = mapIterator(); it.hasNext();) {
-            out.writeObject(it.next());
-            out.writeObject(it.getValue());
+            outStream.writeObject(it.next());
+            outStream.writeObject(it.getValue());
         }
     }
 
@@ -1264,20 +1264,20 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
      * Subclasses may override if the subclass has a specific field that must be present
      * before <code>put()</code> or <code>calculateThreshold()</code> will work correctly.
      *
-     * @param in  the input stream
+     * @param input  the input stream
      * @throws IOException io error
      * @throws ClassNotFoundException class not found
      */
-    protected void doReadObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        loadFactor = in.readFloat();
-        int capacity = in.readInt();
-        int size = in.readInt();
+    protected void doReadObject(ObjectInputStream input) throws IOException, ClassNotFoundException {
+        loadFactor = input.readFloat();
+        int capacity = input.readInt();
+        int size = input.readInt();
         init();
         threshold = calculateThreshold(capacity, loadFactor);
         data = new HashEntry[capacity];
         for (int i = 0; i < size; i++) {
-            Object key = in.readObject();
-            Object value = in.readObject();
+            Object key = input.readObject();
+            Object value = input.readObject();
             put(key, value);
         }
     }

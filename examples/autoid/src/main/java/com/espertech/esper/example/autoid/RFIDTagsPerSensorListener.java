@@ -23,10 +23,10 @@ public class RFIDTagsPerSensorListener implements UpdateListener
         }
     }
 
-    private void logRate(EventBean event)
+    private void logRate(EventBean theEvent)
     {
-        String sensorId = (String) event.get("sensorId");
-        double numTags = (Double) event.get("numTagsPerSensor");
+        String sensorId = (String) theEvent.get("sensorId");
+        double numTags = (Double) theEvent.get("numTagsPerSensor");
 
         log.info("Sensor " + sensorId + " totals " + numTags + " tags");
     }

@@ -21,10 +21,10 @@ import java.util.Date;
  */
 public class TerminalComplexEventListener implements ComplexEventListener {
 
-    public void onComplexEvent(String complexEvent) {
+    public void onComplexEvent(String theEvent) {
         DateFormat dateFormat = SimpleDateFormat.getDateTimeInstance();
         String date = dateFormat.format(new Date());
 
-        System.out.println("CEP: " + date + " " + complexEvent);
+        System.out.println("CEP: " + date + " " + theEvent);
     }
 }

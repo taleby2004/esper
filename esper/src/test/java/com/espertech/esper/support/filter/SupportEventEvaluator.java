@@ -24,10 +24,10 @@ public class SupportEventEvaluator implements EventEvaluator
     private EventBean lastEvent;
     private Collection<FilterHandle> lastMatches;
 
-    public void matchEvent(EventBean event, Collection<FilterHandle> matches)
+    public void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
         countInvoked++;
-        lastEvent = event;
+        lastEvent = theEvent;
         lastMatches = matches;
     }
 

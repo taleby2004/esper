@@ -42,9 +42,9 @@ public class TestFilterExprAnalyzer extends TestCase
         FilterExprAnalyzer.analyzeAndNode(andNode, graph, false);
 
         assertTrue(graph.isNavigableAtAll(0, 1));
-        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intPrimitive", "string"}, QueryGraphTestUtil.getStrictKeyProperties(graph, 0, 1));
-        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intPrimitive", "string"}, QueryGraphTestUtil.getIndexProperties(graph, 1, 0));
-        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intBoxed", "string"}, QueryGraphTestUtil.getStrictKeyProperties(graph, 1, 0));
-        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intBoxed", "string"}, QueryGraphTestUtil.getIndexProperties(graph, 0, 1));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intPrimitive", "theString"}, QueryGraphTestUtil.getStrictKeyProperties(graph, 0, 1));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intPrimitive", "theString"}, QueryGraphTestUtil.getIndexProperties(graph, 1, 0));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intBoxed", "theString"}, QueryGraphTestUtil.getStrictKeyProperties(graph, 1, 0));
+        EPAssertionUtil.assertEqualsExactOrder(new String[]{"intBoxed", "theString"}, QueryGraphTestUtil.getIndexProperties(graph, 0, 1));
     }
 }

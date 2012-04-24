@@ -22,10 +22,11 @@ import com.espertech.esper.support.bean.SupportTimeStartEndA;
 import com.espertech.esper.support.bean.SupportTimeStartEndB;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import javax.xml.xpath.XPathConstants;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TestDTIntervalOps extends TestCase {
@@ -52,16 +53,22 @@ public class TestDTIntervalOps extends TestCase {
     }
 
     public void testCreateSchema() {
+        runAssertionCreateSchema(EventRepresentationEnum.DEFAULT);
+        runAssertionCreateSchema(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionCreateSchema(EventRepresentationEnum.MAP);
+    }
+
+    private void runAssertionCreateSchema(EventRepresentationEnum eventRepresentationEnum) {
 
         // test Map type Long-type timestamps
-        epService.getEPAdministrator().createEPL("create schema TypeA as (startts long, endts long) starttimestamp startts endtimestamp endts");
-        epService.getEPAdministrator().createEPL("create schema TypeB as (startts long, endts long) starttimestamp startts endtimestamp endts");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TypeA as (startts long, endts long) starttimestamp startts endtimestamp endts");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TypeB as (startts long, endts long) starttimestamp startts endtimestamp endts");
 
         EPStatement stmt = epService.getEPAdministrator().createEPL("select a.includes(b) as val0 from TypeA.std:lastevent() as a, TypeB.std:lastevent() as b");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultMSec("2002-05-30T9:00:00.000"), DateTime.parseDefaultMSec("2002-05-30T9:00:01.000")), "TypeA");
-        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultMSec("2002-05-30T9:00:00.500"), DateTime.parseDefaultMSec("2002-05-30T9:00:00.700")), "TypeB");
+        makeSendEvent("TypeA", eventRepresentationEnum, DateTime.parseDefaultMSec("2002-05-30T9:00:00.000"), DateTime.parseDefaultMSec("2002-05-30T9:00:01.000"));
+        makeSendEvent("TypeB", eventRepresentationEnum, DateTime.parseDefaultMSec("2002-05-30T9:00:00.500"), DateTime.parseDefaultMSec("2002-05-30T9:00:00.700"));
         assertEquals(true, listener.assertOneGetNewAndReset().get("val0"));
 
         epService.getEPAdministrator().destroyAllStatements();
@@ -69,14 +76,14 @@ public class TestDTIntervalOps extends TestCase {
         epService.getEPAdministrator().getConfiguration().removeEventType("TypeB", true);
 
         // test Map type Calendar-type timestamps
-        epService.getEPAdministrator().createEPL("create schema TypeA as (startts java.util.Calendar, endts java.util.Calendar) starttimestamp startts endtimestamp endts");
-        epService.getEPAdministrator().createEPL("create schema TypeB as (startts java.util.Calendar, endts java.util.Calendar) starttimestamp startts endtimestamp endts");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TypeA as (startts java.util.Calendar, endts java.util.Calendar) starttimestamp startts endtimestamp endts");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TypeB as (startts java.util.Calendar, endts java.util.Calendar) starttimestamp startts endtimestamp endts");
 
         stmt = epService.getEPAdministrator().createEPL("select a.includes(b) as val0 from TypeA.std:lastevent() as a, TypeB.std:lastevent() as b");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultCal("2002-05-30T9:00:00.000"), DateTime.parseDefaultCal("2002-05-30T9:00:01.000")), "TypeA");
-        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultCal("2002-05-30T9:00:00.500"), DateTime.parseDefaultCal("2002-05-30T9:00:00.700")), "TypeB");
+        makeSendEvent("TypeA", eventRepresentationEnum, DateTime.parseDefaultCal("2002-05-30T9:00:00.000"), DateTime.parseDefaultCal("2002-05-30T9:00:01.000"));
+        makeSendEvent("TypeB", eventRepresentationEnum, DateTime.parseDefaultCal("2002-05-30T9:00:00.500"), DateTime.parseDefaultCal("2002-05-30T9:00:00.700"));
         assertEquals(true, listener.assertOneGetNewAndReset().get("val0"));
 
         epService.getEPAdministrator().destroyAllStatements();
@@ -84,33 +91,33 @@ public class TestDTIntervalOps extends TestCase {
         epService.getEPAdministrator().getConfiguration().removeEventType("TypeB", true);
 
         // test Map type Date-type timestamps
-        epService.getEPAdministrator().createEPL("create schema TypeA as (startts java.util.Date, endts java.util.Date) starttimestamp startts endtimestamp endts");
-        epService.getEPAdministrator().createEPL("create schema TypeB as (startts java.util.Date, endts java.util.Date) starttimestamp startts endtimestamp endts");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TypeA as (startts java.util.Date, endts java.util.Date) starttimestamp startts endtimestamp endts");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema TypeB as (startts java.util.Date, endts java.util.Date) starttimestamp startts endtimestamp endts");
 
-        stmt = epService.getEPAdministrator().createEPL("select a.includes(b) as val0 from TypeA.std:lastevent() as a, TypeB.std:lastevent() as b");
+        stmt = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " select a.includes(b) as val0 from TypeA.std:lastevent() as a, TypeB.std:lastevent() as b");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultDate("2002-05-30T9:00:00.000"), DateTime.parseDefaultDate("2002-05-30T9:00:01.000")), "TypeA");
-        epService.getEPRuntime().sendEvent(makeEvent(DateTime.parseDefaultDate("2002-05-30T9:00:00.500"), DateTime.parseDefaultDate("2002-05-30T9:00:00.700")), "TypeB");
+        makeSendEvent("TypeA", eventRepresentationEnum, DateTime.parseDefaultDate("2002-05-30T9:00:00.000"), DateTime.parseDefaultDate("2002-05-30T9:00:01.000"));
+        makeSendEvent("TypeB", eventRepresentationEnum, DateTime.parseDefaultDate("2002-05-30T9:00:00.500"), DateTime.parseDefaultDate("2002-05-30T9:00:00.700"));
         assertEquals(true, listener.assertOneGetNewAndReset().get("val0"));
         epService.getEPAdministrator().destroyAllStatements();
 
         // test Bean-type Date-type timestamps
-        String epl = "create schema SupportBean as " + SupportBean.class.getName() + " starttimestamp longPrimitive endtimestamp longBoxed";
+        String epl = eventRepresentationEnum.getAnnotationText() + " create schema SupportBean as " + SupportBean.class.getName() + " starttimestamp longPrimitive endtimestamp longBoxed";
         epService.getEPAdministrator().createEPL(epl);
 
         stmt = epService.getEPAdministrator().createEPL("select a.get('month') as val0 from SupportBean a");
         stmt.addListener(listener);
 
-        SupportBean event = new SupportBean();
-        event.setLongPrimitive(DateTime.parseDefaultMSec("2002-05-30T9:00:00.000"));
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setLongPrimitive(DateTime.parseDefaultMSec("2002-05-30T9:00:00.000"));
+        epService.getEPRuntime().sendEvent(theEvent);
         assertEquals(4, listener.assertOneGetNewAndReset().get("val0"));
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
-        assertEquals(epl, model.toEPL());
+        assertEquals(epl.trim(), model.toEPL());
         stmt = epService.getEPAdministrator().create(model);
-        assertEquals(epl, stmt.getText());
+        assertEquals(epl.trim(), stmt.getText());
         
         // try XML
         ConfigurationEventTypeXMLDOM desc = new ConfigurationEventTypeXMLDOM();
@@ -125,13 +132,20 @@ public class TestDTIntervalOps extends TestCase {
         catch (ConfigurationException ex) {
             assertEquals("Declared start timestamp property 'mystarttimestamp' is expected to return a Date, Calendar or long-typed value but returns 'java.lang.Double'", ex.getMessage());
         }
+
+        epService.initialize();
     }
 
-    private Map<String, Object> makeEvent(Object startTs, Object endTs) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("startts", startTs);
-        event.put("endts", endTs);
-        return event;
+    private void makeSendEvent(String typeName, EventRepresentationEnum eventRepresentationEnum, Object startTs, Object endTs) {
+        Map<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("startts", startTs);
+        theEvent.put("endts", endTs);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), typeName);
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, typeName);
+        }
     }
 
     public void testCalendarOps() {
@@ -189,8 +203,8 @@ public class TestDTIntervalOps extends TestCase {
                    "Error starting statement: Parameters mismatch for date-time method 'before', the method has multiple footprints accepting an expression providing timestamp or timestamped-event, or an expression providing timestamp or timestamped-event and an expression providing interval start value, or an expression providing timestamp or timestamped-event and an expression providing interval start value and an expression providing interval finishes value, but receives no parameters [select a.before() from A.std:lastevent() as a, SupportBean.std:lastevent() as b]");
 
         // wrong target
-        tryInvalid("select string.before(a) from A.std:lastevent() as a, SupportBean.std:lastevent() as b",
-                   "Error starting statement: Date-time enumeration method 'before' requires either a Calendar, Date or long value as input or events of an event type that declares a timestamp property but received java.lang.String [select string.before(a) from A.std:lastevent() as a, SupportBean.std:lastevent() as b]");
+        tryInvalid("select theString.before(a) from A.std:lastevent() as a, SupportBean.std:lastevent() as b",
+                   "Error starting statement: Date-time enumeration method 'before' requires either a Calendar, Date or long value as input or events of an event type that declares a timestamp property but received java.lang.String [select theString.before(a) from A.std:lastevent() as a, SupportBean.std:lastevent() as b]");
         tryInvalid("select b.before(a) from A.std:lastevent() as a, SupportBean.std:lastevent() as b",
                    "Error starting statement: Date-time enumeration method 'before' requires either a Calendar, Date or long value as input or events of an event type that declares a timestamp property [select b.before(a) from A.std:lastevent() as a, SupportBean.std:lastevent() as b]");
         tryInvalid("select a.get('month').before(a) from A.std:lastevent() as a, SupportBean.std:lastevent() as b",
@@ -259,12 +273,12 @@ public class TestDTIntervalOps extends TestCase {
         tryInvalidConfig(SupportBean.class, configBean, "Declared end timestamp property name 'xyz' was not found");
 
         configBean.setEndTimestampPropertyName(null);
-        configBean.setStartTimestampPropertyName("string");
-        tryInvalidConfig(SupportBean.class, configBean, "Declared start timestamp property 'string' is expected to return a Date, Calendar or long-typed value but returns 'java.lang.String'");
+        configBean.setStartTimestampPropertyName("theString");
+        tryInvalidConfig(SupportBean.class, configBean, "Declared start timestamp property 'theString' is expected to return a Date, Calendar or long-typed value but returns 'java.lang.String'");
 
         configBean.setStartTimestampPropertyName("longPrimitive");
-        configBean.setEndTimestampPropertyName("string");
-        tryInvalidConfig(SupportBean.class, configBean, "Declared end timestamp property 'string' is expected to return a Date, Calendar or long-typed value but returns 'java.lang.String'");
+        configBean.setEndTimestampPropertyName("theString");
+        tryInvalidConfig(SupportBean.class, configBean, "Declared end timestamp property 'theString' is expected to return a Date, Calendar or long-typed value but returns 'java.lang.String'");
 
         configBean.setStartTimestampPropertyName("msecdate");
         configBean.setEndTimestampPropertyName("caldate");

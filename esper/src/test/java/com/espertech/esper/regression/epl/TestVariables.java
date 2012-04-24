@@ -116,6 +116,11 @@ public class TestVariables extends TestCase
         epService.getEPAdministrator().getConfiguration().addVariable("MYCONST_TWO", "string", null, true);
         tryInvalidSetConstant("MYCONST_TWO", "dummy");
         tryInvalidSetConstant("MYCONST_THREE", false);
+
+        // try ESPER-653
+        EPStatement stmtDate = epService.getEPAdministrator().createEPL("create constant variable java.util.Date START_TIME = java.util.Calendar.getInstance().getTime()");
+        Object value = stmtDate.iterator().next().get("START_TIME");
+        assertNotNull(value);
     }
 
     public void testConstantPerformance() {
@@ -130,20 +135,20 @@ public class TestVariables extends TestCase
         }
 
         // test join
-        EPStatement stmtJoin = epService.getEPAdministrator().createEPL("select * from SupportBean_S0 s0 unidirectional, MyWindow sb where string = MYCONST");
+        EPStatement stmtJoin = epService.getEPAdministrator().createEPL("select * from SupportBean_S0 s0 unidirectional, MyWindow sb where theString = MYCONST");
         stmtJoin.addListener(listener);
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++) {
             epService.getEPRuntime().sendEvent(new SupportBean_S0(i, "E" + i));
-            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sb.intPrimitive".split(","), new Object[]{"E331", -331});
+            EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.theString,sb.intPrimitive".split(","), new Object[]{"E331", -331});
         }
         long delta = System.currentTimeMillis() - start;
         assertTrue("delta=" + delta, delta < 500);
         stmtJoin.destroy();
 
         // test subquery
-        EPStatement stmtSubquery = epService.getEPAdministrator().createEPL("select * from SupportBean_S0 where exists (select * from MyWindow where string = MYCONST)");
+        EPStatement stmtSubquery = epService.getEPAdministrator().createEPL("select * from SupportBean_S0 where exists (select * from MyWindow where theString = MYCONST)");
         stmtSubquery.addListener(listener);
         
         start = System.currentTimeMillis();
@@ -167,7 +172,7 @@ public class TestVariables extends TestCase
         assertEquals(Integer.class, runtimeSPI.getVariableType("var1"));
         assertEquals(String.class, runtimeSPI.getVariableType("var2"));
 
-        String stmtTextSet = "on " + SupportBean.class.getName() + " set var1 = intPrimitive, var2 = string";
+        String stmtTextSet = "on " + SupportBean.class.getName() + " set var1 = intPrimitive, var2 = theString";
         epService.getEPAdministrator().createEPL(stmtTextSet);
 
         assertVariableValues(new String[] {"var1", "var2"}, new Object[] {-1, "abc"});
@@ -323,8 +328,8 @@ public class TestVariables extends TestCase
         String[] fieldsVar = new String[] {"var1", "var2"};
         EPAssertionUtil.assertPropsPerRow(stmtSet.iterator(), fieldsVar, new Object[][]{{null, null}});
 
-        String stmtTextSelect = "select string, intPrimitive from " + SupportBean.class.getName() + "(string = var1 or string = var2)";
-        String[] fieldsSelect = new String[] {"string", "intPrimitive"};
+        String stmtTextSelect = "select theString, intPrimitive from " + SupportBean.class.getName() + "(theString = var1 or theString = var2)";
+        String[] fieldsSelect = new String[] {"theString", "intPrimitive"};
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
         stmtSelect.addListener(listener);
 
@@ -368,8 +373,8 @@ public class TestVariables extends TestCase
         String[] fieldsVar = new String[] {"var1"};
         EPAssertionUtil.assertPropsPerRow(stmtSet.iterator(), fieldsVar, new Object[][]{{null}});
 
-        String stmtTextSelect = "select string, intPrimitive from " + SupportBean.class.getName() + "(string = var1)";
-        String[] fieldsSelect = new String[] {"string", "intPrimitive"};
+        String stmtTextSelect = "select theString, intPrimitive from " + SupportBean.class.getName() + "(theString = var1)";
+        String[] fieldsSelect = new String[] {"theString", "intPrimitive"};
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
         stmtSelect.addListener(listener);
 
@@ -556,18 +561,18 @@ public class TestVariables extends TestCase
     {
         epService.getEPAdministrator().getConfiguration().addVariable("var1", Integer.class, 10);
 
-        String stmtText = "select var1, string from " + SupportBean.class.getName() + "(string like 'E%')";
+        String stmtText = "select var1, theString from " + SupportBean.class.getName() + "(theString like 'E%')";
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtText);
         stmtSelect.addListener(listener);
 
-        String[] fieldsSelect = new String[] {"var1", "string"};
+        String[] fieldsSelect = new String[] {"var1", "theString"};
         sendSupportBean("E1", 1);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsSelect, new Object[]{10, "E1"});
 
         sendSupportBean("E2", 2);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsSelect, new Object[]{10, "E2"});
 
-        String stmtTextSet = "on " + SupportBean.class.getName() + "(string like 'S%') set var1 = intPrimitive";
+        String stmtTextSet = "on " + SupportBean.class.getName() + "(theString like 'S%') set var1 = intPrimitive";
         EPStatement stmtSet = epService.getEPAdministrator().createEPL(stmtTextSet);
         stmtSet.addListener(listenerSet);
 
@@ -611,7 +616,7 @@ public class TestVariables extends TestCase
         epService.getEPAdministrator().getConfiguration().addVariable("var1", Integer.class, null);
         epService.getEPAdministrator().getConfiguration().addVariable("var2", Integer.class, 1);
 
-        String stmtTextSet = "on " + SupportBean.class.getName() + "(string like 'S%' or string like 'B%') set var1 = intPrimitive, var2 = intBoxed";
+        String stmtTextSet = "on " + SupportBean.class.getName() + "(theString like 'S%' or theString like 'B%') set var1 = intPrimitive, var2 = intBoxed";
         EPStatement stmtSet = epService.getEPAdministrator().createEPL(stmtTextSet);
         stmtSet.addListener(listenerSet);
         String[] fieldsVar = new String[] {"var1", "var2"};
@@ -631,10 +636,10 @@ public class TestVariables extends TestCase
         EPAssertionUtil.assertProps(listenerSet.assertOneGetNewAndReset(), fieldsVar, new Object[]{-1, -2});
         EPAssertionUtil.assertPropsPerRow(stmtSet.iterator(), fieldsVar, new Object[][]{{-1, -2}});
 
-        String stmtText = "select var1, var2, string from " + SupportBean.class.getName() + "(string like 'E%' or string like 'B%')";
+        String stmtText = "select var1, var2, theString from " + SupportBean.class.getName() + "(theString like 'E%' or theString like 'B%')";
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtText);
         stmtSelect.addListener(listener);
-        String[] fieldsSelect = new String[] {"var1", "var2", "string"};
+        String[] fieldsSelect = new String[] {"var1", "var2", "theString"};
         EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fieldsSelect, null);
 
         sendSupportBean("E1", 1);
@@ -665,7 +670,7 @@ public class TestVariables extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
-        String stmtTextSet = "on " + SupportBean.class.getName() + "(string like 'S%') set p_1 = 'end', p_2 = false, p_3 = null";
+        String stmtTextSet = "on " + SupportBean.class.getName() + "(theString like 'S%') set p_1 = 'end', p_2 = false, p_3 = null";
         EPStatement stmtSet = epService.getEPAdministrator().createEPL(stmtTextSet);
         stmtSet.addListener(listenerSet);
         String[] fieldsVar = new String[] {"p_1", "p_2", "p_3"};
@@ -709,7 +714,7 @@ public class TestVariables extends TestCase
         epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
-        String stmtTextSet = "on " + SupportBean.class.getName() + " set p_1 = string, p_2 = boolBoxed, p_3 = intBoxed, p_4 = intBoxed";
+        String stmtTextSet = "on " + SupportBean.class.getName() + " set p_1 = theString, p_2 = boolBoxed, p_3 = intBoxed, p_4 = intBoxed";
         EPStatement stmtSet = epService.getEPAdministrator().createEPL(stmtTextSet);
         stmtSet.addListener(listenerSet);
         String[] fieldsVar = new String[] {"p_1", "p_2", "p_3", "p_4"};
@@ -724,7 +729,7 @@ public class TestVariables extends TestCase
         assertTrue(Arrays.equals(typeSet.getPropertyNames(), fieldsVar));
 
         SupportBean bean = new SupportBean();
-        bean.setString("text");
+        bean.setTheString("text");
         bean.setBoolBoxed(false);
         bean.setIntBoxed(200);
         epService.getEPRuntime().sendEvent(bean);
@@ -863,28 +868,28 @@ public class TestVariables extends TestCase
         return bean;
     }
 
-    private SupportBean sendSupportBean(String string, int intPrimitive)
+    private SupportBean sendSupportBean(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
 
-    private SupportBean sendSupportBean(String string, int intPrimitive, Integer intBoxed)
+    private SupportBean sendSupportBean(String theString, int intPrimitive, Integer intBoxed)
     {
-        SupportBean bean = makeSupportBean(string, intPrimitive, intBoxed);
+        SupportBean bean = makeSupportBean(theString, intPrimitive, intBoxed);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
 
-    private void sendSupportBeanNewThread(final String string, final int intPrimitive, final Integer intBoxed) throws InterruptedException
+    private void sendSupportBeanNewThread(final String theString, final int intPrimitive, final Integer intBoxed) throws InterruptedException
     {
         Thread t = new Thread() {
             public void run()
             {
-                SupportBean bean = makeSupportBean(string, intPrimitive, intBoxed);
+                SupportBean bean = makeSupportBean(theString, intPrimitive, intBoxed);
                 epService.getEPRuntime().sendEvent(bean);
             }
         };
@@ -904,10 +909,10 @@ public class TestVariables extends TestCase
         t.join();
     }
 
-    private SupportBean makeSupportBean(String string, int intPrimitive, Integer intBoxed)
+    private SupportBean makeSupportBean(String theString, int intPrimitive, Integer intBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);
         return bean;
@@ -970,7 +975,7 @@ public class TestVariables extends TestCase
         EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
         FilterServiceSPI filterSpi = (FilterServiceSPI) spi.getFilterService();
 
-        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("select string as c0,intPrimitive as c1 from SupportBean(" + operator + ")");
+        EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("select theString as c0,intPrimitive as c1 from SupportBean(" + operator + ")");
         stmt.addListener(listener);
 
         // initiate

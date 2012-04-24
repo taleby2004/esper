@@ -13,13 +13,13 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriber;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportSubscriber;
 import junit.framework.TestCase;
 
 import java.util.Iterator;
@@ -108,7 +108,7 @@ public class TestIsolationUnit extends TestCase
 
     public void testIsolateFilter()
     {
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from pattern [every a=SupportBean -> b=SupportBean(string=a.string)]");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from pattern [every a=SupportBean -> b=SupportBean(theString=a.theString)]");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -128,7 +128,7 @@ public class TestIsolationUnit extends TestCase
 
         // send to 'right' engine
         unit.getEPRuntime().sendEvent(new SupportBean("E1", 3));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,a.intPrimitive,b.intPrimitive".split(","), new Object[]{"E1", 1, 3});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,a.intPrimitive,b.intPrimitive".split(","), new Object[]{"E1", 1, 3});
 
         // send second pair, and a fake to the wrong place
         unit.getEPRuntime().sendEvent(new SupportBean("E2", 4));
@@ -142,7 +142,7 @@ public class TestIsolationUnit extends TestCase
 
         // send to 'right' engine
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 6));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string,a.intPrimitive,b.intPrimitive".split(","), new Object[]{"E2", 4, 6});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString,a.intPrimitive,b.intPrimitive".split(","), new Object[]{"E2", 4, 6});
 
         epService.getEPAdministrator().destroyAllStatements();
         EPAssertionUtil.assertEqualsAnyOrder(new Object[]{"i1"}, epService.getEPServiceIsolatedNames());
@@ -193,7 +193,7 @@ public class TestIsolationUnit extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimerIso(10000, unit);
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"E1"});
 
         sendTimerIso(11000, unit);
         unit.getEPRuntime().sendEvent(new SupportBean("E2", 1));
@@ -207,7 +207,7 @@ public class TestIsolationUnit extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimerUnisolated(130000);
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.string".split(","), new Object[]{"E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.theString".split(","), new Object[]{"E2"});
 
         sendTimerIso(30000, unit);
         assertFalse(listener.isInvoked());
@@ -235,7 +235,7 @@ public class TestIsolationUnit extends TestCase
 
         unit.getEPRuntime().sendEvent(new SupportBean("E2", 2));
         assertFalse(listenerSelect.getAndClearIsInvoked());
-        EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E2"});
+        EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "theString".split(","), new Object[]{"E2"});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
         assertFalse(listenerSelect.getAndClearIsInvoked());
@@ -245,28 +245,28 @@ public class TestIsolationUnit extends TestCase
         unit.getEPAdministrator().removeStatement(stmtInsert);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
-        EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E4"});
-        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E4"});
+        EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "theString".split(","), new Object[]{"E4"});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "theString".split(","), new Object[]{"E4"});
 
         unit.getEPRuntime().sendEvent(new SupportBean("E5", 5));
         assertFalse(listenerSelect.getAndClearIsInvoked());
         assertFalse(listenerInsert.getAndClearIsInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
-        EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E6"});
-        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "string".split(","), new Object[]{"E6"});
+        EPAssertionUtil.assertProps(listenerInsert.assertOneGetNewAndReset(), "theString".split(","), new Object[]{"E6"});
+        EPAssertionUtil.assertProps(listenerSelect.assertOneGetNewAndReset(), "theString".split(","), new Object[]{"E6"});
 
         epService.getEPAdministrator().destroyAllStatements();
     }
 
     public void testIsolateMultiple()
     {
-        String[] fields = new String[] {"string", "sumi"};
+        String[] fields = new String[] {"theString", "sumi"};
         int count = 4;
         SupportUpdateListener[] listeners = new SupportUpdateListener[count];
         for (int i = 0; i < count; i++)
         {
-            String epl = "@Name('S" + i + "') select string, sum(intPrimitive) as sumi from SupportBean(string='" + i + "').win:time(10)";
+            String epl = "@Name('S" + i + "') select theString, sum(intPrimitive) as sumi from SupportBean(theString='" + i + "').win:time(10)";
             listeners[i] = new SupportUpdateListener();
             epService.getEPAdministrator().createEPL(epl).addListener(listeners[i]);
         }
@@ -326,8 +326,8 @@ public class TestIsolationUnit extends TestCase
 
     public void testStartStop()
     {
-        String[] fields = new String[] {"string"};
-        String epl = "select string from SupportBean.win:time(60)";
+        String[] fields = new String[] {"theString"};
+        String epl = "select theString from SupportBean.win:time(60)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -368,10 +368,10 @@ public class TestIsolationUnit extends TestCase
 
     public void testNamedWindowTakeCreate()
     {
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL("@Name('create') create window MyWindow.win:keepall() as SupportBean");
         EPStatement stmtInsert = epService.getEPAdministrator().createEPL("@Name('insert') insert into MyWindow select * from SupportBean");
-        EPStatement stmtDelete = epService.getEPAdministrator().createEPL("@Name('delete') on SupportBean_A delete from MyWindow where string = id");
+        EPStatement stmtDelete = epService.getEPAdministrator().createEPL("@Name('delete') on SupportBean_A delete from MyWindow where theString = id");
         EPStatement stmtConsume = epService.getEPAdministrator().createEPL("@Name('consume') select irstream * from MyWindow");
         stmtConsume.addListener(listener);
 
@@ -417,7 +417,7 @@ public class TestIsolationUnit extends TestCase
     public void testNamedWindowTimeCatchup()
     {
         sendTimerUnisolated(100000);
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL("@Name('create') create window MyWindow.win:time(10) as SupportBean");
         EPStatement stmtInsert = epService.getEPAdministrator().createEPL("@Name('insert') insert into MyWindow select * from SupportBean");
 
@@ -478,7 +478,7 @@ public class TestIsolationUnit extends TestCase
 
         epService.getEPAdministrator().destroyAllStatements();
 
-        stmt = epService.getEPAdministrator().createEPL("select string as ct from SupportBean where current_timestamp() >= 10000");
+        stmt = epService.getEPAdministrator().createEPL("select theString as ct from SupportBean where current_timestamp() >= 10000");
         stmt.addListener(listener);
         
         unit.getEPRuntime().sendEvent(new SupportBean());
@@ -494,7 +494,7 @@ public class TestIsolationUnit extends TestCase
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         stmt.destroy();
-        stmt = epService.getEPAdministrator().createEPL("select string as ct from SupportBean where current_timestamp() >= 120000");
+        stmt = epService.getEPAdministrator().createEPL("select theString as ct from SupportBean where current_timestamp() >= 120000");
         stmt.addListener(listener);
         unit.getEPAdministrator().addStatement(new EPStatement[] {stmt});
 
@@ -510,9 +510,9 @@ public class TestIsolationUnit extends TestCase
     public void testUpdate()
     {
         sendTimerUnisolated(5000);
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         EPStatement stmtInsert = epService.getEPAdministrator().createEPL("insert into NewStream select * from SupportBean");
-        EPStatement stmtUpd = epService.getEPAdministrator().createEPL("update istream NewStream set string = 'X'");
+        EPStatement stmtUpd = epService.getEPAdministrator().createEPL("update istream NewStream set theString = 'X'");
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select * from NewStream");
         stmtSelect.addListener(listener);
 
@@ -547,8 +547,8 @@ public class TestIsolationUnit extends TestCase
     public void testSuspend()
     {
         sendTimerUnisolated(1000);
-        String[] fields = new String[] {"string"};
-        String epl = "select irstream string from SupportBean.win:time(10)";
+        String[] fields = new String[] {"theString"};
+        String epl = "select irstream theString from SupportBean.win:time(10)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -562,7 +562,7 @@ public class TestIsolationUnit extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 0));
 
         sendTimerUnisolated(8000);
-        EPStatement stmtTwo = epService.getEPAdministrator().createEPL("select 'x' as string from pattern [timer:interval(10)]");
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL("select 'x' as theString from pattern [timer:interval(10)]");
         stmtTwo.addListener(listener);
 
         EPServiceProviderIsolated unit = epService.getEPServiceIsolated("i1");
@@ -651,8 +651,8 @@ public class TestIsolationUnit extends TestCase
 
         final Iterator<EventBean> iter = stmtTwo.iterator();
         while (iter.hasNext()) {
-            final EventBean event = iter.next();
-            isolatedService.getEPRuntime().sendEvent(event.getUnderlying());
+            final EventBean theEvent = iter.next();
+            isolatedService.getEPRuntime().sendEvent(theEvent.getUnderlying());
         }
 
         assertTrue(subscriber.isInvoked());

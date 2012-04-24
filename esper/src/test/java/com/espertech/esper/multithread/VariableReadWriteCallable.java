@@ -50,21 +50,21 @@ public class VariableReadWriteCallable implements Callable
             for (int loop = 0; loop < numRepeats; loop++)
             {
                 long newValue = threadNum * 1000000 + loop;
-                Object event;
+                Object theEvent;
 
                 if (loop % 2 == 0)
                 {
-                    event = new SupportMarketDataBean("", 0, newValue, "");
+                    theEvent = new SupportMarketDataBean("", 0, newValue, "");
                 }
                 else
                 {
                     SupportBean bean = new SupportBean();
                     bean.setLongPrimitive(newValue);
-                    event = bean;
+                    theEvent = bean;
                 }
 
                 // Changes the variable values through either of the set-statements
-                engine.getEPRuntime().sendEvent(event);
+                engine.getEPRuntime().sendEvent(theEvent);
 
                 // Select the variable value back, another thread may have changed it, we are only
                 // determining if the set operation is atomic

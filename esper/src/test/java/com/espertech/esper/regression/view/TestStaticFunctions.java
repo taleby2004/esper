@@ -132,7 +132,7 @@ public class TestStaticFunctions extends TestCase
     {
         String className = SupportStaticMethodLib.class.getName();
         statementText = "select * from pattern [myevent=" + SupportBean.class.getName() + "(" +
-                className + ".delimitPipe(string) = '|a|')]";
+                className + ".delimitPipe(theString) = '|a|')]";
         EPStatement stmt = epService.getEPAdministrator().createEPL(statementText);
         listener = new SupportUpdateListener();
         stmt.addListener(listener);
@@ -162,64 +162,6 @@ public class TestStaticFunctions extends TestCase
         statement.addListener(listener);
         sendEvent("IBM", 10d, 4l);
         assertNull(listener.assertOneGetNewAndReset().get("value"));
-    }
-
-	public void testAutoImports()
-	{
-		Configuration configuration = SupportConfigFactory.getConfiguration();
-		configuration.addImport("mull");
-        configuration.addEventType("SupportBean", SupportBean.class);
-		epService = EPServiceProviderManager.getProvider("1", configuration);
-
-		statementText = "select Integer.toBinaryString(7) " + stream;
-		try
-		{
-			createStatementAndGetProperty(true,"Integer.toBinaryString(7)");
-			fail();
-		}
-		catch(EPStatementException e)
-		{
-			// expected
-		}
-
-        try {
-            String query = "select * from SupportBean(Math.abs(-1) = 1) ";
-            epService.getEPAdministrator().createEPL(query);
-        }
-        catch (EPStatementException ex) {
-            assertEquals("Failed to resolve 'Math.abs' to a property, single-row function, script, stream or class name [select * from SupportBean(Math.abs(-1) = 1) ]", ex.getMessage());
-        }
-
-		configuration.addImport("java.lang.*");
-		epService = EPServiceProviderManager.getProvider("2", configuration);
-
-		Object[] result = createStatementAndGetProperty(true, "Integer.toBinaryString(7)");
-		assertEquals(Integer.toBinaryString(7), result[0]);
-        
-        String query = "select * from SupportBean(Math.abs(-1) = 1) ";
-        epService.getEPAdministrator().createEPL(query);
-
-        EPServiceProviderManager.getProvider("1").destroy();
-        EPServiceProviderManager.getProvider("2").destroy();
-	}
-
-    public void testRuntimeAutoImports()
-    {
-        epService = EPServiceProviderManager.getDefaultProvider(SupportConfigFactory.getConfiguration());
-        String text = "select SupportStaticMethodLib.minusOne(doublePrimitive) from " + SupportBean.class.getName();
-
-        try
-        {
-            epService.getEPAdministrator().createEPL(text);
-            fail();
-        }
-        catch (EPStatementException ex)
-        {
-            assertEquals("Error starting statement: Failed to resolve 'SupportStaticMethodLib.minusOne' to a property, single-row function, script, stream or class name [select SupportStaticMethodLib.minusOne(doublePrimitive) from com.espertech.esper.support.bean.SupportBean]", ex.getMessage());
-        }
-
-        epService.getEPAdministrator().getConfiguration().addImport(SupportStaticMethodLib.class.getName());
-        epService.getEPAdministrator().createEPL(text);
     }
 
     public void testArrayParameter()
@@ -560,10 +502,10 @@ public class TestStaticFunctions extends TestCase
         if (expectResult)
         {
             List<Object> properties = new ArrayList<Object>();
-            EventBean event = listener.getAndResetLastNewData()[0];
+            EventBean theEvent = listener.getAndResetLastNewData()[0];
             for(String propertyName : propertyNames)
             {
-                properties.add(event.get(propertyName));
+                properties.add(theEvent.get(propertyName));
             }
             return properties.toArray(new Object[0]);
         }

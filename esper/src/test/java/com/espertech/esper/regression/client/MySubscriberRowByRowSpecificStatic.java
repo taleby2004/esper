@@ -23,9 +23,9 @@ public class MySubscriberRowByRowSpecificStatic
 {
     private static ArrayList<Object[]> indicate = new ArrayList<Object[]>();
 
-    public static void update(String string, int intPrimitive)
+    public static void update(String theString, int intPrimitive)
     {
-        indicate.add(new Object[] {string, intPrimitive});
+        indicate.add(new Object[] {theString, intPrimitive});
     }
 
     public static List<Object[]> getAndResetIndicate()

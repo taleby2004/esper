@@ -9,6 +9,7 @@
 package com.espertech.esper.client;
 
 import com.espertech.esper.client.context.ContextPartitionSelector;
+import com.espertech.esper.client.dataflow.EPDataFlowRuntime;
 import com.espertech.esper.client.util.EventRenderer;
 
 import java.net.URI;
@@ -39,10 +40,23 @@ public interface EPRuntime
      *
      * @param map - map that contains event property values. Keys are expected to be of type String while values
      * can be of any type. Keys and values should match those declared via Configuration for the given eventTypeName.
-     * @param eventTypeName - the name for the Map event type that was previously configured
+     * @param mapEventTypeName - the name for the Map event type that was previously configured
      * @throws EPException - when the processing of the event leads to an error
      */
-    public void sendEvent(Map map, String eventTypeName) throws EPException;
+    public void sendEvent(Map map, String mapEventTypeName) throws EPException;
+
+    /**
+     * Send an object array containing event property values to the event stream processing runtime.
+     * <p>
+     * Use the route method for sending events into the runtime from within UpdateListener code.
+     * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
+     *
+     * @param objectarray - array that contains event property values. Your application must ensure that property values
+     * match the exact same order that the property names and types have been declared, and that the array length matches the number of properties declared.
+     * @param objectArrayEventTypeName - the name for the Object-array event type that was previously configured
+     * @throws EPException - when the processing of the event leads to an error
+     */
+    public void sendEvent(Object[] objectarray, String objectArrayEventTypeName);
 
     /**
      * Send an event represented by a DOM node to the event stream processing runtime.
@@ -75,9 +89,9 @@ public interface EPRuntime
      * events sent to the runtime. In a single-threaded application the routed event is
      * processed before the next event is sent to the runtime through the
      * EPRuntime.sendEvent method.
-     * @param event to route internally for processing by the event stream processing runtime
+     * @param theEvent to route internally for processing by the event stream processing runtime
      */
-    public void route(final Object event);
+    public void route(final Object theEvent);
 
     /**
      * Route the event object back to the event stream processing runtime for internal dispatching,
@@ -93,6 +107,21 @@ public interface EPRuntime
      * @throws EPException - when the processing of the event leads to an error
      */
     public void route(Map map, String eventTypeName) throws EPException;
+
+    /**
+     * Route the event object back to the event stream processing runtime for internal dispatching,
+     * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
+     * The route event is processed just like it was sent to the runtime, that is any
+     * active expressions seeking that event receive it. The routed event has priority over other
+     * events sent to the runtime. In a single-threaded application the routed event is
+     * processed before the next event is sent to the runtime through the
+     * EPRuntime.sendEvent method.
+     * @param objectArray - object array that contains event property values. Your application must ensure that property values
+     * match the exact same order that the property names and types have been declared, and that the array length matches the number of properties declared.
+     * @param eventTypeName - the name for Object-array event type that was previously configured
+     * @throws EPException - when the processing of the event leads to an error
+     */
+    public void route(Object[] objectArray, String eventTypeName) throws EPException;
 
     /**
      * Route the event object back to the event stream processing runtime for internal dispatching,
@@ -255,5 +284,7 @@ public interface EPRuntime
      * outstanding.
      * @return time of next schedule if any
      */
-    public Long getNextScheduledTime();    
+    public Long getNextScheduledTime();
+    
+    public EPDataFlowRuntime getDataFlowRuntime();
 }

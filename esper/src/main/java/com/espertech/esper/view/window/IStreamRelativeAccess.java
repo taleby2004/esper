@@ -48,7 +48,7 @@ public class IStreamRelativeAccess implements RelativeAccessByEventNIndex, ViewU
         }
     }
 
-    public EventBean getRelativeToEvent(EventBean event, int prevIndex)
+    public EventBean getRelativeToEvent(EventBean theEvent, int prevIndex)
     {
         if (lastNewData == null)
         {
@@ -57,10 +57,10 @@ public class IStreamRelativeAccess implements RelativeAccessByEventNIndex, ViewU
 
         if (prevIndex == 0)
         {
-            return event;
+            return theEvent;
         }
 
-        Integer indexIncoming = indexPerEvent.get(event);
+        Integer indexIncoming = indexPerEvent.get(theEvent);
         if (indexIncoming == null)
         {
             return null;
@@ -79,7 +79,7 @@ public class IStreamRelativeAccess implements RelativeAccessByEventNIndex, ViewU
         return null;
     }
 
-    public EventBean getRelativeToEnd(EventBean event, int prevIndex)
+    public EventBean getRelativeToEnd(EventBean theEvent, int prevIndex)
     {
         if (lastNewData == null)
         {

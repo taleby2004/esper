@@ -141,7 +141,7 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
     private EventBean[] getSelectListEvents(boolean isNewData, boolean isSynthesize)
     {
         // Since we are dealing with strictly aggregation nodes, there are no events required for evaluating
-        EventBean event = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
+        EventBean theEvent = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
 
         if (prototype.getOptionalHavingNode() != null)
         {
@@ -153,13 +153,13 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
         }
 
         // The result is always a single row
-        return new EventBean[] {event};
+        return new EventBean[] {theEvent};
     }
 
     private EventBean getSelectListEvent(boolean isNewData, boolean isSynthesize)
     {
         // Since we are dealing with strictly aggregation nodes, there are no events required for evaluating
-        EventBean event = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
+        EventBean theEvent = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
 
         if (prototype.getOptionalHavingNode() != null)
         {
@@ -171,7 +171,7 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
         }
 
         // The result is always a single row
-        return event;
+        return theEvent;
     }
 
     public Iterator<EventBean> getIterator(Viewable parent)
@@ -269,14 +269,14 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
                 oldEvents = new LinkedList<EventBean>();
             }
 
-            List<MultiKeyUntyped> newEventsSortKey = null;
-            List<MultiKeyUntyped> oldEventsSortKey = null;
+            List<Object> newEventsSortKey = null;
+            List<Object> oldEventsSortKey = null;
             if (orderByProcessor != null)
             {
-                newEventsSortKey = new LinkedList<MultiKeyUntyped>();
+                newEventsSortKey = new LinkedList<Object>();
                 if (prototype.isSelectRStream())
                 {
-                    oldEventsSortKey = new LinkedList<MultiKeyUntyped>();
+                    oldEventsSortKey = new LinkedList<Object>();
                 }
             }
 
@@ -324,11 +324,11 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
 
             if (orderByProcessor != null)
             {
-                MultiKeyUntyped[] sortKeysNew = (newEventsSortKey.isEmpty()) ? null : newEventsSortKey.toArray(new MultiKeyUntyped[newEventsSortKey.size()]);
+                Object[] sortKeysNew = (newEventsSortKey.isEmpty()) ? null : newEventsSortKey.toArray(new Object[newEventsSortKey.size()]);
                 newEventsArr = orderByProcessor.sort(newEventsArr, sortKeysNew, exprEvaluatorContext);
                 if (prototype.isSelectRStream())
                 {
-                    MultiKeyUntyped[] sortKeysOld = (oldEventsSortKey.isEmpty()) ? null : oldEventsSortKey.toArray(new MultiKeyUntyped[oldEventsSortKey.size()]);
+                    Object[] sortKeysOld = (oldEventsSortKey.isEmpty()) ? null : oldEventsSortKey.toArray(new Object[oldEventsSortKey.size()]);
                     oldEventsArr = orderByProcessor.sort(oldEventsArr, sortKeysOld, exprEvaluatorContext);
                 }
             }
@@ -429,14 +429,14 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
                 oldEvents = new LinkedList<EventBean>();
             }
 
-            List<MultiKeyUntyped> newEventsSortKey = null;
-            List<MultiKeyUntyped> oldEventsSortKey = null;
+            List<Object> newEventsSortKey = null;
+            List<Object> oldEventsSortKey = null;
             if (orderByProcessor != null)
             {
-                newEventsSortKey = new LinkedList<MultiKeyUntyped>();
+                newEventsSortKey = new LinkedList<Object>();
                 if (prototype.isSelectRStream())
                 {
-                    oldEventsSortKey = new LinkedList<MultiKeyUntyped>();
+                    oldEventsSortKey = new LinkedList<Object>();
                 }
             }
 
@@ -481,11 +481,11 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
             }
             if (orderByProcessor != null)
             {
-                MultiKeyUntyped[] sortKeysNew = (newEventsSortKey.isEmpty()) ? null : newEventsSortKey.toArray(new MultiKeyUntyped[newEventsSortKey.size()]);
+                Object[] sortKeysNew = (newEventsSortKey.isEmpty()) ? null : newEventsSortKey.toArray(new Object[newEventsSortKey.size()]);
                 newEventsArr = orderByProcessor.sort(newEventsArr, sortKeysNew, exprEvaluatorContext);
                 if (prototype.isSelectRStream())
                 {
-                    MultiKeyUntyped[] sortKeysOld = (oldEventsSortKey.isEmpty()) ? null : oldEventsSortKey.toArray(new MultiKeyUntyped[oldEventsSortKey.size()]);
+                    Object[] sortKeysOld = (oldEventsSortKey.isEmpty()) ? null : oldEventsSortKey.toArray(new Object[oldEventsSortKey.size()]);
                     oldEventsArr = orderByProcessor.sort(oldEventsArr, sortKeysOld, exprEvaluatorContext);
                 }
             }
@@ -510,7 +510,7 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
     private void getSelectListEvent(boolean isNewData, boolean isSynthesize, List<EventBean> resultEvents)
     {
         // Since we are dealing with strictly aggregation nodes, there are no events required for evaluating
-        EventBean event = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
+        EventBean theEvent = selectExprProcessor.process(CollectionUtil.EVENT_PER_STREAM_EMPTY, isNewData, isSynthesize, exprEvaluatorContext);
 
         if (prototype.getOptionalHavingNode() != null)
         {
@@ -521,7 +521,7 @@ public class ResultSetProcessorRowForAll implements ResultSetProcessor
             }
         }
 
-        resultEvents.add(event);
+        resultEvents.add(theEvent);
     }
 
     public boolean hasAggregation() {

@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 /**
@@ -25,7 +24,7 @@ public interface AggregationService extends AggregationResultFuture
      * to use for grouping, each distinct key value results in a new row of aggregation state.
      * @param exprEvaluatorContext context for expression evaluatiom
      */
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext);
+    public void applyEnter(EventBean[] eventsPerStream, Object optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * Apply events as leaving a window (old events).
@@ -34,14 +33,14 @@ public interface AggregationService extends AggregationResultFuture
      * to use for grouping, each distinct key value results in a new row of aggregation state.
      * @param exprEvaluatorContext context for expression evaluatiom
      */
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext);
+    public void applyLeave(EventBean[] eventsPerStream, Object optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext);
 
     /**
      * Set the current aggregation state row - for use when evaluation nodes are asked to evaluate.
      * @param groupKey - key identify the row of aggregation states
      * @param agentInstanceId context partition id
      */
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId);
+    public void setCurrentAccess(Object groupKey, int agentInstanceId);
 
     /**
      * Clear current aggregation state.

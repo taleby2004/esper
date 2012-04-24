@@ -8,22 +8,33 @@
  **************************************************************************************/
 package com.espertech.esperio.regression.adapter;
 
-import com.espertech.esper.client.*;
-import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.adapter.InputAdapter;
-import com.espertech.esperio.AdapterInputSource;
-import com.espertech.esperio.AdapterCoordinatorImpl;
+import com.espertech.esper.client.Configuration;
+import com.espertech.esper.client.EPServiceProvider;
+import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
+import com.espertech.esper.client.dataflow.EPDataFlowInstance;
+import com.espertech.esper.client.dataflow.EPDataFlowInstantiationOptions;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.client.time.TimerControlEvent;
+import com.espertech.esper.dataflow.util.DefaultSupportCaptureOp;
+import com.espertech.esper.dataflow.util.DefaultSupportGraphOpProvider;
+import com.espertech.esper.dataflow.util.DefaultSupportGraphParamProvider;
 import com.espertech.esperio.AdapterCoordinator;
+import com.espertech.esperio.AdapterCoordinatorImpl;
+import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.csv.CSVInputAdapter;
 import com.espertech.esperio.csv.CSVInputAdapterSpec;
+import com.espertech.esperio.graph.FileSourceCSV;
 import junit.framework.TestCase;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TestCSVAdapterUseCases extends TestCase
 {
@@ -62,12 +73,25 @@ public class TestCSVAdapterUseCases extends TestCase
         (new CSVInputAdapter(epService, new AdapterInputSource(CSV_FILENAME_ONELINE_TRADE), "TypeA")).start();
 
         assertEquals(1, listener.getNewDataList().size());
+
+        // test graph
+        String graph = "create dataflow ReadCSV " +
+                "FileSource -> mystream<TypeA> { file: '" + CSV_FILENAME_ONELINE_TRADE + "', hasTitleLine: true, classpathFile: true }" +
+                "DefaultSupportCaptureOp(mystream) {}";
+        epService.getEPAdministrator().createEPL(graph);
+
+        DefaultSupportCaptureOp<Object> outputOp = new DefaultSupportCaptureOp<Object>();
+        EPDataFlowInstance instance = epService.getEPRuntime().getDataFlowRuntime().instantiate("ReadCSV", new EPDataFlowInstantiationOptions().operatorProvider(new DefaultSupportGraphOpProvider(outputOp)));
+        instance.run();
+        List<List<Object>> received = outputOp.getAndReset();
+        Object[] receivedArr = received.get(0).toArray();
+        assertEquals(1, receivedArr.length);
     }
 
     /**
      * Play a CSV file that is from memory.
      */
-    public void testPlayFromInputStream()
+    public void testPlayFromInputStream() throws Exception
     {
         String myCSV = "symbol, price, volume" + NEW_LINE + "IBM, 10.2, 10000";
         ByteArrayInputStream inputStream = new ByteArrayInputStream(myCSV.getBytes());
@@ -77,7 +101,7 @@ public class TestCSVAdapterUseCases extends TestCase
     /**
      * Play a CSV file that is from memory.
      */
-    public void testPlayFromStringReader()
+    public void testPlayFromStringReader() throws Exception
     {
         String myCSV = "symbol, price, volume" + NEW_LINE + "IBM, 10.2, 10000";
         StringReader reader = new StringReader(myCSV);
@@ -254,9 +278,11 @@ public class TestCSVAdapterUseCases extends TestCase
     private Configuration makeConfig(String typeName) {
     	return makeConfig(typeName, false);
     }
+
     private Configuration makeConfig(String typeName, boolean useBean)
     {
         Configuration configuration = new Configuration();
+        configuration.addImport(FileSourceCSV.class.getPackage().getName() + ".*");
     	if (useBean) {
             configuration.addEventType(typeName, ExampleMarketDataBean.class);
     	}
@@ -271,7 +297,7 @@ public class TestCSVAdapterUseCases extends TestCase
         return configuration;
     }
 
-    private void trySource(AdapterInputSource source)
+    private void trySource(AdapterInputSource source) throws Exception
     {
         CSVInputAdapterSpec spec = new CSVInputAdapterSpec(source, "TypeC");
 
@@ -285,6 +311,28 @@ public class TestCSVAdapterUseCases extends TestCase
 
         feed.start();
         assertEquals(1, listener.getNewDataList().size());
+
+        if (source.getAsReader() != null) {
+            source.getAsReader().reset();
+        }
+        else {
+            source.getAsStream().reset();
+        }
+
+        // test graph
+        String graph = "create dataflow ReadCSV " +
+                "FileSource -> mystream<TypeC> { hasTitleLine: true, classpathFile: true }" +
+                "DefaultSupportCaptureOp(mystream) {}";
+        epService.getEPAdministrator().createEPL(graph);
+
+        DefaultSupportCaptureOp<Object> outputOp = new DefaultSupportCaptureOp<Object>();
+        EPDataFlowInstantiationOptions options = new EPDataFlowInstantiationOptions();
+        options.operatorProvider(new DefaultSupportGraphOpProvider(outputOp));
+        options.parameterProvider(new DefaultSupportGraphParamProvider(Collections.<String, Object>singletonMap("adapterInputSource", source)));
+        EPDataFlowInstance instance = epService.getEPRuntime().getDataFlowRuntime().instantiate("ReadCSV", options);
+        instance.run();
+        Object[] received = outputOp.getAndReset().get(0).toArray();
+        assertEquals(1, received.length);
     }
 
     /**

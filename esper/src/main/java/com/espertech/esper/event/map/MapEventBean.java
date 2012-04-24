@@ -8,21 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.event.map;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.EventBeanSPI;
 import com.espertech.esper.event.MappedEventBean;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Wrapper for events represented by a Map of key-value pairs that are the event properties.
  * MapEventBean instances are equal if they have the same {@link EventType} and all property names
  * and values are reference-equal.
  */
-public class MapEventBean implements EventBean, MappedEventBean
+public class MapEventBean implements EventBeanSPI, MappedEventBean
 {
     private EventType eventType;
     private Map<String, Object> properties;
@@ -52,6 +52,10 @@ public class MapEventBean implements EventBean, MappedEventBean
     public EventType getEventType()
     {
         return eventType;
+    }
+
+    public void setUnderlying(Object underlying) {
+        properties = (Map<String, Object>) underlying;
     }
 
     /**

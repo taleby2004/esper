@@ -11,14 +11,16 @@
 
 package com.espertech.esper.regression.pattern;
 
-import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import junit.framework.*;
-import com.espertech.esper.regression.support.*;
-import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.PrintUpdateListener;
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.client.time.CurrentTimeEvent;
+import com.espertech.esper.regression.support.*;
+import com.espertech.esper.support.bean.SupportBeanConstants;
+import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportBean_B;
+import com.espertech.esper.support.bean.SupportBean_C;
+import com.espertech.esper.support.client.SupportConfigFactory;
+import junit.framework.TestCase;
 
 public class TestOrOperator extends TestCase implements SupportBeanConstants
 {
@@ -123,21 +125,28 @@ public class TestOrOperator extends TestCase implements SupportBeanConstants
         util.runTest();
     }
 
-    public void testOrAndNot()
-    {
-        tryOrAndNot("(a=A -> b=B) or (a=A -> not b=B)");
-        tryOrAndNot("a=A -> (b=B or not B)");
-    }
-
-    private void tryOrAndNot(String pattern)
+    public void testOrAndNotAndZeroStart()
     {
         Configuration config = SupportConfigFactory.getConfiguration();
         config.addEventType("A", SupportBean_A.class.getName());
         config.addEventType("B", SupportBean_B.class.getName());
         config.addEventType("C", SupportBean_C.class.getName());
+
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
+        tryOrAndNot(epService, "(a=A -> b=B) or (a=A -> not b=B)");
+        tryOrAndNot(epService, "a=A -> (b=B or not B)");
+
+        // try zero-time start
+        SupportUpdateListener listener = new SupportUpdateListener();
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        epService.getEPAdministrator().createEPL("select * from pattern [timer:interval(0) or every timer:interval(1 min)]").addListenerWithReplay(listener);
+        assertTrue(listener.isInvoked());
+    }
+
+    private void tryOrAndNot(EPServiceProvider epService, String pattern)
+    {
         String expression =
             "select * " +
             "from pattern [" + pattern + "]";
@@ -145,18 +154,19 @@ public class TestOrOperator extends TestCase implements SupportBeanConstants
         EPStatement statement = epService.getEPAdministrator().createEPL(expression);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
-        statement.addListener(new PrintUpdateListener());
 
         Object eventA1 = new SupportBean_A("A1");
         epService.getEPRuntime().sendEvent(eventA1);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(eventA1, event.get("a"));
-        assertNull(event.get("b"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(eventA1, theEvent.get("a"));
+        assertNull(theEvent.get("b"));
 
         Object eventB1 = new SupportBean_B("B1");
         epService.getEPRuntime().sendEvent(eventB1);
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(eventA1, event.get("a"));
-        assertEquals(eventB1, event.get("b"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(eventA1, theEvent.get("a"));
+        assertEquals(eventB1, theEvent.get("b"));
+
+        statement.destroy();
     }
 }

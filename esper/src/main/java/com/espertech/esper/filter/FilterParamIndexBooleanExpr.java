@@ -63,22 +63,26 @@ public final class FilterParamIndexBooleanExpr extends FilterParamIndexBase
         return constantsMapRWLock;
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
         List<EventEvaluator> evaluators = new ArrayList<EventEvaluator>();
         constantsMapRWLock.readLock().lock();
-        for (ExprNodeAdapterBase exprNodeAdapter : evaluatorsMap.keySet())
-        {
-            if (exprNodeAdapter.evaluate(eventBean))
+        try {
+            for (ExprNodeAdapterBase exprNodeAdapter : evaluatorsMap.keySet())
             {
-                evaluators.add(evaluatorsMap.get(exprNodeAdapter));
+                if (exprNodeAdapter.evaluate(theEvent))
+                {
+                    evaluators.add(evaluatorsMap.get(exprNodeAdapter));
+                }
             }
         }
-        constantsMapRWLock.readLock().unlock();
+        finally {
+            constantsMapRWLock.readLock().unlock();
+        }
 
         for (EventEvaluator evaluator : evaluators)
         {
-            evaluator.matchEvent(eventBean, matches);
+            evaluator.matchEvent(theEvent, matches);
         }
     }
 

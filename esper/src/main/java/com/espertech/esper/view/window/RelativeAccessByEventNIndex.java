@@ -20,13 +20,13 @@ public interface RelativeAccessByEventNIndex
 {
     /**
      * Returns the prior event to the given event counting back the number of events as supplied by index.
-     * @param event is the event to count back from
+     * @param theEvent is the event to count back from
      * @param index is the number of events to go back
      * @return event
      */
-    public EventBean getRelativeToEvent(EventBean event, int index);
+    public EventBean getRelativeToEvent(EventBean theEvent, int index);
 
-    public EventBean getRelativeToEnd(EventBean event, int index);
+    public EventBean getRelativeToEnd(EventBean theEvent, int index);
 
     public Iterator<EventBean> getWindowToEvent(Object evalEvent);
 

@@ -101,13 +101,13 @@ public class TestMTVariables extends TestCase
         // Since "var3 = var3 + 1" is executed by multiple statements and threads we need to have
         // this counter have all the values from 0 to N-1.
         TreeSet<Long> var3Values = new TreeSet<Long>();
-        for (EventBean event : listenerSetOne.getNewDataListFlattened())
+        for (EventBean theEvent : listenerSetOne.getNewDataListFlattened())
         {
-            var3Values.add((Long) event.get("var3"));
+            var3Values.add((Long) theEvent.get("var3"));
         }
-        for (EventBean event : listenerSetTwo.getNewDataListFlattened())
+        for (EventBean theEvent : listenerSetTwo.getNewDataListFlattened())
         {
-            var3Values.add((Long) event.get("var3"));
+            var3Values.add((Long) theEvent.get("var3"));
         }
         assertEquals(numThreads * numRepeats, var3Values.size());
         for (int i = 1; i < numThreads * numRepeats + 1; i++)

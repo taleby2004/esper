@@ -90,9 +90,9 @@ public class IStreamTimeOrderRandomAccess implements RandomAccessByIndex
                 break;
             }
             ArrayList<EventBean> events = iterator.next();
-            for (EventBean event : events)
+            for (EventBean theEvent : events)
             {
-                cache.add(cacheFilledTo, event);
+                cache.add(cacheFilledTo, theEvent);
                 cacheFilledTo++;
             }
 
@@ -158,9 +158,9 @@ public class IStreamTimeOrderRandomAccess implements RandomAccessByIndex
                 break;
             }
             ArrayList<EventBean> events = iterator.next();
-            for (EventBean event : events)
+            for (EventBean theEvent : events)
             {
-                cache.add(cacheFilledTo, event);
+                cache.add(cacheFilledTo, theEvent);
                 cacheFilledTo++;
             }
         }

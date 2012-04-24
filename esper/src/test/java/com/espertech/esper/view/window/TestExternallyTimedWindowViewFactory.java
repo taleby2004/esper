@@ -69,7 +69,7 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
 
         try
         {
-            factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {"string", 20}));
+            factory.setViewParameters(null, TestViewSupport.toExprListBean(new Object[] {"theString", 20}));
             factory.attach(parentType, SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
@@ -99,10 +99,10 @@ public class TestExternallyTimedWindowViewFactory extends TestCase
         }
     }
 
-    private void tryParameter(Object[] params, String fieldName, long msec) throws Exception
+    private void tryParameter(Object[] parameters, String fieldName, long msec) throws Exception
     {
         ExternallyTimedWindowViewFactory factory = new ExternallyTimedWindowViewFactory();
-        factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(params));
+        factory.setViewParameters(SupportStatementContextFactory.makeViewContext(), TestViewSupport.toExprListBean(parameters));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
         ExternallyTimedWindowView view = (ExternallyTimedWindowView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldName, view.getTimestampExpression().toExpressionString());

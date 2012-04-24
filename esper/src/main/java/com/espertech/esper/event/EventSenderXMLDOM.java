@@ -50,14 +50,14 @@ public class EventSenderXMLDOM implements EventSender
         this.threadingService = threadingService;        
     }
 
-    public void sendEvent(Object node) throws EPException
+    public void sendEvent(Object theEvent) throws EPException
     {
-        sendEvent(node, false);
+        sendEvent(theEvent, false);
     }
 
-    public void route(Object node) throws EPException
+    public void route(Object theEvent) throws EPException
     {
-        sendEvent(node, true);
+        sendEvent(theEvent, true);
     }
 
     private void sendEvent(Object node, boolean isRoute) throws EPException
@@ -90,20 +90,20 @@ public class EventSenderXMLDOM implements EventSender
             }
         }
 
-        EventBean event = eventAdapterService.adapterForTypedDOM(namedNode, baseXMLEventType);
+        EventBean theEvent = eventAdapterService.adapterForTypedDOM(namedNode, baseXMLEventType);
         if (isRoute)
         {
-            runtimeEventSender.routeEventBean(event);            
+            runtimeEventSender.routeEventBean(theEvent);
         }
         else
         {
             if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
             {
-                threadingService.submitInbound(new InboundUnitSendWrapped(event, runtimeEventSender));
+                threadingService.submitInbound(new InboundUnitSendWrapped(theEvent, runtimeEventSender));
             }
             else
             {
-                runtimeEventSender.processWrappedEvent(event);
+                runtimeEventSender.processWrappedEvent(theEvent);
             }
         }
     }

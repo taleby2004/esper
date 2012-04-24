@@ -109,7 +109,7 @@ public class TestDatabaseHintHook extends TestCase
 
         epService.getEPAdministrator().getConfiguration().addVariable("myvariable", int.class, 10);
 
-        String fields[] = "string,intPrimitive".split(",");
+        String fields[] = "theString,intPrimitive".split(",");
         String stmtText = "@Hook(type=HookType.SQLROW, hook='" + SupportSQLOutputRowConversion.class.getName() + "')" +
                 "select * from sql:MyDB ['select * from mytesttable where myint = ${myvariable}']";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);

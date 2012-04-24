@@ -79,11 +79,11 @@ public class TestRegressionLinestViewFactory extends TestCase
         }
     }
 
-    private void tryInvalidParameter(Object[] params) throws Exception
+    private void tryInvalidParameter(Object[] parameters) throws Exception
     {
         try
         {
-            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
+            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(parameters));
             factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
@@ -93,9 +93,9 @@ public class TestRegressionLinestViewFactory extends TestCase
         }
     }
 
-    private void tryParameter(Object[] params, String fieldNameX, String fieldNameY) throws Exception
+    private void tryParameter(Object[] parameters, String fieldNameX, String fieldNameY) throws Exception
     {
-        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(params));
+        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListMD(parameters));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
         RegressionLinestView view = (RegressionLinestView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldNameX, view.getExpressionX().toExpressionString());

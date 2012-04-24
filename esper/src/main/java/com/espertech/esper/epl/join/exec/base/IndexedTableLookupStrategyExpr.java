@@ -50,10 +50,10 @@ public class IndexedTableLookupStrategyExpr implements JoinExecTableLookupStrate
         return index;
     }
 
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
     {
         Object[] keys = new Object[evaluators.length];
-        eventsPerStream[streamNum] = event;
+        eventsPerStream[streamNum] = theEvent;
         for (int i = 0; i < evaluators.length; i++) {
             keys[i] = evaluators[i].evaluate(eventsPerStream, true, exprEvaluatorContext);
         }

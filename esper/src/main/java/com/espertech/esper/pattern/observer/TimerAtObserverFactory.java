@@ -31,7 +31,7 @@ public class TimerAtObserverFactory implements ObserverFactory, MetaDefItem, Ser
     /**
      * Parameters.
      */
-    protected List<ExprNode> params;
+    protected List<ExprNode> parameters;
 
     /**
      * Convertor.
@@ -43,24 +43,24 @@ public class TimerAtObserverFactory implements ObserverFactory, MetaDefItem, Ser
      */
     protected ScheduleSpec spec = null;
 
-    public void setObserverParameters(List<ExprNode> params, MatchedEventConvertor convertor) throws ObserverParameterException
+    public void setObserverParameters(List<ExprNode> parameters, MatchedEventConvertor convertor) throws ObserverParameterException
     {
         if (log.isDebugEnabled())
         {
-            log.debug(".setObserverParameters " + params);
+            log.debug(".setObserverParameters " + parameters);
         }
 
-        if ((params.size() < 5) || (params.size() > 6))
+        if ((parameters.size() < 5) || (parameters.size() > 6))
         {
             throw new ObserverParameterException("Invalid number of parameters for timer:at");
         }
 
-        this.params = params;
+        this.parameters = parameters;
         this.convertor = convertor;
 
         // if all parameters are constants, lets try to evaluate and build a schedule for early validation
         boolean allConstantResult = true;
-        for (ExprNode param : params)
+        for (ExprNode param : parameters)
         {
             if (!param.isConstantResult())
             {
@@ -72,7 +72,7 @@ public class TimerAtObserverFactory implements ObserverFactory, MetaDefItem, Ser
         {
             try
             {
-                List<Object> observerParameters = PatternExpressionUtil.evaluate("Timer-at observer", new MatchedEventMapImpl(), params, convertor, null);
+                List<Object> observerParameters = PatternExpressionUtil.evaluate("Timer-at observer", new MatchedEventMapImpl(convertor.getMatchedEventMapMeta()), parameters, convertor, null);
                 spec = ScheduleSpecUtil.computeValues(observerParameters.toArray());
             }
             catch (ScheduleParameterException e)
@@ -85,7 +85,7 @@ public class TimerAtObserverFactory implements ObserverFactory, MetaDefItem, Ser
     public EventObserver makeObserver(PatternAgentInstanceContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator,
                                       EvalStateNodeNumber stateNodeId, Object observerState)
     {
-        List<Object> observerParameters = PatternExpressionUtil.evaluate("Timer-at observer", beginState, params, convertor, context.getAgentInstanceContext());
+        List<Object> observerParameters = PatternExpressionUtil.evaluate("Timer-at observer", beginState, parameters, convertor, context.getAgentInstanceContext());
 
         try
         {

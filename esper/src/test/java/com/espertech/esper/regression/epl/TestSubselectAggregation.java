@@ -45,7 +45,7 @@ public class TestSubselectAggregation extends TestCase
     public void testCorrelatedAggregationSelectEquals()
     {
         String stmtText = "select p00, " +
-                "(select sum(intPrimitive) from SupportBean.win:keepall() where string = s0.p00) as sump00 " +
+                "(select sum(intPrimitive) from SupportBean.win:keepall() where theString = s0.p00) as sump00 " +
                 "from S0 as s0";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -74,14 +74,14 @@ public class TestSubselectAggregation extends TestCase
     public void testCorrelatedAggregationWhereGreater()
     {
         String stmtText = "select p00 from S0 as s0 where id > " +
-                "(select sum(intPrimitive) from SupportBean.win:keepall() where string = s0.p00)";
+                "(select sum(intPrimitive) from SupportBean.win:keepall() where theString = s0.p00)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
         runAssertionCorrAggWhereGreater();
 
         stmtText = "select p00 from S0 as s0 where id > " +
-                "(select sum(intPrimitive) from SupportBean.win:keepall() where string||'X' = s0.p00||'X')";
+                "(select sum(intPrimitive) from SupportBean.win:keepall() where theString||'X' = s0.p00||'X')";
         stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -123,8 +123,8 @@ public class TestSubselectAggregation extends TestCase
         sendEventMD("GOOG", 2);
         assertFalse(listener.isInvoked());
 
-        Object event = sendEventMD("IBM", 3);
-        assertEquals(event, listener.assertOneGetNewAndReset().getUnderlying());
+        Object theEvent = sendEventMD("IBM", 3);
+        assertEquals(theEvent, listener.assertOneGetNewAndReset().getUnderlying());
     }
 
     public void testCorrelatedPropertiesSelected()
@@ -329,8 +329,8 @@ public class TestSubselectAggregation extends TestCase
 
     private Object sendEventMD(String symbol, double price)
     {
-        Object event = new SupportMarketDataBean(symbol, price, 0L, "");
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        Object theEvent = new SupportMarketDataBean(symbol, price, 0L, "");
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 }

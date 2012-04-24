@@ -31,7 +31,7 @@ public class RunnableDMLFactory implements RunnableFactory
         return context;
     }
 
-    public Runnable makeRunnable(EventBean eventBean) {
-        return new RunnableDML(context, eventBean);
+    public Runnable makeRunnable(EventBean theEvent) {
+        return new RunnableDML(context, theEvent);
     }
 }

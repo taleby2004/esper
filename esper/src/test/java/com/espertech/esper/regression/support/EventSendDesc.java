@@ -15,16 +15,16 @@ import com.espertech.esper.support.bean.SupportMarketDataBean;
 
 public class EventSendDesc
 {
-    private SupportMarketDataBean event;
+    private SupportMarketDataBean theEvent;
     private String eventDesc;
 
-    public EventSendDesc(SupportMarketDataBean event, String eventDesc) {
-        this.event = event;
+    public EventSendDesc(SupportMarketDataBean theEvent, String eventDesc) {
+        this.theEvent = theEvent;
         this.eventDesc = eventDesc;
     }
 
-    public SupportMarketDataBean getEvent() {
-        return event;
+    public SupportMarketDataBean getTheEvent() {
+        return theEvent;
     }
 
     public String getEventDesc() {

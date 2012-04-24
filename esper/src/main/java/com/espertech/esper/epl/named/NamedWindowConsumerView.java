@@ -10,6 +10,7 @@ package com.espertech.esper.epl.named;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.collection.FlushedEventBuffer;
 import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.epl.expression.ExprEvaluator;
@@ -68,7 +69,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StopCallback
     {
         if (audit) {
             if (AuditPath.isInfoEnabled()) {
-                AuditPath.auditLog(exprEvaluatorContext.getEngineURI(), exprEvaluatorContext.getStatementName(), "consume-window " + eventType.getName() + " insert {" + EventBeanUtility.summarize(newData) + "} remove {" + EventBeanUtility.summarize(oldData) + "}");
+                AuditPath.auditLog(exprEvaluatorContext.getEngineURI(), exprEvaluatorContext.getStatementName(), AuditEnum.STREAM, eventType.getName() + " insert {" + EventBeanUtility.summarize(newData) + "} remove {" + EventBeanUtility.summarize(oldData) + "}");
             }
         }
 
@@ -115,9 +116,9 @@ public class NamedWindowConsumerView extends ViewSupport implements StopCallback
         }
 
         OneEventCollection filtered = null;
-        for (EventBean event : eventData)
+        for (EventBean theEvent : eventData)
         {
-            eventPerStream[0] = event;
+            eventPerStream[0] = theEvent;
             boolean pass = true;
             for (ExprEvaluator filter : filterList)
             {
@@ -135,7 +136,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StopCallback
                 {
                     filtered = new OneEventCollection();
                 }
-                filtered.add(event);
+                filtered.add(theEvent);
             }
         }
 

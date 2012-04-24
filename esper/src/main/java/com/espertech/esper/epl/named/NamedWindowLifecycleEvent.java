@@ -19,7 +19,7 @@ public class NamedWindowLifecycleEvent
     private String name;
     private NamedWindowProcessor processor;
     private NamedWindowLifecycleEvent.LifecycleEventType eventType;
-    private Object[] params;
+    private Object[] parameters;
 
     /**
      * Event types.
@@ -41,14 +41,14 @@ public class NamedWindowLifecycleEvent
      * @param name is the name of the named window
      * @param processor instance for processing the named window contents
      * @param eventType the type of event
-     * @param params event parameters
+     * @param parameters event parameters
      */
-    protected NamedWindowLifecycleEvent(String name, NamedWindowProcessor processor, NamedWindowLifecycleEvent.LifecycleEventType eventType, Object... params)
+    protected NamedWindowLifecycleEvent(String name, NamedWindowProcessor processor, NamedWindowLifecycleEvent.LifecycleEventType eventType, Object... parameters)
     {
         this.name = name;
         this.processor = processor;
         this.eventType = eventType;
-        this.params = params;
+        this.parameters = parameters;
     }
 
     /**
@@ -81,7 +81,7 @@ public class NamedWindowLifecycleEvent
      * Returns event parameters.
      * @return params
      */
-    public Object[] getParams() {
-        return params;
+    public Object[] getParameters() {
+        return parameters;
     }
 }

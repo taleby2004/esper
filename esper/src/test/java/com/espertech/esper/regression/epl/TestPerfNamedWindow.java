@@ -67,11 +67,11 @@ public class TestPerfNamedWindow extends TestCase
         String eplIdx1Two = "on SupportBeanRange sbr select sum(intPrimitive) as sumi from MyWindow where intPrimitive between sbr.rangeStart and sbr.rangeEnd";
         runOnDemandAssertion(eplIdx1Two, new SupportBeanRange("R", 5501, 5503), 5501+5502+5503);
 
-        String eplIdx1Three = "on SupportBeanRange sbr select sum(intPrimitive) as sumi from MyWindow where string = key and intPrimitive between sbr.rangeStart and sbr.rangeEnd";
+        String eplIdx1Three = "on SupportBeanRange sbr select sum(intPrimitive) as sumi from MyWindow where theString = key and intPrimitive between sbr.rangeStart and sbr.rangeEnd";
         runOnDemandAssertion(eplIdx1Three, new SupportBeanRange("R", "A", 4998, 5503), 4998+4999);
 
         String eplIdx1Four = "on SupportBeanRange sbr select sum(intPrimitive) as sumi from MyWindow " +
-                "where string = key and longPrimitive = rangeStart and intPrimitive between rangeStart and rangeEnd " +
+                "where theString = key and longPrimitive = rangeStart and intPrimitive between rangeStart and rangeEnd " +
                 "and longBoxed between rangeStart and rangeEnd";
         runOnDemandAssertion(eplIdx1Four, new SupportBeanRange("R", "A", 4998, 5503), 4998);
 
@@ -81,7 +81,7 @@ public class TestPerfNamedWindow extends TestCase
         runOnDemandAssertion(eplIdx1Five, new SupportBeanRange("R", "A", 4998, 5001), 4998 + 4999 + 5000);
     }
 
-    private void runOnDemandAssertion(String epl, SupportBeanRange event, Integer expected) {
+    private void runOnDemandAssertion(String epl, SupportBeanRange theEvent, Integer expected) {
         assertEquals(0, epService.getNamedWindowService().getNamedWindowIndexes("MyWindow").length);
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
@@ -92,7 +92,7 @@ public class TestPerfNamedWindow extends TestCase
         int loops = 1000;
 
         for (int i = 0; i < loops; i++) {
-            epService.getEPRuntime().sendEvent(event);
+            epService.getEPRuntime().sendEvent(theEvent);
             assertEquals(expected, listener.assertOneGetNewAndReset().get("sumi"));
         }
         long end = System.currentTimeMillis();
@@ -106,7 +106,7 @@ public class TestPerfNamedWindow extends TestCase
     public void testDeletePerformance()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create delete stmt
@@ -114,7 +114,7 @@ public class TestPerfNamedWindow extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextDelete);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // load window
@@ -142,7 +142,7 @@ public class TestPerfNamedWindow extends TestCase
     public void testDeletePerformanceCoercion()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, longPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create delete stmt
@@ -150,7 +150,7 @@ public class TestPerfNamedWindow extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextDelete);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, longPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // load window
@@ -178,7 +178,7 @@ public class TestPerfNamedWindow extends TestCase
     public void testDeletePerformanceTwoDeleters()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, longPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create delete stmt one
@@ -190,7 +190,7 @@ public class TestPerfNamedWindow extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextDeleteTwo);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, longPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // load window
@@ -219,7 +219,7 @@ public class TestPerfNamedWindow extends TestCase
     public void testDeletePerformanceIndexReuse()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, longPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create delete stmt
@@ -231,7 +231,7 @@ public class TestPerfNamedWindow extends TestCase
         }
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, longPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // load window
@@ -266,19 +266,19 @@ public class TestPerfNamedWindow extends TestCase
         return bean;
     }
 
-    private SupportBean sendSupportBean(String string, long longPrimitive)
+    private SupportBean sendSupportBean(String theString, long longPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setLongPrimitive(longPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
 
-    private SupportBean sendSupportBean(String string, int intPrimitive)
+    private SupportBean sendSupportBean(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;

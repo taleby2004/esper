@@ -27,21 +27,21 @@ public class SerializableObjectCopier
     public static Object copy(Object orig) throws IOException, ClassNotFoundException
     {
         SimpleByteArrayOutputStream fbos = new SimpleByteArrayOutputStream();
-        ObjectOutputStream out = new ObjectOutputStream(fbos);
+        ObjectOutputStream outStream = new ObjectOutputStream(fbos);
         try {
-            out.writeObject(orig);
-            out.flush();
+            outStream.writeObject(orig);
+            outStream.flush();
         }
         finally {
-            out.close();
+            outStream.close();
         }
 
-        ObjectInputStream in = new ObjectInputStream(fbos.getInputStream());
+        ObjectInputStream inStream = new ObjectInputStream(fbos.getInputStream());
         try {
-            return in.readObject();
+            return inStream.readObject();
         }
         finally {
-            in.close();
+            inStream.close();
         }
     }
 }

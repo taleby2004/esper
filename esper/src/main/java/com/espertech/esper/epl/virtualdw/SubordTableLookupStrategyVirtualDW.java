@@ -64,7 +64,7 @@ public class SubordTableLookupStrategyVirtualDW implements SubordTableLookupStra
             else {
                 QueryGraphValueEntryRangeRelOp relOp = (QueryGraphValueEntryRangeRelOp) rangeKey.getRangeInfo();
                 ExprEvaluator evaluator = relOp.getExpression().getExprEvaluator();
-                evaluators[count] = new ExternalEvaluatorHashRelOp(evaluator, hashKeyCoercionTypes.getCoercionTypes()[i]);
+                evaluators[count] = new ExternalEvaluatorHashRelOp(evaluator, rangeKeyCoercionTypes.getCoercionTypes()[i]);
             }
             count++;
         }

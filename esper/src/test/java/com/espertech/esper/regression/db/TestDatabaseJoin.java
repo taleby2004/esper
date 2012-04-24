@@ -64,7 +64,7 @@ public class TestDatabaseJoin extends TestCase
 
         String stmtText = "select * from SupportBean.std:lastevent() sb, SupportBeanTwo.std:lastevent() sbt, " +
                 "sql:MyDB ['select myint from mytesttable'] as s1 " +
-                "  where sb.string = sbt.stringTwo and s1.myint = sbt.intPrimitiveTwo";
+                "  where sb.theString = sbt.stringTwo and s1.myint = sbt.intPrimitiveTwo";
 
         EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL(stmtText);
         assertFalse(statement.getStatementContext().isStatelessSelect());
@@ -76,11 +76,11 @@ public class TestDatabaseJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T2", 30));
         epService.getEPRuntime().sendEvent(new SupportBean("T2", -1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T2", "T2", 30});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.theString,sbt.stringTwo,s1.myint".split(","), new Object[]{"T2", "T2", 30});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T3", -1));
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T3", 40));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", "T3", 40});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.theString,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", "T3", 40});
     }
 
     public void testTimeBatchEPL()
@@ -122,14 +122,14 @@ public class TestDatabaseJoin extends TestCase
     public void test2HistoricalStarInner()
     {
         String[] fields = "a,b,c,d".split(",");
-        String stmtText = "select string as a, intPrimitive as b, s1.myvarchar as c, s2.myvarchar as d from " +
+        String stmtText = "select theString as a, intPrimitive as b, s1.myvarchar as c, s2.myvarchar as d from " +
                 SupportBean.class.getName() + ".win:keepall() as s0 " +
                 " inner join " +
                 " sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} <> mytesttable.mybigint'] as s1 " +
-                " on s1.myvarchar=s0.string " +
+                " on s1.myvarchar=s0.theString " +
                 " inner join " +
                 " sql:MyDB ['select myvarchar from mytesttable where ${intPrimitive} <> mytesttable.myint'] as s2 " +
-                " on s2.myvarchar=s0.string ";
+                " on s2.myvarchar=s0.theString ";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         listener = new SupportUpdateListener();
         stmt.addListener(listener);
@@ -514,22 +514,22 @@ public class TestDatabaseJoin extends TestCase
 
     private void assertReceived(long mybigint, int myint, String myvarchar, String mychar, boolean mybool, BigDecimal mynumeric, BigDecimal mydecimal, Double mydouble, Double myreal)
     {
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertReceived(event, mybigint, myint, myvarchar, mychar, mybool, mynumeric, mydecimal, mydouble, myreal);
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertReceived(theEvent, mybigint, myint, myvarchar, mychar, mybool, mynumeric, mydecimal, mydouble, myreal);
     }
 
-    private void assertReceived(EventBean event, Long mybigint, Integer myint, String myvarchar, String mychar, Boolean mybool, BigDecimal mynumeric, BigDecimal mydecimal, Double mydouble, Double myreal)
+    private void assertReceived(EventBean theEvent, Long mybigint, Integer myint, String myvarchar, String mychar, Boolean mybool, BigDecimal mynumeric, BigDecimal mydecimal, Double mydouble, Double myreal)
     {
-        assertEquals(mybigint, event.get("mybigint"));
-        assertEquals(myint, event.get("myint"));
-        assertEquals(myvarchar, event.get("myvarchar"));
-        assertEquals(mychar, event.get("mychar"));
-        assertEquals(mybool, event.get("mybool"));
-        assertEquals(mynumeric, event.get("mynumeric"));
-        assertEquals(mydecimal, event.get("mydecimal"));
-        assertEquals(mydouble, event.get("mydouble"));
-        Object r = event.get("myreal");
-        assertEquals(myreal, event.get("myreal"));
+        assertEquals(mybigint, theEvent.get("mybigint"));
+        assertEquals(myint, theEvent.get("myint"));
+        assertEquals(myvarchar, theEvent.get("myvarchar"));
+        assertEquals(mychar, theEvent.get("mychar"));
+        assertEquals(mybool, theEvent.get("mybool"));
+        assertEquals(mynumeric, theEvent.get("mynumeric"));
+        assertEquals(mydecimal, theEvent.get("mydecimal"));
+        assertEquals(mydouble, theEvent.get("mydouble"));
+        Object r = theEvent.get("myreal");
+        assertEquals(myreal, theEvent.get("myreal"));
     }
 
     public void testMySQLDatabaseConnection() throws Exception

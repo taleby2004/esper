@@ -55,7 +55,7 @@ public class TestNamedWindowSelect extends TestCase
         String stmtTextCreate = "create window MyWindow.win:keepall() as (a string, b int)";
         epService.getEPAdministrator().createEPL(stmtTextCreate);
 
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from SupportBean";
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from SupportBean";
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         String stmtTextSelect = "on SupportBean_A select mwc.* as mwcwin from MyWindow mwc where id = a group by a having sum(b) = 20";
@@ -87,7 +87,7 @@ public class TestNamedWindowSelect extends TestCase
         String stmtCount = "on pattern[every timer:interval(10 sec)] select count(eve), eve from MyWindow as eve";
         epService.getEPAdministrator().createEPL(stmtCount);
 
-        String stmtTextOnSelect = "on pattern [ every timer:interval(10 sec)] select string from MyWindow having count(string) > 0";
+        String stmtTextOnSelect = "on pattern [ every timer:interval(10 sec)] select theString from MyWindow having count(theString) > 0";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtTextOnSelect);
         stmt.addListener(listenerConsumer);
 
@@ -102,23 +102,23 @@ public class TestNamedWindowSelect extends TestCase
 
         sendSupportBean("E1", 1);
         sendTimer(31000, epService);
-        assertEquals("E1", listenerConsumer.assertOneGetNewAndReset().get("string"));
+        assertEquals("E1", listenerConsumer.assertOneGetNewAndReset().get("theString"));
     }
 
     public void testInsertIntoWildcard()
     {
-        String[] fields = new String[] {"string", "intPrimitive"};
+        String[] fields = new String[] {"theString", "intPrimitive"};
 
         // create window
         String stmtTextCreate = "create window MyWindow.win:keepall() as select * from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select * from " + SupportBean.class.getName() + "(string like 'E%')";
+        String stmtTextInsertOne = "insert into MyWindow select * from " + SupportBean.class.getName() + "(theString like 'E%')";
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create on-select stmt
-        String stmtTextSelect = "on " + SupportBean_A.class.getName() + " insert into MyStream select mywin.* from MyWindow as mywin order by string asc";
+        String stmtTextSelect = "on " + SupportBean_A.class.getName() + " insert into MyStream select mywin.* from MyWindow as mywin order by theString asc";
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
         stmtSelect.addListener(listenerSelect);
         assertEquals(StatementType.ON_INSERT, ((EPStatementSPI) stmtSelect).getStatementMetadata().getStatementType());
@@ -129,7 +129,7 @@ public class TestNamedWindowSelect extends TestCase
         stmtConsumer.addListener(listenerConsumer);
 
         // create second inserting statement
-        String stmtTextInsertTwo = "insert into MyStream select * from " + SupportBean.class.getName() + "(string like 'I%')";
+        String stmtTextInsertTwo = "insert into MyStream select * from " + SupportBean.class.getName() + "(theString like 'I%')";
         epService.getEPAdministrator().createEPL(stmtTextInsertTwo);
 
         // send event
@@ -166,13 +166,13 @@ public class TestNamedWindowSelect extends TestCase
 
         // check type
         EventType consumerType = stmtConsumer.getEventType();
-        assertEquals(String.class, consumerType.getPropertyType("string"));
+        assertEquals(String.class, consumerType.getPropertyType("theString"));
         assertTrue(consumerType.getPropertyNames().length > 10);
         assertEquals(SupportBean.class, consumerType.getUnderlyingType());
 
         // check type
         EventType onSelectType = stmtSelect.getEventType();
-        assertEquals(String.class, onSelectType.getPropertyType("string"));
+        assertEquals(String.class, onSelectType.getPropertyType("theString"));
         assertTrue(onSelectType.getPropertyNames().length > 10);
         assertEquals(SupportBean.class, onSelectType.getUnderlyingType());
 
@@ -201,8 +201,8 @@ public class TestNamedWindowSelect extends TestCase
         tryInvalid("on " + SupportBean_A.class.getName() + " insert into MyStream select * from DUMMY",
                    "Named window 'DUMMY' has not been declared [on com.espertech.esper.support.bean.SupportBean_A insert into MyStream select * from DUMMY]");
 
-        tryInvalid("on " + SupportBean_A.class.getName() + " select prev(1, string) from MyWindow",
-                   "Error starting statement: Previous function cannot be used in this context [on com.espertech.esper.support.bean.SupportBean_A select prev(1, string) from MyWindow]");
+        tryInvalid("on " + SupportBean_A.class.getName() + " select prev(1, theString) from MyWindow",
+                   "Error starting statement: Previous function cannot be used in this context [on com.espertech.esper.support.bean.SupportBean_A select prev(1, theString) from MyWindow]");
     }
 
     private void tryInvalid(String text, String message)
@@ -224,7 +224,7 @@ public class TestNamedWindowSelect extends TestCase
         String[] fieldsOnSelect = new String[] {"a", "b", "id"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create select stmt
@@ -234,7 +234,7 @@ public class TestNamedWindowSelect extends TestCase
         assertEquals(StatementType.ON_SELECT, ((EPStatementSPI) stmtSelect).getStatementMetadata().getStatementType());
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // send 3 event
@@ -269,7 +269,7 @@ public class TestNamedWindowSelect extends TestCase
         String[] fields = new String[] {"triggerid", "wina", "b"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create select stmt
@@ -278,7 +278,7 @@ public class TestNamedWindowSelect extends TestCase
         stmtSelect.addListener(listenerSelect);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // send 3 event
@@ -312,7 +312,7 @@ public class TestNamedWindowSelect extends TestCase
         String[] fields = new String[] {"sumb"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create select stmt
@@ -321,7 +321,7 @@ public class TestNamedWindowSelect extends TestCase
         stmtSelect.addListener(listenerSelect);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // send 3 event
@@ -365,7 +365,7 @@ public class TestNamedWindowSelect extends TestCase
         String[] fields = new String[] {"sumb"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create select stmt
@@ -374,7 +374,7 @@ public class TestNamedWindowSelect extends TestCase
         stmtSelect.addListener(listenerSelect);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // send 3 event
@@ -411,7 +411,7 @@ public class TestNamedWindowSelect extends TestCase
         String[] fields = new String[] {"a", "sumb"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create select stmt
@@ -425,7 +425,7 @@ public class TestNamedWindowSelect extends TestCase
         stmtSelectTwo.addListener(listenerSelectTwo);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // fire trigger
@@ -486,7 +486,7 @@ public class TestNamedWindowSelect extends TestCase
         String[] fields = new String[] {"a", "b"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create select stmt
@@ -495,7 +495,7 @@ public class TestNamedWindowSelect extends TestCase
         stmtSelect.addListener(listenerSelect);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create delete stmt
@@ -547,7 +547,7 @@ public class TestNamedWindowSelect extends TestCase
         String[] fields = new String[] {"a", "b"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create select stmt
@@ -557,7 +557,7 @@ public class TestNamedWindowSelect extends TestCase
         stmtSelect.addListener(listenerSelect);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // send 3 event
@@ -603,10 +603,10 @@ public class TestNamedWindowSelect extends TestCase
         return bean;
     }
 
-    private SupportBean sendSupportBean(String string, int intPrimitive)
+    private SupportBean sendSupportBean(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
@@ -614,8 +614,8 @@ public class TestNamedWindowSelect extends TestCase
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

@@ -57,22 +57,22 @@ public class EventSenderBean implements EventSender
         this.threadingService = threadingService;
     }
 
-    public void sendEvent(Object event)
+    public void sendEvent(Object theEvent)
     {
-        if (event == null)
+        if (theEvent == null)
         {
             throw new NullPointerException("No event object provided to sendEvent method");
         }
 
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
-            if ((!(event instanceof CurrentTimeEvent)) || (ExecutionPathDebugLog.isTimerDebugEnabled))
+            if ((!(theEvent instanceof CurrentTimeEvent)) || (ExecutionPathDebugLog.isTimerDebugEnabled))
             {
-                log.debug(".sendEvent Processing event " + event);
+                log.debug(".sendEvent Processing event " + theEvent);
             }
         }
 
-        EventBean eventBean = getEventBean(event);
+        EventBean eventBean = getEventBean(theEvent);
 
         // Process event
         if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
@@ -85,28 +85,28 @@ public class EventSenderBean implements EventSender
         }
     }
 
-    public void route(Object event) throws EPException
+    public void route(Object theEvent) throws EPException
     {
-        EventBean eventBean = getEventBean(event);
+        EventBean eventBean = getEventBean(theEvent);
         runtime.routeEventBean(eventBean);
     }
 
-    private EventBean getEventBean(Object event)
+    private EventBean getEventBean(Object theEvent)
     {
         // type check
-        if (event.getClass() != beanEventType.getUnderlyingType())
+        if (theEvent.getClass() != beanEventType.getUnderlyingType())
         {
             synchronized (this)
             {
-                if (!compatibleClasses.contains(event.getClass()))
+                if (!compatibleClasses.contains(theEvent.getClass()))
                 {
-                    if (JavaClassHelper.isSubclassOrImplementsInterface(event.getClass(), beanEventType.getUnderlyingType()))
+                    if (JavaClassHelper.isSubclassOrImplementsInterface(theEvent.getClass(), beanEventType.getUnderlyingType()))
                     {
-                        compatibleClasses.add(event.getClass());
+                        compatibleClasses.add(theEvent.getClass());
                     }
                     else
                     {
-                        throw new EPException("Event object of type " + event.getClass().getName() +
+                        throw new EPException("Event object of type " + theEvent.getClass().getName() +
                                 " does not equal, extend or implement the type " + beanEventType.getUnderlyingType().getName() +
                                 " of event type '" + beanEventType.getName() + "'");
                     }
@@ -114,6 +114,6 @@ public class EventSenderBean implements EventSender
             }
         }
 
-        return eventAdapterService.adapterForTypedBean(event, beanEventType);
+        return eventAdapterService.adapterForTypedBean(theEvent, beanEventType);
     }
 }

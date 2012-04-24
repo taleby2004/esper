@@ -25,8 +25,8 @@ public class SortedAccessStrategyLE extends SortedAccessStrategyRelOpBase implem
         super(isNWOnTrigger, lookupStream, numStreams, keyEval);
     }
 
-    public Set<EventBean> lookup(EventBean event, PropertySortedEventTable index, ExprEvaluatorContext context) {
-        return index.lookupLessEqual(super.evaluateLookup(event, context));
+    public Set<EventBean> lookup(EventBean theEvent, PropertySortedEventTable index, ExprEvaluatorContext context) {
+        return index.lookupLessEqual(super.evaluateLookup(theEvent, context));
     }
 
     public Collection<EventBean> lookup(EventBean[] eventsPerStream, PropertySortedEventTable index, ExprEvaluatorContext context) {

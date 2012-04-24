@@ -21,17 +21,17 @@ import org.apache.commons.logging.Log;
 public class InboundUnitSendEvent implements InboundUnitRunnable
 {
     private static final Log log = LogFactory.getLog(InboundUnitSendEvent.class);
-    private final Object event;
+    private final Object theEvent;
     private final EPRuntimeImpl runtime;
 
     /**
      * Ctor.
-     * @param event to process
+     * @param theEvent to process
      * @param runtime to process event
      */
-    public InboundUnitSendEvent(Object event, EPRuntimeImpl runtime)
+    public InboundUnitSendEvent(Object theEvent, EPRuntimeImpl runtime)
     {
-        this.event = event;
+        this.theEvent = theEvent;
         this.runtime = runtime;
     }
 
@@ -39,7 +39,7 @@ public class InboundUnitSendEvent implements InboundUnitRunnable
     {
         try
         {
-            runtime.processEvent(event);
+            runtime.processEvent(theEvent);
         }
         catch (RuntimeException e)
         {

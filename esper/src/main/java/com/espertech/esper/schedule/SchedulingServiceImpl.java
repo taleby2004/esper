@@ -67,9 +67,7 @@ public final class SchedulingServiceImpl implements SchedulingServiceSPI
     {
         if (handleSetMap.containsKey(handle))
         {
-            String message = "Handle already in collection";
-            SchedulingServiceImpl.log.fatal(".add " + message);
-            throw new ScheduleHandleExistsException(message);
+            remove(handle, slot);
         }
 
         long triggerOnTime = currentTime + afterMSec;
@@ -81,9 +79,7 @@ public final class SchedulingServiceImpl implements SchedulingServiceSPI
     {
         if (handleSetMap.containsKey(handle))
         {
-            String message = "Handle already in collection";
-            SchedulingServiceImpl.log.fatal(".add " + message);
-            throw new ScheduleHandleExistsException(message);
+            remove(handle, slot);
         }
 
         long nextScheduledTime = ScheduleComputeHelper.computeNextOccurance(spec, currentTime);
@@ -118,8 +114,12 @@ public final class SchedulingServiceImpl implements SchedulingServiceSPI
         // current time we just add one to the current time for getting the head map
         SortedMap<Long, SortedMap<ScheduleSlot, ScheduleHandle>> headMap = timeHandleMap.headMap(currentTime + 1);
 
+        if (headMap.isEmpty()) {
+            return;
+        }
+
         // First determine all triggers to shoot
-        List<Long> removeKeys = new LinkedList<Long>();
+        List<Long> removeKeys = new ArrayList<Long>();
         for (Map.Entry<Long, SortedMap<ScheduleSlot, ScheduleHandle>> entry : headMap.entrySet())
         {
             Long key = entry.getKey();

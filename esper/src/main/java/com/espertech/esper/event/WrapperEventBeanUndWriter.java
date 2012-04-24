@@ -31,9 +31,9 @@ public class WrapperEventBeanUndWriter implements EventBeanWriter
        this.undWriter = undWriter;
     }
 
-    public void write(Object[] values, EventBean event)
+    public void write(Object[] values, EventBean theEvent)
     {
-        DecoratingEventBean wrappedEvent = (DecoratingEventBean) event;
+        DecoratingEventBean wrappedEvent = (DecoratingEventBean) theEvent;
         EventBean eventWrapped = wrappedEvent.getUnderlyingEvent();
         undWriter.write(values, eventWrapped);
     }

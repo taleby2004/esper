@@ -11,6 +11,7 @@
 
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
@@ -37,7 +38,7 @@ public class TestResultSetProcessorSimple extends TestCase
     {
         SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(new HashSet<String>());
 
-        SelectExprProcessorHelper factory = new SelectExprProcessorHelper(Collections.<Integer>emptyList(), SupportSelectExprFactory.makeNoAggregateSelectList(), Collections.<SelectExprStreamDesc>emptyList(), null, false, new SupportStreamTypeSvc1Stream(), SupportEventAdapterService.getService(), null, selectExprEventTypeRegistry, null, null, null);
+        SelectExprProcessorHelper factory = new SelectExprProcessorHelper(Collections.<Integer>emptyList(), SupportSelectExprFactory.makeNoAggregateSelectList(), Collections.<SelectExprStreamDesc>emptyList(), null, false, new SupportStreamTypeSvc1Stream(), SupportEventAdapterService.getService(), null, selectExprEventTypeRegistry, null, null, null, new Configuration());
         selectExprProcessor = factory.getEvaluator();
         orderByProcessor = null;
 
@@ -109,10 +110,10 @@ public class TestResultSetProcessorSimple extends TestCase
 	    assertEquals(12, oldEvents[1].get("resultTwo"));
     }
 
-    private Set<MultiKey<EventBean>> makeEventSet(EventBean event)
+    private Set<MultiKey<EventBean>> makeEventSet(EventBean theEvent)
     {
         Set<MultiKey<EventBean>> result = new LinkedHashSet<MultiKey<EventBean>>();
-        result.add(new MultiKey<EventBean>(new EventBean[] { event}));
+        result.add(new MultiKey<EventBean>(new EventBean[] { theEvent}));
         return result;
     }
 

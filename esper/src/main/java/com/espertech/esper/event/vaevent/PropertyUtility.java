@@ -8,14 +8,19 @@
  **************************************************************************************/
 package com.espertech.esper.event.vaevent;
 
-import com.espertech.esper.collection.MultiKey;
-import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -27,16 +32,20 @@ public class PropertyUtility
 
     /**
      * Returns a multi-key for an event and key property getters
-     * @param event to get keys for
+     * @param theEvent to get keys for
      * @param keyPropertyGetters getters to use
      * @return key
      */
-    public static MultiKeyUntyped getKeys(EventBean event, EventPropertyGetter[] keyPropertyGetters)
+    public static Object getKeys(EventBean theEvent, EventPropertyGetter[] keyPropertyGetters)
     {
+        if (keyPropertyGetters.length == 1) {
+            return keyPropertyGetters[0].get(theEvent);
+        }
+
         Object[] keys = new Object[keyPropertyGetters.length];
         for (int i = 0; i < keys.length; i++)
         {
-            keys[i] = keyPropertyGetters[i].get(event);
+            keys[i] = keyPropertyGetters[i].get(theEvent);
         }
         return new MultiKeyUntyped(keys);
     }
@@ -140,8 +149,8 @@ public class PropertyUtility
             typesForGroup.put(deltaEventTypes[i], names[i]);
         }
 
-        Collection<PropertyGroupDesc> out = result.values();
-        PropertyGroupDesc[] array = out.toArray(new PropertyGroupDesc[out.size()]);
+        Collection<PropertyGroupDesc> outColl = result.values();
+        PropertyGroupDesc[] array = outColl.toArray(new PropertyGroupDesc[outColl.size()]);
 
         if (log.isDebugEnabled())
         {
@@ -213,5 +222,58 @@ public class PropertyUtility
         String[] uniqueArr = unique.toArray(new String[unique.size()]);
         Arrays.sort(uniqueArr);
         return uniqueArr;
+    }
+
+    public static PropertyAccessException getMismatchException(Method method, Object object, ClassCastException e) {
+        return getMismatchException(method.getDeclaringClass(), object, e);
+    }
+
+    public static PropertyAccessException getMismatchException(Field field, Object object, ClassCastException e) {
+        return getMismatchException(field.getDeclaringClass(), object, e);
+    }
+
+    public static PropertyAccessException getInvocationTargetException(Method method, InvocationTargetException e) {
+        Class declaring = method.getDeclaringClass();
+        String message = "Failed to invoke method " + method.getName() + " on class " + JavaClassHelper.getClassNameFullyQualPretty(declaring) + ": " + e.getTargetException().getMessage();
+        throw new PropertyAccessException(message, e);
+    }
+
+    public static PropertyAccessException getIllegalAccessException(Field field, IllegalAccessException e) {
+        return getAccessExceptionField(field, e);
+    }
+
+    public static PropertyAccessException getIllegalArgumentException(Field field, IllegalArgumentException e) {
+        return getAccessExceptionField(field, e);
+    }
+
+    private static PropertyAccessException getAccessExceptionField(Field field, Exception e) {
+        Class declaring = field.getDeclaringClass();
+        String message = "Failed to obtain field value for field " + field.getName() + " on class " + JavaClassHelper.getClassNameFullyQualPretty(declaring) + ": " + e.getMessage();
+        throw new PropertyAccessException(message, e);
+    }
+
+    private static PropertyAccessException getMismatchException(Class declared, Object object, ClassCastException e) {
+        String message = "Mismatched getter instance to event bean type, expected " + JavaClassHelper.getClassNameFullyQualPretty(declared) + " but received ";
+        if (object != null) {
+            message += JavaClassHelper.getClassNameFullyQualPretty(object.getClass());
+        }
+        else {
+            message += "null";
+        }
+        throw new PropertyAccessException(message, e);
+    }
+
+    public static PropertyAccessException getIllegalAccessException(Method method, IllegalAccessException e) {
+        return getAccessExceptionMethod(method, e);
+    }
+
+    public static PropertyAccessException getIllegalArgumentException(Method method, IllegalArgumentException e) {
+        return getAccessExceptionMethod(method, e);
+    }
+
+    private static PropertyAccessException getAccessExceptionMethod(Method method, Exception e) {
+        Class declaring = method.getDeclaringClass();
+        String message = "Failed to invoke method " + method.getName() + " on class " + JavaClassHelper.getClassNameFullyQualPretty(declaring) + ": " + e.getMessage();
+        throw new PropertyAccessException(message, e);
     }
 }

@@ -24,19 +24,19 @@ public class InboundUnitSendDOM implements InboundUnitRunnable
 {
     private static final Log log = LogFactory.getLog(InboundUnitSendDOM.class);
 
-    private final org.w3c.dom.Node event;
+    private final org.w3c.dom.Node theEvent;
     private final EPServicesContext services;
     private final EPRuntimeImpl runtime;
 
     /**
      * Ctor.
-     * @param event document
+     * @param theEvent document
      * @param services for wrapping event
      * @param runtime runtime to process
      */
-    public InboundUnitSendDOM(org.w3c.dom.Node event, EPServicesContext services, EPRuntimeImpl runtime)
+    public InboundUnitSendDOM(org.w3c.dom.Node theEvent, EPServicesContext services, EPRuntimeImpl runtime)
     {
-        this.event = event;
+        this.theEvent = theEvent;
         this.services = services;
         this.runtime = runtime;
     }
@@ -45,7 +45,7 @@ public class InboundUnitSendDOM implements InboundUnitRunnable
     {
         try
         {
-            EventBean eventBean = services.getEventAdapterService().adapterForDOM(event);
+            EventBean eventBean = services.getEventAdapterService().adapterForDOM(theEvent);
             runtime.processEvent(eventBean);
         }
         catch (RuntimeException e)

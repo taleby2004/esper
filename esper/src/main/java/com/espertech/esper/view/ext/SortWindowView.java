@@ -14,8 +14,6 @@ import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.util.MultiKeyCollatingComparator;
-import com.espertech.esper.util.MultiKeyComparator;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.DataWindowView;
 import com.espertech.esper.view.View;
@@ -47,10 +45,10 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
     private final EventBean[] eventsPerStream = new EventBean[1];
     private final boolean[] isDescendingValues;
     private final int sortWindowSize;
-    private final IStreamSortedRandomAccess optionalSortedRandomAccess;
+    private final IStreamSortRankRandomAccess optionalSortedRandomAccess;
     private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
 
-    private TreeMap<MultiKeyUntyped, LinkedList<EventBean>> sortedEvents;
+    private TreeMap<Object, Object> sortedEvents;
     private int eventCount;
 
     /**
@@ -68,7 +66,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
                           ExprEvaluator[] sortCriteriaEvaluators,
                           boolean[] descendingValues,
                           int sortWindowSize,
-                          IStreamSortedRandomAccess optionalSortedRandomAccess,
+                          IStreamSortRankRandomAccess optionalSortedRandomAccess,
                           boolean isSortUsingCollator,
                           AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
@@ -80,31 +78,8 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
         this.optionalSortedRandomAccess = optionalSortedRandomAccess;
         this.agentInstanceViewFactoryContext = agentInstanceViewFactoryContext;
 
-        // determine string-type sorting
-        boolean hasStringTypes = false;
-        boolean stringTypes[] = new boolean[sortCriteriaExpressions.length];
-
-        int count = 0;
-        for(ExprEvaluator node : sortCriteriaEvaluators)
-        {
-            if (node.getType() == String.class)
-            {
-                hasStringTypes = true;
-                stringTypes[count] = true;
-            }
-            count++;
-        }
-
-        Comparator<MultiKeyUntyped> comparator;
-        if ((!hasStringTypes) || (!isSortUsingCollator))
-        {
-            comparator = new MultiKeyComparator(isDescendingValues);
-        }
-        else
-        {
-            comparator = new MultiKeyCollatingComparator(isDescendingValues, stringTypes);
-        }
-        sortedEvents = new TreeMap<MultiKeyUntyped, LinkedList<EventBean>>(comparator);
+        Comparator<Object> comparator = RankWindowView.getComparator(sortCriteriaEvaluators, isSortUsingCollator, isDescendingValues);
+        sortedEvents = new TreeMap<Object, Object>(comparator);
     }
 
     /**
@@ -138,7 +113,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
      * Returns the friend handling the random access, cal be null if not required.
      * @return random accessor to sort window contents
      */
-    protected IStreamSortedRandomAccess getOptionalSortedRandomAccess()
+    protected IStreamSortRankRandomAccess getOptionalSortedRandomAccess()
     {
         return optionalSortedRandomAccess;
     }
@@ -163,7 +138,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
         {
             for (int i = 0; i < oldData.length; i++)
             {
-                MultiKeyUntyped sortValues = getSortValues(oldData[i]);
+                Object sortValues = getSortValues(oldData[i]);
                 boolean result = remove(sortValues, oldData[i]);
                 if (result)
                 {
@@ -178,7 +153,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
         {
             for (int i = 0; i < newData.length; i++)
             {
-                MultiKeyUntyped sortValues = getSortValues(newData[i]);
+                Object sortValues = getSortValues(newData[i]);
                 add(sortValues, newData[i]);
                 eventCount++;
             }
@@ -191,18 +166,23 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
             for (int i = 0; i < removeCount; i++)
             {
                 // Remove the last element of the last key - sort order is key and then natural order of arrival
-                MultiKeyUntyped lastKey = sortedEvents.lastKey();
-                LinkedList<EventBean> events = sortedEvents.get(lastKey);
-                EventBean event = events.removeLast();
-                eventCount--;
-
-                // Clear out entry if not used
-                if (events.isEmpty())
-                {
-                    sortedEvents.remove(lastKey);
+                Object lastKey = sortedEvents.lastKey();
+                Object lastEntry = sortedEvents.get(lastKey);
+                if (lastEntry instanceof List) {
+                    List<EventBean> events = (List<EventBean>) lastEntry;
+                    EventBean theEvent = events.remove(events.size() - 1);  // remove oldest event, newest events are first in list
+                    eventCount--;
+                    if (events.isEmpty()) {
+                        sortedEvents.remove(lastKey);
+                    }
+                    removedEvents.add(theEvent);
                 }
-
-                removedEvents.add(event);
+                else {
+                    EventBean theEvent = (EventBean) lastEntry;
+                    eventCount--;
+                    sortedEvents.remove(lastKey);
+                    removedEvents.add(theEvent);
+                }
             }
         }
 
@@ -236,39 +216,59 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
                 " sortWindowSize=" + sortWindowSize;
     }
 
-    private void add(MultiKeyUntyped key, EventBean bean)
+    private void add(Object key, EventBean bean)
     {
-        LinkedList<EventBean> listOfBeans = sortedEvents.get(key);
-        if (listOfBeans != null)
-        {
-            listOfBeans.addFirst(bean); // Add to the front of the list as the second sort critertial is ascending arrival order
-            return;
+        Object current = sortedEvents.get(key);
+        if (current != null) {
+            if (current instanceof List) {
+                List<EventBean> events = (List<EventBean>) current;
+                events.add(0, bean);    // add to front, newest are listed first
+            }
+            else {
+                EventBean theEvent = (EventBean) current;
+                List<EventBean> events = new LinkedList<EventBean>();
+                events.add(bean);
+                events.add(theEvent);
+                sortedEvents.put(key, events);
+            }
         }
-
-        listOfBeans = new LinkedList<EventBean>();
-        listOfBeans.add(bean);
-        sortedEvents.put(key, listOfBeans);
+        else {
+            sortedEvents.put(key, bean);
+        }
     }
 
-    private boolean remove(MultiKeyUntyped key, EventBean bean)
+    private boolean remove(Object key, EventBean bean)
     {
-        LinkedList<EventBean> listOfBeans = sortedEvents.get(key);
+        Object listOfBeans = sortedEvents.get(key);
         if (listOfBeans == null)
         {
             return false;
         }
 
-        boolean result = listOfBeans.remove(bean);
-        if (listOfBeans.isEmpty())
-        {
-            sortedEvents.remove(key);
+        if (listOfBeans instanceof List) {
+            List<EventBean> events = (List<EventBean>) listOfBeans;
+            boolean result = events.remove(bean);
+            if (events.isEmpty())
+            {
+                sortedEvents.remove(key);
+            }
+            return result;
         }
-        return result;
+        else if (listOfBeans == bean) {
+            sortedEvents.remove(key);
+            return true;
+        }
+
+        return false;
     }
 
-    private MultiKeyUntyped getSortValues(EventBean event)
+    private Object getSortValues(EventBean theEvent)
     {
-        eventsPerStream[0] = event;
+        eventsPerStream[0] = theEvent;
+        if (sortCriteriaExpressions.length == 1) {
+            return sortCriteriaEvaluators[0].evaluate(eventsPerStream, true, agentInstanceViewFactoryContext);
+        }
+
     	Object[] result = new Object[sortCriteriaExpressions.length];
     	int count = 0;
     	for(ExprEvaluator expr : sortCriteriaEvaluators)

@@ -24,12 +24,12 @@ public class ServiceHealthMonitor
     {
         EPAdministrator admin = EPServiceProviderManager.getDefaultProvider().getEPAdministrator();
 
-        String event = OperationMeasurement.class.getName();
+        String theEvent = OperationMeasurement.class.getName();
 
         EPStatement statView = admin.createPattern("every (" +
-                event + "(success=false)->" +
-                event + "(success=false)->" +
-                event + "(success=false))");
+                theEvent + "(success=false)->" +
+                theEvent + "(success=false)->" +
+                theEvent + "(success=false))");
 
         statView.addListener(new UpdateListener()
         {

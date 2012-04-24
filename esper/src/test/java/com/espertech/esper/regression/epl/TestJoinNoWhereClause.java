@@ -45,9 +45,9 @@ public class TestJoinNoWhereClause extends TestCase
         {
             setOne[i] = new SupportMarketDataBean("IBM", 0, (long) i, "");
 
-            SupportBean event = new SupportBean();
-            event.setLongBoxed((long)i);
-            setTwo[i] = event;
+            SupportBean theEvent = new SupportBean();
+            theEvent.setLongBoxed((long) i);
+            setTwo[i] = theEvent;
         }
     }
 
@@ -92,8 +92,8 @@ public class TestJoinNoWhereClause extends TestCase
                         {2L, 1L}});
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

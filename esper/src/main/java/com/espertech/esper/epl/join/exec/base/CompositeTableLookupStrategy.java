@@ -66,9 +66,9 @@ public class CompositeTableLookupStrategy implements JoinExecTableLookupStrategy
         return index;
     }
 
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext context)
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext context)
     {
-        Set<EventBean> result = chain.get(event, index.getIndex(), context);
+        Set<EventBean> result = chain.get(theEvent, index.getIndex(), context);
         if (result != null && result.isEmpty()) {
             return null;
         }

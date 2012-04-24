@@ -20,9 +20,11 @@ import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class TestNamedWindowSubqCorrelCoerce extends TestCase
 {
@@ -130,18 +132,28 @@ public class TestNamedWindowSubqCorrelCoerce extends TestCase
     }
 
     private void sendWindow(String col0, long col1, String col2) {
-        HashMap<String, Object> event = new HashMap<String, Object>();
-        event.put("col0", col0);
-        event.put("col1", col1);
-        event.put("col2", col2);
-        epService.getEPRuntime().sendEvent(event, "WindowSchema");
+        HashMap<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("col0", col0);
+        theEvent.put("col1", col1);
+        theEvent.put("col2", col2);
+        if (EventRepresentationEnum.getEngineDefault(epService).isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), "WindowSchema");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "WindowSchema");
+        }
     }
 
     private void sendEvent(String e0, int e1, String e2) {
-        HashMap<String, Object> event = new HashMap<String, Object>();
-        event.put("e0", e0);
-        event.put("e1", e1);
-        event.put("e2", e2);
-        epService.getEPRuntime().sendEvent(event, "EventSchema");
+        HashMap<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("e0", e0);
+        theEvent.put("e1", e1);
+        theEvent.put("e2", e2);
+        if (EventRepresentationEnum.getEngineDefault(epService).isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), "EventSchema");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "EventSchema");
+        }
     }
 }

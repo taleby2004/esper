@@ -11,7 +11,7 @@ package com.espertech.esper.pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -53,19 +53,24 @@ public class EvalNodeUtil
      * @param currentNode parent node
      * @return all child nodes
      */
-    public static Set<EvalFactoryNode> recursiveGetChildNodes(EvalFactoryNode currentNode)
+    public static Set<EvalFactoryNode> recursiveGetChildNodes(EvalFactoryNode currentNode, EvalNodeUtilFactoryFilter filter)
     {
-        Set<EvalFactoryNode> result = new HashSet<EvalFactoryNode>();
-        recursiveGetChildNodes(result, currentNode);
+        Set<EvalFactoryNode> result = new LinkedHashSet<EvalFactoryNode>();
+        if (filter.consider(currentNode)) {
+            result.add(currentNode);
+        }
+        recursiveGetChildNodes(result, currentNode, filter);
         return result;
     }
 
-    private static void recursiveGetChildNodes(Set<EvalFactoryNode> set, EvalFactoryNode currentNode)
+    private static void recursiveGetChildNodes(Set<EvalFactoryNode> set, EvalFactoryNode currentNode, EvalNodeUtilFactoryFilter filter)
     {
         for (EvalFactoryNode node : currentNode.getChildNodes())
         {
-            set.add(node);
-            recursiveGetChildNodes(set, node);
+            if (filter.consider(node)) {
+                set.add(node);
+            }
+            recursiveGetChildNodes(set, node, filter);
         }
     }
 

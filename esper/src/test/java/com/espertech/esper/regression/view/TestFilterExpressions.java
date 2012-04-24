@@ -52,7 +52,7 @@ public class TestFilterExpressions extends TestCase
 		assertFalse("Subscriber should not have received result(s)", listener.isInvoked());
         stmt.destroy();
 
-		stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(string='A' and string='B')");
+		stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(theString='A' and theString='B')");
 		stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 0));
@@ -163,12 +163,12 @@ public class TestFilterExpressions extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
-        SupportBean event = new SupportBean("e1", 2);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean("e1", 2);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.getAndClearIsInvoked());
 
-        event = new SupportBean("e1", 1);
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportBean("e1", 1);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertTrue(listener.isInvoked());
     }
 
@@ -179,12 +179,12 @@ public class TestFilterExpressions extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
-        SupportBeanWithEnum event = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_2);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBeanWithEnum theEvent = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_2);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.getAndClearIsInvoked());
 
-        event = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_1);
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_1);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertTrue(listener.isInvoked());
     }
 
@@ -195,12 +195,12 @@ public class TestFilterExpressions extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
-        SupportBeanWithEnum event = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_2);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBeanWithEnum theEvent = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_2);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertTrue(listener.getAndClearIsInvoked());
 
-        event = new SupportBeanWithEnum("e2", SupportEnum.ENUM_VALUE_1);
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportBeanWithEnum("e2", SupportEnum.ENUM_VALUE_1);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.isInvoked());
 
         stmt.destroy();
@@ -210,12 +210,12 @@ public class TestFilterExpressions extends TestCase
         stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
-        event = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_2);
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportBeanWithEnum("e1", SupportEnum.ENUM_VALUE_2);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertTrue(listener.getAndClearIsInvoked());
 
-        event = new SupportBeanWithEnum("e2", SupportEnum.ENUM_VALUE_1);
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportBeanWithEnum("e2", SupportEnum.ENUM_VALUE_1);
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.isInvoked());
     }
 
@@ -302,10 +302,10 @@ public class TestFilterExpressions extends TestCase
         }
 
         // test equals&where-clause (can be optimized into filter)
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string != 'A'").addListener(listeners[0]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string != 'A' or intPrimitive != 0").addListener(listeners[1]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string = 'A'").addListener(listeners[2]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string = 'A' or intPrimitive != 0").addListener(listeners[3]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString != 'A'").addListener(listeners[0]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString != 'A' or intPrimitive != 0").addListener(listeners[1]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString = 'A'").addListener(listeners[2]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString = 'A' or intPrimitive != 0").addListener(listeners[3]);
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 0));
         assertListeners(listeners, new boolean[] {false, false, false, false});
@@ -330,12 +330,12 @@ public class TestFilterExpressions extends TestCase
         // test equals&selection
         String[] fields = "val0,val1,val2,val3,val4,val5".split(",");
         epService.getEPAdministrator().createEPL("select " +
-                "string != 'A' as val0, " +
-                "string != 'A' or intPrimitive != 0 as val1, " +
-                "string != 'A' and intPrimitive != 0 as val2, " +
-                "string = 'A' as val3," +
-                "string = 'A' or intPrimitive != 0 as val4, " +
-                "string = 'A' and intPrimitive != 0 as val5 from SupportBean").addListener(listener);
+                "theString != 'A' as val0, " +
+                "theString != 'A' or intPrimitive != 0 as val1, " +
+                "theString != 'A' and intPrimitive != 0 as val2, " +
+                "theString = 'A' as val3," +
+                "theString = 'A' or intPrimitive != 0 as val4, " +
+                "theString = 'A' and intPrimitive != 0 as val5 from SupportBean").addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 0));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null, false, null, null, false});
@@ -358,10 +358,10 @@ public class TestFilterExpressions extends TestCase
         epService.getEPAdministrator().destroyAllStatements();
 
         // test is-and-isnot&where-clause
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string is null").addListener(listeners[0]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string is null or intPrimitive != 0").addListener(listeners[1]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string is not null").addListener(listeners[2]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string is not null or intPrimitive != 0").addListener(listeners[3]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString is null").addListener(listeners[0]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString is null or intPrimitive != 0").addListener(listeners[1]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString is not null").addListener(listeners[2]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString is not null or intPrimitive != 0").addListener(listeners[3]);
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 0));
         assertListeners(listeners, new boolean[] {true, true, false, false});
@@ -379,12 +379,12 @@ public class TestFilterExpressions extends TestCase
 
         // test is-and-isnot&selection
         epService.getEPAdministrator().createEPL("select " +
-                "string is null as val0, " +
-                "string is null or intPrimitive != 0 as val1, " +
-                "string is null and intPrimitive != 0 as val2, " +
-                "string is not null as val3," +
-                "string is not null or intPrimitive != 0 as val4, " +
-                "string is not null and intPrimitive != 0 as val5 " +
+                "theString is null as val0, " +
+                "theString is null or intPrimitive != 0 as val1, " +
+                "theString is null and intPrimitive != 0 as val2, " +
+                "theString is not null as val3," +
+                "theString is not null or intPrimitive != 0 as val4, " +
+                "theString is not null and intPrimitive != 0 as val5 " +
                 "from SupportBean").addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 0));
@@ -402,12 +402,12 @@ public class TestFilterExpressions extends TestCase
         epService.getEPAdministrator().destroyAllStatements();
 
         // filter expression
-        epService.getEPAdministrator().createEPL("select * from SupportBean(string is null)").addListener(listeners[0]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string = null").addListener(listeners[1]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean(string = null)").addListener(listeners[2]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean(string is not null)").addListener(listeners[3]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean where string != null").addListener(listeners[4]);
-        epService.getEPAdministrator().createEPL("select * from SupportBean(string != null)").addListener(listeners[5]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean(theString is null)").addListener(listeners[0]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString = null").addListener(listeners[1]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean(theString = null)").addListener(listeners[2]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean(theString is not null)").addListener(listeners[3]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean where theString != null").addListener(listeners[4]);
+        epService.getEPAdministrator().createEPL("select * from SupportBean(theString != null)").addListener(listeners[5]);
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 0));
         assertListeners(listeners, new boolean[] {true, false, false, false, false, false});
@@ -754,31 +754,31 @@ public class TestFilterExpressions extends TestCase
         String text;
 
         text = "select * from " + SupportBean.class.getName() + "(" +
-                SupportStaticMethodLib.class.getName() + ".isStringEquals('b', string))";
+                SupportStaticMethodLib.class.getName() + ".isStringEquals('b', theString))";
         tryFilter(text, true);
 
         text = "select * from " + SupportBean.class.getName() + "(" +
-                SupportStaticMethodLib.class.getName() + ".isStringEquals('bx', string || 'x'))";
+                SupportStaticMethodLib.class.getName() + ".isStringEquals('bx', theString || 'x'))";
         tryFilter(text, true);
 
-        text = "select * from " + SupportBean.class.getName() + "('b'=string," +
-                SupportStaticMethodLib.class.getName() + ".isStringEquals('bx', string || 'x'))";
+        text = "select * from " + SupportBean.class.getName() + "('b'=theString," +
+                SupportStaticMethodLib.class.getName() + ".isStringEquals('bx', theString || 'x'))";
         tryFilter(text, true);
 
-        text = "select * from " + SupportBean.class.getName() + "('b'=string, string='b', string != 'a')";
+        text = "select * from " + SupportBean.class.getName() + "('b'=theString, theString='b', theString != 'a')";
         tryFilter(text, true);
 
-        text = "select * from " + SupportBean.class.getName() + "(string != 'a', string != 'c')";
+        text = "select * from " + SupportBean.class.getName() + "(theString != 'a', theString != 'c')";
         tryFilter(text, true);
 
-        text = "select * from " + SupportBean.class.getName() + "(string = 'b', string != 'c')";
+        text = "select * from " + SupportBean.class.getName() + "(theString = 'b', theString != 'c')";
         tryFilter(text, true);
 
-        text = "select * from " + SupportBean.class.getName() + "(string != 'a' and string != 'c')";
+        text = "select * from " + SupportBean.class.getName() + "(theString != 'a' and theString != 'c')";
         tryFilter(text, true);
 
-        text = "select * from " + SupportBean.class.getName() + "(string = 'a' and string = 'c' and " +
-                SupportStaticMethodLib.class.getName() + ".isStringEquals('bx', string || 'x'))";
+        text = "select * from " + SupportBean.class.getName() + "(theString = 'a' and theString = 'c' and " +
+                SupportStaticMethodLib.class.getName() + ".isStringEquals('bx', theString || 'x'))";
         tryFilter(text, false);
     }
 
@@ -902,7 +902,7 @@ public class TestFilterExpressions extends TestCase
         sendBeanIntDouble(25, 50d);
         assertTrue(listener.getAndClearIsInvoked());
 
-        text = "select * from " + SupportBean.class.getName() + "(2*intBoxed=doubleBoxed, string='s')";
+        text = "select * from " + SupportBean.class.getName() + "(2*intBoxed=doubleBoxed, theString='s')";
         stmt = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmt.addListener(listenerTwo);
@@ -970,8 +970,8 @@ public class TestFilterExpressions extends TestCase
         tryInvalid("select * from " + SupportBean.class.getName() + "(5 - 10)",
                 "Filter expression not returning a boolean value: '(5-10)' [select * from com.espertech.esper.support.bean.SupportBean(5 - 10)]");
 
-        tryInvalid("select * from " + SupportBeanWithEnum.class.getName() + "(string=" + SupportEnum.class.getName() + ".ENUM_VALUE_1)",
-                "Implicit conversion from datatype 'SupportEnum' to 'String' is not allowed [select * from com.espertech.esper.support.bean.SupportBeanWithEnum(string=com.espertech.esper.support.bean.SupportEnum.ENUM_VALUE_1)]");
+        tryInvalid("select * from " + SupportBeanWithEnum.class.getName() + "(theString=" + SupportEnum.class.getName() + ".ENUM_VALUE_1)",
+                "Implicit conversion from datatype 'SupportEnum' to 'String' is not allowed [select * from com.espertech.esper.support.bean.SupportBeanWithEnum(theString=com.espertech.esper.support.bean.SupportEnum.ENUM_VALUE_1)]");
 
         tryInvalid("select * from " + SupportBeanWithEnum.class.getName() + "(supportEnum=A.b)",
                 "Failed to resolve property 'A.b' to a stream or nested property in a stream [select * from com.espertech.esper.support.bean.SupportBeanWithEnum(supportEnum=A.b)]");
@@ -1082,67 +1082,67 @@ public class TestFilterExpressions extends TestCase
 
     private void sendBeanIntDouble(Integer intBoxed, Double doubleBoxed)
     {
-        SupportBean event = new SupportBean();
-        event.setIntBoxed(intBoxed);
-        event.setDoubleBoxed(doubleBoxed);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntBoxed(intBoxed);
+        theEvent.setDoubleBoxed(doubleBoxed);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
-    private void sendBeanIntDoubleString(Integer intBoxed, Double doubleBoxed, String string)
+    private void sendBeanIntDoubleString(Integer intBoxed, Double doubleBoxed, String theString)
     {
-        SupportBean event = new SupportBean();
-        event.setIntBoxed(intBoxed);
-        event.setDoubleBoxed(doubleBoxed);
-        event.setString(string);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntBoxed(intBoxed);
+        theEvent.setDoubleBoxed(doubleBoxed);
+        theEvent.setTheString(theString);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendBeanIntIntDouble(int intPrimitive, Integer intBoxed, Double doubleBoxed)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        event.setIntBoxed(intBoxed);
-        event.setDoubleBoxed(doubleBoxed);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        theEvent.setIntBoxed(intBoxed);
+        theEvent.setDoubleBoxed(doubleBoxed);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendBeanLong(Long longBoxed)
     {
-        SupportBean event = new SupportBean();
-        event.setLongBoxed(longBoxed);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setLongBoxed(longBoxed);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
-    private void sendBeanString(String string)
+    private void sendBeanString(String theString)
     {
-        SupportBean num = new SupportBean(string, -1);
+        SupportBean num = new SupportBean(theString, -1);
         epService.getEPRuntime().sendEvent(num);
     }
 
     private void sendBean(String fieldName, Object value)
     {
-        SupportBean event = new SupportBean();
-        if (fieldName.equals("string"))
+        SupportBean theEvent = new SupportBean();
+        if (fieldName.equals("theString"))
         {
-            event.setString((String) value);
+            theEvent.setTheString((String) value);
         }
         else if (fieldName.equals("boolPrimitive"))
         {
-            event.setBoolPrimitive((Boolean) value);
+            theEvent.setBoolPrimitive((Boolean) value);
         }
         else if (fieldName.equals("intBoxed"))
         {
-            event.setIntBoxed((Integer) value);
+            theEvent.setIntBoxed((Integer) value);
         }
         else if (fieldName.equals("longBoxed"))
         {
-            event.setLongBoxed((Long) value);
+            theEvent.setLongBoxed((Long) value);
         }
         else
         {
             throw new IllegalArgumentException("field name not known");
         }
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     public class MyEvent {

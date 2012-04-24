@@ -11,21 +11,21 @@
 
 package com.espertech.esper.event.map;
 
+import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
-import junit.framework.*;
+import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.support.bean.*;
+import com.espertech.esper.support.event.SupportEventAdapterService;
+import com.espertech.esper.support.event.SupportEventBeanFactory;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
-
-import com.espertech.esper.support.event.SupportEventBeanFactory;
-import com.espertech.esper.support.event.SupportEventAdapterService;
-import com.espertech.esper.support.bean.*;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.EventTypeMetadata;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class TestMapEventType extends TestCase
 {
@@ -36,7 +36,7 @@ public class TestMapEventType extends TestCase
     {
         eventAdapterService = SupportEventAdapterService.getService();
 
-        EventTypeMetadata metadata = EventTypeMetadata.createMapType("typename", true, true, true, false, false);
+        EventTypeMetadata metadata = EventTypeMetadata.createNonPojoApplicationType(EventTypeMetadata.ApplicationType.MAP, "typename", true, true, true, false, false);
         Map<String, Object> testTypesMap = new HashMap<String, Object>();
         testTypesMap.put("myInt", int.class);
         testTypesMap.put("myString", String.class);
@@ -137,7 +137,7 @@ public class TestMapEventType extends TestCase
             getter.get(eventBean);
             assertTrue(false);
         }
-        catch (PropertyAccessException ex)
+        catch (ClassCastException ex)
         {
             // Expected
             log.debug(".testGetGetter Expected exception, msg=" + ex.getMessage());
@@ -151,7 +151,7 @@ public class TestMapEventType extends TestCase
 
     public void testEquals()
     {
-        EventTypeMetadata metadata = EventTypeMetadata.createMapType("", true, true, true, false, false);
+        EventTypeMetadata metadata = EventTypeMetadata.createNonPojoApplicationType(EventTypeMetadata.ApplicationType.MAP, "", true, true, true, false, false);
 
         Map<String, Object> mapTwo = new LinkedHashMap<String, Object>();
         mapTwo.put("myInt", int.class);
@@ -233,7 +233,7 @@ public class TestMapEventType extends TestCase
 
         MapEventType mapType = new MapEventType(null, "M1", 1, eventAdapterService, levelZero, null, null, null);
         Map<String, Object> testData = getTestData();
-        MapEventBean event = new MapEventBean(testData, mapType);
+        MapEventBean theEvent = new MapEventBean(testData, mapType);
 
         Object[][] expected = new Object[][] {
                 {"map.mapOne.simpleTwo", float.class,       300f},
@@ -276,8 +276,8 @@ public class TestMapEventType extends TestCase
         {
             String propName = (String) expected[i][0];
             Object valueExpected = expected[i][2];
-            assertEquals("failed for property type-getter:" + propName, valueExpected, mapType.getGetter(propName).get(event));
-            assertEquals("failed for property event-getter:" + propName, valueExpected, event.get(propName));
+            assertEquals("failed for property type-getter:" + propName, valueExpected, mapType.getGetter(propName).get(theEvent));
+            assertEquals("failed for property event-getter:" + propName, valueExpected, theEvent.get(propName));
         }
 
         // assert access to objects nested within
@@ -293,8 +293,8 @@ public class TestMapEventType extends TestCase
             Object valueExpected = expected[i][2];
             EventPropertyGetter getter = mapType.getGetter(propName);
             assertEquals("failed for property:" + propName, propType, mapType.getPropertyType(propName));
-            assertEquals("failed for property type-getter:" + propName, valueExpected, getter.get(event));
-            assertEquals("failed for property event-getter:" + propName, valueExpected, event.get(propName));
+            assertEquals("failed for property type-getter:" + propName, valueExpected, getter.get(theEvent));
+            assertEquals("failed for property event-getter:" + propName, valueExpected, theEvent.get(propName));
         }
     }
 

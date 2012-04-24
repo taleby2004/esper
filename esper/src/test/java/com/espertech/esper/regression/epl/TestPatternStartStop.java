@@ -62,27 +62,27 @@ public class TestPatternStartStop extends TestCase
     {
         for (int i = 0; i < 1000; i++)
         {
-            Object event = null;
+            Object theEvent = null;
             if (i % 3 == 0)
             {
-                event = new SupportBean();
+                theEvent = new SupportBean();
             }
             else
             {
-                event = SupportBeanComplexProps.makeDefaultBean();
+                theEvent = SupportBeanComplexProps.makeDefaultBean();
             }
 
-            epService.getEPRuntime().sendEvent(event);
+            epService.getEPRuntime().sendEvent(theEvent);
 
             EventBean eventBean = updateListener.assertOneGetNewAndReset();
-            if (event instanceof SupportBean)
+            if (theEvent instanceof SupportBean)
             {
-                assertSame(event, eventBean.get("a"));
+                assertSame(theEvent, eventBean.get("a"));
                 assertNull(eventBean.get("b"));
             }
             else
             {
-                assertSame(event, eventBean.get("b"));
+                assertSame(theEvent, eventBean.get("b"));
                 assertNull(eventBean.get("a"));
             }
         }

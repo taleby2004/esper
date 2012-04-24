@@ -33,7 +33,7 @@ public class TestTimeWindowViewFactory extends TestCase
         tryParameter(3.3d, 3300);
         tryParameter(new Float(1.1f), 1100);
 
-        tryInvalidParameter("string");
+        tryInvalidParameter("theString");
         tryInvalidParameter(true);
     }
 

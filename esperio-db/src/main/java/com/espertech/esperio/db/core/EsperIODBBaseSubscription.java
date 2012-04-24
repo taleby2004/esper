@@ -33,10 +33,10 @@ public class EsperIODBBaseSubscription extends BaseSubscription
         this.executor = executor;
     }
 
-    public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+    public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
     {
         try {
-            Runnable runnable = runnableFactory.makeRunnable(event);
+            Runnable runnable = runnableFactory.makeRunnable(theEvent);
             executor.execute(runnable);
         }
         catch (Throwable t) {

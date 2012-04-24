@@ -22,6 +22,7 @@ import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.SupportBean_ST1;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.util.AuditPath;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +45,7 @@ public class TestAudit extends TestCase {
         configuration.addEventType("SupportBean", SupportBean.class);
         configuration.addEventType("SupportBean_ST0", SupportBean_ST0.class);
         configuration.addEventType("SupportBean_ST1", SupportBean_ST1.class);
-        configuration.getEngineDefaults().getLogging().setAuditPattern("[%u] [%s] %m");
+        configuration.getEngineDefaults().getLogging().setAuditPattern("[%u] [%s] [%c] %m");
         epService = EPServiceProviderManager.getDefaultProvider(configuration);
         epService.initialize();
     }
@@ -54,14 +55,20 @@ public class TestAudit extends TestCase {
 
         String epl = "@Name('All-Order-Events') @Audit('stream,property') select price from OrderEvent";
         epService.getEPAdministrator().createEPL(epl).addListener(listener);
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("price", 100d), "OrderEvent");
+        
+        if (EventRepresentationEnum.getEngineDefault(epService).isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {100d}, "OrderEvent");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(Collections.singletonMap("price", 100d), "OrderEvent");
+        }
     }
 
     public void testAudit() {
 
         // stream
         auditLog.info("*** Stream: ");
-        EPStatement stmtInput = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('stream') select * from SupportBean(string = 'E1')");
+        EPStatement stmtInput = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('stream') select * from SupportBean(theString = 'E1')");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         stmtInput.destroy();
 
@@ -95,7 +102,7 @@ public class TestAudit extends TestCase {
         auditLog.info("*** Expression-Def: ");
         EPStatement stmtExprDef = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('exprdef') " +
                 "expression DEF { 1 } " +
-                "expression INN {  x => x.string }" +
+                "expression INN {  x => x.theString }" +
                 "expression OUT { x => INN(x) } " +
                 "select DEF(), OUT(sb) from SupportBean sb");
         stmtExprDef.addListener(listener);
@@ -132,7 +139,7 @@ public class TestAudit extends TestCase {
         assertEquals(50, listener.assertOneGetNewAndReset().get("intPrimitive"));
         stmtView.destroy();
 
-        EPStatement stmtGroupedView = epService.getEPAdministrator().createEPL("@Audit Select * From SupportBean.std:groupwin(string).win:length(2)");
+        EPStatement stmtGroupedView = epService.getEPAdministrator().createEPL("@Audit Select * From SupportBean.std:groupwin(theString).win:length(2)");
         stmtGroupedView.addListener(listener);
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 50));
         listener.reset();
@@ -149,7 +156,7 @@ public class TestAudit extends TestCase {
 
         // expression-detail
         auditLog.info("*** Expression-Nested: ");
-        EPStatement stmtExprNested = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('expression-nested') select ('A'||string)||'X' as val0 from SupportBean");
+        EPStatement stmtExprNested = epService.getEPAdministrator().createEPL("@Name('ABC') @Audit('expression-nested') select ('A'||theString)||'X' as val0 from SupportBean");
         stmtExprNested.addListener(listener);
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 50));
         assertEquals("AE1X", listener.assertOneGetNewAndReset().get("val0"));

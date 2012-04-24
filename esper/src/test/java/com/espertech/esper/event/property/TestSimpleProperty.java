@@ -25,7 +25,7 @@ public class TestSimpleProperty extends TestCase
     private SimpleProperty invalidPropMap;
     private SimpleProperty invalidPropIndexed;
     private SimpleProperty invalidDummy;
-    private EventBean event;
+    private EventBean theEvent;
     private BeanEventType eventType;
 
     public void setUp()
@@ -34,14 +34,14 @@ public class TestSimpleProperty extends TestCase
         invalidPropMap = new SimpleProperty("mapped");
         invalidPropIndexed = new SimpleProperty("indexed");
         invalidDummy = new SimpleProperty("dummy");
-        event = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
-        eventType = (BeanEventType)event.getEventType();
+        theEvent = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
+        eventType = (BeanEventType) theEvent.getEventType();
     }
 
     public void testGetGetter()
     {
         EventPropertyGetter getter = prop.getGetter(eventType, SupportEventAdapterService.getService());
-        assertEquals("simple", getter.get(event));
+        assertEquals("simple", getter.get(theEvent));
 
         assertNull(invalidDummy.getGetter(eventType, SupportEventAdapterService.getService()));
         assertNull(invalidPropMap.getGetter(eventType, SupportEventAdapterService.getService()));

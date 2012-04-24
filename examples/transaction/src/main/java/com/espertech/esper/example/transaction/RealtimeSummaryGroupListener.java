@@ -30,12 +30,12 @@ public class RealtimeSummaryGroupListener implements UpdateListener
             return;
         }
 
-        EventBean event = newEvents[0];
+        EventBean theEvent = newEvents[0];
         log.debug(
-                groupIdentifier + "=" + event.get(groupIdentifier) +
-                " minAC=" + event.get("minLatency") +
-                " maxAC=" + event.get("maxLatency") +
-                " avgAC=" + event.get("avgLatency")
+                groupIdentifier + "=" + theEvent.get(groupIdentifier) +
+                " minAC=" + theEvent.get("minLatency") +
+                " maxAC=" + theEvent.get("maxLatency") +
+                " avgAC=" + theEvent.get("avgLatency")
                 );
     }
 

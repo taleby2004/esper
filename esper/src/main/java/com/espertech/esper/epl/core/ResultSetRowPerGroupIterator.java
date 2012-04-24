@@ -11,12 +11,11 @@ package com.espertech.esper.epl.core;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.epl.agg.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.collection.MultiKeyUntyped;
 
-import java.util.Iterator;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * Iterator for the group-by case with a row per group.
@@ -28,7 +27,7 @@ public class ResultSetRowPerGroupIterator implements Iterator<EventBean>
     private final AggregationService aggregationService;
     private EventBean nextResult;
     private final EventBean[] eventsPerStream;
-    private final Set<MultiKeyUntyped> priorSeenGroups;
+    private final Set<Object> priorSeenGroups;
     private final ExprEvaluatorContext exprEvaluatorContext;
 
     /**
@@ -44,7 +43,7 @@ public class ResultSetRowPerGroupIterator implements Iterator<EventBean>
         this.resultSetProcessor = resultSetProcessor;
         this.aggregationService = aggregationService;
         eventsPerStream = new EventBean[1];
-        priorSeenGroups = new HashSet<MultiKeyUntyped>();
+        priorSeenGroups = new HashSet<Object>();
         this.exprEvaluatorContext = exprEvaluatorContext;
     }
 
@@ -87,7 +86,7 @@ public class ResultSetRowPerGroupIterator implements Iterator<EventBean>
             EventBean candidate = sourceIterator.next();
             eventsPerStream[0] = candidate;
 
-            MultiKeyUntyped groupKey = resultSetProcessor.generateGroupKey(eventsPerStream, true);
+            Object groupKey = resultSetProcessor.generateGroupKey(eventsPerStream, true);
             aggregationService.setCurrentAccess(groupKey, exprEvaluatorContext.getAgentInstanceId());
 
             Boolean pass = true;

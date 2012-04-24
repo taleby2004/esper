@@ -48,20 +48,20 @@ public class ContextControllerPartitionedFilterCallback implements FilterHandleC
         servicesContext.getFilterService().add(filterValueSet, filterHandle);
     }
 
-    public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches) {
+    public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches) {
         Object key;
         if (getters.length > 1) {
             Object[] keys = new Object[getters.length];
             for (int i = 0; i < keys.length; i++) {
-                 keys[i] = getters[i].get(event);
+                 keys[i] = getters[i].get(theEvent);
             }
             key = new MultiKeyUntyped(keys);
         }
         else {
-            key = getters[0].get(event);
+            key = getters[0].get(theEvent);
         }
 
-        callback.create(key, event);
+        callback.create(key, theEvent);
     }
 
     public boolean isSubSelect() {

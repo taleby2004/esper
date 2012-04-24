@@ -256,9 +256,9 @@ public class TestDeployAdmin extends TestCase
     public void testShortcutReadDeploy() throws Exception {
 
         String resource = "regression/test_module_12.epl";
-        InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
-        assertNotNull(in);
-        DeploymentResult resultOne = deploymentAdmin.readDeploy(in, null, null, null);
+        InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
+        assertNotNull(input);
+        DeploymentResult resultOne = deploymentAdmin.readDeploy(input, null, null, null);
         deploymentAdmin.undeployRemove(resultOne.getDeploymentId());
         assertNull(deploymentAdmin.getDeployment(resultOne.getDeploymentId()));
 
@@ -361,12 +361,12 @@ public class TestDeployAdmin extends TestCase
             fail();
         }
         catch (DeploymentActionException ex) {
-            assertEquals("Deployment failed in module 'mymodule.one' in expression 'create schema MySchemaOne (col1 Wrong)' : Error starting statement: Nestable map type configuration encountered an unexpected property type name 'Wrong' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map type [create schema MySchemaOne (col1 Wrong)]", ex.getMessage());
+            assertEquals("Deployment failed in module 'mymodule.one' in expression 'create schema MySchemaOne (col1 Wrong)' : Error starting statement: Nestable type configuration encountered an unexpected property type name 'Wrong' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map or ObjectArray type [create schema MySchemaOne (col1 Wrong)]", ex.getMessage());
             assertEquals(2,  ex.getExceptions().size());
             assertEquals("create schema MySchemaOne (col1 Wrong)", ex.getExceptions().get(0).getExpression());
-            assertEquals("Error starting statement: Nestable map type configuration encountered an unexpected property type name 'Wrong' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map type [create schema MySchemaOne (col1 Wrong)]", ex.getExceptions().get(0).getInner().getMessage());
+            assertEquals("Error starting statement: Nestable type configuration encountered an unexpected property type name 'Wrong' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map or ObjectArray type [create schema MySchemaOne (col1 Wrong)]", ex.getExceptions().get(0).getInner().getMessage());
             assertEquals("create schema MySchemaOne (col2 WrongTwo)", ex.getExceptions().get(1).getExpression());
-            assertEquals("Error starting statement: Nestable map type configuration encountered an unexpected property type name 'WrongTwo' for property 'col2', expected java.lang.Class or java.util.Map or the name of a previously-declared Map type [create schema MySchemaOne (col2 WrongTwo)]", ex.getExceptions().get(1).getInner().getMessage());
+            assertEquals("Error starting statement: Nestable type configuration encountered an unexpected property type name 'WrongTwo' for property 'col2', expected java.lang.Class or java.util.Map or the name of a previously-declared Map or ObjectArray type [create schema MySchemaOne (col2 WrongTwo)]", ex.getExceptions().get(1).getInner().getMessage());
         }
     }
 
@@ -374,7 +374,7 @@ public class TestDeployAdmin extends TestCase
 
         String textOne = "@Name('A') create schema MySchemaTwo (col1 int)";
         String textTwo = "@Name('B') create schema MySchemaTwo (col1 not_existing_type)";
-        String errorTextTwo = "Error starting statement: Nestable map type configuration encountered an unexpected property type name 'not_existing_type' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map type [@Name('B') create schema MySchemaTwo (col1 not_existing_type)]";
+        String errorTextTwo = "Error starting statement: Nestable type configuration encountered an unexpected property type name 'not_existing_type' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map or ObjectArray type [@Name('B') create schema MySchemaTwo (col1 not_existing_type)]";
         String textThree = "@Name('C') create schema MySchemaTwo (col1 int)";
         Module module = makeModule("mymodule.two", textOne, textTwo, textThree);
 
@@ -424,7 +424,7 @@ public class TestDeployAdmin extends TestCase
 
     public void testFlagCompileOnly() throws Exception {
         String text = "create schema SomeSchema (col1 NotExists)";
-        String error = "Error starting statement: Nestable map type configuration encountered an unexpected property type name 'NotExists' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map type [create schema SomeSchema (col1 NotExists)]";
+        String error = "Error starting statement: Nestable type configuration encountered an unexpected property type name 'NotExists' for property 'col1', expected java.lang.Class or java.util.Map or the name of a previously-declared Map or ObjectArray type [create schema SomeSchema (col1 NotExists)]";
 
         try {
             deploymentAdmin.deploy(makeModule("test", text), null);

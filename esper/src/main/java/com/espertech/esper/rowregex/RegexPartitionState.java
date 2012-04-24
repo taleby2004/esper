@@ -24,7 +24,7 @@ public class RegexPartitionState
 {
     private RegexPartitionStateRandomAccessImpl randomAccess;
     private List<RegexNFAStateEntry> currentStates = new ArrayList<RegexNFAStateEntry>();
-    private MultiKeyUntyped optionalKeys;
+    private Object optionalKeys;
     private List<RegexNFAStateEntry> intervalCallbackItems;
     private boolean isCallbackScheduled;
 
@@ -34,7 +34,7 @@ public class RegexPartitionState
      * @param optionalKeys keys for "partition", if any
      * @param hasInterval true if an interval is provided
      */
-    public RegexPartitionState(RegexPartitionStateRandomAccessImpl randomAccess, MultiKeyUntyped optionalKeys, boolean hasInterval)
+    public RegexPartitionState(RegexPartitionStateRandomAccessImpl randomAccess, Object optionalKeys, boolean hasInterval)
     {
         this.randomAccess = randomAccess;
         this.optionalKeys = optionalKeys;
@@ -66,7 +66,7 @@ public class RegexPartitionState
      */
     public RegexPartitionState(RegexPartitionStateRandomAccessGetter getter,
                                List<RegexNFAStateEntry> currentStates,
-                               MultiKeyUntyped optionalKeys,
+                               Object optionalKeys,
                                boolean hasInterval) {
         if (getter != null)
         {
@@ -109,7 +109,7 @@ public class RegexPartitionState
      * Returns partition keys, if any.
      * @return keys
      */
-    public MultiKeyUntyped getOptionalKeys() {
+    public Object getOptionalKeys() {
         return optionalKeys;
     }
 

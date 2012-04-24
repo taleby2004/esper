@@ -20,7 +20,7 @@ public class SupportHTTPServer {
 
     private final int port;
     private ServerSocket serversocket;
-    private HttpParams params;
+    private HttpParams parameters;
     private HttpService httpService;
     private EsperHttpServiceClassicRunnable runnable;
     private Thread socketThread;
@@ -35,8 +35,8 @@ public class SupportHTTPServer {
         }
 
         this.serversocket = new ServerSocket(port);
-        this.params = new BasicHttpParams();
-        this.params
+        this.parameters = new BasicHttpParams();
+        this.parameters
             .setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
             .setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
             .setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
@@ -59,10 +59,10 @@ public class SupportHTTPServer {
                 httpproc,
                 new DefaultConnectionReuseStrategy(),
                 new DefaultHttpResponseFactory());
-        this.httpService.setParams(this.params);
+        this.httpService.setParams(this.parameters);
         this.httpService.setHandlerResolver(registery);
 
-        runnable = new EsperHttpServiceClassicRunnable("regressionTestService", serversocket, params, httpService);
+        runnable = new EsperHttpServiceClassicRunnable("regressionTestService", serversocket, parameters, httpService);
         socketThread = new Thread(runnable);
         socketThread.setDaemon(true);
         socketThread.start();

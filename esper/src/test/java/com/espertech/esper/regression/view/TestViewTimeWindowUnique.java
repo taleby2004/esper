@@ -106,20 +106,20 @@ public class TestViewTimeWindowUnique extends TestCase
 
     private void sendEvent(String symbol)
     {
-        SupportMarketDataBean event = new SupportMarketDataBean(symbol, 0, 0L, "");
-        epService.getEPRuntime().sendEvent(event);
+        SupportMarketDataBean theEvent = new SupportMarketDataBean(symbol, 0, 0L, "");
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendEvent(String symbol, double price, Long volume)
     {
-        SupportMarketDataBean event = new SupportMarketDataBean(symbol, price, volume, "");
-        epService.getEPRuntime().sendEvent(event);
+        SupportMarketDataBean theEvent = new SupportMarketDataBean(symbol, price, volume, "");
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendTimer(long time)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

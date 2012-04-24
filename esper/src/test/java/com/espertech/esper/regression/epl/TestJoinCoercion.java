@@ -43,7 +43,7 @@ public class TestJoinCoercion extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBeanRange", SupportBeanRange.class);
 
         String fields[] = "sbs,sbi,sbri".split(",");
-        String epl = "select sb.string as sbs, sb.intPrimitive as sbi, sbr.id as sbri from SupportBean.win:length(10) sb, SupportBeanRange.win:length(10) sbr " +
+        String epl = "select sb.theString as sbs, sb.intPrimitive as sbi, sbr.id as sbri from SupportBean.win:length(10) sb, SupportBeanRange.win:length(10) sbr " +
                 "where intPrimitive between rangeStartLong and rangeEndLong";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -66,8 +66,8 @@ public class TestJoinCoercion extends TestCase
         assertFalse(listener.isInvoked());
 
         stmt.destroy();
-        epl = "select sb.string as sbs, sb.intPrimitive as sbi, sbr.id as sbri from SupportBean.win:length(10) sb, SupportBeanRange.win:length(10) sbr " +
-                "where sbr.key = sb.string and intPrimitive between rangeStartLong and rangeEndLong";
+        epl = "select sb.theString as sbs, sb.intPrimitive as sbi, sbr.id as sbri from SupportBean.win:length(10) sb, SupportBeanRange.win:length(10) sbr " +
+                "where sbr.key = sb.theString and intPrimitive between rangeStartLong and rangeEndLong";
         stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 

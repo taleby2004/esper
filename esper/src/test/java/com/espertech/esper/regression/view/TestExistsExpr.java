@@ -40,7 +40,7 @@ public class TestExistsExpr extends TestCase
 
     public void testExistsSimple()
     {
-        String stmtText = "select exists(string) as t0, " +
+        String stmtText = "select exists(theString) as t0, " +
                           " exists(intBoxed?) as t1, " +
                           " exists(dummy?) as t2, " +
                           " exists(intPrimitive?) as t3, " +
@@ -59,8 +59,8 @@ public class TestExistsExpr extends TestCase
         bean.setFloatBoxed(9.5f);
         bean.setIntBoxed(3);
         epService.getEPRuntime().sendEvent(bean);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertResults(event, new boolean[] {true, true, false, true, true});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new boolean[] {true, true, false, true, true});
     }
 
     public void testExistsInner()
@@ -88,27 +88,27 @@ public class TestExistsExpr extends TestCase
 
         // cannot exists if the inner is null
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(null));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertResults(event, new boolean[] {false, false, false, false, false, false, false, false, false, false, false});
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new boolean[] {false, false, false, false, false, false, false, false, false, false, false});
 
         // try nested, indexed and mapped
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(SupportBeanComplexProps.makeDefaultBean()));
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new boolean[] {false, false, false, true, true, true, true, true, true, false, false});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new boolean[]{false, false, false, true, true, true, true, true, true, false, false});
 
         // try nested, indexed and mapped
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(SupportBeanComplexProps.makeDefaultBean()));
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new boolean[] {false, false, false, true, true, true, true, true, true, false, false});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new boolean[] {false, false, false, true, true, true, true, true, true, false, false});
 
         // try a boxed that returns null but does exists
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBeanDynRoot(new SupportBean())));
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new boolean[] {false, false, true, false, false, false, false, false, false, false, false});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new boolean[]{false, false, true, false, false, false, false, false, false, false, false});
 
         epService.getEPRuntime().sendEvent(new SupportBeanDynRoot(new SupportBean_A("10")));
-        event = listener.assertOneGetNewAndReset();
-        assertResults(event, new boolean[] {true, true, false, false, false, false, false, false, false, false, false});
+        theEvent = listener.assertOneGetNewAndReset();
+        assertResults(theEvent, new boolean[] {true, true, false, false, false, false, false, false, false, false, false});
     }
 
     public void testCastDoubleAndNull_OM() throws Exception
@@ -161,11 +161,11 @@ public class TestExistsExpr extends TestCase
         assertEquals(false, listener.assertOneGetNewAndReset().get("t0"));
     }
 
-    private void assertResults(EventBean event, boolean[] result)
+    private void assertResults(EventBean theEvent, boolean[] result)
     {
         for (int i = 0; i < result.length; i++)
         {
-            assertEquals("failed for index " + i, result[i], event.get("t" + i));
+            assertEquals("failed for index " + i, result[i], theEvent.get("t" + i));
         }
     }
 }

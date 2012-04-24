@@ -34,7 +34,7 @@ public class EvalSelectStreamWUnderlyingRecastMap implements SelectExprProcessor
     }
 
     public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
-        MappedEventBean event = (MappedEventBean) eventsPerStream[underlyingStreamNumber];
-        return selectExprContext.getEventAdapterService().adapterForTypedMap(event.getProperties(), resultType);
+        MappedEventBean theEvent = (MappedEventBean) eventsPerStream[underlyingStreamNumber];
+        return selectExprContext.getEventAdapterService().adapterForTypedMap(theEvent.getProperties(), resultType);
     }
 }

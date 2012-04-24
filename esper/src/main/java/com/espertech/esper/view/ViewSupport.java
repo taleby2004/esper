@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Stack;
 
@@ -46,7 +47,7 @@ public abstract class ViewSupport implements View
         children = new ArrayList<View>();
     }
 
-    public final Viewable getParent()
+    public Viewable getParent()
     {
         return parent;
     }
@@ -56,14 +57,14 @@ public abstract class ViewSupport implements View
         this.parent = parent;
     }
 
-    public final View addView(View view)
+    public View addView(View view)
     {
         children.add(view);
         view.setParent(this);
         return view;
     }
 
-    public final boolean removeView(View view)
+    public boolean removeView(View view)
     {
         boolean isRemoved = children.remove(view);
         view.setParent(null);
@@ -75,12 +76,12 @@ public abstract class ViewSupport implements View
         children.clear();
     }
 
-    public final List<View> getViews()
+    public List<View> getViews()
     {
         return children;
     }
 
-    public final boolean hasViews()
+    public boolean hasViews()
     {
         return (!children.isEmpty());
     }
@@ -93,7 +94,7 @@ public abstract class ViewSupport implements View
      * @param newData is the array of new event data
      * @param oldData is the array of old event data
      */
-    public final void updateChildren(EventBean[] newData, EventBean[] oldData)
+    public void updateChildren(EventBean[] newData, EventBean[] oldData)
     {
         int size = children.size();
 
@@ -124,7 +125,7 @@ public abstract class ViewSupport implements View
      * @param newData is the array of new event data
      * @param oldData is the array of old event data
      */
-    protected static void updateChildren(List<View> childViews, EventBean[] newData, EventBean[] oldData)
+    protected static void updateChildren(Collection<View> childViews, EventBean[] newData, EventBean[] oldData)
     {
         for (View child : childViews)
         {

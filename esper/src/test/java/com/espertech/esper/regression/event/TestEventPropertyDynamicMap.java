@@ -188,11 +188,11 @@ public class TestEventPropertyDynamicMap extends TestCase
         }
     }
 
-    private void assertResults(EventBean event, Object[] result)
+    private void assertResults(EventBean theEvent, Object[] result)
     {
         for (int i = 0; i < result.length; i++)
         {
-            assertEquals("failed for index " + i, result[i], event.get("t" + i));
+            assertEquals("failed for index " + i, result[i], theEvent.get("t" + i));
         }
     }
 

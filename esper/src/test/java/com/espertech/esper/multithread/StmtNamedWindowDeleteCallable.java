@@ -43,12 +43,12 @@ public class StmtNamedWindowDeleteCallable implements Callable
             for (int loop = 0; loop < numRepeats; loop++)
             {
                 // Insert event into named window
-                String event = "E" + threadKey + "_" + loop;
-                eventKeys.add(event);
-                sendMarketBean(event, 0);
+                String theEvent = "E" + threadKey + "_" + loop;
+                eventKeys.add(theEvent);
+                sendMarketBean(theEvent, 0);
 
                 // delete same event
-                sendSupportBean_A(event);
+                sendSupportBean_A(theEvent);
             }
         }
         catch (Exception ex)

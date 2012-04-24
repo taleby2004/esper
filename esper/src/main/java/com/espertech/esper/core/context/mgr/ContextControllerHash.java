@@ -106,7 +106,7 @@ public class ContextControllerHash implements ContextController, ContextControll
         optionalPartitionRanges = partitionRanges;
     }
 
-    public synchronized void create(int id, EventBean event) {
+    public synchronized void create(int id, EventBean theEvent) {
         ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
         if (partitionKeys.containsKey(id)) {
             return;
@@ -128,7 +128,7 @@ public class ContextControllerHash implements ContextController, ContextControll
         
         Map<String, Object> properties = ContextPropertyEventType.getHashBean(factoryContext.getContextName(), id);
         currentSubpathId++;
-        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, event, null, id, properties, null);
+        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, theEvent, null, id, properties, null);
         partitionKeys.put(id, handle);
     }
 

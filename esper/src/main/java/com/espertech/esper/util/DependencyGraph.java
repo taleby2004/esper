@@ -8,9 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.util;
 
-import java.util.*;
-import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.*;
 
 /**
  * Model of dependency of lookup, in which one stream supplies values for lookup in another stream.
@@ -18,15 +18,17 @@ import java.io.PrintWriter;
 public class DependencyGraph
 {
     private final int numStreams;
+    private final boolean allowDependencySame;
     private final Map<Integer, SortedSet<Integer>> dependencies;
 
     /**
      * Ctor.
      * @param numStreams - number of streams
      */
-    public DependencyGraph(int numStreams)
+    public DependencyGraph(int numStreams, boolean allowDependencySame)
     {
         this.numStreams = numStreams;
+        this.allowDependencySame = allowDependencySame;
         dependencies = new HashMap<Integer, SortedSet<Integer>>();
     }
 
@@ -82,7 +84,7 @@ public class DependencyGraph
      */
     public void addDependency(int target, int from)
     {
-        if (target == from)
+        if (target == from && !allowDependencySame)
         {
             throw new IllegalArgumentException("Dependency between same streams is not allowed for stream " + target);
         }

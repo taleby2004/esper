@@ -115,7 +115,7 @@ public class ExprVariableNodeImpl extends ExprNodeBase implements ExprEvaluator,
             // the variable name should not overlap with a property name
             try
             {
-                validationContext.getStreamTypeService().resolveByPropertyName(variableName);
+                validationContext.getStreamTypeService().resolveByPropertyName(variableName, false);
                 throw new ExprValidationException("The variable by name '" + variableName + "' is ambigous to a property of the same name");
             }
             catch (DuplicatePropertyException e)
@@ -171,11 +171,11 @@ public class ExprVariableNodeImpl extends ExprNodeBase implements ExprEvaluator,
         if (value == null) {
             return null;
         }
-        EventBean event = (EventBean) value;
+        EventBean theEvent = (EventBean) value;
         if (optSubPropName == null) {
-            return event.getUnderlying();
+            return theEvent.getUnderlying();
         }
-        return eventTypeGetter.get(event);
+        return eventTypeGetter.get(theEvent);
     }
 
     public String toExpressionString()

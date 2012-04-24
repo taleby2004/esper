@@ -10,8 +10,8 @@ package com.espertech.esper.pattern;
 
 import com.espertech.esper.client.EventBean;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Collection for internal use similar to the MatchedEventMap class in the client package
@@ -21,33 +21,31 @@ import java.util.HashMap;
  */
 public final class MatchedEventMapImpl implements MatchedEventMap
 {
-    // Keyed by tag name; Values can be {EventBean, EventBean[]} as metadata is aware
-    private Map<String, Object> events = new HashMap<String, Object>();
+    private final MatchedEventMapMeta meta;
+    private final Object[] matches;
 
     /**
      * Constructor creates an empty collection of events.
+     * @param meta metadata
      */
-    public MatchedEventMapImpl()
-    {
+    public MatchedEventMapImpl(MatchedEventMapMeta meta) {
+        this.meta = meta;
+        this.matches = new Object[meta.getTagsPerIndex().length];
     }
 
-    /**
-     * Ctor.
-     * @param events is the name-value pairs of tag and event
-     */
-    public MatchedEventMapImpl(Map<String, Object> events)
-    {
-        this.events = events;
+    public MatchedEventMapImpl(MatchedEventMapMeta meta, Object[] matches) {
+        this.meta = meta;
+        this.matches = matches;
     }
 
     /**
      * Add an event to the collection identified by the given tag.
      * @param tag is an identifier to retrieve the event from
-     * @param event is the event object or array of event object to be added
+     * @param theEvent is the event object or array of event object to be added
      */
-    public void add(final String tag, final Object event)
+    public void add(final int tag, final Object theEvent)
     {
-        events.put(tag, event);
+        matches[tag] = theEvent;
     }
 
     /**
@@ -55,9 +53,9 @@ public final class MatchedEventMapImpl implements MatchedEventMap
      * instance.
      * @return Hashtable containing event instances
      */
-    public Map<String, Object> getMatchingEvents()
+    public Object[] getMatchingEvents()
     {
-        return events;
+        return matches;
     }
 
     /**
@@ -65,53 +63,14 @@ public final class MatchedEventMapImpl implements MatchedEventMap
      * @param tag is the identifier to look for
      * @return event instances for the tag
      */
-    public EventBean getMatchingEvent(final String tag)
+    public EventBean getMatchingEvent(final int tag)
     {
-        return (EventBean) events.get(tag);
+        return (EventBean) matches[tag];
     }
 
-    public Object getMatchingEventAsObject(final String tag)
+    public Object getMatchingEventAsObject(final int tag)
     {
-        return events.get(tag);
-    }
-
-    public boolean equals(final Object otherObject)
-    {
-        if (otherObject == this)
-        {
-            return true;
-        }
-
-        if (otherObject == null)
-        {
-            return false;
-        }
-
-        if (getClass() != otherObject.getClass())
-        {
-            return false;
-        }
-
-        final MatchedEventMapImpl other = (MatchedEventMapImpl) otherObject;
-
-        if (events.size() != other.events.size())
-        {
-            return false;
-        }
-
-        // Compare entry by entry
-        for (Map.Entry<String, Object> entry : events.entrySet())
-        {
-            final String tag = entry.getKey();
-            final Object event = entry.getValue();
-
-            if (other.getMatchingEvent(tag) != event)
-            {
-                return false;
-            }
-        }
-
-        return true;
+        return matches[tag];
     }
 
     public String toString()
@@ -119,23 +78,18 @@ public final class MatchedEventMapImpl implements MatchedEventMap
         final StringBuilder buffer = new StringBuilder();
         int count = 0;
 
-        for (Map.Entry<String, Object> entry : events.entrySet())
+        for (int i = 0; i < matches.length; i++)
         {
             buffer.append(" (");
             buffer.append(count++);
             buffer.append(") ");
             buffer.append("tag=");
-            buffer.append(entry.getKey());
+            buffer.append(meta.getTagsPerIndex()[i]);
             buffer.append("  event=");
-            buffer.append(entry.getValue());
+            buffer.append(matches[i]);
         }
 
         return buffer.toString();
-    }
-
-    public int hashCode()
-    {
-        return events.hashCode();
     }
 
     /**
@@ -144,9 +98,18 @@ public final class MatchedEventMapImpl implements MatchedEventMap
      */
     public MatchedEventMapImpl shallowCopy()
     {
-        Map<String, Object> copy = new HashMap<String, Object>();
-        copy.putAll(events);
-        return new MatchedEventMapImpl(copy);
+        if (matches.length == 0) {
+            return this;
+        }
+
+        Object[] copy = new Object[matches.length];
+        if (matches.length > 1) {
+            System.arraycopy(matches, 0, copy, 0, matches.length);
+        }
+        else {
+            copy[0] = matches[0];
+        }
+        return new MatchedEventMapImpl(meta, copy);
     }
 
     /**
@@ -161,6 +124,39 @@ public final class MatchedEventMapImpl implements MatchedEventMap
             throw new UnsupportedOperationException("Merge requires same types");
         }
         MatchedEventMapImpl otherImpl = (MatchedEventMapImpl) other;
-        events.putAll(otherImpl.events);
+        for (int i = 0; i < matches.length; i++) {
+            if (otherImpl.matches[i] == null) {
+                continue;
+            }
+            matches[i] = otherImpl.matches[i];
+        }
+    }
+
+    public Map<String, Object> getMatchingEventsAsMap() {
+        Map<String, Object> map = new HashMap<String, Object>();
+        for (int i = 0; i < meta.getTagsPerIndex().length; i++) {
+            if (matches[i] == null) {
+                continue;
+            }
+            map.put(meta.getTagsPerIndex()[i], matches[i]);
+        }
+        return map;
+    }
+
+    public MatchedEventMapMeta getMeta() {
+        return meta;
+    }
+
+    public EventBean getMatchingEventByTag(String resultEventAsName) {
+        Object obj = getMatchingEventAsObjectByTag(resultEventAsName);
+        return (EventBean) obj;
+    }
+
+    public Object getMatchingEventAsObjectByTag(String key) {
+        int index = meta.getTagFor(key);
+        if (index == -1) {
+            return null;
+        }
+        return matches[index];
     }
 }

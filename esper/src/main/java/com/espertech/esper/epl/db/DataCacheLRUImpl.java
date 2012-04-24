@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.db;
 
-import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.join.table.EventTable;
 
 import java.util.LinkedHashMap;
@@ -22,7 +22,7 @@ public class DataCacheLRUImpl implements DataCache
 {
     private final int cacheSize;
     private static final float hashTableLoadFactor = 0.75f;
-    private final LinkedHashMap<MultiKey<Object>, EventTable> cache;
+    private final LinkedHashMap<Object, EventTable> cache;
 
     /**
      * Ctor.
@@ -32,11 +32,11 @@ public class DataCacheLRUImpl implements DataCache
     {
         this.cacheSize = cacheSize;
         int hashTableCapacity = (int)Math.ceil(cacheSize / hashTableLoadFactor) + 1;
-        this.cache = new LinkedHashMap<MultiKey<Object>,EventTable>(hashTableCapacity, hashTableLoadFactor, true)
+        this.cache = new LinkedHashMap<Object,EventTable>(hashTableCapacity, hashTableLoadFactor, true)
         {
             private static final long serialVersionUID = 1;
 
-            @Override protected boolean removeEldestEntry (Map.Entry<MultiKey<Object>,EventTable> eldest)
+            @Override protected boolean removeEldestEntry (Map.Entry<Object,EventTable> eldest)
             {
                 return size() > DataCacheLRUImpl.this.cacheSize;
             }
@@ -51,20 +51,20 @@ public class DataCacheLRUImpl implements DataCache
     */
     public EventTable getCached(Object[] lookupKeys)
     {
-        MultiKey<Object> keys = new MultiKey<Object>(lookupKeys);
-        return cache.get(keys);
+        Object key = DataCacheUtil.getLookupKey(lookupKeys);
+        return cache.get(key);
     }
 
     /**
     * Adds an entry to this cache.
     * If the cache is full, the LRU (least recently used) entry is dropped.
-    * @param key the key with which the specified value is to be associated.
+    * @param keys the keys with which the specified value is to be associated.
     * @param value a value to be associated with the specified key.
     */
-    public synchronized void put(Object[] key, EventTable value)
+    public synchronized void put(Object[] keys, EventTable value)
     {
-        MultiKey<Object> mkeys = new MultiKey<Object>(key);
-        cache.put(mkeys, value);
+        Object key = DataCacheUtil.getLookupKey(keys);
+        cache.put(key, value);
     }
 
     /**

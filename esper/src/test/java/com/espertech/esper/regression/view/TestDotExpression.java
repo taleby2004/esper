@@ -19,6 +19,9 @@ import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
+import java.util.Collections;
+import java.util.Map;
+
 public class TestDotExpression extends TestCase
 {
 	private EPServiceProvider epService;
@@ -33,6 +36,27 @@ public class TestDotExpression extends TestCase
 
     protected void tearDown() throws Exception {
         listener = null;
+    }
+
+    public void testMapIndexPropertyRooted() {
+        epService.getEPAdministrator().getConfiguration().addEventType(MyTypeErasure.class);
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select " +
+                "innerTypes('key1') as c0,\n" +
+                "innerTypes(key) as c1,\n" +
+                "innerTypes('key1').ids[1] as c2,\n" +
+                "innerTypes(key).getIds(subkey) as c3,\n" +
+                "innerTypesArray[1].ids[1] as c4,\n" +
+                "innerTypesArray(subkey).getIds(subkey) as c5\n" +
+                "from MyTypeErasure");
+        stmt.addListener(listener);
+        assertEquals(InnerType.class, stmt.getEventType().getPropertyType("c0"));
+        assertEquals(InnerType.class, stmt.getEventType().getPropertyType("c1"));
+        assertEquals(int.class, stmt.getEventType().getPropertyType("c2"));
+        assertEquals(int.class, stmt.getEventType().getPropertyType("c3"));
+        
+        MyTypeErasure event = new MyTypeErasure("key1", 2, Collections.singletonMap("key1", new InnerType(new int[] {20, 30, 40})), new InnerType[] {new InnerType(new int[] {2, 3}), new InnerType(new int[] {4, 5}), new InnerType(new int[] {6, 7, 8})});
+        epService.getEPRuntime().sendEvent(event);
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "c0,c1,c2,c3,c4,c5".split(","), new Object[] {event.getInnerTypes().get("key1"), event.getInnerTypes().get("key1"), 30, 40, 5, 8});
     }
 
     public void testInvalid() {
@@ -235,6 +259,54 @@ public class TestDotExpression extends TestCase
     public static class LevelThree {
         public String getCustomLevelThree(int val) {
             return "level3:" + val;
+        }
+    }
+
+    public static class MyTypeErasure {
+
+        private String key;
+        private int subkey;
+        private Map<String, InnerType> innerTypes;
+        private InnerType[] innerTypesArray;
+
+        public MyTypeErasure(String key, int subkey, Map<String, InnerType> innerTypes, InnerType[] innerTypesArray) {
+            this.key = key;
+            this.subkey = subkey;
+            this.innerTypes = innerTypes;
+            this.innerTypesArray = innerTypesArray;
+        }
+
+        public Map<String, InnerType> getInnerTypes() {
+            return innerTypes;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public int getSubkey() {
+            return subkey;
+        }
+
+        public InnerType[] getInnerTypesArray() {
+            return innerTypesArray;
+        }
+    }
+
+    public static class InnerType {
+
+        private final int[] ids;
+
+        public InnerType(int[] ids) {
+            this.ids = ids;
+        }
+
+        public int[] getIds() {
+            return ids;
+        }
+
+        public int getIds(int subkey) {
+            return ids[subkey];
         }
     }
 }

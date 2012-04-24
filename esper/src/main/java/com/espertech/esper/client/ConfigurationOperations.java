@@ -161,7 +161,7 @@ public interface ConfigurationOperations
     public void addEventType(Class eventClass);
 
     /**
-     * Add an name for an event type that represents java.util.Map events.
+     * Add an event type that represents java.util.Map events.
      * <p>
      * Allows a second name to be added for the same type.
      * Does not allow the same name to be used for different types.
@@ -171,6 +171,22 @@ public interface ConfigurationOperations
      * @throws ConfigurationException if the name is already in used for a different type
      */
     public void addEventType(String eventTypeName, Properties typeMap)
+            throws ConfigurationException;
+
+    /**
+     * Add an event type that represents Object-array (Object[]) events.
+     * @param eventTypeName is the name for the event type
+     * @throws ConfigurationException if the name is already in used for a different type
+     */
+    public void addEventType(String eventTypeName, String[] propertyNames, Object[] propertyTypes)
+            throws ConfigurationException;
+
+    /**
+     * Add an event type that represents Object-array (Object[]) events.
+     * @param eventTypeName is the name for the event type
+     * @throws ConfigurationException if the name is already in used for a different type
+     */
+    public void addEventType(String eventTypeName, String[] propertyNames, Object[] propertyTypes, ConfigurationEventTypeObjectArray optionalConfiguration)
             throws ConfigurationException;
 
     /**
@@ -525,4 +541,6 @@ public interface ConfigurationOperations
      * @param maxSubexpressions to set
      */
     public void setPatternMaxSubexpressions(Long maxSubexpressions);
+
+    public void updateObjectArrayEventType(String myEvent, String[] namesNew, Object[] typesNew);
 }

@@ -136,6 +136,7 @@ tokens
 	CONTEXT='context';
 	INITIATED='initiated';
 	TERMINATED='terminated';
+	DATAFLOW='dataflow';
 	
    	NUMERIC_PARAM_RANGE;
    	NUMERIC_PARAM_LIST;
@@ -277,7 +278,7 @@ tokens
 	ON_SET_EXPR_ITEM;
 	CREATE_SCHEMA_EXPR;
 	CREATE_SCHEMA_EXPR_QUAL;
-	CREATE_SCHEMA_EXPR_VAR;
+	CREATE_SCHEMA_DEF;
 	VARIANT_LIST;
 	MERGE_UNM;
 	MERGE_MAT;
@@ -295,6 +296,16 @@ tokens
    	CREATE_CTX_CATITEM;
    	CREATE_CTX_NESTED;
    	CREATE_CTX_PATTERN;
+   	CREATE_DATAFLOW;
+   	GOP;
+   	GOPPARAM;
+   	GOPPARAMITM;
+   	GOPOUT;
+   	GOPOUTITM;
+   	GOPOUTTYP;
+   	GOPCFG;
+   	GOPCFGITM;
+   	GOPCFGEPL;
    	PARTITIONITEM;
 	
    	INT_TYPE;
@@ -318,6 +329,10 @@ tokens
    	MATCHREC_DEFINE_ITEM;
    	MATCHREC_MEASURES;
    	MATCHREC_MEASURE_ITEM;
+   	
+   	JSON_OBJECT;
+   	JSON_ARRAY;
+   	JSON_FIELD;
 }
 
 @header {
@@ -406,14 +421,8 @@ tokens
 	lexerTokenParaphases.put(STAR_ASSIGN, "a star assign '*='");
 	lexerTokenParaphases.put(MOD, "a modulo");
 	lexerTokenParaphases.put(MOD_ASSIGN, "a modulo assign");
-	lexerTokenParaphases.put(SR, "a shift right '>>'");
-	lexerTokenParaphases.put(SR_ASSIGN, "a shift right assign '>>='");
-	lexerTokenParaphases.put(BSR, "a binary shift right '>>>'");
-	lexerTokenParaphases.put(BSR_ASSIGN, "a binary shift right assign '>>>='");
 	lexerTokenParaphases.put(GE, "a greater equals '>='");
 	lexerTokenParaphases.put(GT, "a greater then '>'");
-	lexerTokenParaphases.put(SL, "a shift left '<<'");
-	lexerTokenParaphases.put(SL_ASSIGN, "a shift left assign '<<='");
 	lexerTokenParaphases.put(LE, "a less equals '<='");
 	lexerTokenParaphases.put(LT, "a lesser then '<'");
 	lexerTokenParaphases.put(BXOR, "a binary xor '^'");
@@ -620,6 +629,11 @@ startEventPropertyRule
 		EOF!
 	;
 
+startJsonValueRule 
+	:	jsonvalue
+		EOF!
+	;
+
 //----------------------------------------------------------------------------
 // Expression Declaration
 //----------------------------------------------------------------------------
@@ -646,12 +660,12 @@ expressionLambdaDecl
 // Annotations
 //----------------------------------------------------------------------------
 annotationNoEnum
-    :   '@' classIdentifier ( '(' ( elementValuePairsNoEnum | elementValueNoEnum )? ')' )?
+    :   ATCHAR classIdentifier ( '(' ( elementValuePairsNoEnum | elementValueNoEnum )? ')' )?
 	-> ^(ANNOTATION classIdentifier elementValuePairsNoEnum? elementValueNoEnum?)
     ;
     
 annotationEnum
-    :   '@' classIdentifier ( '(' ( elementValuePairsEnum | elementValueEnum )? ')' )?
+    :   ATCHAR classIdentifier ( '(' ( elementValuePairsEnum | elementValueEnum )? ')' )?
 	-> ^(ANNOTATION classIdentifier elementValuePairsEnum? elementValueEnum?)
     ;
     
@@ -708,7 +722,8 @@ eplExpression
 	|	createSchemaExpr
 	|	createContextExpr
 	|	onExpr
-	|	updateExpr) forExpr?
+	|	updateExpr
+	|	createDataflow) forExpr?
 	;
 	
 contextExpr
@@ -918,13 +933,94 @@ createSelectionListElement
 	;
 
 createSchemaExpr
-	:	CREATE keyword=IDENT? SCHEMA name=IDENT AS? 
+	:	CREATE keyword=IDENT? createSchemaDef
+		-> ^(CREATE_SCHEMA_EXPR createSchemaDef $keyword?)
+	;
+
+createSchemaDef
+	:	SCHEMA name=IDENT AS? 
 		  (
 			variantList
 		  |   	LPAREN createColumnList? RPAREN 
 		  ) createSchemaQual*		  
-		-> {$keyword != null}? ^(CREATE_SCHEMA_EXPR $name variantList? ^(CREATE_SCHEMA_EXPR_VAR $keyword) createSchemaQual*)
-		-> ^(CREATE_SCHEMA_EXPR $name variantList? createColumnList? createSchemaQual*)
+		-> ^(CREATE_SCHEMA_DEF $name variantList? createColumnList? createSchemaQual*)
+	;
+
+createDataflow
+	:	CREATE DATAFLOW name=IDENT AS? gopList
+		-> ^(CREATE_DATAFLOW $name gopList)
+	;
+
+gopList
+	:	gop gop*
+	;
+	
+gop
+	:	annotationEnum* (opName=IDENT | s=SELECT) gopParams? gopOut? LCURLY gopDetail? COMMA? RCURLY
+		-> ^(GOP $opName? $s? gopParams? gopOut? gopDetail? annotationEnum*)
+	|	createSchemaExpr COMMA!
+	;	
+	
+gopParams
+	:	LPAREN gopParamsItemList RPAREN
+		-> ^(GOPPARAM gopParamsItemList)
+	;
+	
+gopParamsItemList
+	:	gopParamsItem (COMMA! gopParamsItem)* 
+	;
+		
+gopParamsItem
+	:	(n=classIdentifier | gopParamsItemMany) gopParamsItemAs?
+		-> ^(GOPPARAMITM $n? gopParamsItemMany? gopParamsItemAs?)
+	;
+
+gopParamsItemMany
+	:	LPAREN! classIdentifier (COMMA! classIdentifier) RPAREN!
+	;
+
+gopParamsItemAs
+	:	AS a=IDENT
+		-> ^(AS $a)
+	;
+
+gopOut
+	:	FOLLOWED_BY gopOutItem (COMMA gopOutItem)*
+		-> ^(GOPOUT gopOutItem+)
+	;
+
+gopOutItem
+	:	n=classIdentifier gopOutTypeList?
+		-> ^(GOPOUTITM $n gopOutTypeList?)
+	;
+	
+gopOutTypeList
+	:	LT! gopOutTypeParam (COMMA! gopOutTypeParam)* GT!
+	;	
+
+gopOutTypeParam
+	:	(gopOutTypeItem | q=QUESTION)
+		-> ^(GOPOUTTYP gopOutTypeItem? $q?)
+	;
+
+gopOutTypeItem
+	:	classIdentifier gopOutTypeList?
+	;
+
+gopDetail
+	:	gopConfig (COMMA gopConfig)*
+		-> ^(GOPCFG gopConfig+)
+	;
+
+gopConfig
+	:	SELECT (COLON|EQUALS) LPAREN selectExpr RPAREN
+		-> ^(GOPCFGEPL selectExpr)
+	|	n=IDENT (COLON|EQUALS) (expression | jsonobject | jsonarray)
+		-> ^(GOPCFGITM $n expression? jsonobject? jsonarray?) 
+	;
+
+streamFilterExpression
+	:	IDENT (DOT viewExpression (DOT viewExpression)*)? 
 	;
 
 createContextExpr
@@ -1079,7 +1175,6 @@ streamSelector
 		-> ^(SELECTION_STREAM $s $i?)
 	;
 	
-// TODO: review should row pattern recognition be a stream or before the WHERE; if after WHERE then make it the only thing
 streamExpression
 	:	(eventFilterExpression | patternInclusionExpression | databaseJoinExpression | methodJoinExpression )
 		(DOT viewExpression (DOT viewExpression)*)? (AS i=IDENT | i=IDENT)? (u=UNIDIRECTIONAL)? (ru=RETAINUNION|ri=RETAININTERSECTION)?
@@ -1902,7 +1997,7 @@ eventPropertyIdent
 	
 keywordAllowedIdent returns [String result]
 	:	i1=IDENT { $result = $i1.getText(); }
-		|i2=TICKED_STRING_LITERAL { $result = removeTicks($i2.getText()); }
+		|i2=TICKED_STRING_LITERAL { $result = $i2.getText(); }
 		|AT { $result = "at"; }
 		|COUNT { $result = "count"; }
 		|ESCAPE { $result = "escape"; }
@@ -1949,6 +2044,8 @@ keywordAllowedIdent returns [String result]
 		|PARTITION { $result = "partition"; }
 		|MATCHES { $result = "matches"; }
 		|CONTEXT { $result = "context"; }
+		|FOR { $result = "for"; }
+		|USING { $result = "using"; }
 	;
 		
 escapableStr returns [String result]
@@ -2055,6 +2152,38 @@ stringconstant
 	;
 
 //----------------------------------------------------------------------------
+// JSON
+//----------------------------------------------------------------------------
+jsonvalue
+	: constant
+	| jsonobject
+	| jsonarray
+	;
+
+jsonobject
+	: LCURLY jsonmembers RCURLY 
+	  -> ^(JSON_OBJECT jsonmembers)
+	;
+	
+jsonarray	
+        : LBRACK jsonelements? RBRACK
+	  -> ^(JSON_ARRAY jsonelements?)
+	;
+
+jsonelements
+	: jsonvalue (COMMA! jsonvalue)* (COMMA!)?
+	;
+	
+jsonmembers	
+	: jsonpair (COMMA! jsonpair)* (COMMA!)?
+	;
+	 
+jsonpair
+	: (stringconstant | keywordAllowedIdent) COLON jsonvalue 
+	  -> ^(JSON_FIELD stringconstant? keywordAllowedIdent? jsonvalue) 
+	;
+
+//----------------------------------------------------------------------------
 // LEXER
 //----------------------------------------------------------------------------
 
@@ -2090,14 +2219,8 @@ STAR 		: '*';
 STAR_ASSIGN 	: '*=';
 MOD 		: '%';
 MOD_ASSIGN 	: '%=';
-SR 		: '>>';
-SR_ASSIGN 	: '>>=';
-BSR 		: '>>>';
-BSR_ASSIGN 	: '>>>=';
 GE 		: '>=';
 GT 		: '>';
-SL 		: '<<';
-SL_ASSIGN 	: '<<=';
 LE 		: '<=';
 LT 		: '<';
 BXOR 		: '^';

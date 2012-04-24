@@ -8,10 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.type;
 
-import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Enum representing relational types of operation.
@@ -31,7 +31,7 @@ public enum BitWiseOpEnum
      */
     BXOR ("^");
 
-    private static Map<MultiKey<Object>, BitWiseOpEnum.Computer> computers;
+    private static Map<MultiKeyUntyped, BitWiseOpEnum.Computer> computers;
 
     private String expressionText;
 
@@ -51,22 +51,22 @@ public enum BitWiseOpEnum
 
     static
     {
-        computers = new HashMap<MultiKey<Object>, BitWiseOpEnum.Computer>();
-        computers.put(new MultiKey<Object>(new Object[] {Byte.class, BAND}), new BAndByte());
-        computers.put(new MultiKey<Object>(new Object[] {Short.class, BAND}), new BAndShort());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, BAND}), new BAndInt());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, BAND}), new BAndLong());
-        computers.put(new MultiKey<Object>(new Object[] {Boolean.class, BAND}), new BAndBoolean());
-        computers.put(new MultiKey<Object>(new Object[] {Byte.class, BOR}), new BOrByte());
-        computers.put(new MultiKey<Object>(new Object[] {Short.class, BOR}), new BOrShort());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, BOR}), new BOrInt());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, BOR}), new BOrLong());
-        computers.put(new MultiKey<Object>(new Object[] {Boolean.class, BOR}), new BOrBoolean());
-        computers.put(new MultiKey<Object>(new Object[] {Byte.class, BXOR}), new BXorByte());
-        computers.put(new MultiKey<Object>(new Object[] {Short.class, BXOR}), new BXorShort());
-        computers.put(new MultiKey<Object>(new Object[] {Integer.class, BXOR}), new BXorInt());
-        computers.put(new MultiKey<Object>(new Object[] {Long.class, BXOR}), new BXorLong());
-        computers.put(new MultiKey<Object>(new Object[] {Boolean.class, BXOR}), new BXorBoolean());
+        computers = new HashMap<MultiKeyUntyped, BitWiseOpEnum.Computer>();
+        computers.put(new MultiKeyUntyped(new Object[] {Byte.class, BAND}), new BAndByte());
+        computers.put(new MultiKeyUntyped(new Object[] {Short.class, BAND}), new BAndShort());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, BAND}), new BAndInt());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, BAND}), new BAndLong());
+        computers.put(new MultiKeyUntyped(new Object[] {Boolean.class, BAND}), new BAndBoolean());
+        computers.put(new MultiKeyUntyped(new Object[] {Byte.class, BOR}), new BOrByte());
+        computers.put(new MultiKeyUntyped(new Object[] {Short.class, BOR}), new BOrShort());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, BOR}), new BOrInt());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, BOR}), new BOrLong());
+        computers.put(new MultiKeyUntyped(new Object[] {Boolean.class, BOR}), new BOrBoolean());
+        computers.put(new MultiKeyUntyped(new Object[] {Byte.class, BXOR}), new BXorByte());
+        computers.put(new MultiKeyUntyped(new Object[] {Short.class, BXOR}), new BXorShort());
+        computers.put(new MultiKeyUntyped(new Object[] {Integer.class, BXOR}), new BXorInt());
+        computers.put(new MultiKeyUntyped(new Object[] {Long.class, BXOR}), new BXorLong());
+        computers.put(new MultiKeyUntyped(new Object[] {Boolean.class, BXOR}), new BXorBoolean());
 
 
     }
@@ -86,7 +86,7 @@ public enum BitWiseOpEnum
         {
             throw new IllegalArgumentException("Expected base numeric or boolean type for computation result but got type " + coercedType);
         }
-        MultiKey<Object> key = new MultiKey<Object>(new Object[] {coercedType, this});
+        MultiKeyUntyped key = new MultiKeyUntyped(new Object[] {coercedType, this});
         return computers.get(key);
     }
 

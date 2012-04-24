@@ -79,8 +79,8 @@ public class TerminalEventProcessingAgent {
         });
     }
 
-    public void sendEvent(Object event) {
-        esperEngine.getEPRuntime().sendEvent(event);
+    public void sendEvent(Object theEvent) {
+        esperEngine.getEPRuntime().sendEvent(theEvent);
     }
 
 }

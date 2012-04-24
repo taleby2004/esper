@@ -88,9 +88,9 @@ public class TestQueryGraphValue extends TestCase {
                 assertEquals(ranges[count][0], getProp(relOp.getExpression()));
             }
             else {
-                QueryGraphValueEntryRangeIn in = (QueryGraphValueEntryRangeIn) r;
-                assertEquals(ranges[count][1], getProp(in.getExprStart()));
-                assertEquals(ranges[count][2], getProp(in.getExprEnd()));
+                QueryGraphValueEntryRangeIn rangeIn = (QueryGraphValueEntryRangeIn) r;
+                assertEquals(ranges[count][1], getProp(rangeIn.getExprStart()));
+                assertEquals(ranges[count][2], getProp(rangeIn.getExprEnd()));
             }
         }
     }

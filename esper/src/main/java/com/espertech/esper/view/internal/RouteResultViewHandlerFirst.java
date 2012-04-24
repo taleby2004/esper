@@ -58,10 +58,10 @@ public class RouteResultViewHandlerFirst implements RouteResultViewHandler
         this.audit = AuditEnum.INSERT.getAudit(statementContext.getAnnotations()) != null;
     }
 
-    public boolean handle(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
+    public boolean handle(EventBean theEvent, ExprEvaluatorContext exprEvaluatorContext)
     {
         int index = -1;
-        eventsPerStream[0] = event;
+        eventsPerStream[0] = theEvent;
 
         for (int i = 0; i < whereClauses.length; i++)
         {

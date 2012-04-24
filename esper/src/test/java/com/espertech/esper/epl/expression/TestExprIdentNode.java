@@ -159,9 +159,9 @@ public class TestExprIdentNode extends TestCase
 
     protected static EventBean makeEvent(int intPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        return SupportEventBeanFactory.createObject(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        return SupportEventBeanFactory.createObject(theEvent);
     }
 
     private void tryInvalidValidate(ExprIdentNode identNode)

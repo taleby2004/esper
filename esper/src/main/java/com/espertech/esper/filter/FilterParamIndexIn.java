@@ -110,9 +110,9 @@ public final class FilterParamIndexIn extends FilterParamIndexLookupableBase
         return constantsMapRWLock;
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
-        Object attributeValue = lookupable.getGetter().get(eventBean);
+        Object attributeValue = lookupable.getGetter().get(theEvent);
 
         if (attributeValue == null)
         {
@@ -130,12 +130,15 @@ public final class FilterParamIndexIn extends FilterParamIndexLookupableBase
             return;
         }
 
-        for (EventEvaluator evaluator : evaluators)
-        {
-            evaluator.matchEvent(eventBean, matches);
+        try {
+            for (EventEvaluator evaluator : evaluators)
+            {
+                evaluator.matchEvent(theEvent, matches);
+            }
         }
-
-        constantsMapRWLock.readLock().unlock();
+        finally {
+            constantsMapRWLock.readLock().unlock();
+        }
     }
 
     private static final Log log = LogFactory.getLog(FilterParamIndexIn.class);

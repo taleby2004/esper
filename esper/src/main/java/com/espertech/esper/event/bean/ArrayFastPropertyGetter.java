@@ -12,7 +12,7 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventPropertyGetterAndIndexed;
-import com.espertech.esper.event.bean.BeanEventPropertyGetter;
+import com.espertech.esper.event.vaevent.PropertyUtility;
 import net.sf.cglib.reflect.FastMethod;
 
 import java.lang.reflect.Array;
@@ -62,11 +62,11 @@ public class ArrayFastPropertyGetter extends BaseNativePropertyGetter implements
         }
         catch (ClassCastException e)
         {
-            throw new PropertyAccessException("Mismatched getter instance to event bean type");
+            throw PropertyUtility.getMismatchException(fastMethod.getJavaMethod(), object, e);
         }
         catch (InvocationTargetException e)
         {
-            throw new PropertyAccessException(e);
+            throw PropertyUtility.getInvocationTargetException(fastMethod.getJavaMethod(), e);
         }
     }
 

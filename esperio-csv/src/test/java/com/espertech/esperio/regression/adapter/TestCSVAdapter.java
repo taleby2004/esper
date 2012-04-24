@@ -8,13 +8,12 @@
  **************************************************************************************/
 package com.espertech.esperio.regression.adapter;
 
+import com.espertech.esper.adapter.AdapterState;
+import com.espertech.esper.adapter.InputAdapter;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.adapter.InputAdapter;
-import com.espertech.esper.adapter.AdapterState;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.csv.CSVInputAdapter;
 import com.espertech.esperio.csv.CSVInputAdapterSpec;
@@ -114,9 +113,8 @@ public class TestCSVAdapter extends TestCase
 		events.add(new Object[] { 100, 3, 3.3, "moreProperties.three" });
 		String[] propertyOrder = new String[] { "someString", "myInt", "someInt", "myDouble", "myString" };
 
-		boolean isLooping = false;
-		startAdapter(filename, eventsPerSec, isLooping, true, null, propertyOrder);
-		assertEvents(isLooping, events);
+		startAdapter(filename, eventsPerSec, false, true, null, propertyOrder);
+		assertEvents(false, events);
 	}
 
 	public void testConflictingPropertyOrder()
@@ -611,16 +609,16 @@ public class TestCSVAdapter extends TestCase
 		assertTrue(howManyBack < listener.getNewDataList().size());
 		EventBean[] data = listener.getNewDataList().get(howManyBack);
 		assertEquals(1, data.length);
-		EventBean event = data[0];
-		assertEquals(myInt, event.get("myInt"));
-		assertEquals(myDouble, event.get("myDouble"));
-		assertEquals(myString, event.get("myString"));
+		EventBean theEvent = data[0];
+		assertEquals(myInt, theEvent.get("myInt"));
+		assertEquals(myDouble, theEvent.get("myDouble"));
+		assertEquals(myString, theEvent.get("myString"));
 	}
 
 	private void sendTimeEvent(int timeIncrement){
 		currentTime += timeIncrement;
-	    CurrentTimeEvent event = new CurrentTimeEvent(currentTime);
-	    epService.getEPRuntime().sendEvent(event);
+	    CurrentTimeEvent theEvent = new CurrentTimeEvent(currentTime);
+	    epService.getEPRuntime().sendEvent(theEvent);
 	}
 
 
@@ -661,10 +659,10 @@ public class TestCSVAdapter extends TestCase
 	{
 		assertTrue(listener.getAndClearIsInvoked());
 		assertEquals(1, listener.getLastNewData().length);
-		EventBean event = listener.getLastNewData()[0];
-		assertEquals(myInt, event.get("myInt"));
-		assertEquals(myDouble, event.get("myDouble"));
-		assertEquals(myString, event.get("myString"));
+		EventBean theEvent = listener.getLastNewData()[0];
+		assertEquals(myInt, theEvent.get("myInt"));
+		assertEquals(myDouble, theEvent.get("myDouble"));
+		assertEquals(myString, theEvent.get("myString"));
 		listener.reset();
 	}
 
@@ -675,16 +673,16 @@ public class TestCSVAdapter extends TestCase
 		assertEquals(2, listener.getNewDataList().size());
 
 		assertEquals(1, listener.getNewDataList().get(0).length);
-		EventBean event = listener.getNewDataList().get(0)[0];
-		assertEquals(intOne, event.get("myInt"));
-		assertEquals(doubleOne, event.get("myDouble"));
-		assertEquals(stringOne, event.get("myString"));
+		EventBean theEvent = listener.getNewDataList().get(0)[0];
+		assertEquals(intOne, theEvent.get("myInt"));
+		assertEquals(doubleOne, theEvent.get("myDouble"));
+		assertEquals(stringOne, theEvent.get("myString"));
 
 		assertEquals(1, listener.getNewDataList().get(1).length);
-		event = listener.getNewDataList().get(1)[0];
-		assertEquals(intTwo, event.get("myInt"));
-		assertEquals(doubleTwo, event.get("myDouble"));
-		assertEquals(stringTwo, event.get("myString"));
+		theEvent = listener.getNewDataList().get(1)[0];
+		assertEquals(intTwo, theEvent.get("myInt"));
+		assertEquals(doubleTwo, theEvent.get("myDouble"));
+		assertEquals(stringTwo, theEvent.get("myString"));
 	}
 
 
@@ -710,10 +708,10 @@ public class TestCSVAdapter extends TestCase
 
 	private void assertFlatEvents(List<Object[]> events)
 	{
-		for(Object[] event : events)
+		for(Object[] theEvent : events)
 		{
-			sendTimeEvent((Integer)event[0]);
-			assertEvent(event);
+			sendTimeEvent((Integer)theEvent[0]);
+			assertEvent(theEvent);
 			listener.reset();
 		}
 	}
@@ -743,6 +741,8 @@ public class TestCSVAdapter extends TestCase
 		}
 		catch(EPException ex)
 		{
+            System.out.println(ex.getMessage());
+            ex.printStackTrace();
 			// Expected
 		}
 	}

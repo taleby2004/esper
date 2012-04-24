@@ -66,16 +66,16 @@ public class TestStockTickerMultithreaded extends TestCase implements StockTicke
         log.info(".performTest Send limit and initial tick events - singlethreaded");
         for (int i = 0; i < TestStockTickerGenerator.NUM_STOCK_NAMES * 2; i++)
         {
-            Object event = stream.removeFirst();
-            epService.getEPRuntime().sendEvent(event);
+            Object theEvent = stream.removeFirst();
+            epService.getEPRuntime().sendEvent(theEvent);
         }
 
         log.info(".performTest Loading thread pool work queue, numberOfRunnables=" + stream.size());
 
         ThreadPoolExecutor pool = new ThreadPoolExecutor(0, numberOfThreads, 99999, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
-        for (Object event : stream)
+        for (Object theEvent : stream)
         {
-            SendEventRunnable runnable = new SendEventRunnable(epService, event);
+            SendEventRunnable runnable = new SendEventRunnable(epService, theEvent);
             pool.execute(runnable);
         }
 

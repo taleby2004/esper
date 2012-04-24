@@ -312,15 +312,15 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         Object eventB1 = new SupportBean_B("B1");
         epService.getEPRuntime().sendEvent(eventB1);
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("a"), new Object[]{eventA1, eventA2});
-        assertSame(eventA1, event.get("a0"));
-        assertSame(eventA2, event.get("a1"));
-        assertNull(event.get("a2"));
-        assertEquals("A1", event.get("a0Id"));
-        assertEquals("A2", event.get("a1Id"));
-        assertNull(null, event.get("a2Id"));
-        assertSame(eventB1, event.get("b"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) theEvent.get("a"), new Object[]{eventA1, eventA2});
+        assertSame(eventA1, theEvent.get("a0"));
+        assertSame(eventA2, theEvent.get("a1"));
+        assertNull(theEvent.get("a2"));
+        assertEquals("A1", theEvent.get("a0Id"));
+        assertEquals("A2", theEvent.get("a1Id"));
+        assertNull(null, theEvent.get("a2Id"));
+        assertSame(eventB1, theEvent.get("b"));
 
         // try wildcard
         stmt ="select * from pattern [a=A until b=B]";
@@ -332,15 +332,15 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
         epService.getEPRuntime().sendEvent(eventB1);
 
-        event = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertEqualsExactOrder((Object[]) event.get("a"), new Object[]{eventA1, eventA2});
-        assertSame(eventA1, event.get("a[0]"));
-        assertSame(eventA2, event.get("a[1]"));
-        assertNull(event.get("a[2]"));
-        assertEquals("A1", event.get("a[0].id"));
-        assertEquals("A2", event.get("a[1].id"));
-        assertNull(null, event.get("a[2].id"));
-        assertSame(eventB1, event.get("b"));
+        theEvent = listener.assertOneGetNewAndReset();
+        EPAssertionUtil.assertEqualsExactOrder((Object[]) theEvent.get("a"), new Object[]{eventA1, eventA2});
+        assertSame(eventA1, theEvent.get("a[0]"));
+        assertSame(eventA2, theEvent.get("a[1]"));
+        assertNull(theEvent.get("a[2]"));
+        assertEquals("A1", theEvent.get("a[0].id"));
+        assertEquals("A2", theEvent.get("a[1].id"));
+        assertNull(null, theEvent.get("a[2].id"));
+        assertSame(eventB1, theEvent.get("b"));
     }
 
     public void testUseFilter()
@@ -351,7 +351,7 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         String stmt;
         SupportUpdateListener listener;
         EPStatement statement;
-        EventBean event;
+        EventBean theEvent;
 
         stmt ="select * from pattern [a=A until b=B -> c=C(id = ('C' || a[0].id || a[1].id || b.id))]";
         listener = new SupportUpdateListener();
@@ -372,16 +372,16 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
 
         Object eventC1 = new SupportBean_C("CA1A2B1");
         epService.getEPRuntime().sendEvent(eventC1);
-        event = listener.assertOneGetNewAndReset();
-        assertSame(eventA1, event.get("a[0]"));
-        assertSame(eventA2, event.get("a[1]"));
-        assertNull(event.get("a[2]"));
-        assertSame(eventB1, event.get("b"));
-        assertSame(eventC1, event.get("c"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertSame(eventA1, theEvent.get("a[0]"));
+        assertSame(eventA2, theEvent.get("a[1]"));
+        assertNull(theEvent.get("a[2]"));
+        assertSame(eventB1, theEvent.get("b"));
+        assertSame(eventC1, theEvent.get("c"));
         statement.destroy();
 
         // Test equals-optimization with array event
-        stmt ="select * from pattern [a=A until b=B -> c=SupportBean(string = a[1].id)]";
+        stmt ="select * from pattern [a=A until b=B -> c=SupportBean(theString = a[1].id)]";
         listener = new SupportUpdateListener();
         statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(listener);
@@ -394,12 +394,12 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("A2", 10));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(10, event.get("c.intPrimitive"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(10, theEvent.get("c.intPrimitive"));
         statement.destroy();
 
         // Test in-optimization
-        stmt ="select * from pattern [a=A until b=B -> c=SupportBean(string in(a[2].id))]";
+        stmt ="select * from pattern [a=A until b=B -> c=SupportBean(theString in(a[2].id))]";
         listener = new SupportUpdateListener();
         statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(listener);
@@ -413,12 +413,12 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("A3", 5));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(5, event.get("c.intPrimitive"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(5, theEvent.get("c.intPrimitive"));
         statement.destroy();
 
         // Test not-in-optimization
-        stmt ="select * from pattern [a=A until b=B -> c=SupportBean(string!=a[0].id and string!=a[1].id and string!=a[2].id)]";
+        stmt ="select * from pattern [a=A until b=B -> c=SupportBean(theString!=a[0].id and theString!=a[1].id and theString!=a[2].id)]";
         listener = new SupportUpdateListener();
         statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(listener);
@@ -434,12 +434,12 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("A6", 5));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(5, event.get("c.intPrimitive"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(5, theEvent.get("c.intPrimitive"));
         statement.destroy();
 
         // Test range-optimization
-        stmt ="select * from pattern [a=SupportBean(string like 'A%') until b=SupportBean(string like 'B%') -> c=SupportBean(intPrimitive between a[0].intPrimitive and a[1].intPrimitive)]";
+        stmt ="select * from pattern [a=SupportBean(theString like 'A%') until b=SupportBean(theString like 'B%') -> c=SupportBean(intPrimitive between a[0].intPrimitive and a[1].intPrimitive)]";
         listener = new SupportUpdateListener();
         statement = epService.getEPAdministrator().createEPL(stmt);
         statement.addListener(listener);
@@ -454,8 +454,8 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 5));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(5, event.get("c.intPrimitive"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(5, theEvent.get("c.intPrimitive"));
     }
 
     public void testRepeatUseTags()
@@ -479,7 +479,7 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         // test with timer:interval
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
-        String query="select * from pattern [every ([2:]e1=SupportBean(string='2') until timer:interval(5))->([2:]e2=SupportBean(string='3') until timer:interval(2))]";
+        String query="select * from pattern [every ([2:]e1=SupportBean(theString='2') until timer:interval(5))->([2:]e2=SupportBean(theString='3') until timer:interval(2))]";
 
         statement = epService.getEPAdministrator().createEPL(query);
 
@@ -500,9 +500,9 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         // test followed by 3 streams
         epService.getEPAdministrator().destroyAllStatements();
         listener.reset();
-        String epl = "select * from pattern [ every [2] A=SupportBean(string='1') " +
-                "-> [2] B=SupportBean(string='2' and intPrimitive=A[0].intPrimitive)" +
-                "-> [2] C=SupportBean(string='3' and intPrimitive=A[0].intPrimitive)]";
+        String epl = "select * from pattern [ every [2] A=SupportBean(theString='1') " +
+                "-> [2] B=SupportBean(theString='2' and intPrimitive=A[0].intPrimitive)" +
+                "-> [2] C=SupportBean(theString='3' and intPrimitive=A[0].intPrimitive)]";
         epService.getEPAdministrator().createEPL(epl).addListener(listener);
         
         epService.getEPRuntime().sendEvent(new SupportBean("1", 10));
@@ -528,9 +528,9 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         epService.getEPRuntime().sendEvent(new SupportBean_A("A2"));
         epService.getEPRuntime().sendEvent(new SupportBean_A("A3"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("A2"));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(3, event.get("length"));
-        assertEquals(3, event.get("l2"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(3, theEvent.get("length"));
+        assertEquals(3, theEvent.get("l2"));
     }
 
     public void testExpressionBounds() {
@@ -546,7 +546,7 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         // test variables - closed bounds
         epService.getEPRuntime().setVariableValue("lower",2);
         epService.getEPRuntime().setVariableValue("upper",3);
-        String stmtOne = "[lower:upper] a=SupportBean (string = 'A') until b=SupportBean (string = 'B')";
+        String stmtOne = "[lower:upper] a=SupportBean (theString = 'A') until b=SupportBean (theString = 'B')";
         validateStmt(epService, stmtOne, 0,  false, null);
         validateStmt(epService, stmtOne, 1,  false, null);
         validateStmt(epService, stmtOne, 2,  true, 2);
@@ -557,7 +557,7 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         // test variables - half open
         epService.getEPRuntime().setVariableValue("lower",3);
         epService.getEPRuntime().setVariableValue("upper",null);
-        String stmtTwo = "[lower:] a=SupportBean (string = 'A') until b=SupportBean (string = 'B')";
+        String stmtTwo = "[lower:] a=SupportBean (theString = 'A') until b=SupportBean (theString = 'B')";
         validateStmt(epService, stmtTwo, 0,  false, null);
         validateStmt(epService, stmtTwo, 1,  false, null);
         validateStmt(epService, stmtTwo, 2,  false, null);
@@ -568,7 +568,7 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         // test variables - half closed
         epService.getEPRuntime().setVariableValue("lower",null);
         epService.getEPRuntime().setVariableValue("upper",2);
-        String stmtThree = "[:upper] a=SupportBean (string = 'A') until b=SupportBean (string = 'B')";
+        String stmtThree = "[:upper] a=SupportBean (theString = 'A') until b=SupportBean (theString = 'B')";
         validateStmt(epService, stmtThree, 0,  true, null);
         validateStmt(epService, stmtThree, 1,  true, 1);
         validateStmt(epService, stmtThree, 2,  true, 2);
@@ -583,14 +583,13 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "b[0].string,b[1].string".split(","), new Object[]{"E1", "E2"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "b[0].theString,b[1].theString".split(","), new Object[]{"E1", "E2"});
 
         // test substitution parameter
         String epl = "select * from pattern[[?] SupportBean]";
         EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(epl);
         prepared.setObject(1, 2);
-        EPStatement stmt = epService.getEPAdministrator().create(prepared);
-
+        epService.getEPAdministrator().create(prepared);
     }
 
     private void validateStmt(EPServiceProvider engine, String stmtText, int numEventsA, boolean match, Integer matchCount)
@@ -634,9 +633,9 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         tryInvalid(epService, "a=A -> B(a[0].id='a')", "Property named 'a[0].id' is not valid in any stream [a=A -> B(a[0].id='a')]");
         tryInvalid(epService, "(a=A until c=B) -> c=C", "Tag 'c' for event 'C' has already been declared for events of type com.espertech.esper.support.bean.SupportBean_B [(a=A until c=B) -> c=C]");
         tryInvalid(epService, "((a=A until b=B) until a=A)", "Tag 'a' for event 'A' used in the repeat-until operator cannot also appear in other filter expressions [((a=A until b=B) until a=A)]");
-        tryInvalid(epService, "a=SupportBean -> [a.string] b=SupportBean", "Match-until bounds value expressions must return a numeric value [a=SupportBean -> [a.string] b=SupportBean]");
-        tryInvalid(epService, "a=SupportBean -> [:a.string] b=SupportBean", "Match-until bounds value expressions must return a numeric value [a=SupportBean -> [:a.string] b=SupportBean]");
-        tryInvalid(epService, "a=SupportBean -> [a.string:1] b=SupportBean", "Match-until bounds value expressions must return a numeric value [a=SupportBean -> [a.string:1] b=SupportBean]");
+        tryInvalid(epService, "a=SupportBean -> [a.theString] b=SupportBean", "Match-until bounds value expressions must return a numeric value [a=SupportBean -> [a.theString] b=SupportBean]");
+        tryInvalid(epService, "a=SupportBean -> [:a.theString] b=SupportBean", "Match-until bounds value expressions must return a numeric value [a=SupportBean -> [:a.theString] b=SupportBean]");
+        tryInvalid(epService, "a=SupportBean -> [a.theString:1] b=SupportBean", "Match-until bounds value expressions must return a numeric value [a=SupportBean -> [a.theString:1] b=SupportBean]");
     }
 
     private void tryInvalid(EPServiceProvider epService, String pattern, String message)

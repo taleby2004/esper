@@ -28,13 +28,13 @@ public class TestRelationalOpEnum extends TestCase
 
     public void testStringComputers()
     {
-        String[][] params = new String[][] { {"a", "b"}, {"a", "a"}, {"b", "a"} };
+        String[][] parameters = new String[][] { {"a", "b"}, {"a", "a"}, {"b", "a"} };
 
         for (RelationalOpEnum op : RelationalOpEnum.values())
         {
-            for (int i = 0; i < params.length; i++)
+            for (int i = 0; i < parameters.length; i++)
             {
-                boolean result = op.getComputer(String.class, String.class, String.class).compare(params[i][0], params[i][1]);
+                boolean result = op.getComputer(String.class, String.class, String.class).compare(parameters[i][0], parameters[i][1]);
                 assertEquals("op=" + op.toString() + ",i=" + i, expected[op.ordinal()][i], result);
             }
         }
@@ -42,13 +42,13 @@ public class TestRelationalOpEnum extends TestCase
 
     public void testLongComputers()
     {
-        long[][] params = new long[][] { {1, 2}, {1, 1}, {2, 1} };
+        long[][] parameters = new long[][] { {1, 2}, {1, 1}, {2, 1} };
 
         for (RelationalOpEnum op : RelationalOpEnum.values())
         {
-            for (int i = 0; i < params.length; i++)
+            for (int i = 0; i < parameters.length; i++)
             {
-                boolean result = op.getComputer(Long.class, Long.class, long.class).compare(params[i][0], params[i][1]);
+                boolean result = op.getComputer(Long.class, Long.class, long.class).compare(parameters[i][0], parameters[i][1]);
                 assertEquals("op=" + op.toString() + ",i=" + i, expected[op.ordinal()][i], result);
             }
         }
@@ -56,13 +56,13 @@ public class TestRelationalOpEnum extends TestCase
 
     public void testDoubleComputers()
     {
-        double[][] params = new double[][] { {1, 2}, {1, 1}, {2, 1} };
+        double[][] parameters = new double[][] { {1, 2}, {1, 1}, {2, 1} };
 
         for (RelationalOpEnum op : RelationalOpEnum.values())
         {
-            for (int i = 0; i < params.length; i++)
+            for (int i = 0; i < parameters.length; i++)
             {
-                boolean result = op.getComputer(Double.class, double.class, Double.class).compare(params[i][0], params[i][1]);
+                boolean result = op.getComputer(Double.class, double.class, Double.class).compare(parameters[i][0], parameters[i][1]);
                 assertEquals("op=" + op.toString() + ",i=" + i, expected[op.ordinal()][i], result);
             }
         }
@@ -70,7 +70,7 @@ public class TestRelationalOpEnum extends TestCase
 
     public void testBigNumberComputers()
     {
-        Object[][] params = new Object[][] {
+        Object[][] parameters = new Object[][] {
                 {false, BigInteger.valueOf(10), RelationalOpEnum.LE, BigInteger.valueOf(10), true},
                 {false, BigInteger.valueOf(10), RelationalOpEnum.GE, BigInteger.valueOf(10), true},
                 {false, BigInteger.valueOf(10), RelationalOpEnum.LT, BigInteger.valueOf(10), false},
@@ -97,13 +97,13 @@ public class TestRelationalOpEnum extends TestCase
                 {true, new BigDecimal(6), RelationalOpEnum.LT, (double)6, false},
                 };
 
-        for (int i = 0; i < params.length; i++)
+        for (int i = 0; i < parameters.length; i++)
         {
-            boolean isBigDec = (Boolean) params[i][0];
-            Object lhs = params[i][1];
-            RelationalOpEnum e = (RelationalOpEnum) params[i][2];
-            Object rhs = params[i][3];
-            Object expected = params[i][4];
+            boolean isBigDec = (Boolean) parameters[i][0];
+            Object lhs = parameters[i][1];
+            RelationalOpEnum e = (RelationalOpEnum) parameters[i][2];
+            Object rhs = parameters[i][3];
+            Object expected = parameters[i][4];
 
             RelationalOpEnum.Computer computer;
             if (isBigDec)

@@ -35,16 +35,16 @@ public interface InternalEventRouter
 
     /**
      * Route the event such that the event is processed as required.
-     * @param event to route
+     * @param theEvent to route
      * @param statementHandle provides statement resources
      * @param exprEvaluatorContext context for expression evalauation
      * @param routeDest routing destination
      */
-    public void route(EventBean event, EPStatementHandle statementHandle, InternalEventRouteDest routeDest, ExprEvaluatorContext exprEvaluatorContext, boolean addToFront);
+    public void route(EventBean theEvent, EPStatementHandle statementHandle, InternalEventRouteDest routeDest, ExprEvaluatorContext exprEvaluatorContext, boolean addToFront);
 
     public boolean isHasPreprocessing();
 
-    public EventBean preprocess(EventBean event, ExprEvaluatorContext engineFilterAndDispatchTimeContext);
+    public EventBean preprocess(EventBean theEvent, ExprEvaluatorContext engineFilterAndDispatchTimeContext);
 
     public void setInsertIntoListener(InsertIntoListener insertIntoListener);
 }

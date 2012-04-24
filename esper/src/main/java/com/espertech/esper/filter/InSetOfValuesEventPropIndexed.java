@@ -51,7 +51,7 @@ public class InSetOfValuesEventPropIndexed implements FilterSpecParamInValue
     }
 
     public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext) {
-        EventBean[] events = (EventBean[]) matchedEvents.getMatchingEventAsObject(resultEventAsName);
+        EventBean[] events = (EventBean[]) matchedEvents.getMatchingEventAsObjectByTag(resultEventAsName);
 
         Object value = null;
         if (events == null)

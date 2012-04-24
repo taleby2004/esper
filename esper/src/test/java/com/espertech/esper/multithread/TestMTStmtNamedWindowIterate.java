@@ -36,10 +36,10 @@ public class TestMTStmtNamedWindowIterate extends TestCase
         engine.initialize();
 
         engine.getEPAdministrator().createEPL(
-                "create window MyWindow.std:groupwin(string).win:keepall() as select string, longPrimitive from " + SupportBean.class.getName());
+                "create window MyWindow.std:groupwin(theString).win:keepall() as select theString, longPrimitive from " + SupportBean.class.getName());
 
         engine.getEPAdministrator().createEPL(
-                "insert into MyWindow(string, longPrimitive) " +
+                "insert into MyWindow(theString, longPrimitive) " +
                 " select symbol, volume \n" +
                 " from " + SupportMarketDataBean.class.getName());
     }

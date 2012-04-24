@@ -51,12 +51,12 @@ public class TestViewPropertyAccess extends TestCase
 
         SupportBeanComplexProps eventObject = SupportBeanComplexProps.makeDefaultBean();
         epService.getEPRuntime().sendEvent(eventObject);
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals(eventObject.getMapped("keyOne"), event.get("a"));
-        assertEquals(eventObject.getIndexed(1), event.get("b"));
-        assertEquals(eventObject.getNested().getNestedNested().getNestedNestedValue(), event.get("c"));
-        assertEquals(eventObject.getMapProperty(), event.get("mapProperty"));
-        assertEquals(eventObject.getArrayProperty()[0], event.get("arrayProperty[0]"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(eventObject.getMapped("keyOne"), theEvent.get("a"));
+        assertEquals(eventObject.getIndexed(1), theEvent.get("b"));
+        assertEquals(eventObject.getNested().getNestedNested().getNestedNestedValue(), theEvent.get("c"));
+        assertEquals(eventObject.getMapProperty(), theEvent.get("mapProperty"));
+        assertEquals(eventObject.getArrayProperty()[0], theEvent.get("arrayProperty[0]"));
 
         eventObject.setIndexed(1, Integer.MIN_VALUE);
         assertFalse(testListener.isInvoked());

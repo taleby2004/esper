@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 
 /**
  * A data view that aggregates events in a stream and releases them in one batch at every specified time interval.
@@ -54,8 +54,8 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, S
 
     // Current running parameters
     private Long currentReferencePoint;
-    private LinkedList<EventBean> lastBatch = null;
-    private LinkedList<EventBean> currentBatch = new LinkedList<EventBean>();
+    private ArrayDeque<EventBean> lastBatch = null;
+    private ArrayDeque<EventBean> currentBatch = new ArrayDeque<EventBean>();
     private boolean isCallbackScheduled;
 
     /**
@@ -226,7 +226,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, S
         }
 
         lastBatch = currentBatch;
-        currentBatch = new LinkedList<EventBean>();
+        currentBatch = new ArrayDeque<EventBean>();
     }
 
     /**

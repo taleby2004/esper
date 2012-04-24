@@ -51,9 +51,9 @@ public class TestMTStmtInsertInto extends TestCase
     {
         engine.getEPAdministrator().createEPL(
                 "insert into XStream " +
-                " select string as key, count(*) as mycount\n" +
+                " select theString as key, count(*) as mycount\n" +
                 " from " + SupportBean.class.getName() + ".win:time(5 min)" +
-                " group by string"
+                " group by theString"
                 );
         engine.getEPAdministrator().createEPL(
                 "insert into XStream " +
@@ -93,10 +93,10 @@ public class TestMTStmtInsertInto extends TestCase
         EventBean[] result = listener.getNewDataListFlattened();
         assertEquals(totalExpected, result.length);
         HashMap<Long, Set<String>> results = new LinkedHashMap<Long, Set<String>>();
-        for (EventBean event : result)
+        for (EventBean theEvent : result)
         {
-            long count = (Long) event.get("mycount");
-            String key = (String) event.get("key");
+            long count = (Long) theEvent.get("mycount");
+            String key = (String) theEvent.get("key");
 
             Set<String> entries = results.get(count);
             if (entries == null)

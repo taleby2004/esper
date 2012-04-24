@@ -33,9 +33,9 @@ public class TestIndexedTableLookupStrategy extends TestCase
     {
         eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
 
-        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(0, eventType, new String[] {"string", "intPrimitive"});
+        PropertyIndexedEventTableFactory factory = new PropertyIndexedEventTableFactory(0, eventType, new String[] {"theString", "intPrimitive"});
         propertyMapEventIndex = (PropertyIndexedEventTable) factory.makeEventTable();
-        lookupStrategy = new IndexedTableLookupStrategy(eventType, new String[] {"string", "intPrimitive"}, propertyMapEventIndex);
+        lookupStrategy = new IndexedTableLookupStrategy(eventType, new String[] {"theString", "intPrimitive"}, propertyMapEventIndex);
 
         propertyMapEventIndex.add(new EventBean[] {SupportEventBeanFactory.createObject(new SupportBean("a", 1))});
     }
@@ -51,7 +51,7 @@ public class TestIndexedTableLookupStrategy extends TestCase
     {
         try
         {
-            new IndexedTableLookupStrategy(eventType, new String[] {"string", "xxx"}, propertyMapEventIndex);
+            new IndexedTableLookupStrategy(eventType, new String[] {"theString", "xxx"}, propertyMapEventIndex);
             fail();
         }
         catch (IllegalArgumentException ex)

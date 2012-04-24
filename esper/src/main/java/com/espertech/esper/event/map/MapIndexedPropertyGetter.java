@@ -10,8 +10,8 @@ package com.espertech.esper.event.map;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.BaseNestableEventUtil;
 
-import java.lang.reflect.Array;
 import java.util.Map;
 
 /**
@@ -36,59 +36,23 @@ public class MapIndexedPropertyGetter implements MapEventPropertyGetter
     public Object getMap(Map<String, Object> map) throws PropertyAccessException
     {
         Object value = map.get(fieldName);
-        if (value == null)
-        {
-            return null;
-        }
-        if (!value.getClass().isArray())
-        {
-            return null;
-        }
-        if (index >= Array.getLength(value))
-        {
-            return null;
-        }
-        return Array.get(value, index);
+        return BaseNestableEventUtil.getIndexedValue(value, index);
     }
 
     public boolean isMapExistsProperty(Map<String, Object> map)
     {
         Object value = map.get(fieldName);
-        if (value == null)
-        {
-            return false;
-        }
-        if (!value.getClass().isArray())
-        {
-            return false;
-        }
-        if (index >= Array.getLength(value))
-        {
-            return false;
-        }
-        return true;
+        return BaseNestableEventUtil.isExistsIndexedValue(value, index);
     }
 
     public Object get(EventBean eventBean) throws PropertyAccessException
     {
-        Object underlying = eventBean.getUnderlying();
-        if (!(underlying instanceof Map))
-        {
-            return null;
-        }
-        Map map = (Map) underlying;
-        return getMap(map);
+        return getMap(BaseNestableEventUtil.checkedCastUnderlyingMap(eventBean));
     }
 
     public boolean isExistsProperty(EventBean eventBean)
     {
-        Object underlying = eventBean.getUnderlying();
-        if (!(underlying instanceof Map))
-        {
-            return false;
-        }
-        Map map = (Map) underlying;
-        return isMapExistsProperty(map);
+        return isMapExistsProperty(BaseNestableEventUtil.checkedCastUnderlyingMap(eventBean));
     }
 
     public Object getFragment(EventBean eventBean)

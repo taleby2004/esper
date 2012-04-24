@@ -27,12 +27,12 @@ public class InboundUnitSendWrapped implements InboundUnitRunnable
 
     /**
      * Ctor.
-     * @param event inbound event, wrapped
+     * @param theEvent inbound event, wrapped
      * @param runtime to process
      */
-    public InboundUnitSendWrapped(EventBean event, EPRuntimeEventSender runtime)
+    public InboundUnitSendWrapped(EventBean theEvent, EPRuntimeEventSender runtime)
     {
-        this.eventBean = event;
+        this.eventBean = theEvent;
         this.runtime = runtime;
     }
 

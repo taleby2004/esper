@@ -35,14 +35,14 @@ public class TestDataWindowUnionExpiry extends TestCase
     {
         init(false);
 
-        EPStatement nwstmt = epService.getEPAdministrator().createEPL("create window MyWindow.std:firstunique(string).win:firstlength(3) retain-union as SupportBean");
+        EPStatement nwstmt = epService.getEPAdministrator().createEPL("create window MyWindow.std:firstunique(theString).win:firstlength(3) retain-union as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
-        epService.getEPAdministrator().createEPL("on SupportBean_S0 delete from MyWindow where string = p00");
+        epService.getEPAdministrator().createEPL("on SupportBean_S0 delete from MyWindow where theString = p00");
 
         EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream * from MyWindow");
         stmt.addListener(listener);
 
-        String[] fields = new String[] {"string", "intPrimitive"};
+        String[] fields = new String[] {"theString", "intPrimitive"};
 
         sendEvent("E1", 1);
         EPAssertionUtil.assertPropsPerRowAnyOrder(nwstmt.iterator(), fields, new Object[][]{{"E1", 1}});
@@ -58,8 +58,8 @@ public class TestDataWindowUnionExpiry extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
         EPAssertionUtil.assertPropsPerRowAnyOrder(nwstmt.iterator(), fields, new Object[][]{{"E2", 2}});
-        EPAssertionUtil.assertProps(listener.getLastOldData()[0], "string".split(","), new Object[]{"E1"});
-        EPAssertionUtil.assertProps(listener.getLastOldData()[1], "string".split(","), new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[0], "theString".split(","), new Object[]{"E1"});
+        EPAssertionUtil.assertProps(listener.getLastOldData()[1], "theString".split(","), new Object[]{"E1"});
         listener.reset();
 
         sendEvent("E1", 3);
@@ -71,7 +71,7 @@ public class TestDataWindowUnionExpiry extends TestCase
     {
         init(false);
 
-        String epl = "select irstream string, intPrimitive from SupportBean.win:firstlength(3).std:firstunique(string) retain-union";
+        String epl = "select irstream theString, intPrimitive from SupportBean.win:firstlength(3).std:firstunique(theString) retain-union";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -80,7 +80,7 @@ public class TestDataWindowUnionExpiry extends TestCase
         stmt.destroy();
         listener.reset();
 
-        epl = "select irstream string, intPrimitive from SupportBean.std:firstunique(string).win:firstlength(3) retain-union";
+        epl = "select irstream theString, intPrimitive from SupportBean.std:firstunique(theString).win:firstlength(3) retain-union";
         stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -89,7 +89,7 @@ public class TestDataWindowUnionExpiry extends TestCase
 
     private void runAssertionFirstUniqueAndFirstLength(EPStatement stmt)
     {
-        String[] fields = new String[] {"string", "intPrimitive"};
+        String[] fields = new String[] {"theString", "intPrimitive"};
 
         sendEvent("E1", 1);
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, new Object[][]{{"E1", 1}});
@@ -119,9 +119,9 @@ public class TestDataWindowUnionExpiry extends TestCase
     public void testBatchWindow()
     {
         init(false);
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.win:length_batch(3).std:unique(intPrimitive) retain-union");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream theString from SupportBean.win:length_batch(3).std:unique(intPrimitive) retain-union");
         stmt.addListener(listener);
 
         sendEvent("E1", 1);
@@ -187,9 +187,9 @@ public class TestDataWindowUnionExpiry extends TestCase
     public void testUnionGroupBy()
     {
         init(false);
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
 
-        String text = "select irstream string from SupportBean.std:groupwin(intPrimitive).win:length(2).std:unique(intBoxed) retain-union";
+        String text = "select irstream theString from SupportBean.std:groupwin(intPrimitive).win:length(2).std:unique(intBoxed) retain-union";
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
@@ -236,7 +236,7 @@ public class TestDataWindowUnionExpiry extends TestCase
     {
         init(false);
 
-        String text = "select * from SupportBean_S0 where p00 in (select string from SupportBean.win:length(2).std:unique(intPrimitive) retain-union)";
+        String text = "select * from SupportBean_S0 where p00 in (select theString from SupportBean.win:length(2).std:unique(intPrimitive) retain-union)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
         stmt.addListener(listener);
 
@@ -265,9 +265,9 @@ public class TestDataWindowUnionExpiry extends TestCase
     public void testUnionThreeUnique()
     {
         init(false);
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.std:unique(intPrimitive).std:unique(intBoxed).std:unique(doublePrimitive) retain-union");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream theString from SupportBean.std:unique(intPrimitive).std:unique(intBoxed).std:unique(doublePrimitive) retain-union");
         stmt.addListener(listener);
 
         sendEvent("E1", 1, 10, 100d);
@@ -318,9 +318,9 @@ public class TestDataWindowUnionExpiry extends TestCase
     public void testUnionTwoUnique()
     {
         init(false);
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.std:unique(intPrimitive).std:unique(intBoxed) retain-union");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream theString from SupportBean.std:unique(intPrimitive).std:unique(intBoxed) retain-union");
         stmt.addListener(listener);
 
         sendEvent("E1", 1, 10);
@@ -379,9 +379,9 @@ public class TestDataWindowUnionExpiry extends TestCase
     public void testUnionSorted()
     {
         init(false);
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.ext:sort(2, intPrimitive).ext:sort(2, intBoxed) retain-union");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream theString from SupportBean.ext:sort(2, intPrimitive).ext:sort(2, intBoxed) retain-union");
         stmt.addListener(listener);
 
         sendEvent("E1", 1, 10);
@@ -399,7 +399,7 @@ public class TestDataWindowUnionExpiry extends TestCase
         sendEvent("E4", -1, -1);
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E3", "E4"));
         assertEquals(2, listener.getLastOldData().length);
-        Object[] result = {listener.getLastOldData()[0].get("string"), listener.getLastOldData()[1].get("string")};
+        Object[] result = {listener.getLastOldData()[0].get("theString"), listener.getLastOldData()[1].get("theString")};
         EPAssertionUtil.assertEqualsAnyOrder(result, new String[]{"E1", "E2"});
         EPAssertionUtil.assertProps(listener.assertOneGetNew(), fields, new Object[]{"E4"});
         listener.reset();
@@ -424,7 +424,7 @@ public class TestDataWindowUnionExpiry extends TestCase
         init(false);
 
         sendTimer(0);
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream string from SupportBean.std:unique(intPrimitive).win:time(10 sec) retain-union");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select irstream theString from SupportBean.std:unique(intPrimitive).win:time(10 sec) retain-union");
         stmt.addListener(listener);
 
         runAssertionTimeWinUnique(stmt);
@@ -435,7 +435,7 @@ public class TestDataWindowUnionExpiry extends TestCase
         init(false);
 
         sendTimer(0);
-        String stmtText = "select irstream string from SupportBean.win:time(10 seconds).std:unique(intPrimitive) retain-union";
+        String stmtText = "select irstream theString from SupportBean.win:time(10 seconds).std:unique(intPrimitive) retain-union";
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         assertEquals(stmtText, model.toEPL());
         EPStatement stmt = epService.getEPAdministrator().create(model);
@@ -467,7 +467,7 @@ public class TestDataWindowUnionExpiry extends TestCase
         epService.getEPAdministrator().createEPL("on SupportBean_S0 delete from MyWindow where intBoxed = id");
         stmt.addListener(listener);
 
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
 
         sendTimer(1000);
         sendEvent("E1", 1, 10);
@@ -505,7 +505,7 @@ public class TestDataWindowUnionExpiry extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(50));
         assertEquals(2, listener.getLastOldData().length);
-        Object[] result = {listener.getLastOldData()[0].get("string"), listener.getLastOldData()[1].get("string")};
+        Object[] result = {listener.getLastOldData()[0].get("theString"), listener.getLastOldData()[1].get("theString")};
         EPAssertionUtil.assertEqualsAnyOrder(result, new String[]{"E5", "E6"});
         listener.reset();
         EPAssertionUtil.assertPropsPerRowAnyOrder(stmt.iterator(), fields, toArr("E1", "E3", "E4"));
@@ -523,7 +523,7 @@ public class TestDataWindowUnionExpiry extends TestCase
 
     private void runAssertionTimeWinUnique(EPStatement stmt)
     {
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
 
         sendTimer(1000);
         sendEvent("E1", 1);
@@ -594,42 +594,42 @@ public class TestDataWindowUnionExpiry extends TestCase
         init(false);
         String text = null;
 
-        text = "select string from SupportBean.std:groupwin(string).std:unique(string).std:merge(intPrimitive) retain-union";
-        tryInvalid(text, "Error starting statement: Error attaching view to parent view: Groupwin view for this merge view could not be found among parent views [select string from SupportBean.std:groupwin(string).std:unique(string).std:merge(intPrimitive) retain-union]");
+        text = "select theString from SupportBean.std:groupwin(theString).std:unique(theString).std:merge(intPrimitive) retain-union";
+        tryInvalid(text, "Error starting statement: Error attaching view to parent view: Groupwin view for this merge view could not be found among parent views [select theString from SupportBean.std:groupwin(theString).std:unique(theString).std:merge(intPrimitive) retain-union]");
 
-        text = "select string from SupportBean.std:groupwin(string).std:groupwin(intPrimitive).std:unique(string).std:unique(intPrimitive) retain-union";
-        tryInvalid(text, "Error starting statement: Multiple groupwin views are not allowed in conjuntion with multiple data windows [select string from SupportBean.std:groupwin(string).std:groupwin(intPrimitive).std:unique(string).std:unique(intPrimitive) retain-union]");
+        text = "select theString from SupportBean.std:groupwin(theString).std:groupwin(intPrimitive).std:unique(theString).std:unique(intPrimitive) retain-union";
+        tryInvalid(text, "Error starting statement: Multiple groupwin views are not allowed in conjuntion with multiple data windows [select theString from SupportBean.std:groupwin(theString).std:groupwin(intPrimitive).std:unique(theString).std:unique(intPrimitive) retain-union]");
     }
 
     public void testValidLegacy()
     {
         init(true);
-        epService.getEPAdministrator().createEPL("select string from SupportBean.std:unique(string).std:unique(intPrimitive)");
+        epService.getEPAdministrator().createEPL("select theString from SupportBean.std:unique(theString).std:unique(intPrimitive)");
     }
 
-    private void sendEvent(String string, int intPrimitive, int intBoxed, double doublePrimitive)
+    private void sendEvent(String theString, int intPrimitive, int intBoxed, double doublePrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);
         bean.setDoublePrimitive(doublePrimitive);
         epService.getEPRuntime().sendEvent(bean);
     }
 
-    private void sendEvent(String string, int intPrimitive, int intBoxed)
+    private void sendEvent(String theString, int intPrimitive, int intBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);
         epService.getEPRuntime().sendEvent(bean);
     }
 
-    private void sendEvent(String string, int intPrimitive)
+    private void sendEvent(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
     }
@@ -659,9 +659,9 @@ public class TestDataWindowUnionExpiry extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void init(boolean isAllowMultipleDataWindows)

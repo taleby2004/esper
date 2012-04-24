@@ -63,7 +63,7 @@ public class TestNamedWindowSubqUncorrel extends TestCase
 
     private void runAssertion(boolean enableIndexShareCreate, boolean disableIndexShareConsumer)
     {
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, longPrimitive as b, longBoxed as c from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, longPrimitive as b, longBoxed as c from " + SupportBean.class.getName();
         if (enableIndexShareCreate) {
             stmtTextCreate = "@Hint('enable_window_subquery_indexshare') " + stmtTextCreate;
         }
@@ -72,7 +72,7 @@ public class TestNamedWindowSubqUncorrel extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, longPrimitive as b, longBoxed as c from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, longPrimitive as b, longBoxed as c from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create consumer
@@ -146,10 +146,10 @@ public class TestNamedWindowSubqUncorrel extends TestCase
         epService.getEPAdministrator().destroyAllStatements();
     }
 
-    private SupportBean sendSupportBean(String string, long longPrimitive, Long longBoxed)
+    private SupportBean sendSupportBean(String theString, long longPrimitive, Long longBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setLongPrimitive(longPrimitive);
         bean.setLongBoxed(longBoxed);
         epService.getEPRuntime().sendEvent(bean);

@@ -64,10 +64,10 @@ public class StmtJoinCallable implements Callable
                 // Should have received one that's mine, possible multiple since the statement is used by other threads
                 boolean found = false;
                 EventBean[] events = assertListener.getNewDataListFlattened();
-                for (EventBean event : events)
+                for (EventBean theEvent : events)
                 {
-                    Object s0Received = event.get("s0");
-                    Object s1Received = event.get("s1");
+                    Object s0Received = theEvent.get("s0");
+                    Object s1Received = theEvent.get("s1");
                     //ThreadLogUtil.info("received", event.get("s0"), event.get("s1"));
                     if ((s0Received == eventS0) && (s1Received == eventS1))
                     {
@@ -94,12 +94,12 @@ public class StmtJoinCallable implements Callable
         return true;
     }
 
-    private SupportBean makeEvent(String string, long longPrimitive)
+    private SupportBean makeEvent(String theString, long longPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setLongPrimitive(longPrimitive);
-        event.setString(string);
-        return event;
+        SupportBean theEvent = new SupportBean();
+        theEvent.setLongPrimitive(longPrimitive);
+        theEvent.setTheString(theString);
+        return theEvent;
     }
 
     private static final Log log = LogFactory.getLog(StmtJoinCallable.class);

@@ -23,10 +23,10 @@ public interface JoinExecTableLookupStrategy
     /**
      * Returns matched events for a event to look up for. Never returns an empty result set,
      * always returns null to indicate no results.
-     * @param event to look up
+     * @param theEvent to look up
      * @param cursor the path in the query that the lookup took
      * @param exprEvaluatorContext expression evaluation context
      * @return set of matching events, or null if none matching
      */
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext);
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext);
 }

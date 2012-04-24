@@ -206,11 +206,11 @@ public class TestUseResultPattern extends TestCase implements SupportBeanConstan
 
         for (int i = 0; i < 100; i++)
         {
-            SupportTradeEvent event = new
+            SupportTradeEvent theEvent = new
                     SupportTradeEvent(i, users[random.nextInt(users.length)],
                     ccy[random.nextInt(ccy.length)], direction[random.nextInt(direction.length
             )]);
-            epService.getEPRuntime().sendEvent(event);
+            epService.getEPRuntime().sendEvent(theEvent);
         }
 
         assertEquals(0, listener.badMatchCount);

@@ -119,19 +119,19 @@ public class TestPriorityAndDropInstructions extends TestCase
         stmtText = "insert into MyWindow select * from SupportBean";
         epService.getEPAdministrator().createEPL(stmtText);
 
-        stmtText = "@Priority(1) on MyWindow e select e.string as string, 1 as prio from MyWindow";
+        stmtText = "@Priority(1) on MyWindow e select e.theString as theString, 1 as prio from MyWindow";
         stmt = epService.getEPAdministrator().createEPL(stmtText, "s1");
         stmt.addListener(listener);
 
-        stmtText = "@Priority(3) on MyWindow e select e.string as string, 3 as prio from MyWindow";
+        stmtText = "@Priority(3) on MyWindow e select e.theString as theString, 3 as prio from MyWindow";
         stmt = epService.getEPAdministrator().createEPL(stmtText, "s3");
         stmt.addListener(listener);
 
-        stmtText = "@Priority(2) on MyWindow e select e.string as string, 2 as prio from MyWindow";
+        stmtText = "@Priority(2) on MyWindow e select e.theString as theString, 2 as prio from MyWindow";
         stmt = epService.getEPAdministrator().createEPL(stmtText, "s2");
         stmt.addListener(listener);
 
-        stmtText = "@Priority(4) on MyWindow e select e.string as string, 4 as prio from MyWindow";
+        stmtText = "@Priority(4) on MyWindow e select e.theString as theString, 4 as prio from MyWindow";
         stmt = epService.getEPAdministrator().createEPL(stmtText, "s4");
         stmt.addListener(listener);
 
@@ -139,20 +139,20 @@ public class TestPriorityAndDropInstructions extends TestCase
         assertPrio("E1", new int[] {4, 3, 2, 1});
 
         epService.getEPAdministrator().getStatement("s2").destroy();
-        stmt = epService.getEPAdministrator().createEPL("on MyWindow e select e.string as string, 0 as prio from MyWindow", "s0");
+        stmt = epService.getEPAdministrator().createEPL("on MyWindow e select e.theString as theString, 0 as prio from MyWindow", "s0");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 0));
         assertPrio("E2", new int[] {4, 3, 1, 0});
 
-        stmtText = "@Priority(2) on MyWindow e select e.string as string, 2 as prio from MyWindow";
+        stmtText = "@Priority(2) on MyWindow e select e.theString as theString, 2 as prio from MyWindow";
         stmt = epService.getEPAdministrator().createEPL(stmtText, "s2");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 0));
         assertPrio("E3", new int[] {4, 3, 2, 1, 0});
 
-        stmtText = "@Priority(3) on MyWindow e select e.string as string, 3 as prio from MyWindow";
+        stmtText = "@Priority(3) on MyWindow e select e.theString as theString, 3 as prio from MyWindow";
         stmt = epService.getEPAdministrator().createEPL(stmtText, "sx");
         stmt.addListener(listener);
 
@@ -171,15 +171,15 @@ public class TestPriorityAndDropInstructions extends TestCase
         stmtText = "insert into MyWindow select * from SupportBean";
         epService.getEPAdministrator().createEPL(stmtText);
 
-        stmtText = "@Drop on MyWindow e select e.string as string, 2 as prio from MyWindow";
+        stmtText = "@Drop on MyWindow e select e.theString as theString, 2 as prio from MyWindow";
         stmt = epService.getEPAdministrator().createEPL(stmtText, "s2");
         stmt.addListener(listener);
 
-        stmtText = "@Priority(3) on MyWindow e select e.string as string, 3 as prio from MyWindow";
+        stmtText = "@Priority(3) on MyWindow e select e.theString as theString, 3 as prio from MyWindow";
         stmt = epService.getEPAdministrator().createEPL(stmtText, "s3");
         stmt.addListener(listener);
 
-        stmtText = "on MyWindow e select e.string as string, 0 as prio from MyWindow";
+        stmtText = "on MyWindow e select e.theString as theString, 0 as prio from MyWindow";
         stmt = epService.getEPAdministrator().createEPL(stmtText, "s2");
         stmt.addListener(listener);
 
@@ -251,7 +251,7 @@ public class TestPriorityAndDropInstructions extends TestCase
         assertReceivedSingle(0, "E3");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 3));
-        assertEquals("E4", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E4", listener.assertOneGetNewAndReset().get("theString"));
         assertReceivedNone();
 
         String stmtThreeText = "@Drop select * from SupportBean where intPrimitive = 3";
@@ -268,7 +268,7 @@ public class TestPriorityAndDropInstructions extends TestCase
         
         statementOne.destroy();
         epService.getEPRuntime().sendEvent(new SupportBean("E7", 1));
-        assertEquals("E7", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E7", listener.assertOneGetNewAndReset().get("theString"));
         assertReceivedNone();
 
         String stmtSelectTextTwo = "@Priority(50) select * from SupportBean";
@@ -276,8 +276,8 @@ public class TestPriorityAndDropInstructions extends TestCase
         stmtSelectTwo.addListener(listenerTwo);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E8", 1));
-        assertEquals("E8", listener.assertOneGetNewAndReset().get("string"));
-        assertEquals("E8", listenerTwo.assertOneGetNewAndReset().get("string"));
+        assertEquals("E8", listener.assertOneGetNewAndReset().get("theString"));
+        assertEquals("E8", listenerTwo.assertOneGetNewAndReset().get("theString"));
         assertReceivedNone();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E9", 2));
@@ -295,19 +295,19 @@ public class TestPriorityAndDropInstructions extends TestCase
             }
             assertFalse(listeners[i].isInvoked());
         }
-        assertEquals(stringValue, listeners[index].assertOneGetNewAndReset().get("string"));
+        assertEquals(stringValue, listeners[index].assertOneGetNewAndReset().get("theString"));
     }
 
-    private void assertPrio(String string, int[] prioValues)
+    private void assertPrio(String theString, int[] prioValues)
     {
         EventBean[] events = listener.getNewDataListFlattened();
         assertEquals(prioValues.length, events.length);
         for (int i = 0; i < prioValues.length; i++)
         {
             assertEquals(prioValues[i], events[i].get("prio"));
-            if (string != null)
+            if (theString != null)
             {
-                assertEquals(string, events[i].get("string"));
+                assertEquals(theString, events[i].get("theString"));
             }
         }
         listener.reset();
@@ -323,7 +323,7 @@ public class TestPriorityAndDropInstructions extends TestCase
 
     private void sendTimer(long time, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
-        epService.getEPRuntime().sendEvent(event);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

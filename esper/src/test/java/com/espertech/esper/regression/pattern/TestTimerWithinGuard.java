@@ -308,7 +308,7 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
         sendTimer(0, epService);
 
         // Set up a timer:within
-        EPStatement statement = epService.getEPAdministrator().createEPL("select b.string as id from pattern[a=SupportBean -> (every b=SupportBean) where timer:within(a.intPrimitive seconds)]");
+        EPStatement statement = epService.getEPAdministrator().createEPL("select b.theString as id from pattern[a=SupportBean -> (every b=SupportBean) where timer:within(a.intPrimitive seconds)]");
 
         SupportUpdateListener testListener = new SupportUpdateListener();
         statement.addListener(testListener);
@@ -371,15 +371,15 @@ public class TestTimerWithinGuard extends TestCase implements SupportBeanConstan
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void sendEvent(EPServiceProvider epService)
     {
-        SupportBean event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     public static class Ev {

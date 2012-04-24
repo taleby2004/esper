@@ -26,8 +26,8 @@ public class SortedAccessStrategyRangeInverted extends SortedAccessStrategyRange
         super(isNWOnTrigger, lookupStream, numStreams, start, includeStart, end, includeEnd);
     }
 
-    public Set<EventBean> lookup(EventBean event, PropertySortedEventTable index, ExprEvaluatorContext context) {
-        return index.lookupRangeInverted(super.evaluateLookupStart(event, context), includeStart, super.evaluateLookupEnd(event, context), includeEnd);
+    public Set<EventBean> lookup(EventBean theEvent, PropertySortedEventTable index, ExprEvaluatorContext context) {
+        return index.lookupRangeInverted(super.evaluateLookupStart(theEvent, context), includeStart, super.evaluateLookupEnd(theEvent, context), includeEnd);
     }
 
     public Collection<EventBean> lookup(EventBean[] eventsPerStream, PropertySortedEventTable index, ExprEvaluatorContext context) {

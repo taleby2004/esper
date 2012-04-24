@@ -364,9 +364,9 @@ public class TestTimerAtObserver extends TestCase implements SupportBeanConstant
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void addAll (EventExpressionCase desc)

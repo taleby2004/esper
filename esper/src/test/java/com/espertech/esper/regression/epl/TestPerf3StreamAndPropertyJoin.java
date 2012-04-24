@@ -118,9 +118,9 @@ public class TestPerf3StreamAndPropertyJoin extends TestCase
         assertTrue((endTime - startTime) < 500);
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private static final Log log = LogFactory.getLog(TestPerf3StreamAndPropertyJoin.class);

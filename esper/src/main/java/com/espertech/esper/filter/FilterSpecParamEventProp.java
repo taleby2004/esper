@@ -101,14 +101,14 @@ public final class FilterSpecParamEventProp extends FilterSpecParam
 
     public Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext evaluatorContext)
     {
-        EventBean event = matchedEvents.getMatchingEvent(resultEventAsName);
+        EventBean theEvent = matchedEvents.getMatchingEventByTag(resultEventAsName);
         Object value = null;
-        if (event == null)
+        if (theEvent == null)
         {
             log.warn("Matching events for tag '" + resultEventAsName + "' returned a null result, using null value in filter criteria, for statement '" + statementName + "'");
         }
         else {
-            value = event.get(resultEventProperty);
+            value = theEvent.get(resultEventProperty);
         }
 
         // Coerce if necessary

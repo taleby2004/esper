@@ -25,9 +25,9 @@ public class TimeAction
         events = new ArrayList<EventSendDesc>();
     }
 
-    public void add(SupportMarketDataBean event, String eventDesc)
+    public void add(SupportMarketDataBean theEvent, String eventDesc)
     {
-        events.add(new EventSendDesc(event, eventDesc));
+        events.add(new EventSendDesc(theEvent, eventDesc));
     }
 
     public void setActionDesc(String actionDesc) {

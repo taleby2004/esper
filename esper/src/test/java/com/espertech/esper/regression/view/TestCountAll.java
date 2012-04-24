@@ -113,8 +113,8 @@ public class TestCountAll extends TestCase
 
     public void testCountHaving()
     {
-        String event = SupportBean.class.getName();
-        String statementText = "select irstream sum(intPrimitive) as mysum from " + event + " having sum(intPrimitive) = 2";
+        String theEvent = SupportBean.class.getName();
+        String statementText = "select irstream sum(intPrimitive) as mysum from " + theEvent + " having sum(intPrimitive) = 2";
         selectTestView = epService.getEPAdministrator().createEPL(statementText);
         selectTestView.addListener(listener);
 
@@ -128,8 +128,8 @@ public class TestCountAll extends TestCase
 
     public void testSumHaving()
     {
-        String event = SupportBean.class.getName();
-        String statementText = "select irstream count(*) as mysum from " + event + " having count(*) = 2";
+        String theEvent = SupportBean.class.getName();
+        String statementText = "select irstream count(*) as mysum from " + theEvent + " having count(*) = 2";
         selectTestView = epService.getEPAdministrator().createEPL(statementText);
         selectTestView.addListener(listener);
 

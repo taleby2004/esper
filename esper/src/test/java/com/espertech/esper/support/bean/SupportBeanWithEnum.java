@@ -15,18 +15,18 @@ import java.io.Serializable;
 
 public class SupportBeanWithEnum implements Serializable
 {
-    private String string;
+    private String theString;
     private SupportEnum supportEnum;
 
-    public SupportBeanWithEnum(String string, SupportEnum supportEnum)
+    public SupportBeanWithEnum(String theString, SupportEnum supportEnum)
     {
-        this.string = string;
+        this.theString = theString;
         this.supportEnum = supportEnum;
     }
 
-    public String getString()
+    public String getTheString()
     {
-        return string;
+        return theString;
     }
 
     public SupportEnum getSupportEnum()

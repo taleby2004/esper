@@ -12,10 +12,7 @@ import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPServiceProviderIsolated;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.deploy.*;
-import com.espertech.esper.core.service.EPAdministratorIsolatedSPI;
-import com.espertech.esper.core.service.EPAdministratorSPI;
-import com.espertech.esper.core.service.StatementEventTypeRef;
-import com.espertech.esper.core.service.StatementIsolationService;
+import com.espertech.esper.core.service.*;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.util.DependencyGraph;
@@ -31,7 +28,7 @@ import java.util.*;
 /**
  * Deployment administrative implementation.
  */
-public class EPDeploymentAdminImpl implements EPDeploymentAdmin
+public class EPDeploymentAdminImpl implements EPDeploymentAdminSPI
 {
     private static Log log = LogFactory.getLog(EPDeploymentAdminImpl.class);
 
@@ -449,7 +446,7 @@ public class EPDeploymentAdminImpl implements EPDeploymentAdmin
             count++;
         }
 
-        DependencyGraph graph = new DependencyGraph(proposedModules.size());
+        DependencyGraph graph = new DependencyGraph(proposedModules.size(), false);
         int fromModule = 0;
         for (Module proposedModule : proposedModules) {
             if ((proposedModule.getUses() == null) || (proposedModule.getUses().isEmpty())) {

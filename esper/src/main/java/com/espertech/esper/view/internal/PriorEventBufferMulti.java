@@ -107,21 +107,21 @@ public class PriorEventBufferMulti implements ViewUpdatedCollection, RelativeAcc
         lastOldData = oldData;
     }
 
-    public EventBean getRelativeToEvent(EventBean event, int priorToIndex)
+    public EventBean getRelativeToEvent(EventBean theEvent, int priorToIndex)
     {
         if (priorToIndex >= priorToIndexesSize)
         {
             throw new IllegalArgumentException("Index " + priorToIndex + " not allowed, max size is " + priorToIndexesSize);
         }
-        EventBean[] priorEvents = priorEventMap.get(event);
+        EventBean[] priorEvents = priorEventMap.get(theEvent);
         if (priorEvents == null)
         {
-            throw new IllegalStateException("Event not currently in collection, event=" + event);
+            throw new IllegalStateException("Event not currently in collection, event=" + theEvent);
         }
         return priorEvents[priorToIndex];
     }
 
-    public EventBean getRelativeToEnd(EventBean event, int index)
+    public EventBean getRelativeToEnd(EventBean theEvent, int index)
     {
         // No requirements to return events related to the end of the current buffer
         return null;

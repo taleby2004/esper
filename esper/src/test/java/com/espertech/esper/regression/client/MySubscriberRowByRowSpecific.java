@@ -23,9 +23,9 @@ public class MySubscriberRowByRowSpecific
 {
     private ArrayList<Object[]> indicate = new ArrayList<Object[]>();
 
-    public void update(String string, int intPrimitive)
+    public void update(String theString, int intPrimitive)
     {
-        indicate.add(new Object[] {string, intPrimitive});
+        indicate.add(new Object[] {theString, intPrimitive});
     }
 
     public void update(int wideByte, long wideInt, double wideLong, double wideFloat)
@@ -49,9 +49,9 @@ public class MySubscriberRowByRowSpecific
         indicate.add(new Object[] {n, nn});
     }
 
-    public void update(String string, SupportEnum supportEnum)
+    public void update(String theString, SupportEnum supportEnum)
     {
-        indicate.add(new Object[] {string, supportEnum});
+        indicate.add(new Object[] {theString, supportEnum});
     }
 
     public void update(String nullableValue, Long longBoxed)

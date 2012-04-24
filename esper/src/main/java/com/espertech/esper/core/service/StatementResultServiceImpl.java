@@ -161,6 +161,10 @@ public class StatementResultServiceImpl implements StatementResultService
         return statementName;
     }
 
+    public EPStatementListenerSet getStatementListenerSet() {
+        return statementListenerSet;
+    }
+
     public void setUpdateListeners(EPStatementListenerSet statementListenerSet)
     {
         // indicate that listeners were updated for potential persistence of listener set, once the statement context is known
@@ -249,24 +253,27 @@ public class StatementResultServiceImpl implements StatementResultService
         // Discrete delivery
         if ((groupDeliveryExpressions == null) || (groupDeliveryExpressions.length == 0)){
             UniformPair<EventBean[]> todeliver = new UniformPair<EventBean[]>(null, null);
-            if (events.getFirst() != null) {
-                for (EventBean event : events.getFirst()) {
-                    todeliver.setFirst(new EventBean[] {event});
-                    dispatchInternal(todeliver);
+            if (events != null) {
+                if (events.getFirst() != null) {
+                    for (EventBean theEvent : events.getFirst()) {
+                        todeliver.setFirst(new EventBean[] {theEvent});
+                        dispatchInternal(todeliver);
+                    }
+                    todeliver.setFirst(null);
                 }
-            }
-            todeliver.setFirst(null);
-            if (events.getSecond() != null) {
-                for (EventBean event : events.getSecond()) {
-                    todeliver.setSecond(new EventBean[] {event});
-                    dispatchInternal(todeliver);
+                if (events.getSecond() != null) {
+                    for (EventBean theEvent : events.getSecond()) {
+                        todeliver.setSecond(new EventBean[] {theEvent});
+                        dispatchInternal(todeliver);
+                    }
+                    todeliver.setSecond(null);
                 }
             }
             return;
         }
 
         // Grouped delivery
-        Map<MultiKeyUntyped, UniformPair<EventBean[]>> groups;
+        Map<Object, UniformPair<EventBean[]>> groups;
         try {
             groups = getGroupedResults(events);
         }
@@ -277,68 +284,74 @@ public class StatementResultServiceImpl implements StatementResultService
         }
 
         // Deliver each group separately
-        for (Map.Entry<MultiKeyUntyped, UniformPair<EventBean[]>> group : groups.entrySet()) {
+        for (Map.Entry<Object, UniformPair<EventBean[]>> group : groups.entrySet()) {
             dispatchInternal(group.getValue());
         }
     }
 
-    private Map<MultiKeyUntyped, UniformPair<EventBean[]>> getGroupedResults(UniformPair<EventBean[]> events)
+    private Map<Object, UniformPair<EventBean[]>> getGroupedResults(UniformPair<EventBean[]> events)
     {
         if (events == null) {
             return Collections.emptyMap();
         }
-        Map<MultiKeyUntyped, UniformPair<EventBean[]>> groups = new LinkedHashMap<MultiKeyUntyped, UniformPair<EventBean[]>>();
+        Map<Object, UniformPair<EventBean[]>> groups = new LinkedHashMap<Object, UniformPair<EventBean[]>>();
         EventBean[] eventsPerStream = new EventBean[1];
         getGroupedResults(groups, events.getFirst(), true, eventsPerStream);
         getGroupedResults(groups, events.getSecond(), false, eventsPerStream);
         return groups;
     }
 
-    private void getGroupedResults(Map<MultiKeyUntyped, UniformPair<EventBean[]>> groups, EventBean[] events, boolean insertStream, EventBean[] eventsPerStream)
+    private void getGroupedResults(Map<Object, UniformPair<EventBean[]>> groups, EventBean[] events, boolean insertStream, EventBean[] eventsPerStream)
     {
         if (events == null) {
             return;
         }
         
-        for (EventBean event : events) {
+        for (EventBean theEvent : events) {
 
-            EventBean evalEvent = event;
+            EventBean evalEvent = theEvent;
             if (evalEvent instanceof NaturalEventBean) {
                 evalEvent = ((NaturalEventBean) evalEvent).getOptionalSynthetic();
             }
 
-            Object[] keys = new Object[groupDeliveryExpressions.length];
-            for (int i = 0; i < groupDeliveryExpressions.length; i++) {
-                eventsPerStream[0] = evalEvent;
-                keys[i] = groupDeliveryExpressions[i].evaluate(eventsPerStream, true, exprEvaluatorContext);
+            Object key;
+            eventsPerStream[0] = evalEvent;
+            if (groupDeliveryExpressions.length == 1) {
+                key = groupDeliveryExpressions[0].evaluate(eventsPerStream, true, exprEvaluatorContext);
             }
-            MultiKeyUntyped key = new MultiKeyUntyped(keys);
+            else {
+                Object[] keys = new Object[groupDeliveryExpressions.length];
+                for (int i = 0; i < groupDeliveryExpressions.length; i++) {
+                    keys[i] = groupDeliveryExpressions[i].evaluate(eventsPerStream, true, exprEvaluatorContext);
+                }
+                key = new MultiKeyUntyped(keys);
+            }
 
             UniformPair<EventBean[]> groupEntry = groups.get(key);
             if (groupEntry == null) {
                 if (insertStream) {
-                    groupEntry = new UniformPair<EventBean[]>(new EventBean[] {event}, null);
+                    groupEntry = new UniformPair<EventBean[]>(new EventBean[] {theEvent}, null);
                 }
                 else {
-                    groupEntry = new UniformPair<EventBean[]>(null, new EventBean[] {event});
+                    groupEntry = new UniformPair<EventBean[]>(null, new EventBean[] {theEvent});
                 }
                 groups.put(key, groupEntry);
             }
             else {
                 if (insertStream) {
                     if (groupEntry.getFirst() == null) {
-                        groupEntry.setFirst(new EventBean[] {event});
+                        groupEntry.setFirst(new EventBean[] {theEvent});
                     }
                     else {
-                        groupEntry.setFirst(EventBeanUtility.addToArray(groupEntry.getFirst(), event));
+                        groupEntry.setFirst(EventBeanUtility.addToArray(groupEntry.getFirst(), theEvent));
                     }
                 }
                 else {
                     if (groupEntry.getSecond() == null) {
-                        groupEntry.setSecond(new EventBean[] {event});
+                        groupEntry.setSecond(new EventBean[] {theEvent});
                     }
                     else {
-                        groupEntry.setSecond(EventBeanUtility.addToArray(groupEntry.getSecond(), event));
+                        groupEntry.setSecond(EventBeanUtility.addToArray(groupEntry.getSecond(), theEvent));
                     }
                 }
             }

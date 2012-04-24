@@ -54,12 +54,12 @@ public class TestEventRowRegexHelper extends TestCase
             
             EventRowRegexHelper.recursiveInspectVariables(parent, false, singles, multiples);
 
-            String out = "Failed in :" + pattern +
+            String outText = "Failed in :" + pattern +
                     " result is : single " + Arrays.toString(singles.toArray()) +
                     " multiple " + Arrays.toString(multiples.toArray());
             
-            assertEquals(out, patternTests[i][1], Arrays.toString(singles.toArray()));
-            assertEquals(out, patternTests[i][2], Arrays.toString(multiples.toArray()));
+            assertEquals(outText, patternTests[i][1], Arrays.toString(singles.toArray()));
+            assertEquals(outText, patternTests[i][2], Arrays.toString(multiples.toArray()));
         }
     }
 }

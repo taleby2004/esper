@@ -39,13 +39,13 @@ public class TestNamedWindowOutputrate extends TestCase
     public void testOutputSnapshot() {
         epService.getEPAdministrator().createEPL("create schema SupportBean as " + SupportBean.class.getName());
 
-        epService.getEPAdministrator().createEPL("create window MyWindowOne.win:keepall() as (string string, intv int)");
-        epService.getEPAdministrator().createEPL("insert into MyWindowOne select string, intPrimitive as intv from SupportBean");
+        epService.getEPAdministrator().createEPL("create window MyWindowOne.win:keepall() as (theString string, intv int)");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne select theString, intPrimitive as intv from SupportBean");
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
-        String[] fields = new String[] {"string","c"};
-        EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select irstream string, count(*) as c from MyWindowOne group by string output snapshot every 1 second");
+        String[] fields = new String[] {"theString","c"};
+        EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select irstream theString, count(*) as c from MyWindowOne group by theString output snapshot every 1 second");
         stmtSelect.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 1));

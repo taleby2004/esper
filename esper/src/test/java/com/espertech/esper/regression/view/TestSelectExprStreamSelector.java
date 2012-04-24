@@ -94,17 +94,17 @@ public class TestSelectExprStreamSelector extends TestCase
         EventType eventType = stmtOne.getEventType();
         assertEquals(SupportBean.class, eventType.getUnderlyingType());
 
-        Object event = sendBeanEvent("E1", 10);
-        assertSame(event, listenerTwo.assertOneGetNewAndReset().getUnderlying());
+        Object theEvent = sendBeanEvent("E1", 10);
+        assertSame(theEvent, listenerTwo.assertOneGetNewAndReset().getUnderlying());
 
-        event = sendBeanEvent("E2", 10);
-        assertSame(event, listenerTwo.assertOneGetNewAndReset().getUnderlying());
+        theEvent = sendBeanEvent("E2", 10);
+        assertSame(theEvent, listenerTwo.assertOneGetNewAndReset().getUnderlying());
 
         String stmtThreeText = "insert into streamB select a.*, 'abc' as abc from pattern [every a=" + SupportBean.class.getName() + " where timer:within(30 sec)]";
         EPStatement stmtThree = epService.getEPAdministrator().createEPL(stmtThreeText);
         assertEquals(Pair.class, stmtThree.getEventType().getUnderlyingType());
         assertEquals(String.class, stmtThree.getEventType().getPropertyType("abc"));
-        assertEquals(String.class, stmtThree.getEventType().getPropertyType("string"));
+        assertEquals(String.class, stmtThree.getEventType().getPropertyType("theString"));
     }
 
     public void testObjectModelJoinAlias()
@@ -113,7 +113,7 @@ public class TestSelectExprStreamSelector extends TestCase
         model.setSelectClause(SelectClause.create()
                 .addStreamWildcard("s0")
                 .addStreamWildcard("s1", "s1stream")
-                .addWithAsProvidedName("string", "sym"));
+                .addWithAsProvidedName("theString", "sym"));
         model.setFromClause(FromClause.create()
                 .add(FilterStream.create(SupportBean.class.getName(), "s0").addView("win", "keepall"))
                 .add(FilterStream.create(SupportMarketDataBean.class.getName(), "s1").addView("win", "keepall")));
@@ -121,7 +121,7 @@ public class TestSelectExprStreamSelector extends TestCase
         EPStatement selectTestView = epService.getEPAdministrator().create(model);
         selectTestView.addListener(testListener);
 
-        String viewExpr = "select s0.*, s1.* as s1stream, string as sym from " + SupportBean.class.getName() + ".win:keepall() as s0, " +
+        String viewExpr = "select s0.*, s1.* as s1stream, theString as sym from " + SupportBean.class.getName() + ".win:keepall() as s0, " +
                 SupportMarketDataBean.class.getName() + ".win:keepall() as s1";
         assertEquals(viewExpr, model.toEPL());
         EPStatementObjectModel modelReverse = epService.getEPAdministrator().compileEPL(model.toEPL());
@@ -134,9 +134,9 @@ public class TestSelectExprStreamSelector extends TestCase
         sendBeanEvent("E1");
         assertFalse(testListener.isInvoked());
 
-        Object event = sendMarketEvent("E1");
+        Object theEvent = sendMarketEvent("E1");
         EventBean outevent = testListener.assertOneGetNewAndReset();
-        assertSame(event, outevent.get("s1stream"));
+        assertSame(theEvent, outevent.get("s1stream"));
     }
 
     public void testNoJoinWildcardNoAlias()
@@ -149,8 +149,8 @@ public class TestSelectExprStreamSelector extends TestCase
         assertTrue(type.getPropertyNames().length > 15);
         assertEquals(SupportBean.class, type.getUnderlyingType());
 
-        Object event = sendBeanEvent("E1", 16);
-        assertSame(event, testListener.assertOneGetNewAndReset().getUnderlying());
+        Object theEvent = sendBeanEvent("E1", 16);
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().getUnderlying());
     }
 
     public void testJoinWildcardNoAlias()
@@ -187,9 +187,9 @@ public class TestSelectExprStreamSelector extends TestCase
         assertEquals(Pair.class, type.getUnderlyingType());
         assertEquals(SupportBean.class, type.getPropertyType("s0"));
 
-        Object event = sendBeanEvent("E1", 15);
-        String[] fields = new String[] {"string", "intPrimitive", "s0"};
-        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 15, event});
+        Object theEvent = sendBeanEvent("E1", 15);
+        String[] fields = new String[] {"theString", "intPrimitive", "s0"};
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 15, theEvent});
     }
 
     public void testJoinWildcardWithAlias()
@@ -218,7 +218,7 @@ public class TestSelectExprStreamSelector extends TestCase
 
     public void testNoJoinWithAliasWithProperties()
     {
-        String viewExpr = "select string.* as s0, intPrimitive as a, string.* as s1, intPrimitive as b from " + SupportBean.class.getName() + ".win:length(3) as string";
+        String viewExpr = "select theString.* as s0, intPrimitive as a, theString.* as s1, intPrimitive as b from " + SupportBean.class.getName() + ".win:length(3) as theString";
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
@@ -230,14 +230,14 @@ public class TestSelectExprStreamSelector extends TestCase
         assertEquals(SupportBean.class, type.getPropertyType("s0"));
         assertEquals(SupportBean.class, type.getPropertyType("s1"));
 
-        Object event = sendBeanEvent("E1", 12);
+        Object theEvent = sendBeanEvent("E1", 12);
         String[] fields = new String[] {"s0", "s1", "a", "b"};
-        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[]{event, event, 12, 12});
+        EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[]{theEvent, theEvent, 12, 12});
     }
 
     public void testJoinWithAliasWithProperties()
     {
-        String viewExpr = "select intPrimitive, s1.* as s1stream, string, symbol as sym, s0.* as s0stream from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
+        String viewExpr = "select intPrimitive, s1.* as s1stream, theString, symbol as sym, s0.* as s0stream from " + SupportBean.class.getName() + ".win:length(3) as s0, " +
                 SupportMarketDataBean.class.getName() + ".win:keepall() as s1";
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
@@ -248,18 +248,18 @@ public class TestSelectExprStreamSelector extends TestCase
         assertEquals(SupportMarketDataBean.class, type.getPropertyType("s1stream"));
         assertEquals(SupportBean.class, type.getPropertyType("s0stream"));
         assertEquals(String.class, type.getPropertyType("sym"));
-        assertEquals(String.class, type.getPropertyType("string"));
+        assertEquals(String.class, type.getPropertyType("theString"));
         assertEquals(Map.class, type.getUnderlyingType());
 
         Object eventOne = sendBeanEvent("E1", 13);
         assertFalse(testListener.isInvoked());
 
         Object eventTwo = sendMarketEvent("E2");
-        String[] fields = new String[] {"intPrimitive", "sym", "string", "s0stream", "s1stream"};
+        String[] fields = new String[] {"intPrimitive", "sym", "theString", "s0stream", "s1stream"};
         EventBean received = testListener.assertOneGetNewAndReset();
         EPAssertionUtil.assertProps(received, fields, new Object[]{13, "E2", "E1", eventOne, eventTwo});
-        EventBean event = (EventBean) ((Map)received.getUnderlying()).get("s0stream");
-        assertSame(eventOne, event.getUnderlying());
+        EventBean theEvent = (EventBean) ((Map)received.getUnderlying()).get("s0stream");
+        assertSame(eventOne, theEvent.getUnderlying());
     }
 
     public void testNoJoinNoAliasWithProperties()
@@ -273,10 +273,10 @@ public class TestSelectExprStreamSelector extends TestCase
         assertEquals(Pair.class, type.getUnderlyingType());
         assertEquals(int.class, type.getPropertyType("a"));
         assertEquals(int.class, type.getPropertyType("b"));
-        assertEquals(String.class, type.getPropertyType("string"));
+        assertEquals(String.class, type.getPropertyType("theString"));
 
         sendBeanEvent("E1", 10);
-        String[] fields = new String[] {"a", "string", "intPrimitive", "b"};
+        String[] fields = new String[] {"a", "theString", "intPrimitive", "b"};
         EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), fields, new Object[]{10, "E1", 10, 10});
     }
 
@@ -295,16 +295,16 @@ public class TestSelectExprStreamSelector extends TestCase
         sendBeanEvent("E1", 11);
         assertFalse(testListener.isInvoked());
 
-        Object event = sendMarketEvent("E1");
+        Object theEvent = sendMarketEvent("E1");
         String[] fields = new String[] {"intPrimitive", "sym", "symbol"};
         EventBean received = testListener.assertOneGetNewAndReset();
         EPAssertionUtil.assertProps(received, fields, new Object[]{11, "E1", "E1"});
-        assertSame(event, ((Pair)received.getUnderlying()).getFirst());
+        assertSame(theEvent, ((Pair)received.getUnderlying()).getFirst());
     }
 
     public void testAloneNoJoinNoAlias()
     {
-        String viewExpr = "select string.* from " + SupportBean.class.getName() + ".win:length(3) as string";
+        String viewExpr = "select theString.* from " + SupportBean.class.getName() + ".win:length(3) as theString";
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
@@ -312,13 +312,13 @@ public class TestSelectExprStreamSelector extends TestCase
         assertTrue(type.getPropertyNames().length > 10);
         assertEquals(SupportBean.class, type.getUnderlyingType());
 
-        Object event = sendBeanEvent("E1");
-        assertSame(event, testListener.assertOneGetNewAndReset().getUnderlying());
+        Object theEvent = sendBeanEvent("E1");
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().getUnderlying());
     }
 
     public void testAloneNoJoinAlias()
     {
-        String viewExpr = "select string.* as s0 from " + SupportBean.class.getName() + ".win:length(3) as string";
+        String viewExpr = "select theString.* as s0 from " + SupportBean.class.getName() + ".win:length(3) as theString";
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
@@ -327,8 +327,8 @@ public class TestSelectExprStreamSelector extends TestCase
         assertEquals(SupportBean.class, type.getPropertyType("s0"));
         assertEquals(Map.class, type.getUnderlyingType());
 
-        Object event = sendBeanEvent("E1");
-        assertSame(event, testListener.assertOneGetNewAndReset().get("s0"));
+        Object theEvent = sendBeanEvent("E1");
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().get("s0"));
     }
 
     public void testAloneJoinAlias()
@@ -345,8 +345,8 @@ public class TestSelectExprStreamSelector extends TestCase
         sendBeanEvent("E1");
         assertFalse(testListener.isInvoked());
 
-        Object event = sendMarketEvent("E1");
-        assertSame(event, testListener.assertOneGetNewAndReset().get("s1"));
+        Object theEvent = sendMarketEvent("E1");
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().get("s1"));
 
         selectTestView.destroy();
 
@@ -363,8 +363,8 @@ public class TestSelectExprStreamSelector extends TestCase
         sendMarketEvent("E1");
         assertFalse(testListener.isInvoked());
 
-        event = sendBeanEvent("E1");
-        assertSame(event, testListener.assertOneGetNewAndReset().get("szero"));
+        theEvent = sendBeanEvent("E1");
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().get("szero"));
     }
 
     public void testAloneJoinNoAlias()
@@ -381,8 +381,8 @@ public class TestSelectExprStreamSelector extends TestCase
         sendBeanEvent("E1");
         assertFalse(testListener.isInvoked());
 
-        Object event = sendMarketEvent("E1");
-        assertSame(event, testListener.assertOneGetNewAndReset().getUnderlying());
+        Object theEvent = sendMarketEvent("E1");
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().getUnderlying());
 
         selectTestView.destroy();
 
@@ -393,20 +393,20 @@ public class TestSelectExprStreamSelector extends TestCase
         selectTestView.addListener(testListener);
 
         type = selectTestView.getEventType();
-        assertEquals(String.class, type.getPropertyType("string"));
+        assertEquals(String.class, type.getPropertyType("theString"));
         assertEquals(SupportBean.class, type.getUnderlyingType());
 
         sendMarketEvent("E1");
         assertFalse(testListener.isInvoked());
 
-        event = sendBeanEvent("E1");
-        assertSame(event, testListener.assertOneGetNewAndReset().getUnderlying());
+        theEvent = sendBeanEvent("E1");
+        assertSame(theEvent, testListener.assertOneGetNewAndReset().getUnderlying());
     }
 
     public void testInvalidSelect()
     {
-        tryInvalid("select string.* as string, string from " + SupportBean.class.getName() + ".win:length(3) as string",
-                   "Error starting statement: Column name 'string' appears more then once in select clause [select string.* as string, string from com.espertech.esper.support.bean.SupportBean.win:length(3) as string]");
+        tryInvalid("select theString.* as theString, theString from " + SupportBean.class.getName() + ".win:length(3) as theString",
+                   "Error starting statement: Column name 'theString' appears more then once in select clause [select theString.* as theString, theString from com.espertech.esper.support.bean.SupportBean.win:length(3) as theString]");
 
         tryInvalid("select s1.* as abc from " + SupportBean.class.getName() + ".win:length(3) as s0",
                    "Error starting statement: Stream selector 's1.*' does not match any stream name in the from clause [select s1.* as abc from com.espertech.esper.support.bean.SupportBean.win:length(3) as s0]");
@@ -434,7 +434,7 @@ public class TestSelectExprStreamSelector extends TestCase
     private SupportBean sendBeanEvent(String s)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(s);
+        bean.setTheString(s);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
@@ -442,7 +442,7 @@ public class TestSelectExprStreamSelector extends TestCase
     private SupportBean sendBeanEvent(String s, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(s);
+        bean.setTheString(s);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;

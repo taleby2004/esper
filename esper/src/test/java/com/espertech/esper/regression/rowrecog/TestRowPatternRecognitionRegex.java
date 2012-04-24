@@ -148,7 +148,7 @@ public class TestRowPatternRecognitionRegex extends TestCase {
         for (String measure : testDesc.getMeasures().split(","))
         {
             buf.append(delimiter);
-            buf.append(measure.toUpperCase() + ".string as " + replaceBrackets(measure) + "val");
+            buf.append(measure.toUpperCase() + ".theString as " + replaceBrackets(measure) + "val");
             delimiter = ",";
         }
         buf.append("\n all matches ");
@@ -166,7 +166,7 @@ public class TestRowPatternRecognitionRegex extends TestCase {
         for (String define : defines)
         {
             buf.append(delimiter);
-            buf.append(define + " as (" + define + ".string like '" + define.toLowerCase() + "%')");
+            buf.append(define + " as (" + define + ".theString like '" + define.toLowerCase() + "%')");
             delimiter = ",\n";
         }
         buf.append(")");

@@ -16,6 +16,9 @@ package com.espertech.esper.event.util;
  */
 public class OutputValueRendererXMLString implements OutputValueRenderer
 {
+    public OutputValueRendererXMLString() {
+    }
+
     public void render(Object object, StringBuilder buf)
     {
         if (object == null)

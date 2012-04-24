@@ -45,7 +45,7 @@ public class TestPerf2StreamAndPropertyJoin extends TestCase
         String joinStatement = "select * from " +
                 SupportMarketDataBean.class.getName() + ".win:length(1000000)," +
                 SupportBean.class.getName() + ".win:length(1000000)" +
-            " where symbol=string and volume=longBoxed";
+            " where symbol=theString and volume=longBoxed";
 
         EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
@@ -74,7 +74,7 @@ public class TestPerf2StreamAndPropertyJoin extends TestCase
         String joinStatement = "select * from " +
                 SupportMarketDataBean.class.getName() + "().win:length(1000000)," +
                 SupportBean.class.getName() + ".win:length(1000000)" +
-            " where symbol=string and volume=longBoxed and doublePrimitive=price";
+            " where symbol=theString and volume=longBoxed and doublePrimitive=price";
 
         EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
@@ -96,15 +96,15 @@ public class TestPerf2StreamAndPropertyJoin extends TestCase
         assertTrue((endTime - startTime) < 500);
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private Object makeSupportEvent(String id, long longBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(id);
+        bean.setTheString(id);
         bean.setLongBoxed(longBoxed);
         return bean;
     }

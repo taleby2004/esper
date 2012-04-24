@@ -12,10 +12,7 @@
 package com.espertech.esper.pattern.observer;
 
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.pattern.MatchedEventMapImpl;
-import com.espertech.esper.pattern.PatternAgentInstanceContext;
-import com.espertech.esper.pattern.PatternContext;
+import com.espertech.esper.pattern.*;
 import com.espertech.esper.schedule.SchedulingServiceImpl;
 import com.espertech.esper.support.guard.SupportObserverEvaluator;
 import com.espertech.esper.support.pattern.SupportPatternContextFactory;
@@ -37,11 +34,11 @@ public class TestTimerIntervalObserver extends TestCase
     public void setUp()
     {
         
-        beginState = new MatchedEventMapImpl();
+        beginState = new MatchedEventMapImpl(new MatchedEventMapMeta(new String[0], false));
 
         scheduleService = new SchedulingServiceImpl(new TimeSourceServiceImpl());
         StatementContext stmtContext = SupportStatementContextFactory.makeContext(scheduleService);
-        context = new PatternContext(stmtContext, 1);
+        context = new PatternContext(stmtContext, 1, new MatchedEventMapMeta(new String[0], false));
         agentContext = SupportPatternContextFactory.makePatternAgentInstanceContext(scheduleService);
 
         evaluator = new SupportObserverEvaluator(agentContext);

@@ -20,26 +20,26 @@ public class IntervalStartEndParameterPair {
         this.end = end;
     }
 
-    public static IntervalStartEndParameterPair fromParamsWithSameEnd(ExprOptionalConstant[] params) {
-        ExprOptionalConstant start = params[0];
+    public static IntervalStartEndParameterPair fromParamsWithSameEnd(ExprOptionalConstant[] parameters) {
+        ExprOptionalConstant start = parameters[0];
         ExprOptionalConstant end;
-        if (params.length == 1) {
+        if (parameters.length == 1) {
             end = start;
         }
         else {
-            end = params[1];
+            end = parameters[1];
         }
         return new IntervalStartEndParameterPair(start, end);
     }
 
-    public static IntervalStartEndParameterPair fromParamsWithLongMaxEnd(ExprOptionalConstant[] params) {
-        ExprOptionalConstant start = params[0];
+    public static IntervalStartEndParameterPair fromParamsWithLongMaxEnd(ExprOptionalConstant[] parameters) {
+        ExprOptionalConstant start = parameters[0];
         ExprOptionalConstant end;
-        if (params.length == 1) {
+        if (parameters.length == 1) {
             end = ExprOptionalConstant.make(Long.MAX_VALUE);
         }
         else {
-            end = params[1];
+            end = parameters[1];
         }
         return new IntervalStartEndParameterPair(start, end);
     }

@@ -63,9 +63,9 @@ public class HistoricalIndexLookupStrategyIndex implements HistoricalIndexLookup
         return indexTable.iterator();
     }
 
-    private Object[] getKeys(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
+    private Object[] getKeys(EventBean theEvent, ExprEvaluatorContext exprEvaluatorContext)
     {
-        eventsPerStream[lookupStream] = event;
+        eventsPerStream[lookupStream] = theEvent;
         Object[] keys = new Object[evaluators.length];
         for (int i = 0; i < evaluators.length; i++) {
             keys[i] = evaluators[i].evaluate(eventsPerStream, true, exprEvaluatorContext);

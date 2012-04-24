@@ -86,5 +86,6 @@ public interface EPRuntimeSPI extends EPRuntime
     public void processThreadWorkQueue();
     public void dispatch();
     public void initialize();
-
+    public void processWrappedEvent(EventBean eventBean);
+    public String getEngineURI();
 }

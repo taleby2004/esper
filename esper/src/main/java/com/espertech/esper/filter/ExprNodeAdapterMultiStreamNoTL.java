@@ -20,7 +20,7 @@ public class ExprNodeAdapterMultiStreamNoTL extends ExprNodeAdapterMultiStream
     }
 
     @Override
-    public boolean evaluate(EventBean event)
+    public boolean evaluate(EventBean theEvent)
     {
         if (variableService != null)
         {
@@ -29,7 +29,7 @@ public class ExprNodeAdapterMultiStreamNoTL extends ExprNodeAdapterMultiStream
 
         EventBean[] eventsPerStream = new EventBean[prototypeArray.length];
         System.arraycopy(prototypeArray, 0, eventsPerStream, 0, prototypeArray.length);
-        eventsPerStream[0] = event;
+        eventsPerStream[0] = theEvent;
         return super.evaluatePerStream(eventsPerStream);
     }
 }

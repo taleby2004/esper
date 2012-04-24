@@ -64,9 +64,9 @@ public class OHLCBarPlugInView extends ViewSupport implements CloneableView
             return;
         }
 
-        for (EventBean event : newData)
+        for (EventBean theEvent : newData)
         {
-            eventsPerStream[0] = event;
+            eventsPerStream[0] = theEvent;
             Long timestamp = (Long) timestampExpression.getExprEvaluator().evaluate(eventsPerStream, true, agentInstanceViewFactoryContext);
             Long timestampMinute = removeSeconds(timestamp);
             double value = (Double) valueExpression.getExprEvaluator().evaluate(eventsPerStream, true, agentInstanceViewFactoryContext);

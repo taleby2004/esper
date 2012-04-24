@@ -104,8 +104,8 @@ public class SupportVirtualDW implements VirtualDataWindow {
         return Collections.<EventBean>emptyList().iterator();
     }
 
-    public void handleEvent(VirtualDataWindowEvent event) {
-        events.add(event);
+    public void handleEvent(VirtualDataWindowEvent theEvent) {
+        events.add(theEvent);
     }
 
     public List<VirtualDataWindowEvent> getEvents() {

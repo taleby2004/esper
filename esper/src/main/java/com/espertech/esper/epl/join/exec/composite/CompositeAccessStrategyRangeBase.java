@@ -45,13 +45,13 @@ public abstract class CompositeAccessStrategyRangeBase {
         this.lookupStream = lookupStream;
     }
 
-    public Object evaluateLookupStart(EventBean event, ExprEvaluatorContext context) {
-        events[lookupStream] = event;
+    public Object evaluateLookupStart(EventBean theEvent, ExprEvaluatorContext context) {
+        events[lookupStream] = theEvent;
         return start.evaluate(events, true, context);
     }
 
-    public Object evaluateLookupEnd(EventBean event, ExprEvaluatorContext context) {
-        events[lookupStream] = event;
+    public Object evaluateLookupEnd(EventBean theEvent, ExprEvaluatorContext context) {
+        events[lookupStream] = theEvent;
         return end.evaluate(events, true, context);
     }
 

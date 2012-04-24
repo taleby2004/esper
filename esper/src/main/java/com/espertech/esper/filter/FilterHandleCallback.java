@@ -21,10 +21,10 @@ public interface FilterHandleCallback extends FilterHandle
     /**
      * Indicate that an event was evaluated by the {@link com.espertech.esper.filter.FilterService}
      * which matches the filter specification {@link com.espertech.esper.filter.FilterSpecCompiled} associated with this callback.
-     * @param event - the event received that matches the filter specification
+     * @param theEvent - the event received that matches the filter specification
      * @param allStmtMatches
      */
-    public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches);
+    public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches);
 
     /**
      * Returns true if the filter applies to subselects.

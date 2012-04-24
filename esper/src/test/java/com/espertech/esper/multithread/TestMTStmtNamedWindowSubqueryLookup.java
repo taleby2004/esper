@@ -46,19 +46,20 @@ public class TestMTStmtNamedWindowSubqueryLookup extends TestCase
     private void trySend(int numThreads, int numEventsPerThread) throws Exception
     {
         Configuration config = SupportConfigFactory.getConfiguration();
+        config.getEngineDefaults().getEventMeta().setDefaultEventRepresentation(Configuration.EventRepresentation.MAP); // use Map-type events for testing
         config.addEventType("SupportBean", SupportBean.class);
         engine = EPServiceProviderManager.getDefaultProvider(config);
         engine.initialize();
 
         // setup statements
         engine.getEPAdministrator().createEPL("create schema MyUpdateEvent as (key string, intupd int)");
-        engine.getEPAdministrator().createEPL("create schema MySchema as (string string, intval int)");
+        engine.getEPAdministrator().createEPL("create schema MySchema as (theString string, intval int)");
         EPStatement namedWindow = engine.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as MySchema");
         engine.getEPAdministrator().createEPL("on MyUpdateEvent mue merge MyWindow mw " +
-                "where mw.string = mue.key " +
-                "when not matched then insert select key as string, intupd as intval " +
+                "where mw.theString = mue.key " +
+                "when not matched then insert select key as theString, intupd as intval " +
                 "when matched then delete");
-        EPStatement targetStatement = engine.getEPAdministrator().createEPL("select (select intval from MyWindow mw where mw.string = sb.string) as val from SupportBean sb");
+        EPStatement targetStatement = engine.getEPAdministrator().createEPL("select (select intval from MyWindow mw where mw.theString = sb.theString) as val from SupportBean sb");
 
         // execute
         ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);

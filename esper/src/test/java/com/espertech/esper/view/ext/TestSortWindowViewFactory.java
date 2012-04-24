@@ -82,11 +82,11 @@ public class TestSortWindowViewFactory extends TestCase
         assertFalse(factory.canReuse(new SortWindowView(factory, SupportExprNodeFactory.makeIdentNodesMD("price", "symbol"), new ExprEvaluator[0], new boolean[] {true, false}, 100, null, false, null)));
     }
 
-    private void tryInvalidParameter(Object[] params) throws Exception
+    private void tryInvalidParameter(Object[] parameters) throws Exception
     {
         try
         {
-            factory.setViewParameters(null, TestViewSupport.toExprListMD(params));
+            factory.setViewParameters(null, TestViewSupport.toExprListMD(parameters));
             factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
@@ -96,9 +96,9 @@ public class TestSortWindowViewFactory extends TestCase
         }
     }
 
-    private void tryParameter(Object[] params, String[] fieldNames, int size) throws Exception
+    private void tryParameter(Object[] parameters, String[] fieldNames, int size) throws Exception
     {
-        factory.setViewParameters(null, TestViewSupport.toExprListMD(params));
+        factory.setViewParameters(null, TestViewSupport.toExprListMD(parameters));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportMarketDataBean.class), SupportStatementContextFactory.makeContext(), null, null);
         SortWindowView view = (SortWindowView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(size, view.getSortWindowSize());

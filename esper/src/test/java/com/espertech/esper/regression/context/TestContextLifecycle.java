@@ -44,7 +44,7 @@ public class TestContextLifecycle extends TestCase {
         SupportVirtualDWFactory.getWindows().clear();
         SupportVirtualDWFactory.setDestroyed(false);
         
-        epService.getEPAdministrator().createEPL("create context CtxSegmented as partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("create context CtxSegmented as partition by theString from SupportBean");
         epService.getEPAdministrator().createEPL("context CtxSegmented create window TestVDWWindow.test:vdw() as SupportBean");
         epService.getEPAdministrator().createEPL("select * from TestVDWWindow");
         
@@ -148,7 +148,7 @@ public class TestContextLifecycle extends TestCase {
 
         // test update: update is not allowed as it is processed out-of-context by runtime
         epService.getEPAdministrator().createEPL("insert into ABCStream select * from SupportBean");
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByAString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByAString partition by theString from SupportBean");
         try {
             epService.getEPAdministrator().createEPL("context SegmentedByAString update istream ABCStream set intPrimitive = (select id from SupportBean_S0.std:lastevent()) where intPrimitive < 0");
             fail();

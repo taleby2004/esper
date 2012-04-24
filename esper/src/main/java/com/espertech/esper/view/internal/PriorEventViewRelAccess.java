@@ -30,12 +30,12 @@ public class PriorEventViewRelAccess implements RelativeAccessByEventNIndex
         this.relativeIndex = relativeIndex;
     }
 
-    public EventBean getRelativeToEvent(EventBean event, int prevIndex)
+    public EventBean getRelativeToEvent(EventBean theEvent, int prevIndex)
     {
-        return buffer.getRelativeToEvent(event, relativeIndex);
+        return buffer.getRelativeToEvent(theEvent, relativeIndex);
     }
 
-    public EventBean getRelativeToEnd(EventBean event, int index)
+    public EventBean getRelativeToEnd(EventBean theEvent, int index)
     {
         // No requirement to index from end of current buffer
         return null;

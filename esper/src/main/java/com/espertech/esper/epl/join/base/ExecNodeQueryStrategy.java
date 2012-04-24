@@ -46,15 +46,15 @@ public class ExecNodeQueryStrategy implements QueryStrategy
             return;
         }
 
-        for (EventBean event : lookupEvents)
+        for (EventBean theEvent : lookupEvents)
         {
             // Set up prototype row
             EventBean[] prototype = new EventBean[numStreams];
-            prototype[forStream] = event;
+            prototype[forStream] = theEvent;
 
             // Perform execution
             List<EventBean[]> results = new LinkedList<EventBean[]>();
-            execNode.process(event, prototype, results, exprEvaluatorContext);
+            execNode.process(theEvent, prototype, results, exprEvaluatorContext);
 
             // Convert results into unique set
             for (EventBean[] row : results)

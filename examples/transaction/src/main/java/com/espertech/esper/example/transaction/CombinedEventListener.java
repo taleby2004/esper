@@ -23,14 +23,14 @@ public class CombinedEventListener implements UpdateListener
             return;
         }
 
-        EventBean event = newEvents[0];
+        EventBean theEvent = newEvents[0];
         log.debug("Combined event detected " +
-                " transactionId=" + event.get("transactionId") +
-                " customerId=" + event.get("customerId") +
-                " supplierId=" + event.get("supplierId") +
-                " latencyAC=" + event.get("latencyAC") +
-                " latencyAB=" + event.get("latencyAB") +
-                " latencyBC=" + event.get("latencyBC")
+                " transactionId=" + theEvent.get("transactionId") +
+                " customerId=" + theEvent.get("customerId") +
+                " supplierId=" + theEvent.get("supplierId") +
+                " latencyAC=" + theEvent.get("latencyAC") +
+                " latencyAB=" + theEvent.get("latencyAB") +
+                " latencyBC=" + theEvent.get("latencyBC")
                 );
     }
 

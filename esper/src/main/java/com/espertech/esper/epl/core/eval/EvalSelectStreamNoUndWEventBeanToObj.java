@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class EvalSelectStreamNoUndWEventBeanToObj extends EvalSelectStreamBase implements SelectExprProcessor {
+public class EvalSelectStreamNoUndWEventBeanToObj extends EvalSelectStreamBaseMap implements SelectExprProcessor {
 
     private static final Log log = LogFactory.getLog(EvalSelectStreamNoUndWEventBeanToObj.class);
 

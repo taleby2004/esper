@@ -10,10 +10,10 @@ public class SupportSocketUtil {
     public static void sendSingleObject(int port, Object object) throws UnknownHostException, IOException
     {
         Socket requestSocket = new Socket("localhost", port);
-        ObjectOutputStream out = new ObjectOutputStream(requestSocket.getOutputStream());
-        out.writeObject(object);
-        out.flush();
-        out.close();
+        ObjectOutputStream outStream = new ObjectOutputStream(requestSocket.getOutputStream());
+        outStream.writeObject(object);
+        outStream.flush();
+        outStream.close();
         requestSocket.close();
     }
 }

@@ -39,9 +39,9 @@ public class SampleJMSMessageListener implements MessageListener
         String ipAddress = payload[0];
         double duration = Double.parseDouble(payload[1]);
 
-        SampleEvent event = new SampleEvent(ipAddress, duration);
+        SampleEvent theEvent = new SampleEvent(ipAddress, duration);
 
-        engine.sendEvent(event);
+        engine.sendEvent(theEvent);
         count++;
     }
 

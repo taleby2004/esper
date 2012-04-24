@@ -17,7 +17,7 @@ public class StatementLifecycleEvent
 {
     private EPStatement statement;
     private LifecycleEventType eventType;
-    private Object[] params;
+    private Object[] parameters;
 
     /**
      * Event types.
@@ -49,13 +49,13 @@ public class StatementLifecycleEvent
      * Ctor.
      * @param statement the statement
      * @param eventType the tyoe if event
-     * @param params event parameters
+     * @param parameters event parameters
      */
-    protected StatementLifecycleEvent(EPStatement statement, LifecycleEventType eventType, Object... params)
+    protected StatementLifecycleEvent(EPStatement statement, LifecycleEventType eventType, Object... parameters)
     {
         this.statement = statement;
         this.eventType = eventType;
-        this.params = params;
+        this.parameters = parameters;
     }
 
     /**
@@ -79,7 +79,7 @@ public class StatementLifecycleEvent
      * Returns event parameters.
      * @return params
      */
-    public Object[] getParams() {
-        return params;
+    public Object[] getParameters() {
+        return parameters;
     }
 }

@@ -37,51 +37,51 @@ public class TestIterator extends TestCase
     {
         // Test for Esper-115
         String cepStatementString =	"select * from pattern " +
-									"[every ( addressInfo = " + SupportBean.class.getName() + "(string='address') " +
-									"-> txnWD = " + SupportBean.class.getName() + "(string='txn') ) ] " +
+									"[every ( addressInfo = " + SupportBean.class.getName() + "(theString='address') " +
+									"-> txnWD = " + SupportBean.class.getName() + "(theString='txn') ) ] " +
 									"where addressInfo.intBoxed = txnWD.intBoxed";
 		EPStatement epStatement = epService.getEPAdministrator().createEPL(cepStatementString);
 
 		SupportBean myEventBean1 = new SupportBean();
-		myEventBean1.setString("address");
+		myEventBean1.setTheString("address");
 		myEventBean1.setIntBoxed(9001);
 		epService.getEPRuntime().sendEvent(myEventBean1);
         assertFalse(epStatement.iterator().hasNext());
 
         SupportBean myEventBean2 = new SupportBean();
-        myEventBean2.setString("txn");
+        myEventBean2.setTheString("txn");
         myEventBean2.setIntBoxed(9001);
         epService.getEPRuntime().sendEvent(myEventBean2);
         assertTrue(epStatement.iterator().hasNext());
 
         Iterator<EventBean> itr = epStatement.iterator();
-        EventBean event = itr.next();
-        assertEquals(myEventBean1, event.get("addressInfo"));
-        assertEquals(myEventBean2, event.get("txnWD"));
+        EventBean theEvent = itr.next();
+        assertEquals(myEventBean1, theEvent.get("addressInfo"));
+        assertEquals(myEventBean2, theEvent.get("txnWD"));
     }
 
     public void testPatternWithWindow()
     {
 		String cepStatementString =	"select * from pattern " +
-									"[every ( addressInfo = " + SupportBean.class.getName() + "(string='address') " +
-									"-> txnWD = " + SupportBean.class.getName() + "(string='txn') ) ].std:lastevent() " +
+									"[every ( addressInfo = " + SupportBean.class.getName() + "(theString='address') " +
+									"-> txnWD = " + SupportBean.class.getName() + "(theString='txn') ) ].std:lastevent() " +
 									"where addressInfo.intBoxed = txnWD.intBoxed";
 		EPStatement epStatement = epService.getEPAdministrator().createEPL(cepStatementString);
 
 		SupportBean myEventBean1 = new SupportBean();
-		myEventBean1.setString("address");
+		myEventBean1.setTheString("address");
 		myEventBean1.setIntBoxed(9001);
 		epService.getEPRuntime().sendEvent(myEventBean1);
 
         SupportBean myEventBean2 = new SupportBean();
-        myEventBean2.setString("txn");
+        myEventBean2.setTheString("txn");
         myEventBean2.setIntBoxed(9001);
         epService.getEPRuntime().sendEvent(myEventBean2);
 
         Iterator<EventBean> itr = epStatement.iterator();
-        EventBean event = itr.next();
-        assertEquals(myEventBean1, event.get("addressInfo"));
-        assertEquals(myEventBean2, event.get("txnWD"));
+        EventBean theEvent = itr.next();
+        assertEquals(myEventBean1, theEvent.get("addressInfo"));
+        assertEquals(myEventBean2, theEvent.get("txnWD"));
     }
 
     public void testOrderByWildcard()
@@ -508,9 +508,9 @@ public class TestIterator extends TestCase
 
     private SupportMarketDataBean sendEvent(String symbol, long volume)
     {
-        SupportMarketDataBean event = new SupportMarketDataBean(symbol, 0, volume, null);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportMarketDataBean theEvent = new SupportMarketDataBean(symbol, 0, volume, null);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
     private void sendEvent(long volume)

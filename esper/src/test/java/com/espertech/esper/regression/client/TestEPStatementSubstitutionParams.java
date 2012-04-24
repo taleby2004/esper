@@ -39,18 +39,18 @@ public class TestEPStatementSubstitutionParams extends TestCase
 
     public void testPattern()
     {
-        String stmt = SupportBean.class.getName() + "(string=?)";
+        String stmt = SupportBean.class.getName() + "(theString=?)";
         EPPreparedStatement prepared = epService.getEPAdministrator().preparePattern(stmt);
 
         prepared.setObject(1, "e1");
         EPStatement statement = epService.getEPAdministrator().create(prepared);
         statement.addListener(listenerOne);
-        assertEquals("select * from pattern [com.espertech.esper.support.bean.SupportBean(string = \"e1\")]", statement.getText());
+        assertEquals("select * from pattern [com.espertech.esper.support.bean.SupportBean(theString = \"e1\")]", statement.getText());
 
         prepared.setObject(1, "e2");
         statement = epService.getEPAdministrator().create(prepared);
         statement.addListener(listenerTwo);
-        assertEquals("select * from pattern [com.espertech.esper.support.bean.SupportBean(string = \"e2\")]", statement.getText());
+        assertEquals("select * from pattern [com.espertech.esper.support.bean.SupportBean(theString = \"e2\")]", statement.getText());
 
         epService.getEPRuntime().sendEvent(new SupportBean("e2", 10));
         assertFalse(listenerOne.isInvoked());
@@ -109,18 +109,18 @@ public class TestEPStatementSubstitutionParams extends TestCase
 
     public void testSimpleOneParameter()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
+        String stmt = "select * from " + SupportBean.class.getName() + "(theString=?)";
         EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         prepared.setObject(1, "e1");
         EPStatement statement = epService.getEPAdministrator().create(prepared);
         statement.addListener(listenerOne);
-        assertEquals("select * from com.espertech.esper.support.bean.SupportBean(string = \"e1\")", statement.getText());
+        assertEquals("select * from com.espertech.esper.support.bean.SupportBean(theString = \"e1\")", statement.getText());
 
         prepared.setObject(1, "e2");
         statement = epService.getEPAdministrator().create(prepared);
         statement.addListener(listenerTwo);
-        assertEquals("select * from com.espertech.esper.support.bean.SupportBean(string = \"e2\")", statement.getText());
+        assertEquals("select * from com.espertech.esper.support.bean.SupportBean(theString = \"e2\")", statement.getText());
 
         epService.getEPRuntime().sendEvent(new SupportBean("e2", 10));
         assertFalse(listenerOne.isInvoked());
@@ -157,19 +157,19 @@ public class TestEPStatementSubstitutionParams extends TestCase
 
     public void testSimpleTwoParameterFilter()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + "(string=?, intPrimitive=?)";
+        String stmt = "select * from " + SupportBean.class.getName() + "(theString=?, intPrimitive=?)";
         runSimpleTwoParameter(stmt, null, true);
     }
 
     public void testSimpleTwoParameterWhere()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + " where string=? and intPrimitive=?";
+        String stmt = "select * from " + SupportBean.class.getName() + " where theString=? and intPrimitive=?";
         runSimpleTwoParameter(stmt, null, false);
     }
 
     public void testSimpleTwoParameterWhereNamed()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + " where string=? and intPrimitive=?";
+        String stmt = "select * from " + SupportBean.class.getName() + " where theString=? and intPrimitive=?";
         runSimpleTwoParameter(stmt, "s1", false);
     }
 
@@ -191,7 +191,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
         statement.addListener(listenerOne);
         if (compareText)
         {
-            assertEquals("select * from com.espertech.esper.support.bean.SupportBean(string = \"e1\" and intPrimitive = 1)", statement.getText());
+            assertEquals("select * from com.espertech.esper.support.bean.SupportBean(theString = \"e1\" and intPrimitive = 1)", statement.getText());
         }
 
         prepared.setObject(1, "e2");
@@ -207,7 +207,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
         statement.addListener(listenerTwo);
         if (compareText)
         {
-            assertEquals("select * from com.espertech.esper.support.bean.SupportBean(string = \"e2\" and intPrimitive = 2)", statement.getText());
+            assertEquals("select * from com.espertech.esper.support.bean.SupportBean(theString = \"e2\" and intPrimitive = 2)", statement.getText());
         }
 
         epService.getEPRuntime().sendEvent(new SupportBean("e2", 2));
@@ -225,16 +225,16 @@ public class TestEPStatementSubstitutionParams extends TestCase
 
     public void testSimpleNoParameter()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + "(string=\"e1\")";
+        String stmt = "select * from " + SupportBean.class.getName() + "(theString=\"e1\")";
         EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         EPStatement statement = epService.getEPAdministrator().create(prepared);
         statement.addListener(listenerOne);
-        assertEquals("select * from com.espertech.esper.support.bean.SupportBean(string = \"e1\")", statement.getText());
+        assertEquals("select * from com.espertech.esper.support.bean.SupportBean(theString = \"e1\")", statement.getText());
 
         statement = epService.getEPAdministrator().create(prepared);
         statement.addListener(listenerTwo);
-        assertEquals("select * from com.espertech.esper.support.bean.SupportBean(string = \"e1\")", statement.getText());
+        assertEquals("select * from com.espertech.esper.support.bean.SupportBean(theString = \"e1\")", statement.getText());
 
         epService.getEPRuntime().sendEvent(new SupportBean("e2", 10));
         assertFalse(listenerOne.isInvoked());
@@ -247,7 +247,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
 
     public void testInvalidParameterNotSet()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
+        String stmt = "select * from " + SupportBean.class.getName() + "(theString=?)";
         EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
@@ -260,7 +260,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
             assertEquals("Substitution parameter value for index 1 not set, please provide a value for this parameter", ex.getMessage());
         }
 
-        stmt = "select * from " + SupportBean.class.getName() + "(string in (?, ?))";
+        stmt = "select * from " + SupportBean.class.getName() + "(theString in (?, ?))";
         prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
@@ -291,7 +291,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
 
     public void testInvalidParameterType()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
+        String stmt = "select * from " + SupportBean.class.getName() + "(theString=?)";
         EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
@@ -302,13 +302,13 @@ public class TestEPStatementSubstitutionParams extends TestCase
         }
         catch (EPException ex)
         {
-            assertEquals("Implicit conversion from datatype 'Integer' to 'String' is not allowed [select * from com.espertech.esper.support.bean.SupportBean(string = -1)]", ex.getMessage());
+            assertEquals("Implicit conversion from datatype 'Integer' to 'String' is not allowed [select * from com.espertech.esper.support.bean.SupportBean(theString = -1)]", ex.getMessage());
         }
     }
 
     public void testInvalidNoParameters()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + "(string='ABC')";
+        String stmt = "select * from " + SupportBean.class.getName() + "(theString='ABC')";
         EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
@@ -324,7 +324,7 @@ public class TestEPStatementSubstitutionParams extends TestCase
 
     public void testInvalidSetObject()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
+        String stmt = "select * from " + SupportBean.class.getName() + "(theString=?)";
         EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(stmt);
 
         try
@@ -350,33 +350,33 @@ public class TestEPStatementSubstitutionParams extends TestCase
 
     public void testInvalidCreateEPL()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
+        String stmt = "select * from " + SupportBean.class.getName() + "(theString=?)";
         try
         {
             epService.getEPAdministrator().createEPL(stmt);
         }
         catch (EPException ex)
         {
-            assertEquals("Invalid use of substitution parameters marked by '?' in statement, use the prepare method to prepare statements with substitution parameters [select * from com.espertech.esper.support.bean.SupportBean(string=?)]", ex.getMessage());
+            assertEquals("Invalid use of substitution parameters marked by '?' in statement, use the prepare method to prepare statements with substitution parameters [select * from com.espertech.esper.support.bean.SupportBean(theString=?)]", ex.getMessage());
         }
     }
 
     public void testInvalidCreatePattern()
     {
-        String stmt = SupportBean.class.getName() + "(string=?)";
+        String stmt = SupportBean.class.getName() + "(theString=?)";
         try
         {
             epService.getEPAdministrator().createPattern(stmt);
         }
         catch (EPException ex)
         {
-            assertEquals("Invalid use of substitution parameters marked by '?' in statement, use the prepare method to prepare statements with substitution parameters [com.espertech.esper.support.bean.SupportBean(string=?)]", ex.getMessage());
+            assertEquals("Invalid use of substitution parameters marked by '?' in statement, use the prepare method to prepare statements with substitution parameters [com.espertech.esper.support.bean.SupportBean(theString=?)]", ex.getMessage());
         }
     }
 
     public void testInvalidCompile()
     {
-        String stmt = "select * from " + SupportBean.class.getName() + "(string=?)";
+        String stmt = "select * from " + SupportBean.class.getName() + "(theString=?)";
         try
         {
             epService.getEPAdministrator().compileEPL(stmt);

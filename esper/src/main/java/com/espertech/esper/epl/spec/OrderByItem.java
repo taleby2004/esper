@@ -50,4 +50,8 @@ public class OrderByItem implements MetaDefItem, Serializable
     {
         return isDescending;
     }
+
+    public OrderByItem copy() {
+        return new OrderByItem(exprNode, isDescending());
+    }
 }

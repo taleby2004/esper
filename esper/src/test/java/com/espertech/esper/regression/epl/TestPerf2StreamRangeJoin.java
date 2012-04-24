@@ -68,7 +68,7 @@ public class TestPerf2StreamRangeJoin extends TestCase
                       "from SB sb " +
                       "full outer join " +
                       "SBR sbr " +
-                      "on string = key " +
+                      "on theString = key " +
                       "where intPrimitive between rangeStart and rangeEnd";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -149,7 +149,7 @@ public class TestPerf2StreamRangeJoin extends TestCase
         log.info("Done preloading");
 
         // start query
-        String epl = "select * from SBR sbr, SB sb where sbr.key = sb.string and sb.intPrimitive between sbr.rangeStart and sbr.rangeEnd";
+        String epl = "select * from SBR sbr, SB sb where sbr.key = sb.theString and sb.intPrimitive between sbr.rangeStart and sbr.rangeEnd";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -195,7 +195,7 @@ public class TestPerf2StreamRangeJoin extends TestCase
         log.info("Done preloading");
 
         // start query
-        String epl = "select * from SupportBeanRange.std:lastevent() sbr, SB sb where sbr.key = sb.string and sb.intPrimitive not in [sbr.rangeStart:sbr.rangeEnd]";
+        String epl = "select * from SupportBeanRange.std:lastevent() sbr, SB sb where sbr.key = sb.theString and sb.intPrimitive not in [sbr.rangeStart:sbr.rangeEnd]";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 

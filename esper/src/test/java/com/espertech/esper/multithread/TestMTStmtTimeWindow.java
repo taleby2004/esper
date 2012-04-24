@@ -45,7 +45,7 @@ public class TestMTStmtTimeWindow extends TestCase
     public void testTimeWin() throws Exception
     {
         EPStatement stmt = engine.getEPAdministrator().createEPL(
-                " select irstream intPrimitive, string as key " +
+                " select irstream intPrimitive, theString as key " +
                 " from " + SupportBean.class.getName() + ".win:time(1 sec)");
 
         listener = new SupportMTUpdateListener();
@@ -110,10 +110,10 @@ public class TestMTStmtTimeWindow extends TestCase
     private HashMap<Integer, List<String>> sortPerIntKey(EventBean[] result)
     {
         HashMap<Integer, List<String>> results = new LinkedHashMap<Integer, List<String>>();
-        for (EventBean event : result)
+        for (EventBean theEvent : result)
         {
-            int count = (Integer) event.get("intPrimitive");
-            String key = (String) event.get("key");
+            int count = (Integer) theEvent.get("intPrimitive");
+            String key = (String) theEvent.get("key");
 
             List<String> entries = results.get(count);
             if (entries == null)

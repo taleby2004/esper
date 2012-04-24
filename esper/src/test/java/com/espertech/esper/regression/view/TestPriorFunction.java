@@ -506,7 +506,7 @@ public class TestPriorFunction extends TestCase
 
     public void testPriorTimeBatchWindowJoin()
     {
-        String viewExpr = "select string as currSymbol, " +
+        String viewExpr = "select theString as currSymbol, " +
                           "prior(2, symbol) as priorSymbol, " +
                           "prior(1, price) as priorPrice " +
                           "from " + SupportBean.class.getName() + ".win:keepall(), " +
@@ -663,8 +663,8 @@ public class TestPriorFunction extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
-        epService.getEPRuntime().sendEvent(event);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendMarketEvent(String symbol, double price)
@@ -679,10 +679,10 @@ public class TestPriorFunction extends TestCase
         epService.getEPRuntime().sendEvent(bean);
     }
 
-    private void sendBeanEvent(String string)
+    private void sendBeanEvent(String theString)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         epService.getEPRuntime().sendEvent(bean);
     }
 

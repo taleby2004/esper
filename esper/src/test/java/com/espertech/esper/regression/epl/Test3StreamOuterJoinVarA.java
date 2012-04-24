@@ -583,9 +583,9 @@ public class Test3StreamOuterJoinVarA extends TestCase
         }
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendEventsAndReset(Object[] events)

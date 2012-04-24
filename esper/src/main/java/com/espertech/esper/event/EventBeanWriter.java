@@ -21,7 +21,7 @@ public interface EventBeanWriter
     /**
      * Write property values to the event.
      * @param values to write
-     * @param event to write to
+     * @param theEvent to write to
      */
-    public void write(Object[] values, EventBean event);
+    public void write(Object[] values, EventBean theEvent);
 }

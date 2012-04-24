@@ -300,9 +300,9 @@ public class TestSchemaXMLEventTranspose extends TestCase
 
         EventSender sender = epService.getEPRuntime().getEventSender("TestNested2");
         sender.sendEvent(SupportXML.getDocument("<nested2><prop3>2</prop3><prop3></prop3><prop3>4</prop3></nested2>"));
-        EventBean event = stmtInsert.iterator().next();
-        EPAssertionUtil.assertEqualsExactOrder((Integer[]) event.get("prop3"), new Object[]{2, null, 4});
-        EventTypeAssertionUtil.assertConsistency(event);
+        EventBean theEvent = stmtInsert.iterator().next();
+        EPAssertionUtil.assertEqualsExactOrder((Integer[]) theEvent.get("prop3"), new Object[]{2, null, 4});
+        EventTypeAssertionUtil.assertConsistency(theEvent);
 
         // try array property nested
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select nested3.* from ABCType");

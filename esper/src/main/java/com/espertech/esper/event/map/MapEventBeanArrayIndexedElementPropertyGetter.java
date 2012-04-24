@@ -14,6 +14,7 @@ package com.espertech.esper.event.map;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.BaseNestableEventUtil;
 
 import java.util.Map;
 
@@ -43,17 +44,7 @@ public class MapEventBeanArrayIndexedElementPropertyGetter implements MapEventPr
     {
         // If the map does not contain the key, this is allowed and represented as null
         EventBean[] wrapper = (EventBean[]) map.get(propertyName);
-
-        if (wrapper == null)
-        {
-            return null;
-        }
-        if (wrapper.length <= index)
-        {
-            return null;
-        }
-        EventBean innerArrayEvent = wrapper[index];
-        return nestedGetter.get(innerArrayEvent);
+        return BaseNestableEventUtil.getArrayPropertyValue(wrapper, index, nestedGetter);
     }
 
     public boolean isMapExistsProperty(Map<String, Object> map)
@@ -63,15 +54,7 @@ public class MapEventBeanArrayIndexedElementPropertyGetter implements MapEventPr
 
     public Object get(EventBean obj)
     {
-        // The underlying is expected to be a map
-        if (!(obj.getUnderlying() instanceof Map))
-        {
-            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                    "the underlying data object is not of type java.lang.Map");
-        }
-
-        Map map = (Map) obj.getUnderlying();
-        return getMap(map);
+        return getMap(BaseNestableEventUtil.checkedCastUnderlyingMap(obj));
     }
 
     public boolean isExistsProperty(EventBean eventBean)
@@ -81,27 +64,8 @@ public class MapEventBeanArrayIndexedElementPropertyGetter implements MapEventPr
 
     public Object getFragment(EventBean obj)
     {
-        // The underlying is expected to be a map
-        if (!(obj.getUnderlying() instanceof Map))
-        {
-            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                    "the underlying data object is not of type java.lang.Map");
-        }
-
-        Map map = (Map) obj.getUnderlying();
-
-        // If the map does not contain the key, this is allowed and represented as null
+        Map<String, Object> map = BaseNestableEventUtil.checkedCastUnderlyingMap(obj);
         EventBean[] wrapper = (EventBean[]) map.get(propertyName);
-
-        if (wrapper == null)
-        {
-            return null;
-        }
-        if (wrapper.length <= index)
-        {
-            return null;
-        }
-        EventBean innerArrayEvent = wrapper[index];
-        return nestedGetter.getFragment(innerArrayEvent);
+        return BaseNestableEventUtil.getArrayPropertyFragment(wrapper, index, nestedGetter);
     }
 }

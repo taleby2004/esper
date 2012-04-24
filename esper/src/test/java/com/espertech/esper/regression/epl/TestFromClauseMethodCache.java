@@ -41,9 +41,9 @@ public class TestFromClauseMethodCache extends TestCase
         epService.initialize();
         listener = new SupportUpdateListener();
 
-        String joinStatement = "select id, p00, string from " +
+        String joinStatement = "select id, p00, theString from " +
                 SupportBean.class.getName() + "().win:length(100) as s1, " +
-                " method:SupportStaticMethodInvocations.fetchObjectLog(string, intPrimitive)";
+                " method:SupportStaticMethodInvocations.fetchObjectLog(theString, intPrimitive)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(joinStatement);
         stmt.addListener(listener);
 
@@ -51,7 +51,7 @@ public class TestFromClauseMethodCache extends TestCase
         SupportStaticMethodInvocations.getInvocationSizeReset();
 
         // The LRU cache caches per same keys
-        String[] fields = new String[] {"id", "p00", "string"};
+        String[] fields = new String[] {"id", "p00", "theString"};
         sendBeanEvent("E1", 1);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, "|E1|", "E1"});
         
@@ -95,9 +95,9 @@ public class TestFromClauseMethodCache extends TestCase
         epService.initialize();
         listener = new SupportUpdateListener();
 
-        String joinStatement = "select id, p00, string from " +
+        String joinStatement = "select id, p00, theString from " +
                 SupportBean.class.getName() + "().win:length(100) as s1, " +
-                " method:SupportStaticMethodInvocations.fetchObjectLog(string, intPrimitive)";
+                " method:SupportStaticMethodInvocations.fetchObjectLog(theString, intPrimitive)";
         EPStatement stmt = epService.getEPAdministrator().createEPL(joinStatement);
         stmt.addListener(listener);
 
@@ -105,7 +105,7 @@ public class TestFromClauseMethodCache extends TestCase
         SupportStaticMethodInvocations.getInvocationSizeReset();
 
         sendTimer(1000);
-        String[] fields = new String[] {"id", "p00", "string"};
+        String[] fields = new String[] {"id", "p00", "theString"};
         sendBeanEvent("E1", 1);
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1, "|E1|", "E1"});
 
@@ -142,15 +142,15 @@ public class TestFromClauseMethodCache extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
-    private void sendBeanEvent(String string, int intPrimitive)
+    private void sendBeanEvent(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
     }

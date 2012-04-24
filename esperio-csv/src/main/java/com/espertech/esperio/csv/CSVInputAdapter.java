@@ -126,9 +126,9 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
             }
 			else
 			{
-				SendableEvent event = eventsToSend.first();
-				eventsToSend.remove(event);
-				return event;
+				SendableEvent theEvent = eventsToSend.first();
+				eventsToSend.remove(theEvent);
+				return theEvent;
 			}
 		}
 		catch (EOFException e)
@@ -186,10 +186,10 @@ public class CSVInputAdapter extends AbstractCoordinatedAdapter implements Input
 	protected void replaceFirstEventToSend()
 	{
 		eventsToSend.remove(eventsToSend.first());
-		SendableEvent event = read();
-		if(event != null)
+		SendableEvent theEvent = read();
+		if(theEvent != null)
 		{
-			eventsToSend.add(event);
+			eventsToSend.add(theEvent);
 		}
 	}
 

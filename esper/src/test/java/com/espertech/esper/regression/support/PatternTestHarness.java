@@ -100,13 +100,13 @@ public class PatternTestHarness implements SupportBeanConstants
             {
                 if (model != null)
                 {
-                    statement = serviceProvider.getEPAdministrator().create(model);
+                    statement = serviceProvider.getEPAdministrator().create(model, "name--" + expressionText);
                 }
                 else
                 {
                     if (testStyle == PatternTestStyle.USE_PATTERN_LANGUAGE)
                     {
-                        statement = serviceProvider.getEPAdministrator().createPattern(expressionText);
+                        statement = serviceProvider.getEPAdministrator().createPattern(expressionText, "name--" + expressionText);
                     }
                     else if (testStyle == PatternTestStyle.USE_EPL)
                     {

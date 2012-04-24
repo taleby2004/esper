@@ -37,20 +37,20 @@ public class AggregationAccessImpl implements AggregationAccess
 
     public void applyLeave(EventBean[] eventsPerStream)
     {
-        EventBean event = eventsPerStream[streamId];
-        if (event == null) {
+        EventBean theEvent = eventsPerStream[streamId];
+        if (theEvent == null) {
             return;
         }
-        events.remove(event);
+        events.remove(theEvent);
     }
 
     public void applyEnter(EventBean[] eventsPerStream)
     {
-        EventBean event = eventsPerStream[streamId];
-        if (event == null) {
+        EventBean theEvent = eventsPerStream[streamId];
+        if (theEvent == null) {
             return;
         }
-        events.add(event);
+        events.add(theEvent);
     }
 
     public EventBean getFirstNthValue(int index)

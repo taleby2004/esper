@@ -23,6 +23,7 @@ public class PatternContext
 {
     private final int streamNumber;
     private final StatementContext statementContext;
+    private final MatchedEventMapMeta matchedEventMapMeta;
 
     /**
      * Constructor.
@@ -30,10 +31,12 @@ public class PatternContext
      * @param streamNumber is the stream number
      */
     public PatternContext(StatementContext statementContext,
-                          int streamNumber)
+                          int streamNumber,
+                          MatchedEventMapMeta matchedEventMapMeta)
     {
         this.streamNumber = streamNumber;
         this.statementContext = statementContext;
+        this.matchedEventMapMeta = matchedEventMapMeta;
     }
 
     /**
@@ -159,5 +162,9 @@ public class PatternContext
 
     public StatementContext getStatementContext() {
         return statementContext;
+    }
+
+    public MatchedEventMapMeta getMatchedEventMapMeta() {
+        return matchedEventMapMeta;
     }
 }

@@ -49,6 +49,7 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
     private CreateContextDesc createContextDesc;
     private String optionalContextName;
     private List<ExpressionScriptProvided> scriptExpressions;
+    private CreateDataFlowDesc createDataFlowDesc;
 
     private static final long serialVersionUID = 5390766716794133693L;
 
@@ -484,5 +485,13 @@ public class StatementSpecRaw implements MetaDefItem, Serializable
 
     public void setScriptExpressions(List<ExpressionScriptProvided> scriptExpressions) {
         this.scriptExpressions = scriptExpressions;
+    }
+
+    public CreateDataFlowDesc getCreateDataFlowDesc() {
+        return createDataFlowDesc;
+    }
+
+    public void setCreateDataFlowDesc(CreateDataFlowDesc createDataFlowDesc) {
+        this.createDataFlowDesc = createDataFlowDesc;
     }
 }

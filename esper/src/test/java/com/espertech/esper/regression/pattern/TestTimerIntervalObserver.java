@@ -267,7 +267,7 @@ public class TestTimerIntervalObserver extends TestCase implements SupportBeanCo
         sendTimer(0, epService);
 
         // Set up a timer:within
-        EPStatement statement = epService.getEPAdministrator().createEPL("select a.string as id from pattern [every a=SupportBean -> timer:interval(intPrimitive seconds)]");
+        EPStatement statement = epService.getEPAdministrator().createEPL("select a.theString as id from pattern [every a=SupportBean -> timer:interval(intPrimitive seconds)]");
 
         SupportUpdateListener testListener = new SupportUpdateListener();
         statement.addListener(testListener);
@@ -297,7 +297,7 @@ public class TestTimerIntervalObserver extends TestCase implements SupportBeanCo
         sendTimer(0, epService);
 
         // Set up a timer:within
-        EPStatement statement = epService.getEPAdministrator().createEPL("select a[0].string as a0id, a[1].string as a1id from pattern [ [2] a=SupportBean -> timer:interval(a[0].intPrimitive+a[1].intPrimitive seconds)]");
+        EPStatement statement = epService.getEPAdministrator().createEPL("select a[0].theString as a0id, a[1].theString as a1id from pattern [ [2] a=SupportBean -> timer:interval(a[0].intPrimitive+a[1].intPrimitive seconds)]");
 
         SupportUpdateListener testListener = new SupportUpdateListener();
         statement.addListener(testListener);
@@ -340,8 +340,8 @@ public class TestTimerIntervalObserver extends TestCase implements SupportBeanCo
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

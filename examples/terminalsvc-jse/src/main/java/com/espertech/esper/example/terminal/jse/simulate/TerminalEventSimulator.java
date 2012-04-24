@@ -44,8 +44,8 @@ public class TerminalEventSimulator {
     public void sendEvents() throws InterruptedException {
         List<BaseTerminalEvent> eventsToSend = eventGenerator.generateBatch();
 
-        for (BaseTerminalEvent event : eventsToSend) {
-            terminalEventProcessingAgent.sendEvent(event);
+        for (BaseTerminalEvent theEvent : eventsToSend) {
+            terminalEventProcessingAgent.sendEvent(theEvent);
         }
 
         // Throttle the sender to roughly send a batch every SLEEP ms

@@ -12,7 +12,6 @@
 package com.espertech.esper.support.epl;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationRowRemovedCallback;
 import com.espertech.esper.epl.agg.AggregationService;
@@ -24,30 +23,30 @@ import java.util.List;
 
 public class SupportAggregationService implements AggregationService
 {
-    private List<Pair<EventBean[], MultiKeyUntyped>> leaveList = new LinkedList<Pair<EventBean[], MultiKeyUntyped>>();
-    private List<Pair<EventBean[], MultiKeyUntyped>> enterList = new LinkedList<Pair<EventBean[], MultiKeyUntyped>>();
+    private List<Pair<EventBean[], Object>> leaveList = new LinkedList<Pair<EventBean[], Object>>();
+    private List<Pair<EventBean[], Object>> enterList = new LinkedList<Pair<EventBean[], Object>>();
 
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyEnter(EventBean[] eventsPerStream, Object optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext)
     {
-        enterList.add(new Pair<EventBean[], MultiKeyUntyped>(eventsPerStream, optionalGroupKeyPerRow));
+        enterList.add(new Pair<EventBean[], Object>(eventsPerStream, optionalGroupKeyPerRow));
     }
 
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyLeave(EventBean[] eventsPerStream, Object optionalGroupKeyPerRow, ExprEvaluatorContext exprEvaluatorContext)
     {
-        leaveList.add(new Pair<EventBean[], MultiKeyUntyped>(eventsPerStream, optionalGroupKeyPerRow));
+        leaveList.add(new Pair<EventBean[], Object>(eventsPerStream, optionalGroupKeyPerRow));
     }
 
-    public List<Pair<EventBean[], MultiKeyUntyped>> getLeaveList()
+    public List<Pair<EventBean[], Object>> getLeaveList()
     {
         return leaveList;
     }
 
-    public List<Pair<EventBean[], MultiKeyUntyped>> getEnterList()
+    public List<Pair<EventBean[], Object>> getEnterList()
     {
         return enterList;
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId)
+    public void setCurrentAccess(Object groupKey, int agentInstanceId)
     {
     }
 

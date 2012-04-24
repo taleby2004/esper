@@ -36,11 +36,11 @@ public class MapEventBeanWriterSimpleProps implements EventBeanWriter
     /**
      * Write values to an event.
      * @param values to write
-     * @param event to write to
+     * @param theEvent to write to
      */
-    public void write(Object[] values, EventBean event)
+    public void write(Object[] values, EventBean theEvent)
     {
-        MappedEventBean mappedEvent = (MappedEventBean) event;
+        MappedEventBean mappedEvent = (MappedEventBean) theEvent;
         Map<String, Object> map = mappedEvent.getProperties();
 
         for (int i = 0; i < properties.length; i++)

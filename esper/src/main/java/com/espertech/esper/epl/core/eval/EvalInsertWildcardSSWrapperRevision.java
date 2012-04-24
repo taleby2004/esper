@@ -22,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Map;
 
-public class EvalInsertWildcardSSWrapperRevision extends EvalBase implements SelectExprProcessor {
+public class EvalInsertWildcardSSWrapperRevision extends EvalBaseMap implements SelectExprProcessor {
 
     private static final Log log = LogFactory.getLog(EvalInsertWildcardSSWrapperRevision.class);
 
@@ -51,7 +51,7 @@ public class EvalInsertWildcardSSWrapperRevision extends EvalBase implements Sel
             }
         }
 
-        EventBean event = eventsPerStream[0];
-        return vaeProcessor.getValueAddEventBean(event);
+        EventBean theEvent = eventsPerStream[0];
+        return vaeProcessor.getValueAddEventBean(theEvent);
     }
 }

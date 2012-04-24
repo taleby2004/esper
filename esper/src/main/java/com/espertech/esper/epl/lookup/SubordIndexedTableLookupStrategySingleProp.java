@@ -67,8 +67,8 @@ public class SubordIndexedTableLookupStrategySingleProp implements SubordTableLo
      */
     protected Object getKey(EventBean[] eventsPerStream)
     {
-        EventBean event = eventsPerStream[keyStreamNum];
-        return propertyGetter.get(event);
+        EventBean theEvent = eventsPerStream[keyStreamNum];
+        return propertyGetter.get(theEvent);
     }
 
     public String toString()

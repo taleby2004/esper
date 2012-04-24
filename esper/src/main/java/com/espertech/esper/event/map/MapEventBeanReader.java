@@ -35,7 +35,7 @@ public class MapEventBeanReader implements EventBeanReader
         List<MapEventPropertyGetter> getters = new ArrayList<MapEventPropertyGetter>();
         for (String property : properties)
         {
-            MapEventPropertyGetter getter = type.getGetter(property);
+            MapEventPropertyGetter getter = (MapEventPropertyGetter) type.getGetter(property);
             if (getter != null)
             {
                 getters.add(getter);
@@ -44,9 +44,9 @@ public class MapEventBeanReader implements EventBeanReader
         getterArray = getters.toArray(new MapEventPropertyGetter[getters.size()]);
     }
 
-    public Object[] read(EventBean event)
+    public Object[] read(EventBean theEvent)
     {
-        Map<String, Object> underlying = (Map<String, Object>) event.getUnderlying();
+        Map<String, Object> underlying = (Map<String, Object>) theEvent.getUnderlying();
         Object[] values = new Object[getterArray.length];
         for (int i = 0; i < getterArray.length; i++)
         {

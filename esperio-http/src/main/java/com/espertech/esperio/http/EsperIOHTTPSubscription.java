@@ -54,20 +54,20 @@ public class EsperIOHTTPSubscription extends BaseSubscription
         }
     }
 
-    public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+    public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
     {
-        EventTypeSPI spi = (EventTypeSPI) event.getEventType();
+        EventTypeSPI spi = (EventTypeSPI) theEvent.getEventType();
         EventBeanReader reader = spi.getReader();
-        Object[] props = reader.read(event);
+        Object[] props = reader.read(theEvent);
         String names[] = spi.getPropertyNames();
-        Map<String, String> params = formPairs(names, props, "stream", stream);
+        Map<String, String> parameters = formPairs(names, props, "stream", stream);
 
         URI requestURI;
         if (uriPrecompiled != null) {
-            requestURI = URIUtil.withQuery(uriPrecompiled, params);
+            requestURI = URIUtil.withQuery(uriPrecompiled, parameters);
         }
         else {
-            String uri = formURI(params, fragments);
+            String uri = formURI(parameters, fragments);
             try {
                 requestURI = new URI(uri);
             } catch (URISyntaxException e) {
@@ -89,12 +89,12 @@ public class EsperIOHTTPSubscription extends BaseSubscription
         }
     }
 
-    private String formURI(Map<String, String> params, List<PlaceholderParser.Fragment> fragments) {
+    private String formURI(Map<String, String> parameters, List<PlaceholderParser.Fragment> fragments) {
         StringBuilder buf = new StringBuilder();
         for (PlaceholderParser.Fragment fragment : fragments) {
             if (fragment instanceof PlaceholderParser.ParameterFragment) {
                 PlaceholderParser.ParameterFragment param = (PlaceholderParser.ParameterFragment) fragment;
-                String val = params.get(param.getValue());
+                String val = parameters.get(param.getValue());
                 if (val == null) {
                     buf.append("null");
                 }

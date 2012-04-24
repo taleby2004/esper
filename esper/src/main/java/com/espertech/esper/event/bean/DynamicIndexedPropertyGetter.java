@@ -8,11 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.event.bean;
 
-import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.bean.DynamicPropertyDescriptor;
+import com.espertech.esper.event.vaevent.PropertyUtility;
 
-import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -23,7 +21,7 @@ import java.lang.reflect.Method;
 public class DynamicIndexedPropertyGetter extends DynamicPropertyGetterBase
 {
     private final String getterMethodName;
-    private final Object[] params;
+    private final Object[] parameters;
     private final int index;
 
     /**
@@ -36,7 +34,7 @@ public class DynamicIndexedPropertyGetter extends DynamicPropertyGetterBase
     {
         super(eventAdapterService);
         getterMethodName = PropertyHelper.getGetterMethodName(fieldName);
-        this.params = new Object[] {index};
+        this.parameters = new Object[] {index};
         this.index = index;
     }
 
@@ -72,7 +70,7 @@ public class DynamicIndexedPropertyGetter extends DynamicPropertyGetterBase
         {
             if (descriptor.isHasParameters())
             {
-                return descriptor.getMethod().invoke(underlying, params);
+                return descriptor.getMethod().invoke(underlying, parameters);
             }
             else
             {
@@ -90,15 +88,15 @@ public class DynamicIndexedPropertyGetter extends DynamicPropertyGetterBase
         }
         catch (ClassCastException e)
         {
-            throw new PropertyAccessException("Mismatched getter instance to event bean type");
+            throw PropertyUtility.getMismatchException(descriptor.getMethod().getJavaMethod(), underlying, e);
         }
         catch (InvocationTargetException e)
         {
-            throw new PropertyAccessException(e);
+            throw PropertyUtility.getInvocationTargetException(descriptor.getMethod().getJavaMethod(), e);
         }
         catch (IllegalArgumentException e)
         {
-            throw new PropertyAccessException(e);
+            throw PropertyUtility.getIllegalArgumentException(descriptor.getMethod().getJavaMethod(), e);
         }
     }
 }

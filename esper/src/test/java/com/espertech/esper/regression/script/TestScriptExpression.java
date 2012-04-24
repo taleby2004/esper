@@ -372,7 +372,7 @@ public class TestScriptExpression extends TestCase {
         };
         trySelect("expression mvel:abc(myint) [ myint * 10 ]", "abc(intPrimitive)", int.class, testData);
 
-        expression = "if (string.equals('E1')) " +
+        expression = "if (theString.equals('E1')) " +
                 "  return myint * 10;" +
                 "else " +
                 "  return myint * 5;";
@@ -381,8 +381,8 @@ public class TestScriptExpression extends TestCase {
                 {new SupportBean("E1", 6), 60},
                 {new SupportBean("E2", 7), 35}
         };
-        trySelect("expression mvel:abc(myint, string) [" + expression +  "]", "abc(intPrimitive, string)", Object.class, testData);
-        trySelect("expression int mvel:abc(myint, string) [" + expression +  "]", "abc(intPrimitive, string)", Integer.class, testData);
+        trySelect("expression mvel:abc(myint, theString) [" + expression +  "]", "abc(intPrimitive, theString)", Object.class, testData);
+        trySelect("expression int mvel:abc(myint, theString) [" + expression +  "]", "abc(intPrimitive, theString)", Integer.class, testData);
 
         expression = "a + Integer.toString(b)";
         testData = new Object[][] {
@@ -390,7 +390,7 @@ public class TestScriptExpression extends TestCase {
                 {new SupportBean("E1", 6), "E16"},
                 {new SupportBean("E2", 7), "E27"}
         };
-        trySelect("expression mvel:abc(a, b) [" + expression +  "]", "abc(string, intPrimitive)", String.class, testData);
+        trySelect("expression mvel:abc(a, b) [" + expression +  "]", "abc(theString, intPrimitive)", String.class, testData);
     }
 
     private void tryVoidReturnType(String dialect) {
@@ -416,7 +416,7 @@ public class TestScriptExpression extends TestCase {
                 "  epl.setScriptAttribute('flag', flagValue);" +
                 "  flagValue;" +
                 "]" +
-                "select getFlag() as val from SupportBean(string = 'E1' or setFlag(intPrimitive > 0))");
+                "select getFlag() as val from SupportBean(theString = 'E1' or setFlag(intPrimitive > 0))");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 10));
@@ -467,12 +467,12 @@ public class TestScriptExpression extends TestCase {
     private void tryReturnObject(String dialect) {
 
         String expression = "expression " + SupportBean.class.getName() + " " + dialect + ":callIt() [ new " + SupportBean.class.getName() + "('E1', 10); ]";
-        EPStatement stmt = epService.getEPAdministrator().createEPL(expression + " select callIt() as val0, callIt().getString() as val1 from SupportBean as sb");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(expression + " select callIt() as val0, callIt().getTheString() as val1 from SupportBean as sb");
         stmt.addListener(listener);
         assertEquals(SupportBean.class, stmt.getEventType().getPropertyType("val0"));
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0.string,val0.intPrimitive,val1".split(","), new Object[]{"E1", 10, "E1"});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "val0.theString,val0.intPrimitive,val1".split(","), new Object[]{"E1", 10, "E1"});
 
         stmt.destroy();
     }
@@ -556,10 +556,10 @@ public class TestScriptExpression extends TestCase {
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean());
-        EventBean out = listener.assertOneGetNewAndReset();
+        EventBean outEvent = listener.assertOneGetNewAndReset();
         for (String col : Arrays.asList("callOne()","callTwo(1)","callThree(1, 2)")) {
             assertEquals(Integer.class, stmt.getEventType().getPropertyType(col));
-            assertEquals(1, out.get(col));
+            assertEquals(1, outEvent.get(col));
         }
 
         stmt.destroy();
@@ -608,12 +608,12 @@ public class TestScriptExpression extends TestCase {
         assertEquals(expectedType, stmt.getEventType().getPropertyType("val"));
 
         for (int row = 0; row < testdata.length; row++) {
-            Object event = testdata[row][0];
+            Object theEvent = testdata[row][0];
             Object expected = testdata[row][1];
 
-            epService.getEPRuntime().sendEvent(event);
-            EventBean out = listener.assertOneGetNewAndReset();
-            assertEquals(expected, out.get("val"));
+            epService.getEPRuntime().sendEvent(theEvent);
+            EventBean outEvent = listener.assertOneGetNewAndReset();
+            assertEquals(expected, outEvent.get("val"));
         }
 
         stmt.destroy();
@@ -629,8 +629,8 @@ public class TestScriptExpression extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean());
         assertEquals(type, stmt.getEventType().getPropertyType("getResultOne()"));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(value, event.get("getResultOne()"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(value, theEvent.get("getResultOne()"));
         stmt.destroy();
     }
 

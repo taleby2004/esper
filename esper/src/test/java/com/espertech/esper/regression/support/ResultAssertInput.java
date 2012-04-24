@@ -63,7 +63,7 @@ public class ResultAssertInput
         add(7200);
     }
 
-    private static void add(long time, SupportMarketDataBean event, String eventDesc)
+    private static void add(long time, SupportMarketDataBean theEvent, String eventDesc)
     {
         TimeAction timeAction = actions.get(time);
         if (timeAction == null)
@@ -71,7 +71,7 @@ public class ResultAssertInput
             timeAction = new TimeAction();
             actions.put(time, timeAction);
         }
-        timeAction.add(event, eventDesc);
+        timeAction.add(theEvent, eventDesc);
     }
 
     private static void add(long time)

@@ -43,9 +43,9 @@ public class BeanEventBeanReader implements EventBeanReader
         getterArray = getters.toArray(new BeanEventPropertyGetter[getters.size()]);
     }
 
-    public Object[] read(EventBean event)
+    public Object[] read(EventBean theEvent)
     {
-        Object underlying = event.getUnderlying();
+        Object underlying = theEvent.getUnderlying();
         Object[] values = new Object[getterArray.length];
         for (int i = 0; i < getterArray.length; i++)
         {

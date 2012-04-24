@@ -102,20 +102,20 @@ public class TestCaseExpr extends TestCase
     private void runCaseSyntax1Sum()
     {
         sendMarketDataEvent("DELL", 10000, 50);
-        EventBean event = testListener.assertOneGetNewAndReset();
-        assertEquals(50.0, event.get("p1"));
+        EventBean theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(50.0, theEvent.get("p1"));
 
         sendMarketDataEvent("DELL", 10000, 50);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(100.0, event.get("p1"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(100.0, theEvent.get("p1"));
 
         sendMarketDataEvent("CSCO", 4000, 5);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(null,event.get("p1"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(null,theEvent.get("p1"));
 
         sendMarketDataEvent("GE", 20, 30);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(20.0, event.get("p1"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(20.0, theEvent.get("p1"));
     }
 
     public void testCaseSyntax1WithElse()
@@ -175,12 +175,12 @@ public class TestCaseExpr extends TestCase
     private void runCaseSyntax1WithElse()
     {
         sendMarketDataEvent("CSCO", 4000, 0);
-        EventBean event = testListener.assertOneGetNewAndReset();
-        assertEquals(4000l,event.get("p1"));
+        EventBean theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(4000l,theEvent.get("p1"));
 
         sendMarketDataEvent("DELL", 20, 0);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(3 * 20L, event.get("p1"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(3 * 20L, theEvent.get("p1"));
     }
 
     public void testCaseSyntax1Branches3()
@@ -197,16 +197,16 @@ public class TestCaseExpr extends TestCase
         assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
 
         sendMarketDataEvent("DELL", 10000, 0);
-        EventBean event = testListener.assertOneGetNewAndReset();
-        assertEquals(10000 / 2.0,event.get("p1"));
+        EventBean theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(10000 / 2.0,theEvent.get("p1"));
 
         sendMarketDataEvent("MSFT", 10000, 0);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(10000 / 3.0,event.get("p1"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(10000 / 3.0,theEvent.get("p1"));
 
         sendMarketDataEvent("GE", 10000, 0);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(10000.0,event.get("p1"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(10000.0,theEvent.get("p1"));
     }
 
     public void testCaseSyntax2()
@@ -225,23 +225,23 @@ public class TestCaseExpr extends TestCase
         // intPrimitive = longPrimitive
         // case result is intPrimitive + longPrimitive
         sendSupportBeanEvent(2, 2L, 1.0f, 1.0);
-        EventBean event = testListener.assertOneGetNewAndReset();
-        assertEquals(4.0, event.get("p1"));
+        EventBean theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(4.0, theEvent.get("p1"));
         // intPrimitive = doublePrimitive
         // case result is intPrimitive * doublePrimitive
         sendSupportBeanEvent(5, 1L, 1.0f, 5.0);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(25.0, event.get("p1"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(25.0, theEvent.get("p1"));
         // intPrimitive = floatPrimitive
         // case result is floatPrimitive / doublePrimitive
         sendSupportBeanEvent(12, 1L, 12.0f, 4.0);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(3.0, event.get("p1"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(3.0, theEvent.get("p1"));
         // all the properties of the event are different
         // The else part is computed: 1+2+3+4 = 10
         sendSupportBeanEvent(1, 2L, 3.0f, 4.0);
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(10.0, event.get("p1"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(10.0, theEvent.get("p1"));
     }
 
     public void testCaseSyntax2StringsNBranches()
@@ -264,7 +264,7 @@ public class TestCaseExpr extends TestCase
                 " when 14 then Float.toString(floatBoxed) " +
                 " when 15 then Double.toString(doublePrimitive) " +
                 " when 16 then Double.toString(doubleBoxed) " +
-                " when 17 then string " +
+                " when 17 then theString " +
                 " else 'x' end as p1 " +
                 " from " + SupportBean.class.getName() + ".win:length(1)";
 
@@ -273,81 +273,81 @@ public class TestCaseExpr extends TestCase
         assertEquals(String.class, selectTestCase.getEventType().getPropertyType("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 1, new Integer(0),0L,new Long(0L),'0',new Character('a'),(short)0,new Short((short)0),(byte)0,new Byte((byte)0),0.0f,new Float((float)0),0.0,new Double(0.0),null,SupportEnum.ENUM_VALUE_1);
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals("true", event.get("p1"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("true", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 2, new Integer(0),0L,new Long(0L),'0',new Character('a'),(short)0,new Short((short)0),(byte)0,new Byte((byte)0),0.0f,new Float((float)0),0.0,new Double(0.0),null,SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("false", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("false", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 3, new Integer(0),0L,new Long(0L),'0',new Character('a'),(short)0,new Short((short)0),(byte)0,new Byte((byte)0),0.0f,new Float((float)0),0.0,new Double(0.0),null,SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("3", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("3", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 4, new Integer(4),0L,new Long(0L),'0',new Character('a'),(short)0,new Short((short)0),(byte)0,new Byte((byte)0),0.0f,new Float((float)0),0.0,new Double(0.0),null,SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("4", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("4", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 5, new Integer(0),5L,new Long(0L),'0',new Character('a'),(short)0,new Short((short)0),(byte)0,new Byte((byte)0),0.0f,new Float((float)0),0.0,new Double(0.0),null,SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("5", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("5", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 6, new Integer(0),0L,new Long(6L),'0',new Character('a'),(short)0,new Short((short)0),(byte)0,new Byte((byte)0),0.0f,new Float((float)0),0.0,new Double(0.0),null,SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("6", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("6", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 7, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)0,new Short((short)0),(byte)0,new Byte((byte)0),0.0f,new Float((float)0),0.0,new Double(0.0),null,SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("A", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("A", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 8, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)0,new Short((short)0),(byte)0,new Byte((byte)0),0.0f,new Float((float)0),0.0,new Double(0.0),null,SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("a", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("a", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 9, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)0),(byte)0,new Byte((byte)0),0.0f,new Float((float)0),0.0,new Double(0.0),null,SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("9", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("9", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 10, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)10),(byte)11,new Byte((byte)12),13.0f,new Float((float)14),15.0,new Double(16.0),"testCoercion",SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("10", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("10", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 11, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)10),(byte)11,new Byte((byte)12),13.0f,new Float((float)14),15.0,new Double(16.0),"testCoercion",SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("11", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("11", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 12, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)10),(byte)11,new Byte((byte)12),13.0f,new Float((float)14),15.0,new Double(16.0),"testCoercion",SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("12", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("12", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 13, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)10),(byte)11,new Byte((byte)12),13.0f,new Float((float)14),15.0,new Double(16.0),"testCoercion",SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("13.0", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("13.0", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 14, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)10),(byte)11,new Byte((byte)12),13.0f,new Float((float)14),15.0,new Double(16.0),"testCoercion",SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("14.0", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("14.0", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 15, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)10),(byte)11,new Byte((byte)12),13.0f,new Float((float)14),15.0,new Double(16.0),"testCoercion",SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("15.0", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("15.0", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 16, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)10),(byte)11,new Byte((byte)12),13.0f,new Float((float)14),15.0,new Double(16.0),"testCoercion",SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("16.0", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("16.0", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), 17, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)10),(byte)11,new Byte((byte)12),13.0f,new Float((float)14),15.0,new Double(16.0),"testCoercion",SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("testCoercion", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("testCoercion", theEvent.get("p1"));
 
         sendSupportBeanEvent(true, new Boolean(false), -1, new Integer(0),0L,new Long(0L),'A',new Character('a'),(short)9,new Short((short)10),(byte)11,new Byte((byte)12),13.0f,new Float((float)14),15.0,new Double(16.0),"testCoercion",SupportEnum.ENUM_VALUE_1);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("x", event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("x", theEvent.get("p1"));
     }
 
     public void testCaseSyntax2NoElseWithNull()
     {
-       String caseExpr = "select case string " +
+       String caseExpr = "select case theString " +
                  " when null then true " +
                  " when '' then false end as p1" +
                  " from " + SupportBean.class.getName() + ".win:length(100)";
@@ -372,8 +372,8 @@ public class TestCaseExpr extends TestCase
     public void testCaseSyntax1WithNull()
     {
        String caseExpr = "select case " +
-                 " when string is null then true " +
-                 " when string = '' then false end as p1" +
+                 " when theString is null then true " +
+                 " when theString = '' then false end as p1" +
                  " from " + SupportBean.class.getName() + ".win:length(100)";
 
         EPStatement selectTestCase = epService.getEPAdministrator().createEPL(caseExpr);
@@ -519,16 +519,16 @@ public class TestCaseExpr extends TestCase
         assertEquals(Integer.class, selectTestCase.getEventType().getPropertyType("p1"));
 
         sendSupportBeanEvent(1);
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals(4, event.get("p1"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(4, theEvent.get("p1"));
 
         sendSupportBeanEvent(2);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(6, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(6, theEvent.get("p1"));
 
         sendSupportBeanEvent(3);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(20, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(20, theEvent.get("p1"));
     }
 
     public void testCaseSyntax2Sum()
@@ -543,28 +543,28 @@ public class TestCaseExpr extends TestCase
         assertEquals(Double.class, selectTestCase.getEventType().getPropertyType("p1"));
 
         sendSupportBeanEvent(1, 10L, 3.0f, 4.0);
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals(10d, event.get("p1"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(10d, theEvent.get("p1"));
 
         sendSupportBeanEvent(1, 15L, 3.0f, 4.0);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(25d, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(25d, theEvent.get("p1"));
 
         sendSupportBeanEvent(2, 1L, 3.0f, 4.0);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(9d, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(9d, theEvent.get("p1"));
 
         sendSupportBeanEvent(2, 1L, 3.0f, 4.0);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(12.0d, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(12.0d, theEvent.get("p1"));
 
         sendSupportBeanEvent(5, 1L, 1.0f, 1.0);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(11.0d, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(11.0d, theEvent.get("p1"));
 
         sendSupportBeanEvent(5, 1L, 1.0f, 1.0);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(16d, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(16d, theEvent.get("p1"));
     }
 
     public void testCaseSyntax2EnumChecks()
@@ -580,16 +580,16 @@ public class TestCaseExpr extends TestCase
         assertEquals(Integer.class, selectTestCase.getEventType().getPropertyType("p1"));
 
         sendSupportBeanEvent("a", SupportEnum.ENUM_VALUE_1);
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals(1, event.get("p1"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(1, theEvent.get("p1"));
 
         sendSupportBeanEvent("b", SupportEnum.ENUM_VALUE_2);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(2, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(2, theEvent.get("p1"));
 
         sendSupportBeanEvent("c", SupportEnum.ENUM_VALUE_3);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(null, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(null, theEvent.get("p1"));
     }
 
     public void testCaseSyntax2EnumResult()
@@ -606,16 +606,16 @@ public class TestCaseExpr extends TestCase
         assertEquals(SupportEnum.class, selectTestCase.getEventType().getPropertyType("p1"));
 
         sendSupportBeanEvent(1);
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals(SupportEnum.ENUM_VALUE_1, event.get("p1"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(SupportEnum.ENUM_VALUE_1, theEvent.get("p1"));
 
         sendSupportBeanEvent(2);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(SupportEnum.ENUM_VALUE_2, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(SupportEnum.ENUM_VALUE_2, theEvent.get("p1"));
 
         sendSupportBeanEvent(3);
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals(SupportEnum.ENUM_VALUE_3, event.get("p1"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(SupportEnum.ENUM_VALUE_3, theEvent.get("p1"));
     }
 
     public void testCaseSyntax2NoAsName()
@@ -629,71 +629,71 @@ public class TestCaseExpr extends TestCase
         assertEquals(Integer.class, selectTestCase.getEventType().getPropertyType(caseSubExpr));
 
         sendSupportBeanEvent(1);
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals(0, event.get(caseSubExpr));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals(0, theEvent.get(caseSubExpr));
     }
 
     private void sendSupportBeanEvent(boolean b_, Boolean boolBoxed_, int i_, Integer intBoxed_, long l_, Long longBoxed_,
                                       char c_, Character charBoxed_, short s_, Short shortBoxed_, byte by_, Byte byteBoxed_,
                                       float f_, Float floatBoxed_, double d_, Double doubleBoxed_, String str_, SupportEnum enum_)
     {
-        SupportBean event = new SupportBean();
-        event.setBoolPrimitive(b_);
-        event.setBoolBoxed(boolBoxed_);
-        event.setIntPrimitive(i_);
-        event.setIntBoxed(intBoxed_);
-        event.setLongPrimitive(l_);
-        event.setLongBoxed(longBoxed_);
-        event.setCharPrimitive(c_);
-        event.setCharBoxed(charBoxed_);
-        event.setShortPrimitive(s_);
-        event.setShortBoxed(shortBoxed_);
-        event.setBytePrimitive(by_);
-        event.setByteBoxed(byteBoxed_);
-        event.setFloatPrimitive(f_);
-        event.setFloatBoxed(floatBoxed_);
-        event.setDoublePrimitive(d_);
-        event.setDoubleBoxed(doubleBoxed_);
-        event.setString(str_);
-        event.setEnumValue(enum_);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setBoolPrimitive(b_);
+        theEvent.setBoolBoxed(boolBoxed_);
+        theEvent.setIntPrimitive(i_);
+        theEvent.setIntBoxed(intBoxed_);
+        theEvent.setLongPrimitive(l_);
+        theEvent.setLongBoxed(longBoxed_);
+        theEvent.setCharPrimitive(c_);
+        theEvent.setCharBoxed(charBoxed_);
+        theEvent.setShortPrimitive(s_);
+        theEvent.setShortBoxed(shortBoxed_);
+        theEvent.setBytePrimitive(by_);
+        theEvent.setByteBoxed(byteBoxed_);
+        theEvent.setFloatPrimitive(f_);
+        theEvent.setFloatBoxed(floatBoxed_);
+        theEvent.setDoublePrimitive(d_);
+        theEvent.setDoubleBoxed(doubleBoxed_);
+        theEvent.setTheString(str_);
+        theEvent.setEnumValue(enum_);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendSupportBeanEvent(int intPrimitive, long longPrimitive, float floatPrimitive, double doublePrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        event.setLongPrimitive(longPrimitive);
-        event.setFloatPrimitive(floatPrimitive);
-        event.setDoublePrimitive(doublePrimitive);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        theEvent.setLongPrimitive(longPrimitive);
+        theEvent.setFloatPrimitive(floatPrimitive);
+        theEvent.setDoublePrimitive(doublePrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendSupportBeanEvent(int intPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
-    private void sendSupportBeanEvent(String string)
+    private void sendSupportBeanEvent(String theString)
     {
-        SupportBean event = new SupportBean();
-        event.setString(string);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setTheString(theString);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendSupportBeanEvent(boolean boolBoxed)
     {
-        SupportBean event = new SupportBean();
-        event.setBoolBoxed(boolBoxed);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setBoolBoxed(boolBoxed);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
-    private void sendSupportBeanEvent(String string, SupportEnum supportEnum)
+    private void sendSupportBeanEvent(String theString, SupportEnum supportEnum)
     {
-        SupportBeanWithEnum event = new SupportBeanWithEnum(string, supportEnum);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBeanWithEnum theEvent = new SupportBeanWithEnum(theString, supportEnum);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendMarketDataEvent(String symbol, long volume, double price)

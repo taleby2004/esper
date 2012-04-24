@@ -29,8 +29,8 @@ public class SortedAccessStrategyRange extends SortedAccessStrategyRangeBase imp
         this.allowRangeReversal = allowRangeReversal;
     }
 
-    public Set<EventBean> lookup(EventBean event, PropertySortedEventTable index, ExprEvaluatorContext context) {
-        return index.lookupRange(super.evaluateLookupStart(event, context), includeStart, super.evaluateLookupEnd(event, context), includeEnd, allowRangeReversal);
+    public Set<EventBean> lookup(EventBean theEvent, PropertySortedEventTable index, ExprEvaluatorContext context) {
+        return index.lookupRange(super.evaluateLookupStart(theEvent, context), includeStart, super.evaluateLookupEnd(theEvent, context), includeEnd, allowRangeReversal);
     }
 
     public Collection<EventBean> lookup(EventBean[] eventsPerStream, PropertySortedEventTable index, ExprEvaluatorContext context) {

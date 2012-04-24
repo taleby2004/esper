@@ -35,6 +35,6 @@ public class SupportVirtualDWInvalid implements VirtualDataWindow {
         return null;
     }
 
-    public void handleEvent(VirtualDataWindowEvent event) {
+    public void handleEvent(VirtualDataWindowEvent theEvent) {
     }
 }

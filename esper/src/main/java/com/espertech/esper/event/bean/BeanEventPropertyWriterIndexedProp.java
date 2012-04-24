@@ -24,6 +24,6 @@ public class BeanEventPropertyWriterIndexedProp extends BeanEventPropertyWriter 
     }
 
     public void write(Object value, EventBean target) {
-        super.invoke(new Object[] {index, value}, target);
+        super.invoke(new Object[] {index, value}, target.getUnderlying());
     }
 }

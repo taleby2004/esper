@@ -27,10 +27,10 @@ public class RateReportingListener implements UpdateListener
         }
     }
 
-    private void logRate(EventBean event)
+    private void logRate(EventBean theEvent)
     {
-        log.info("Current rate for feed " + event.get("feed").toString() +
-                  " is " + event.get("cnt"));
+        log.info("Current rate for feed " + theEvent.get("feed").toString() +
+                  " is " + theEvent.get("cnt"));
     }
 
     private static final Log log = LogFactory.getLog(RateReportingListener.class);

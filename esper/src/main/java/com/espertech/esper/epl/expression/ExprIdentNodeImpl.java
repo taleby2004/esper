@@ -10,12 +10,13 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.client.annotation.Audit;
 import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.core.PropertyResolutionDescriptor;
-import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.parse.ASTFilterSpecHelper;
+import com.espertech.esper.event.property.PropertyParser;
 import com.espertech.esper.filter.FilterSpecLookupable;
 
 import java.util.Map;
@@ -145,12 +146,19 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
 
     public void validate(ExprValidationContext validationContext) throws ExprValidationException
     {
-        Pair<PropertyResolutionDescriptor, String> propertyInfoPair = ExprIdentNodeUtil.getTypeFromStream(validationContext.getStreamTypeService(), unresolvedPropertyName, streamOrPropertyName);
+        String unescapedPropertyName = PropertyParser.unescapeBacktick(unresolvedPropertyName);
+        Pair<PropertyResolutionDescriptor, String> propertyInfoPair = ExprIdentNodeUtil.getTypeFromStream(validationContext.getStreamTypeService(), unescapedPropertyName, streamOrPropertyName, false);
         resolvedStreamName = propertyInfoPair.getSecond();
         int streamNum = propertyInfoPair.getFirst().getStreamNum();
         Class propertyType = propertyInfoPair.getFirst().getPropertyType();
         resolvedPropertyName = propertyInfoPair.getFirst().getPropertyName();
-        EventPropertyGetter propertyGetter = propertyInfoPair.getFirst().getStreamEventType().getGetter(resolvedPropertyName);
+        EventPropertyGetter propertyGetter;
+        try {
+            propertyGetter = propertyInfoPair.getFirst().getStreamEventType().getGetter(resolvedPropertyName);
+        }
+        catch (PropertyAccessException ex) {
+            throw new ExprValidationException("Property '" + unresolvedPropertyName + "' is not valid: " + ex.getMessage(), ex);
+        }
 
         if (propertyGetter == null)
         {
@@ -261,7 +269,7 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
         {
             buffer.append(ASTFilterSpecHelper.unescapeDot(streamOrPropertyName)).append('.');
         }
-        buffer.append(ASTFilterSpecHelper.unescapeDot(unresolvedPropertyName));
+        buffer.append(ASTFilterSpecHelper.unescapeDot(PropertyParser.unescapeBacktick(unresolvedPropertyName)));
 
         return buffer.toString();
     }
@@ -280,20 +288,6 @@ public class ExprIdentNodeImpl extends ExprNodeBase implements ExprIdentNode
         if (unresolvedPropertyName != null ? !unresolvedPropertyName.equals(other.getUnresolvedPropertyName()) : other.getUnresolvedPropertyName() != null)
             return false;
         return true;
-    }
-
-    public static Pair<PropertyResolutionDescriptor, String> getTypeFromStream(StreamTypeService streamTypeService, String propertyNameNestable, boolean explicitPropertiesOnly)
-                    throws ExprValidationPropertyException {
-        String streamOrProp = null;
-        String prop = propertyNameNestable;
-        if (propertyNameNestable.indexOf('.') != -1) {
-            prop = propertyNameNestable.substring(propertyNameNestable.indexOf('.') + 1);
-            streamOrProp = propertyNameNestable.substring(0, propertyNameNestable.indexOf('.'));
-        }
-        if (explicitPropertiesOnly) {
-            return ExprIdentNodeUtil.getTypeFromStreamExplicitProperties(streamTypeService, prop, streamOrProp);
-        }
-        return ExprIdentNodeUtil.getTypeFromStream(streamTypeService, prop, streamOrProp);
     }
 
     public ExprIdentNodeEvaluator getExprEvaluatorIdent() {

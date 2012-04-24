@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
-import com.espertech.esper.client.epn.EPNetworkAdmin;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
 

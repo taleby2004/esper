@@ -12,10 +12,15 @@
 package com.espertech.esper.regression.event;
 
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TestPropertyResolution extends TestCase
 {
@@ -32,8 +37,8 @@ public class TestPropertyResolution extends TestCase
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
-        Object event = new SupportBeanReservedKeyword(1, 2);
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBeanReservedKeyword(1, 2);
+        epService.getEPRuntime().sendEvent(theEvent);
         EventBean eventBean = listener.assertOneGetNewAndReset();
         assertEquals(1, eventBean.get("seconds"));
         assertEquals(2, eventBean.get("order"));
@@ -42,7 +47,7 @@ public class TestPropertyResolution extends TestCase
         stmt = epService.getEPAdministrator().createEPL("select * from `Order`");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
         eventBean = listener.assertOneGetNewAndReset();
         assertEquals(1, eventBean.get("seconds"));
         assertEquals(2, eventBean.get("order"));
@@ -57,6 +62,42 @@ public class TestPropertyResolution extends TestCase
         epService.getEPRuntime().sendEvent(bean);
         eventBean = listener.assertOneGetNewAndReset();
         assertEquals(10, eventBean.get("val"));
+
+        // test back-tick with spaces etc
+        Map<String, Object> defType = new HashMap<String, Object>();
+        defType.put("candidate book", String.class);
+        defType.put("XML Message Type", String.class);
+        defType.put("select", int.class);
+        defType.put("children's books", int[].class);
+        defType.put("my <> map", Map.class);
+        epService.getEPAdministrator().getConfiguration().addEventType("MyType", defType);
+        epService.getEPAdministrator().createEPL("select `candidate book` as c0, `XML Message Type` as c1, `select` as c2, `children's books`[0] as c3, `my <> map`('xx') as c4 from MyType").addListener(listener);
+
+        Map<String, Object> defValues = new HashMap<String, Object>();
+        defValues.put("candidate book", "Enders Game");
+        defValues.put("XML Message Type", "book");
+        defValues.put("select", 100);
+        defValues.put("children's books", new int[] {50, 51});
+        defValues.put("my <> map", Collections.singletonMap("xx", "abc"));
+        epService.getEPRuntime().sendEvent(defValues, "MyType");
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "c0,c1,c2,c3,c4".split(","), new Object[]{"Enders Game", "book", 100, 50, "abc"});
+        
+        try {
+            epService.getEPAdministrator().createEPL("select `select` from " + SupportBean.class.getName());
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals("Error starting statement: Property named 'select' is not valid in any stream [select `select` from com.espertech.esper.support.bean.SupportBean]", ex.getMessage());
+        }
+
+        try {
+            epService.getEPAdministrator().createEPL("select `ab cd` from " + SupportBean.class.getName());
+            fail();
+        }
+        catch (EPException ex) {
+            ex.printStackTrace();
+            assertEquals("Error starting statement: Failed to find property 'ab cd', the property name does not parse (are you sure?): Incorrect syntax near 'cd' expecting end of input but found an identifier at line 1 column 3 [ab cd] [select `ab cd` from com.espertech.esper.support.bean.SupportBean]", ex.getMessage());
+        }
     }
 
     public void testWriteOnly()
@@ -68,10 +109,10 @@ public class TestPropertyResolution extends TestCase
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
-        Object event = new SupportBeanWriteOnly();
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBeanWriteOnly();
+        epService.getEPRuntime().sendEvent(theEvent);
         EventBean eventBean = listener.assertOneGetNewAndReset();
-        assertSame(event, eventBean.getUnderlying());
+        assertSame(theEvent, eventBean.getUnderlying());
 
         EventType type = stmt.getEventType();
         assertEquals(0, type.getPropertyNames().length);
@@ -129,11 +170,11 @@ public class TestPropertyResolution extends TestCase
                 " from " + SupportBeanComplexProps.class.getName());
         stmt.addListener(listener);
         epService.getEPRuntime().sendEvent(SupportBeanComplexProps.makeDefaultBean());
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("nestedValue", event.get("val1"));
-        assertEquals(10, event.get("val2"));
-        assertEquals("valueOne", event.get("val3"));
-        assertEquals(1, event.get("val4"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("nestedValue", theEvent.get("val1"));
+        assertEquals(10, theEvent.get("val2"));
+        assertEquals("valueOne", theEvent.get("val3"));
+        assertEquals(1, theEvent.get("val4"));
     }
 
     public void testAccessorStyleGlobalPublic() {
@@ -147,9 +188,9 @@ public class TestPropertyResolution extends TestCase
         SupportUpdateListener listener = new SupportUpdateListener();
         stmt.addListener(listener);
 
-        SupportLegacyBean event = new SupportLegacyBean("E1");
-        event.fieldLegacyVal = "val1";
-        epService.getEPRuntime().sendEvent(event);
+        SupportLegacyBean theEvent = new SupportLegacyBean("E1");
+        theEvent.fieldLegacyVal = "val1";
+        epService.getEPRuntime().sendEvent(theEvent);
         assertEquals("val1", listener.assertOneGetNewAndReset().get("fieldLegacyVal"));
     }
 
@@ -188,8 +229,8 @@ public class TestPropertyResolution extends TestCase
         configuration.getEngineDefaults().getEventMeta().setClassPropertyResolutionStyle(Configuration.PropertyResolutionStyle.CASE_INSENSITIVE);
         configuration.addEventType("Bean", SupportBean.class);
 
-        tryCaseInsensitive(configuration, "select STRING, INTPRIMITIVE from Bean where STRING='A'", "STRING", "INTPRIMITIVE");
-        tryCaseInsensitive(configuration, "select sTrInG, INTprimitIVE from Bean where STRing='A'", "sTrInG", "INTprimitIVE");
+        tryCaseInsensitive(configuration, "select THESTRING, INTPRIMITIVE from Bean where THESTRING='A'", "THESTRING", "INTPRIMITIVE");
+        tryCaseInsensitive(configuration, "select ThEsTrInG, INTprimitIVE from Bean where THESTRing='A'", "ThEsTrInG", "INTprimitIVE");
     }
 
     public void testCaseInsensitiveTypeConfig()
@@ -199,8 +240,8 @@ public class TestPropertyResolution extends TestCase
         legacyDef.setPropertyResolutionStyle(Configuration.PropertyResolutionStyle.CASE_INSENSITIVE);
         configuration.addEventType("Bean", SupportBean.class.getName(), legacyDef);
 
-        tryCaseInsensitive(configuration, "select STRING, INTPRIMITIVE from Bean where STRING='A'", "STRING", "INTPRIMITIVE");
-        tryCaseInsensitive(configuration, "select sTrInG, INTprimitIVE from Bean where STRing='A'", "sTrInG", "INTprimitIVE");
+        tryCaseInsensitive(configuration, "select theSTRING, INTPRIMITIVE from Bean where THESTRING='A'", "theSTRING", "INTPRIMITIVE");
+        tryCaseInsensitive(configuration, "select THEsTrInG, INTprimitIVE from Bean where theSTRing='A'", "THEsTrInG", "INTprimitIVE");
     }
 
     private void tryCaseInsensitive(Configuration configuration, String stmtText, String propOneName, String propTwoName)

@@ -54,7 +54,7 @@ public class TestDatabase3StreamOuterJoin extends TestCase
         String stmtText = "select * from SupportBean.std:lastevent() sb" +
                 " inner join " +
                 " SupportBeanTwo.std:lastevent() sbt" +
-                " on sb.string = sbt.stringTwo " +
+                " on sb.theString = sbt.stringTwo " +
                 " inner join " +
                 " sql:MyDB ['select myint from mytesttable'] as s1 " +
                 "  on s1.myint = sbt.intPrimitiveTwo";
@@ -68,11 +68,11 @@ public class TestDatabase3StreamOuterJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T2", 30));
         epService.getEPRuntime().sendEvent(new SupportBean("T2", -1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T2", "T2", 30});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.theString,sbt.stringTwo,s1.myint".split(","), new Object[]{"T2", "T2", 30});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T3", -1));
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T3", 40));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", "T3", 40});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.theString,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", "T3", 40});
     }
 
     public void testOuterJoinLeftS0()
@@ -82,7 +82,7 @@ public class TestDatabase3StreamOuterJoin extends TestCase
         String stmtText = "select * from SupportBean.std:lastevent() sb" +
                 " left outer join " +
                 " SupportBeanTwo.std:lastevent() sbt" +
-                " on sb.string = sbt.stringTwo " +
+                " on sb.theString = sbt.stringTwo " +
                 " left outer join " +
                 " sql:MyDB ['select myint from mytesttable'] as s1 " +
                 "  on s1.myint = sbt.intPrimitiveTwo";
@@ -93,16 +93,16 @@ public class TestDatabase3StreamOuterJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T1", 2));
         epService.getEPRuntime().sendEvent(new SupportBean("T1", 3));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T1", "T1", null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.theString,sbt.stringTwo,s1.myint".split(","), new Object[]{"T1", "T1", null});
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T2", 30));
         epService.getEPRuntime().sendEvent(new SupportBean("T2", -2));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T2", "T2", 30});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.theString,sbt.stringTwo,s1.myint".split(","), new Object[]{"T2", "T2", 30});
 
         epService.getEPRuntime().sendEvent(new SupportBean("T3", -1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", null, null});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.theString,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", null, null});
 
         epService.getEPRuntime().sendEvent(new SupportBeanTwo("T3", 40));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.string,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", "T3", 40});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "sb.theString,sbt.stringTwo,s1.myint".split(","), new Object[]{"T3", "T3", 40});
     }
 }

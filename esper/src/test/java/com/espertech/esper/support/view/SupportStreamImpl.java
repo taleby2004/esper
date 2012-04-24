@@ -50,11 +50,11 @@ public class SupportStreamImpl implements EventStream
 
     /**
      * Insert a single event to the stream
-     * @param event
+     * @param theEvent
      */
-    public void insert(EventBean event)
+    public void insert(EventBean theEvent)
     {
-        events.add(event);
+        events.add(theEvent);
 
         EventBean[] oldEvents = null;
         if (events.size() > depth)
@@ -64,7 +64,7 @@ public class SupportStreamImpl implements EventStream
 
         for (View child : childViews)
         {
-            child.update(new EventBean[] {event}, oldEvents);
+            child.update(new EventBean[] {theEvent}, oldEvents);
         }
     }
 
@@ -74,9 +74,9 @@ public class SupportStreamImpl implements EventStream
      */
     public void insert(EventBean[] eventArray)
     {
-        for (EventBean event : eventArray)
+        for (EventBean theEvent : eventArray)
         {
-            events.add(event);
+            events.add(theEvent);
         }
 
         EventBean[] oldEvents = null;

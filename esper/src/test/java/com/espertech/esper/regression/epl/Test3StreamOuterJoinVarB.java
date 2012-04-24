@@ -327,9 +327,9 @@ public class Test3StreamOuterJoinVarB extends TestCase
                 {s0Events[1], s1Events[1], s2Events[0]}}, getAndResetNewEvents());
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendEventsAndReset(Object[] events)

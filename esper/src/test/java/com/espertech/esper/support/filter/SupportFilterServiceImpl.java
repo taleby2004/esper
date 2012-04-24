@@ -27,12 +27,12 @@ public class SupportFilterServiceImpl implements FilterService
     private List<Pair<FilterValueSet, FilterHandle>> added = new LinkedList<Pair<FilterValueSet, FilterHandle>>();
     private List<FilterHandle> removed = new LinkedList<FilterHandle>();
 
-    public long evaluate(EventBean event, Collection<FilterHandle> matches)
+    public long evaluate(EventBean theEvent, Collection<FilterHandle> matches)
     {
         throw new UnsupportedOperationException();
     }
 
-    public long evaluate(EventBean event, Collection<FilterHandle> matches, String statementId)
+    public long evaluate(EventBean theEvent, Collection<FilterHandle> matches, String statementId)
     {
         throw new UnsupportedOperationException();
     }

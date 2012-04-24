@@ -8,87 +8,21 @@
  **************************************************************************************/
 package com.espertech.esper.collection;
 
-import java.util.*;
-import com.espertech.esper.client.EventBean;
+import java.util.ArrayDeque;
 
-/**
- * Iterator for {@link TimeWindow} to iterate over a timestamp slots that hold events.
- */
-public final class TimeWindowIterator implements Iterator<EventBean>
+public final class TimeWindowIterator extends MixedEventBeanAndCollectionIteratorBase
 {
-    private final Iterator<Pair<Long, ArrayDeque<EventBean>>> keyIterator;
-    private Iterator<EventBean> currentListIterator;
-
     /**
      * Ctor.
      * @param window is the time-slotted collection
      */
-    public TimeWindowIterator(ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> window)
+    public TimeWindowIterator(ArrayDeque<Pair<Long, Object>> window)
     {
-        keyIterator = window.iterator();
-        if (keyIterator.hasNext())
-        {
-            // Position to the next filled list
-            Pair<Long, ArrayDeque<EventBean>> pair = keyIterator.next();
-            while((pair.getSecond().isEmpty()) && (keyIterator.hasNext()))
-            {
-                pair = keyIterator.next();
-            }
-            currentListIterator = pair.getSecond().iterator();
-        }
+        super(window.iterator());
+        init();
     }
 
-    public final EventBean next()
-    {
-        if (currentListIterator == null)
-        {
-            throw new NoSuchElementException();
-        }
-
-        EventBean eventBean = currentListIterator.next();
-
-        if (!currentListIterator.hasNext())
-        {
-            currentListIterator = null;
-            if (keyIterator.hasNext())
-            {
-                // Position to the next filled list
-                Pair<Long, ArrayDeque<EventBean>> pair = keyIterator.next();
-                while((pair.getSecond().isEmpty()) && (keyIterator.hasNext()))
-                {
-                    pair = keyIterator.next();
-                }
-                currentListIterator = pair.getSecond().iterator();
-            }
-        }
-
-        return eventBean;
-    }
-
-    public final void remove()
-    {
-        throw new UnsupportedOperationException();
-    }
-
-    public final boolean hasNext()
-    {
-        if (currentListIterator == null)
-        {
-            return false;
-        }
-
-        if (currentListIterator.hasNext())
-        {
-            return true;
-        }
-
-        currentListIterator = null;
-
-        if (!keyIterator.hasNext())
-        {
-            return false;
-        }
-
-        return true;
+    protected Object getValue(Object iteratorKeyValue) {
+        return ((Pair<Long, Object>) iteratorKeyValue).getSecond();
     }
 }

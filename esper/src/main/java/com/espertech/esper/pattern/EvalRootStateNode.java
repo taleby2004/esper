@@ -82,7 +82,7 @@ public final class EvalRootStateNode extends EvalStateNode implements Evaluator,
             topStateNode = null;
         }
 
-        callback.matchFound(matchEvent.getMatchingEvents());
+        callback.matchFound(matchEvent.getMatchingEventsAsMap());
     }
 
     public final void evaluateFalse(EvalStateNode fromNode)

@@ -22,10 +22,10 @@ public class RateAggregator implements AggregationMethod {
 
     public void enter(Object value) {
         if (value.getClass().isArray()) {
-            final Object[] params = (Object[]) value;
-            Number val = (Number) params[1];
+            final Object[] parameters = (Object[]) value;
+            Number val = (Number) parameters[1];
             accumulator += val.doubleValue();
-            latest = (Long) params[0];
+            latest = (Long) parameters[0];
         } else {
             accumulator += 1;
             latest = (Long) value;
@@ -34,10 +34,10 @@ public class RateAggregator implements AggregationMethod {
 
     public void leave(Object value) {
         if (value.getClass().isArray()) {
-            final Object[] params = (Object[]) value;
-            Number val = (Number) params[1];
+            final Object[] parameters = (Object[]) value;
+            Number val = (Number) parameters[1];
             accumulator -= val.doubleValue();
-            oldest = (Long) params[0];
+            oldest = (Long) parameters[0];
         } else {
             accumulator -= 1;
             oldest = (Long) value;

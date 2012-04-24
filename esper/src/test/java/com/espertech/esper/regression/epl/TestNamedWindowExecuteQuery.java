@@ -12,23 +12,24 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
-import com.espertech.esper.client.EPStatementSyntaxException;
 import com.espertech.esper.client.deploy.DeploymentOptions;
 import com.espertech.esper.client.deploy.EPDeploymentAdmin;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.client.EventBean;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TestNamedWindowExecuteQuery extends TestCase
 {
     private EPServiceProvider epService;
-    private String[] fields = new String[] {"string", "intPrimitive"};
+    private String[] fields = new String[] {"theString", "intPrimitive"};
 
     // test expressions + current timestamp
     public void setUp()
@@ -46,28 +47,34 @@ public class TestNamedWindowExecuteQuery extends TestCase
     }
 
     public void test3StreamInnerJoin() throws Exception {
+        runAssertion3StreamInnerJoin(EventRepresentationEnum.OBJECTARRAY);
+        runAssertion3StreamInnerJoin(EventRepresentationEnum.MAP);
+        runAssertion3StreamInnerJoin(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertion3StreamInnerJoin(EventRepresentationEnum eventRepresentationEnum) throws Exception {
         Configuration config = new Configuration();
         config.getEngineDefaults().getLogging().setEnableQueryPlan(true);
         EPServiceProvider epService = EPServiceProviderManager.getProvider("ESPER1", config);
 
         String epl = "" +
-        "create schema Product (productId string, categoryId string);" +
-        "create schema Category (categoryId string, owner string);" +
-        "create schema ProductOwnerDetails (productId string, owner string);" +
-        "create window WinProduct.win:keepall() as select * from Product;" +
-        "create window WinCategory.win:keepall() as select * from Category;" +
-        "create window WinProductOwnerDetails.win:keepall() as select * from ProductOwnerDetails;" +
+        eventRepresentationEnum.getAnnotationText() + " create schema Product (productId string, categoryId string);" +
+        eventRepresentationEnum.getAnnotationText() + " create schema Category (categoryId string, owner string);" +
+        eventRepresentationEnum.getAnnotationText() + " create schema ProductOwnerDetails (productId string, owner string);" +
+        eventRepresentationEnum.getAnnotationText() + " create window WinProduct.win:keepall() as select * from Product;" +
+        eventRepresentationEnum.getAnnotationText() + " create window WinCategory.win:keepall() as select * from Category;" +
+        eventRepresentationEnum.getAnnotationText() + " create window WinProductOwnerDetails.win:keepall() as select * from ProductOwnerDetails;" +
         "insert into WinProduct select * from Product;" +
         "insert into WinCategory select * from Category;" +
         "insert into WinProductOwnerDetails select * from ProductOwnerDetails;";
         EPDeploymentAdmin dAdmin = epService.getEPAdministrator().getDeploymentAdmin();
         dAdmin.deploy(dAdmin.parse(epl), new DeploymentOptions());
 
-        sendEvent(epService, "Product", new String[] {"productId=Product1", "categoryId=Category1"});
-        sendEvent(epService, "Product", new String[] {"productId=Product2", "categoryId=Category1"});
-        sendEvent(epService, "Product", new String[] {"productId=Product3", "categoryId=Category1"});
-        sendEvent(epService, "Category", new String[] {"categoryId=Category1", "owner=Petar"});
-        sendEvent(epService, "ProductOwnerDetails", new String[] {"productId=Product1", "owner=Petar"});
+        sendEvent(eventRepresentationEnum, epService, "Product", new String[] {"productId=Product1", "categoryId=Category1"});
+        sendEvent(eventRepresentationEnum, epService, "Product", new String[] {"productId=Product2", "categoryId=Category1"});
+        sendEvent(eventRepresentationEnum, epService, "Product", new String[] {"productId=Product3", "categoryId=Category1"});
+        sendEvent(eventRepresentationEnum, epService, "Category", new String[] {"categoryId=Category1", "owner=Petar"});
+        sendEvent(eventRepresentationEnum, epService, "ProductOwnerDetails", new String[] {"productId=Product1", "owner=Petar"});
 
         String[] fields = "WinProduct.productId".split(",");
         EventBean[] queryResults;
@@ -109,18 +116,27 @@ public class TestNamedWindowExecuteQuery extends TestCase
         epService.destroy();
     }
 	
-    private void sendEvent(EPServiceProvider epService, String eventName, String[] attributes) {
-        Map<String, Object> event = new HashMap<String, Object>();
+    private void sendEvent(EventRepresentationEnum eventRepresentationEnum, EPServiceProvider epService, String eventName, String[] attributes) {
+        Map<String, Object> eventMap = new HashMap<String, Object>();
+        List<Object> eventObjectArray = new ArrayList<Object>();
         for (String attribute: attributes) {
-            event.put(attribute.split("=")[0], attribute.split("=")[1]);
+            String key = attribute.split("=")[0];
+            String value = attribute.split("=")[1];
+            eventMap.put(key, value);
+            eventObjectArray.add(value);
         }
-        epService.getEPRuntime().sendEvent(event, eventName);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(eventObjectArray.toArray(), eventName);
+        }
+        else {
+            epService.getEPRuntime().sendEvent(eventMap, eventName);
+        }
     }
 
     public void testNamedWindowJoinWhere() throws Exception
     {
-        epService.getEPAdministrator().createEPL("create window Win1.win:keepall() (key String, keyJoin String)");
-        epService.getEPAdministrator().createEPL("create window Win2.win:keepall() (keyJoin String, value double)");
+        epService.getEPAdministrator().createEPL(EventRepresentationEnum.MAP.getAnnotationText() + " create window Win1.win:keepall() (key String, keyJoin String)");
+        epService.getEPAdministrator().createEPL(EventRepresentationEnum.MAP.getAnnotationText() + " create window Win2.win:keepall() (keyJoin String, value double)");
         String queryAgg = "select w1.key, sum(value) from Win1 w1, Win2 w2 WHERE w1.keyJoin = w2.keyJoin GROUP BY w1.key order by w1.key";
         String[] fieldsAgg = "w1.key,sum(value)".split(",");
         String queryNoagg = "select w1.key, w2.value from Win1 w1, Win2 w2 where w1.keyJoin = w2.keyJoin and value = 1 order by w1.key";
@@ -168,17 +184,17 @@ public class TestNamedWindowExecuteQuery extends TestCase
     }
 
     private void sendWin1Event(String key, String keyJoin) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("key", key);
-        event.put("keyJoin", keyJoin);
-        epService.getEPRuntime().sendEvent(event, "Win1");
+        Map<String, Object> theEvent = new HashMap<String, Object>();
+        theEvent.put("key", key);
+        theEvent.put("keyJoin", keyJoin);
+        epService.getEPRuntime().sendEvent(theEvent, "Win1");
     }
 
     private void sendWin2Event(String keyJoin, double value) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("keyJoin", keyJoin);
-        event.put("value", value);
-        epService.getEPRuntime().sendEvent(event, "Win2");
+        Map<String, Object> theEvent = new HashMap<String, Object>();
+        theEvent.put("keyJoin", keyJoin);
+        theEvent.put("value", value);
+        epService.getEPRuntime().sendEvent(theEvent, "Win2");
     }
 
     public void testExecuteSimple() throws Exception
@@ -264,9 +280,9 @@ public class TestNamedWindowExecuteQuery extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 5));
-        String fields[] = new String[] {"string", "total"};
+        String fields[] = new String[] {"theString", "total"};
 
-        String query = "select string, sum(intPrimitive) as total from MyWindow";
+        String query = "select theString, sum(intPrimitive) as total from MyWindow";
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
         EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 16}, {"E2", 16}, {"E3", 16}});
 
@@ -280,9 +296,9 @@ public class TestNamedWindowExecuteQuery extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
-        String fields[] = new String[] {"string", "total"};
+        String fields[] = new String[] {"theString", "total"};
 
-        String query = "select string, sum(intPrimitive) as total from MyWindow group by string order by string asc";
+        String query = "select theString, sum(intPrimitive) as total from MyWindow group by theString order by theString asc";
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
         EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E1", 6}, {"E2", 11}});
 
@@ -303,10 +319,10 @@ public class TestNamedWindowExecuteQuery extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 5));
         epService.getEPRuntime().sendEvent(new SupportBean_A("E2"));
-        String fields[] = new String[] {"string", "intPrimitive", "id"};
+        String fields[] = new String[] {"theString", "intPrimitive", "id"};
 
-        String query = "select string, intPrimitive, id from MyWindow nw1, " +
-                            "MySecondWindow nw2 where nw1.string = nw2.id";
+        String query = "select theString, intPrimitive, id from MyWindow nw1, " +
+                            "MySecondWindow nw2 where nw1.theString = nw2.id";
         EPOnDemandQueryResult result = epService.getEPRuntime().executeQuery(query);
         EPAssertionUtil.assertPropsPerRow(result.iterator(), fields, new Object[][]{{"E2", 11, "E2"}});
 
@@ -338,8 +354,8 @@ public class TestNamedWindowExecuteQuery extends TestCase
         epl = "select * from pattern [every MyWindow]";
         tryInvalid(epl, "Error executing statement: On-demand queries require named windows and do not allow event streams or patterns [select * from pattern [every MyWindow]]");
 
-        epl = "select prev(1, string) from MyWindow";
-        tryInvalid(epl, "Error executing statement: Previous function cannot be used in this context [select prev(1, string) from MyWindow]");
+        epl = "select prev(1, theString) from MyWindow";
+        tryInvalid(epl, "Error executing statement: Previous function cannot be used in this context [select prev(1, theString) from MyWindow]");
     }
 
     private void tryInvalid(String epl, String message)

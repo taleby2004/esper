@@ -115,7 +115,7 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
             {
                 for (String tag : taggedEventTypes.keySet())
                 {
-                    events[count] = matchedEvents.getMatchingEvent(tag);
+                    events[count] = matchedEvents.getMatchingEventByTag(tag);
                     count++;
                 }
             }
@@ -125,7 +125,7 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
                 for (Map.Entry<String, Pair<EventType, String>> entry : arrayEventTypes.entrySet())
                 {
                     EventType compositeEventType = entry.getValue().getFirst();
-                    events[count] = eventAdapterService.adapterForTypedMap(matchedEvents.getMatchingEvents(), compositeEventType);
+                    events[count] = eventAdapterService.adapterForTypedMap(matchedEvents.getMatchingEventsAsMap(), compositeEventType);
                     count++;
                 }
             }

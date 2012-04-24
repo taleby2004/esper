@@ -13,6 +13,8 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.core.thread.ThreadingService;
 import com.espertech.esper.epl.core.MethodResolutionService;
+import com.espertech.esper.event.arr.ObjectArrayEventBean;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 import com.espertech.esper.event.bean.BeanEventAdapter;
 import com.espertech.esper.event.bean.BeanEventBean;
 import com.espertech.esper.event.bean.BeanEventType;
@@ -21,6 +23,7 @@ import com.espertech.esper.event.map.MapEventBean;
 import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.event.xml.*;
 import com.espertech.esper.plugin.*;
+import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.URIUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -213,6 +216,10 @@ public class EventAdapterServiceImpl implements EventAdapterService
         {
             return new EventSenderMap(runtimeEventSender, (MapEventType) eventType, this, threadingService);
         }
+        if (eventType instanceof ObjectArrayEventType)
+        {
+            return new EventSenderObjectArray(runtimeEventSender, (ObjectArrayEventType) eventType, this, threadingService);
+        }
         if (eventType instanceof BaseXMLEventType)
         {
             return new EventSenderXMLDOM(runtimeEventSender, (BaseXMLEventType) eventType, this, threadingService);
@@ -240,6 +247,22 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
         MapEventType mapEventType = (MapEventType) type;
         mapEventType.addAdditionalProperties(typeMap, this);
+    }
+
+    public void updateObjectArrayEventType(String objectArrayEventTypeName, Map<String, Object> typeMap) throws EventAdapterException
+    {
+        EventType type = nameToTypeMap.get(objectArrayEventTypeName);
+        if (type == null)
+        {
+            throw new EventAdapterException("Event type named '" + objectArrayEventTypeName + "' has not been declared");
+        }
+        if (!(type instanceof ObjectArrayEventType))
+        {
+            throw new EventAdapterException("Event type by name '" + objectArrayEventTypeName + "' is not an Object-array event type");
+        }
+
+        ObjectArrayEventType objectArrayEventType = (ObjectArrayEventType) type;
+        objectArrayEventType.addAdditionalProperties(typeMap, this);
     }
 
     public EventSender getDynamicTypeEventSender(EPRuntimeEventSender epRuntime, URI[] uri, ThreadingService threadingService) throws EventTypeException
@@ -376,18 +399,18 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     /**
      * Create an event bean given an event of object id.
-     * @param event is the event class
+     * @param theEvent is the event class
      * @return event
      */
-    public EventBean adapterForBean(Object event)
+    public EventBean adapterForBean(Object theEvent)
     {
-        EventType eventType = typesPerJavaBean.get(event.getClass());
+        EventType eventType = typesPerJavaBean.get(theEvent.getClass());
         if (eventType == null)
         {
             // This will update the typesPerJavaBean mapping
-            eventType = beanEventAdapter.createBeanType(event.getClass().getName(), event.getClass(), false, false, false);
+            eventType = beanEventAdapter.createBeanType(theEvent.getClass().getName(), theEvent.getClass(), false, false, false);
         }
-        return new BeanEventBean(event, eventType);
+        return new BeanEventBean(theEvent, eventType);
     }
 
     /**
@@ -471,8 +494,8 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public synchronized EventType addNestableMapType(String eventTypeName, Map<String, Object> propertyTypes, ConfigurationEventTypeMap optionalConfig, boolean isPreconfiguredStatic, boolean isPreconfigured, boolean isConfigured, boolean namedWindow, boolean insertInto) throws EventAdapterException
     {
-        Pair<EventType[], Set<EventType>> mapSuperTypes = getMapSuperTypes(optionalConfig);
-        EventTypeMetadata metadata = EventTypeMetadata.createMapType(eventTypeName, isPreconfiguredStatic, isPreconfigured, isConfigured, namedWindow, insertInto);
+        Pair<EventType[], Set<EventType>> mapSuperTypes = getSuperTypesDepthFirst(optionalConfig != null ? optionalConfig.getSuperTypes() : null, true);
+        EventTypeMetadata metadata = EventTypeMetadata.createNonPojoApplicationType(EventTypeMetadata.ApplicationType.MAP, eventTypeName, isPreconfiguredStatic, isPreconfigured, isConfigured, namedWindow, insertInto);
 
         int typeId = eventTypeIdGenerator.getTypeId(eventTypeName);
         MapEventType newEventType = new MapEventType(metadata, eventTypeName, typeId, this, propertyTypes, mapSuperTypes.getFirst(), mapSuperTypes.getSecond(), optionalConfig);
@@ -497,15 +520,52 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return newEventType;
     }
 
-    public EventBean adapterForMap(Map<String, Object> event, String eventTypeName) throws EventAdapterException
+    public synchronized EventType addNestableObjectArrayType(String eventTypeName, Map<String, Object> propertyTypes, ConfigurationEventTypeObjectArray optionalConfig, boolean isPreconfiguredStatic, boolean isPreconfigured, boolean isConfigured, boolean namedWindow, boolean insertInto) throws EventAdapterException
     {
+        Pair<EventType[], Set<EventType>> mapSuperTypes = getSuperTypesDepthFirst(optionalConfig != null ? optionalConfig.getSuperTypes() : null, false);
+        EventTypeMetadata metadata = EventTypeMetadata.createNonPojoApplicationType(EventTypeMetadata.ApplicationType.OBJECTARR, eventTypeName, isPreconfiguredStatic, isPreconfigured, isConfigured, namedWindow, insertInto);
+
+        int typeId = eventTypeIdGenerator.getTypeId(eventTypeName);
+        ObjectArrayEventType newEventType = new ObjectArrayEventType(metadata, eventTypeName, typeId, this, propertyTypes, optionalConfig, mapSuperTypes.getFirst(), mapSuperTypes.getSecond());
+
         EventType existingType = nameToTypeMap.get(eventTypeName);
-        if (existingType == null)
+        if (existingType != null)
         {
-            throw new EventAdapterException("Event type named '" + eventTypeName + "' has not been defined");
+            // The existing type must be the same as the type createdStatement
+            if (!newEventType.equalsCompareType(existingType))
+            {
+                String message = newEventType.getEqualsMessage(existingType);
+                throw new EventAdapterException("Event type named '" + eventTypeName +
+                        "' has already been declared with differing column name or type information: " + message);
+            }
+
+            // Since it's the same, return the existing type
+            return existingType;
         }
 
-        return adapterForTypedMap(event, existingType);
+        nameToTypeMap.put(eventTypeName, newEventType);
+
+        return newEventType;
+    }
+
+    public EventBean adapterForMap(Map<String, Object> theEvent, String eventTypeName) throws EPException
+    {
+        EventType existingType = nameToTypeMap.get(eventTypeName);
+        if (!(existingType instanceof MapEventType)) {
+            throw new EPException(getMessageExpecting(eventTypeName, existingType, "Map"));
+        }
+
+        return adapterForTypedMap(theEvent, existingType);
+    }
+
+    public EventBean adapterForObjectArray(Object[] theEvent, String eventTypeName) throws EPException
+    {
+        EventType existingType = nameToTypeMap.get(eventTypeName);
+        if (!(existingType instanceof ObjectArrayEventType)) {
+            throw new EPException(getMessageExpecting(eventTypeName, existingType, "Object-array"));
+        }
+
+        return adapterForTypedObjectArray(theEvent, existingType);
     }
 
     public EventBean adapterForDOM(Node node)
@@ -614,13 +674,18 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return type;
     }
 
-    public final EventBean adapterForType(Object event, EventType eventType) {
-        return EventAdapterServiceHelper.adapterForType(event, eventType, this);
+    public final EventBean adapterForType(Object theEvent, EventType eventType) {
+        return EventAdapterServiceHelper.adapterForType(theEvent, eventType, this);
     }
 
     public final EventBean adapterForTypedMap(Map<String, Object> properties, EventType eventType)
     {
         return new MapEventBean(properties, eventType);
+    }
+
+    public final EventBean adapterForTypedObjectArray(Object[] properties, EventType eventType)
+    {
+        return new ObjectArrayEventBean(properties, eventType);
     }
 
     public synchronized EventType addWrapperType(String eventTypeName, EventType underlyingEventType, Map<String, Object> propertyTypes, boolean isNamedWindow, boolean isInsertInto) throws EventAdapterException
@@ -721,6 +786,13 @@ public class EventAdapterServiceImpl implements EventAdapterService
         return new MapEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), this, propertyTypes, null, null, null);
     }
 
+    public final EventType createAnonymousObjectArrayType(String typeName, Map<String, Object> propertyTypes) throws EventAdapterException
+    {
+        String assignedTypeName = EventAdapterService.ANONYMOUS_TYPE_NAME_PREFIX + typeName;
+        EventTypeMetadata metadata = EventTypeMetadata.createAnonymous(assignedTypeName);
+        return new ObjectArrayEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), this, propertyTypes, null, null, null);
+    }
+
     public EventType createSemiAnonymousMapType(String typeName, Map<String, Pair<EventType, String>> taggedEventTypes, Map<String, Pair<EventType, String>> arrayEventTypes, boolean isUsedByChildViews)
     {
         Map<String, Object> mapProperties = new LinkedHashMap<String, Object>();
@@ -757,17 +829,17 @@ public class EventAdapterServiceImpl implements EventAdapterService
     	return new WrapperEventType(metadata, assignedTypeName, eventTypeIdGenerator.getTypeId(assignedTypeName), underlyingEventType, propertyTypes, this);
     }
 
-	public final EventBean adapterForTypedWrapper(EventBean event, Map<String, Object> properties, EventType eventType)
+	public final EventBean adapterForTypedWrapper(EventBean theEvent, Map<String, Object> properties, EventType eventType)
 	{
-        if (event instanceof DecoratingEventBean)
+        if (theEvent instanceof DecoratingEventBean)
         {
-            DecoratingEventBean wrapper = (DecoratingEventBean) event;
+            DecoratingEventBean wrapper = (DecoratingEventBean) theEvent;
             properties.putAll(wrapper.getDecoratingProperties());
             return new WrapperEventBean(wrapper.getUnderlyingEvent(), properties, eventType);
         }
         else
         {
-            return new WrapperEventBean(event, properties, eventType);
+            return new WrapperEventBean(theEvent, properties, eventType);
         }
     }
 
@@ -781,34 +853,51 @@ public class EventAdapterServiceImpl implements EventAdapterService
         javaPackageNames.add(javaPackageName);
     }
 
-    private Pair<EventType[], Set<EventType>> getMapSuperTypes(ConfigurationEventTypeMap optionalConfig)
+    public EventType createAnonymousBeanType(String eventTypeName, Class clazz) {
+        return new BeanEventType(EventTypeMetadata.createBeanType(eventTypeName, clazz, false, false, false, EventTypeMetadata.TypeClass.ANONYMOUS),
+                -1, clazz, this, beanEventAdapter.getClassToLegacyConfigs(clazz.getName()));
+    }
+
+    private Pair<EventType[], Set<EventType>> getSuperTypesDepthFirst(Set<String> superTypesSet, boolean expectMapType)
             throws EventAdapterException
     {
-        if (optionalConfig == null || optionalConfig.getSuperTypes() == null || optionalConfig.getSuperTypes().isEmpty())
+        if (superTypesSet == null || superTypesSet.isEmpty())
         {
             return new Pair<EventType[], Set<EventType>>(null,null);
         }
 
-        EventType[] superTypes = new EventType[optionalConfig.getSuperTypes().size()];
+        EventType[] superTypes = new EventType[superTypesSet.size()];
         Set<EventType> deepSuperTypes = new LinkedHashSet<EventType>();
 
         int count = 0;
-        for (String superName : optionalConfig.getSuperTypes())
+        for (String superName : superTypesSet)
         {
             EventType type = this.nameToTypeMap.get(superName);
             if (type == null)
             {
-                throw new EventAdapterException("Map supertype by name '" + superName + "' could not be found");
+                throw new EventAdapterException("Supertype by name '" + superName + "' could not be found");
             }
-            if (!(type instanceof MapEventType))
-            {
-                throw new EventAdapterException("Supertype by name '" + superName + "' is not a Map, expected a Map event type as a supertype");
+            if (expectMapType) {
+                if (!(type instanceof MapEventType))
+                {
+                    throw new EventAdapterException("Supertype by name '" + superName + "' is not a Map, expected a Map event type as a supertype");
+                }
+            }
+            else {
+                if (!(type instanceof ObjectArrayEventType))
+                {
+                    throw new EventAdapterException("Supertype by name '" + superName + "' is not an Object-array type, expected a Object-array event type as a supertype");
+                }
             }
             superTypes[count++] = type;
             deepSuperTypes.add(type);
             addRecursiveSupertypes(deepSuperTypes, type);
         }
-        return new Pair<EventType[], Set<EventType>>(superTypes,deepSuperTypes);
+
+        List<EventType> superTypesListDepthFirst = new ArrayList<EventType>(deepSuperTypes);
+        Collections.reverse(superTypesListDepthFirst);
+
+        return new Pair<EventType[], Set<EventType>>(superTypes,new LinkedHashSet<EventType>(superTypesListDepthFirst));
     }
 
     private static void addRecursiveSupertypes(Set<EventType> superTypes, EventType child)
@@ -825,50 +914,7 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
     public EventBean[] typeCast(List<EventBean> events, EventType targetType)
     {
-        EventBean[] convertedArray = new EventBean[events.size()];
-        int count = 0;
-        for (EventBean event : events)
-        {
-            EventBean converted;
-            if (event instanceof DecoratingEventBean)
-            {
-                DecoratingEventBean wrapper = (DecoratingEventBean) event;
-                if (targetType instanceof MapEventType)
-                {
-                    Map<String, Object> props = new HashMap<String, Object>();
-                    props.putAll(wrapper.getDecoratingProperties());
-                    for (EventPropertyDescriptor propDesc : wrapper.getUnderlyingEvent().getEventType().getPropertyDescriptors())
-                    {
-                        props.put(propDesc.getPropertyName(), wrapper.getUnderlyingEvent().get(propDesc.getPropertyName()));
-                    }
-                    converted = adapterForTypedMap(props, targetType);
-                }
-                else
-                {
-                    converted = adapterForTypedWrapper(wrapper.getUnderlyingEvent(), wrapper.getDecoratingProperties(), targetType);
-                }
-            }
-            else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof MapEventType))
-            {
-                MappedEventBean mapEvent = (MappedEventBean) event;
-                converted = this.adapterForTypedMap(mapEvent.getProperties(), targetType);
-            }
-            else if ((event.getEventType() instanceof MapEventType) && (targetType instanceof WrapperEventType))
-            {
-                converted = this.adapterForTypedWrapper(event, Collections.EMPTY_MAP, targetType);
-            }
-            else if ((event.getEventType() instanceof BeanEventType) && (targetType instanceof BeanEventType))
-            {
-                converted = this.adapterForTypedBean(event.getUnderlying(), targetType);
-            }
-            else
-            {
-                throw new EPException("Unknown event type " + event.getEventType());
-            }
-            convertedArray[count] = converted;
-            count++;
-        }
-        return convertedArray;
+        return EventAdapterServiceHelper.typeCast(events, targetType, this);
     }
 
     public boolean removeType(String name)
@@ -887,5 +933,24 @@ public class EventAdapterServiceImpl implements EventAdapterService
 
         nameToHandlerMap.remove(name);
         return true;
+    }
+
+    public EventBeanSPI getShellForType(EventType eventType) {
+        return EventAdapterServiceHelper.getShellForType(eventType);
+    }
+
+    private String getMessageExpecting(String eventTypeName, EventType existingType, String typeOfEventType) {
+        String message = "Event type named '" + eventTypeName + "' has not been defined or is not a " + typeOfEventType + " event type";
+        if (existingType != null) {
+            message += ", the name '" + eventTypeName + "' refers to a " + JavaClassHelper.getClassNameFullyQualPretty(existingType.getUnderlyingType()) + " event type";
+        }
+        else {
+            message += ", the name '" + eventTypeName + "' has not been defined as an event type";
+        }
+        return message;
+    }
+
+    public EventBeanAdapterFactory getAdapterFactoryForType(EventType eventType) {
+        return EventAdapterServiceHelper.getAdapterFactoryForType(eventType);
     }
 }

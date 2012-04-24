@@ -181,11 +181,11 @@ public class TestModifiedWildcardSelect extends TestCase
 		Configuration configuration = SupportConfigFactory.getConfiguration();
 		Map<String, Object> typeMap = new HashMap<String, Object>();
 		typeMap.put("int", Integer.class);
-		typeMap.put("string", String.class);
+		typeMap.put("theString", String.class);
 		configuration.addEventType("mapEvent", typeMap);
 		epService = EPServiceProviderManager.getProvider("wildcard map event", configuration);
 
-		String text = "select *, string||string as concat from mapEvent.win:length(5)";
+		String text = "select *, theString||theString as concat from mapEvent.win:length(5)";
 
 		EPStatement statement = epService.getEPAdministrator().createEPL(text);
 		statement.addListener(listener);
@@ -193,13 +193,13 @@ public class TestModifiedWildcardSelect extends TestCase
 		// The map to send into the runtime
 		Map<String, Object> props = new HashMap<String, Object>();
 		props.put("int", 1);
-		props.put("string", "xx");
+		props.put("theString", "xx");
 		epService.getEPRuntime().sendEvent(props, "mapEvent");
 
 		// The map of expected results
         Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("int", 1);
-		properties.put("string", "xx");
+		properties.put("theString", "xx");
 		properties.put("concat", "xxxx");
 
 		assertProperties(properties, listener);
@@ -228,17 +228,17 @@ public class TestModifiedWildcardSelect extends TestCase
 		SupportBeanSimple eventSimple = sendSimpleEvent("string");
 		SupportMarketDataBean eventMarket = sendMarketEvent("string");
 
-		EventBean event = listener.getLastNewData()[0];
+		EventBean theEvent = listener.getLastNewData()[0];
         Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("concat", "stringstring");
 		assertProperties(properties, listener);
-		assertSame(eventSimple, event.get("eventOne"));
-		assertSame(eventMarket, event.get("eventTwo"));
+		assertSame(eventSimple, theEvent.get("eventOne"));
+		assertSame(eventMarket, theEvent.get("eventTwo"));
 	}
 
 	private void assertSimple() throws InterruptedException
 	{
-		SupportBeanSimple event = sendSimpleEvent("string");
+		SupportBeanSimple theEvent = sendSimpleEvent("string");
 
         assertEquals("stringstring", listener.getLastNewData()[0].get("concat"));
         Map<String, Object> properties = new HashMap<String, Object>();
@@ -250,19 +250,19 @@ public class TestModifiedWildcardSelect extends TestCase
         assertEquals(Pair.class, listener.getLastNewData()[0].getEventType().getUnderlyingType());
         assertTrue(listener.getLastNewData()[0].getUnderlying() instanceof Pair);
         Pair pair = (Pair) listener.getLastNewData()[0].getUnderlying();
-        assertEquals(event, pair.getFirst());
+        assertEquals(theEvent, pair.getFirst());
         assertEquals("stringstring", ((Map)pair.getSecond()).get("concat"));
     }
 
 	private void assertCommonProperties() throws InterruptedException
 	{
 		sendABEvents("string");
-		EventBean event = listener.getLastNewData()[0];
+		EventBean theEvent = listener.getLastNewData()[0];
         Map<String, Object> properties = new HashMap<String, Object>();
 		properties.put("concat", "stringstring");
 		assertProperties(properties, listener);
-		assertNotNull(event.get("eventOne"));
-		assertNotNull(event.get("eventTwo"));
+		assertNotNull(theEvent.get("eventOne"));
+		assertNotNull(theEvent.get("eventTwo"));
 	}
 
 	private void assertCombinedProps() throws InterruptedException
@@ -283,10 +283,10 @@ public class TestModifiedWildcardSelect extends TestCase
 
 	private void assertProperties(Map<String, Object> properties, SupportUpdateListener listener)
 	{
-		EventBean event = listener.getLastNewData()[0];
+		EventBean theEvent = listener.getLastNewData()[0];
 		for(String property : properties.keySet())
 		{
-			assertEquals(properties.get(property), event.get(property));
+			assertEquals(properties.get(property), theEvent.get(property));
 		}
 	}
 

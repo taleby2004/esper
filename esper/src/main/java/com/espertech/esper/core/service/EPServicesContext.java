@@ -18,6 +18,7 @@ import com.espertech.esper.dispatch.DispatchServiceProvider;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineSettingsService;
 import com.espertech.esper.epl.db.DatabaseConfigService;
+import com.espertech.esper.dataflow.core.GraphService;
 import com.espertech.esper.epl.metric.MetricReportingServiceSPI;
 import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.PluggableObjectCollection;
@@ -85,6 +86,8 @@ public final class EPServicesContext
     private StatementLifecycleSvc statementLifecycleSvc;
     private InternalEventRouterImpl internalEventRouter;
     private EventTypeIdGenerator eventTypeIdGenerator;
+
+    private GraphService graphService;
 
     /**
      * Constructor - sets up new set of services.
@@ -154,7 +157,8 @@ public final class EPServicesContext
                              StatementMetadataFactory statementMetadataFactory,
                              ContextManagementService contextManagementService,
                              SchedulableAgentInstanceDirectory schedulableAgentInstanceDirectory,
-                             PatternSubexpressionPoolEngineSvc patternSubexpressionPoolSvc)
+                             PatternSubexpressionPoolEngineSvc patternSubexpressionPoolSvc,
+                             GraphService graphService)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -195,6 +199,7 @@ public final class EPServicesContext
         this.contextManagementService = contextManagementService;
         this.schedulableAgentInstanceDirectory = schedulableAgentInstanceDirectory;
         this.patternSubexpressionPoolSvc = patternSubexpressionPoolSvc;
+        this.graphService = graphService;
     }
 
     public PatternNodeFactory getPatternNodeFactory() {
@@ -395,6 +400,9 @@ public final class EPServicesContext
      */
     public void destroy()
     {
+        if (graphService != null) {
+            graphService.destroy();
+        }
         if (metricsReportingService != null)
         {
             metricsReportingService.destroy();
@@ -631,5 +639,9 @@ public final class EPServicesContext
 
     public PatternSubexpressionPoolEngineSvc getPatternSubexpressionPoolSvc() {
         return patternSubexpressionPoolSvc;
+    }
+
+    public GraphService getGraphService() {
+        return graphService;
     }
 }

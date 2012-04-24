@@ -202,8 +202,8 @@ public class TestLeftOuterJoinWhere extends TestCase
         }
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

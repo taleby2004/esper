@@ -41,7 +41,7 @@ public class TestConsumingFilter extends TestCase implements SupportBeanConstant
 
     public void testFollowedBy() {
         String[] fields = "a,b".split(",");
-        String pattern = "select a.string as a, b.string as b from pattern[every a=SupportBean -> b=SupportBean@consume]";
+        String pattern = "select a.theString as a, b.theString as b from pattern[every a=SupportBean -> b=SupportBean@consume]";
         engine.getEPAdministrator().createEPL(pattern).addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 0));
@@ -59,14 +59,14 @@ public class TestConsumingFilter extends TestCase implements SupportBeanConstant
 
     public void testAnd() {
         String[] fields = "a,b".split(",");
-        String pattern = "select a.string as a, b.string as b from pattern[every (a=SupportBean and b=SupportBean)]";
+        String pattern = "select a.theString as a, b.theString as b from pattern[every (a=SupportBean and b=SupportBean)]";
         engine.getEPAdministrator().createEPL(pattern).addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 0));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", "E1"});
         engine.getEPAdministrator().destroyAllStatements();
 
-        pattern = "select a.string as a, b.string as b from pattern [every (a=SupportBean and b=SupportBean(intPrimitive = 10)@consume(2))]";
+        pattern = "select a.theString as a, b.theString as b from pattern [every (a=SupportBean and b=SupportBean(intPrimitive = 10)@consume(2))]";
         engine.getEPAdministrator().createEPL(pattern).addListener(listener);
 
         engine.getEPRuntime().sendEvent(new SupportBean("E1", 10));
@@ -93,47 +93,47 @@ public class TestConsumingFilter extends TestCase implements SupportBeanConstant
 
     public void testOr() {
         String[] fields = "a,b".split(",");
-        runAssertion(fields, "select a.string as a, b.string as b from pattern[every a=SupportBean or b=SupportBean] order by a asc",
+        runAssertion(fields, "select a.theString as a, b.theString as b from pattern[every a=SupportBean or b=SupportBean] order by a asc",
                 new Object[][]{{null, "E1"}, {"E1", null}});
 
-        runAssertion(fields, "select a.string as a, b.string as b from pattern[every a=SupportBean@consume(1) or every b=SupportBean@consume(1)] order by a asc",
+        runAssertion(fields, "select a.theString as a, b.theString as b from pattern[every a=SupportBean@consume(1) or every b=SupportBean@consume(1)] order by a asc",
                 new Object[][]{{null, "E1"}, {"E1", null}});
 
-        runAssertion(fields, "select a.string as a, b.string as b from pattern[every a=SupportBean@consume(2) or b=SupportBean@consume(1)] order by a asc",
+        runAssertion(fields, "select a.theString as a, b.theString as b from pattern[every a=SupportBean@consume(2) or b=SupportBean@consume(1)] order by a asc",
                 new Object[]{"E1", null});
 
-        runAssertion(fields, "select a.string as a, b.string as b from pattern[every a=SupportBean@consume(1) or b=SupportBean@consume(2)] order by a asc",
+        runAssertion(fields, "select a.theString as a, b.theString as b from pattern[every a=SupportBean@consume(1) or b=SupportBean@consume(2)] order by a asc",
                 new Object[]{null, "E1"});
 
-        runAssertion(fields, "select a.string as a, b.string as b from pattern[every a=SupportBean or b=SupportBean@consume(2)] order by a asc",
+        runAssertion(fields, "select a.theString as a, b.theString as b from pattern[every a=SupportBean or b=SupportBean@consume(2)] order by a asc",
                 new Object[]{null, "E1"});
 
-        runAssertion(fields, "select a.string as a, b.string as b from pattern[every a=SupportBean@consume(1) or b=SupportBean] order by a asc",
+        runAssertion(fields, "select a.theString as a, b.theString as b from pattern[every a=SupportBean@consume(1) or b=SupportBean] order by a asc",
                 new Object[]{"E1", null});
 
-        runAssertion(fields, "select a.string as a, b.string as b from pattern[every a=SupportBean(intPrimitive=11)@consume(1) or b=SupportBean] order by a asc",
+        runAssertion(fields, "select a.theString as a, b.theString as b from pattern[every a=SupportBean(intPrimitive=11)@consume(1) or b=SupportBean] order by a asc",
                 new Object[]{null, "E1"});
 
-        runAssertion(fields, "select a.string as a, b.string as b from pattern[every a=SupportBean(intPrimitive=10)@consume(1) or b=SupportBean] order by a asc",
+        runAssertion(fields, "select a.theString as a, b.theString as b from pattern[every a=SupportBean(intPrimitive=10)@consume(1) or b=SupportBean] order by a asc",
                 new Object[]{"E1", null});
 
         fields = "a,b,c".split(",");
-        runAssertion(fields, "select a.string as a, b.string as b, c.string as c from pattern[every a=SupportBean@consume(1) or b=SupportBean@consume(2) or c=SupportBean@consume(3)] order by a,b,c",
+        runAssertion(fields, "select a.theString as a, b.theString as b, c.theString as c from pattern[every a=SupportBean@consume(1) or b=SupportBean@consume(2) or c=SupportBean@consume(3)] order by a,b,c",
                 new Object[][]{{null, null, "E1"}});
 
-        runAssertion(fields, "select a.string as a, b.string as b, c.string as c from pattern[every a=SupportBean@consume(1) or every b=SupportBean@consume(2) or every c=SupportBean@consume(2)] order by a,b,c",
+        runAssertion(fields, "select a.theString as a, b.theString as b, c.theString as c from pattern[every a=SupportBean@consume(1) or every b=SupportBean@consume(2) or every c=SupportBean@consume(2)] order by a,b,c",
                 new Object[][]{{null, null, "E1"}, {null, "E1", null}});
 
-        runAssertion(fields, "select a.string as a, b.string as b, c.string as c from pattern[every a=SupportBean@consume(2) or every b=SupportBean@consume(2) or every c=SupportBean@consume(2)] order by a,b,c",
+        runAssertion(fields, "select a.theString as a, b.theString as b, c.theString as c from pattern[every a=SupportBean@consume(2) or every b=SupportBean@consume(2) or every c=SupportBean@consume(2)] order by a,b,c",
                 new Object[][]{{null, null, "E1"}, {null, "E1", null}, {"E1", null, null}});
 
-        runAssertion(fields, "select a.string as a, b.string as b, c.string as c from pattern[every a=SupportBean@consume(2) or every b=SupportBean@consume(2) or every c=SupportBean@consume(1)] order by a,b,c",
+        runAssertion(fields, "select a.theString as a, b.theString as b, c.theString as c from pattern[every a=SupportBean@consume(2) or every b=SupportBean@consume(2) or every c=SupportBean@consume(1)] order by a,b,c",
                 new Object[][]{{null, "E1", null}, {"E1", null, null}});
 
-        runAssertion(fields, "select a.string as a, b.string as b, c.string as c from pattern[every a=SupportBean@consume(2) or every b=SupportBean@consume(1) or every c=SupportBean@consume(2)] order by a,b,c",
+        runAssertion(fields, "select a.theString as a, b.theString as b, c.theString as c from pattern[every a=SupportBean@consume(2) or every b=SupportBean@consume(1) or every c=SupportBean@consume(2)] order by a,b,c",
                 new Object[][]{{null, null, "E1"}, {"E1", null, null}});
 
-        runAssertion(fields, "select a.string as a, b.string as b, c.string as c from pattern[every a=SupportBean@consume(0) or every b=SupportBean or every c=SupportBean] order by a,b,c",
+        runAssertion(fields, "select a.theString as a, b.theString as b, c.theString as c from pattern[every a=SupportBean@consume(0) or every b=SupportBean or every c=SupportBean] order by a,b,c",
                 new Object[][]{{null, null, "E1"}, {null, "E1", null}, {"E1", null, null}});
     }
 

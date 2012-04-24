@@ -20,8 +20,8 @@ public interface EventBeanCopyMethod
 {
     /**
      * Copy the event bean returning a shallow copy.
-     * @param event to copy
+     * @param theEvent to copy
      * @return shallow copy
      */
-    public EventBean copy(EventBean event);
+    public EventBean copy(EventBean theEvent);
 }

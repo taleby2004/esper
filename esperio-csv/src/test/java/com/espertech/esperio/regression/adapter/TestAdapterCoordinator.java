@@ -269,17 +269,17 @@ public class TestAdapterCoordinator extends TestCase
 		assertTrue(howManyBack < listener.getNewDataList().size());
 		EventBean[] data = listener.getNewDataList().get(howManyBack);
 		assertEquals(1, data.length);
-		EventBean event = data[0];
-		assertEquals(myInt, event.get("myInt"));
-		assertEquals(myDouble, event.get("myDouble"));
-		assertEquals(myString, event.get("myString"));
+		EventBean theEvent = data[0];
+		assertEquals(myInt, theEvent.get("myInt"));
+		assertEquals(myDouble, theEvent.get("myDouble"));
+		assertEquals(myString, theEvent.get("myString"));
 	}
 
 
 	private void sendTimeEvent(int timeIncrement){
 		currentTime += timeIncrement;
-	    CurrentTimeEvent event = new CurrentTimeEvent(currentTime);
-	    epService.getEPRuntime().sendEvent(event);
+	    CurrentTimeEvent theEvent = new CurrentTimeEvent(currentTime);
+	    epService.getEPRuntime().sendEvent(theEvent);
 	}
 
 	private void assertSizeAndReset(int size)

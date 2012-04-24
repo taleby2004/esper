@@ -21,4 +21,6 @@ public interface MatchedEventConvertor
      * @return events per stream
      */
     public EventBean[] convert(MatchedEventMap events);
+
+    public MatchedEventMapMeta getMatchedEventMapMeta();
 }

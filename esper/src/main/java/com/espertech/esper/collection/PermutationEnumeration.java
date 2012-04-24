@@ -90,10 +90,10 @@ public class PermutationEnumeration implements Enumeration<int[]>
         */
 
         int[] result = new int[numElements];
-        List<Integer> out = new ArrayList<Integer>();
+        List<Integer> outList = new ArrayList<Integer>();
         for (int i = 0; i < numElements; i++)
         {
-            out.add(i);
+            outList.add(i);
         }
         int currentVal = permutation;
 
@@ -101,11 +101,11 @@ public class PermutationEnumeration implements Enumeration<int[]>
         {
             int factor = factors[position];
             int index = currentVal / factor;
-            result[position] = out.get(index);
-            out.remove(index);
+            result[position] = outList.get(index);
+            outList.remove(index);
             currentVal -= index * factor;
         }
-        result[numElements - 1] = out.get(0);
+        result[numElements - 1] = outList.get(0);
 
         return result;
     }

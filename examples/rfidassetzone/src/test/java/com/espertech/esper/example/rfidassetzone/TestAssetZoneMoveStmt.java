@@ -92,8 +92,8 @@ public class TestAssetZoneMoveStmt extends TestCase
 
     private void sendTimer(long timeInSeconds)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInSeconds * 1000);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInSeconds * 1000);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

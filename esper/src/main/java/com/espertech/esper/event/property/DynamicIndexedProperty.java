@@ -9,18 +9,20 @@
 package com.espertech.esper.event.property;
 
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.map.MapIndexedPropertyGetter;
-import com.espertech.esper.event.map.MapEventPropertyGetter;
+import com.espertech.esper.event.arr.ObjectArrayEventPropertyGetter;
+import com.espertech.esper.event.arr.ObjectArrayIndexedPropertyGetter;
+import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.DynamicIndexedPropertyGetter;
-import com.espertech.esper.event.xml.SchemaElementComplex;
-import com.espertech.esper.event.xml.SchemaItem;
+import com.espertech.esper.event.map.MapEventPropertyGetter;
+import com.espertech.esper.event.map.MapIndexedPropertyGetter;
 import com.espertech.esper.event.xml.BaseXMLEventType;
 import com.espertech.esper.event.xml.DOMIndexedGetter;
+import com.espertech.esper.event.xml.SchemaElementComplex;
+import com.espertech.esper.event.xml.SchemaItem;
 
-import java.util.Map;
 import java.io.StringWriter;
+import java.util.Map;
 
 /**
  * Represents a dynamic indexed property of a given name.
@@ -75,6 +77,11 @@ public class DynamicIndexedProperty extends PropertyBase implements DynamicPrope
     public MapEventPropertyGetter getGetterMap(Map optionalMapPropTypes, EventAdapterService eventAdapterService)
     {
         return new MapIndexedPropertyGetter(this.getPropertyNameAtomic(), index);
+    }
+
+    public ObjectArrayEventPropertyGetter getGetterObjectArray(Map<String, Integer> indexPerProperty, Map<String, Object> nestableTypes, EventAdapterService eventAdapterService) {
+        Integer propertyIndex = indexPerProperty.get(propertyNameAtomic);
+        return propertyIndex == null ? null : new ObjectArrayIndexedPropertyGetter(propertyIndex, index);
     }
 
     public void toPropertyEPL(StringWriter writer)

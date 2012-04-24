@@ -90,9 +90,9 @@ public class TestMapEventBean extends TestCase
         events.put("a", beanOne);
         events.put("b", beanTwo);
 
-        MapEventBean event = new MapEventBean(events, eventType);
-        assertSame(event.get("a"), beanOne);
-        assertSame(event.get("b"), beanTwo);
+        MapEventBean theEvent = new MapEventBean(events, eventType);
+        assertSame(theEvent.get("a"), beanOne);
+        assertSame(theEvent.get("b"), beanTwo);
     }
 
     private static final Log log = LogFactory.getLog(TestMapEventBean.class);

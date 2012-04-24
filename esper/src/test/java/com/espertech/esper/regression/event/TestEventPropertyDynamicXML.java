@@ -91,12 +91,12 @@ public class TestEventPropertyDynamicXML extends TestCase
         EventSender sender = epService.getEPRuntime().getEventSender("MyEvent");
         Document root = SupportXML.sendEvent(sender, SCHEMA_XML);
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertSame(root.getDocumentElement().getChildNodes().item(0), event.get("type?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(4), event.get("dyn[1]?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(6).getChildNodes().item(1), event.get("nested.nes2?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(8), event.get("map('a')?"));
-        EventTypeAssertionUtil.assertConsistency(event);
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertSame(root.getDocumentElement().getChildNodes().item(0), theEvent.get("type?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(4), theEvent.get("dyn[1]?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(6).getChildNodes().item(1), theEvent.get("nested.nes2?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(8), theEvent.get("map('a')?"));
+        EventTypeAssertionUtil.assertConsistency(theEvent);
     }
 
     public void testSchemaDOMGetter() throws Exception
@@ -130,12 +130,12 @@ public class TestEventPropertyDynamicXML extends TestCase
         EventSender sender = epService.getEPRuntime().getEventSender("MyEvent");
         Document root = SupportXML.sendEvent(sender, SCHEMA_XML);
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertSame(root.getDocumentElement().getChildNodes().item(0), event.get("type?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(4), event.get("dyn[1]?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(6).getChildNodes().item(1), event.get("nested.nes2?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(8), event.get("map('a')?"));
-        EventTypeAssertionUtil.assertConsistency(event);
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertSame(root.getDocumentElement().getChildNodes().item(0), theEvent.get("type?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(4), theEvent.get("dyn[1]?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(6).getChildNodes().item(1), theEvent.get("nested.nes2?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(8), theEvent.get("map('a')?"));
+        EventTypeAssertionUtil.assertConsistency(theEvent);
     }
 
     public void testNoSchemaXPathGetter() throws Exception
@@ -163,13 +163,13 @@ public class TestEventPropertyDynamicXML extends TestCase
         EventTypeAssertionUtil.assertConsistency(stmt.getEventType());
 
         Document root = SupportXML.sendEvent(epService.getEPRuntime(), NOSCHEMA_XML);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertSame(root.getDocumentElement().getChildNodes().item(1), event.get("type?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(5), event.get("dyn[1]?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(7).getChildNodes().item(1), event.get("nested.nes2?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(9), event.get("map('a')?"));
-        assertNull(event.get("other?"));
-        EventTypeAssertionUtil.assertConsistency(event);
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertSame(root.getDocumentElement().getChildNodes().item(1), theEvent.get("type?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(5), theEvent.get("dyn[1]?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(7).getChildNodes().item(1), theEvent.get("nested.nes2?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(9), theEvent.get("map('a')?"));
+        assertNull(theEvent.get("other?"));
+        EventTypeAssertionUtil.assertConsistency(theEvent);
     }
 
     public void testNoSchemaDOMGetter() throws Exception
@@ -195,11 +195,11 @@ public class TestEventPropertyDynamicXML extends TestCase
         EventTypeAssertionUtil.assertConsistency(stmt.getEventType());
 
         Document root = SupportXML.sendEvent(epService.getEPRuntime(), NOSCHEMA_XML);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertSame(root.getDocumentElement().getChildNodes().item(1), event.get("type?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(5), event.get("dyn[1]?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(7).getChildNodes().item(1), event.get("nested.nes2?"));
-        assertSame(root.getDocumentElement().getChildNodes().item(9), event.get("map('a')?"));
-        EventTypeAssertionUtil.assertConsistency(event);
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertSame(root.getDocumentElement().getChildNodes().item(1), theEvent.get("type?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(5), theEvent.get("dyn[1]?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(7).getChildNodes().item(1), theEvent.get("nested.nes2?"));
+        assertSame(root.getDocumentElement().getChildNodes().item(9), theEvent.get("map('a')?"));
+        EventTypeAssertionUtil.assertConsistency(theEvent);
     }
 }

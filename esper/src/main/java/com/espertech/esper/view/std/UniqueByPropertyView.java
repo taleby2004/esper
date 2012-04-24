@@ -10,7 +10,7 @@ package com.espertech.esper.view.std;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.collection.MultiKey;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
@@ -48,7 +48,7 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
     private final ExprNode[] criteriaExpressions;
     private final ExprEvaluator[] criteriaExpressionsEvals;
     private final int numKeys;
-    private final Map<MultiKey<Object>, EventBean> mostRecentEvents = new LinkedHashMap<MultiKey<Object>, EventBean>();
+    private final Map<Object, EventBean> mostRecentEvents = new LinkedHashMap<Object, EventBean>();
     private final EventBean[] eventsPerStream = new EventBean[1];
     private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
 
@@ -99,7 +99,7 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
             for (int i = 0; i < newData.length; i++)
             {
                 // Obtain unique value
-                MultiKey<Object> key = getUniqueKey(newData[i]);
+                Object key = getUniqueKey(newData[i]);
 
                 // If there are no child views, just update the own collection
                 if (!this.hasViews())
@@ -125,7 +125,7 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
             for (int i = 0; i < oldData.length; i++)
             {
                 // Obtain unique value
-                MultiKey<Object> key = getUniqueKey(oldData[i]);
+                Object key = getUniqueKey(oldData[i]);
 
                 // If the old event is the current unique event, remove and post as old data
                 EventBean lastValue = mostRecentEvents.get(key);
@@ -173,15 +173,19 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
         return this.getClass().getName() + " uniqueFieldNames=" + Arrays.toString(criteriaExpressions);
     }
 
-    private MultiKey<Object> getUniqueKey(EventBean event)
+    private Object getUniqueKey(EventBean theEvent)
     {
-        eventsPerStream[0] = event;
+        eventsPerStream[0] = theEvent;
+        if (criteriaExpressionsEvals.length == 1) {
+            return criteriaExpressionsEvals[0].evaluate(eventsPerStream, true, agentInstanceViewFactoryContext);
+        }
+
         Object[] values = new Object[numKeys];
         for (int i = 0; i < numKeys; i++)
         {
             values[i] = criteriaExpressionsEvals[i].evaluate(eventsPerStream, true, agentInstanceViewFactoryContext);
         }
-        return new MultiKey<Object>(values);
+        return new MultiKeyUntyped(values);
     }
 
     private static final Log log = LogFactory.getLog(UniqueByPropertyView.class);

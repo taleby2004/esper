@@ -13,6 +13,8 @@ public class TriviaExample {
         Configuration config = new Configuration();
         config.getEngineDefaults().getExecution().setPrioritized(true);
         config.getEngineDefaults().getThreading().setInternalTimerEnabled(false);
+        // using Map-event representations by default
+        config.getEngineDefaults().getEventMeta().setDefaultEventRepresentation(Configuration.EventRepresentation.MAP);
 
         EPServiceProvider engine = EPServiceProviderManager.getDefaultProvider(config);
         engine.initialize();

@@ -9,6 +9,7 @@
 package com.espertech.esper.view;
 
 import com.espertech.esper.rowregex.EventRowRegexNFAViewFactory;
+import com.espertech.esper.view.ext.RankWindowViewFactory;
 import com.espertech.esper.view.ext.SortWindowViewFactory;
 import com.espertech.esper.view.ext.TimeOrderViewFactory;
 import com.espertech.esper.view.internal.IntersectViewFactory;
@@ -135,6 +136,11 @@ public enum ViewEnum
      * Sorted window.
      */
     SORT_WINDOW("ext", "sort", SortWindowViewFactory.class, null),
+
+    /**
+     * Rank window.
+     */
+    RANK_WINDOW("ext", "rank", RankWindowViewFactory.class, null),
 
     /**
      * Time order event window.

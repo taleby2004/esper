@@ -80,16 +80,16 @@ public class PriorEventBufferSingle implements ViewUpdatedCollection, RelativeAc
     }
 
     // Users are assigned an index
-    public EventBean getRelativeToEvent(EventBean event, int priorToIndex)
+    public EventBean getRelativeToEvent(EventBean theEvent, int priorToIndex)
     {
         if (priorToIndex != 0)
         {
             throw new IllegalArgumentException("Single prior event buffer takes only a given index of zero");
         }
-        EventBean priorEvent = priorEventMap.get(event);
+        EventBean priorEvent = priorEventMap.get(theEvent);
         if (priorEvent == null)
         {
-            if (!priorEventMap.containsKey(event))
+            if (!priorEventMap.containsKey(theEvent))
             {
                 return null;
             }
@@ -97,7 +97,7 @@ public class PriorEventBufferSingle implements ViewUpdatedCollection, RelativeAc
         return priorEvent;
     }
 
-    public EventBean getRelativeToEnd(EventBean event, int index)
+    public EventBean getRelativeToEnd(EventBean theEvent, int index)
     {
         // No requirement to index from end of current buffer
         return null;

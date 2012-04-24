@@ -60,14 +60,14 @@ public class TestPollExecStrategyDBQuery extends TestCase
         assertEquals(2, resultRows[1].size());
         assertEquals(1, resultRows[2].size());
 
-        EventBean event = resultRows[1].get(0);
-        assertEquals("D", event.get("myvarchar"));
+        EventBean theEvent = resultRows[1].get(0);
+        assertEquals("D", theEvent.get("myvarchar"));
 
-        event = resultRows[1].get(1);
-        assertEquals("E", event.get("myvarchar"));
+        theEvent = resultRows[1].get(1);
+        assertEquals("E", theEvent.get("myvarchar"));
 
-        event = resultRows[2].get(0);
-        assertEquals("F", event.get("myvarchar"));
+        theEvent = resultRows[2].get(0);
+        assertEquals("F", theEvent.get("myvarchar"));
 
         dbPollExecStrategy.done();
         dbPollExecStrategy.destroy();

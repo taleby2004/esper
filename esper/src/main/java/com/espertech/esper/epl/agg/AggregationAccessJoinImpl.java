@@ -38,31 +38,31 @@ public class AggregationAccessJoinImpl implements AggregationAccess
 
     public void applyEnter(EventBean[] eventsPerStream)
     {
-        EventBean event = eventsPerStream[streamId];
-        if (event == null) {
+        EventBean theEvent = eventsPerStream[streamId];
+        if (theEvent == null) {
             return;
         }
         array = null;
-        Integer value = refSet.get(event);
+        Integer value = refSet.get(theEvent);
         if (value == null)
         {
-            refSet.put(event, 1);
+            refSet.put(theEvent, 1);
             return;
         }
 
         value++;
-        refSet.put(event, value);
+        refSet.put(theEvent, value);
     }
 
     public void applyLeave(EventBean[] eventsPerStream)
     {
-        EventBean event = eventsPerStream[streamId];
-        if (event == null) {
+        EventBean theEvent = eventsPerStream[streamId];
+        if (theEvent == null) {
             return;
         }
         array = null;
 
-        Integer value = refSet.get(event);
+        Integer value = refSet.get(theEvent);
         if (value == null)
         {
             return;
@@ -70,12 +70,12 @@ public class AggregationAccessJoinImpl implements AggregationAccess
 
         if (value == 1)
         {
-            refSet.remove(event);
+            refSet.remove(theEvent);
             return;
         }
 
         value--;
-        refSet.put(event, value);
+        refSet.put(theEvent, value);
     }
 
     public EventBean getFirstNthValue(int index) {

@@ -59,10 +59,10 @@ public class StmtDatabaseJoinCallable implements Callable
                 // Should have received one that's mine, possible multiple since the statement is used by other threads
                 boolean found = false;
                 EventBean[] events = assertListener.getNewDataListFlattened();
-                for (EventBean event : events)
+                for (EventBean theEvent : events)
                 {
-                    Object s0Received = event.get("s0");
-                    Map s1Received = (Map) event.get("s1");
+                    Object s0Received = theEvent.get("s0");
+                    Map s1Received = (Map) theEvent.get("s1");
                     if ((s0Received == eventS0) || (s1Received.get("myvarchar").equals(MYVARCHAR_VALUES[intPrimitive - 1])))
                     {
                         found = true;
@@ -90,9 +90,9 @@ public class StmtDatabaseJoinCallable implements Callable
 
     private SupportBean makeEvent(int intPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        return event;
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        return theEvent;
     }
 
     private static final Log log = LogFactory.getLog(StmtDatabaseJoinCallable.class);

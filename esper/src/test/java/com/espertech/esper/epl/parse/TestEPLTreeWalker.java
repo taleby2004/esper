@@ -45,6 +45,71 @@ public class TestEPLTreeWalker extends TestCase
                     CLASSNAME + "(string='a').win:length(10).std:lastevent() as win1," +
                     CLASSNAME + "(string='b').win:length(10).std:lastevent() as win2 ";
 
+    public void testWalkGraph() throws Exception {
+        String expression = "create dataflow MyGraph MyOp((s0, s1) as ST1, s2) -> out1, out2 {}";
+        EPLTreeWalker walker = parseAndWalkEPL(expression);
+        CreateDataFlowDesc graph = walker.getStatementSpec().getCreateDataFlowDesc();
+        assertEquals("MyGraph", graph.getGraphName());
+        assertEquals(1, graph.getOperators().size());
+        GraphOperatorSpec op = graph.getOperators().get(0);
+        assertEquals("MyOp", op.getOperatorName());
+        
+        // assert input
+        assertEquals(2, op.getInput().getStreamNamesAndAliases().size());
+        GraphOperatorInputNamesAlias in1 = op.getInput().getStreamNamesAndAliases().get(0);
+        EPAssertionUtil.assertEqualsExactOrder("s0,s1".split(","), in1.getInputStreamNames());
+        assertEquals("ST1", in1.getOptionalAsName());
+        GraphOperatorInputNamesAlias in2 = op.getInput().getStreamNamesAndAliases().get(1);
+        EPAssertionUtil.assertEqualsExactOrder("s2".split(","), in2.getInputStreamNames());
+        assertNull(in2.getOptionalAsName());
+
+        // assert output
+        assertEquals(2, op.getOutput().getItems().size());
+        GraphOperatorOutputItem out1 = op.getOutput().getItems().get(0);
+        assertEquals("out1", out1.getStreamName());
+        assertEquals(0, out1.getTypeInfo().size());
+        GraphOperatorOutputItem out2 = op.getOutput().getItems().get(1);
+        assertEquals("out2", out2.getStreamName());
+        assertEquals(0, out1.getTypeInfo().size());
+
+        GraphOperatorOutputItemType type;
+
+        type = tryWalkGraphTypes("out<?>");
+        assertTrue(type.isWildcard());
+        assertNull(type.getTypeOrClassname());
+        assertNull(type.getTypeParameters());
+
+        type = tryWalkGraphTypes("out<eventbean<?>>");
+        assertFalse(type.isWildcard());
+        assertEquals("event", type.getTypeOrClassname());
+        assertEquals(1, type.getTypeParameters().size());
+        assertTrue(type.getTypeParameters().get(0).isWildcard());
+        assertNull(type.getTypeParameters().get(0).getTypeOrClassname());
+        assertNull(type.getTypeParameters().get(0).getTypeParameters());
+
+        type = tryWalkGraphTypes("out<eventbean<someschema>>");
+        assertFalse(type.isWildcard());
+        assertEquals("event", type.getTypeOrClassname());
+        assertEquals(1, type.getTypeParameters().size());
+        assertFalse(type.getTypeParameters().get(0).isWildcard());
+        assertEquals("someschema", type.getTypeParameters().get(0).getTypeOrClassname());
+        assertEquals(0, type.getTypeParameters().get(0).getTypeParameters().size());
+
+        type = tryWalkGraphTypes("out<Map<String, Integer>>");
+        assertFalse(type.isWildcard());
+        assertEquals("Map", type.getTypeOrClassname());
+        assertEquals(2, type.getTypeParameters().size());
+        assertEquals("String", type.getTypeParameters().get(0).getTypeOrClassname());
+        assertEquals("Integer", type.getTypeParameters().get(1).getTypeOrClassname());
+    }
+
+    private GraphOperatorOutputItemType tryWalkGraphTypes(String outstream) throws Exception {
+        String expression = "create dataflow MyGraph MyOp((s0, s1) as ST1, s2) -> " + outstream + " {}";
+        EPLTreeWalker walker = parseAndWalkEPL(expression);
+        CreateDataFlowDesc graph = walker.getStatementSpec().getCreateDataFlowDesc();
+        return graph.getOperators().get(0).getOutput().getItems().get(0).getTypeInfo().get(0);
+    }
+
     public void testWalkCreateSchema() throws Exception
     {
         String expression = "create schema MyName as com.company.SupportBean";
@@ -54,7 +119,7 @@ public class TestEPLTreeWalker extends TestCase
         EPAssertionUtil.assertEqualsExactOrder("com.company.SupportBean".split(","), schema.getTypes().toArray());
         assertTrue(schema.getInherits().isEmpty());
         assertTrue(schema.getColumns().isEmpty());
-        assertFalse(schema.isVariant());
+        assertEquals(CreateSchemaDesc.AssignedType.NONE, schema.getAssignedType());
 
         expression = "create schema MyName (col1 string, col2 int, col3 Type[]) inherits InheritedType";
         walker = parseAndWalkEPL(expression);
@@ -73,7 +138,7 @@ public class TestEPLTreeWalker extends TestCase
         EPAssertionUtil.assertEqualsExactOrder("MyNameTwo,MyNameThree".split(","), schema.getTypes().toArray());
         assertTrue(schema.getInherits().isEmpty());
         assertTrue(schema.getColumns().isEmpty());
-        assertTrue(schema.isVariant());
+        assertEquals(CreateSchemaDesc.AssignedType.VARIANT, schema.getAssignedType());
     }
 
     private void assertSchema(ColumnDesc element, String name, String type, boolean isArray) {

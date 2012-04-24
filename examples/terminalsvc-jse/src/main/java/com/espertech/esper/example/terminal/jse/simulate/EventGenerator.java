@@ -83,19 +83,19 @@ public class EventGenerator {
                 continue;
             }
 
-            BaseTerminalEvent event = null;
+            BaseTerminalEvent theEvent = null;
 
             // With a x in 1000 chance send an OutOfOrder
             if (random.nextInt(1000) < TERMINAL_OUTOFORDER_LIKELYHOOD_PER_CHECKIN) {
                 outOfOrderCount++;
-                event = new OutOfOrder(new Terminal(termId));
-                System.out.println("\tGenerated a Checkin followed by " + event.getType() + " event for terminal " + event.getTerminal().getId());
+                theEvent = new OutOfOrder(new Terminal(termId));
+                System.out.println("\tGenerated a Checkin followed by " + theEvent.getType() + " event for terminal " + theEvent.getTerminal().getId());
             } else if (random.nextInt(3) < 1) {//Boolean()) {
                 completedCount++;
-                event = new Completed(new Terminal(termId));
+                theEvent = new Completed(new Terminal(termId));
             } else if (random.nextInt(3) < 2) {//{
                 cancelledCount++;
-                event = new Cancelled(new Terminal(termId));
+                theEvent = new Cancelled(new Terminal(termId));
             } else {
                 slowCustomer++;
                 // 33% of customers are doing checking over 2 runs (reading all screens and talking etc)
@@ -110,8 +110,8 @@ public class EventGenerator {
                 // of the terminal status between each batch
             }
 
-            if (event != null) {
-                eventBatch.add(event);
+            if (theEvent != null) {
+                eventBatch.add(theEvent);
             }
         }
 
@@ -128,17 +128,17 @@ public class EventGenerator {
             return outOfOrder;
         }
 
-        BaseTerminalEvent event = null;
+        BaseTerminalEvent theEvent = null;
         if (random.nextBoolean()) {
-            event = new LowPaper(getRandomTerminal());
+            theEvent = new LowPaper(getRandomTerminal());
         } else {
             Terminal terminal = getRandomTerminal();
-            event = new OutOfOrder(terminal);
+            theEvent = new OutOfOrder(terminal);
             outOfOrder.add(terminal.getId());
         }
 
-        eventBatch.add(event);
-        System.out.println("\tGenerated " + event.getType() + " event for terminal " + event.getTerminal().getId());
+        eventBatch.add(theEvent);
+        System.out.println("\tGenerated " + theEvent.getType() + " event for terminal " + theEvent.getTerminal().getId());
         return outOfOrder;
     }
 

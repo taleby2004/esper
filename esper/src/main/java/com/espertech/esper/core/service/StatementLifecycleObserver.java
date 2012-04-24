@@ -15,7 +15,7 @@ public interface StatementLifecycleObserver
 {
     /**
      * Observer statement state changes.
-     * @param event indicates statement changed
+     * @param theEvent indicates statement changed
      */
-    public void observe(StatementLifecycleEvent event);
+    public void observe(StatementLifecycleEvent theEvent);
 }

@@ -39,10 +39,10 @@ public interface ValueAddEventProcessor
     /**
      * For use in executing an insert-into, wraps the given event applying the revision event type,
      * but not yet computing a new revision.
-     * @param event to wrap
+     * @param theEvent to wrap
      * @return revision event bean
      */
-    public EventBean getValueAddEventBean(EventBean event);
+    public EventBean getValueAddEventBean(EventBean theEvent);
 
     /**
      * Upon new events arriving into a named window (new data), and upon events being deleted

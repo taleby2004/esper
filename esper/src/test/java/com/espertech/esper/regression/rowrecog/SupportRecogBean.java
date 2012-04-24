@@ -13,26 +13,26 @@ package com.espertech.esper.regression.rowrecog;
 
 public class SupportRecogBean
 {
-    private String string;
+    private String theString;
     private int value;
     private String cat;
 
-    public SupportRecogBean(String string, int value)
+    public SupportRecogBean(String theString, int value)
     {
-        this.string = string;
+        this.theString = theString;
         this.value = value;
     }
 
-    public SupportRecogBean(String string, String cat, int value)
+    public SupportRecogBean(String theString, String cat, int value)
     {
-        this.string = string;
+        this.theString = theString;
         this.cat = cat;
         this.value = value;
     }
 
-    public String getString()
+    public String getTheString()
     {
-        return string;
+        return theString;
     }
 
     public String getCat() {
@@ -43,9 +43,9 @@ public class SupportRecogBean
         this.cat = cat;
     }
 
-    public void setString(String string)
+    public void setTheString(String theString)
     {
-        this.string = string;
+        this.theString = theString;
     }
 
     public int getValue()
@@ -60,6 +60,6 @@ public class SupportRecogBean
 
     public String toString()
     {
-        return string;
+        return theString;
     }
 }

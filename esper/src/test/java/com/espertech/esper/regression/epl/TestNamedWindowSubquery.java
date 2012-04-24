@@ -84,13 +84,13 @@ public class TestNamedWindowSubquery extends TestCase
         String fields[] = new String[] {"key", "value"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as key, intBoxed as value from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as key, intBoxed as value from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
         // create insert into (not does insert if key already exists)
-        String stmtTextInsertOne = "insert into MyWindow select string as key, intBoxed as value from " + SupportBean.class.getName() + " as s0" +
-                                    " where not exists (select * from MyWindow as win where win.key = s0.string)";
+        String stmtTextInsertOne = "insert into MyWindow select theString as key, intBoxed as value from " + SupportBean.class.getName() + " as s0" +
+                                    " where not exists (select * from MyWindow as win where win.key = s0.theString)";
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         sendSupportBean("E1", 1);
@@ -129,17 +129,17 @@ public class TestNamedWindowSubquery extends TestCase
         String fields[] = new String[] {"key", "value"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as key, intBoxed as value from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as key, intBoxed as value from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
         // delete
-        String stmtTextDelete = "on " + SupportBean.class.getName() + " delete from MyWindow where key = string";
+        String stmtTextDelete = "on " + SupportBean.class.getName() + " delete from MyWindow where key = theString";
         EPStatement stmtDelete = epService.getEPAdministrator().createEPL(stmtTextDelete);
         stmtDelete.addListener(listenerStmtDelete);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as key, intBoxed as value from " + SupportBean.class.getName() + " as s0";
+        String stmtTextInsertOne = "insert into MyWindow select theString as key, intBoxed as value from " + SupportBean.class.getName() + " as s0";
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         sendSupportBean("E1", 1);
@@ -162,24 +162,24 @@ public class TestNamedWindowSubquery extends TestCase
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as " + SupportBean.class.getName());
         try
         {
-            epService.getEPAdministrator().createEPL("select (select string from MyWindow.std:lastevent()) from MyWindow");
+            epService.getEPAdministrator().createEPL("select (select theString from MyWindow.std:lastevent()) from MyWindow");
             fail();
         }
         catch (EPException ex)
         {
-            assertEquals("Error starting statement: Consuming statements to a named window cannot declare a data window view onto the named window [select (select string from MyWindow.std:lastevent()) from MyWindow]", ex.getMessage());
+            assertEquals("Error starting statement: Consuming statements to a named window cannot declare a data window view onto the named window [select (select theString from MyWindow.std:lastevent()) from MyWindow]", ex.getMessage());
         }
     }
 
     public void testUncorrelatedSubqueryAggregation()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, longPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, longPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, longPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create consumer
@@ -209,20 +209,20 @@ public class TestNamedWindowSubquery extends TestCase
         EPAssertionUtil.assertProps(listenerStmtTwo.assertOneGetNewAndReset(), fieldsStmt, new Object[]{23L, "M4"});
     }
 
-    private SupportBean sendSupportBean(String string, long longPrimitive, Long longBoxed)
+    private SupportBean sendSupportBean(String theString, long longPrimitive, Long longBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setLongPrimitive(longPrimitive);
         bean.setLongBoxed(longBoxed);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
 
-    private SupportBean sendSupportBean(String string, int intBoxed)
+    private SupportBean sendSupportBean(String theString, int intBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntBoxed(intBoxed);
         epService.getEPRuntime().sendEvent(bean);
         return bean;

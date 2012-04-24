@@ -165,14 +165,14 @@ public class TestEventBeanUtility extends TestCase
     {
         // try 2 properties
         EventPropertyGetter[] getters = makeGetters();
-        EventBean event = SupportEventBeanFactory.createObject(new SupportBean("a", 10));
-        Object[] properties = EventBeanUtility.getPropertyArray(event, getters);
+        EventBean theEvent = SupportEventBeanFactory.createObject(new SupportBean("a", 10));
+        Object[] properties = EventBeanUtility.getPropertyArray(theEvent, getters);
         assertEquals(2, properties.length);
         assertEquals("a", properties[0]);
         assertEquals(10, properties[1]);
 
         // try no properties
-        properties = EventBeanUtility.getPropertyArray(event, new EventPropertyGetter[0]);
+        properties = EventBeanUtility.getPropertyArray(theEvent, new EventPropertyGetter[0]);
         assertEquals(0, properties.length);
     }
 
@@ -180,14 +180,14 @@ public class TestEventBeanUtility extends TestCase
     {
         // try 2 properties
         EventPropertyGetter[] getters = makeGetters();
-        EventBean event = SupportEventBeanFactory.createObject(new SupportBean("a", 10));
-        MultiKeyUntyped multikey = EventBeanUtility.getMultiKey(event, getters);
+        EventBean theEvent = SupportEventBeanFactory.createObject(new SupportBean("a", 10));
+        MultiKeyUntyped multikey = EventBeanUtility.getMultiKey(theEvent, getters);
         assertEquals(2, multikey.getKeys().length);
         assertEquals("a", multikey.getKeys()[0]);
         assertEquals(10, multikey.getKeys()[1]);
 
         // try no properties
-        multikey = EventBeanUtility.getMultiKey(event, new EventPropertyGetter[0]);
+        multikey = EventBeanUtility.getMultiKey(theEvent, new EventPropertyGetter[0]);
         assertEquals(0, multikey.getKeys().length);
     }
 
@@ -195,7 +195,7 @@ public class TestEventBeanUtility extends TestCase
     {
         EventType eventType = SupportEventTypeFactory.createBeanType(SupportBean.class);
         EventPropertyGetter[] getters = new EventPropertyGetter[2];
-        getters[0] = eventType.getGetter("string");
+        getters[0] = eventType.getGetter("theString");
         getters[1] = eventType.getGetter("intPrimitive");
         return getters;
     }

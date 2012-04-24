@@ -397,6 +397,22 @@ public class EngineImportServiceImpl implements EngineImportService
                     ClassLoader cl = Thread.currentThread().getContextClassLoader();
                     return Class.forName(importName, true, cl);
 				}
+
+                String prefixedClassName = importName + '$' + className;
+                try
+                {
+                    ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                    Class clazz = Class.forName(prefixedClassName, true, cl);
+                    if (!requireAnnotation || clazz.isAnnotation()) {
+                        return clazz;
+                    }
+                }
+                catch(ClassNotFoundException e){
+                    if (log.isDebugEnabled())
+                    {
+                        log.debug("Class not found for resolving from name '" + prefixedClassName + "'");
+                    }
+                }
 			}
 			else
 			{

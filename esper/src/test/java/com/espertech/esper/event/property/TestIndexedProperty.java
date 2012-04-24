@@ -22,7 +22,7 @@ import junit.framework.TestCase;
 public class TestIndexedProperty extends TestCase
 {
     private IndexedProperty[] indexed;
-    private EventBean event;
+    private EventBean theEvent;
     private BeanEventType eventType;
 
     public void setUp()
@@ -33,8 +33,8 @@ public class TestIndexedProperty extends TestCase
         indexed[2] = new IndexedProperty("arrayProperty", 0);
         indexed[3] = new IndexedProperty("arrayProperty", 1);
 
-        event = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
-        eventType = (BeanEventType)event.getEventType();
+        theEvent = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
+        eventType = (BeanEventType) theEvent.getEventType();
     }
 
     public void testGetGetter()
@@ -43,7 +43,7 @@ public class TestIndexedProperty extends TestCase
         for (int i = 0; i < indexed.length; i++)
         {
             EventPropertyGetter getter = indexed[i].getGetter(eventType, SupportEventAdapterService.getService());
-            assertEquals(expected[i], getter.get(event));
+            assertEquals(expected[i], getter.get(theEvent));
         }
 
         // try invalid case

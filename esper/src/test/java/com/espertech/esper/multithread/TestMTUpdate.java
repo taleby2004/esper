@@ -41,14 +41,14 @@ public class TestMTUpdate extends TestCase
 
     public void testUpdateCreateDelete() throws Exception
     {
-        EPStatement stmt = engine.getEPAdministrator().createEPL("select string from " + SupportBean.class.getName());
+        EPStatement stmt = engine.getEPAdministrator().createEPL("select theString from " + SupportBean.class.getName());
 
         final List<String> strings = Collections.synchronizedList(new ArrayList<String>());
         stmt.addListener(new UpdateListener()
         {
             public void update(EventBean[] newEvents, EventBean[] oldEvents)
             {
-                strings.add((String) newEvents[0].get("string"));
+                strings.add((String) newEvents[0].get("theString"));
             }
         });
 
@@ -79,7 +79,7 @@ public class TestMTUpdate extends TestCase
 
         for (int i = 0; i < 50; i++)
         {
-            EPStatement stmtUpd = engine.getEPAdministrator().createEPL("update istream " + SupportBean.class.getName() + " set string='a'");
+            EPStatement stmtUpd = engine.getEPAdministrator().createEPL("update istream " + SupportBean.class.getName() + " set theString='a'");
             Thread.sleep(10);
             stmtUpd.destroy();
         }

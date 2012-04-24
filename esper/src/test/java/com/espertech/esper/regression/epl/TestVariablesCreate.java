@@ -255,19 +255,19 @@ public class TestVariablesCreate extends TestCase
         }
     }
 
-    private SupportBean sendSupportBean(String string, int intPrimitive)
+    private SupportBean sendSupportBean(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
 
-    private SupportBean makeSupportBean(String string, int intPrimitive, Integer intBoxed)
+    private SupportBean makeSupportBean(String theString, int intPrimitive, Integer intBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);
         return bean;

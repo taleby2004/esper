@@ -84,7 +84,7 @@ public class SupportDriverManagerDataSource implements DataSource
         return null;
     }
 
-    public void setLogWriter(PrintWriter out) throws SQLException
+    public void setLogWriter(PrintWriter outWriter) throws SQLException
     {
     }
 

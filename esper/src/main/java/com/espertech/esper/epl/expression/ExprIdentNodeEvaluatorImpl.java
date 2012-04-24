@@ -27,12 +27,12 @@ public class ExprIdentNodeEvaluatorImpl implements ExprIdentNodeEvaluator
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
     {
-        EventBean event = eventsPerStream[streamNum];
-        if (event == null)
+        EventBean theEvent = eventsPerStream[streamNum];
+        if (theEvent == null)
         {
             return null;
         }
-        return propertyGetter.get(event);
+        return propertyGetter.get(theEvent);
     }
 
     public Class getType() {
@@ -55,12 +55,12 @@ public class ExprIdentNodeEvaluatorImpl implements ExprIdentNodeEvaluator
      */
     public boolean evaluatePropertyExists(EventBean[] eventsPerStream, boolean isNewData)
     {
-        EventBean event = eventsPerStream[streamNum];
-        if (event == null)
+        EventBean theEvent = eventsPerStream[streamNum];
+        if (theEvent == null)
         {
             return false;
         }
-        return propertyGetter.isExistsProperty(event);
+        return propertyGetter.isExistsProperty(theEvent);
     }
 
     public int getStreamNum() {

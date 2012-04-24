@@ -18,25 +18,25 @@ public class RangeValueString implements FilterSpecParamRangeValue
 {
     private static final long serialVersionUID = -2813440284912349247L;
 
-    private final String string;
+    private final String theStringValue;
 
     /**
      * Ctor.
-     * @param string is the value of the range endpoint
+     * @param theStringValue is the value of the range endpoint
      */
-    public RangeValueString(String string)
+    public RangeValueString(String theStringValue)
     {
-        this.string = string;
+        this.theStringValue = theStringValue;
     }
 
     public final String getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
-        return string;
+        return theStringValue;
     }
 
     public final String toString()
     {
-        return string;
+        return theStringValue;
     }
 
     public boolean equals(Object o) {
@@ -45,12 +45,12 @@ public class RangeValueString implements FilterSpecParamRangeValue
 
         RangeValueString that = (RangeValueString) o;
 
-        if (string != null ? !string.equals(that.string) : that.string != null) return false;
+        if (theStringValue != null ? !theStringValue.equals(that.theStringValue) : that.theStringValue != null) return false;
 
         return true;
     }
 
     public int hashCode() {
-        return string != null ? string.hashCode() : 0;
+        return theStringValue != null ? theStringValue.hashCode() : 0;
     }
 }

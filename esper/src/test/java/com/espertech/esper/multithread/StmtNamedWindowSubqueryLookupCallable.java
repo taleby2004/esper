@@ -89,10 +89,10 @@ public class StmtNamedWindowSubqueryLookupCallable implements Callable<Boolean>
     }
 
     private void sendEvent(String key, int intupd) {
-        Map<String,Object> event = new HashMap<String,Object>();
-        event.put("key", key);
-        event.put("intupd", intupd);
-        engine.getEPRuntime().sendEvent(event, "MyUpdateEvent");
+        Map<String,Object> theEvent = new HashMap<String,Object>();
+        theEvent.put("key", key);
+        theEvent.put("intupd", intupd);
+        engine.getEPRuntime().sendEvent(theEvent, "MyUpdateEvent");
     }
 
     private static final Log log = LogFactory.getLog(StmtNamedWindowSubqueryLookupCallable.class);

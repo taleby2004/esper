@@ -12,6 +12,7 @@
 package com.espertech.esper.util;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.event.EventBeanUtility;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +22,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class AuditPath {
 
-    private static final Log log = LogFactory.getLog(AuditPath.class);
+    private static final Log auditLogDestination = LogFactory.getLog(AuditPath.AUDIT_LOG);
 
     /**
      * Log destination for the query plan logging.
@@ -49,21 +50,28 @@ public class AuditPath {
         AuditPath.auditPattern = auditPattern;
     }
 
-    public static void auditInsertInto(String engineURI, String statementName, EventBean event) {
-        auditLog(engineURI, statementName, "insert-into " + EventBeanUtility.summarize(event));
+    public static void auditInsertInto(String engineURI, String statementName, EventBean theEvent) {
+        auditLog(engineURI, statementName, AuditEnum.INSERT, EventBeanUtility.summarize(theEvent));
     }
 
-    public static void auditLog(String engineURI, String statementName, String message) {
+    public static void auditLog(String engineURI, String statementName, AuditEnum category, String message) {
         if (auditPattern == null) {
-            log.info("Statement " + statementName + " " + message);
+            StringBuilder buf = new StringBuilder();
+            buf.append("Statement ");
+            buf.append(statementName);
+            buf.append(" ");
+            buf.append(category.getPrettyPrintText());
+            buf.append(" ");
+            buf.append(message);
+            auditLogDestination.info(buf.toString());
         }
         else {
-            String result = auditPattern.replace("%s", statementName).replace("%u", engineURI).replace("%m", message);
-            log.info(result);
+            String result = auditPattern.replace("%s", statementName).replace("%u", engineURI).replace("%c", category.getValue()).replace("%m", message);
+            auditLogDestination.info(result);
         }
     }
 
     public static boolean isInfoEnabled() {
-        return log.isInfoEnabled();
+        return auditLogDestination.isInfoEnabled();
     }
 }

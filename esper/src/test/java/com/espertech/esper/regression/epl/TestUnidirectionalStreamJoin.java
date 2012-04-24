@@ -119,8 +119,8 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
         // test 3-stream full outer join
         //
-        String[] fields3FOJ = "p00,p10,string".split(",");
-        String stmtText3FOJ = "select p00, p10, string " +
+        String[] fields3FOJ = "p00,p10,theString".split(",");
+        String stmtText3FOJ = "select p00, p10, theString " +
                 "from " +
                 "SupportBean_S0.win:keepall()" +
                 "full outer join " +
@@ -154,8 +154,8 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
         // test 3-stream full outer join with where-clause
         //
-        String[] fields3FOJW = "p00,p10,string".split(",");
-        String stmtText3FOJW = "select p00, p10, string " +
+        String[] fields3FOJW = "p00,p10,theString".split(",");
+        String stmtText3FOJW = "select p00, p10, theString " +
                 "from " +
                 "SupportBean_S0.win:keepall() as s0 " +
                 "full outer join " +
@@ -204,7 +204,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
         String stmtText = "select irstream symbol, count(*) as cnt " +
                       "from " + SupportMarketDataBean.class.getName() + " unidirectional, " +
                       SupportBean.class.getName() + ".win:keepall() " +
-                      "where string = symbol group by string, symbol";
+                      "where theString = symbol group by theString, symbol";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -254,7 +254,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
         String stmtText = "select irstream count(*) as cnt " +
                       "from " + SupportMarketDataBean.class.getName() + " unidirectional, " +
                       SupportBean.class.getName() + ".win:keepall() " +
-                      "where string = symbol";
+                      "where theString = symbol";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -324,9 +324,9 @@ public class TestUnidirectionalStreamJoin extends TestCase
         // no iterator allowed
         String stmtText = "select count(*) as num " +
                 "from pattern [every timer:at(*/1,*,*,*,*)] unidirectional,\n" +
-                "SupportBean(intPrimitive=1).std:unique(string) a,\n" +
-                "SupportBean(intPrimitive=2).std:unique(string) b\n" +
-                "where a.string = b.string";
+                "SupportBean(intPrimitive=1).std:unique(theString) a,\n" +
+                "SupportBean(intPrimitive=2).std:unique(theString) b\n" +
+                "where a.theString = b.theString";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -351,9 +351,9 @@ public class TestUnidirectionalStreamJoin extends TestCase
         // no iterator allowed
         String stmtText = "select count(*) as num " +
                 "from pattern [every timer:at(*/1,*,*,*,*)] unidirectional,\n" +
-                "SupportBean(intPrimitive=1).std:unique(string) a,\n" +
-                "SupportBean(intPrimitive=2).std:unique(string) b\n" +
-                "where a.string = b.string output every 2 minutes";
+                "SupportBean(intPrimitive=1).std:unique(theString) a,\n" +
+                "SupportBean(intPrimitive=2).std:unique(theString) b\n" +
+                "where a.theString = b.theString output every 2 minutes";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -492,11 +492,11 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
     public void test2TableFullOuterJoin()
     {
-        String stmtText = "select symbol, volume, string, intPrimitive " +
+        String stmtText = "select symbol, volume, theString, intPrimitive " +
                       "from " + SupportMarketDataBean.class.getName() + " unidirectional " +
                       "full outer join " +
                       SupportBean.class.getName() +
-                      ".win:keepall() on string = symbol";
+                      ".win:keepall() on theString = symbol";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
 
         tryFullOuterPassive2Stream(stmt);
@@ -504,11 +504,11 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
     public void test2TableFullOuterJoinCompile()
     {
-        String stmtText = "select symbol, volume, string, intPrimitive " +
+        String stmtText = "select symbol, volume, theString, intPrimitive " +
                       "from " + SupportMarketDataBean.class.getName() + " unidirectional " +
                       "full outer join " +
                       SupportBean.class.getName() +
-                      ".win:keepall() on string = symbol";
+                      ".win:keepall() on theString = symbol";
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
         assertEquals(stmtText, model.toEPL());
@@ -520,16 +520,16 @@ public class TestUnidirectionalStreamJoin extends TestCase
     public void test2TableFullOuterJoinOM()
     {
         EPStatementObjectModel model = new EPStatementObjectModel();
-        model.setSelectClause(SelectClause.create("symbol", "volume", "string", "intPrimitive"));
+        model.setSelectClause(SelectClause.create("symbol", "volume", "theString", "intPrimitive"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportMarketDataBean.class.getName()).unidirectional(true)));
         model.getFromClause().add(FilterStream.create(SupportBean.class.getName()).addView("win", "keepall"));
-        model.getFromClause().add(OuterJoinQualifier.create("string", OuterJoinType.FULL, "symbol"));
+        model.getFromClause().add(OuterJoinQualifier.create("theString", OuterJoinType.FULL, "symbol"));
 
-        String stmtText = "select symbol, volume, string, intPrimitive " +
+        String stmtText = "select symbol, volume, theString, intPrimitive " +
                       "from " + SupportMarketDataBean.class.getName() + " unidirectional " +
                       "full outer join " +
                       SupportBean.class.getName() +
-                      ".win:keepall() on string = symbol";
+                      ".win:keepall() on theString = symbol";
         assertEquals(stmtText, model.toEPL());
 
         EPStatement stmt = epService.getEPAdministrator().create(model);
@@ -539,11 +539,11 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
     public void test2TableFullOuterJoinBackwards()
     {
-        String stmtText = "select symbol, volume, string, intPrimitive " +
+        String stmtText = "select symbol, volume, theString, intPrimitive " +
                           "from " + SupportBean.class.getName() +
                           ".win:keepall() full outer join " +
                           SupportMarketDataBean.class.getName() + " unidirectional " +
-                          "on string = symbol";
+                          "on theString = symbol";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
 
         tryFullOuterPassive2Stream(stmt);
@@ -551,20 +551,20 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
     public void test2TableJoin()
     {
-        String stmtText = "select symbol, volume, string, intPrimitive " +
+        String stmtText = "select symbol, volume, theString, intPrimitive " +
                       "from " + SupportMarketDataBean.class.getName() + " unidirectional, " +
                       SupportBean.class.getName() +
-                      ".win:keepall() where string = symbol";
+                      ".win:keepall() where theString = symbol";
 
         tryJoinPassive2Stream(stmtText);
     }
 
     public void test2TableBackwards()
     {
-        String stmtText = "select symbol, volume, string, intPrimitive " +
+        String stmtText = "select symbol, volume, theString, intPrimitive " +
                           "from " + SupportBean.class.getName() + ".win:keepall(), " +
                           SupportMarketDataBean.class.getName() + " unidirectional " +
-                          "where string = symbol";
+                          "where theString = symbol";
 
         tryJoinPassive2Stream(stmtText);
     }
@@ -574,14 +574,14 @@ public class TestUnidirectionalStreamJoin extends TestCase
         String text = "select * from " + SupportBean.class.getName() + " unidirectional " +
                           "full outer join " +
                           SupportMarketDataBean.class.getName() + ".win:keepall() unidirectional " +
-                          "on string = symbol";
-        tryInvalid(text, "Error starting statement: The unidirectional keyword can only apply to one stream in a join [select * from com.espertech.esper.support.bean.SupportBean unidirectional full outer join com.espertech.esper.support.bean.SupportMarketDataBean.win:keepall() unidirectional on string = symbol]");
+                          "on theString = symbol";
+        tryInvalid(text, "Error starting statement: The unidirectional keyword can only apply to one stream in a join [select * from com.espertech.esper.support.bean.SupportBean unidirectional full outer join com.espertech.esper.support.bean.SupportMarketDataBean.win:keepall() unidirectional on theString = symbol]");
 
         text = "select * from " + SupportBean.class.getName() + ".win:length(2) unidirectional " +
                           "full outer join " +
                           SupportMarketDataBean.class.getName() + ".win:keepall()" +
-                          "on string = symbol";
-        tryInvalid(text, "Error starting statement: The unidirectional keyword requires that no views are declared onto the stream [select * from com.espertech.esper.support.bean.SupportBean.win:length(2) unidirectional full outer join com.espertech.esper.support.bean.SupportMarketDataBean.win:keepall()on string = symbol]");
+                          "on theString = symbol";
+        tryInvalid(text, "Error starting statement: The unidirectional keyword requires that no views are declared onto the stream [select * from com.espertech.esper.support.bean.SupportBean.win:length(2) unidirectional full outer join com.espertech.esper.support.bean.SupportMarketDataBean.win:keepall()on theString = symbol]");
     }
 
     private void tryInvalid(String text, String message)
@@ -604,7 +604,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
         // send event, expect result
         sendEventMD("E1", 1L);
-        String[] fields = "symbol,volume,string,intPrimitive".split(",");
+        String[] fields = "symbol,volume,theString,intPrimitive".split(",");
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 1L, null, null});
 
         sendEvent("E1", 10);
@@ -625,7 +625,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
         // send event, expect result
         sendEventMD("E1", 1L);
-        String[] fields = "symbol,volume,string,intPrimitive".split(",");
+        String[] fields = "symbol,volume,theString,intPrimitive".split(",");
         assertFalse(listener.isInvoked());
 
         sendEvent("E1", 10);
@@ -641,7 +641,7 @@ public class TestUnidirectionalStreamJoin extends TestCase
     private void sendEvent(String s, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(s);
+        bean.setTheString(s);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
     }

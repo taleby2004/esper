@@ -78,7 +78,7 @@ public class TestNamedWindowIndex extends TestCase
         // widen to long
         String stmtTextCreate = "create window MyWindowOne.win:keepall() as (f1 long, f2 string)";
         epService.getEPAdministrator().createEPL(stmtTextCreate);
-        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2) select longPrimitive, string from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2) select longPrimitive, theString from SupportBean");
         epService.getEPAdministrator().createEPL("create index MyWindowOneIndex1 on MyWindowOne(f1 btree)");
         String fields[] = "f1,f2".split(",");
 
@@ -96,7 +96,7 @@ public class TestNamedWindowIndex extends TestCase
         // coerce to short
         stmtTextCreate = "create window MyWindowTwo.win:keepall() as (f1 short, f2 string)";
         epService.getEPAdministrator().createEPL(stmtTextCreate);
-        epService.getEPAdministrator().createEPL("insert into MyWindowTwo(f1, f2) select shortPrimitive, string from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowTwo(f1, f2) select shortPrimitive, theString from SupportBean");
         epService.getEPAdministrator().createEPL("create index MyWindowTwoIndex1 on MyWindowTwo(f1 btree)");
 
         sendEventShort("E1", (short) 2);
@@ -113,7 +113,7 @@ public class TestNamedWindowIndex extends TestCase
         // widen to long
         String stmtTextCreate = "create window MyWindowOne.win:keepall() as (f1 long, f2 string)";
         epService.getEPAdministrator().createEPL(stmtTextCreate);
-        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2) select longPrimitive, string from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2) select longPrimitive, theString from SupportBean");
         epService.getEPAdministrator().createEPL("create index MyWindowOneIndex1 on MyWindowOne(f1)");
         String fields[] = "f1,f2".split(",");
 
@@ -125,7 +125,7 @@ public class TestNamedWindowIndex extends TestCase
         // coerce to short
         stmtTextCreate = "create window MyWindowTwo.win:keepall() as (f1 short, f2 string)";
         epService.getEPAdministrator().createEPL(stmtTextCreate);
-        epService.getEPAdministrator().createEPL("insert into MyWindowTwo(f1, f2) select shortPrimitive, string from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowTwo(f1, f2) select shortPrimitive, theString from SupportBean");
         epService.getEPAdministrator().createEPL("create index MyWindowTwoIndex1 on MyWindowTwo(f1)");
 
         sendEventShort("E1", (short) 2);
@@ -141,7 +141,7 @@ public class TestNamedWindowIndex extends TestCase
 
         String stmtTextCreate = "create window MyWindowOne.win:keepall() as (f1 string, f2 int, f3 string, f4 string)";
         epService.getEPAdministrator().createEPL(stmtTextCreate);
-        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2, f3, f4) select string, intPrimitive, '>'||string||'<', '?'||string||'?' from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2, f3, f4) select theString, intPrimitive, '>'||theString||'<', '?'||theString||'?' from SupportBean");
         EPStatement indexOne = epService.getEPAdministrator().createEPL("create index MyWindowOneIndex on MyWindowOne(f2, f3, f1)");
         String fields[] = "f1,f2,f3,f4".split(",");
 
@@ -174,7 +174,7 @@ public class TestNamedWindowIndex extends TestCase
 
         String stmtTextCreateOne = "create window MyWindowOne.win:keepall() as (f1 string, f2 int, f3 string, f4 string)";
         epService.getEPAdministrator().createEPL(stmtTextCreateOne);
-        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2, f3, f4) select string, intPrimitive, '>'||string||'<', '?'||string||'?' from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2, f3, f4) select theString, intPrimitive, '>'||theString||'<', '?'||theString||'?' from SupportBean");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", -4));
         epService.getEPRuntime().sendEvent(new SupportBean("E1", -2));
@@ -195,7 +195,7 @@ public class TestNamedWindowIndex extends TestCase
 
         String stmtTextCreateOne = "create window MyWindowOne.win:keepall() as (f1 string, f2 int, f3 string, f4 string)";
         epService.getEPAdministrator().createEPL(stmtTextCreateOne);
-        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2, f3, f4) select string, intPrimitive, '>'||string||'<', '?'||string||'?' from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2, f3, f4) select theString, intPrimitive, '>'||theString||'<', '?'||theString||'?' from SupportBean");
         epService.getEPAdministrator().createEPL("create index MyWindowOneIndex1 on MyWindowOne(f2, f3, f1)");
         epService.getEPAdministrator().createEPL("create index MyWindowOneIndex2 on MyWindowOne(f2, f3)");
         epService.getEPAdministrator().createEPL("create index MyWindowOneIndex3 on MyWindowOne(f2)");
@@ -231,7 +231,7 @@ public class TestNamedWindowIndex extends TestCase
 
         String stmtTextCreateOne = "create window MyWindowOne.win:keepall() as (f1 string, f2 int, f3 string, f4 string)";
         epService.getEPAdministrator().createEPL(stmtTextCreateOne);
-        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2, f3, f4) select string, intPrimitive, '>'||string||'<', '?'||string||'?' from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2, f3, f4) select theString, intPrimitive, '>'||theString||'<', '?'||theString||'?' from SupportBean");
         EPStatement indexOne = epService.getEPAdministrator().createEPL("create index MyWindowOneIndex1 on MyWindowOne(f1)");
         EPStatement indexTwo = epService.getEPAdministrator().createEPL("create index MyWindowOneIndex2 on MyWindowOne(f4)");
         String fields[] = "f1,f2".split(",");
@@ -274,7 +274,7 @@ public class TestNamedWindowIndex extends TestCase
 
         String stmtTextCreateOne = "create window MyWindowOne.win:keepall() as (f1 string, f2 int)";
         epService.getEPAdministrator().createEPL(stmtTextCreateOne);
-        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2) select string, intPrimitive from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into MyWindowOne(f1, f2) select theString, intPrimitive from SupportBean");
         EPStatement indexOne = epService.getEPAdministrator().createEPL("create index MyWindowOneIndex1 on MyWindowOne(f2)");
         String fields[] = "f1,f2".split(",");
 
@@ -304,9 +304,9 @@ public class TestNamedWindowIndex extends TestCase
 
         // two-key index order test
         epService.getEPAdministrator().createEPL("create window MyWindowTwo.win:keepall() as SupportBean");
-        epService.getEPAdministrator().createEPL("create index idx1 on MyWindowTwo (string, intPrimitive)");
-        epService.getEPAdministrator().createEPL("on SupportBean sb select * from MyWindowTwo w where w.string = sb.string and w.intPrimitive = sb.intPrimitive");
-        epService.getEPAdministrator().createEPL("on SupportBean sb select * from MyWindowTwo w where w.intPrimitive = sb.intPrimitive and w.string = sb.string");
+        epService.getEPAdministrator().createEPL("create index idx1 on MyWindowTwo (theString, intPrimitive)");
+        epService.getEPAdministrator().createEPL("on SupportBean sb select * from MyWindowTwo w where w.theString = sb.theString and w.intPrimitive = sb.intPrimitive");
+        epService.getEPAdministrator().createEPL("on SupportBean sb select * from MyWindowTwo w where w.intPrimitive = sb.intPrimitive and w.theString = sb.theString");
         assertEquals(1, epService.getNamedWindowService().getNamedWindowIndexes("MyWindowTwo").length);
     }
 
@@ -340,17 +340,17 @@ public class TestNamedWindowIndex extends TestCase
         }
     }
 
-    private void sendEventLong(String string, long longPrimitive) {
-        SupportBean event = new SupportBean();
-        event.setString(string);
-        event.setLongPrimitive(longPrimitive);
-        epService.getEPRuntime().sendEvent(event);
+    private void sendEventLong(String theString, long longPrimitive) {
+        SupportBean theEvent = new SupportBean();
+        theEvent.setTheString(theString);
+        theEvent.setLongPrimitive(longPrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
-    private void sendEventShort(String string, short shortPrimitive) {
-        SupportBean event = new SupportBean();
-        event.setString(string);
-        event.setShortPrimitive(shortPrimitive);
-        epService.getEPRuntime().sendEvent(event);
+    private void sendEventShort(String theString, short shortPrimitive) {
+        SupportBean theEvent = new SupportBean();
+        theEvent.setTheString(theString);
+        theEvent.setShortPrimitive(shortPrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

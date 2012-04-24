@@ -57,11 +57,11 @@ public class PropertyEvaluatorNested implements PropertyEvaluator
         this.expressionTexts = expressionTexts;
     }
 
-    public EventBean[] getProperty(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
+    public EventBean[] getProperty(EventBean theEvent, ExprEvaluatorContext exprEvaluatorContext)
     {
         ArrayDeque<EventBean> resultEvents = new ArrayDeque<EventBean>();
-        eventsPerStream[0] = event;
-        populateEvents(event, 0, resultEvents, exprEvaluatorContext);
+        eventsPerStream[0] = theEvent;
+        populateEvents(theEvent, 0, resultEvents, exprEvaluatorContext);
         if (resultEvents.isEmpty())
         {
             return null;
@@ -82,12 +82,12 @@ public class PropertyEvaluatorNested implements PropertyEvaluator
                 {
                     if (whereClauses[level] != null)
                     {
-                        for (EventBean event : fragments)
+                        for (EventBean theEvent : fragments)
                         {
-                            eventsPerStream[level+1] = event;
+                            eventsPerStream[level+1] = theEvent;
                             if (ExprNodeUtility.applyFilterExpression(whereClauses[level], eventsPerStream, exprEvaluatorContext))
                             {
-                                events.add(event);
+                                events.add(theEvent);
                             }
                         }
                     }

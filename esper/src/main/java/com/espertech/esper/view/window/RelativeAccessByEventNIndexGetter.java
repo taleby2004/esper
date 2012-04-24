@@ -50,15 +50,15 @@ public class RelativeAccessByEventNIndexGetter implements IStreamRelativeAccess.
 
     /**
      * Returns the access into window contents given an event.
-     * @param event to which the method returns relative access from
+     * @param theEvent to which the method returns relative access from
      * @return buffer
      */
-    public IStreamRelativeAccess getAccessor(EventBean event)
+    public IStreamRelativeAccess getAccessor(EventBean theEvent)
     {
-        IStreamRelativeAccess iStreamRelativeAccess = accessorByEvent.get(event);
+        IStreamRelativeAccess iStreamRelativeAccess = accessorByEvent.get(theEvent);
         if (iStreamRelativeAccess == null)
         {
-            throw new IllegalStateException("Accessor for window random access not found for event " + event);
+            throw new IllegalStateException("Accessor for window random access not found for event " + theEvent);
         }
         return iStreamRelativeAccess;
     }

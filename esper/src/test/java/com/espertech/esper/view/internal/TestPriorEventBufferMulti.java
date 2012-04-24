@@ -96,11 +96,11 @@ public class TestPriorEventBufferMulti extends TestCase
         assertEquals(events[1], buffer.getRelativeToEvent(events[4], 1));
     }
 
-    public void tryInvalid(EventBean event, int index)
+    public void tryInvalid(EventBean theEvent, int index)
     {
         try
         {
-            buffer.getRelativeToEvent(event, index);
+            buffer.getRelativeToEvent(theEvent, index);
             fail();
         }
         catch (IllegalStateException ex)

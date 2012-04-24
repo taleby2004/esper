@@ -10,6 +10,7 @@ package com.espertech.esper.pattern;
 
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.JavaClassHelper;
@@ -17,7 +18,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.StringWriter;
-import java.util.Map;
 
 /**
  * This class represents the state of a followed-by operator in the evaluation state tree.
@@ -60,7 +60,7 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
     {
         if (evalAuditNode.getFactoryNode().isAuditPattern() && AuditPath.isInfoEnabled()) {
             String message = toStringEvaluateTrue(this, evalAuditNode.getFactoryNode().getPatternExpr(), matchEvent, fromNode, isQuitted);
-            AuditPath.auditLog(evalAuditNode.getContext().getStatementContext().getEngineURI(), evalAuditNode.getContext().getPatternContext().getStatementName(), message);
+            AuditPath.auditLog(evalAuditNode.getContext().getStatementContext().getEngineURI(), evalAuditNode.getContext().getPatternContext().getStatementName(), AuditEnum.PATTERN, message);
         }
 
         if (isQuitted)
@@ -76,7 +76,7 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
     {
         if (evalAuditNode.getFactoryNode().isAuditPattern() && AuditPath.isInfoEnabled()) {
             String message = toStringEvaluateFalse(this, evalAuditNode.getFactoryNode().getPatternExpr(), fromNode);
-            AuditPath.auditLog(evalAuditNode.getContext().getStatementContext().getEngineURI(), evalAuditNode.getContext().getPatternContext().getStatementName(), message);
+            AuditPath.auditLog(evalAuditNode.getContext().getStatementContext().getEngineURI(), evalAuditNode.getContext().getPatternContext().getStatementName(), AuditEnum.PATTERN, message);
         }
 
         this.getParentEvaluator().evaluateFalse(this);
@@ -126,7 +126,6 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
 
         StringWriter writer = new StringWriter();
 
-        writer.write("pattern ");
         writePatternExpr(current, patternExpression, writer);
         writer.write(" evaluate-true {");
 
@@ -135,16 +134,18 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
 
         writer.write(" map: {");
         String delimiter = "";
-        for (Object entryObj : matchEvent.getMatchingEvents().entrySet()) {
-            Map.Entry<String, Object> entry = (Map.Entry<String, Object>) entryObj;
+        Object[] data = matchEvent.getMatchingEvents();
+        for (int i = 0; i < data.length; i++) {
+            String name = matchEvent.getMeta().getTagsPerIndex()[i];
+            Object value = matchEvent.getMatchingEventAsObject(i);
             writer.write(delimiter);
-            writer.write(entry.getKey());
+            writer.write(name);
             writer.write("=");
-            if (entry.getValue() instanceof EventBean) {
-                writer.write(((EventBean) entry.getValue()).getUnderlying().toString());
+            if (value instanceof EventBean) {
+                writer.write(((EventBean) value).getUnderlying().toString());
             }
-            else if (entry.getValue() instanceof EventBean[]) {
-                writer.write(EventBeanUtility.summarize((EventBean[]) entry.getValue()));
+            else if (value instanceof EventBean[]) {
+                writer.write(EventBeanUtility.summarize((EventBean[]) value));
             }
             delimiter = ", ";
         }
@@ -159,7 +160,6 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
     private String toStringEvaluateFalse(EvalAuditStateNode current, String patternExpression, EvalStateNode fromNode) {
 
         StringWriter writer = new StringWriter();
-        writer.write("pattern ");
         writePatternExpr(current, patternExpression, writer);
         writer.write(" evaluate-false {");
 

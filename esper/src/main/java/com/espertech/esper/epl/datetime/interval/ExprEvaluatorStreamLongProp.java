@@ -30,11 +30,11 @@ public class ExprEvaluatorStreamLongProp implements ExprEvaluator {
     }
 
     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
-        EventBean event = eventsPerStream[streamId];
-        if (event == null) {
+        EventBean theEvent = eventsPerStream[streamId];
+        if (theEvent == null) {
             return null;
         }
-        return getter.get(event);
+        return getter.get(theEvent);
     }
 
     public Class getType() {

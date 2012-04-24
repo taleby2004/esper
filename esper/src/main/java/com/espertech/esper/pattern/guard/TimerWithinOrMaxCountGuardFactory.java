@@ -39,25 +39,25 @@ public class TimerWithinOrMaxCountGuardFactory implements GuardFactory, MetaDefI
      */
     protected transient MatchedEventConvertor convertor;
 
-    public void setGuardParameters(List<ExprNode> params, MatchedEventConvertor convertor) throws GuardParameterException
+    public void setGuardParameters(List<ExprNode> parameters, MatchedEventConvertor convertor) throws GuardParameterException
     {
         String message = "Timer-within-or-max-count guard requires two parameters: "
                     + "numeric or time period parameter and an integer-value expression parameter";
 
-        if (params.size() != 2) {
+        if (parameters.size() != 2) {
             throw new GuardParameterException(message);
         }
 
-        if (!JavaClassHelper.isNumeric(params.get(0).getExprEvaluator().getType())) {
+        if (!JavaClassHelper.isNumeric(parameters.get(0).getExprEvaluator().getType())) {
             throw new GuardParameterException(message);
         }
 
-        if (params.get(1).getExprEvaluator().getType() != Integer.class) {
+        if (parameters.get(1).getExprEvaluator().getType() != Integer.class) {
             throw new GuardParameterException(message);
         }
 
-        this.millisecondsExpr = params.get(0);
-        this.numCountToExpr = params.get(1);
+        this.millisecondsExpr = parameters.get(0);
+        this.numCountToExpr = parameters.get(1);
         this.convertor = convertor;
     }
 

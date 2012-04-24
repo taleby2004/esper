@@ -11,15 +11,15 @@
 
 package com.espertech.esper.regression.epl;
 
+import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import junit.framework.TestCase;
-import com.espertech.esper.client.*;
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
+import junit.framework.TestCase;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TestNamedWindowJoin extends TestCase
@@ -47,47 +47,67 @@ public class TestNamedWindowJoin extends TestCase
     }
 
     public void testInnerJoinLateStart() {
+        runAssertionInnerJoinLateStart(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionInnerJoinLateStart(EventRepresentationEnum.MAP);
+        runAssertionInnerJoinLateStart(EventRepresentationEnum.DEFAULT);
+    }
 
-        // ESPER-526
-        epService.getEPAdministrator().createEPL("create schema Product (product string, size int)");
-        epService.getEPAdministrator().createEPL("create schema Portfolio (portfolio string, product string)");
-        epService.getEPAdministrator().createEPL("create window ProductWin.win:keepall() as Product");
+    private void runAssertionInnerJoinLateStart(EventRepresentationEnum eventRepresentationEnum) {
+
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema Product (product string, size int)");
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtOne.getEventType().getUnderlyingType());
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema Portfolio (portfolio string, product string)");
+        EPStatement stmtTwo = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create window ProductWin.win:keepall() as Product");
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtTwo.getEventType().getUnderlyingType());
+
         epService.getEPAdministrator().createEPL("insert into ProductWin select * from Product");
-        epService.getEPAdministrator().createEPL("create window PortfolioWin.win:keepall() as Portfolio");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create window PortfolioWin.win:keepall() as Portfolio");
         epService.getEPAdministrator().createEPL("insert into PortfolioWin select * from Portfolio");
 
-        sendProduct("productA", 1);
-        sendProduct("productB", 2);
-        sendPortfolio("Portfolio", "productA");
+        sendProduct(eventRepresentationEnum, "productA", 1);
+        sendProduct(eventRepresentationEnum, "productB", 2);
+        sendPortfolio(eventRepresentationEnum, "Portfolio", "productA");
 
         String stmtText = "@Name(\"Query2\") select portfolio, ProductWin.product, size " +
                 "from PortfolioWin unidirectional inner join ProductWin on PortfolioWin.product=ProductWin.product";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listenerStmtOne);
 
-        sendPortfolio("Portfolio", "productB");
+        sendPortfolio(eventRepresentationEnum, "Portfolio", "productB");
         EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), new String[]{"portfolio", "ProductWin.product", "size"}, new Object[]{"Portfolio", "productB", 2});
 
-        sendPortfolio("Portfolio", "productC");
+        sendPortfolio(eventRepresentationEnum, "Portfolio", "productC");
         listenerStmtOne.reset();
 
-        sendProduct("productC", 3);
-        sendPortfolio("Portfolio", "productC");
+        sendProduct(eventRepresentationEnum, "productC", 3);
+        sendPortfolio(eventRepresentationEnum, "Portfolio", "productC");
         EPAssertionUtil.assertProps(listenerStmtOne.assertOneGetNewAndReset(), new String[]{"portfolio", "ProductWin.product", "size"}, new Object[]{"Portfolio", "productC", 3});
+
+        epService.initialize();
     }
 
-    private void sendProduct(String product, int size) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("product", product);
-        event.put("size", size);
-        epService.getEPRuntime().sendEvent(event, "Product");
+    private void sendProduct(EventRepresentationEnum eventRepresentationEnum, String product, int size) {
+        Map<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("product", product);
+        theEvent.put("size", size);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), "Product");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "Product");
+        }
     }
 
-    private void sendPortfolio(String portfolio, String product) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("portfolio", portfolio);
-        event.put("product", product);
-        epService.getEPRuntime().sendEvent(event, "Portfolio");
+    private void sendPortfolio(EventRepresentationEnum eventRepresentationEnum, String portfolio, String product) {
+        Map<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("portfolio", portfolio);
+        theEvent.put("product", product);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), "Portfolio");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "Portfolio");
+        }
     }
 
     public void testRightOuterJoinLateStart()
@@ -197,11 +217,11 @@ public class TestNamedWindowJoin extends TestCase
     public void testFullOuterJoinNamedAggregationLateStart()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.std:groupwin(string, intPrimitive).win:length(3) as select string, intPrimitive, boolPrimitive from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.std:groupwin(theString, intPrimitive).win:length(3) as select theString, intPrimitive, boolPrimitive from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string, intPrimitive, boolPrimitive from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString, intPrimitive, boolPrimitive from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // fill window
@@ -226,10 +246,10 @@ public class TestNamedWindowJoin extends TestCase
         assertEquals(19, received.length);
 
         // create select stmt
-        String stmtTextSelect = "select string, intPrimitive, count(boolPrimitive) as cntBool, symbol " +
+        String stmtTextSelect = "select theString, intPrimitive, count(boolPrimitive) as cntBool, symbol " +
                                 "from MyWindow full outer join " + SupportMarketDataBean.class.getName() + ".win:keepall() " +
-                                "on string = symbol " +
-                                "group by string, intPrimitive, symbol order by string, intPrimitive, symbol";
+                                "on theString = symbol " +
+                                "group by theString, intPrimitive, symbol order by theString, intPrimitive, symbol";
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
 
         // send outer join events
@@ -238,7 +258,7 @@ public class TestNamedWindowJoin extends TestCase
 
         // get iterator results
         received = EPAssertionUtil.iteratorToArray(stmtSelect.iterator());
-        EPAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,cntBool,symbol".split(","),
+        EPAssertionUtil.assertPropsPerRow(received, "theString,intPrimitive,cntBool,symbol".split(","),
                 new Object[][]{
                         {null, null, 0L, "c3"},
                         {"c0", 0, 2L, "c0"},
@@ -269,7 +289,7 @@ public class TestNamedWindowJoin extends TestCase
     public void testJoinNamedAndStream()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
@@ -278,7 +298,7 @@ public class TestNamedWindowJoin extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextDelete);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create consumer
@@ -332,12 +352,12 @@ public class TestNamedWindowJoin extends TestCase
         String[] fields = new String[] {"a1", "b1", "a2", "b2"};
 
         // create window
-        String stmtTextCreateOne = "create window MyWindowOne.win:keepall() as select string as a1, intPrimitive as b1 from " + SupportBean.class.getName();
+        String stmtTextCreateOne = "create window MyWindowOne.win:keepall() as select theString as a1, intPrimitive as b1 from " + SupportBean.class.getName();
         EPStatement stmtCreateOne = epService.getEPAdministrator().createEPL(stmtTextCreateOne);
         stmtCreateOne.addListener(listenerWindow);
 
         // create window
-        String stmtTextCreateTwo = "create window MyWindowTwo.win:keepall() as select string as a2, intPrimitive as b2 from " + SupportBean.class.getName();
+        String stmtTextCreateTwo = "create window MyWindowTwo.win:keepall() as select theString as a2, intPrimitive as b2 from " + SupportBean.class.getName();
         EPStatement stmtCreateTwo = epService.getEPAdministrator().createEPL(stmtTextCreateTwo);
         stmtCreateTwo.addListener(listenerWindowTwo);
 
@@ -349,10 +369,10 @@ public class TestNamedWindowJoin extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextDelete);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindowOne select string as a1, intPrimitive as b1 from " + SupportBean.class.getName() + "(boolPrimitive = true)";
+        String stmtTextInsert = "insert into MyWindowOne select theString as a1, intPrimitive as b1 from " + SupportBean.class.getName() + "(boolPrimitive = true)";
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
-        stmtTextInsert = "insert into MyWindowTwo select string as a2, intPrimitive as b2 from " + SupportBean.class.getName() + "(boolPrimitive = false)";
+        stmtTextInsert = "insert into MyWindowTwo select theString as a2, intPrimitive as b2 from " + SupportBean.class.getName() + "(boolPrimitive = false)";
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumers
@@ -401,7 +421,7 @@ public class TestNamedWindowJoin extends TestCase
         String[] fields = new String[] {"a0", "b0", "a1", "b1"};
 
         // create window
-        String stmtTextCreateOne = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreateOne = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreateOne = epService.getEPAdministrator().createEPL(stmtTextCreateOne);
         stmtCreateOne.addListener(listenerWindow);
 
@@ -410,7 +430,7 @@ public class TestNamedWindowJoin extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextDelete);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumers
@@ -438,12 +458,12 @@ public class TestNamedWindowJoin extends TestCase
         String[] fields = new String[] {"a1", "b1", "a2", "b2"};
 
         // create window
-        String stmtTextCreateOne = "create window MyWindowOne.win:keepall() as select string as a1, intPrimitive as b1 from " + SupportBean.class.getName();
+        String stmtTextCreateOne = "create window MyWindowOne.win:keepall() as select theString as a1, intPrimitive as b1 from " + SupportBean.class.getName();
         EPStatement stmtCreateOne = epService.getEPAdministrator().createEPL(stmtTextCreateOne);
         stmtCreateOne.addListener(listenerWindow);
 
         // create window
-        String stmtTextCreateTwo = "create window MyWindowTwo.win:keepall() as select string as a2, intPrimitive as b2 from " + SupportBean.class.getName();
+        String stmtTextCreateTwo = "create window MyWindowTwo.win:keepall() as select theString as a2, intPrimitive as b2 from " + SupportBean.class.getName();
         EPStatement stmtCreateTwo = epService.getEPAdministrator().createEPL(stmtTextCreateTwo);
         stmtCreateTwo.addListener(listenerWindowTwo);
 
@@ -455,10 +475,10 @@ public class TestNamedWindowJoin extends TestCase
         epService.getEPAdministrator().createEPL(stmtTextDelete);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindowOne select string as a1, intPrimitive as b1 from " + SupportBean.class.getName() + "(boolPrimitive = true)";
+        String stmtTextInsert = "insert into MyWindowOne select theString as a1, intPrimitive as b1 from " + SupportBean.class.getName() + "(boolPrimitive = true)";
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
-        stmtTextInsert = "insert into MyWindowTwo select string as a2, intPrimitive as b2 from " + SupportBean.class.getName() + "(boolPrimitive = false)";
+        stmtTextInsert = "insert into MyWindowTwo select theString as a2, intPrimitive as b2 from " + SupportBean.class.getName() + "(boolPrimitive = false)";
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumers
@@ -509,7 +529,7 @@ public class TestNamedWindowJoin extends TestCase
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() select * from SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
 
-        EPStatement stmtOne = epService.getEPAdministrator().createEPL("select w.* from MyWindow w unidirectional, SupportBean_A.std:lastevent() s where s.id = w.string");
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL("select w.* from MyWindow w unidirectional, SupportBean_A.std:lastevent() s where s.id = w.theString");
         stmtOne.addListener(listenerStmtOne);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
@@ -530,20 +550,20 @@ public class TestNamedWindowJoin extends TestCase
         return bean;
     }
 
-    private SupportBean sendSupportBean(String string, int intPrimitive)
+    private SupportBean sendSupportBean(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
 
-    private SupportBean sendSupportBean(boolean boolPrimitive, String string, int intPrimitive)
+    private SupportBean sendSupportBean(boolean boolPrimitive, String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
         bean.setBoolPrimitive(boolPrimitive);
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;

@@ -42,11 +42,11 @@ public class TestPerRowFunc extends TestCase
 
     public void testCoalesceBeans()
     {
-        tryCoalesceBeans("select coalesce(a.string, b.string) as myString, coalesce(a, b) as myBean" +
-                          " from pattern [every (a=" + SupportBean.class.getName() + "(string='s0') or b=" + SupportBean.class.getName() + "(string='s1'))]");
+        tryCoalesceBeans("select coalesce(a.theString, b.theString) as myString, coalesce(a, b) as myBean" +
+                          " from pattern [every (a=" + SupportBean.class.getName() + "(theString='s0') or b=" + SupportBean.class.getName() + "(theString='s1'))]");
 
-        tryCoalesceBeans("SELECT COALESCE(a.string, b.string) AS myString, COALESCE(a, b) AS myBean" +
-                          " FROM PATTERN [EVERY (a=" + SupportBean.class.getName() + "(string='s0') OR b=" + SupportBean.class.getName() + "(string='s1'))]");
+        tryCoalesceBeans("SELECT COALESCE(a.theString, b.theString) AS myString, COALESCE(a, b) AS myBean" +
+                          " FROM PATTERN [EVERY (a=" + SupportBean.class.getName() + "(theString='s0') OR b=" + SupportBean.class.getName() + "(theString='s1'))]");
     }
 
     private void tryCoalesceBeans(String viewExpr)
@@ -55,15 +55,15 @@ public class TestPerRowFunc extends TestCase
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(testListener);
 
-        SupportBean event = sendEvent("s0");
+        SupportBean theEvent = sendEvent("s0");
         EventBean eventReceived = testListener.assertOneGetNewAndReset();
         assertEquals("s0", eventReceived.get("myString"));
-        assertSame(event, eventReceived.get("myBean"));
+        assertSame(theEvent, eventReceived.get("myBean"));
 
-        event = sendEvent("s1");
+        theEvent = sendEvent("s1");
         eventReceived = testListener.assertOneGetNewAndReset();
         assertEquals("s1", eventReceived.get("myString"));
-        assertSame(event, eventReceived.get("myBean"));
+        assertSame(theEvent, eventReceived.get("myBean"));
     }
 
     public void testCoalesceLong()
@@ -342,10 +342,10 @@ public class TestPerRowFunc extends TestCase
         return selectTestView;
     }
 
-    private SupportBean sendEvent(String string)
+    private SupportBean sendEvent(String theString)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
@@ -378,10 +378,10 @@ public class TestPerRowFunc extends TestCase
 
     private void assertConcat(String c1, String c2, String c3)
     {
-        EventBean event = testListener.getLastNewData()[0];
-        assertEquals(c1, event.get("c1"));
-        assertEquals(c2, event.get("c2"));
-        assertEquals(c3, event.get("c3"));
+        EventBean theEvent = testListener.getLastNewData()[0];
+        assertEquals(c1, theEvent.get("c1"));
+        assertEquals(c2, theEvent.get("c2"));
+        assertEquals(c3, theEvent.get("c3"));
         testListener.reset();
     }
 

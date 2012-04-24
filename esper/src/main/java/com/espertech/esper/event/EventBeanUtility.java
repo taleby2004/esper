@@ -280,7 +280,7 @@ public class EventBeanUtility
      * @param eventList is a list of events to convert
      * @return array of events
      */
-    public static EventBean[] toArray(List<EventBean> eventList)
+    public static EventBean[] toArray(Collection<EventBean> eventList)
     {
         if ((eventList == null) || (eventList.isEmpty()))
         {
@@ -292,16 +292,16 @@ public class EventBeanUtility
     /**
      * Returns object array containing property values of given properties, retrieved via EventPropertyGetter
      * instances.
-     * @param event - event to get property values from
+     * @param theEvent - event to get property values from
      * @param propertyGetters - getters to use for getting property values
      * @return object array with property values
      */
-    public static Object[] getPropertyArray(EventBean event, EventPropertyGetter[] propertyGetters)
+    public static Object[] getPropertyArray(EventBean theEvent, EventPropertyGetter[] propertyGetters)
     {
         Object[] keyValues = new Object[propertyGetters.length];
         for (int i = 0; i < propertyGetters.length; i++)
         {
-            keyValues[i] = propertyGetters[i].get(event);
+            keyValues[i] = propertyGetters[i].get(theEvent);
         }
         return keyValues;
     }
@@ -318,18 +318,18 @@ public class EventBeanUtility
 
     /**
      * Returns Multikey instance for given event and getters.
-     * @param event - event to get property values from
+     * @param theEvent - event to get property values from
      * @param propertyGetters - getters for access to properties
      * @return MultiKey with property values
      */
-    public static MultiKeyUntyped getMultiKey(EventBean event, EventPropertyGetter[] propertyGetters)
+    public static MultiKeyUntyped getMultiKey(EventBean theEvent, EventPropertyGetter[] propertyGetters)
     {
-        Object[] keyValues = getPropertyArray(event, propertyGetters);
+        Object[] keyValues = getPropertyArray(theEvent, propertyGetters);
         return new MultiKeyUntyped(keyValues);
     }
 
-    public static MultiKeyUntyped getMultiKey(EventBean event, EventPropertyGetter[] propertyGetters, Class[] coercionTypes) {
-        Object[] keyValues = getPropertyArray(event, propertyGetters);
+    public static MultiKeyUntyped getMultiKey(EventBean theEvent, EventPropertyGetter[] propertyGetters, Class[] coercionTypes) {
+        Object[] keyValues = getPropertyArray(theEvent, propertyGetters);
         if (coercionTypes == null) {
             return new MultiKeyUntyped(keyValues);
         }
@@ -376,15 +376,6 @@ public class EventBeanUtility
         return keys;
     }
 
-    public static MultiKeyUntyped getMultiKey(EventBean[] eventPerStream, EventPropertyGetter[] propertyGetters, int[] keyStreamNums, Class[] coercionTypes) {
-        Object[] keyValues = getPropertyArray(eventPerStream, propertyGetters, keyStreamNums);
-        if (coercionTypes == null) {
-            return new MultiKeyUntyped(keyValues);
-        }
-        coerce(keyValues, coercionTypes);
-        return new MultiKeyUntyped(keyValues);
-    }
-
     private static void coerce(Object[] keyValues, Class[] coercionTypes) {
         for (int i = 0; i < coercionTypes.length; i++)
         {
@@ -416,14 +407,14 @@ public class EventBeanUtility
 
     /**
      * Format the event and return a string representation.
-     * @param event is the event to format.
+     * @param theEvent is the event to format.
      * @return string representation of event
      */
-    public static String printEvent(EventBean event)
+    public static String printEvent(EventBean theEvent)
     {
         StringWriter writer = new StringWriter();
         PrintWriter buf = new PrintWriter(writer);
-        printEvent(buf, event);
+        printEvent(buf, theEvent);
         return writer.toString();
     }
 
@@ -432,21 +423,21 @@ public class EventBeanUtility
         StringWriter writer = new StringWriter();
         PrintWriter buf = new PrintWriter(writer);
         int count = 0;
-        for (EventBean event : events) {
+        for (EventBean theEvent : events) {
             count++;
             buf.println("Event " + String.format("%6d:", count));
-            printEvent(buf, event);
+            printEvent(buf, theEvent);
         }
         return writer.toString();
     }
 
-    private static void printEvent(PrintWriter writer, EventBean event)
+    private static void printEvent(PrintWriter writer, EventBean theEvent)
     {
-        String[] properties = event.getEventType().getPropertyNames();
+        String[] properties = theEvent.getEventType().getPropertyNames();
         for (int i = 0; i < properties.length; i++)
         {
             String propName = properties[i];
-            Object property = event.get(propName);
+            Object property = theEvent.get(propName);
             String printProperty;
             if (property == null)
             {
@@ -476,14 +467,14 @@ public class EventBeanUtility
         return Arrays.toString(objects);
     }
 
-    public static void appendEvent(StringWriter writer, EventBean event)
+    public static void appendEvent(StringWriter writer, EventBean theEvent)
     {
-        String[] properties = event.getEventType().getPropertyNames();
+        String[] properties = theEvent.getEventType().getPropertyNames();
         String delimiter = "";
         for (int i = 0; i < properties.length; i++)
         {
             String propName = properties[i];
-            Object property = event.get(propName);
+            Object property = theEvent.get(propName);
             String printProperty;
             if (property == null)
             {
@@ -630,19 +621,19 @@ public class EventBeanUtility
 
         Set<MultiKeyUntypedEventPair> set = new LinkedHashSet<MultiKeyUntypedEventPair>();
         if (events.getFirst() instanceof NaturalEventBean) {
-            for (EventBean event : events)
+            for (EventBean theEvent : events)
             {
-                EventBean inner = ((NaturalEventBean) event).getOptionalSynthetic();
+                EventBean inner = ((NaturalEventBean) theEvent).getOptionalSynthetic();
                 Object[] keys = reader.read(inner);
-                MultiKeyUntypedEventPair pair = new MultiKeyUntypedEventPair(keys, event);
+                MultiKeyUntypedEventPair pair = new MultiKeyUntypedEventPair(keys, theEvent);
                 set.add(pair);
             }
         }
         else {
-            for (EventBean event : events)
+            for (EventBean theEvent : events)
             {
-                Object[] keys = reader.read(event);
-                MultiKeyUntypedEventPair pair = new MultiKeyUntypedEventPair(keys, event);
+                Object[] keys = reader.read(theEvent);
+                MultiKeyUntypedEventPair pair = new MultiKeyUntypedEventPair(keys, theEvent);
                 set.add(pair);
             }
         }
@@ -671,19 +662,19 @@ public class EventBeanUtility
 
         Set<MultiKeyUntypedEventPair> set = new LinkedHashSet<MultiKeyUntypedEventPair>();
         if (events[0] instanceof NaturalEventBean) {
-            for (EventBean event : events)
+            for (EventBean theEvent : events)
             {
-                EventBean inner = ((NaturalEventBean) event).getOptionalSynthetic();
+                EventBean inner = ((NaturalEventBean) theEvent).getOptionalSynthetic();
                 Object[] keys = reader.read(inner);
-                MultiKeyUntypedEventPair pair = new MultiKeyUntypedEventPair(keys, event);
+                MultiKeyUntypedEventPair pair = new MultiKeyUntypedEventPair(keys, theEvent);
                 set.add(pair);
             }
         }
         else {
-            for (EventBean event : events)
+            for (EventBean theEvent : events)
             {
-                Object[] keys = reader.read(event);
-                MultiKeyUntypedEventPair pair = new MultiKeyUntypedEventPair(keys, event);
+                Object[] keys = reader.read(theEvent);
+                MultiKeyUntypedEventPair pair = new MultiKeyUntypedEventPair(keys, theEvent);
                 set.add(pair);
             }
         }
@@ -726,11 +717,51 @@ public class EventBeanUtility
         return true;
     }
 
-    public static String summarize(EventBean event) {
-        if (event == null) {
+    public static String summarize(EventBean theEvent) {
+        if (theEvent == null) {
             return "(null)";
         }
-        return event.getEventType().getName() + "[" + event.getUnderlying().toString() + "]";
+        StringWriter writer = new StringWriter();
+        summarize(theEvent, writer);
+        return writer.toString();
+    }
+
+    public static void summarize(EventBean theEvent, StringWriter writer) {
+        if (theEvent == null) {
+            writer.write("(null)");
+            return;
+        }
+        writer.append(theEvent.getEventType().getName());
+        writer.append("[");
+        summarizeUnderlying(theEvent.getUnderlying(), writer);
+        writer.append("]");
+    }
+
+    public static void summarizeUnderlying(Object underlying, StringWriter writer) {
+        if (underlying.getClass().isArray()) {
+            if (underlying instanceof Object[]) {
+                writer.append(Arrays.toString((Object[]) underlying));
+            }
+            else {
+                String delimiter = "";
+                writer.append("[");
+                for (int i = 0; i < Array.getLength(underlying); i++) {
+                    writer.append(delimiter);
+                    delimiter = ",";
+                    Object value = Array.get(underlying, i);
+                    if (value != null) {
+                        writer.append(value.toString());
+                    }
+                    else {
+                        writer.append("(null)");
+                    }
+                }
+                writer.append("]");
+            }
+        }
+        else {
+            writer.append(underlying.toString());
+        }
     }
 
     public static String summarize(EventBean[] events) {
@@ -747,7 +778,7 @@ public class EventBeanUtility
             writer.write("event ");
             writer.write(Integer.toString(i));
             writer.write(":");
-            writer.write(summarize(events[i]));
+            summarize(events[i], writer);
             delimiter = ", ";
         }
         return writer.toString();
@@ -813,13 +844,13 @@ public class EventBeanUtility
         return events.toArray(new EventBean[events.size()]);
     }
 
-    private static boolean findEvent(EventBean event, EventBean[][] eventsPerView) {
+    private static boolean findEvent(EventBean theEvent, EventBean[][] eventsPerView) {
         for (int i = 0; i < eventsPerView.length; i++) {
             if (eventsPerView[i] == null) {
                 continue;
             }
             for (int j = 0; j < eventsPerView[i].length; j++) {
-                if (eventsPerView[i][j] == event) {
+                if (eventsPerView[i][j] == theEvent) {
                     return true;
                 }
             }

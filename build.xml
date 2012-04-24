@@ -4,7 +4,7 @@
 	<property name="Name" value="Esper"/>
 	<property name="name" value="esper"/>
 	<property name="nameio" value="esperio"/>
-	<property name="version" value="4.5.0"/>
+	<property name="version" value="4.6.0"/>
 	<property name="patchlevel" value=""/>
 	<property name="fullversion" value="${version}${patchlevel}"/>
 	<property name="fullname" value="${name}-${fullversion}"/>
@@ -52,16 +52,22 @@
 		<echo message="Building a zip for distribution" />
 		<property name="zip-file" value=""/>
 		<zip zipfile="${dist.dir}/${fullname}-src.zip">
-            		<zipfileset dir="esper/src/main/java" includes="**"/>
-            		<zipfileset dir="esper" includes="pom.xml"/>
+            		<zipfileset prefix="src" dir="esper/src/main/java" includes="**"/>
+            		<zipfileset prefix="test" dir="esper/src/test/java" includes="**"/>
+            		<zipfileset prefix="grammar" dir="esper/grammar" includes="**"/>
+            		<zipfileset prefix="pom" dir="esper" includes="pom.xml"/>
         	</zip>
 		<zip zipfile="${dist.dir}/${fullnameio}-src.zip">
-            		<zipfileset dir="esperio-csv/src/main/java" includes="**"/>
-            		<zipfileset dir="esperio-http/src/main/java" includes="**"/>
-            		<zipfileset dir="esperio-db/src/main/java" includes="**"/>
-            		<zipfileset dir="esperio-socket/src/main/java" includes="**"/>
-            		<zipfileset dir="esperio-springjms/src/main/java" includes="**"/>
-            		<zipfileset dir="esperio-stax/src/main/java" includes="**"/>
+            		<zipfileset prefix="csv" dir="esperio-csv/src/main/java" includes="**"/>
+            		<zipfileset prefix="http" dir="esperio-http/src/main/java" includes="**"/>
+            		<zipfileset prefix="db" dir="esperio-db/src/main/java" includes="**"/>
+            		<zipfileset prefix="tcp" dir="esperio-socket/src/main/java" includes="**"/>
+            		<zipfileset prefix="jms" dir="esperio-springjms/src/main/java" includes="**"/>
+            		<zipfileset prefix="stax" dir="esperio-stax/src/main/java" includes="**"/>
+        	</zip>
+		<zip zipfile="${dist.dir}/${fullname}-examples-src.zip">
+            		<zipfileset prefix="vwap" dir="examples/vwap/src/main/java" includes="**"/>
+            		<zipfileset prefix="vwap" dir="examples/vwap/src/test/java" includes="**"/>
         	</zip>
         </target>
 
@@ -76,9 +82,9 @@
 		<zip zipfile="${zip-file}">
 			<zipfileset prefix="${name}-${version}" dir="." includes="${dist_includes}" excludes="${dist_excludes}"/>
 			<zipfileset prefix="${name}-${version}" dir="." includes="${dist_includes_exceptions}"/>
-			<zipfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
+			<zipfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/target/docbook/publish/en-US" includes="**"/>
 			<zipfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
-			<zipfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>
+			<zipfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/target/docbook/publish/en-US" includes="**"/>
 			<zipfileset prefix="${name}-${version}/esperio/doc/api" dir="esperio/doc/javadoc/api" includes="**"/>
 			<zipfileset prefix="${name}-${version}" dir="esper/target" includes="esper-${version}.jar"/>
 			<zipfileset prefix="${name}-${version}" dir="esperio-csv/target" includes="esperio-csv*-${version}.jar"/>
@@ -109,9 +115,9 @@
 			<tarfileset prefix="${name}-${version}" dir="." includes="${dist_includes}" excludes="${dist_excludes}"/>
 			<tarfileset prefix="${name}-${version}" dir="." includes="${dist_includes_exceptions}"/>
 			<tarfileset prefix="${name}-${version}" dir="." mode="555" includes="examples/**/*.sh" excludes="examples/**/target/**/*.sh"/>
-		    	<tarfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/build/en" includes="**"/>
+			<tarfileset prefix="${name}-${version}/esper/doc/reference" dir="esper/doc/reference/target/docbook/publish/en-US" includes="**"/>
 		    	<tarfileset prefix="${name}-${version}/esper/doc/api" dir="esper/doc/javadoc/api" includes="**"/>
-		    	<tarfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/build/en" includes="**"/>
+		    	<tarfileset prefix="${name}-${version}/esperio/doc/reference" dir="esperio/doc/reference/target/docbook/publish/en-US" includes="**"/>
 		    	<tarfileset prefix="${name}-${version}/esperio/doc/api" dir="esperio/doc/javadoc/api" includes="**"/>            
 			<tarfileset prefix="${name}-${version}" dir="esper/target" includes="esper-${version}.jar"/>
 			<tarfileset prefix="${name}-${version}" dir="esperio-csv/target" includes="esperio-csv*-${version}.jar"/>

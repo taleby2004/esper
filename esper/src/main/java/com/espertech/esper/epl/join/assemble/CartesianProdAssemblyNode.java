@@ -143,9 +143,9 @@ public class CartesianProdAssemblyNode extends BaseAssemblyNode
         for (Node node : resultsForStream)
         {
             Set<EventBean> events = node.getEvents();
-            for (EventBean event : events)
+            for (EventBean theEvent : events)
             {
-                ChildStreamResults results = completedEvents.get(event);
+                ChildStreamResults results = completedEvents.get(theEvent);
 
                 // If there were no results for the event posted by any child nodes
                 if (results == null)
@@ -153,7 +153,7 @@ public class CartesianProdAssemblyNode extends BaseAssemblyNode
                     if (allSubStreamsOptional)
                     {
                         EventBean[] row = new EventBean[numStreams];
-                        row[streamNum] = event;
+                        row[streamNum] = theEvent;
                         parentNode.result(row, streamNum, node.getParentEvent(), node.getParent());
                     }
                     continue;

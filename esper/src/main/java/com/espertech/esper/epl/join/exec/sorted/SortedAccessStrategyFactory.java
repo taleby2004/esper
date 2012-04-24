@@ -30,14 +30,14 @@ public class SortedAccessStrategyFactory {
         QueryGraphValueEntryRange rangeKeyPair = streamRangeKey.getRangeInfo();
 
         if (rangeKeyPair.getType().isRange()) {
-            QueryGraphValueEntryRangeIn in = (QueryGraphValueEntryRangeIn) rangeKeyPair;
-            ExprEvaluator startExpr = in.getExprStart().getExprEvaluator();
-            ExprEvaluator endExpr = in.getExprEnd().getExprEvaluator();
+            QueryGraphValueEntryRangeIn rangeIn = (QueryGraphValueEntryRangeIn) rangeKeyPair;
+            ExprEvaluator startExpr = rangeIn.getExprStart().getExprEvaluator();
+            ExprEvaluator endExpr = rangeIn.getExprEnd().getExprEvaluator();
             boolean includeStart = rangeKeyPair.getType().isIncludeStart();
 
             boolean includeEnd = rangeKeyPair.getType().isIncludeEnd();
             if (!rangeKeyPair.getType().isRangeInverted()) {
-                return new SortedAccessStrategyRange(isNWOnTrigger, lookupStream, numStreams, startExpr, includeStart, endExpr, includeEnd, in.isAllowRangeReversal());
+                return new SortedAccessStrategyRange(isNWOnTrigger, lookupStream, numStreams, startExpr, includeStart, endExpr, includeEnd, rangeIn.isAllowRangeReversal());
             }
             else {
                 return new SortedAccessStrategyRangeInverted(isNWOnTrigger, lookupStream, numStreams, startExpr, includeStart, endExpr, includeEnd);

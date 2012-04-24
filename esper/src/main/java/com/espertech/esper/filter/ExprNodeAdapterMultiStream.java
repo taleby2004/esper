@@ -39,14 +39,14 @@ public class ExprNodeAdapterMultiStream extends ExprNodeAdapterBaseVariables
     }
 
     @Override
-    public boolean evaluate(EventBean event)
+    public boolean evaluate(EventBean theEvent)
     {
         if (variableService != null)
         {
             variableService.setLocalVersion();
         }
         EventBean[] eventsPerStream = arrayPerThread.get();
-        eventsPerStream[0] = event;
+        eventsPerStream[0] = theEvent;
         return evaluatePerStream(eventsPerStream);
     }
 }

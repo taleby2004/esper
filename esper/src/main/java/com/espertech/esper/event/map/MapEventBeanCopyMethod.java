@@ -38,9 +38,9 @@ public class MapEventBeanCopyMethod implements EventBeanCopyMethod
         this.eventAdapterService = eventAdapterService;
     }
 
-    public EventBean copy(EventBean event)
+    public EventBean copy(EventBean theEvent)
     {
-        MappedEventBean mapped = (MappedEventBean) event;
+        MappedEventBean mapped = (MappedEventBean) theEvent;
         Map<String, Object> props = mapped.getProperties();
         return eventAdapterService.adapterForTypedMap(new HashMap<String, Object>(props), mapEventType);
     }

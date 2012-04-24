@@ -40,10 +40,10 @@ public class TestInstanceOfExpr extends TestCase
 
     public void testInstanceofSimple()
     {
-        String stmtText = "select instanceof(string, string) as t0, " +
+        String stmtText = "select instanceof(theString, string) as t0, " +
                           " instanceof(intBoxed, int) as t1, " +
                           " instanceof(floatBoxed, java.lang.Float) as t2, " +
-                          " instanceof(string, java.lang.Float, char, byte) as t3, " +
+                          " instanceof(theString, java.lang.Float, char, byte) as t3, " +
                           " instanceof(intPrimitive, java.lang.Integer) as t4, " +
                           " instanceof(intPrimitive, long) as t5, " +
                           " instanceof(intPrimitive, long, long, java.lang.Number) as t6, " +
@@ -74,14 +74,14 @@ public class TestInstanceOfExpr extends TestCase
 
     public void testInstanceofStringAndNull_OM() throws Exception
     {
-        String stmtText = "select instanceof(string, string) as t0, " +
-                          "instanceof(string, float, string, int) as t1 " +
+        String stmtText = "select instanceof(theString, string) as t0, " +
+                          "instanceof(theString, float, string, int) as t1 " +
                           "from " + SupportBean.class.getName();
 
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setSelectClause(SelectClause.create()
-                .add(Expressions.instanceOf("string", "string"), "t0")
-                .add(Expressions.instanceOf(Expressions.property("string"), "float", "string", "int"), "t1"));
+                .add(Expressions.instanceOf("theString", "string"), "t0")
+                .add(Expressions.instanceOf(Expressions.property("theString"), "float", "string", "int"), "t1"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName())));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
         assertEquals(stmtText, model.toEPL());
@@ -90,20 +90,20 @@ public class TestInstanceOfExpr extends TestCase
         selectTestCase.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("abc", 100));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertTrue((Boolean) event.get("t0"));
-        assertTrue((Boolean) event.get("t1"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertTrue((Boolean) theEvent.get("t0"));
+        assertTrue((Boolean) theEvent.get("t1"));
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 100));
-        event = listener.assertOneGetNewAndReset();
-        assertFalse((Boolean) event.get("t0"));
-        assertFalse((Boolean) event.get("t1"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertFalse((Boolean) theEvent.get("t0"));
+        assertFalse((Boolean) theEvent.get("t1"));
     }
 
     public void testInstanceofStringAndNull_Compile() throws Exception
     {
-        String stmtText = "select instanceof(string, string) as t0, " +
-                          "instanceof(string, float, string, int) as t1 " +
+        String stmtText = "select instanceof(theString, string) as t0, " +
+                          "instanceof(theString, float, string, int) as t1 " +
                           "from " + SupportBean.class.getName();
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(stmtText);
@@ -113,14 +113,14 @@ public class TestInstanceOfExpr extends TestCase
         selectTestCase.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("abc", 100));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertTrue((Boolean) event.get("t0"));
-        assertTrue((Boolean) event.get("t1"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertTrue((Boolean) theEvent.get("t0"));
+        assertTrue((Boolean) theEvent.get("t1"));
 
         epService.getEPRuntime().sendEvent(new SupportBean(null, 100));
-        event = listener.assertOneGetNewAndReset();
-        assertFalse((Boolean) event.get("t0"));
-        assertFalse((Boolean) event.get("t1"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertFalse((Boolean) theEvent.get("t0"));
+        assertFalse((Boolean) theEvent.get("t1"));
     }
 
     public void testDynamicPropertyJavaTypes()
@@ -189,11 +189,11 @@ public class TestInstanceOfExpr extends TestCase
         assertResults(listener.assertOneGetNewAndReset(), new boolean[] {false, true, true, false, true, true, false, false});
     }
 
-    private void assertResults(EventBean event, boolean[] result)
+    private void assertResults(EventBean theEvent, boolean[] result)
     {
         for (int i = 0; i < result.length; i++)
         {
-            assertEquals("failed for index " + i, result[i], event.get("t" + i));            
+            assertEquals("failed for index " + i, result[i], theEvent.get("t" + i));
         }
     }
 }

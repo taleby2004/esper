@@ -59,11 +59,11 @@ public class TestViewWhereClause extends TestCase
         // invalid return type for filter during compilation time
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         try {
-            epService.getEPAdministrator().createEPL("Select string From SupportBean.win:time(30 seconds) where intPrimitive group by string");
+            epService.getEPAdministrator().createEPL("Select theString From SupportBean.win:time(30 seconds) where intPrimitive group by theString");
             fail();
         }
         catch (EPStatementException ex) {
-            assertEquals("Error validating expression: The where-clause filter expression must return a boolean value [Select string From SupportBean.win:time(30 seconds) where intPrimitive group by string]", ex.getMessage());
+            assertEquals("Error validating expression: The where-clause filter expression must return a boolean value [Select theString From SupportBean.win:time(30 seconds) where intPrimitive group by theString]", ex.getMessage());
         }
 
         // invalid return type for filter at runtime
@@ -100,28 +100,28 @@ public class TestViewWhereClause extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         sendSupportBeanEvent(2, 2, 2, 2);
-        EventBean event = listener.getAndResetLastNewData()[0];
-        assertEquals(Long.class, event.getEventType().getPropertyType("p1"));
-        assertEquals(4l, event.get("p1"));
-        assertEquals(Double.class, event.getEventType().getPropertyType("p2"));
-        assertEquals(4d, event.get("p2"));
-        assertEquals(Double.class, event.getEventType().getPropertyType("p3"));
-        assertEquals(1d, event.get("p3"));
+        EventBean theEvent = listener.getAndResetLastNewData()[0];
+        assertEquals(Long.class, theEvent.getEventType().getPropertyType("p1"));
+        assertEquals(4l, theEvent.get("p1"));
+        assertEquals(Double.class, theEvent.getEventType().getPropertyType("p2"));
+        assertEquals(4d, theEvent.get("p2"));
+        assertEquals(Double.class, theEvent.getEventType().getPropertyType("p3"));
+        assertEquals(1d, theEvent.get("p3"));
     }
 
     private void sendMarketDataEvent(String symbol)
     {
-        SupportMarketDataBean event = new SupportMarketDataBean(symbol, 0, 0L, "");
-        epService.getEPRuntime().sendEvent(event);
+        SupportMarketDataBean theEvent = new SupportMarketDataBean(symbol, 0, 0L, "");
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendSupportBeanEvent(int intPrimitive, long longPrimitive, float floatPrimitive, double doublePrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        event.setLongPrimitive(longPrimitive);
-        event.setFloatPrimitive(floatPrimitive);
-        event.setDoublePrimitive(doublePrimitive);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        theEvent.setLongPrimitive(longPrimitive);
+        theEvent.setFloatPrimitive(floatPrimitive);
+        theEvent.setDoublePrimitive(doublePrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 }

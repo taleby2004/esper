@@ -219,19 +219,19 @@ public class TestNoSchemaXMLEvent extends TestCase
         joinView.addListener(updateListener);
 
         sendXMLEvent("<a><b><c></c></b></a>");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("", event.get("type"));
-        assertEquals("", event.get("element1"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("", theEvent.get("type"));
+        assertEquals("", theEvent.get("element1"));
 
         sendXMLEvent("<a><b></b></a>");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEquals(null, event.get("type"));
-        assertEquals("", event.get("element1"));
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals(null, theEvent.get("type"));
+        assertEquals("", theEvent.get("element1"));
 
         sendXMLEvent("<a><b><c>text</c></b></a>");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEquals("text", event.get("type"));
-        assertEquals("text", event.get("element1"));
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("text", theEvent.get("type"));
+        assertEquals("text", theEvent.get("element1"));
     }
 
     public void testNestedXMLXPathGetter() throws Exception
@@ -252,19 +252,19 @@ public class TestNoSchemaXMLEvent extends TestCase
         joinView.addListener(updateListener);
 
         sendXMLEvent("<a><b><c></c></b></a>");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("", event.get("type"));
-        assertEquals("", event.get("element1"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("", theEvent.get("type"));
+        assertEquals("", theEvent.get("element1"));
 
         sendXMLEvent("<a><b></b></a>");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEquals("", event.get("type"));
-        assertEquals("", event.get("element1"));
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("", theEvent.get("type"));
+        assertEquals("", theEvent.get("element1"));
 
         sendXMLEvent("<a><b><c>text</c></b></a>");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEquals("text", event.get("type"));
-        assertEquals("text", event.get("element1"));
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("text", theEvent.get("type"));
+        assertEquals("text", theEvent.get("element1"));
     }
 
     public void testDotEscapeSyntax() throws Exception
@@ -283,8 +283,8 @@ public class TestNoSchemaXMLEvent extends TestCase
         joinView.addListener(updateListener);
 
         sendXMLEvent("<myroot><a.b><c.d>value</c.d></a.b></myroot>");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("value", event.get("val"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("value", theEvent.get("val"));
     }
 
     public void testEventXML() throws Exception
@@ -305,9 +305,9 @@ public class TestNoSchemaXMLEvent extends TestCase
         joinView.addListener(updateListener);
 
         sendXMLEvent("<event type=\"a-f-G\" uid=\"terminal.55\" time=\"2007-04-19T13:05:20.22Z\" version=\"2.0\"></event>");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("a-f-G", event.get("type"));
-        assertEquals("terminal.55", event.get("uid"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("a-f-G", theEvent.get("type"));
+        assertEquals("terminal.55", theEvent.get("uid"));
     }
 
     public void testElementNode() throws Exception
@@ -339,9 +339,9 @@ public class TestNoSchemaXMLEvent extends TestCase
         Element topElement = doc.getDocumentElement();
 
         epService.getEPRuntime().sendEvent(topElement);
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("a-f-G", event.get("type"));
-        assertEquals("terminal.55", event.get("uid"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("a-f-G", theEvent.get("type"));
+        assertEquals("terminal.55", theEvent.get("uid"));
     }
 
     public void testNamespaceXPathRelative() throws Exception
@@ -372,9 +372,9 @@ public class TestNoSchemaXMLEvent extends TestCase
         Document doc = builderFactory.newDocumentBuilder().parse(source);
 
         epService.getEPRuntime().sendEvent(doc);
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("IBM", event.get("symbol_a"));
-        assertEquals("IBM", event.get("symbol_b"));
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("IBM", theEvent.get("symbol_a"));
+        assertEquals("IBM", theEvent.get("symbol_b"));
     }
 
     public void testNamespaceXPathAbsolute() throws Exception
@@ -421,12 +421,12 @@ public class TestNoSchemaXMLEvent extends TestCase
         */
 
         epService.getEPRuntime().sendEvent(doc);
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEquals("IBM", event.get("symbol_a"));
-        assertEquals("IBM", event.get("symbol_b"));
-        assertEquals("IBM", event.get("symbol_c"));
-        assertEquals("IBM", event.get("symbol_d"));
-        assertEquals("", event.get("symbol_e"));    // should be empty string as we are doing absolute XPath
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEquals("IBM", theEvent.get("symbol_a"));
+        assertEquals("IBM", theEvent.get("symbol_b"));
+        assertEquals("IBM", theEvent.get("symbol_c"));
+        assertEquals("IBM", theEvent.get("symbol_d"));
+        assertEquals("", theEvent.get("symbol_e"));    // should be empty string as we are doing absolute XPath
     }
 
     public void testXPathArray() throws Exception
@@ -459,45 +459,45 @@ public class TestNoSchemaXMLEvent extends TestCase
         Document doc = SupportXML.getDocument(xml);
         epService.getEPRuntime().sendEvent(doc);
 
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        Object value = event.get("A");
-        EPAssertionUtil.assertProps(event, "A".split(","), new Object[]{new Object[]{"987654321", "9876543210"}});
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        Object value = theEvent.get("A");
+        EPAssertionUtil.assertProps(theEvent, "A".split(","), new Object[]{new Object[]{"987654321", "9876543210"}});
     }
 
     private void assertDataSimpleXPath(String element1)
     {
         assertNotNull(updateListener.getLastNewData());
-        EventBean event = updateListener.getLastNewData()[0];
+        EventBean theEvent = updateListener.getLastNewData()[0];
 
-        assertEquals(element1, event.get("xpathElement1"));
-        assertEquals(2.0, event.get("xpathCountE21"));
-        assertEquals("VAL3", event.get("xpathAttrString"));
-        assertEquals(5d, event.get("xpathAttrNum"));
-        assertEquals(true, event.get("xpathAttrBool"));
-        assertEquals(5L, event.get("stringCastLong"));
-        assertEquals(5d, event.get("stringCastDouble"));
-        assertEquals(5, event.get("numCastInt"));
+        assertEquals(element1, theEvent.get("xpathElement1"));
+        assertEquals(2.0, theEvent.get("xpathCountE21"));
+        assertEquals("VAL3", theEvent.get("xpathAttrString"));
+        assertEquals(5d, theEvent.get("xpathAttrNum"));
+        assertEquals(true, theEvent.get("xpathAttrBool"));
+        assertEquals(5L, theEvent.get("stringCastLong"));
+        assertEquals(5d, theEvent.get("stringCastDouble"));
+        assertEquals(5, theEvent.get("numCastInt"));
     }
 
     private void assertDataGetter(String element1, boolean isInvalidReturnsEmptyString)
     {
         assertNotNull(updateListener.getLastNewData());
-        EventBean event = updateListener.getLastNewData()[0];
+        EventBean theEvent = updateListener.getLastNewData()[0];
 
-        assertEquals(element1, event.get("element1"));
-        assertEquals("VAL4-1", event.get("nestedElement"));
-        assertEquals("VAL21-2", event.get("mappedElement"));
-        assertEquals("VAL21-2", event.get("indexedElement"));
+        assertEquals(element1, theEvent.get("element1"));
+        assertEquals("VAL4-1", theEvent.get("nestedElement"));
+        assertEquals("VAL21-2", theEvent.get("mappedElement"));
+        assertEquals("VAL21-2", theEvent.get("indexedElement"));
 
         if (isInvalidReturnsEmptyString)
         {
-            assertEquals("", event.get("invalidelement"));
-            assertEquals("", event.get("invalidattribute"));
+            assertEquals("", theEvent.get("invalidelement"));
+            assertEquals("", theEvent.get("invalidattribute"));
         }
         else
         {
-            assertEquals(null, event.get("invalidelement"));
-            assertEquals(null, event.get("invalidattribute"));
+            assertEquals(null, theEvent.get("invalidelement"));
+            assertEquals(null, theEvent.get("invalidattribute"));
         }
     }
 

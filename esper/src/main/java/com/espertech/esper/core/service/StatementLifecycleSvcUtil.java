@@ -17,6 +17,9 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.pattern.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class StatementLifecycleSvcUtil {
 
     public static void walkStatement(StatementSpecRaw spec, ExprNodeSubselectDeclaredDotVisitor visitor) throws ExprValidationException {
@@ -172,5 +175,33 @@ public class StatementLifecycleSvcUtil {
                 }
             }
         }
+    }
+
+    public static SelectClauseSpecCompiled compileSelectClause(SelectClauseSpecRaw spec) {
+        List<SelectClauseElementCompiled> selectElements = new ArrayList<SelectClauseElementCompiled>();
+        SelectClauseSpecCompiled selectClauseCompiled = new SelectClauseSpecCompiled(selectElements, spec.isDistinct());
+        for (SelectClauseElementRaw raw : spec.getSelectExprList())
+        {
+            if (raw instanceof SelectClauseExprRawSpec)
+            {
+                SelectClauseExprRawSpec rawExpr = (SelectClauseExprRawSpec) raw;
+                selectElements.add(new SelectClauseExprCompiledSpec(rawExpr.getSelectExpression(), rawExpr.getOptionalAsName(), rawExpr.getOptionalAsName()));
+            }
+            else if (raw instanceof SelectClauseStreamRawSpec)
+            {
+                SelectClauseStreamRawSpec rawExpr = (SelectClauseStreamRawSpec) raw;
+                selectElements.add(new SelectClauseStreamCompiledSpec(rawExpr.getStreamName(), rawExpr.getOptionalAsName()));
+            }
+            else if (raw instanceof SelectClauseElementWildcard)
+            {
+                SelectClauseElementWildcard wildcard = (SelectClauseElementWildcard) raw;
+                selectElements.add(wildcard);
+            }
+            else
+            {
+                throw new IllegalStateException("Unexpected select clause element class : " + raw.getClass().getName());
+            }
+        }
+        return selectClauseCompiled;
     }
 }

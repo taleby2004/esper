@@ -68,6 +68,15 @@ public class TestBeanEventBean extends TestCase
             // Expected
             log.debug(".testGetter Expected exception, msg=" + ex.getMessage());
         }
+        
+        EventPropertyGetter getter = eventType.getGetter("myString");
+        try {
+            getter.get(new BeanEventBean(new SupportBean_A("id"), eventType));
+            fail();
+        }
+        catch (PropertyAccessException ex) {
+            assertEquals("Mismatched getter instance to event bean type, expected com.espertech.esper.support.bean.SupportBeanSimple but received com.espertech.esper.support.bean.SupportBean_A", ex.getMessage());
+        }
     }
 
     public void testGetComplexProperty()
@@ -137,8 +146,8 @@ public class TestBeanEventBean extends TestCase
         assertEquals(new EventPropertyDescriptor("iterableInteger", Iterable.class, Integer.class, false, false, true, false, false), eventBean.getEventType().getPropertyDescriptor("iterableInteger"));
         assertEquals(new EventPropertyDescriptor("listNested", List.class, SupportBeanIterableProps.SupportBeanSpecialGetterNested.class, false, false, true, false, true), eventBean.getEventType().getPropertyDescriptor("listNested"));
         assertEquals(new EventPropertyDescriptor("listInteger", List.class, Integer.class, false, false, true, false, false), eventBean.getEventType().getPropertyDescriptor("listInteger"));
-        assertEquals(new EventPropertyDescriptor("mapNested", Map.class, null, false, false, false, true, false), eventBean.getEventType().getPropertyDescriptor("mapNested"));
-        assertEquals(new EventPropertyDescriptor("mapInteger", Map.class, null, false, false, false, true, false), eventBean.getEventType().getPropertyDescriptor("mapInteger"));
+        assertEquals(new EventPropertyDescriptor("mapNested", Map.class, SupportBeanIterableProps.SupportBeanSpecialGetterNested.class, false, false, false, true, false), eventBean.getEventType().getPropertyDescriptor("mapNested"));
+        assertEquals(new EventPropertyDescriptor("mapInteger", Map.class, Integer.class, false, false, false, true, false), eventBean.getEventType().getPropertyDescriptor("mapInteger"));
         assertEquals(new EventPropertyDescriptor("iterableUndefined", Iterable.class, Object.class, false, false, true, false, false), eventBean.getEventType().getPropertyDescriptor("iterableUndefined"));
         assertEquals(new EventPropertyDescriptor("iterableObject", Iterable.class, Object.class, false, false, true, false, false), eventBean.getEventType().getPropertyDescriptor("iterableObject"));
 
@@ -201,8 +210,8 @@ public class TestBeanEventBean extends TestCase
         assertEquals(false, fragmentTypeOne.isIndexed());
         assertEquals(SupportBeanIterableProps.SupportBeanSpecialGetterNested.class, fragmentTypeOne.getFragmentType().getUnderlyingType());
 
-        EventBean event = (EventBean) eventBean.getFragment(propertyName);
-        assertEquals(value, event.get("nestedValue"));
+        EventBean theEvent = (EventBean) eventBean.getFragment(propertyName);
+        assertEquals(value, theEvent.get("nestedValue"));
     }
 
     private void assertNestedCollection(EventBean eventBean, String propertyName, String prefix)

@@ -15,7 +15,6 @@ import com.espertech.esper.client.EPAdministrator;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPPreparedStatementImpl;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.epn.EPNetworkAdmin;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
@@ -93,10 +92,4 @@ public interface EPAdministratorSPI extends EPAdministrator
     public EPStatement createPatternStatementId(String pattern, String statementName, Object userObject, String statementId) throws EPException;
     public EPStatement createPreparedEPLStatementId(EPPreparedStatementImpl prepared, String statementName, Object userObject, String statementId) throws EPException;
     public String getStatementNameForId(String statementId);
-
-    /**
-     * Returns EP-network administrative services.
-     * @return network administration
-     */
-    public EPNetworkAdmin getNetworkAdmin();
 }

@@ -52,7 +52,7 @@ public class TestSimpleXMLEventType extends TestCase {
             "\t</nested3>\n" +
             "</simpleEvent>";
 
-    private EventBean event;
+    private EventBean theEvent;
 	
 	protected void setUp() throws Exception
     {
@@ -65,29 +65,29 @@ public class TestSimpleXMLEventType extends TestCase {
         config.addXPathProperty("customProp", "count(/simpleEvent/nested3/nested4)", XPathConstants.NUMBER);
 
         SimpleXMLEventType eventType = new SimpleXMLEventType(null, 1, config, SupportEventAdapterService.getService());
-		event = new XMLEventBean(simpleDoc.getDocumentElement(), eventType);
+		theEvent = new XMLEventBean(simpleDoc.getDocumentElement(), eventType);
 	}
 
 	public void testSimpleProperies() {
-		assertEquals("SAMPLE_V6", event.get("prop4"));
+		assertEquals("SAMPLE_V6", theEvent.get("prop4"));
 	}
 	
 	public void testNestedProperties() {
-		assertEquals("true",event.get("nested1.prop2"));
+		assertEquals("true", theEvent.get("nested1.prop2"));
 	}
 	
 	public void testMappedProperties() {
-		assertEquals("SAMPLE_V8",event.get("nested3.nested4('a').prop5[1]"));
-		assertEquals("SAMPLE_V10",event.get("nested3.nested4('c').prop5[0]"));
+		assertEquals("SAMPLE_V8", theEvent.get("nested3.nested4('a').prop5[1]"));
+		assertEquals("SAMPLE_V10", theEvent.get("nested3.nested4('c').prop5[0]"));
 	}
 	
 	public void testIndexedProperties() {
-		assertEquals("5",event.get("nested1.nested2.prop3[2]"));
-		assertEquals(String.class,event.getEventType().getPropertyType("nested1.nested2.prop3[2]"));
+		assertEquals("5", theEvent.get("nested1.nested2.prop3[2]"));
+		assertEquals(String.class, theEvent.getEventType().getPropertyType("nested1.nested2.prop3[2]"));
 	}
 	
 	public void testCustomProperty() {
-		assertEquals(Double.class,event.getEventType().getPropertyType("customProp"));
-		assertEquals(new Double(3),event.get("customProp"));
+		assertEquals(Double.class, theEvent.getEventType().getPropertyType("customProp"));
+		assertEquals(new Double(3), theEvent.get("customProp"));
 	}
 }

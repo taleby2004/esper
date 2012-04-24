@@ -155,7 +155,7 @@ public class TestInsertInto extends TestCase
         assertTrue(stmtSelect.getEventType() instanceof BeanEventType);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        assertEquals("E1", listener.assertOneGetNew().get("string"));
+        assertEquals("E1", listener.assertOneGetNew().get("theString"));
         assertTrue(listener.assertOneGetNew() instanceof BeanEventBean);
     }
 
@@ -165,7 +165,7 @@ public class TestInsertInto extends TestCase
                       "select intPrimitive - intBoxed as deltaTag, intPrimitive * intBoxed as productTag " +
                       "from " + SupportBean.class.getName() + ".win:length(100) as s0," +
                                 SupportBean_A.class.getName() + ".win:length(100) as s1 " +
-                      " where s0.string = s1.id";
+                      " where s0.theString = s1.id";
 
         runAsserts(stmtText, null);
     }
@@ -176,7 +176,7 @@ public class TestInsertInto extends TestCase
         "select * " +
         "from " + SupportBean.class.getName() + ".win:length(100) as s0," +
                   SupportBean_A.class.getName() + ".win:length(100) as s1 " +
-        " where s0.string = s1.id";
+        " where s0.theString = s1.id";
 
         try{
         	epService.getEPAdministrator().createEPL(stmtText);
@@ -211,20 +211,20 @@ public class TestInsertInto extends TestCase
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmtTwo.addListener(listenerTwo);
 
-        SupportBean event = sendEvent(10, 11);
+        SupportBean theEvent = sendEvent(10, 11);
         assertTrue(listenerOne.getAndClearIsInvoked());
         assertEquals(1, listenerOne.getLastNewData().length);
         assertEquals(10, listenerOne.getLastNewData()[0].get("intPrimitive"));
         assertEquals(11, listenerOne.getLastNewData()[0].get("intBoxed"));
         assertEquals(20, listenerOne.getLastNewData()[0].getEventType().getPropertyNames().length);
-        assertSame(event, listenerOne.getLastNewData()[0].getUnderlying());
+        assertSame(theEvent, listenerOne.getLastNewData()[0].getUnderlying());
 
         assertTrue(listenerTwo.getAndClearIsInvoked());
         assertEquals(1, listenerTwo.getLastNewData().length);
         assertEquals(10, listenerTwo.getLastNewData()[0].get("intPrimitive"));
         assertEquals(11, listenerTwo.getLastNewData()[0].get("intBoxed"));
         assertEquals(20, listenerTwo.getLastNewData()[0].getEventType().getPropertyNames().length);
-        assertSame(event, listenerTwo.getLastNewData()[0].getUnderlying());
+        assertSame(theEvent, listenerTwo.getLastNewData()[0].getUnderlying());
 
         // assert statement-type reference
         EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
@@ -251,7 +251,7 @@ public class TestInsertInto extends TestCase
                       "select intPrimitive - intBoxed as delta, intPrimitive * intBoxed as product " +
                         "from " + SupportBean.class.getName() + ".win:length(100) as s0," +
                                   SupportBean_A.class.getName() + ".win:length(100) as s1 " +
-                        " where s0.string = s1.id";
+                        " where s0.theString = s1.id";
 
         runAsserts(stmtText, null);
 
@@ -273,7 +273,7 @@ public class TestInsertInto extends TestCase
         String textOne = "insert into event2 select * " +
         		          "from " + SupportBean.class.getName() + ".win:length(100) as s0, " +
         		          SupportBean_A.class.getName() + ".win:length(5) as s1 " +
-        		          "where s0.string = s1.id";
+        		          "where s0.theString = s1.id";
         String textTwo = "select * from event2.win:length(10)";
 
         // Attach listener to feed
@@ -450,8 +450,8 @@ public class TestInsertInto extends TestCase
         assertFalse(listener.isInvoked());
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals("LR1", event.get("locationReportId"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("LR1", theEvent.get("locationReportId"));
 
         listenerOne.reset();
         listenerTwo.reset();
@@ -464,8 +464,8 @@ public class TestInsertInto extends TestCase
         assertFalse(listener.isInvoked());
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(2000));
 
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("LR2", event.get("locationReportId"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("LR2", theEvent.get("locationReportId"));
     }
 
     public void testNullType()
@@ -502,9 +502,9 @@ public class TestInsertInto extends TestCase
         epService.getEPRuntime().sendEvent(bean);
     }
 
-    private void sendSimpleEvent(String string, int val)
+    private void sendSimpleEvent(String theString, int val)
     {
-    	epService.getEPRuntime().sendEvent(new SupportBeanSimple(string, val));
+    	epService.getEPRuntime().sendEvent(new SupportBeanSimple(theString, val));
     }
 
     private EPStatement runAsserts(String stmtText, EPStatementObjectModel model)
@@ -589,7 +589,7 @@ public class TestInsertInto extends TestCase
     private SupportBean sendEvent(int intPrimitive, int intBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString("myId");
+        bean.setTheString("myId");
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);
         epService.getEPRuntime().sendEvent(bean);

@@ -13,9 +13,9 @@ package com.espertech.esper.util;
 
 import com.espertech.esper.collection.MultiKeyUntyped;
 
-import java.util.Comparator;
-import java.text.Collator;
 import java.io.Serializable;
+import java.text.Collator;
+import java.util.Comparator;
 
 /**
  * A comparator on multikeys with string values and using the Collator for comparing.

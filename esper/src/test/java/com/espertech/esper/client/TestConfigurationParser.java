@@ -11,7 +11,6 @@
 
 package com.espertech.esper.client;
 
-import com.espertech.esper.client.annotation.Name;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.soda.StreamSelector;
 import com.espertech.esper.collection.Pair;
@@ -72,6 +71,7 @@ public class TestConfigurationParser extends TestCase
 
         assertEquals(Configuration.PropertyResolutionStyle.CASE_SENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
         assertEquals(ConfigurationEventTypeLegacy.AccessorStyle.JAVABEAN, config.getEngineDefaults().getEventMeta().getDefaultAccessorStyle());
+        assertEquals(Configuration.EventRepresentation.MAP, config.getEngineDefaults().getEventMeta().getDefaultEventRepresentation());
 
         assertTrue(config.getEngineDefaults().getViewResources().isShareViews());
         assertFalse(config.getEngineDefaults().getViewResources().isAllowMultipleExpiryPolicies());
@@ -121,10 +121,15 @@ public class TestConfigurationParser extends TestCase
         assertEquals("com.mycompany.package.MyLegacyTypeEvent", config.getEventTypeNames().get("MyLegacyTypeEvent"));
 
         // assert auto imports
-        assertEquals(3, config.getImports().size());
-        assertEquals(Name.class.getPackage().getName() + ".*", config.getImports().get(0));
-        assertEquals("com.mycompany.myapp.*", config.getImports().get(1));
-        assertEquals("com.mycompany.myapp.ClassOne", config.getImports().get(2));
+        assertEquals(8, config.getImports().size());
+        assertEquals("java.lang.*", config.getImports().get(0));
+        assertEquals("java.math.*", config.getImports().get(1));
+        assertEquals("java.text.*", config.getImports().get(2));
+        assertEquals("java.util.*", config.getImports().get(3));
+        assertEquals("com.espertech.esper.client.annotation.*", config.getImports().get(4));
+        assertEquals("com.espertech.esper.graph.ops.*", config.getImports().get(5));
+        assertEquals("com.mycompany.myapp.*", config.getImports().get(6));
+        assertEquals("com.mycompany.myapp.ClassOne", config.getImports().get(7));
 
         // assert XML DOM - no schema
         assertEquals(2, config.getEventTypesXMLDOM().size());
@@ -174,6 +179,19 @@ public class TestConfigurationParser extends TestCase
         EPAssertionUtil.assertEqualsExactOrder(new Object[]{"MyMapSuperType1", "MyMapSuperType2"}, superTypes.toArray());
         assertEquals("startts", config.getMapTypeConfigurations().get("MyMapEvent").getStartTimestampPropertyName());
         assertEquals("endts", config.getMapTypeConfigurations().get("MyMapEvent").getEndTimestampPropertyName());
+
+        // assert objectarray events
+        assertEquals(1, config.getEventTypesNestableObjectArrayEvents().size());
+        assertTrue(config.getEventTypesNestableObjectArrayEvents().containsKey("MyObjectArrayEvent"));
+        Map<String, String> expectedPropsObjectArray = new HashMap<String, String>();
+        expectedPropsObjectArray.put("myInt", "int");
+        expectedPropsObjectArray.put("myString", "string");
+        assertEquals(expectedPropsObjectArray, config.getEventTypesNestableObjectArrayEvents().get("MyObjectArrayEvent"));
+        assertEquals(1, config.getObjectArrayTypeConfigurations().size());
+        Set<String> superTypesOA = config.getObjectArrayTypeConfigurations().get("MyObjectArrayEvent").getSuperTypes();
+        EPAssertionUtil.assertEqualsExactOrder(new Object[]{"MyObjectArraySuperType1", "MyObjectArraySuperType2"}, superTypesOA.toArray());
+        assertEquals("startts", config.getObjectArrayTypeConfigurations().get("MyObjectArrayEvent").getStartTimestampPropertyName());
+        assertEquals("endts", config.getObjectArrayTypeConfigurations().get("MyObjectArrayEvent").getEndTimestampPropertyName());
 
         // assert legacy type declaration
         assertEquals(1, config.getEventTypesLegacy().size());
@@ -368,6 +386,7 @@ public class TestConfigurationParser extends TestCase
         assertTrue(config.getEngineDefaults().getViewResources().isAllowMultipleExpiryPolicies());
         assertEquals(Configuration.PropertyResolutionStyle.DISTINCT_CASE_INSENSITIVE, config.getEngineDefaults().getEventMeta().getClassPropertyResolutionStyle());
         assertEquals(ConfigurationEventTypeLegacy.AccessorStyle.PUBLIC, config.getEngineDefaults().getEventMeta().getDefaultAccessorStyle());
+        assertEquals(Configuration.EventRepresentation.MAP, config.getEngineDefaults().getEventMeta().getDefaultEventRepresentation());
         assertTrue(config.getEngineDefaults().getLogging().isEnableExecutionDebug());
         assertFalse(config.getEngineDefaults().getLogging().isEnableTimerDebug());
         assertTrue(config.getEngineDefaults().getLogging().isEnableQueryPlan());
@@ -437,14 +456,14 @@ public class TestConfigurationParser extends TestCase
 
         // method references
         assertEquals(2, config.getMethodInvocationReferences().size());
-        ConfigurationMethodRef ref = config.getMethodInvocationReferences().get("abc");
-        expCache = (ConfigurationExpiryTimeCache) ref.getDataCacheDesc();
+        ConfigurationMethodRef methodRef = config.getMethodInvocationReferences().get("abc");
+        expCache = (ConfigurationExpiryTimeCache) methodRef.getDataCacheDesc();
         assertEquals(91.0, expCache.getMaxAgeSeconds());
         assertEquals(92.2, expCache.getPurgeIntervalSeconds());
         assertEquals(ConfigurationCacheReferenceType.WEAK, expCache.getCacheReferenceType());
 
-        ref = config.getMethodInvocationReferences().get("def");
-        lruCache = (ConfigurationLRUCache) ref.getDataCacheDesc();
+        methodRef = config.getMethodInvocationReferences().get("def");
+        lruCache = (ConfigurationLRUCache) methodRef.getDataCacheDesc();
         assertEquals(20, lruCache.getSize());
 
         // plug-in event representations

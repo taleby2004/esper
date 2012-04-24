@@ -57,6 +57,11 @@ public enum StatementType
     CREATE_CONTEXT,
 
     /**
+     * Create-graph statement.
+     */
+    CREATE_GRAPH,
+
+    /**
      * On-merge statement.
      */
     ON_MERGE,

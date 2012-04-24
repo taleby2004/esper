@@ -46,8 +46,8 @@ public class SupportInternalEventRouter implements InternalEventRouter
     public void removePreprocessing(EventType eventType, UpdateDesc desc) {
     }
 
-    public void route(EventBean event, EPStatementHandle statementHandle, InternalEventRouteDest routeDest, ExprEvaluatorContext exprEvaluatorContext, boolean addToFront) {
-        routed.add(event);
+    public void route(EventBean theEvent, EPStatementHandle statementHandle, InternalEventRouteDest routeDest, ExprEvaluatorContext exprEvaluatorContext, boolean addToFront) {
+        routed.add(theEvent);
     }
 
     public boolean isHasPreprocessing()
@@ -55,7 +55,7 @@ public class SupportInternalEventRouter implements InternalEventRouter
         return false;
     }
 
-    public EventBean preprocess(EventBean event, ExprEvaluatorContext engineFilterAndDispatchTimeContext)
+    public EventBean preprocess(EventBean theEvent, ExprEvaluatorContext engineFilterAndDispatchTimeContext)
     {
         return null;
     }

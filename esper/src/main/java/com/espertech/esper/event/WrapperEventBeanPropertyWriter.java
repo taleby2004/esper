@@ -29,11 +29,11 @@ public class WrapperEventBeanPropertyWriter implements EventBeanWriter
         this.writerArr = writerArr;
     }
 
-    public void write(Object[] values, EventBean event)
+    public void write(Object[] values, EventBean theEvent)
     {
         for (int i = 0; i < values.length; i++)
         {
-            writerArr[i].write(values[i], event);
+            writerArr[i].write(values[i], theEvent);
         }
     }
 }

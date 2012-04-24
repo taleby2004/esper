@@ -89,8 +89,8 @@ public class StmtListenerRouteCallable implements Callable
             SupportMTUpdateListener listener = new SupportMTUpdateListener();
             stmt.addListener(listener);
 
-            Object event = new SupportMarketDataBean("", 0, (long) numThread, null);
-            engine.getEPRuntime().sendEvent(event);
+            Object theEvent = new SupportMarketDataBean("", 0, (long) numThread, null);
+            engine.getEPRuntime().sendEvent(theEvent);
             stmt.stop();
 
             EventBean[] eventsReceived = listener.getNewDataListFlattened();
@@ -98,7 +98,7 @@ public class StmtListenerRouteCallable implements Callable
             boolean found = false;
             for (int i = 0; i < eventsReceived.length; i++)
             {
-                if (eventsReceived[i].getUnderlying() == event)
+                if (eventsReceived[i].getUnderlying() == theEvent)
                 {
                     found = true;
                 }

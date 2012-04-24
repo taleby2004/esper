@@ -37,7 +37,7 @@ public class TestViewTimeInterval extends TestCase
     public void testTimeWindowPreparedStmt()
     {
         sendTimer(0);
-        String text = "select rstream string from SupportBean.win:time(?)";
+        String text = "select rstream theString from SupportBean.win:time(?)";
         EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(text);
 
         prepared.setObject(1, 4);
@@ -56,7 +56,7 @@ public class TestViewTimeInterval extends TestCase
     public void testTimeWindowVariableStmt()
     {
         sendTimer(0);
-        String text = "select rstream string from SupportBean.win:time(TIME_WIN)";
+        String text = "select rstream theString from SupportBean.win:time(TIME_WIN)";
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 
         epService.getEPAdministrator().getConfiguration().addVariable("TIME_WIN", int.class, 4);
@@ -76,12 +76,12 @@ public class TestViewTimeInterval extends TestCase
     {
         sendTimer(0);
 
-        String text = "select rstream string from SupportBean.win:time(4 sec)";
+        String text = "select rstream theString from SupportBean.win:time(4 sec)";
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
 
-        text = "select rstream string from SupportBean.win:time(3000 milliseconds)";
+        text = "select rstream theString from SupportBean.win:time(3000 milliseconds)";
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
         stmtTwo.addListener(listenerTwo);
@@ -94,14 +94,14 @@ public class TestViewTimeInterval extends TestCase
         epService.getEPAdministrator().getConfiguration().addVariable("TIME_WIN", double.class, 4000);
         sendTimer(0);
         
-        String text = "select rstream string from SupportBean.win:time(TIME_WIN milliseconds)";
+        String text = "select rstream theString from SupportBean.win:time(TIME_WIN milliseconds)";
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
 
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listenerOne = new SupportUpdateListener();
         stmtOne.addListener(listenerOne);
 
-        text = "select rstream string from SupportBean.win:time(TIME_WIN minutes)";
+        text = "select rstream theString from SupportBean.win:time(TIME_WIN minutes)";
         epService.getEPRuntime().setVariableValue("TIME_WIN", 0.05);
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listenerTwo = new SupportUpdateListener();
@@ -211,28 +211,28 @@ public class TestViewTimeInterval extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void sendEvent()
     {
-        SupportBean event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
-    private void sendEvent(String string)
+    private void sendEvent(String theString)
     {
-        SupportBean event = new SupportBean(string, 1);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean(theString, 1);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendExtTimeEvent(long longPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setLongPrimitive(longPrimitive);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setLongPrimitive(longPrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void runAssertion(SupportUpdateListener listenerOne, SupportUpdateListener listenerTwo)
@@ -250,11 +250,11 @@ public class TestViewTimeInterval extends TestCase
         assertFalse(listenerTwo.isInvoked());
 
         sendTimer(4000);
-        assertEquals("E1", listenerTwo.assertOneGetNewAndReset().get("string"));
+        assertEquals("E1", listenerTwo.assertOneGetNewAndReset().get("theString"));
         assertFalse(listenerTwo.isInvoked());
 
         sendTimer(5000);
-        assertEquals("E1", listenerOne.assertOneGetNewAndReset().get("string"));
+        assertEquals("E1", listenerOne.assertOneGetNewAndReset().get("theString"));
         assertFalse(listenerOne.isInvoked());
     }
 }

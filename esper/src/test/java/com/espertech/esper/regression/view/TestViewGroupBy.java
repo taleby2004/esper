@@ -19,6 +19,7 @@ import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -31,6 +32,7 @@ public class TestViewGroupBy extends TestCase
 
     private EPServiceProvider epService;
 
+    private SupportUpdateListener listener;
     private SupportUpdateListener priceLast3StatsListener;
     private SupportUpdateListener priceAllStatsListener;
     private SupportUpdateListener volumeLast3StatsListener;
@@ -38,6 +40,7 @@ public class TestViewGroupBy extends TestCase
 
     public void setUp()
     {
+        listener = new SupportUpdateListener();
         priceLast3StatsListener = new SupportUpdateListener();
         priceAllStatsListener = new SupportUpdateListener();
         volumeLast3StatsListener = new SupportUpdateListener();
@@ -52,11 +55,30 @@ public class TestViewGroupBy extends TestCase
         priceAllStatsListener = null;
         volumeLast3StatsListener = null;
         volumeAllStatsListener = null;
+        listener = null;
+    }
+
+    public void testObjectArrayEvent() {
+        String[] fields = "p1,sp2".split(",");
+        epService.getEPAdministrator().getConfiguration().addEventType("MyOAEvent", new String[] {"p1","p2"}, new Object[] {String.class, int.class});
+        epService.getEPAdministrator().createEPL("select p1,sum(p2) as sp2 from MyOAEvent.std:groupwin(p1).win:length(2)").addListener(listener);
+        
+        epService.getEPRuntime().sendEvent(new Object[] {"A", 10}, "MyOAEvent");
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A", 10});
+
+        epService.getEPRuntime().sendEvent(new Object[] {"B", 11}, "MyOAEvent");
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"B", 21});
+
+        epService.getEPRuntime().sendEvent(new Object[] {"A", 12}, "MyOAEvent");
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A", 33});
+
+        epService.getEPRuntime().sendEvent(new Object[] {"A", 13}, "MyOAEvent");
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"A", 36});
     }
 
     public void testSelfJoin() {
         // ESPER-528
-        epService.getEPAdministrator().createEPL("create schema Product (product string, productsize int)");
+        epService.getEPAdministrator().createEPL(EventRepresentationEnum.MAP.getAnnotationText() + " create schema Product (product string, productsize int)");
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         String query =
@@ -76,10 +98,10 @@ public class TestViewGroupBy extends TestCase
     }
 
     private void sendProductNew(String product, int size) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("product", product);
-        event.put("productsize", size);
-        epService.getEPRuntime().sendEvent(event, "Product");
+        Map<String, Object> theEvent = new HashMap<String, Object>();
+        theEvent.put("product", product);
+        theEvent.put("productsize", size);
+        epService.getEPRuntime().sendEvent(theEvent, "Product");
     }
 
     public void testReclaimTimeWindow()
@@ -88,12 +110,12 @@ public class TestViewGroupBy extends TestCase
 
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().createEPL("@Hint('reclaim_group_aged=30,reclaim_group_freq=5') " +
-                "select longPrimitive, count(*) from SupportBean.std:groupwin(string).win:time(3000000)");
+                "select longPrimitive, count(*) from SupportBean.std:groupwin(theString).win:time(3000000)");
 
         for (int i = 0; i < 10; i++)
         {
-            SupportBean event = new SupportBean(Integer.toString(i), i);
-            epService.getEPRuntime().sendEvent(event);
+            SupportBean theEvent = new SupportBean(Integer.toString(i), i);
+            epService.getEPRuntime().sendEvent(theEvent);
         }
 
         EPServiceProviderSPI spi = (EPServiceProviderSPI) epService;
@@ -109,16 +131,16 @@ public class TestViewGroupBy extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     public void testReclaimAgedHint() {
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         String epl = "@Hint('reclaim_group_aged=5,reclaim_group_freq=1') " +
-                "select * from SupportBean.std:groupwin(string).win:keepall()";
+                "select * from SupportBean.std:groupwin(theString).win:keepall()";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
 
         int maxSlots = 10;
@@ -300,25 +322,25 @@ public class TestViewGroupBy extends TestCase
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"ABC", Double.NaN, Double.NaN, "f1"});
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 1.0, 1L, "f2"));
-        EventBean event = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(event, fields, new Object[]{"DEF", Double.NaN, Double.NaN, "f2"});
-        assertEquals(1d, event.get("XAverage"));
-        assertEquals(0d, event.get("XStandardDeviationPop"));
-        assertEquals(Double.NaN, event.get("XStandardDeviationSample"));
-        assertEquals(1d, event.get("XSum"));
-        assertEquals(Double.NaN, event.get("XVariance"));
-        assertEquals(1d, event.get("YAverage"));
-        assertEquals(0d, event.get("YStandardDeviationPop"));
-        assertEquals(Double.NaN, event.get("YStandardDeviationSample"));
-        assertEquals(1d, event.get("YSum"));
-        assertEquals(Double.NaN, event.get("YVariance"));
-        assertEquals(1L, event.get("dataPoints"));
-        assertEquals(1L, event.get("n"));
-        assertEquals(1d, event.get("sumX"));
-        assertEquals(1d, event.get("sumXSq"));
-        assertEquals(1d, event.get("sumXY"));
-        assertEquals(1d, event.get("sumY"));
-        assertEquals(1d, event.get("sumYSq"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        EPAssertionUtil.assertProps(theEvent, fields, new Object[]{"DEF", Double.NaN, Double.NaN, "f2"});
+        assertEquals(1d, theEvent.get("XAverage"));
+        assertEquals(0d, theEvent.get("XStandardDeviationPop"));
+        assertEquals(Double.NaN, theEvent.get("XStandardDeviationSample"));
+        assertEquals(1d, theEvent.get("XSum"));
+        assertEquals(Double.NaN, theEvent.get("XVariance"));
+        assertEquals(1d, theEvent.get("YAverage"));
+        assertEquals(0d, theEvent.get("YStandardDeviationPop"));
+        assertEquals(Double.NaN, theEvent.get("YStandardDeviationSample"));
+        assertEquals(1d, theEvent.get("YSum"));
+        assertEquals(Double.NaN, theEvent.get("YVariance"));
+        assertEquals(1L, theEvent.get("dataPoints"));
+        assertEquals(1L, theEvent.get("n"));
+        assertEquals(1d, theEvent.get("sumX"));
+        assertEquals(1d, theEvent.get("sumXSq"));
+        assertEquals(1d, theEvent.get("sumXY"));
+        assertEquals(1d, theEvent.get("sumY"));
+        assertEquals(1d, theEvent.get("sumYSq"));
         // above computed values tested in more detail in RegressionBean test
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("DEF", 2.0, 2L, "f3"));
@@ -335,8 +357,8 @@ public class TestViewGroupBy extends TestCase
 
     private void sendEvent(String symbol, double price, long volume)
     {
-        SupportMarketDataBean event = new SupportMarketDataBean(symbol, price, volume, "");
-        epService.getEPRuntime().sendEvent(event);
+        SupportMarketDataBean theEvent = new SupportMarketDataBean(symbol, price, volume, "");
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private List<Map<String, Object>> makeMap(String symbol, double average)

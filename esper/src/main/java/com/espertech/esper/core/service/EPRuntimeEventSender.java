@@ -23,7 +23,7 @@ public interface EPRuntimeEventSender
 
     /**
      * For processing a routed event.
-     * @param event routed event
+     * @param theEvent routed event
      */
-    public void routeEventBean(EventBean event);
+    public void routeEventBean(EventBean theEvent);
 }

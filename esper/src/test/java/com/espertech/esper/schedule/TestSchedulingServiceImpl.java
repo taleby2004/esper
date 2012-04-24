@@ -57,26 +57,10 @@ public class TestSchedulingServiceImpl extends TestCase
     {
         service.add(100, callbacks[0], slots[0][0]);
         assertTrue(service.isScheduled(callbacks[0]));
-        try
-        {
-            service.add(100, callbacks[0], slots[0][0]);
-            fail();
-        }
-        catch (ScheduleHandleExistsException ex)
-        {
-            // expected
-        }
+        service.add(100, callbacks[0], slots[0][0]);
 
         service.add(new ScheduleSpec(), callbacks[1], slots[0][0]);
-        try
-        {
-            service.add(new ScheduleSpec(), callbacks[1], slots[0][0]);
-            fail();
-        }
-        catch (ScheduleHandleExistsException ex)
-        {
-            // expected
-        }
+        service.add(new ScheduleSpec(), callbacks[1], slots[0][0]);
     }
 
     public void testTrigger()
@@ -121,15 +105,7 @@ public class TestSchedulingServiceImpl extends TestCase
 
         // Adding the same callback more than once should cause an exception
         service.add(20, callbacks[0], slots[0][0]);
-        try
-        {
-            service.add(28, callbacks[0], slots[0][0]);
-            fail();
-        }
-        catch (ScheduleServiceException ex)
-        {
-            // Expected exception
-        }
+        service.add(28, callbacks[0], slots[0][0]);
         service.remove(callbacks[0], slots[0][0]);
 
         service.add(20, callbacks[2], slots[1][0]);

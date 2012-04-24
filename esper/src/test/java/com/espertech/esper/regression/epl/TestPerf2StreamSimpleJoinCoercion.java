@@ -42,8 +42,8 @@ public class TestPerf2StreamSimpleJoinCoercion extends TestCase
     public void testPerformanceCoercionForward()
     {
         String stmt = "select A.longBoxed as value from " +
-                SupportBean.class.getName() + "(string='A').win:length(1000000) as A," +
-                SupportBean.class.getName() + "(string='B').win:length(1000000) as B" +
+                SupportBean.class.getName() + "(theString='A').win:length(1000000) as A," +
+                SupportBean.class.getName() + "(theString='B').win:length(1000000) as B" +
             " where A.longBoxed=B.intPrimitive";
 
         EPStatement statement = epService.getEPAdministrator().createEPL(stmt);
@@ -72,8 +72,8 @@ public class TestPerf2StreamSimpleJoinCoercion extends TestCase
     public void testPerformanceCoercionBack()
     {
         String stmt = "select A.intPrimitive as value from " +
-                SupportBean.class.getName() + "(string='A').win:length(1000000) as A," +
-                SupportBean.class.getName() + "(string='B').win:length(1000000) as B" +
+                SupportBean.class.getName() + "(theString='A').win:length(1000000) as A," +
+                SupportBean.class.getName() + "(theString='B').win:length(1000000) as B" +
             " where A.intPrimitive=B.longBoxed";
 
         EPStatement statement = epService.getEPAdministrator().createEPL(stmt);
@@ -99,10 +99,10 @@ public class TestPerf2StreamSimpleJoinCoercion extends TestCase
         assertTrue("Failed perf test, delta=" + delta, delta < 1500);
     }
 
-    private Object makeSupportEvent(String string, int intPrimitive, long longBoxed)
+    private Object makeSupportEvent(String theString, int intPrimitive, long longBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         bean.setLongBoxed(longBoxed);
         return bean;

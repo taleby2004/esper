@@ -35,21 +35,21 @@ public class TimerWithinGuardFactory implements GuardFactory, MetaDefItem, Seria
      */
     protected transient MatchedEventConvertor convertor;
 
-    public void setGuardParameters(List<ExprNode> params, MatchedEventConvertor convertor) throws GuardParameterException
+    public void setGuardParameters(List<ExprNode> parameters, MatchedEventConvertor convertor) throws GuardParameterException
     {
         String errorMessage = "Timer-within guard requires a single numeric or time period parameter";
-        if (params.size() != 1)
+        if (parameters.size() != 1)
         {
             throw new GuardParameterException(errorMessage);
         }
 
-        if (!JavaClassHelper.isNumeric(params.get(0).getExprEvaluator().getType()))
+        if (!JavaClassHelper.isNumeric(parameters.get(0).getExprEvaluator().getType()))
         {
             throw new GuardParameterException(errorMessage);
         }
 
         this.convertor = convertor;
-        this.millisecondsExpr = params.get(0);
+        this.millisecondsExpr = parameters.get(0);
     }
 
     public Guard makeGuard(PatternAgentInstanceContext context, MatchedEventMap matchedEventMap, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState)

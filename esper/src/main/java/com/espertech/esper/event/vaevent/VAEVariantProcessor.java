@@ -109,9 +109,9 @@ public class VAEVariantProcessor implements ValueAddEventProcessor
         throw new ExprValidationException(getMessage());
     }
 
-    public EventBean getValueAddEventBean(EventBean event)
+    public EventBean getValueAddEventBean(EventBean theEvent)
     {
-        return new VariantEventBean(variantEventType, event);
+        return new VariantEventBean(variantEventType, theEvent);
     }
 
     public void onUpdate(EventBean[] newData, EventBean[] oldData, NamedWindowRootViewInstance namedWindowRootView, NamedWindowIndexRepository indexRepository)

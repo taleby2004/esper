@@ -47,8 +47,8 @@ public class EvalInsertBeanWrapRecast implements SelectExprProcessor {
     }
 
     public EventBean process(EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext) {
-        EventBean event = eventsPerStream[streamNumber];
-        EventBean recast = eventAdapterService.adapterForTypedBean(event.getUnderlying(), eventType.getUnderlyingEventType());
+        EventBean theEvent = eventsPerStream[streamNumber];
+        EventBean recast = eventAdapterService.adapterForTypedBean(theEvent.getUnderlying(), eventType.getUnderlyingEventType());
         return eventAdapterService.adapterForTypedWrapper(recast, Collections.<String, Object>emptyMap(), eventType);
     }
 

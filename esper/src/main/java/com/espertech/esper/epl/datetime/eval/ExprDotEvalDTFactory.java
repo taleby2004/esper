@@ -13,6 +13,7 @@ package com.espertech.esper.epl.datetime.eval;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.datetime.calop.CalendarOp;
 import com.espertech.esper.epl.datetime.calop.CalendarOpFactory;
 import com.espertech.esper.epl.datetime.interval.IntervalOp;
@@ -33,7 +34,7 @@ import java.util.Map;
 
 public class ExprDotEvalDTFactory {
 
-    public static ExprDotEvalDTMethodDesc validateMake(EventType[] typesPerStream, Deque<ExprChainedSpec> chainSpecStack, DatetimeMethodEnum dtMethod, String dtMethodName, ExprDotEvalTypeInfo inputType, List<ExprNode> parameters, ExprDotNodeFilterAnalyzerInput inputDesc)
+    public static ExprDotEvalDTMethodDesc validateMake(StreamTypeService streamTypeService, Deque<ExprChainedSpec> chainSpecStack, DatetimeMethodEnum dtMethod, String dtMethodName, ExprDotEvalTypeInfo inputType, List<ExprNode> parameters, ExprDotNodeFilterAnalyzerInput inputDesc)
             throws ExprValidationException
     {
         // verify input
@@ -45,7 +46,7 @@ public class ExprDotEvalDTFactory {
         }
         else {
             if (!inputType.isScalar() || inputType.getScalar() == null) {
-                throw new ExprValidationException(message);
+                throw new ExprValidationException(message + " but received " + inputType.toTypeName());
             }
             if (!JavaClassHelper.isDatetimeClass(inputType.getScalar())) {
                 throw new ExprValidationException(message + " but received " + JavaClassHelper.getClassNameFullyQualPretty(inputType.getScalar()));
@@ -82,18 +83,18 @@ public class ExprDotEvalDTFactory {
 
                 // compile filter analyzer information if there are no calendar ops in the chain
                 if (calendarOps.isEmpty()) {
-                    filterAnalyzerDesc = reformatOp.getFilterDesc(typesPerStream, currentMethod, currentParameters, inputDesc);
+                    filterAnalyzerDesc = reformatOp.getFilterDesc(streamTypeService.getEventTypes(), currentMethod, currentParameters, inputDesc);
                 }
                 else {
                     filterAnalyzerDesc = null;
                 }
             }
             else if (opFactory instanceof IntervalOpFactory) {
-                intervalOp = ((IntervalOpFactory) opFactory).getOp(typesPerStream, currentMethod, currentMethodName, currentParameters, evaluators);
+                intervalOp = ((IntervalOpFactory) opFactory).getOp(streamTypeService, currentMethod, currentMethodName, currentParameters, evaluators);
 
                 // compile filter analyzer information if there are no calendar ops in the chain
                 if (calendarOps.isEmpty()) {
-                    filterAnalyzerDesc = intervalOp.getFilterDesc(typesPerStream, currentMethod, currentParameters, inputDesc);
+                    filterAnalyzerDesc = intervalOp.getFilterDesc(streamTypeService.getEventTypes(), currentMethod, currentParameters, inputDesc);
                 }
                 else {
                     filterAnalyzerDesc = null;

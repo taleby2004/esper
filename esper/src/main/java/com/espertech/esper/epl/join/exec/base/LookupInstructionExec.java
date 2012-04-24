@@ -116,7 +116,7 @@ public class LookupInstructionExec
         for (;it.hasNext();)
         {
             Cursor cursor = it.next();
-            EventBean lookupEvent = cursor.getEvent();
+            EventBean lookupEvent = cursor.getTheEvent();
             int streamCount = 0;
 
             // For that event, lookup in all required streams

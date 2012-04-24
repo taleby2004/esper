@@ -11,17 +11,19 @@
 
 package com.espertech.esper.multithread;
 
-import junit.framework.TestCase;
+import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
-import com.espertech.esper.client.Configuration;
-import com.espertech.esper.client.time.TimerControlEvent;
-import com.espertech.esper.support.util.SupportMTUpdateListener;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.SupportMTUpdateListener;
+import junit.framework.TestCase;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test for pattern statement parallel execution by threads.
@@ -33,6 +35,7 @@ public class TestMTStmtPattern extends TestCase
     public void setUp()
     {
         Configuration configuration = SupportConfigFactory.getConfiguration();
+        configuration.getEngineDefaults().getEventMeta().setDefaultEventRepresentation(Configuration.EventRepresentation.MAP); // use Map-type events for testing
         engine = EPServiceProviderManager.getDefaultProvider(configuration);
         engine.initialize();
     }

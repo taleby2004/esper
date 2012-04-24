@@ -15,13 +15,14 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.core.context.util.ContextDescriptor;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.filter.FilterFaultHandler;
 import com.espertech.esper.filter.FilterSpecLookupable;
 import com.espertech.esper.type.NumberSetParameter;
 
 import java.util.Collection;
 import java.util.List;
 
-public interface ContextManager {
+public interface ContextManager extends FilterFaultHandler {
     public ContextDescriptor getContextDescriptor();
 
     public void addStatement(ContextControllerStatementBase statement) throws ExprValidationException;

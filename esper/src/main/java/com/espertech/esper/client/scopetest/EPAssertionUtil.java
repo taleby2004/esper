@@ -74,6 +74,17 @@ public class EPAssertionUtil
     }
 
     /**
+     * Compare the collection of object arrays, and using property names for messages, against expected values.
+     * @param actual colleciton of array of objects
+     * @param propertyNames property names
+     * @param expected expected values
+     */
+    public static void assertEqualsExactOrder(Collection<Object[]> actual, String[] propertyNames, Object[][] expected) {
+        Object[][] arr = actual.toArray(new Object[actual.size()][]);
+        assertEqualsExactOrder(arr, propertyNames, expected);
+    }
+
+    /**
      * Compare the iterator-returned events against the expected events
      * @param expected is the expected values
      * @param actual is the actual values
@@ -127,9 +138,9 @@ public class EPAssertionUtil
         }
 
         ArrayList<Object> underlying = new ArrayList<Object>();
-        for (EventBean event : actual)
+        for (EventBean theEvent : actual)
         {
-            underlying.add(event.getUnderlying());
+            underlying.add(theEvent.getUnderlying());
         }
 
         assertEqualsExactOrder(expected, underlying.toArray());
@@ -177,6 +188,20 @@ public class EPAssertionUtil
             Object expectedValue = expected[i];
             assertEqualsAllowArray("Failed to assert at element " + i, expectedValue, value);
         }
+    }
+
+    /**
+     * Compare the objects in the expected arrays and actual collection assuming the exact same order.
+     * @param expected is the expected values
+     * @param actual is the actual values
+     */
+    public static void assertEqualsExactOrder(Object[] expected, Collection actual)
+    {
+        Object[] actualArray = null;
+        if (actual != null) {
+            actualArray = actual.toArray();
+        }
+        assertEqualsExactOrder(expected, actualArray);
     }
 
     /**
@@ -415,7 +440,7 @@ public class EPAssertionUtil
                 }
                 log.error(".assertEqualsAnyOrder received=" + CollectionUtil.toStringArray(received));
             }
-            ScopeTestHelper.assertTrue(found);
+            ScopeTestHelper.assertTrue("Failed to find value " + expectedObject + ", check the error logs", found);
         }
 
         // Must have matched exactly the number of objects times
@@ -588,7 +613,7 @@ public class EPAssertionUtil
             String name = propertyNames[j].trim();
             Object value = expected[j];
             Object eventProp = received.get(name);
-            assertEqualsAllowArray("Failed to assert property " + name, value, eventProp);
+            assertEqualsAllowArray("Failed to assert property '" + name + "'", value, eventProp);
         }
     }
 
@@ -706,7 +731,7 @@ public class EPAssertionUtil
 
     /**
      * Compare the values of a Map against the expected values.
-     * @param received provides events
+     * @param received provides properties
      * @param expected expected values
      * @param propertyNames property names to assert
      */
@@ -729,6 +754,36 @@ public class EPAssertionUtil
                 String name = propertyNames[j].trim();
                 Object value = expected[j];
                 Object eventProp = received.get(name);
+                ScopeTestHelper.assertEquals("Error asserting property named '" + name + "'", value, eventProp);
+            }
+        }
+    }
+
+    /**
+     * Compare the values of a object array (single row) against the expected values.
+     * @param received provides properties
+     * @param expected expected values
+     * @param propertyNames property names to assert
+     */
+    public static void assertPropsObjectArray(Object[] received, String[] propertyNames, Object... expected)
+    {
+        if (expected == null)
+        {
+            if (received == null)
+            {
+                return;
+            }
+        }
+        else {
+            ScopeTestHelper.assertNotNull(received);
+        }
+
+        if (expected != null) {
+            for (int j = 0; j < expected.length; j++)
+            {
+                String name = propertyNames[j].trim();
+                Object value = expected[j];
+                Object eventProp = received[j];
                 ScopeTestHelper.assertEquals("Error asserting property named '" + name + "'", value, eventProp);
             }
         }
@@ -1154,10 +1209,10 @@ public class EPAssertionUtil
         }
         Object[][] objects = new Object[events.length][];
         for (int i = 0; i < events.length; i++) {
-            EventBean event = events[i];
+            EventBean theEvent = events[i];
             Object[] values = new Object[propertyNames.length];
             for (int j = 0; j < propertyNames.length; j++) {
-                values[j] = event.get(propertyNames[j]);
+                values[j] = theEvent.get(propertyNames[j]);
             }
             objects[i] = values;
         }
@@ -1274,10 +1329,25 @@ public class EPAssertionUtil
      */
     public static void assertPropsPerRow(Object[] received, String[] propertyNames, Object[][] expected)
     {
-        ScopeTestHelper.assertEquals(received.length, expected.length);
+        ScopeTestHelper.assertEquals("Mismatch in number of rows received", expected.length, received.length);
         for (int row = 0; row < received.length; row++)
         {
             assertProps(received[row], propertyNames, expected[row]);
+        }
+    }
+
+    /**
+     * Assert that property values of rows, wherein each row can either be Map or POJO objects, matches the expected values.
+     * @param received array of objects may contain Map and POJO events
+     * @param propertyNames property names
+     * @param expected expected value
+     */
+    public static void assertPropsPerRow(List<Object[]> received, String[] propertyNames, Object[][] expected)
+    {
+        ScopeTestHelper.assertEquals(received.size(), expected.length);
+        for (int row = 0; row < received.size(); row++)
+        {
+            assertProps(received.get(row), propertyNames, expected[row]);
         }
     }
 
@@ -1292,6 +1362,10 @@ public class EPAssertionUtil
         if (received instanceof Map)
         {
             assertPropsMap((Map) received, propertyNames, expected);
+        }
+        else if (received instanceof Object[])
+        {
+            assertPropsObjectArray((Object[]) received, propertyNames, expected);
         }
         else if (received instanceof EventBean)
         {

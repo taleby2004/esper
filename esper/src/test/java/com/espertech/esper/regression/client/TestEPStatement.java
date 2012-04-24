@@ -13,13 +13,13 @@ package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriber;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.SupportStmtAwareUpdateListener;
-import com.espertech.esper.support.util.SupportSubscriber;
 import com.espertech.esper.view.StatementStopCallback;
 import junit.framework.TestCase;
 
@@ -54,7 +54,7 @@ public class TestEPStatement extends TestCase
         listener.reset();
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
-        assertEquals("E1", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E1", listener.assertOneGetNewAndReset().get("theString"));
         stmt.destroy();
         listener.reset();
 
@@ -62,7 +62,7 @@ public class TestEPStatement extends TestCase
         stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("select * from SupportBean.win:length(2)");
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         stmt.addListenerWithReplay(listener);
-        assertEquals("E1", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E1", listener.assertOneGetNewAndReset().get("theString"));
         stmt.destroy();
         listener.reset();
 
@@ -71,7 +71,7 @@ public class TestEPStatement extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
         stmt.addListenerWithReplay(listener);
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"E1"}, {"E2"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"E1"}, {"E2"}});
 
         // test stopped statement and destroyed statement
         listener.reset();
@@ -253,9 +253,9 @@ public class TestEPStatement extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private class StopCallbackImpl implements StatementStopCallback {

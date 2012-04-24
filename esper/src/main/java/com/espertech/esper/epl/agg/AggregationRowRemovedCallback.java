@@ -8,9 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
-
 public interface AggregationRowRemovedCallback
 {
-    public void removed(MultiKeyUntyped groupRowKey);
+    public void removed(Object groupRowKey);
 }

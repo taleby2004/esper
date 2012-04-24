@@ -46,14 +46,14 @@ public class EventSenderMap implements EventSender
         this.eventAdapterService = eventAdapterService;
     }
 
-    public void sendEvent(Object event)
+    public void sendEvent(Object theEvent)
     {
-        if (!(event instanceof Map))
+        if (!(theEvent instanceof Map))
         {
-            throw new EPException("Unexpected event object of type " + event.getClass().getName() + ", expected " + Map.class.getName());
+            throw new EPException("Unexpected event object of type " + theEvent.getClass().getName() + ", expected " + Map.class.getName());
         }
         
-        Map<String, Object> map = (Map<String, Object>) event;
+        Map<String, Object> map = (Map<String, Object>) theEvent;
         EventBean mapEvent = eventAdapterService.adapterForTypedMap(map, mapEventType);
 
         if ((ThreadingOption.isThreadingEnabled) && (threadingService.isInboundThreading()))
@@ -66,13 +66,13 @@ public class EventSenderMap implements EventSender
         }
     }
 
-    public void route(Object event)
+    public void route(Object theEvent)
     {
-        if (!(event instanceof Map))
+        if (!(theEvent instanceof Map))
         {
-            throw new EPException("Unexpected event object of type " + event.getClass().getName() + ", expected " + Map.class.getName());
+            throw new EPException("Unexpected event object of type " + theEvent.getClass().getName() + ", expected " + Map.class.getName());
         }
-        Map<String, Object> map = (Map<String, Object>) event;
+        Map<String, Object> map = (Map<String, Object>) theEvent;
         EventBean mapEvent = eventAdapterService.adapterForTypedMap(map, mapEventType);
         runtimeEventSender.routeEventBean(mapEvent);
     }

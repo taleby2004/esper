@@ -75,7 +75,7 @@ public class TestNamedWindowSubqCorrelIndex extends TestCase
     }
 
     private void runAssertion(boolean enableIndexShareCreate, boolean disableIndexShareConsumer, boolean createExplicitIndex, boolean setNoindex) {
-        String createEpl = "create window MyWindow.std:unique(string) as select * from SupportBean";
+        String createEpl = "create window MyWindow.std:unique(theString) as select * from SupportBean";
         if (enableIndexShareCreate) {
             createEpl = "@Hint('enable_window_subquery_indexshare') " + createEpl;
         }
@@ -84,10 +84,10 @@ public class TestNamedWindowSubqCorrelIndex extends TestCase
 
         EPStatement stmtIndex = null;
         if (createExplicitIndex) {
-            stmtIndex = epService.getEPAdministrator().createEPL("create index MyIndex on MyWindow (string)");
+            stmtIndex = epService.getEPAdministrator().createEPL("create index MyIndex on MyWindow (theString)");
         }
 
-        String consumeEpl = "select status.*, (select * from MyWindow where string = ABean.p00) as details from ABean as status";
+        String consumeEpl = "select status.*, (select * from MyWindow where theString = ABean.p00) as details from ABean as status";
         if (disableIndexShareConsumer) {
             consumeEpl = "@Hint('disable_window_subquery_indexshare') " + consumeEpl;
         }
@@ -97,7 +97,7 @@ public class TestNamedWindowSubqCorrelIndex extends TestCase
         EPStatement consumeStmt = epService.getEPAdministrator().createEPL(consumeEpl);
         consumeStmt.addListener(listenerStmtOne);
 
-        String[] fields = "id,details.string,details.intPrimitive".split(",");
+        String[] fields = "id,details.theString,details.intPrimitive".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));

@@ -41,74 +41,74 @@ public class TestRowPatternInvalid extends TestCase {
         // invalid after syntax
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a" +
+                "  measures A.theString as a" +
                 "  AFTER MATCH SKIP TO OTHER ROW " +
                 "  pattern (A B*) " +
                 "  define " +
-                "    A as A.string like 'A%'" +
+                "    A as A.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error in expression: Match-recognize AFTER clause must be either AFTER MATCH SKIP TO LAST ROW or AFTER MATCH SKIP TO NEXT ROW or AFTER MATCH SKIP TO CURRENT ROW [select * from MyEvent.win:keepall() match_recognize (  measures A.string as a  AFTER MATCH SKIP TO OTHER ROW   pattern (A B*)   define     A as A.string like 'A%')]");
+        tryInvalid(text, "Error in expression: Match-recognize AFTER clause must be either AFTER MATCH SKIP TO LAST ROW or AFTER MATCH SKIP TO NEXT ROW or AFTER MATCH SKIP TO CURRENT ROW [select * from MyEvent.win:keepall() match_recognize (  measures A.theString as a  AFTER MATCH SKIP TO OTHER ROW   pattern (A B*)   define     A as A.theString like 'A%')]");
 
         // property cannot resolve
         text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a, D.string as x" +
+                "  measures A.theString as a, D.theString as x" +
                 "  pattern (A B*) " +
                 "  define " +
-                "    A as A.string like 'A%'" +
+                "    A as A.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error starting statement: Failed to resolve property 'D.string' to a stream or nested property in a stream, ensure that grouped variables (variables B) are accessed via index (i.e. variable[0].string) or appear within an aggregation, ensure that singleton variables (variables A) are not accessed via index [select * from MyEvent.win:keepall() match_recognize (  measures A.string as a, D.string as x  pattern (A B*)   define     A as A.string like 'A%')]");
+        tryInvalid(text, "Error starting statement: Failed to resolve property 'D.theString' to a stream or nested property in a stream, ensure that grouped variables (variables B) are accessed via index (i.e. variable[0].property) or appear within an aggregation, ensure that singleton variables (variables A) are not accessed via index [select * from MyEvent.win:keepall() match_recognize (  measures A.theString as a, D.theString as x  pattern (A B*)   define     A as A.theString like 'A%')]");
 
         // property not named
         text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string, A.string as xxx" +
+                "  measures A.theString, A.theString as xxx" +
                 "  pattern (A B*) " +
                 "  define " +
-                "    A as A.string like 'A%'" +
+                "    A as A.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error starting statement: The measures clause requires that each expression utilizes the AS keyword to assign a column name [select * from MyEvent.win:keepall() match_recognize (  measures A.string, A.string as xxx  pattern (A B*)   define     A as A.string like 'A%')]");
+        tryInvalid(text, "Error starting statement: The measures clause requires that each expression utilizes the AS keyword to assign a column name [select * from MyEvent.win:keepall() match_recognize (  measures A.theString, A.theString as xxx  pattern (A B*)   define     A as A.theString like 'A%')]");
 
         // grouped property not indexed
         text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures B.string as b1" +
+                "  measures B.theString as b1" +
                 "  pattern (A B*) " +
                 "  define " +
-                "    A as A.string like 'A%'" +
+                "    A as A.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error starting statement: Failed to resolve property 'B.string' to a stream or nested property in a stream, ensure that grouped variables (variables B) are accessed via index (i.e. variable[0].string) or appear within an aggregation, ensure that singleton variables (variables A) are not accessed via index [select * from MyEvent.win:keepall() match_recognize (  measures B.string as b1  pattern (A B*)   define     A as A.string like 'A%')]");
+        tryInvalid(text, "Error starting statement: Failed to resolve property 'B.theString' to a stream or nested property in a stream, ensure that grouped variables (variables B) are accessed via index (i.e. variable[0].property) or appear within an aggregation, ensure that singleton variables (variables A) are not accessed via index [select * from MyEvent.win:keepall() match_recognize (  measures B.theString as b1  pattern (A B*)   define     A as A.theString like 'A%')]");
 
         // define twice
         text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a" +
+                "  measures A.theString as a" +
                 "  pattern (A B*) " +
                 "  define " +
-                "    A as A.string like 'A%'," +
-                "    A as A.string like 'A%'" +
+                "    A as A.theString like 'A%'," +
+                "    A as A.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error starting statement: Variable 'A' has already been defined [select * from MyEvent.win:keepall() match_recognize (  measures A.string as a  pattern (A B*)   define     A as A.string like 'A%',    A as A.string like 'A%')]");
+        tryInvalid(text, "Error starting statement: Variable 'A' has already been defined [select * from MyEvent.win:keepall() match_recognize (  measures A.theString as a  pattern (A B*)   define     A as A.theString like 'A%',    A as A.theString like 'A%')]");
 
         // define for not used variable
         text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a" +
+                "  measures A.theString as a" +
                 "  pattern (A B*) " +
                 "  define " +
-                "    X as X.string like 'A%'" +
+                "    X as X.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error starting statement: Variable 'X' does not occur in pattern [select * from MyEvent.win:keepall() match_recognize (  measures A.string as a  pattern (A B*)   define     X as X.string like 'A%')]");
+        tryInvalid(text, "Error starting statement: Variable 'X' does not occur in pattern [select * from MyEvent.win:keepall() match_recognize (  measures A.theString as a  pattern (A B*)   define     X as X.theString like 'A%')]");
 
         // define mentions another variable
         text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a" +
+                "  measures A.theString as a" +
                 "  pattern (A B*) " +
                 "  define " +
-                "    A as B.string like 'A%'" +
+                "    A as B.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error starting statement: Failed to find a stream named 'B' (did you mean 'A'?) [select * from MyEvent.win:keepall() match_recognize (  measures A.string as a  pattern (A B*)   define     A as B.string like 'A%')]");
+        tryInvalid(text, "Error starting statement: Failed to find a stream named 'B' (did you mean 'A'?) [select * from MyEvent.win:keepall() match_recognize (  measures A.theString as a  pattern (A B*)   define     A as B.theString like 'A%')]");
 
         // aggregation over multiple groups
         text = "select * from MyEvent.win:keepall() " +
@@ -116,9 +116,9 @@ public class TestRowPatternInvalid extends TestCase {
                 "  measures sum(A.value+B.value) as mytotal" +
                 "  pattern (A* B*) " +
                 "  define " +
-                "    A as A.string like 'A%'" +
+                "    A as A.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error starting statement: Aggregation functions in the measure-clause must only refer to properties of exactly one group variable returning multiple events [select * from MyEvent.win:keepall() match_recognize (  measures sum(A.value+B.value) as mytotal  pattern (A* B*)   define     A as A.string like 'A%')]");
+        tryInvalid(text, "Error starting statement: Aggregation functions in the measure-clause must only refer to properties of exactly one group variable returning multiple events [select * from MyEvent.win:keepall() match_recognize (  measures sum(A.value+B.value) as mytotal  pattern (A* B*)   define     A as A.theString like 'A%')]");
 
         // aggregation over no groups
         text = "select * from MyEvent.win:keepall() " +
@@ -126,19 +126,19 @@ public class TestRowPatternInvalid extends TestCase {
                 "  measures sum(A.value) as mytotal" +
                 "  pattern (A B*) " +
                 "  define " +
-                "    A as A.string like 'A%'" +
+                "    A as A.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error starting statement: Aggregation functions in the measure-clause must refer to one or more properties of exactly one group variable returning multiple events [select * from MyEvent.win:keepall() match_recognize (  measures sum(A.value) as mytotal  pattern (A B*)   define     A as A.string like 'A%')]");
+        tryInvalid(text, "Error starting statement: Aggregation functions in the measure-clause must refer to one or more properties of exactly one group variable returning multiple events [select * from MyEvent.win:keepall() match_recognize (  measures sum(A.value) as mytotal  pattern (A B*)   define     A as A.theString like 'A%')]");
 
         // aggregation in define
         text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as astring" +
+                "  measures A.theString as astring" +
                 "  pattern (A B) " +
                 "  define " +
                 "    A as sum(A.value + B.value) > 3000" +
                 ")";
-        tryInvalid(text, "Error starting statement: An aggregate function may not appear in a DEFINE clause [select * from MyEvent.win:keepall() match_recognize (  measures A.string as astring  pattern (A B)   define     A as sum(A.value + B.value) > 3000)]");
+        tryInvalid(text, "Error starting statement: An aggregate function may not appear in a DEFINE clause [select * from MyEvent.win:keepall() match_recognize (  measures A.theString as astring  pattern (A B)   define     A as sum(A.value + B.value) > 3000)]");
 
         // join disallowed
         text = "select * from MyEvent.win:keepall(), MyEvent.win:keepall() " +
@@ -146,9 +146,9 @@ public class TestRowPatternInvalid extends TestCase {
                 "  measures A.value as aval" +
                 "  pattern (A B*) " +
                 "  define " +
-                "    A as A.string like 'A%'" +
+                "    A as A.theString like 'A%'" +
                 ")";
-        tryInvalid(text, "Error starting statement: Joins are not allowed when using match recognize [select * from MyEvent.win:keepall(), MyEvent.win:keepall() match_recognize (  measures A.value as aval  pattern (A B*)   define     A as A.string like 'A%')]");
+        tryInvalid(text, "Error starting statement: Joins are not allowed when using match recognize [select * from MyEvent.win:keepall(), MyEvent.win:keepall() match_recognize (  measures A.value as aval  pattern (A B*)   define     A as A.theString like 'A%')]");
     }
 
     private void tryInvalid(String epl, String error)

@@ -352,28 +352,28 @@ public abstract class AbstractReferenceMap extends AbstractHashedMap {
      * background thread.
      */
     protected void purge() {
-        Reference ref = queue.poll();
-        while (ref != null) {
-            purge(ref);
-            ref = queue.poll();
+        Reference reference = queue.poll();
+        while (reference != null) {
+            purge(reference);
+            reference = queue.poll();
         }
     }
 
     /**
      * Purges the specified reference.
      *
-     * @param ref  the reference to purge
+     * @param reference  the reference to purge
      */
-    protected void purge(Reference ref) {
+    protected void purge(Reference reference) {
         // The hashCode of the reference is the hashCode of the
         // mapping key, even if the reference refers to the
         // mapping value...
-        int hash = ref.hashCode();
+        int hash = reference.hashCode();
         int index = hashIndex(hash, data.length);
         HashEntry previous = null;
         HashEntry entry = data[index];
         while (entry != null) {
-            if (((ReferenceEntry) entry).purge(ref)) {
+            if (((ReferenceEntry) entry).purge(reference)) {
                 if (previous == null) {
                     data[index] = entry.next;
                 } else {
@@ -671,12 +671,12 @@ public abstract class AbstractReferenceMap extends AbstractHashedMap {
 
         /**
          * Purges the specified reference
-         * @param ref  the reference to purge
+         * @param reference  the reference to purge
          * @return true or false
          */
-        boolean purge(Reference ref) {
-            boolean r = (parent.keyType > HARD) && (key == ref);
-            r = r || ((parent.valueType > HARD) && (value == ref));
+        boolean purge(Reference reference) {
+            boolean r = (parent.keyType > HARD) && (key == reference);
+            r = r || ((parent.valueType > HARD) && (value == reference));
             if (r) {
                 if (parent.keyType > HARD) {
                     ((Reference)key).clear();
@@ -923,19 +923,19 @@ public abstract class AbstractReferenceMap extends AbstractHashedMap {
      * on read before this implementation will work. Generally, the read determines
      * what must be serialized here, if anything.
      *
-     * @param out  the output stream
+     * @param outStream  the output stream
      */
-    protected void doWriteObject(ObjectOutputStream out) throws IOException {
-        out.writeInt(keyType);
-        out.writeInt(valueType);
-        out.writeBoolean(purgeValues);
-        out.writeFloat(loadFactor);
-        out.writeInt(data.length);
+    protected void doWriteObject(ObjectOutputStream outStream) throws IOException {
+        outStream.writeInt(keyType);
+        outStream.writeInt(valueType);
+        outStream.writeBoolean(purgeValues);
+        outStream.writeFloat(loadFactor);
+        outStream.writeInt(data.length);
         for (MapIterator it = mapIterator(); it.hasNext();) {
-            out.writeObject(it.next());
-            out.writeObject(it.getValue());
+            outStream.writeObject(it.next());
+            outStream.writeObject(it.getValue());
         }
-        out.writeObject(null);  // null terminate map
+        outStream.writeObject(null);  // null terminate map
         // do not call super.doWriteObject() as code there doesn't work for reference map
     }
 
@@ -954,22 +954,22 @@ public abstract class AbstractReferenceMap extends AbstractHashedMap {
      * Subclasses may override if the subclass has a specific field that must be present
      * before <code>put()</code> or <code>calculateThreshold()</code> will work correctly.
      *
-     * @param in  the input stream
+     * @param input  the input stream
      */
-    protected void doReadObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        this.keyType = in.readInt();
-        this.valueType = in.readInt();
-        this.purgeValues = in.readBoolean();
-        this.loadFactor = in.readFloat();
-        int capacity = in.readInt();
+    protected void doReadObject(ObjectInputStream input) throws IOException, ClassNotFoundException {
+        this.keyType = input.readInt();
+        this.valueType = input.readInt();
+        this.purgeValues = input.readBoolean();
+        this.loadFactor = input.readFloat();
+        int capacity = input.readInt();
         init();
         data = new HashEntry[capacity];
         while (true) {
-            Object key = in.readObject();
+            Object key = input.readObject();
             if (key == null) {
                 break;
             }
-            Object value = in.readObject();
+            Object value = input.readObject();
             put(key, value);
         }
         threshold = calculateThreshold(data.length, loadFactor);

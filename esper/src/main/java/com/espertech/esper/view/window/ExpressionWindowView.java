@@ -86,7 +86,7 @@ public final class ExpressionWindowView extends ExpressionViewBase {
             for (;it.hasNext();) {
                 TimestampEventPair pair = it.next();
                 for (EventBean anOldData : oldData) {
-                    if (pair.getEvent() == anOldData) {
+                    if (pair.getTheEvent() == anOldData) {
                         it.remove();
                         break;
                     }
@@ -122,7 +122,7 @@ public final class ExpressionWindowView extends ExpressionViewBase {
                     if (expired == null) {
                          expired = new OneEventCollection();
                     }
-                    EventBean removed = window.removeFirst().getEvent();
+                    EventBean removed = window.removeFirst().getTheEvent();
                     expired.add(removed);
                     if (aggregationService != null) {
                         removedEvents[0] = removed;
@@ -170,7 +170,7 @@ public final class ExpressionWindowView extends ExpressionViewBase {
         builtinEventProps.getProperties().put(ExpressionViewUtil.NEWEST_TIMESTAMP, newest.getTimestamp());
         builtinEventProps.getProperties().put(ExpressionViewUtil.VIEW_REFERENCE, this);
         builtinEventProps.getProperties().put(ExpressionViewUtil.EXPIRED_COUNT, numExpired);
-        eventsPerStream[0] = pair.getEvent();
+        eventsPerStream[0] = pair.getTheEvent();
 
         for (AggregationServiceAggExpressionDesc aggregateNode : aggregateNodes) {
             aggregateNode.assignFuture(aggregationService);
@@ -197,19 +197,19 @@ public final class ExpressionWindowView extends ExpressionViewBase {
 
     private static class TimestampEventPair {
         private final long timestamp;
-        private final EventBean event;
+        private final EventBean theEvent;
 
-        private TimestampEventPair(long timestamp, EventBean event) {
+        private TimestampEventPair(long timestamp, EventBean theEvent) {
             this.timestamp = timestamp;
-            this.event = event;
+            this.theEvent = theEvent;
         }
 
         public long getTimestamp() {
             return timestamp;
         }
 
-        public EventBean getEvent() {
-            return event;
+        public EventBean getTheEvent() {
+            return theEvent;
         }
     }
 
@@ -225,7 +225,7 @@ public final class ExpressionWindowView extends ExpressionViewBase {
         }
 
         public EventBean next() {
-            return events.next().getEvent();
+            return events.next().getTheEvent();
         }
 
         public void remove() {

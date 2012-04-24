@@ -69,7 +69,7 @@ public class TestFilterParamIndexEquals extends TestCase
 
     public void testString()
     {
-        FilterParamIndexEquals index = makeOne("string", testEventType);
+        FilterParamIndexEquals index = makeOne("theString", testEventType);
 
         index.put("hello", testEvaluator);
         index.put("test", testEvaluator);
@@ -107,7 +107,7 @@ public class TestFilterParamIndexEquals extends TestCase
 
     private void verifyString(FilterParamIndexBase index, String testValue, int numExpected)
     {
-        testBean.setString(testValue);
+        testBean.setTheString(testValue);
         index.matchEvent(testEventBean, matchesList);
         assertEquals(numExpected, testEvaluator.getAndResetCountInvoked());
     }

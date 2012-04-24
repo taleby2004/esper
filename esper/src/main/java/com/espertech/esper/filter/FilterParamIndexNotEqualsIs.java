@@ -27,30 +27,32 @@ public final class FilterParamIndexNotEqualsIs extends FilterParamIndexNotEquals
         super(lookupable, FilterOperator.IS_NOT);
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
-        Object attributeValue = lookupable.getGetter().get(eventBean);
+        Object attributeValue = lookupable.getGetter().get(theEvent);
 
         // Look up in hashtable
         constantsMapRWLock.readLock().lock();
-
-        for(Map.Entry<Object, EventEvaluator> entry : constantsMap.entrySet())
-        {
-            if (entry.getKey() == null)
+        try {
+            for(Map.Entry<Object, EventEvaluator> entry : constantsMap.entrySet())
             {
-                if (attributeValue != null) {
-                    entry.getValue().matchEvent(eventBean, matches);
+                if (entry.getKey() == null)
+                {
+                    if (attributeValue != null) {
+                        entry.getValue().matchEvent(theEvent, matches);
+                    }
+                    continue;
                 }
-                continue;
-            }
 
-            if (!entry.getKey().equals(attributeValue))
-            {
-                entry.getValue().matchEvent(eventBean, matches);
+                if (!entry.getKey().equals(attributeValue))
+                {
+                    entry.getValue().matchEvent(theEvent, matches);
+                }
             }
         }
-
-        constantsMapRWLock.readLock().unlock();
+        finally {
+            constantsMapRWLock.readLock().unlock();
+        }
     }
 
     private static final Log log = LogFactory.getLog(FilterParamIndexNotEqualsIs.class);

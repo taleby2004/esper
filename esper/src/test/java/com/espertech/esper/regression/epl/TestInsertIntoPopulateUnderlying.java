@@ -13,15 +13,17 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriber;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
-import com.espertech.esper.support.util.SupportSubscriber;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TestInsertIntoPopulateUnderlying extends TestCase
@@ -93,7 +95,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_ST0", SupportBean_ST0.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_ST1", SupportBean_ST1.class);
 
-        String eplOne = "insert into SupportBeanCtorOne select string, intBoxed, intPrimitive, boolPrimitive from SupportBean";
+        String eplOne = "insert into SupportBeanCtorOne select theString, intBoxed, intPrimitive, boolPrimitive from SupportBean";
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(eplOne);
         stmtOne.addListener(listener);
 
@@ -103,7 +105,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         stmtOne.destroy();
 
         // boxable type and null values
-        String eplTwo = "insert into SupportBeanCtorOne select string, null, intBoxed from SupportBean";
+        String eplTwo = "insert into SupportBeanCtorOne select theString, null, intBoxed from SupportBean";
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL(eplTwo);
         stmtTwo.addListener(listener);
         sendReceiveTwo("E1", 100);
@@ -116,18 +118,18 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", 1));
         epService.getEPRuntime().sendEvent(new SupportBean_ST1("ST1", 2));
-        SupportBeanCtorTwo event = (SupportBeanCtorTwo) listener.assertOneGetNewAndReset().getUnderlying();
-        assertNotNull(event.getSt0());
-        assertNotNull(event.getSt1());
+        SupportBeanCtorTwo theEvent = (SupportBeanCtorTwo) listener.assertOneGetNewAndReset().getUnderlying();
+        assertNotNull(theEvent.getSt0());
+        assertNotNull(theEvent.getSt1());
         stmtThree.destroy();
 
         // test (should not use column names)
-        String eplFour = "insert into SupportBeanCtorOne(string, intPrimitive) select 'E1', 5 from SupportBean";
+        String eplFour = "insert into SupportBeanCtorOne(theString, intPrimitive) select 'E1', 5 from SupportBean";
         EPStatement stmtFour = epService.getEPAdministrator().createEPL(eplFour);
         stmtFour.addListener(listener);
         epService.getEPRuntime().sendEvent(new SupportBean("x", -1));
         SupportBeanCtorOne eventOne = (SupportBeanCtorOne) listener.assertOneGetNewAndReset().getUnderlying();
-        assertEquals("E1", eventOne.getString());
+        assertEquals("E1", eventOne.getTheString());
         assertEquals(99, eventOne.getIntPrimitive());
         assertEquals((Integer) 5, eventOne.getIntBoxed());
     }
@@ -166,9 +168,9 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         epService.getEPRuntime().sendEvent(n1);
         SupportBean_S0 s01 = new SupportBean_S0(1);
         epService.getEPRuntime().sendEvent(s01);
-        SupportBeanObject event = (SupportBeanObject) listener.assertOneGetNewAndReset().getUnderlying();
-        assertSame(n1, event.getOne());
-        assertSame(s01, event.getTwo());
+        SupportBeanObject theEvent = (SupportBeanObject) listener.assertOneGetNewAndReset().getUnderlying();
+        assertSame(n1, theEvent.getOne());
+        assertSame(s01, theEvent.getTwo());
 
         // test select stream names
         stmtOne.destroy();
@@ -178,9 +180,9 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
 
         epService.getEPRuntime().sendEvent(n1);
         epService.getEPRuntime().sendEvent(s01);
-        event = (SupportBeanObject) listener.assertOneGetNewAndReset().getUnderlying();
-        assertSame(n1, event.getOne());
-        assertSame(s01, event.getTwo());
+        theEvent = (SupportBeanObject) listener.assertOneGetNewAndReset().getUnderlying();
+        assertSame(n1, theEvent.getOne());
+        assertSame(s01, theEvent.getTwo());
         stmtOne.destroy();
 
         // test fully-qualified class name as target
@@ -190,9 +192,9 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
 
         epService.getEPRuntime().sendEvent(n1);
         epService.getEPRuntime().sendEvent(s01);
-        event = (SupportBeanObject) listener.assertOneGetNewAndReset().getUnderlying();
-        assertSame(n1, event.getOne());
-        assertSame(s01, event.getTwo());
+        theEvent = (SupportBeanObject) listener.assertOneGetNewAndReset().getUnderlying();
+        assertSame(n1, theEvent.getOne());
+        assertSame(s01, theEvent.getTwo());
 
         // test local class and auto-import
         stmtOne.destroy();
@@ -288,7 +290,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
     {
         // test select column names
         String stmtTextOne = "insert into SupportBean select " +
-                "'E1' as string, 1 as intPrimitive, 2 as intBoxed, 3L as longPrimitive," +
+                "'E1' as theString, 1 as intPrimitive, 2 as intBoxed, 3L as longPrimitive," +
                 "null as longBoxed, true as boolPrimitive, " +
                 "'x' as charPrimitive, 0xA as bytePrimitive, " +
                 "8.0f as floatPrimitive, 9.0d as doublePrimitive, " +
@@ -302,7 +304,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
 
         epService.getEPRuntime().sendEvent(new HashMap(), "MyMap");
         SupportBean received = (SupportBean) listener.assertOneGetNewAndReset().getUnderlying();
-        assertEquals("E1", received.getString());
+        assertEquals("E1", received.getTheString());
         EPAssertionUtil.assertPropsPOJO(received,
                 "intPrimitive,intBoxed,longPrimitive,longBoxed,boolPrimitive,charPrimitive,bytePrimitive,floatPrimitive,doublePrimitive,shortPrimitive,enumValue".split(","),
                 new Object[]{1, 2, 3l, null, true, 'x', (byte) 10, 8f, 9d, (short) 5, SupportEnum.ENUM_VALUE_2});
@@ -311,7 +313,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         stmtOne.destroy();
         stmtTwo.destroy();
         listener.reset();
-        stmtTextOne = "insert into SupportBean(string, intPrimitive, intBoxed, longPrimitive," +
+        stmtTextOne = "insert into SupportBean(theString, intPrimitive, intBoxed, longPrimitive," +
                 "longBoxed, boolPrimitive, charPrimitive, bytePrimitive, floatPrimitive, doublePrimitive, " +
                 "shortPrimitive, enumValue) select " +
                 "'E1', 1, 2, 3L," +
@@ -325,7 +327,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
 
         epService.getEPRuntime().sendEvent(new HashMap(), "MyMap");
         received = (SupportBean) listener.assertOneGetNewAndReset().getUnderlying();
-        assertEquals("E1", received.getString());
+        assertEquals("E1", received.getTheString());
         EPAssertionUtil.assertPropsPOJO(received,
                 "intPrimitive,intBoxed,longPrimitive,longBoxed,boolPrimitive,charPrimitive,bytePrimitive,floatPrimitive,doublePrimitive,shortPrimitive,enumValue".split(","),
                 new Object[]{1, 2, 3l, null, true, 'x', (byte) 10, 8f, 9d, (short) 5, SupportEnum.ENUM_VALUE_2});
@@ -349,7 +351,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         Map<String, Object> mapDef = new HashMap<String, Object>();
         mapDef.put("intPrimitive", int.class);
         mapDef.put("longBoxed", Long.class);
-        mapDef.put("string", String.class);
+        mapDef.put("theString", String.class);
         mapDef.put("boolPrimitive", Boolean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("MySupportMap", mapDef);
 
@@ -360,12 +362,12 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         Map<String, Object> vals = new HashMap<String, Object>();
         vals.put("intPrimitive", 4);
         vals.put("longBoxed", 100L);
-        vals.put("string", "E1");
+        vals.put("theString", "E1");
         vals.put("boolPrimitive", true);
 
         epService.getEPRuntime().sendEvent(vals, "MySupportMap");
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(),
-                "intPrimitive,longBoxed,string,boolPrimitive".split(","),
+                "intPrimitive,longBoxed,theString,boolPrimitive".split(","),
                 new Object[]{4, 100L, "E1", true});
     }
 
@@ -384,10 +386,10 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         inner.put("mykey", "myval");
         mymapVals.put("mapProp", inner);
         epService.getEPRuntime().sendEvent(mymapVals, "MyMap");
-        SupportBeanComplexProps event = (SupportBeanComplexProps) listener.assertOneGetNewAndReset().getUnderlying();
-        assertEquals(-2, event.getArrayProperty()[1]);
-        assertEquals(20, event.getObjectArray()[1]);
-        assertEquals("myval", event.getMapProperty().get("mykey"));
+        SupportBeanComplexProps theEvent = (SupportBeanComplexProps) listener.assertOneGetNewAndReset().getUnderlying();
+        assertEquals(-2, theEvent.getArrayProperty()[1]);
+        assertEquals(20, theEvent.getObjectArray()[1]);
+        assertEquals("myval", theEvent.getMapProperty().get("mykey"));
 
         // inheritance
         stmtOne.destroy();
@@ -426,7 +428,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         assertEquals("nestedValue", ((SupportBeanComplexProps.SupportBeanSpecialGetterNested) eventFour.getAnyObject()).getNestedValue());
 
         // test null value
-        String stmtTextThree = "insert into SupportBean select 'B' as string, intBoxed as intPrimitive from SupportBean(string='A')";
+        String stmtTextThree = "insert into SupportBean select 'B' as theString, intBoxed as intPrimitive from SupportBean(theString='A')";
         EPStatement stmtThree = epService.getEPAdministrator().createEPL(stmtTextThree);
         stmtThree.addListener(listener);
 
@@ -451,30 +453,51 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("MyMapType", defMap);
         EPStatement stmtOrig = epService.getEPAdministrator().createEPL("select * from MyMapType");
 
-        String stmtTextOne = "insert into MyMapType select intPrimitive as intVal, string as stringVal, doubleBoxed as doubleVal from SupportBean";
+        String stmtTextOne = "insert into MyMapType select intPrimitive as intVal, theString as stringVal, doubleBoxed as doubleVal from SupportBean";
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmtTextOne);
         stmtOne.addListener(listener);
         assertSame(stmtOrig.getEventType(), stmtOne.getEventType());
 
         SupportBean bean = new SupportBean();
         bean.setIntPrimitive(1000);
-        bean.setString("E1");
+        bean.setTheString("E1");
         bean.setDoubleBoxed(1001d);
         epService.getEPRuntime().sendEvent(bean);
         
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "intVal,stringVal,doubleVal".split(","), new Object[]{1000, "E1", 1001d});
     }
 
+    public void testPopulateObjectArray()
+    {
+        String[] props = new String[] {"intVal", "stringVal", "doubleVal", "nullVal"};
+        Object[] types = new Object[] {int.class, String.class, Double.class, null};
+        epService.getEPAdministrator().getConfiguration().addEventType("MyOAType", props, types);
+        EPStatement stmtOrig = epService.getEPAdministrator().createEPL("select * from MyOAType");
+
+        String stmtTextOne = "insert into MyOAType select intPrimitive as intVal, theString as stringVal, doubleBoxed as doubleVal from SupportBean";
+        EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmtTextOne);
+        stmtOne.addListener(listener);
+        assertSame(stmtOrig.getEventType(), stmtOne.getEventType());
+
+        SupportBean bean = new SupportBean();
+        bean.setIntPrimitive(1000);
+        bean.setTheString("E1");
+        bean.setDoubleBoxed(1001d);
+        epService.getEPRuntime().sendEvent(bean);
+
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "intVal,stringVal,doubleVal,nullVal".split(","), new Object[]{1000, "E1", 1001d, null});
+    }
+
     public void testBeanFactoryMethod()
     {
         // test factory method on the same event class
-        String stmtTextOne = "insert into SupportBeanString select 'abc' as string from MyMap";
+        String stmtTextOne = "insert into SupportBeanString select 'abc' as theString from MyMap";
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmtTextOne);
         stmtOne.addListener(listener);
         stmtOne.setSubscriber(subscriber);
 
         epService.getEPRuntime().sendEvent(new HashMap(), "MyMap");
-        assertEquals("abc", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("abc", listener.assertOneGetNewAndReset().get("theString"));
         assertEquals("abc", subscriber.assertOneGetNewAndReset());
         stmtOne.destroy();
 
@@ -526,7 +549,7 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
 
         // Test valid case of array insert
         String validEpl = "INSERT INTO FinalEventValid SELECT s as startEvent, e as endEvent FROM PATTERN [" +
-                "every s=SupportBean_S0 -> e=SupportBean(string=s.p00) until timer:interval(10 sec)]";
+                "every s=SupportBean_S0 -> e=SupportBean(theString=s.p00) until timer:interval(10 sec)]";
         EPStatement stmt = epService.getEPAdministrator().createEPL(validEpl);
         stmt.addListener(listener);
 
@@ -535,43 +558,49 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 3));
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
 
-        FinalEventValid out = ((FinalEventValid) listener.assertOneGetNewAndReset().getUnderlying());
-        assertEquals(1, out.getStartEvent().getId());
-        assertEquals("G1", out.getStartEvent().getP00());
-        assertEquals(2, out.getEndEvent().length);
-        assertEquals(2, out.getEndEvent()[0].getIntPrimitive());
-        assertEquals(3, out.getEndEvent()[1].getIntPrimitive());
+        FinalEventValid outEvent = ((FinalEventValid) listener.assertOneGetNewAndReset().getUnderlying());
+        assertEquals(1, outEvent.getStartEvent().getId());
+        assertEquals("G1", outEvent.getStartEvent().getP00());
+        assertEquals(2, outEvent.getEndEvent().length);
+        assertEquals(2, outEvent.getEndEvent()[0].getIntPrimitive());
+        assertEquals(3, outEvent.getEndEvent()[1].getIntPrimitive());
 
         // Test invalid case of non-array destination insert
         String invalidEpl = "INSERT INTO FinalEventInvalidNonArray SELECT s as startEvent, e as endEvent FROM PATTERN [" +
-                "every s=SupportBean_S0 -> e=SupportBean(string=s.p00) until timer:interval(10 sec)]";
+                "every s=SupportBean_S0 -> e=SupportBean(theString=s.p00) until timer:interval(10 sec)]";
         try {
             epService.getEPAdministrator().createEPL(invalidEpl);
             fail();
         }
         catch (EPException ex) {
-            assertEquals("Error starting statement: Invalid assignment of column 'endEvent' of type 'com.espertech.esper.support.bean.SupportBean[]' to event property 'endEvent' typed as 'com.espertech.esper.support.bean.SupportBean', column and parameter types mismatch [INSERT INTO FinalEventInvalidNonArray SELECT s as startEvent, e as endEvent FROM PATTERN [every s=SupportBean_S0 -> e=SupportBean(string=s.p00) until timer:interval(10 sec)]]", ex.getMessage());
+            assertEquals("Error starting statement: Invalid assignment of column 'endEvent' of type 'com.espertech.esper.support.bean.SupportBean[]' to event property 'endEvent' typed as 'com.espertech.esper.support.bean.SupportBean', column and parameter types mismatch [INSERT INTO FinalEventInvalidNonArray SELECT s as startEvent, e as endEvent FROM PATTERN [every s=SupportBean_S0 -> e=SupportBean(theString=s.p00) until timer:interval(10 sec)]]", ex.getMessage());
         }
 
         // Test invalid case of array destination insert from non-array var
         String invalidEplTwo = "INSERT INTO FinalEventInvalidArray SELECT s as startEvent, e as endEvent FROM PATTERN [" +
-                "every s=SupportBean_S0 -> e=SupportBean(string=s.p00) until timer:interval(10 sec)]";
+                "every s=SupportBean_S0 -> e=SupportBean(theString=s.p00) until timer:interval(10 sec)]";
         try {
             epService.getEPAdministrator().createEPL(invalidEplTwo);
             fail();
         }
         catch (EPException ex) {
-            assertEquals("Error starting statement: Invalid assignment of column 'startEvent' of type 'com.espertech.esper.support.bean.SupportBean_S0' to event property 'startEvent' typed as 'com.espertech.esper.support.bean.SupportBean_S0[]', column and parameter types mismatch [INSERT INTO FinalEventInvalidArray SELECT s as startEvent, e as endEvent FROM PATTERN [every s=SupportBean_S0 -> e=SupportBean(string=s.p00) until timer:interval(10 sec)]]", ex.getMessage());
+            assertEquals("Error starting statement: Invalid assignment of column 'startEvent' of type 'com.espertech.esper.support.bean.SupportBean_S0' to event property 'startEvent' typed as 'com.espertech.esper.support.bean.SupportBean_S0[]', column and parameter types mismatch [INSERT INTO FinalEventInvalidArray SELECT s as startEvent, e as endEvent FROM PATTERN [every s=SupportBean_S0 -> e=SupportBean(theString=s.p00) until timer:interval(10 sec)]]", ex.getMessage());
         }
     }
 
     public void testArrayMapInsert() {
+        runAssertionArrayMapInsert(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionArrayMapInsert(EventRepresentationEnum.MAP);
+        runAssertionArrayMapInsert(EventRepresentationEnum.DEFAULT);
+    }
 
-        epService.getEPAdministrator().createEPL("create schema EventOne(id string)");
-        epService.getEPAdministrator().createEPL("create schema EventTwo(id string, val int)");
-        epService.getEPAdministrator().createEPL("create schema FinalEventValid (startEvent EventOne, endEvent EventTwo[])");
-        epService.getEPAdministrator().createEPL("create schema FinalEventInvalidNonArray (startEvent EventOne, endEvent EventTwo)");
-        epService.getEPAdministrator().createEPL("create schema FinalEventInvalidArray (startEvent EventOne, endEvent EventTwo)");
+    private void runAssertionArrayMapInsert(EventRepresentationEnum eventRepresentationEnum) {
+
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema EventOne(id string)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema EventTwo(id string, val int)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema FinalEventValid (startEvent EventOne, endEvent EventTwo[])");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema FinalEventInvalidNonArray (startEvent EventOne, endEvent EventTwo)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema FinalEventInvalidArray (startEvent EventOne, endEvent EventTwo)");
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
@@ -581,15 +610,26 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(validEpl);
         stmt.addListener(listener);
 
-        sendEventOne("G1");
-        sendEventTwo("G1", 2);
-        sendEventTwo("G1", 3);
+        sendEventOne(epService, eventRepresentationEnum, "G1");
+        sendEventTwo(epService, eventRepresentationEnum, "G1", 2);
+        sendEventTwo(epService, eventRepresentationEnum, "G1", 3);
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(10000));
 
-        Map out = ((Map) listener.assertOneGetNewAndReset().getUnderlying());
-        EventBean startEventOne = (EventBean) out.get("startEvent");
-        EventBean endEventOne = ((EventBean[]) out.get("endEvent"))[0];
-        EventBean endEventTwo = ((EventBean[]) out.get("endEvent"))[1];
+        EventBean startEventOne;
+        EventBean endEventOne;
+        EventBean endEventTwo;
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            Object[] outArray = ((Object[]) listener.assertOneGetNewAndReset().getUnderlying());
+            startEventOne = (EventBean) outArray[0];
+            endEventOne = ((EventBean[]) outArray[1])[0];
+            endEventTwo = ((EventBean[]) outArray[1])[1];
+        }
+        else {
+            Map outMap = ((Map) listener.assertOneGetNewAndReset().getUnderlying());
+            startEventOne = (EventBean) outMap.get("startEvent");
+            endEventOne = ((EventBean[]) outMap.get("endEvent"))[0];
+            endEventTwo = ((EventBean[]) outMap.get("endEvent"))[1];
+        }
         assertEquals("G1", startEventOne.get("id"));
         assertEquals(2, endEventOne.get("val"));
         assertEquals(3, endEventTwo.get("val"));
@@ -615,19 +655,31 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         catch (EPException ex) {
             assertEquals("Error starting statement: Event type named 'FinalEventInvalidArray' has already been declared with differing column name or type information: Type by name 'FinalEventInvalidArray' in property 'endEvent' expected event type 'EventTwo' but receives event type 'EventTwo[]' [INSERT INTO FinalEventInvalidArray SELECT s as startEvent, e as endEvent FROM PATTERN [every s=EventOne -> e=EventTwo(id=s.id) until timer:interval(10 sec)]]", ex.getMessage());
         }
+
+        epService.initialize();
     }
 
-    private void sendEventTwo(String id, int val) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("id", id);
-        event.put("val", val);
-        epService.getEPRuntime().sendEvent(event, "EventTwo");
+    private void sendEventTwo(EPServiceProvider epService, EventRepresentationEnum eventRepresentationEnum, String id, int val) {
+        Map<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("id", id);
+        theEvent.put("val", val);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), "EventTwo");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "EventTwo");
+        }
     }
 
-    private void sendEventOne(String id) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("id", id);
-        epService.getEPRuntime().sendEvent(event, "EventOne");
+    private void sendEventOne(EPServiceProvider epService, EventRepresentationEnum eventRepresentationEnum, String id) {
+        Map<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("id", id);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), "EventOne");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "EventOne");
+        }
     }
 
     private void tryInvalid(String msg, String stmt)
@@ -718,27 +770,27 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         }
     }
 
-    private void sendReceiveTwo(String string, Integer intBoxed)
+    private void sendReceiveTwo(String theString, Integer intBoxed)
     {
-        SupportBean bean = new SupportBean(string, -1);
+        SupportBean bean = new SupportBean(theString, -1);
         bean.setIntBoxed(intBoxed);
         epService.getEPRuntime().sendEvent(bean);
-        SupportBeanCtorOne event = (SupportBeanCtorOne) listener.assertOneGetNewAndReset().getUnderlying();
-        assertEquals(string, event.getString());
-        assertEquals(null, event.getIntBoxed());
-        assertEquals(intBoxed, (Integer) event.getIntPrimitive());
+        SupportBeanCtorOne theEvent = (SupportBeanCtorOne) listener.assertOneGetNewAndReset().getUnderlying();
+        assertEquals(theString, theEvent.getTheString());
+        assertEquals(null, theEvent.getIntBoxed());
+        assertEquals(intBoxed, (Integer) theEvent.getIntPrimitive());
     }
 
-    private void sendReceive(String string, int intPrimitive, boolean boolPrimitive, Integer intBoxed)
+    private void sendReceive(String theString, int intPrimitive, boolean boolPrimitive, Integer intBoxed)
     {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setBoolPrimitive(boolPrimitive);
         bean.setIntBoxed(intBoxed);
         epService.getEPRuntime().sendEvent(bean);
-        SupportBeanCtorOne event = (SupportBeanCtorOne) listener.assertOneGetNewAndReset().getUnderlying();
-        assertEquals(string, event.getString());
-        assertEquals(intBoxed, event.getIntBoxed());
-        assertEquals(boolPrimitive,  event.isBoolPrimitive());
-        assertEquals(intPrimitive, event.getIntPrimitive());
+        SupportBeanCtorOne theEvent = (SupportBeanCtorOne) listener.assertOneGetNewAndReset().getUnderlying();
+        assertEquals(theString, theEvent.getTheString());
+        assertEquals(intBoxed, theEvent.getIntBoxed());
+        assertEquals(boolPrimitive, theEvent.isBoolPrimitive());
+        assertEquals(intPrimitive, theEvent.getIntPrimitive());
     }
 }

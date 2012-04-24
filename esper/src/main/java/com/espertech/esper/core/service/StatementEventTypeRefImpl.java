@@ -51,9 +51,9 @@ public class StatementEventTypeRefImpl implements StatementEventTypeRef
         mapLock.acquireWriteLock();
         try
         {
-            for (String ref : eventTypesReferenced)
+            for (String reference : eventTypesReferenced)
             {
-                addReference(statementName, ref);
+                addReference(statementName, reference);
             }
         }
         finally

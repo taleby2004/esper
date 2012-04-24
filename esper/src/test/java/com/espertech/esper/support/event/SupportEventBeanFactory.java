@@ -19,9 +19,9 @@ import java.util.Map;
 
 public class SupportEventBeanFactory
 {
-    public static EventBean createObject(Object event)
+    public static EventBean createObject(Object theEvent)
     {
-        return SupportEventAdapterService.getService().adapterForBean(event);
+        return SupportEventAdapterService.getService().adapterForBean(theEvent);
     }
 
     public static EventBean createMapFromValues(Map<String, Object> testValuesMap, EventType eventType)
@@ -35,7 +35,7 @@ public class SupportEventBeanFactory
         for (int i = 0; i < events.length; i++)
         {
             SupportBean bean = new SupportBean();
-            bean.setString(ids[i]);
+            bean.setTheString(ids[i]);
             events[i] = createObject(bean);
         }
         return events;

@@ -66,24 +66,24 @@ public final class FilterServiceImpl implements FilterServiceSPI
         filtersVersion++;
     }
 
-    public final long evaluate(EventBean eventBean, Collection<FilterHandle> matches)
+    public final long evaluate(EventBean theEvent, Collection<FilterHandle> matches)
     {
         long version = filtersVersion;
         numEventsEvaluated.incrementAndGet();
 
         // Finds all matching filters and return their callbacks
-        eventTypeIndex.matchEvent(eventBean, matches);
+        eventTypeIndex.matchEvent(theEvent, matches);
 
         if ((AuditPath.isAuditEnabled) && (!filterServiceListeners.isEmpty())) {
             for (FilterServiceListener listener : filterServiceListeners) {
-                listener.filtering(eventBean, matches, null);
+                listener.filtering(theEvent, matches, null);
             }
         }
 
         return version;
     }
 
-    public final long evaluate(EventBean eventBean, Collection<FilterHandle> matches, String statementId)
+    public final long evaluate(EventBean theEvent, Collection<FilterHandle> matches, String statementId)
     {
         long version = filtersVersion;
         numEventsEvaluated.incrementAndGet();
@@ -91,7 +91,7 @@ public final class FilterServiceImpl implements FilterServiceSPI
         ArrayDeque<FilterHandle> allMatches = new ArrayDeque<FilterHandle>();
 
         // Finds all matching filters
-        eventTypeIndex.matchEvent(eventBean, allMatches);
+        eventTypeIndex.matchEvent(theEvent, allMatches);
 
         // Add statement matches to collection passed
         for (FilterHandle match : allMatches) {
@@ -102,7 +102,7 @@ public final class FilterServiceImpl implements FilterServiceSPI
 
         if ((AuditPath.isAuditEnabled) && (!filterServiceListeners.isEmpty())) {
             for (FilterServiceListener listener : filterServiceListeners) {
-                listener.filtering(eventBean, matches, statementId);
+                listener.filtering(theEvent, matches, statementId);
             }
         }
 

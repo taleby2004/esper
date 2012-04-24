@@ -136,8 +136,8 @@ public class TestNotOperator extends TestCase implements SupportBeanConstants
         EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config);
         epService.initialize();
 
-        String text = "select A.string as string from pattern " +
-                    "[every A=BBB(intPrimitive=123) -> (timer:interval(30 seconds) and not AAA(volume=123, symbol=A.string))]";
+        String text = "select A.theString as theString from pattern " +
+                    "[every A=BBB(intPrimitive=123) -> (timer:interval(30 seconds) and not AAA(volume=123, symbol=A.theString))]";
         EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -156,7 +156,7 @@ public class TestNotOperator extends TestCase implements SupportBeanConstants
         assertFalse(listener.isInvoked());
 
         sendTimer(40000, epService);
-        String fields[] = new String[] {"string"};
+        String fields[] = new String[] {"theString"};
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E2"});
 
         statement.stop();
@@ -186,8 +186,8 @@ public class TestNotOperator extends TestCase implements SupportBeanConstants
 
     private void sendTimer(long timeInMSec, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

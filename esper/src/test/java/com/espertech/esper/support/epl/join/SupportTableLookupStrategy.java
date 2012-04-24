@@ -27,7 +27,7 @@ public class SupportTableLookupStrategy implements JoinExecTableLookupStrategy
         this.numResults = numResults;
     }
 
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
     {
         return SupportJoinResultNodeFactory.makeEventSet(numResults);
     }

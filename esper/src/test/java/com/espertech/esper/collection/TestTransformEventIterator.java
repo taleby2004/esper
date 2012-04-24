@@ -56,17 +56,17 @@ public class TestTransformEventIterator extends TestCase
         {
             SupportBean bean = new SupportBean();
             bean.setIntPrimitive(values[i]);
-            EventBean event = SupportEventBeanFactory.createObject(bean);
-            events.add(event);
+            EventBean theEvent = SupportEventBeanFactory.createObject(bean);
+            events.add(theEvent);
         }
         return new TransformEventIterator(events.iterator(), new MyTransform());
     }
 
     public class MyTransform implements TransformEventMethod
     {
-        public EventBean transform(EventBean event)
+        public EventBean transform(EventBean theEvent)
         {
-            Integer value = (Integer) event.get("intPrimitive");
+            Integer value = (Integer) theEvent.get("intPrimitive");
             return SupportEventBeanFactory.createObject(new SupportBean_S0(value));
         }
 

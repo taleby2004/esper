@@ -24,9 +24,9 @@ public interface PlugInEventBeanFactory
     /**
      * Returns an event wrapper for the event object specific to the plug-in event representation
      * or using one of the built-in types, or null if the event object is unknown and cannot be handled.
-     * @param event is the event object to reflect upon and wrap
+     * @param theEvent is the event object to reflect upon and wrap
      * @param resolutionURI is the URI used originally for obtaining the event sender
      * @return wrapped event object, or null if the event is of unknown type or content
      */
-    public EventBean create(Object event, URI resolutionURI);
+    public EventBean create(Object theEvent, URI resolutionURI);
 }

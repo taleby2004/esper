@@ -11,14 +11,13 @@
 
 package com.espertech.esper.event.bean;
 
-import com.espertech.esper.event.EventPropertyWriter;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.event.EventPropertyWriter;
 import net.sf.cglib.reflect.FastMethod;
-
-import java.lang.reflect.InvocationTargetException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Writer for a property to an event.
@@ -43,13 +42,18 @@ public class BeanEventPropertyWriter implements EventPropertyWriter
 
     public void write(Object value, EventBean target)
     {
+        invoke(new Object[] {value}, target.getUnderlying());
+    }
+
+    public void writeValue(Object value, Object target)
+    {
         invoke(new Object[] {value}, target);
     }
 
-    protected void invoke(Object[] values, EventBean target) {
+    protected void invoke(Object[] values, Object target) {
         try
         {
-            writerMethod.invoke(target.getUnderlying(), values);
+            writerMethod.invoke(target, values);
         }
         catch (InvocationTargetException e)
         {

@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.hook.AggregationFunctionFactory;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.epl.agg.AggregationAccess;
 import com.espertech.esper.epl.agg.AggregationMethod;
@@ -259,12 +258,13 @@ public interface MethodResolutionService
     /**
      * Returns a new set of aggregators given an existing prototype-set of aggregators for a given context partition and group key.
      *
+     *
      * @param prototypes is the prototypes
      * @param agentInstanceId context partition
      * @param groupKey is the key to group-by for
      * @return new set of aggregators for this group
      */
-    public AggregationMethod[] newAggregators(AggregationMethodFactory[] prototypes, int agentInstanceId, MultiKeyUntyped groupKey);
+    public AggregationMethod[] newAggregators(AggregationMethodFactory[] prototypes, int agentInstanceId, Object groupKey);
 
     /**
      * Returns a new set of aggregators given an existing prototype-set of aggregators for a given context partition (no groups).
@@ -279,7 +279,7 @@ public interface MethodResolutionService
      * @param agentInstanceId
      * @param groupKey that is no longer used
      */
-    public void removeAggregators(int agentInstanceId, MultiKeyUntyped groupKey);
+    public void removeAggregators(int agentInstanceId, Object groupKey);
 
     /**
      * Returns the current row count of an aggregation, for use with resilience.
@@ -288,7 +288,7 @@ public interface MethodResolutionService
      */
     public long getCurrentRowCount(AggregationMethod[] aggregators, AggregationAccess[] accesses);
 
-    public AggregationAccess makeAccessStreamId(int agentInstanceId, boolean isJoin, int streamId, MultiKeyUntyped mk);
+    public AggregationAccess makeAccessStreamId(int agentInstanceId, boolean isJoin, int streamId, Object mk);
 
     public void destroyedAgentInstance(int agentInstanceId);
 

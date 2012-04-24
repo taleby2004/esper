@@ -20,7 +20,6 @@ import com.espertech.esper.support.event.SupportEventBeanFactory;
 import com.espertech.esper.support.event.SupportEventAdapterService;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.event.bean.CGLibPropertyGetter;
 import net.sf.cglib.reflect.FastClass;
 import net.sf.cglib.reflect.FastMethod;
 
@@ -35,7 +34,7 @@ public class TestCGLibPropertyGetter extends TestCase
     {
         SupportBean testEvent = new SupportBean();
         testEvent.setIntPrimitive(10);
-        testEvent.setString("a");
+        testEvent.setTheString("a");
         testEvent.setDoubleBoxed(null);
 
         unitTestBean = SupportEventBeanFactory.createObject(testEvent);
@@ -46,7 +45,7 @@ public class TestCGLibPropertyGetter extends TestCase
         CGLibPropertyGetter getter = makeGetter(SupportBean.class, "getIntPrimitive");
         assertEquals(10, getter.get(unitTestBean));
 
-        getter = makeGetter(SupportBean.class, "getString");
+        getter = makeGetter(SupportBean.class, "getTheString");
         assertEquals("a", getter.get(unitTestBean));
 
         getter = makeGetter(SupportBean.class, "getDoubleBoxed");

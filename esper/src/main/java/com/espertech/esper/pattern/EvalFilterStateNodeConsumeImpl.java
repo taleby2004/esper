@@ -23,25 +23,25 @@ public final class EvalFilterStateNodeConsumeImpl extends EvalFilterStateNode im
         super(parentNode, evalFilterNode, beginState);
     }
 
-    public final void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+    public final void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
     {
         // not receiving the remaining matches simply means we evaluate the event
         if (allStmtMatches == null) {
-            super.matchFound(event, null);
+            super.matchFound(theEvent, null);
             return;
         }
 
         EvalFilterConsumptionHandler handler = getEvalFilterNode().getContext().getConsumptionHandler();
-        processMatches(handler, event, allStmtMatches);
+        processMatches(handler, theEvent, allStmtMatches);
     }
 
-    public static void processMatches(EvalFilterConsumptionHandler handler, EventBean event, Collection<FilterHandleCallback> allStmtMatches) {
+    public static void processMatches(EvalFilterConsumptionHandler handler, EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches) {
 
         // ignore all other callbacks for the same event
-        if (handler.getLastEvent() == event) {
+        if (handler.getLastEvent() == theEvent) {
             return;
         }
-        handler.setLastEvent(event);
+        handler.setLastEvent(theEvent);
 
         // evaluate consumption for all same-pattern filters
         ArrayDeque<FilterHandleCallback> matches = new ArrayDeque<FilterHandleCallback>();
@@ -68,7 +68,7 @@ public final class EvalFilterStateNodeConsumeImpl extends EvalFilterStateNode im
 
         // execute matches
         for (FilterHandleCallback match : matches) {
-            match.matchFound(event, null);
+            match.matchFound(theEvent, null);
         }
     }
 }

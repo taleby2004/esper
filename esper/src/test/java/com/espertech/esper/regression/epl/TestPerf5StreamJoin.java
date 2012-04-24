@@ -77,17 +77,17 @@ public class TestPerf5StreamJoin extends TestCase
     {
         assertEquals(1, updateListener.getLastNewData().length);
         assertNull(updateListener.getLastOldData());
-        EventBean event = updateListener.getLastNewData()[0];
-        assertEquals(expectedIds[0], ((SupportBean_S0) event.get("s0")).getId());
-        assertEquals(expectedIds[1], ((SupportBean_S1) event.get("s1")).getId());
-        assertEquals(expectedIds[2], ((SupportBean_S2) event.get("s2")).getId());
-        assertEquals(expectedIds[3], ((SupportBean_S3) event.get("s3")).getId());
-        assertEquals(expectedIds[4], ((SupportBean_S4) event.get("s4")).getId());
+        EventBean theEvent = updateListener.getLastNewData()[0];
+        assertEquals(expectedIds[0], ((SupportBean_S0) theEvent.get("s0")).getId());
+        assertEquals(expectedIds[1], ((SupportBean_S1) theEvent.get("s1")).getId());
+        assertEquals(expectedIds[2], ((SupportBean_S2) theEvent.get("s2")).getId());
+        assertEquals(expectedIds[3], ((SupportBean_S3) theEvent.get("s3")).getId());
+        assertEquals(expectedIds[4], ((SupportBean_S4) theEvent.get("s4")).getId());
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendEvents(int[] ids, String[] propertyValues)

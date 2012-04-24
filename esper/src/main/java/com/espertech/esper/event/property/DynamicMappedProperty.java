@@ -9,18 +9,20 @@
 package com.espertech.esper.event.property;
 
 import com.espertech.esper.client.EventPropertyGetter;
-import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.EventAdapterService;
-import com.espertech.esper.event.map.MapMappedPropertyGetter;
-import com.espertech.esper.event.map.MapEventPropertyGetter;
+import com.espertech.esper.event.arr.ObjectArrayEventPropertyGetter;
+import com.espertech.esper.event.arr.ObjectArrayMappedPropertyGetter;
+import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.DynamicMappedPropertyGetter;
-import com.espertech.esper.event.xml.SchemaElementComplex;
-import com.espertech.esper.event.xml.SchemaItem;
+import com.espertech.esper.event.map.MapEventPropertyGetter;
+import com.espertech.esper.event.map.MapMappedPropertyGetter;
 import com.espertech.esper.event.xml.BaseXMLEventType;
 import com.espertech.esper.event.xml.DOMMapGetter;
+import com.espertech.esper.event.xml.SchemaElementComplex;
+import com.espertech.esper.event.xml.SchemaItem;
 
-import java.util.Map;
 import java.io.StringWriter;
+import java.util.Map;
 
 /**
  * Represents a dynamic mapped property of a given name.
@@ -99,5 +101,10 @@ public class DynamicMappedProperty extends PropertyBase implements DynamicProper
     public EventPropertyGetter getGetterDOM()
     {
         return new DOMMapGetter(propertyNameAtomic, key, null);
+    }
+
+    public ObjectArrayEventPropertyGetter getGetterObjectArray(Map<String, Integer> indexPerProperty, Map<String, Object> nestableTypes, EventAdapterService eventAdapterService) {
+        Integer propertyIndex = indexPerProperty.get(propertyNameAtomic);
+        return propertyIndex == null ? null : new ObjectArrayMappedPropertyGetter(propertyIndex, key);
     }
 }

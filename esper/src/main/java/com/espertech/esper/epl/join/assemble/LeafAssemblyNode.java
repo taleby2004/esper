@@ -45,17 +45,17 @@ public class LeafAssemblyNode extends BaseAssemblyNode
         for (Node node : nodes)
         {
             Set<EventBean> events = node.getEvents();
-            for (EventBean event : events)
+            for (EventBean theEvent : events)
             {
-                processEvent(event, node);
+                processEvent(theEvent, node);
             }
         }
     }
 
-    private void processEvent(EventBean event, Node currentNode)
+    private void processEvent(EventBean theEvent, Node currentNode)
     {
         EventBean[] row = new EventBean[numStreams];
-        row[streamNum] = event;
+        row[streamNum] = theEvent;
         parentNode.result(row, streamNum, currentNode.getParentEvent(), currentNode.getParent());
     }
 

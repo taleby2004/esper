@@ -24,4 +24,6 @@ public interface EventBeanManufacturer
      * @return event object
      */
     public EventBean make(Object[] properties);
+
+    public Object makeUnderlying(Object[] properties);
 }

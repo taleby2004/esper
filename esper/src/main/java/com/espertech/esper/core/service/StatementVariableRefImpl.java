@@ -67,9 +67,9 @@ public class StatementVariableRefImpl implements StatementVariableRef
         mapLock.acquireWriteLock();
         try
         {
-            for (String ref : variablesReferenced)
+            for (String reference : variablesReferenced)
             {
-                addReference(statementName, ref);
+                addReference(statementName, reference);
             }
         }
         finally

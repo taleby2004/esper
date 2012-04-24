@@ -72,10 +72,12 @@ public enum AuditEnum
     INSERT("INSERT");
 
     private final String value;
+    private final String prettyPrintText;
 
     private AuditEnum(String value)
     {
         this.value = value.toUpperCase();
+        this.prettyPrintText = value.toLowerCase();
     }
 
     /**
@@ -85,6 +87,14 @@ public enum AuditEnum
     public String getValue()
     {
         return value;
+    }
+
+    /**
+     * Returns text used for the category of the audit log item.
+     * @return category name
+     */
+    public String getPrettyPrintText() {
+        return prettyPrintText;
     }
 
     /**

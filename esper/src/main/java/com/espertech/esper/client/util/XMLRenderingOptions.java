@@ -18,6 +18,7 @@ public class XMLRenderingOptions
 {
     private boolean preventLooping;
     private boolean defaultAsAttribute;
+    private EventPropertyRenderer renderer;
 
     /**
      * Ctor.
@@ -76,5 +77,13 @@ public class XMLRenderingOptions
     {
         this.defaultAsAttribute = defaultAsAttribute;
         return this;
+    }
+
+    public EventPropertyRenderer getRenderer() {
+        return renderer;
+    }
+
+    public void setRenderer(EventPropertyRenderer renderer) {
+        this.renderer = renderer;
     }
 }

@@ -9,7 +9,6 @@
 package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -105,9 +104,9 @@ public final class FilterParamIndexNotIn extends FilterParamIndexLookupableBase
         return constantsMapRWLock;
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
-        Object attributeValue = lookupable.getGetter().get(eventBean);
+        Object attributeValue = lookupable.getGetter().get(theEvent);
 
         if (attributeValue == null)
         {
@@ -121,11 +120,15 @@ public final class FilterParamIndexNotIn extends FilterParamIndexLookupableBase
         // if all known evaluators are matching, invoke all
         if (evalNotMatching == null)
         {
-            for (EventEvaluator eval : evaluatorsSet)
-            {
-                eval.matchEvent(eventBean, matches);
+            try {
+                for (EventEvaluator eval : evaluatorsSet)
+                {
+                    eval.matchEvent(theEvent, matches);
+                }
             }
-            constantsMapRWLock.readLock().unlock();
+            finally {
+                constantsMapRWLock.readLock().unlock();
+            }
             return;
         }
 
@@ -137,15 +140,18 @@ public final class FilterParamIndexNotIn extends FilterParamIndexLookupableBase
         }
 
         // handle partial matches: loop through all evaluators and see which one should not be matching, match all else
-        for (EventEvaluator eval : evaluatorsSet)
-        {
-            if (!(evalNotMatching.contains(eval)))
+        try {
+            for (EventEvaluator eval : evaluatorsSet)
             {
-                eval.matchEvent(eventBean, matches);
+                if (!(evalNotMatching.contains(eval)))
+                {
+                    eval.matchEvent(theEvent, matches);
+                }
             }
         }
-
-        constantsMapRWLock.readLock().unlock();
+        finally {
+            constantsMapRWLock.readLock().unlock();
+        }
     }
 
     private static final Log log = LogFactory.getLog(FilterParamIndexNotIn.class);

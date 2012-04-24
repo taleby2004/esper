@@ -155,10 +155,10 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
         {
             log.debug(".replaceFirstEventToSend Replacing event");
         }
-        SendableEvent event = eventsToSend.first();
-        eventsToSend.remove(event);
-        addNewEvent(eventsFromAdapters.get(event));
-        eventsFromAdapters.remove(event);
+        SendableEvent theEvent = eventsToSend.first();
+        eventsToSend.remove(theEvent);
+        addNewEvent(eventsFromAdapters.get(theEvent));
+        eventsFromAdapters.remove(theEvent);
         pollEmptyAdapters();
     }
 
@@ -176,15 +176,15 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
         {
 		    log.debug(".addNewEvent eventsFromAdapters==" + eventsFromAdapters);
         }
-        SendableEvent event = adapter.read();
-		if(event != null)
+        SendableEvent theEvent = adapter.read();
+		if(theEvent != null)
 		{
             if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
             {
-			    log.debug(".addNewEvent event==" + event);
+			    log.debug(".addNewEvent event==" + theEvent);
             }
-            eventsToSend.add(event);
-			eventsFromAdapters.put(event, adapter);
+            eventsToSend.add(theEvent);
+			eventsFromAdapters.put(theEvent, adapter);
 		}
 		else
 		{
@@ -215,11 +215,11 @@ public class AdapterCoordinatorImpl extends AbstractCoordinatedAdapter implement
 				continue;
 			}
 
-			SendableEvent event = adapter.read();
-			if(event != null)
+			SendableEvent theEvent = adapter.read();
+			if(theEvent != null)
 			{
-				eventsToSend.add(event);
-				eventsFromAdapters.put(event, adapter);
+				eventsToSend.add(theEvent);
+				eventsFromAdapters.put(theEvent, adapter);
 				iterator.remove();
 			}
 		}

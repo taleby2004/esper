@@ -16,28 +16,28 @@ import java.io.StringWriter;
 public class DotMethodFP {
 
     private final DotMethodFPInputEnum input;
-    private final DotMethodFPParam[] params;
+    private final DotMethodFPParam[] parameters;
 
-    public DotMethodFP(DotMethodFPInputEnum input, DotMethodFPParam... params) {
+    public DotMethodFP(DotMethodFPInputEnum input, DotMethodFPParam... parameters) {
         this.input = input;
-        this.params = params;
+        this.parameters = parameters;
     }
 
     public DotMethodFPInputEnum getInput() {
         return input;
     }
 
-    public DotMethodFPParam[] getParams() {
-        return params;
+    public DotMethodFPParam[] getParameters() {
+        return parameters;
     }
 
     public String toStringFootprint(boolean isLambdaApplies) {
-        if (params.length == 0) {
+        if (parameters.length == 0) {
             return "no parameters";
         }
         StringWriter buf = new StringWriter();
         String delimiter = "";
-        for (DotMethodFPParam param : params) {
+        for (DotMethodFPParam param : parameters) {
             buf.append(delimiter);
 
             if (isLambdaApplies) {
@@ -63,19 +63,19 @@ public class DotMethodFP {
     }
 
     public static String toStringProvided(DotMethodFPProvided provided, boolean isLambdaApplies) {
-        if (provided.getParams().length == 0) {
+        if (provided.getParameters().length == 0) {
             return "no parameters";
         }
         StringWriter buf = new StringWriter();
         String delimiter = "";
 
         if (!isLambdaApplies) {
-            buf.append(Integer.toString(provided.getParams().length));
+            buf.append(Integer.toString(provided.getParameters().length));
             buf.append(" expressions");
         }
         else {
 
-            for (DotMethodFPProvidedParam param : provided.getParams()) {
+            for (DotMethodFPProvidedParam param : provided.getParameters()) {
                 buf.append(delimiter);
 
                 if (param.getLambdaParamNum() == 0) {

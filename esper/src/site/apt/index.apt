@@ -65,7 +65,7 @@ Core Esper Features
 	
 * Event Stream Processing
 
-	* Sliding windows: time, length, sorted, accumulating, time-ordering, externally-timed (value-based windowing), expiry-expression-based with aggregations
+	* Sliding windows: time, length, sorted, ranked, accumulating, time-ordering, externally-timed (value-based windowing), expiry-expression-based with aggregations
 
 	* Tumbling windows: time, length and multi-policy; first-event; expiry-expression-based with aggregations
 	

@@ -11,18 +11,18 @@
 
 package com.espertech.esper.support.epl;
 
+import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBeanNumeric;
 import com.espertech.esper.support.bean.SupportBean_S0;
-import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.math.BigInteger;
-import java.math.BigDecimal;
-import java.lang.reflect.Array;
 
 public class SupportStaticMethodLib 
 {
@@ -38,7 +38,7 @@ public class SupportStaticMethodLib
 
     public static boolean compareEvents(SupportMarketDataBean beanOne, SupportBean beanTwo)
     {
-        return beanOne.getSymbol().equals(beanTwo.getString());
+        return beanOne.getSymbol().equals(beanTwo.getTheString());
     }
 
     public static Map fetchMapArrayMetadata()
@@ -102,7 +102,7 @@ public class SupportStaticMethodLib
     }
 
     public static String join(SupportBean bean) {
-        return bean.getString() + " " + Integer.toString(bean.getIntPrimitive());
+        return bean.getTheString() + " " + Integer.toString(bean.getIntPrimitive());
     }
 
     public static Map[] fetchResult100()
@@ -192,7 +192,7 @@ public class SupportStaticMethodLib
         return values;
     }
 
-    public static Map[] fetchMapArray(String string, int id)
+    public static Map[] fetchMapArray(String theString, int id)
     {
         if (id < 0)
         {
@@ -210,7 +210,7 @@ public class SupportStaticMethodLib
             Map<String, Object> values = new HashMap<String, Object>();
             rows[i] = values;
 
-            values.put("mapstring", "|" + string + "_" + i + "|");
+            values.put("mapstring", "|" + theString + "_" + i + "|");
             values.put("mapint", i + 100);
         }
 
@@ -225,7 +225,7 @@ public class SupportStaticMethodLib
         return values;
     }
 
-    public static Map fetchMap(String string, int id)
+    public static Map fetchMap(String theString, int id)
     {
         if (id < 0)
         {
@@ -238,7 +238,7 @@ public class SupportStaticMethodLib
             return values;
         }
         
-        values.put("mapstring", "|" + string + "|");
+        values.put("mapstring", "|" + theString + "|");
         values.put("mapint", id + 1);
         return values;
     }
@@ -263,6 +263,11 @@ public class SupportStaticMethodLib
         result.put("one", values.get("one"));
         result.put("two", "|" + values.get("two") + "|");
         return result;
+    }
+
+    public static Object[] convertEventObjectArray(Object[] values)
+    {
+        return new Object[] {values[0], "|" + values[1] + "|"};
     }
 
     public static SupportBean convertEvent(SupportMarketDataBean bean)
@@ -308,9 +313,9 @@ public class SupportStaticMethodLib
         return value + 1;
     }
 
-    public static String appendPipe(String string, String value)
+    public static String appendPipe(String theString, String value)
     {
-        return string + "|" + value;
+        return theString + "|" + value;
     }
 
     public static SupportBean_S0 fetchObjectAndSleep(String fetchId, int passThroughNumber, long msecSleepTime)
@@ -398,13 +403,13 @@ public class SupportStaticMethodLib
         return true;
     }
 
-    public static String delimitPipe(String string)
+    public static String delimitPipe(String theString)
     {
-        if (string == null)
+        if (theString == null)
         {
             return "|<null>|";
         }
-        return "|" + string + "|";
+        return "|" + theString + "|";
     }
 
     public static class FetchedData
@@ -523,8 +528,8 @@ public class SupportStaticMethodLib
         return sum;
     }
 
-    public static SupportBean makeSupportBean(String string, Integer intPrimitive) {
-        return new SupportBean(string, intPrimitive);
+    public static SupportBean makeSupportBean(String theString, Integer intPrimitive) {
+        return new SupportBean(theString, intPrimitive);
     }
 
     public static SupportBeanNumeric makeSupportBeanNumeric(Integer intOne, Integer intTwo) {

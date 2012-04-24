@@ -39,7 +39,7 @@ public class TestQueryPlanBuilder extends TestCase
                 SupportEventAdapterService.getService().addBeanType(SupportBean_S0.class.getName(), SupportBean_S0.class, true, true, true),
                 SupportEventAdapterService.getService().addBeanType(SupportBean_S1.class.getName(), SupportBean_S1.class, true, true, true)
         };
-        dependencyGraph = new DependencyGraph(2);
+        dependencyGraph = new DependencyGraph(2, false);
         isHistorical = new boolean[2];
     }
 

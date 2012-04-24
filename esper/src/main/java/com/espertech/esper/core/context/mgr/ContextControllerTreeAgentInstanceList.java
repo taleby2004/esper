@@ -16,14 +16,20 @@ import java.util.Map;
 
 public class ContextControllerTreeAgentInstanceList {
 
+    private long filterVersionAfterAllocation;
     private Object initPartitionKey;
     private Map<String, Object> initContextProperties;
     private List<AgentInstance> agentInstances;
 
-    public ContextControllerTreeAgentInstanceList(Object initPartitionKey, Map<String, Object> initContextProperties, List<AgentInstance> agentInstances) {
+    public ContextControllerTreeAgentInstanceList(long filterVersionAfterAllocation, Object initPartitionKey, Map<String, Object> initContextProperties, List<AgentInstance> agentInstances) {
+        this.filterVersionAfterAllocation = filterVersionAfterAllocation;
         this.initPartitionKey = initPartitionKey;
         this.initContextProperties = initContextProperties;
         this.agentInstances = agentInstances;
+    }
+
+    public long getFilterVersionAfterAllocation() {
+        return filterVersionAfterAllocation;
     }
 
     public Object getInitPartitionKey() {

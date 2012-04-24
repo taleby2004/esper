@@ -14,12 +14,14 @@ package com.espertech.esper.regression.event;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import com.espertech.esper.support.bean.*;
-import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.event.EventTypeSPI;
-import com.espertech.esper.event.EventTypeMetadata;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
+import com.espertech.esper.event.EventTypeMetadata;
+import com.espertech.esper.event.EventTypeSPI;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanVariantStream;
+import com.espertech.esper.support.bean.SupportBean_A;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
+import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -72,7 +74,7 @@ public class TestVariantStreamAny extends TestCase
         epService.getEPAdministrator().createEPL("insert into MyVariantStream select * from " + SupportBean.class.getName());
         epService.getEPAdministrator().createEPL("insert into MyVariantStream select * from " + SupportBeanVariantStream.class.getName());
         epService.getEPAdministrator().createEPL("insert into MyVariantStream select * from " + SupportBean_A.class.getName());
-        epService.getEPAdministrator().createEPL("insert into MyVariantStream select symbol as string, volume as intPrimitive, feed as id from " + SupportMarketDataBean.class.getName());
+        epService.getEPAdministrator().createEPL("insert into MyVariantStream select symbol as theString, volume as intPrimitive, feed as id from " + SupportMarketDataBean.class.getName());
 
         EPStatement stmt = epService.getEPAdministrator().createEPL("select * from MyVariantStream");
         stmt.addListener(listener);
@@ -87,13 +89,13 @@ public class TestVariantStreamAny extends TestCase
         assertSame(eventTwo, listener.assertOneGetNewAndReset().getUnderlying());
 
         stmt.destroy();
-        stmt = epService.getEPAdministrator().createEPL("select string,id,intPrimitive from MyVariantStream");
+        stmt = epService.getEPAdministrator().createEPL("select theString,id,intPrimitive from MyVariantStream");
         stmt.addListener(listener);
-        assertEquals(Object.class, stmt.getEventType().getPropertyType("string"));
+        assertEquals(Object.class, stmt.getEventType().getPropertyType("theString"));
         assertEquals(Object.class, stmt.getEventType().getPropertyType("id"));
         assertEquals(Object.class, stmt.getEventType().getPropertyType("intPrimitive"));
 
-        String[] fields = "string,id,intPrimitive".split(",");
+        String[] fields = "theString,id,intPrimitive".split(",");
         epService.getEPRuntime().sendEvent(new SupportBeanVariantStream("E1"));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"E1", null, null});
 
@@ -105,6 +107,18 @@ public class TestVariantStreamAny extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean("s1", 100, 1000L, "f1"));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"s1", "f1", 1000L});
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // Test inserting a wrapper of underlying plus properties
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        epService.getEPAdministrator().createEPL("create variant schema TheVariantStream as *");
+        epService.getEPAdministrator().createEPL("insert into TheVariantStream select 'test' as eventConfigId, * from SupportBean");
+        epService.getEPAdministrator().createEPL("select * from TheVariantStream").addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        EventBean event = listener.assertOneGetNewAndReset();
+        assertEquals("test", event.get("eventConfigId"));
+        assertEquals(1, event.get("intPrimitive"));
     }
 
     public void testAnyTypeStaggered()
@@ -116,8 +130,8 @@ public class TestVariantStreamAny extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportMarketDataBean", SupportMarketDataBean.class);
 
-        epService.getEPAdministrator().createEPL("insert into MyStream select string, intPrimitive from SupportBean");
-        epService.getEPAdministrator().createEPL("insert into VarStream select string as abc from MyStream");
+        epService.getEPAdministrator().createEPL("insert into MyStream select theString, intPrimitive from SupportBean");
+        epService.getEPAdministrator().createEPL("insert into VarStream select theString as abc from MyStream");
         epService.getEPAdministrator().createEPL("@Name('Target') select * from VarStream.win:keepall()");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));

@@ -22,6 +22,7 @@ import com.espertech.esper.epl.spec.OutputLimitSpec;
 public class ResultSetProcessorAggregateGroupedFactory implements ResultSetProcessorFactory
 {
     private final SelectExprProcessor selectExprProcessor;
+    private final ExprEvaluator groupKeyNode;
     private final ExprEvaluator[] groupKeyNodes;
     private final ExprEvaluator optionalHavingNode;
     private final boolean isSorting;
@@ -48,6 +49,12 @@ public class ResultSetProcessorAggregateGroupedFactory implements ResultSetProce
                                                      boolean isSorting)
     {
         this.selectExprProcessor = selectExprProcessor;
+        if (groupKeyNodes.length == 1) {
+            groupKeyNode = groupKeyNodes[0];
+        }
+        else {
+            groupKeyNode = null;
+        }
         this.groupKeyNodes = groupKeyNodes;
         this.optionalHavingNode = optionalHavingNode;
         this.isSorting = isSorting;
@@ -91,5 +98,9 @@ public class ResultSetProcessorAggregateGroupedFactory implements ResultSetProce
 
     public OutputLimitSpec getOutputLimitSpec() {
         return outputLimitSpec;
+    }
+
+    public ExprEvaluator getGroupKeyNode() {
+        return groupKeyNode;
     }
 }

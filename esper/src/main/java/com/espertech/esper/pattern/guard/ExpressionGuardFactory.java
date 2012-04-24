@@ -31,16 +31,16 @@ public class ExpressionGuardFactory implements GuardFactory, MetaDefItem, Serial
      */
     protected transient MatchedEventConvertor convertor;
 
-    public void setGuardParameters(List<ExprNode> params, MatchedEventConvertor convertor) throws GuardParameterException
+    public void setGuardParameters(List<ExprNode> parameters, MatchedEventConvertor convertor) throws GuardParameterException
     {
         String errorMessage = "Expression pattern guard requires a single expression as a parameter returning a true or false (boolean) value";
-        if (params.size() != 1)
+        if (parameters.size() != 1)
         {
             throw new GuardParameterException(errorMessage);
         }
-        expression = params.get(0);
+        expression = parameters.get(0);
 
-        if (JavaClassHelper.getBoxedType(params.get(0).getExprEvaluator().getType()) != Boolean.class)
+        if (JavaClassHelper.getBoxedType(parameters.get(0).getExprEvaluator().getType()) != Boolean.class)
         {
             throw new GuardParameterException(errorMessage);
         }

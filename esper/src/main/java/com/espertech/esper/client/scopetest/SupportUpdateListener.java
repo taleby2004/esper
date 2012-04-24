@@ -61,7 +61,34 @@ public class SupportUpdateListener implements UpdateListener
         }
     }
 
-    public void update(EventBean[] newData, EventBean[] oldData)
+    /**
+     * Wait for the listener invocation for up to the given number of milliseconds.
+     * @param msecWait to wait
+     * @param numberOfNewEvents in any number of separate invocations required before returning
+     * @throws RuntimeException when no results or insufficient number of events were received
+     */
+    public void waitForInvocation(long msecWait, int numberOfNewEvents) {
+        long startTime = System.currentTimeMillis();
+        while(true) {
+            if ((System.currentTimeMillis() - startTime) > msecWait) {
+                throw new RuntimeException("No events or less then the number of expected events received, expected " + numberOfNewEvents + " received " + getNewDataListFlattened().length);
+            }
+
+            EventBean[] events = getNewDataListFlattened();
+            if (events.length >= numberOfNewEvents) {
+                return;
+            }
+
+            try {
+                Thread.sleep(50);
+            }
+            catch (InterruptedException e) {
+                return;
+            }
+        }
+    }
+
+    public synchronized void update(EventBean[] newData, EventBean[] oldData)
     {
         this.oldDataList.add(oldData);
         this.newDataList.add(newData);
@@ -75,7 +102,7 @@ public class SupportUpdateListener implements UpdateListener
     /**
      * Reset listener, clearing all associated state.
      */
-    public void reset()
+    public synchronized void reset()
     {
         this.oldDataList.clear();
         this.newDataList.clear();
@@ -106,7 +133,7 @@ public class SupportUpdateListener implements UpdateListener
      * Returns the last array of events (insert stream) that were received and resets the listener.
      * @return insert stream events or null if either a null value was received or when no events have been received since the last reset
      */
-    public EventBean[] getAndResetLastNewData()
+    public synchronized EventBean[] getAndResetLastNewData()
     {
         EventBean[] lastNew = lastNewData;
         reset();
@@ -117,7 +144,7 @@ public class SupportUpdateListener implements UpdateListener
      * Returns the last array of events (insert stream) that were received and resets the listener.
      * @return insert stream events or null if either a null value was received or when no events have been received since the last reset
      */
-    public EventBean[] getAndResetLastOldData()
+    public synchronized EventBean[] getAndResetLastOldData()
     {
         EventBean[] lastOld = lastOldData;
         reset();
@@ -128,7 +155,7 @@ public class SupportUpdateListener implements UpdateListener
      * Asserts that exactly one insert stream event was received and no remove stream events, resets the listener clearing all state and returns the received event.
      * @return single insert-stream event
      */
-    public EventBean assertOneGetNewAndReset()
+    public synchronized EventBean assertOneGetNewAndReset()
     {
         ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
         
@@ -150,7 +177,7 @@ public class SupportUpdateListener implements UpdateListener
      * Asserts that exactly one remove stream event was received and no insert stream events, resets the listener clearing all state and returns the received event.
      * @return single remove-stream event
      */
-    public EventBean assertOneGetOldAndReset()
+    public synchronized EventBean assertOneGetOldAndReset()
     {
         ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
 
@@ -172,7 +199,7 @@ public class SupportUpdateListener implements UpdateListener
      * Asserts that exactly one insert stream event and exactly one remove stream event was received, resets the listener clearing all state and returns the received events as a pair.
      * @return pair of insert-stream and remove-stream events
      */
-    public UniformPair<EventBean> assertPairGetIRAndReset()
+    public synchronized UniformPair<EventBean> assertPairGetIRAndReset()
     {
         ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
 
@@ -198,7 +225,7 @@ public class SupportUpdateListener implements UpdateListener
      * Asserts that exactly one insert stream event was received not checking remove stream data, and returns the received event.
      * @return single insert-stream event
      */
-    public EventBean assertOneGetNew()
+    public synchronized EventBean assertOneGetNew()
     {
         ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
 
@@ -216,7 +243,7 @@ public class SupportUpdateListener implements UpdateListener
      * Asserts that exactly one remove stream event was received not checking insert stream data, and returns the received event.
      * @return single remove-stream event
      */
-    public EventBean assertOneGetOld()
+    public synchronized EventBean assertOneGetOld()
     {
         ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
 
@@ -261,7 +288,7 @@ public class SupportUpdateListener implements UpdateListener
      * Returns true if the listener was invoked at least once and clears the invocation flag.
      * @return invoked flag
      */
-    public boolean getAndClearIsInvoked()
+    public synchronized boolean getAndClearIsInvoked()
     {
         boolean invoked = isInvoked;
         isInvoked = false;
@@ -290,7 +317,7 @@ public class SupportUpdateListener implements UpdateListener
      * Returns an event array that represents all insert-stream events received so far.
      * @return event array
      */
-    public EventBean[] getNewDataListFlattened()
+    public synchronized EventBean[] getNewDataListFlattened()
     {
         return flatten(newDataList);
     }
@@ -299,7 +326,7 @@ public class SupportUpdateListener implements UpdateListener
      * Returns an event array that represents all remove-stream events received so far.
      * @return event array
      */
-    public EventBean[] getOldDataListFlattened()
+    public synchronized EventBean[] getOldDataListFlattened()
     {
         return flatten(oldDataList);
     }
@@ -335,7 +362,7 @@ public class SupportUpdateListener implements UpdateListener
      * asserting that only a single invocation occured, and resetting the listener.
      * @return pair of event arrays, the first in the pair is the insert stream data, the second in the pair is the remove stream data
      */
-    public UniformPair<EventBean[]> assertInvokedAndReset() {
+    public synchronized UniformPair<EventBean[]> assertInvokedAndReset() {
         ScopeTestHelper.assertTrue("Listener invocation not received but expected", isInvoked);
         ScopeTestHelper.assertEquals("Received more then one invocation", 1, getNewDataList().size());
         ScopeTestHelper.assertEquals("Received more then one invocation", 1, getOldDataList().size());
@@ -349,7 +376,7 @@ public class SupportUpdateListener implements UpdateListener
      * Returns a pair of insert and remove stream event arrays considering the all invocations.
      * @return pair of event arrays, the first in the pair is the insert stream data, the second in the pair is the remove stream data
      */
-    public UniformPair<EventBean[]> getDataListsFlattened()
+    public synchronized UniformPair<EventBean[]> getDataListsFlattened()
     {
         return new UniformPair<EventBean[]>(flatten(newDataList), flatten(oldDataList));
     }    
@@ -358,7 +385,7 @@ public class SupportUpdateListener implements UpdateListener
      * Returns a pair of insert and remove stream event arrays considering the all invocations, and resets the listener.
      * @return pair of event arrays, the first in the pair is the insert stream data, the second in the pair is the remove stream data
      */
-    public UniformPair<EventBean[]> getAndResetDataListsFlattened()
+    public synchronized UniformPair<EventBean[]> getAndResetDataListsFlattened()
     {
         UniformPair pair = getDataListsFlattened();
         reset();

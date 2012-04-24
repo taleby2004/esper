@@ -65,7 +65,7 @@ public class TestGroupByEventPerRowHaving extends TestCase
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(3) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-                          "  and one.string = two.symbol " +
+                          "  and one.theString = two.symbol " +
                           "group by symbol " +
                           "having sum(price) >= 50";
 

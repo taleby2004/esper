@@ -49,13 +49,13 @@ public class TestPerfPropertyAccess extends TestCase
         joinView.addListener(updateListener);
 
         // Send events for each stream
-        SupportBeanCombinedProps event = SupportBeanCombinedProps.makeDefaultBean();
+        SupportBeanCombinedProps theEvent = SupportBeanCombinedProps.makeDefaultBean();
         log.info(methodName + " Sending events");
 
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++)
         {
-            sendEvent(event);
+            sendEvent(theEvent);
         }
         log.info(methodName + " Done sending events");
 
@@ -66,9 +66,9 @@ public class TestPerfPropertyAccess extends TestCase
         assertTrue((endTime - startTime) < 1000);
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private static final Log log = LogFactory.getLog(TestPerfPropertyAccess.class);

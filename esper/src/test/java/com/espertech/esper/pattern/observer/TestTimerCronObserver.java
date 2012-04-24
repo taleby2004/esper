@@ -13,6 +13,7 @@ package com.espertech.esper.pattern.observer;
 
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.pattern.MatchedEventMapImpl;
+import com.espertech.esper.pattern.MatchedEventMapMeta;
 import com.espertech.esper.pattern.PatternAgentInstanceContext;
 import com.espertech.esper.schedule.ScheduleSpec;
 import com.espertech.esper.schedule.SchedulingServiceImpl;
@@ -32,7 +33,7 @@ public class TestTimerCronObserver extends TestCase
 
     public void setUp()
     {
-        beginState = new MatchedEventMapImpl();
+        beginState = new MatchedEventMapImpl(new MatchedEventMapMeta(new String[0], false));
 
         scheduleService = new SchedulingServiceImpl(new TimeSourceServiceImpl());
         PatternAgentInstanceContext agentContext = SupportPatternContextFactory.makePatternAgentInstanceContext(scheduleService);

@@ -37,6 +37,10 @@ public class StatementAgentInstanceFilterVersion implements Serializable {
         this.stmtFilterVersion = stmtFilterVersion;
     }
 
+    public long getStmtFilterVersion() {
+        return stmtFilterVersion;
+    }
+
     /**
      * Check current filter.
      * @param filterVersion to check

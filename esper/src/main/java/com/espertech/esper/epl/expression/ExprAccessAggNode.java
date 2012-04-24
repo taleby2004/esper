@@ -266,8 +266,8 @@ public class ExprAccessAggNode extends ExprAggregateNodeBase implements ExprEval
             this.eventsPerStream = new EventBean[streamId + 1];
         }
 
-        public Object evaluate(EventBean event, boolean isNewData, ExprEvaluatorContext context) {
-            eventsPerStream[streamId] = event;
+        public Object evaluate(EventBean theEvent, boolean isNewData, ExprEvaluatorContext context) {
+            eventsPerStream[streamId] = theEvent;
             return scalarEvaluator.evaluate(eventsPerStream, isNewData, context);
         }
 

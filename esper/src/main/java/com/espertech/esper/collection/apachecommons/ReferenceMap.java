@@ -152,23 +152,23 @@ public class ReferenceMap extends AbstractReferenceMap implements Serializable {
     //-----------------------------------------------------------------------
     /**
      * Write the map out using a custom routine.
-     * @param out out stream
+     * @param outputStream out stream
      * @throws IOException io error
      */
-    private void writeObject(ObjectOutputStream out) throws IOException {
-        out.defaultWriteObject();
-        doWriteObject(out);
+    private void writeObject(ObjectOutputStream outputStream) throws IOException {
+        outputStream.defaultWriteObject();
+        doWriteObject(outputStream);
     }
 
     /**
      * Read the map in using a custom routine.
-     * @param in in stream
+     * @param input in stream
      * @throws IOException io error
      * @throws ClassNotFoundException class not found
      */
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-        in.defaultReadObject();
-        doReadObject(in);
+    private void readObject(ObjectInputStream input) throws IOException, ClassNotFoundException {
+        input.defaultReadObject();
+        doReadObject(input);
     }
 
 }

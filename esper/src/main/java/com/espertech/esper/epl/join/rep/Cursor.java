@@ -16,19 +16,19 @@ import com.espertech.esper.client.EventBean;
  */
 public class Cursor
 {
-    private final EventBean event;
+    private final EventBean theEvent;
     private final int stream;
     private final Node node;
 
     /**
      * Ctor.
-     * @param event is the current event
+     * @param theEvent is the current event
      * @param stream is the current stream
      * @param node is the node containing the set of events to which the event belongs to
      */
-    public Cursor(EventBean event, int stream, Node node)
+    public Cursor(EventBean theEvent, int stream, Node node)
     {
-        this.event = event;
+        this.theEvent = theEvent;
         this.stream = stream;
         this.node = node;
     }
@@ -37,9 +37,9 @@ public class Cursor
      * Supplies current event.
      * @return event
      */
-    public EventBean getEvent()
+    public EventBean getTheEvent()
     {
-        return event;
+        return theEvent;
     }
 
     /**

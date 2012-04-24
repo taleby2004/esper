@@ -37,8 +37,8 @@ public abstract class CompositeAccessStrategyRelOpBase {
         this.isNWOnTrigger = isNWOnTrigger;
     }
 
-    public Object evaluateLookup(EventBean event, ExprEvaluatorContext context) {
-        events[lookupStream] = event;
+    public Object evaluateLookup(EventBean theEvent, ExprEvaluatorContext context) {
+        events[lookupStream] = theEvent;
         return key.evaluate(events, true, context);
     }
 

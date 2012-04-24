@@ -52,6 +52,7 @@ public class EPStatementObjectModel implements Serializable
     private CreateIndexClause createIndex;
     private CreateSchemaClause createSchema;
     private CreateContextClause createContext;
+    private CreateDataFlowClause createDataFlow;
     private OnClause onExpr;
     private InsertIntoClause insertInto;
     private SelectClause selectClause;
@@ -311,7 +312,19 @@ public class EPStatementObjectModel implements Serializable
      */
     public String toEPL()
     {
-        return toEPL(new EPStatementFormatter(false));
+        StringWriter writer = new StringWriter();
+        toEPL(new EPStatementFormatter(false), writer);
+        return writer.toString();
+    }
+
+    public void toEPL(StringWriter writer) {
+        toEPL(new EPStatementFormatter(false), writer);
+    }
+
+    public String toEPL(EPStatementFormatter formatter) {
+        StringWriter writer = new StringWriter();
+        toEPL(formatter, writer);
+        return writer.toString();
     }
 
     /**
@@ -320,10 +333,8 @@ public class EPStatementObjectModel implements Serializable
      * @return EPL representing the statement object model
      * @throws IllegalStateException if required clauses do not exist
      */
-    public String toEPL(EPStatementFormatter formatter)
+    public void toEPL(EPStatementFormatter formatter, StringWriter writer)
     {
-        StringWriter writer = new StringWriter();
-
         AnnotationPart.toEPL(writer, annotations, formatter);
         ExpressionDeclaration.toEPL(writer, expressionDeclarations, formatter);
         ScriptExpression.toEPL(writer, scriptExpressions, formatter);
@@ -338,19 +349,19 @@ public class EPStatementObjectModel implements Serializable
         {
             formatter.beginCreateIndex(writer);
             createIndex.toEPL(writer);
-            return writer.toString();
+            return;
         }
         else if (createSchema != null)
         {
             formatter.beginCreateSchema(writer);
             createSchema.toEPL(writer);
-            return writer.toString();
+            return;
         }
         else if (createContext != null)
         {
             formatter.beginCreateContext(writer);
             createContext.toEPL(writer, formatter);
-            return writer.toString();
+            return;
         }
         else if (createWindow != null)
         {
@@ -375,13 +386,19 @@ public class EPStatementObjectModel implements Serializable
                 fromClause.toEPL(writer, formatter);
                 createWindow.toEPLInsertPart(writer);
             }
-            return writer.toString();
+            return;
         }
         else if (createVariable != null)
         {
             formatter.beginCreateVariable(writer);
             createVariable.toEPL(writer);
-            return writer.toString();
+            return;
+        }
+        else if (createDataFlow != null)
+        {
+            formatter.beginCreateDataFlow(writer);
+            createDataFlow.toEPL(writer, formatter);
+            return;
         }
 
         boolean displayWhereClause = true;
@@ -506,8 +523,6 @@ public class EPStatementObjectModel implements Serializable
             formatter.beginFor(writer);
             forClause.toEPL(writer);
         }
-
-        return writer.toString();
     }
 
     /**
@@ -748,5 +763,13 @@ public class EPStatementObjectModel implements Serializable
      */
     public void setScriptExpressions(List<ScriptExpression> scriptExpressions) {
         this.scriptExpressions = scriptExpressions;
+    }
+
+    public CreateDataFlowClause getCreateDataFlow() {
+        return createDataFlow;
+    }
+
+    public void setCreateDataFlow(CreateDataFlowClause createDataFlow) {
+        this.createDataFlow = createDataFlow;
     }
 }

@@ -92,12 +92,12 @@ public class TestMTDispatch extends TestCase
         }
     }
 
-    private String print(int[][] in)
+    private String print(int[][] input)
     {
         StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < in.length; i++)
+        for (int i = 0; i < input.length; i++)
         {
-            buf.append(Arrays.toString(in[i]));
+            buf.append(Arrays.toString(input[i]));
             buf.append(",");
         }
         return buf.toString();

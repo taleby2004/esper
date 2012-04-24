@@ -8,11 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.event.xml;
 
-import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.PropertyAccessException;
-
+import com.espertech.esper.event.EventBeanSPI;
 import org.w3c.dom.Node;
 
 /**
@@ -22,18 +21,18 @@ import org.w3c.dom.Node;
  * @author pablo
  *
  */
-public class XMLEventBean implements EventBean
+public class XMLEventBean implements EventBeanSPI
 {
 	private EventType eventType;
-	private Node event;
+	private Node theEvent;
 
     /**
      * Ctor.
-     * @param event is the node with event property information
+     * @param theEvent is the node with event property information
      * @param type is the event type for this event wrapper
      */
-    public XMLEventBean(Node event, EventType type) {
-		this.event = event;
+    public XMLEventBean(Node theEvent, EventType type) {
+		this.theEvent = theEvent;
 		eventType = type;
 	}
 
@@ -41,7 +40,11 @@ public class XMLEventBean implements EventBean
 		return eventType;
 	}
 
-	public Object get(String property) throws PropertyAccessException {
+    public void setUnderlying(Object underlying) {
+        theEvent = (Node) underlying;
+    }
+
+    public Object get(String property) throws PropertyAccessException {
 		EventPropertyGetter getter = eventType.getGetter(property);
 		if (getter == null)
 			 throw new PropertyAccessException("Property named '" + property + "' is not a valid property name for this type");
@@ -49,7 +52,7 @@ public class XMLEventBean implements EventBean
 	}
 
 	public Object getUnderlying() {
-		return event;
+		return theEvent;
 	}
 
     public Object getFragment(String propertyExpression)

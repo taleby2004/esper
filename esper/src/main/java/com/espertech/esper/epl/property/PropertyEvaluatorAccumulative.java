@@ -59,15 +59,15 @@ public class PropertyEvaluatorAccumulative
 
     /**
      * Returns the accumulative events for the input event.
-     * @param event is the input event
+     * @param theEvent is the input event
      * @param exprEvaluatorContext expression evaluation context
      * @return events per stream for each row
      */
-    public ArrayDeque<EventBean[]> getAccumulative(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
+    public ArrayDeque<EventBean[]> getAccumulative(EventBean theEvent, ExprEvaluatorContext exprEvaluatorContext)
     {
         ArrayDeque<EventBean[]> resultEvents = new ArrayDeque<EventBean[]>();
-        eventsPerStream[0] = event;
-        populateEvents(event, 0, resultEvents, exprEvaluatorContext);
+        eventsPerStream[0] = theEvent;
+        populateEvents(theEvent, 0, resultEvents, exprEvaluatorContext);
         if (resultEvents.isEmpty())
         {
             return null;
@@ -88,9 +88,9 @@ public class PropertyEvaluatorAccumulative
                 {
                     if (whereClauses[level] != null)
                     {
-                        for (EventBean event : fragments)
+                        for (EventBean theEvent : fragments)
                         {
-                            eventsPerStream[level+1] = event;
+                            eventsPerStream[level+1] = theEvent;
                             if (ExprNodeUtility.applyFilterExpression(whereClauses[level], eventsPerStream, exprEvaluatorContext))
                             {
                                 EventBean[] eventsPerRow = new EventBean[levels];
@@ -101,9 +101,9 @@ public class PropertyEvaluatorAccumulative
                     }
                     else
                     {
-                        for (EventBean event : fragments)
+                        for (EventBean theEvent : fragments)
                         {
-                            eventsPerStream[level+1] = event;
+                            eventsPerStream[level+1] = theEvent;
                             EventBean[] eventsPerRow = new EventBean[levels];
                             System.arraycopy(eventsPerStream, 0, eventsPerRow, 0, levels);
                             events.add(eventsPerRow);

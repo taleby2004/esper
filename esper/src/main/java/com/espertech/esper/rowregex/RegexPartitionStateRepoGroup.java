@@ -14,7 +14,6 @@ package com.espertech.esper.rowregex;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprEvaluator;
-import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ public class RegexPartitionStateRepoGroup implements RegexPartitionStateRepo
     public final static int INITIAL_COLLECTION_MIN = 100;
 
     private final RegexPartitionStateRandomAccessGetter getter;
-    private final Map<MultiKeyUntyped, RegexPartitionState> states;
+    private final Map<Object, RegexPartitionState> states;
     private final boolean hasInterval;
     private final ExprEvaluator[] partitionExpressions;
     private final EventBean[] eventsPerStream = new EventBean[1];
@@ -55,18 +54,18 @@ public class RegexPartitionStateRepoGroup implements RegexPartitionStateRepo
         this.getter = getter;
         this.partitionExpressions  = partitionExpressions;
         this.hasInterval = hasInterval;
-        this.states = new HashMap<MultiKeyUntyped, RegexPartitionState>();
+        this.states = new HashMap<Object, RegexPartitionState>();
         this.exprEvaluatorContext = exprEvaluatorContext;
     }
 
-    public void removeState(MultiKeyUntyped partitionKey) {
+    public void removeState(Object partitionKey) {
         states.remove(partitionKey);
     }
 
     public RegexPartitionStateRepo copyForIterate()
     {
         RegexPartitionStateRepoGroup copy = new RegexPartitionStateRepoGroup(getter, partitionExpressions, hasInterval, exprEvaluatorContext);
-        for (Map.Entry<MultiKeyUntyped, RegexPartitionState> entry : states.entrySet())
+        for (Map.Entry<Object, RegexPartitionState> entry : states.entrySet())
         {
             copy.states.put(entry.getKey(), new RegexPartitionState(entry.getValue().getRandomAccess(), entry.getKey(), hasInterval));
         }
@@ -84,7 +83,7 @@ public class RegexPartitionStateRepoGroup implements RegexPartitionStateRepo
             }
             else
             {
-                for (Map.Entry<MultiKeyUntyped, RegexPartitionState> entry : states.entrySet())
+                for (Map.Entry<Object, RegexPartitionState> entry : states.entrySet())
                 {
                     entry.getValue().getCurrentStates().clear();
                 }
@@ -133,18 +132,18 @@ public class RegexPartitionStateRepoGroup implements RegexPartitionStateRepo
         }
     }
    
-    public RegexPartitionState getState(MultiKeyUntyped key)
+    public RegexPartitionState getState(Object key)
     {
         return states.get(key);
     }
 
-    public RegexPartitionState getState(EventBean event, boolean isCollect)
+    public RegexPartitionState getState(EventBean theEvent, boolean isCollect)
     {
         // collect unused states
         if ((isCollect) && (states.size() >= currentCollectionSize))
         {
-            List<MultiKeyUntyped> removeList = new ArrayList<MultiKeyUntyped>();
-            for (Map.Entry<MultiKeyUntyped, RegexPartitionState> entry : states.entrySet())
+            List<Object> removeList = new ArrayList<Object>();
+            for (Map.Entry<Object, RegexPartitionState> entry : states.entrySet())
             {
                 if ((entry.getValue().getCurrentStates().isEmpty()) &&
                     (entry.getValue().getRandomAccess() == null || entry.getValue().getRandomAccess().isEmpty()))
@@ -153,7 +152,7 @@ public class RegexPartitionStateRepoGroup implements RegexPartitionStateRepo
                 }
             }
 
-            for (MultiKeyUntyped removeKey : removeList)
+            for (Object removeKey : removeList)
             {
                 states.remove(removeKey);
             }
@@ -164,7 +163,7 @@ public class RegexPartitionStateRepoGroup implements RegexPartitionStateRepo
             }
         }
 
-        MultiKeyUntyped key = getKeys(event);
+        Object key = getKeys(theEvent);
         
         RegexPartitionState state = states.get(key);
         if (state != null)
@@ -178,10 +177,14 @@ public class RegexPartitionStateRepoGroup implements RegexPartitionStateRepo
         return state;
     }
 
-    private MultiKeyUntyped getKeys(EventBean event)
+    private Object getKeys(EventBean theEvent)
     {
+        eventsPerStream[0] = theEvent;
+        if (partitionExpressions.length == 1) {
+            return partitionExpressions[0].evaluate(eventsPerStream, true, exprEvaluatorContext);
+        }
+
         Object[] keys = new Object[partitionExpressions.length];
-        eventsPerStream[0] = event;
         int count = 0;
         for (ExprEvaluator node : partitionExpressions)
         {

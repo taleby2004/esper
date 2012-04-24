@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.spec;
 
+import com.espertech.esper.client.EPException;
+import com.espertech.esper.client.soda.CreateSchemaClauseTypeDef;
 import com.espertech.esper.util.MetaDefItem;
 
 import java.io.Serializable;
@@ -25,7 +27,7 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
     private final Set<String> types;
     private final List<ColumnDesc> columns;
     private final Set<String> inherits;
-    private final boolean variant;
+    private final AssignedType assignedType;
     private final String startTimestampProperty;
     private final String endTimestampProperty;
     private final Set<String> copyFrom;
@@ -36,14 +38,14 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
      * @param types event type name(s)
      * @param columns column definition
      * @param inherits supertypes
-     * @param variant variant streams
+     * @param assignedType any type assignment such as Map, Object-array or variant or none-specified
      */
-    public CreateSchemaDesc(String schemaName, Set<String> types, List<ColumnDesc> columns, Set<String> inherits, boolean variant, String startTimestampProperty, String endTimestampProperty, Set<String> copyFrom) {
+    public CreateSchemaDesc(String schemaName, Set<String> types, List<ColumnDesc> columns, Set<String> inherits, AssignedType assignedType, String startTimestampProperty, String endTimestampProperty, Set<String> copyFrom) {
         this.schemaName = schemaName;
         this.types = types;
         this.columns = columns;
         this.inherits = inherits;
-        this.variant = variant;
+        this.assignedType = assignedType;
         this.startTimestampProperty = startTimestampProperty;
         this.endTimestampProperty = endTimestampProperty;
         this.copyFrom = copyFrom;
@@ -85,13 +87,8 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
         return types;
     }
 
-    /**
-     * Returns true for variant stream.
-     * @return flag
-     */
-    public boolean isVariant()
-    {
-        return variant;
+    public AssignedType getAssignedType() {
+        return assignedType;
     }
 
     public String getStartTimestampProperty() {
@@ -104,5 +101,53 @@ public class CreateSchemaDesc implements MetaDefItem, Serializable
 
     public Set<String> getCopyFrom() {
         return copyFrom;
+    }
+
+    public static enum AssignedType {
+        VARIANT,
+        MAP,
+        OBJECTARRAY,
+        NONE;
+
+        public CreateSchemaClauseTypeDef mapToSoda() {
+            if (this == VARIANT) {
+                return CreateSchemaClauseTypeDef.VARIANT;
+            }
+            else if (this == MAP) {
+                return CreateSchemaClauseTypeDef.MAP;
+            }
+            else if (this == OBJECTARRAY) {
+                return CreateSchemaClauseTypeDef.OBJECTARRAY;
+            }
+            else {
+                return CreateSchemaClauseTypeDef.NONE;
+            }
+        }
+
+        public static AssignedType parseKeyword(String keywordNodeText) {
+            if (keywordNodeText.toLowerCase().equals("variant")) {
+                return VARIANT;
+            }
+            if (keywordNodeText.toLowerCase().equals("map")) {
+                return MAP;
+            }
+            if (keywordNodeText.toLowerCase().equals("objectarray")) {
+                return OBJECTARRAY;
+            }
+            throw new EPException("Expected 'variant', 'map' or 'objectarray' keyword after create-schema clause but encountered '" + keywordNodeText + "'");
+        }
+
+        public static AssignedType mapFrom(CreateSchemaClauseTypeDef typeDefinition) {
+            if (typeDefinition == null || CreateSchemaClauseTypeDef.NONE == typeDefinition) {
+                return NONE;
+            }
+            if (CreateSchemaClauseTypeDef.MAP == typeDefinition) {
+                return MAP;
+            }
+            if (CreateSchemaClauseTypeDef.OBJECTARRAY == typeDefinition) {
+                return OBJECTARRAY;
+            }
+            return VARIANT;
+        }
     }
 }

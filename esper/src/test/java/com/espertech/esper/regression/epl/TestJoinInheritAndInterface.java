@@ -52,8 +52,8 @@ public class TestJoinInheritAndInterface extends TestCase
 
         epService.getEPRuntime().sendEvent(new ISupportBImpl("1", "ab3"));
         assertTrue(testListener.isInvoked());
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals("1", event.get("a"));
-        assertEquals("1", event.get("b"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("1", theEvent.get("a"));
+        assertEquals("1", theEvent.get("b"));
     }
 }

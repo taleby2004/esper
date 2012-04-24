@@ -72,7 +72,7 @@ public class TestGroupByTimeBatch extends TestCase
     public void testTimeBatchRowForAllJoin()
     {
         sendTimer(0);
-        String stmtText = "select irstream sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean.win:keepall() as S1 where S0.symbol = S1.string";
+        String stmtText = "select irstream sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean.win:keepall() as S1 where S0.symbol = S1.theString";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -139,7 +139,7 @@ public class TestGroupByTimeBatch extends TestCase
     public void testTimeBatchAggregateAllJoin()
     {
         sendTimer(0);
-        String stmtText = "select irstream symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean.win:keepall() as S1 where S0.symbol = S1.string";
+        String stmtText = "select irstream symbol, sum(price) as sumPrice from MarketData.win:time_batch(1 sec) as S0, SupportBean.win:keepall() as S1 where S0.symbol = S1.theString";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -211,7 +211,7 @@ public class TestGroupByTimeBatch extends TestCase
         sendTimer(0);
         String stmtText = "select irstream symbol, sum(price) as sumPrice " +
                          " from MarketData.win:time_batch(1 sec) as S0, SupportBean.win:keepall() as S1" +
-                         " where S0.symbol = S1.string " +
+                         " where S0.symbol = S1.theString " +
                          " group by symbol";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -280,7 +280,7 @@ public class TestGroupByTimeBatch extends TestCase
         sendTimer(0);
         String stmtText = "select irstream symbol, sum(price) as sumPrice, volume " +
                           "from MarketData.win:time_batch(1 sec) as S0, SupportBean.win:keepall() as S1" +
-                          " where S0.symbol = S1.string " +
+                          " where S0.symbol = S1.theString " +
                           " group by symbol";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -311,9 +311,9 @@ public class TestGroupByTimeBatch extends TestCase
         assertEvent(oldEvents[2], "DELL", null, 250L);
     }
 
-    private void sendSupportEvent(String string)
+    private void sendSupportEvent(String theString)
     {
-        epService.getEPRuntime().sendEvent(new SupportBean(string, -1));
+        epService.getEPRuntime().sendEvent(new SupportBean(theString, -1));
     }
 
     private void sendMDEvent(String symbol, double price, Long volume)
@@ -321,28 +321,28 @@ public class TestGroupByTimeBatch extends TestCase
         epService.getEPRuntime().sendEvent(new SupportMarketDataBean(symbol, price, volume, null));
     }
 
-    private void assertEvent(EventBean event, String symbol, Double sumPrice, Long volume)
+    private void assertEvent(EventBean theEvent, String symbol, Double sumPrice, Long volume)
     {
-        assertEquals(symbol, event.get("symbol"));
-        assertEquals(sumPrice, event.get("sumPrice"));
-        assertEquals(volume, event.get("volume"));
+        assertEquals(symbol, theEvent.get("symbol"));
+        assertEquals(sumPrice, theEvent.get("sumPrice"));
+        assertEquals(volume, theEvent.get("volume"));
     }
 
-    private void assertEvent(EventBean event, String symbol, Double sumPrice)
+    private void assertEvent(EventBean theEvent, String symbol, Double sumPrice)
     {
-        assertEquals(symbol, event.get("symbol"));
-        assertEquals(sumPrice, event.get("sumPrice"));
+        assertEquals(symbol, theEvent.get("symbol"));
+        assertEquals(sumPrice, theEvent.get("sumPrice"));
     }
 
-    private void assertEvent(EventBean event, Double sumPrice)
+    private void assertEvent(EventBean theEvent, Double sumPrice)
     {
-        assertEquals(sumPrice, event.get("sumPrice"));
+        assertEquals(sumPrice, theEvent.get("sumPrice"));
     }
 
     private void sendTimer(long time)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

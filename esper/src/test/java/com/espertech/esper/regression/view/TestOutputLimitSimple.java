@@ -60,7 +60,7 @@ public class TestOutputLimitSimple extends TestCase
     {
         String stmtText = "select symbol, volume, price " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol";
+                            "SupportBean.win:keepall() where theString=symbol";
         runAssertion12(stmtText, "none");
     }
 
@@ -76,7 +76,7 @@ public class TestOutputLimitSimple extends TestCase
     {
         String stmtText = "select symbol, volume, price " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             " having price > 10";
         runAssertion34(stmtText, "none");
     }
@@ -93,7 +93,7 @@ public class TestOutputLimitSimple extends TestCase
     {
         String stmtText = "select symbol, volume, price " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "output every 1 seconds";
         runAssertion56(stmtText, "default");
     }
@@ -111,7 +111,7 @@ public class TestOutputLimitSimple extends TestCase
     {
         String stmtText = "select symbol, volume, price " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "having price > 10" +
                             "output every 1 seconds";
         runAssertion78(stmtText, "default");
@@ -129,7 +129,7 @@ public class TestOutputLimitSimple extends TestCase
     {
         String stmtText = "select symbol, volume, price " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "output all every 1 seconds";
         runAssertion56(stmtText, "all");
     }
@@ -147,7 +147,7 @@ public class TestOutputLimitSimple extends TestCase
     {
         String stmtText = "select symbol, volume, price " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "having price > 10" +
                             "output all every 1 seconds";
         runAssertion78(stmtText, "all");
@@ -165,7 +165,7 @@ public class TestOutputLimitSimple extends TestCase
     {
         String stmtText = "select symbol, volume, price " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "output last every 1 seconds";
         runAssertion13_14(stmtText, "last");
     }
@@ -183,7 +183,7 @@ public class TestOutputLimitSimple extends TestCase
     {
         String stmtText = "select symbol, volume, price " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "having price > 10 " +
                             "output last every 1 seconds";
         runAssertion15_16(stmtText, "last");
@@ -443,7 +443,7 @@ public class TestOutputLimitSimple extends TestCase
         String stmtText = "select symbol, volume " +
                             "from " + SupportMarketDataBean.class.getName() + ".win:length(10) as one," +
                             SupportBean.class.getName() + ".win:length(10) as two " +
-                            "where one.symbol=two.string " +
+                            "where one.symbol=two.theString " +
                             "having volume > 0 " +
                             "output every 5 events";
 
@@ -470,10 +470,10 @@ public class TestOutputLimitSimple extends TestCase
     public void testIterator()
 	{
         String[] fields = new String[] {"symbol", "price"};
-        String statementString = "select symbol, string, price from " +
+        String statementString = "select symbol, theString, price from " +
     	            SupportMarketDataBean.class.getName() + ".win:length(10) as one, " +
     	            SupportBeanString.class.getName() + ".win:length(100) as two " +
-                    "where one.symbol = two.string " +
+                    "where one.symbol = two.theString " +
                     "output every 3 events";
         EPStatement statement = epService.getEPAdministrator().createEPL(statementString);
         epService.getEPRuntime().sendEvent(new SupportBeanString("CAT"));
@@ -501,7 +501,7 @@ public class TestOutputLimitSimple extends TestCase
 			"select * from " +
 				eventName1 + ".win:length(5) as event1," +
 				eventName2 + ".win:length(5) as event2" +
-			" where event1.string = event2.id";
+			" where event1.theString = event2.id";
 		String outputStmt1 = joinStatement + " output every 1 events";
 	   	String outputStmt3 = joinStatement + " output every 3 events";
 
@@ -593,7 +593,7 @@ public class TestOutputLimitSimple extends TestCase
         sendTimer(40000);
         EventBean[] newEvents = listener.getAndResetLastNewData();
         assertEquals(1, newEvents.length);
-        assertEquals("e1", newEvents[0].get("string"));
+        assertEquals("e1", newEvents[0].get("theString"));
         listener.reset();
 
         sendTimer(50000);
@@ -613,8 +613,8 @@ public class TestOutputLimitSimple extends TestCase
         sendTimer(80000);
         newEvents = listener.getAndResetLastNewData();
         assertEquals(2, newEvents.length);
-        assertEquals("e2", newEvents[0].get("string"));
-        assertEquals("e3", newEvents[1].get("string"));
+        assertEquals("e2", newEvents[0].get("theString"));
+        assertEquals("e3", newEvents[1].get("theString"));
 
         sendTimer(90000);
         assertTrue(listener.isInvoked());
@@ -698,7 +698,7 @@ public class TestOutputLimitSimple extends TestCase
     private void sendEvent(long longBoxed, int intBoxed, short shortBoxed)
 	{
 	    SupportBean bean = new SupportBean();
-	    bean.setString(JOIN_KEY);
+	    bean.setTheString(JOIN_KEY);
 	    bean.setLongBoxed(longBoxed);
 	    bean.setIntBoxed(intBoxed);
 	    bean.setShortBoxed(shortBoxed);
@@ -801,7 +801,7 @@ public class TestOutputLimitSimple extends TestCase
 
         sendTimer(2000);
         sendEvent("YAH");
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"IBM"}, {"MSFT"}, {"YAH"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"IBM"}, {"MSFT"}, {"YAH"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -812,7 +812,7 @@ public class TestOutputLimitSimple extends TestCase
 
         sendTimer(10000);
         sendEvent("s6");
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"IBM"}, {"MSFT"}, {"YAH"}, {"s4"}, {"s5"}, {"s6"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"IBM"}, {"MSFT"}, {"YAH"}, {"s4"}, {"s5"}, {"s6"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -824,12 +824,12 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendEvent("s9");
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"YAH"}, {"s4"}, {"s5"}, {"s6"}, {"s7"}, {"s8"}, {"s9"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"YAH"}, {"s4"}, {"s5"}, {"s6"}, {"s7"}, {"s8"}, {"s9"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendTimer(14000);
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s6"}, {"s7"}, {"s8"}, {"s9"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"s6"}, {"s7"}, {"s8"}, {"s9"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -838,7 +838,7 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(23000);
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s10"}, {"s11"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"s10"}, {"s11"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -851,8 +851,8 @@ public class TestOutputLimitSimple extends TestCase
         SupportUpdateListener listener = new SupportUpdateListener();
 
         sendTimer(0);
-        String selectStmt = "select string from " + SupportBean.class.getName() + ".win:time(10) as s," +
-                SupportMarketDataBean.class.getName() + ".win:keepall() as m where s.string = m.symbol output snapshot every 3 events order by symbol asc";
+        String selectStmt = "select theString from " + SupportBean.class.getName() + ".win:time(10) as s," +
+                SupportMarketDataBean.class.getName() + ".win:keepall() as m where s.theString = m.symbol output snapshot every 3 events order by symbol asc";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(selectStmt);
         stmt.addListener(listener);
@@ -869,7 +869,7 @@ public class TestOutputLimitSimple extends TestCase
 
         sendTimer(2000);
         sendEvent("s2");
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s0"}, {"s1"}, {"s2"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"s0"}, {"s1"}, {"s2"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -880,7 +880,7 @@ public class TestOutputLimitSimple extends TestCase
 
         sendTimer(10000);
         sendEvent("s6");
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s0"}, {"s1"}, {"s2"}, {"s4"}, {"s5"}, {"s6"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"s0"}, {"s1"}, {"s2"}, {"s4"}, {"s5"}, {"s6"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -892,12 +892,12 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendEvent("s9");
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s2"}, {"s4"}, {"s5"}, {"s6"}, {"s7"}, {"s8"}, {"s9"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"s2"}, {"s4"}, {"s5"}, {"s6"}, {"s7"}, {"s8"}, {"s9"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
         sendTimer(14000);
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s6"}, {"s7"}, {"s8"}, {"s9"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"s6"}, {"s7"}, {"s8"}, {"s9"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -906,7 +906,7 @@ public class TestOutputLimitSimple extends TestCase
         assertFalse(listener.isInvoked());
 
         sendTimer(23000);
-        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"string"}, new Object[][]{{"s10"}, {"s11"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getLastNewData(), new String[]{"theString"}, new Object[][]{{"s10"}, {"s11"}});
         assertNull(listener.getLastOldData());
         listener.reset();
 
@@ -946,15 +946,15 @@ public class TestOutputLimitSimple extends TestCase
 
     private void sendTimer(long time)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void sendEvent(String s)
 	{
 	    SupportBean bean = new SupportBean();
-	    bean.setString(s);
+	    bean.setTheString(s);
 	    bean.setDoubleBoxed(0.0);
 	    bean.setIntPrimitive(0);
 	    bean.setIntBoxed(0);
@@ -1047,14 +1047,14 @@ public class TestOutputLimitSimple extends TestCase
 
     private void sendTimeEvent(int timeIncrement){
     	currentTime += timeIncrement;
-        CurrentTimeEvent event = new CurrentTimeEvent(currentTime);
-        epService.getEPRuntime().sendEvent(event);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(currentTime);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendJoinEvents(String s)
 	{
 	    SupportBean event1 = new SupportBean();
-	    event1.setString(s);
+	    event1.setTheString(s);
 	    event1.setDoubleBoxed(0.0);
 	    event1.setIntPrimitive(0);
 	    event1.setIntBoxed(0);

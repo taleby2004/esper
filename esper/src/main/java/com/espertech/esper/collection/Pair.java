@@ -32,6 +32,10 @@ public final class Pair<First,Second> implements Serializable
         this.second = second;
     }
 
+    public static <K, V> Pair<K, V> createPair(K key, V value) {
+        return new Pair<K, V>(key, value);
+    }
+
     /**
      * Returns first value within pair.
      * @return first value within pair

@@ -48,14 +48,14 @@ public class ContextControllerHashedGetterCRC32Serialized implements EventProper
     public Object get(EventBean eventBean) throws PropertyAccessException {
         EventBean[] events = new EventBean[] {eventBean};
 
-        Object[] params = new Object[evaluators.length];
+        Object[] parameters = new Object[evaluators.length];
         for (int i = 0; i < serializers.length; i++) {
-            params[i] = evaluators[i].evaluate(events, true, null);
+            parameters[i] = evaluators[i].evaluate(events, true, null);
         }
 
         byte[] bytes;
         try {
-            bytes = SerializerFactory.serialize(serializers, params);
+            bytes = SerializerFactory.serialize(serializers, parameters);
         } catch (IOException e) {
             log.error("Exception serializing parameters for computing consistent hash for statement '" + statementName + "': " + e.getMessage(), e);
             bytes = new byte[0];

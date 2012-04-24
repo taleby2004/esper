@@ -58,24 +58,24 @@ public class TestPatternJoin extends TestCase
         assertFalse(updateListener.getAndClearIsInvoked());
 
         sendEventS0(1, "b");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEventData(event, null, null, 1, "b", 1, "s1A");
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEventData(theEvent, null, null, 1, "b", 1, "s1A");
 
         sendEventS1(2, "s2A");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEventData(event, 2, "a", null, null, 2, "s2A");
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEventData(theEvent, 2, "a", null, null, 2, "s2A");
 
         sendEventS1(20, "s20A");
         sendEventS1(30, "s30A");
         assertFalse(updateListener.getAndClearIsInvoked());
 
         sendEventS0(20, "a");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEventData(event, 20, "a", null, null, 20, "s20A");
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEventData(theEvent, 20, "a", null, null, 20, "s20A");
 
         sendEventS0(20, "b");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEventData(event, null, null, 20, "b", 20, "s20A");
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEventData(theEvent, null, null, 20, "b", 20, "s20A");
 
         sendEventS0(30, "c");   // filtered out
         assertFalse(updateListener.getAndClearIsInvoked());
@@ -84,8 +84,8 @@ public class TestPatternJoin extends TestCase
         assertFalse(updateListener.getAndClearIsInvoked());
 
         sendEventS0(50, "b");   // pushing an event s0(2, "a") out the window
-        event = updateListener.assertOneGetOldAndReset();
-        assertEventData(event, 2, "a", null, null, 2, "s2A");
+        theEvent = updateListener.assertOneGetOldAndReset();
+        assertEventData(theEvent, 2, "a", null, null, 2, "s2A");
 
         // stop statement
         statement.stop();
@@ -104,8 +104,8 @@ public class TestPatternJoin extends TestCase
         assertFalse(updateListener.getAndClearIsInvoked());
 
         sendEventS0(70, "b");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEventData(event, null, null, 70, "b", 70, "s1-70");
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEventData(theEvent, null, null, 70, "b", 70, "s1-70");
     }
 
     public void test2PatternJoinSelect()
@@ -133,8 +133,8 @@ public class TestPatternJoin extends TestCase
         sendEventS0(3, "a");
         sendEventS2(3, "c");
         sendEventS1(1, "b");
-        EventBean event = updateListener.assertOneGetNewAndReset();
-        assertEventData(event, 3, 1, 3, 2, "a", "b", "c", "d");
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
+        assertEventData(theEvent, 3, 1, 3, 2, "a", "b", "c", "d");
 
         sendEventS0(11, "a1");
         sendEventS2(13, "c1");
@@ -146,13 +146,13 @@ public class TestPatternJoin extends TestCase
         sendEventS0(21, "a2");
         sendEventS2(21, "c2");
         sendEventS1(26, "b2");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEventData(event, 21, 26, 21, 25, "a2", "b2", "c2", "d2");
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEventData(theEvent, 21, 26, 21, 25, "a2", "b2", "c2", "d2");
 
         sendEventS0(31, "a3");
         sendEventS1(32, "b3");
-        event = updateListener.assertOneGetOldAndReset();   // event moving out of window
-        assertEventData(event, 3, 1, 3, 2, "a", "b", "c", "d");
+        theEvent = updateListener.assertOneGetOldAndReset();   // event moving out of window
+        assertEventData(theEvent, 3, 1, 3, 2, "a", "b", "c", "d");
         sendEventS2(33, "c3");
         sendEventS3(35, "d3");
         assertFalse(updateListener.getAndClearIsInvoked());
@@ -179,8 +179,8 @@ public class TestPatternJoin extends TestCase
         sendEventS0(51, "a6");
         sendEventS2(51, "c6");
         sendEventS1(56, "b6");
-        event = updateListener.assertOneGetNewAndReset();
-        assertEventData(event, 51, 56, 51, 55, "a6", "b6", "c6", "d6");
+        theEvent = updateListener.assertOneGetNewAndReset();
+        assertEventData(theEvent, 51, 56, 51, 55, "a6", "b6", "c6", "d6");
     }
 
     public void test2PatternJoinWildcard()
@@ -202,69 +202,69 @@ public class TestPatternJoin extends TestCase
         SupportBean_S2 s2 = sendEventS2(100, "");
         SupportBean_S3 s3 = sendEventS3(2, "");
 
-        EventBean event = updateListener.assertOneGetNewAndReset();
+        EventBean theEvent = updateListener.assertOneGetNewAndReset();
 
-        Map<String, EventBean> result = (Map<String, EventBean>) event.get("s0");
+        Map<String, EventBean> result = (Map<String, EventBean>) theEvent.get("s0");
         assertSame(s0, result.get("es0").getUnderlying());
         assertSame(s1, result.get("es1").getUnderlying());
 
-        result = (Map<String, EventBean>) event.get("s1");
+        result = (Map<String, EventBean>) theEvent.get("s1");
         assertSame(s2, result.get("es2").getUnderlying());
         assertSame(s3, result.get("es3").getUnderlying());
     }
 
     private SupportBean_S0 sendEventS0(int id, String p00)
     {
-        SupportBean_S0 event = new SupportBean_S0(id, p00);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean_S0 theEvent = new SupportBean_S0(id, p00);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
     private SupportBean_S1 sendEventS1(int id, String p10)
     {
-        SupportBean_S1 event = new SupportBean_S1(id, p10);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean_S1 theEvent = new SupportBean_S1(id, p10);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
     private SupportBean_S2 sendEventS2(int id, String p20)
     {
-        SupportBean_S2 event = new SupportBean_S2(id, p20);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean_S2 theEvent = new SupportBean_S2(id, p20);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
     private SupportBean_S3 sendEventS3(int id, String p30)
     {
-        SupportBean_S3 event = new SupportBean_S3(id, p30);
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean_S3 theEvent = new SupportBean_S3(id, p30);
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 
-    private void assertEventData(EventBean event, int s0es0Id, int s0es1Id, int s1es2Id, int s1es3Id,
+    private void assertEventData(EventBean theEvent, int s0es0Id, int s0es1Id, int s1es2Id, int s1es3Id,
                                  String p00, String p10, String p20, String p30)
     {
-        assertEquals(s0es0Id, event.get("s0es0Id"));
-        assertEquals(s0es1Id, event.get("s0es1Id"));
-        assertEquals(s1es2Id, event.get("s1es2Id"));
-        assertEquals(s1es3Id, event.get("s1es3Id"));
-        assertEquals(p00, event.get("es0p00"));
-        assertEquals(p10, event.get("es1p10"));
-        assertEquals(p20, event.get("es2p20"));
-        assertEquals(p30, event.get("es3p30"));
+        assertEquals(s0es0Id, theEvent.get("s0es0Id"));
+        assertEquals(s0es1Id, theEvent.get("s0es1Id"));
+        assertEquals(s1es2Id, theEvent.get("s1es2Id"));
+        assertEquals(s1es3Id, theEvent.get("s1es3Id"));
+        assertEquals(p00, theEvent.get("es0p00"));
+        assertEquals(p10, theEvent.get("es1p10"));
+        assertEquals(p20, theEvent.get("es2p20"));
+        assertEquals(p30, theEvent.get("es3p30"));
     }
 
-    private void assertEventData(EventBean event,
+    private void assertEventData(EventBean theEvent,
                                  Integer es0aId, String es0ap00,
                                  Integer es0bId, String es0bp00,
                                  int s1Id, String s1p10
                                  )
     {
-        assertEquals(es0aId, event.get("es0aId"));
-        assertEquals(es0ap00, event.get("es0ap00"));
-        assertEquals(es0bId, event.get("es0bId"));
-        assertEquals(es0bp00, event.get("es0bp00"));
-        assertEquals(s1Id, event.get("s1Id"));
-        assertEquals(s1p10, event.get("s1p10"));
+        assertEquals(es0aId, theEvent.get("es0aId"));
+        assertEquals(es0ap00, theEvent.get("es0ap00"));
+        assertEquals(es0bId, theEvent.get("es0bId"));
+        assertEquals(es0bp00, theEvent.get("es0bp00"));
+        assertEquals(s1Id, theEvent.get("s1Id"));
+        assertEquals(s1p10, theEvent.get("s1p10"));
     }
 }

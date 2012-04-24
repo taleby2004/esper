@@ -42,13 +42,13 @@ public class TestCompositeSelect extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
-        EventBean event = listener.assertOneGetNewAndReset();
+        EventBean theEvent = listener.assertOneGetNewAndReset();
 
         Object[] values = new Object[stmtTwo.getEventType().getPropertyNames().length];
         int count = 0;
         for (String name : stmtTwo.getEventType().getPropertyNames())
         {
-            values[count++] = event.get(name);
+            values[count++] = theEvent.get(name);
         }
 
         EPAssertionUtil.assertEqualsAnyOrder(new Object[]{
@@ -80,29 +80,29 @@ public class TestCompositeSelect extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_A("A2"));
         epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
         
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertTrue(event.getUnderlying() instanceof Map);
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertTrue(theEvent.getUnderlying() instanceof Map);
 
         // test fragment B type and event
-        FragmentEventType typeFragB = event.getEventType().getFragmentType("b");
+        FragmentEventType typeFragB = theEvent.getEventType().getFragmentType("b");
         assertFalse(typeFragB.isIndexed());
         assertEquals("B", typeFragB.getFragmentType().getName());
         assertEquals(String.class, typeFragB.getFragmentType().getPropertyType("id"));
 
-        EventBean eventFragB = (EventBean) event.getFragment("b");
+        EventBean eventFragB = (EventBean) theEvent.getFragment("b");
         assertEquals("B", eventFragB.getEventType().getName());
 
         // test fragment A type and event
-        FragmentEventType typeFragA = event.getEventType().getFragmentType("a");
+        FragmentEventType typeFragA = theEvent.getEventType().getFragmentType("a");
         assertTrue(typeFragA.isIndexed());
         assertEquals("A", typeFragA.getFragmentType().getName());
         assertEquals(String.class, typeFragA.getFragmentType().getPropertyType("id"));
 
-        assertTrue(event.getFragment("a") instanceof EventBean[]);
-        EventBean eventFragA1 = (EventBean) event.getFragment("a[0]");
+        assertTrue(theEvent.getFragment("a") instanceof EventBean[]);
+        EventBean eventFragA1 = (EventBean) theEvent.getFragment("a[0]");
         assertEquals("A", eventFragA1.getEventType().getName());
         assertEquals("A1", eventFragA1.get("id"));
-        EventBean eventFragA2 = (EventBean) event.getFragment("a[1]");
+        EventBean eventFragA2 = (EventBean) theEvent.getFragment("a[1]");
         assertEquals("A", eventFragA2.getEventType().getName());
         assertEquals("A2", eventFragA2.get("id"));
     }

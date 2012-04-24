@@ -31,6 +31,7 @@ import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.EventTypeUtility;
 import com.espertech.esper.event.NativeEventType;
+import com.espertech.esper.event.arr.ObjectArrayEventType;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.map.MapEventType;
 import com.espertech.esper.filter.FilterSpecCompiled;
@@ -38,6 +39,7 @@ import com.espertech.esper.filter.FilterSpecParam;
 import com.espertech.esper.pattern.EvalFilterFactoryNode;
 import com.espertech.esper.pattern.EvalNodeAnalysisResult;
 import com.espertech.esper.pattern.EvalNodeUtil;
+import com.espertech.esper.util.EventRepresentationUtil;
 import com.espertech.esper.util.ManagedReadWriteLock;
 import com.espertech.esper.util.UuidGenerator;
 import com.espertech.esper.view.ViewProcessingException;
@@ -243,7 +245,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         StatementSpecCompiled compiledSpec;
         try
         {
-            compiledSpec = compile(statementSpec, expression, statementContext, false, annotations, visitor.getSubselects(), visitor.getChainedExpressionsDot(), visitor.getDeclaredExpressions());
+            compiledSpec = compile(statementSpec, expression, statementContext, false, annotations, visitor.getSubselects(), visitor.getDeclaredExpressions(), services);
         }
         catch (EPStatementException ex)
         {
@@ -383,12 +385,12 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
 
         if (!script.getParameterNames().isEmpty()) {
-            HashSet<String> params = new HashSet<String>();
+            HashSet<String> parameters = new HashSet<String>();
             for (String param : script.getParameterNames()) {
-                if (params.contains(param)) {
+                if (parameters.contains(param)) {
                     throw new ExprValidationException("Invalid script parameters for script '" + script.getName() + "', parameter '" + param + "' is defined more then once");
                 }
-                params.add(param);
+                parameters.add(param);
             }
         }
     }
@@ -927,8 +929,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                                                    boolean isSubquery,
                                                    Annotation[] annotations,
                                                    List<ExprSubselectNode> subselectNodes,
-                                                   List<ExprDotNode> dotNodes,
-                                                   List<ExprDeclaredNode> declaredNodes) throws EPStatementException
+                                                   List<ExprDeclaredNode> declaredNodes,
+                                                   EPServicesContext servicesContext) throws EPStatementException
     {
         List<StreamSpecCompiled> compiledStreams;
         Set<String> eventTypeReferences = new HashSet<String>();
@@ -977,30 +979,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         }
 
         // compile select-clause
-        List<SelectClauseElementCompiled> selectElements = new ArrayList<SelectClauseElementCompiled>();
-        SelectClauseSpecCompiled selectClauseCompiled = new SelectClauseSpecCompiled(selectElements, spec.getSelectClauseSpec().isDistinct());
-        for (SelectClauseElementRaw raw : spec.getSelectClauseSpec().getSelectExprList())
-        {
-            if (raw instanceof SelectClauseExprRawSpec)
-            {
-                SelectClauseExprRawSpec rawExpr = (SelectClauseExprRawSpec) raw;
-                selectElements.add(new SelectClauseExprCompiledSpec(rawExpr.getSelectExpression(), rawExpr.getOptionalAsName(), rawExpr.getOptionalAsName()));
-            }
-            else if (raw instanceof SelectClauseStreamRawSpec)
-            {
-                SelectClauseStreamRawSpec rawExpr = (SelectClauseStreamRawSpec) raw;
-                selectElements.add(new SelectClauseStreamCompiledSpec(rawExpr.getStreamName(), rawExpr.getOptionalAsName()));
-            }
-            else if (raw instanceof SelectClauseElementWildcard)
-            {
-                SelectClauseElementWildcard wildcard = (SelectClauseElementWildcard) raw;
-                selectElements.add(wildcard);
-            }
-            else
-            {
-                throw new IllegalStateException("Unexpected select clause element class : " + raw.getClass().getName());
-            }
-        }
+        SelectClauseSpecCompiled selectClauseCompiled = StatementLifecycleSvcUtil.compileSelectClause(spec.getSelectClauseSpec());
 
         // Determine subselects in filter streams, these may need special handling for locking
         ExprNodeSubselectDeclaredDotVisitor visitor = new ExprNodeSubselectDeclaredDotVisitor();
@@ -1027,7 +1006,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         for (ExprSubselectNode subselect : subselectNodes)
         {
             StatementSpecRaw raw = subselect.getStatementSpecRaw();
-            StatementSpecCompiled compiled = compile(raw, eplStatement, statementContext, true, new Annotation[0], Collections.<ExprSubselectNode>emptyList(), dotNodes, Collections.<ExprDeclaredNode>emptyList());
+            StatementSpecCompiled compiled = compile(raw, eplStatement, statementContext, true, new Annotation[0], Collections.<ExprSubselectNode>emptyList(), Collections.<ExprDeclaredNode>emptyList(), servicesContext);
             subselectNumber++;
             subselect.setStatementSpecCompiled(compiled, subselectNumber);
         }
@@ -1106,7 +1085,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                     // set the window to insert from
                     spec.getCreateWindowDesc().setInsertFromWindow(consumerStreamSpec.getWindowName());
                 }
-                Pair<FilterSpecCompiled, SelectClauseSpecRaw> newFilter = handleCreateWindow(selectFromType, selectFromTypeName, spec.getCreateWindowDesc().getColumns(), spec, eplStatement, statementContext);
+                Pair<FilterSpecCompiled, SelectClauseSpecRaw> newFilter = handleCreateWindow(selectFromType, selectFromTypeName, spec.getCreateWindowDesc().getColumns(), spec, eplStatement, statementContext, servicesContext);
                 eventTypeReferences.add(((EventTypeSPI)newFilter.getFirst().getFilterForEventType()).getMetadata().getPrimaryName());
 
                 // view must be non-empty list
@@ -1154,7 +1133,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                 spec.getForClauseSpec(),
                 spec.getSqlParameters(),
                 spec.getCreateContextDesc(),
-                spec.getOptionalContextName()
+                spec.getOptionalContextName(),
+                spec.getCreateDataFlowDesc()
                 );
     }
 
@@ -1277,7 +1257,8 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                                            List<ColumnDesc> columns,
                                            StatementSpecRaw spec,
                                            String eplStatement,
-                                           StatementContext statementContext)
+                                           StatementContext statementContext,
+                                           EPServicesContext servicesContext)
             throws ExprValidationException
     {
         String typeName = spec.getCreateWindowDesc().getWindowName();
@@ -1291,14 +1272,14 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // If no columns selected, simply create a wrapper type
         // Build a list of properties
         SelectClauseSpecRaw newSelectClauseSpecRaw = new SelectClauseSpecRaw();
-        Map<String, Object> properties;
+        LinkedHashMap<String, Object> properties;
         boolean hasProperties = false;
         if ((columns != null) && (!columns.isEmpty())) {
             properties = EventTypeUtility.buildType(columns, null, null);
             hasProperties = true;
         }
         else {
-            properties = new HashMap<String, Object>();
+            properties = new LinkedHashMap<String, Object>();
             for (NamedWindowSelectedProps selectElement : select)
             {
                 if (selectElement.getFragmentType() != null)
@@ -1334,12 +1315,23 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             if (hasProperties && !isOnlyWildcard)
             {
                 Map<String, Object> compiledProperties = EventTypeUtility.compileMapTypeProperties(properties, statementContext.getEventAdapterService());
-                targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, compiledProperties, null, false, false, false, true, false);
+                boolean mapType = EventRepresentationUtil.isMap(statementContext.getAnnotations(), servicesContext.getConfigSnapshot(), CreateSchemaDesc.AssignedType.NONE);
+                if (mapType) {
+                    targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, compiledProperties, null, false, false, false, true, false);
+                }
+                else {
+                    targetType = statementContext.getEventAdapterService().addNestableObjectArrayType(typeName, compiledProperties, null, false, false, false, true, false);
+                }
             }
             else
             {
                 // No columns selected, no wildcard, use the type as is or as a wrapped type
-                if (selectFromType instanceof MapEventType)
+                if (selectFromType instanceof ObjectArrayEventType)
+                {
+                    ObjectArrayEventType objectArrayEventType = (ObjectArrayEventType) selectFromType;
+                    targetType = statementContext.getEventAdapterService().addNestableObjectArrayType(typeName, objectArrayEventType.getTypes(), null, false, false, false, true, false);
+                }
+                else if (selectFromType instanceof MapEventType)
                 {
                     MapEventType mapType = (MapEventType) selectFromType;
                     targetType = statementContext.getEventAdapterService().addNestableMapType(typeName, mapType.getTypes(), null, false, false, false, true, false);
@@ -1410,11 +1402,11 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         return selectProps;
     }
 
-    public void dispatchStatementLifecycleEvent(StatementLifecycleEvent event)
+    public void dispatchStatementLifecycleEvent(StatementLifecycleEvent theEvent)
     {
         for (StatementLifecycleObserver observer : observers)
         {
-            observer.observe(event);
+            observer.observe(theEvent);
         }
     }
 

@@ -389,7 +389,8 @@ where sensor.sensorId = loc.sensorId</pre></div>
           Lets assume we want to output only once after 60 seconds, start fresh every 60 seconds, compute aggregations continuously and don't retain any events for those 60 seconds (only retain aggregated values in memory).
           This is the two statements that accomplish this:
         </p>
-	<div class="source"><pre>create context CtxEachMinute initiated by pattern [every timer:interval(1 min)] terminated after 1 minute</pre></div>      
+	<div class="source"><pre>// Activate now and every 1-minute, terminating after 1 minute
+create context CtxEachMinute initiated by pattern [timer:interval(0) or every timer:interval(1 min)] terminated after 1 minute</pre></div>      
 	<div class="source"><pre>context CtxEachMinute select avg(value) as avgValue, count(value) as countValue, 
 min(value) as minValue, max(value) as maxValue from MyEvent
 output snapshot when terminated</pre></div>      

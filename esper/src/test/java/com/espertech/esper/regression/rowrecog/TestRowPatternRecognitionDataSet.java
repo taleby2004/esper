@@ -46,7 +46,7 @@ public class TestRowPatternRecognitionDataSet extends TestCase
         String text = "select * " +
                 "from SupportBean " +
                 "match_recognize (" +
-                " measures A.string as beginA, last(Z.string) as lastZ" +
+                " measures A.theString as beginA, last(Z.theString) as lastZ" +
                 " all matches" +
                 " after match skip to current row" +
                 " pattern (A W+ X+ Y+ Z+)" +
@@ -139,10 +139,10 @@ public class TestRowPatternRecognitionDataSet extends TestCase
         int rowCount = 0;
         for (Object[] row : data)
         {
-            SupportBean event = new SupportBean((String) row[0], (Integer) row[1]);
-            epService.getEPRuntime().sendEvent(event);
+            SupportBean theEvent = new SupportBean((String) row[0], (Integer) row[1]);
+            epService.getEPRuntime().sendEvent(theEvent);
 
-            compare(row, rowCount, event, listener);
+            compare(row, rowCount, theEvent, listener);
             rowCount++;
         }
 
@@ -157,10 +157,10 @@ public class TestRowPatternRecognitionDataSet extends TestCase
         
         for (Object[] row : data)
         {
-            SupportBean event = new SupportBean((String) row[0], (Integer) row[1]);
-            epService.getEPRuntime().sendEvent(event);
+            SupportBean theEvent = new SupportBean((String) row[0], (Integer) row[1]);
+            epService.getEPRuntime().sendEvent(theEvent);
 
-            compare(row, rowCount, event, listener);
+            compare(row, rowCount, theEvent, listener);
             rowCount++;
         }
     }
@@ -170,25 +170,25 @@ public class TestRowPatternRecognitionDataSet extends TestCase
         String query = "SELECT * " +
             "FROM MyEvent.win:keepall()" +
             "   MATCH_RECOGNIZE (" +
-            "       MEASURES A.string AS a_string," +
+            "       MEASURES A.theString AS a_string," +
             "         A.value AS a_value," +
-            "         B.string AS b_string," +
+            "         B.theString AS b_string," +
             "         B.value AS b_value," +
-            "         C[0].string AS c0_string," +
+            "         C[0].theString AS c0_string," +
             "         C[0].value AS c0_value," +
-            "         C[1].string AS c1_string," +
+            "         C[1].theString AS c1_string," +
             "         C[1].value AS c1_value," +
-            "         C[2].string AS c2_string," +
+            "         C[2].theString AS c2_string," +
             "         C[2].value AS c2_value," +
-            "         D.string AS d_string," +
+            "         D.theString AS d_string," +
             "         D.value AS d_value," +
-            "         E[0].string AS e0_string," +
+            "         E[0].theString AS e0_string," +
             "         E[0].value AS e0_value," +
-            "         E[1].string AS e1_string," +
+            "         E[1].theString AS e1_string," +
             "         E[1].value AS e1_value," +
-            "         F[0].string AS f0_string," +
+            "         F[0].theString AS f0_string," +
             "         F[0].value AS f0_value," +
-            "         F[1].string AS f1_string," +
+            "         F[1].theString AS f1_string," +
             "         F[1].value AS f1_value" +
             "       ALL MATCHES" +
             "       after match skip to current row" +
@@ -231,17 +231,17 @@ public class TestRowPatternRecognitionDataSet extends TestCase
         for (Object[] row : data)
         {
             rowCount++;
-            SupportRecogBean event = new SupportRecogBean((String) row[0], (Integer) row[1]);
-            epService.getEPRuntime().sendEvent(event);
+            SupportRecogBean theEvent = new SupportRecogBean((String) row[0], (Integer) row[1]);
+            epService.getEPRuntime().sendEvent(theEvent);
 
-            compare(row, rowCount, event, listener);
+            compare(row, rowCount, theEvent, listener);
             rowCount++;
         }
 
         stmt.destroy();
     }
 
-    private static void compare(Object[] row, int rowCount, Object event, SupportUpdateListener listener)
+    private static void compare(Object[] row, int rowCount, Object theEvent, SupportUpdateListener listener)
     {
         if (row.length < 3 || row[2] == null)
         {
@@ -256,7 +256,7 @@ public class TestRowPatternRecognitionDataSet extends TestCase
                     }
                 }
             }
-            assertFalse("For event " +event + " row " + rowCount, listener.isInvoked());
+            assertFalse("For event " +theEvent + " row " + rowCount, listener.isInvoked());
             return;
         }
 
@@ -289,30 +289,30 @@ public class TestRowPatternRecognitionDataSet extends TestCase
         Arrays.sort(expected);
         Arrays.sort(matchesText);
 
-        assertEquals("For event " + event, matches.length, expected.length);
+        assertEquals("For event " + theEvent, matches.length, expected.length);
         for (int i = 0; i < expected.length; i++)
         {
             if (!expected[i].equals(matchesText[i]))
             {
                 log.info("expected:" + expected[i]);
                 log.info("  actual:" + expected[i]);
-                assertEquals("Sending event " + event + " row " + rowCount, expected[i], matchesText[i]);
+                assertEquals("Sending event " + theEvent + " row " + rowCount, expected[i], matchesText[i]);
             }
         }
 
         listener.reset();
     }
 
-    private static String getProps(EventBean event)
+    private static String getProps(EventBean theEvent)
     {
         StringBuilder buf = new StringBuilder();
         String delimiter = "";
-        for (EventPropertyDescriptor prop : event.getEventType().getPropertyDescriptors())
+        for (EventPropertyDescriptor prop : theEvent.getEventType().getPropertyDescriptors())
         {
             buf.append(delimiter);
             buf.append(prop.getPropertyName());
             buf.append("=");
-            buf.append(event.get(prop.getPropertyName()));
+            buf.append(theEvent.get(prop.getPropertyName()));
             delimiter = ",";
         }
         return buf.toString();

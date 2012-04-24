@@ -97,7 +97,7 @@ public class TestGroupByMedianAndDeviation extends TestCase
                     .add(Expressions.eq("symbol", "IBM"))
                     .add(Expressions.eq("symbol", "GE"))
                 )
-                .add(Expressions.eqProperty("one.string", "two.symbol")));
+                .add(Expressions.eqProperty("one.theString", "two.symbol")));
         model.setGroupByClause(GroupByClause.create("symbol"));
         model = (EPStatementObjectModel) SerializableObjectCopier.copy(model);
 
@@ -109,7 +109,7 @@ public class TestGroupByMedianAndDeviation extends TestCase
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
                           "where (symbol = \"DELL\" or symbol = \"IBM\" or symbol = \"GE\") " +
-                          "and one.string = two.symbol " +
+                          "and one.theString = two.symbol " +
                           "group by symbol";
         assertEquals(viewExpr, model.toEPL());
 
@@ -133,7 +133,7 @@ public class TestGroupByMedianAndDeviation extends TestCase
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(5) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-                          "       and one.string = two.symbol " +
+                          "       and one.theString = two.symbol " +
                           "group by symbol";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);

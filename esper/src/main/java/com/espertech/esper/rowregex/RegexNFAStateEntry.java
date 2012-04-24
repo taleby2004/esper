@@ -25,7 +25,7 @@ public class RegexNFAStateEntry
     private final EventBean[] eventsPerStream;
     private final int[] greedycountPerState;
     private final MultimatchState[] optionalMultiMatches;
-    private final MultiKeyUntyped partitionKey;
+    private final Object partitionKey;
     private int matchEndEventSeqNo;
 
     /**
@@ -38,7 +38,7 @@ public class RegexNFAStateEntry
      * @param optionalMultiMatches matches for multirow-variables
      * @param partitionKey key of partition
      */
-    public RegexNFAStateEntry(int matchBeginEventSeqNo, long matchBeginEventTime, RegexNFAState state, EventBean[] eventsPerStream, int[] greedycountPerState, MultimatchState[] optionalMultiMatches, MultiKeyUntyped partitionKey) {
+    public RegexNFAStateEntry(int matchBeginEventSeqNo, long matchBeginEventTime, RegexNFAState state, EventBean[] eventsPerStream, int[] greedycountPerState, MultimatchState[] optionalMultiMatches, Object partitionKey) {
         this.matchBeginEventSeqNo = matchBeginEventSeqNo;
         this.matchBeginEventTime = matchBeginEventTime;
         this.state = state;
@@ -118,7 +118,7 @@ public class RegexNFAStateEntry
      * Returns the partition key.
      * @return key
      */
-    public MultiKeyUntyped getPartitionKey()
+    public Object getPartitionKey()
     {
         return partitionKey;
     }

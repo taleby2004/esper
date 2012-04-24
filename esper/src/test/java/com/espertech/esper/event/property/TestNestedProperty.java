@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TestNestedProperty extends TestCase
 {
     private NestedProperty[] nested;
-    private EventBean event;
+    private EventBean theEvent;
     private BeanEventTypeFactory beanEventTypeFactory;
 
     public void setUp()
@@ -40,22 +40,22 @@ public class TestNestedProperty extends TestCase
         nested[0] = makeProperty(new String[] {"nested", "nestedValue"});
         nested[1] = makeProperty(new String[] {"nested", "nestedNested", "nestedNestedValue"});
 
-        event = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
+        theEvent = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
     }
 
     public void testGetGetter()
     {
-        EventPropertyGetter getter = nested[0].getGetter((BeanEventType)event.getEventType(), SupportEventAdapterService.getService());
-        assertEquals("nestedValue", getter.get(event));
+        EventPropertyGetter getter = nested[0].getGetter((BeanEventType) theEvent.getEventType(), SupportEventAdapterService.getService());
+        assertEquals("nestedValue", getter.get(theEvent));
 
-        getter = nested[1].getGetter((BeanEventType)event.getEventType(), SupportEventAdapterService.getService());
-        assertEquals("nestedNestedValue", getter.get(event));
+        getter = nested[1].getGetter((BeanEventType) theEvent.getEventType(), SupportEventAdapterService.getService());
+        assertEquals("nestedNestedValue", getter.get(theEvent));
     }
 
     public void testGetPropertyType()
     {
-        assertEquals(String.class, nested[0].getPropertyType((BeanEventType)event.getEventType(), SupportEventAdapterService.getService()));
-        assertEquals(String.class, nested[1].getPropertyType((BeanEventType)event.getEventType(), SupportEventAdapterService.getService()));
+        assertEquals(String.class, nested[0].getPropertyType((BeanEventType) theEvent.getEventType(), SupportEventAdapterService.getService()));
+        assertEquals(String.class, nested[1].getPropertyType((BeanEventType) theEvent.getEventType(), SupportEventAdapterService.getService()));
     }
 
     private NestedProperty makeProperty(String[] propertyNames)

@@ -37,12 +37,12 @@ public class PropertyIndexedEventTableCoerceAdd extends PropertyIndexedEventTabl
     }
 
     @Override
-    protected MultiKeyUntyped getMultiKey(EventBean event)
+    protected MultiKeyUntyped getMultiKey(EventBean theEvent)
     {
         Object[] keyValues = new Object[propertyGetters.length];
         for (int i = 0; i < propertyGetters.length; i++)
         {
-            Object value = propertyGetters[i].get(event);
+            Object value = propertyGetters[i].get(theEvent);
             if ((value != null) && (!value.getClass().equals(coercionTypes[i])))
             {
                 if (value instanceof Number)

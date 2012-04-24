@@ -11,6 +11,7 @@
 
 package com.espertech.esper.schedule;
 
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.JavaClassHelper;
 import org.apache.commons.logging.Log;
@@ -46,9 +47,9 @@ public class ScheduleHandleCallbackProxy implements java.lang.reflect.Invocation
         if (m.getName().equals(target.getName())) {
             if (AuditPath.isInfoEnabled()) {
                 StringWriter message = new StringWriter();
-                message.write("schedule trigger handle ");
+                message.write("trigger handle ");
                 JavaClassHelper.writeInstance(message, scheduleHandleCallback, true);
-                AuditPath.auditLog(engineURI, statementName, message.toString());
+                AuditPath.auditLog(engineURI, statementName, AuditEnum.SCHEDULE, message.toString());
             }
         }
 

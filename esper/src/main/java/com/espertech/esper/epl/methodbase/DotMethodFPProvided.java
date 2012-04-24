@@ -13,13 +13,13 @@ package com.espertech.esper.epl.methodbase;
 
 public class DotMethodFPProvided {
 
-    private final DotMethodFPProvidedParam[] params;
+    private final DotMethodFPProvidedParam[] parameters;
 
-    public DotMethodFPProvided(DotMethodFPProvidedParam[] params) {
-        this.params = params;
+    public DotMethodFPProvided(DotMethodFPProvidedParam[] parameters) {
+        this.parameters = parameters;
     }
 
-    public DotMethodFPProvidedParam[] getParams() {
-        return params;
+    public DotMethodFPProvidedParam[] getParameters() {
+        return parameters;
     }
 }

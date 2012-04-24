@@ -50,7 +50,7 @@ public class TestEnumInvalid extends TestCase {
 
         // test not an enumeration method
         epl = "select contained.notAMethod(x=>x.boolPrimitive) from SupportBean_ST0_Container";
-        tryInvalid(epl, "Error starting statement: Could not find enumeration method, date-time method or instance method named 'notAMethod' in class 'java.util.List' with matching parameter number and expected parameter type(s) 'null (any type)' [select contained.notAMethod(x=>x.boolPrimitive) from SupportBean_ST0_Container]");
+        tryInvalid(epl, "Error starting statement: Could not find event property, enumeration method or instance method named 'notAMethod' in collection of events of type 'SupportBean_ST0' [select contained.notAMethod(x=>x.boolPrimitive) from SupportBean_ST0_Container]");
 
         // invalid lambda expression for non-lambda func
         epl = "select makeTest(x=>1) from SupportBean_ST0_Container";
@@ -89,12 +89,12 @@ public class TestEnumInvalid extends TestCase {
         tryInvalid(epl, "Error starting statement: Parameters mismatch for enumeration method 'where', the method has multiple footprints accepting a lambda expression providing predictate, or a 2-parameter lambda expression providing (predictate, index), but receives an (non-lambda) expression and an (non-lambda) expression [select contained.where(1,2) from SupportBean_ST0_Container]");
 
         // subselect multiple columns
-        epl = "select (select string, intPrimitive from SupportBean.std:lastevent()).where(x=>x.boolPrimitive) from SupportBean_ST0";
-        tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'where', expecting collection of event-type or scalar values as input, received an incompatible type [select (select string, intPrimitive from SupportBean.std:lastevent()).where(x=>x.boolPrimitive) from SupportBean_ST0]");
+        epl = "select (select theString, intPrimitive from SupportBean.std:lastevent()).where(x=>x.boolPrimitive) from SupportBean_ST0";
+        tryInvalid(epl, "Error starting statement: Invalid input for built-in enumeration method 'where', expecting collection of event-type or scalar values as input, received an incompatible type [select (select theString, intPrimitive from SupportBean.std:lastevent()).where(x=>x.boolPrimitive) from SupportBean_ST0]");
 
         // subselect individual column
-        epl = "select (select string from SupportBean.std:lastevent()).where(x=>x.boolPrimitive) from SupportBean_ST0";
-        tryInvalid(epl, "Error starting statement: Error validating enumeration method 'where' parameter 0: Failed to resolve property 'x.boolPrimitive' to a stream or nested property in a stream [select (select string from SupportBean.std:lastevent()).where(x=>x.boolPrimitive) from SupportBean_ST0]");
+        epl = "select (select theString from SupportBean.std:lastevent()).where(x=>x.boolPrimitive) from SupportBean_ST0";
+        tryInvalid(epl, "Error starting statement: Error validating enumeration method 'where' parameter 0: Failed to resolve property 'x.boolPrimitive' to a stream or nested property in a stream [select (select theString from SupportBean.std:lastevent()).where(x=>x.boolPrimitive) from SupportBean_ST0]");
 
         // aggregation
         epl = "select avg(intPrimitive).where(x=>x.boolPrimitive) from SupportBean_ST0";

@@ -70,7 +70,7 @@ public class TestFilterExpressionsPluginSingleRow extends TestCase
         // test function returns lookup value and "equals"
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("libSplit", MyLib.class.getName(), "libSplit", ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
         for (int i = 0; i < listeners.length; i++) {
-            EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(libSplit(string) = " + i + ")");
+            EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(libSplit(theString) = " + i + ")");
             stmt.addListener(listeners[i]);
         }
 
@@ -95,7 +95,7 @@ public class TestFilterExpressionsPluginSingleRow extends TestCase
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("libE1True", MyLib.class.getName(), "libE1True", ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
         int count = 100;
         for (int i = 0; i < count; i++) {
-            EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(libE1True(string))");
+            EPStatement stmt = epService.getEPAdministrator().createEPL("select * from SupportBean(libE1True(theString))");
             stmt.addListener(listener);
         }
 
@@ -125,23 +125,23 @@ public class TestFilterExpressionsPluginSingleRow extends TestCase
         String epl;
 
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("funcOne", MyLib.class.getName(), "libSplit", ConfigurationPlugInSingleRowFunction.FilterOptimizable.DISABLED);
-        epl = "select * from SupportBean(funcOne(string) = 0)";
+        epl = "select * from SupportBean(funcOne(theString) = 0)";
         assertFilterSingle(epl, FilterSpecCompiler.PROPERTY_NAME_BOOLEAN_EXPRESSION, FilterOperator.BOOLEAN_EXPRESSION);
         
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("funcOneWDefault", MyLib.class.getName(), "libSplit");
-        epl = "select * from SupportBean(funcOneWDefault(string) = 0)";
-        assertFilterSingle(epl, "funcOneWDefault(string)", FilterOperator.EQUAL);
+        epl = "select * from SupportBean(funcOneWDefault(theString) = 0)";
+        assertFilterSingle(epl, "funcOneWDefault(theString)", FilterOperator.EQUAL);
 
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("funcTwo", MyLib.class.getName(), "libSplit", ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
-        epl = "select * from SupportBean(funcTwo(string) = 0)";
-        assertFilterSingle(epl, "funcTwo(string)", FilterOperator.EQUAL);
+        epl = "select * from SupportBean(funcTwo(theString) = 0)";
+        assertFilterSingle(epl, "funcTwo(theString)", FilterOperator.EQUAL);
         
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("libE1True", MyLib.class.getName(), "libE1True", ConfigurationPlugInSingleRowFunction.FilterOptimizable.ENABLED);
-        epl = "select * from SupportBean(libE1True(string))";
-        assertFilterSingle(epl, "libE1True(string)", FilterOperator.EQUAL);
+        epl = "select * from SupportBean(libE1True(theString))";
+        assertFilterSingle(epl, "libE1True(theString)", FilterOperator.EQUAL);
 
-        epl = "select * from SupportBean(funcTwo( string ) > 10)";
-        assertFilterSingle(epl, "funcTwo(string)", FilterOperator.GREATER);
+        epl = "select * from SupportBean(funcTwo( theString ) > 10)";
+        assertFilterSingle(epl, "funcTwo(theString)", FilterOperator.GREATER);
     }
 
     private void assertFilterSingle(String epl, String expression, FilterOperator op) {
@@ -164,15 +164,15 @@ public class TestFilterExpressionsPluginSingleRow extends TestCase
 
         private static int countInvoked;
 
-        public static int libSplit(String string) {
-            String[] key = string.split("_");
+        public static int libSplit(String theString) {
+            String[] key = theString.split("_");
             countInvoked++;
             return Integer.parseInt(key[1]);
         }
 
-        public static boolean libE1True(String string) {
+        public static boolean libE1True(String theString) {
             countInvoked++;
-            return string.equals("E_1");
+            return theString.equals("E_1");
         }
 
         public static int getCountInvoked() {

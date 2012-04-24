@@ -10,9 +10,8 @@ package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.util.AuditPath;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 public class ExprIdentNodeEvaluatorLogging extends ExprIdentNodeEvaluatorImpl
 {
@@ -31,7 +30,7 @@ public class ExprIdentNodeEvaluatorLogging extends ExprIdentNodeEvaluatorImpl
     {
         Object result = super.evaluate(eventsPerStream, isNewData, exprEvaluatorContext);
         if (AuditPath.isInfoEnabled()) {
-            AuditPath.auditLog(engineURI, statementName, "property " + propertyName + " value " + result);
+            AuditPath.auditLog(engineURI, statementName, AuditEnum.PROPERTY, propertyName + " value " + result);
         }
         return result;
     }

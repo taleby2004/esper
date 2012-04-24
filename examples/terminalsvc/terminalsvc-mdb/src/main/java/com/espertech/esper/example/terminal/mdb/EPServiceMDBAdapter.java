@@ -58,11 +58,11 @@ public class EPServiceMDBAdapter
         statement.addListener(new CountPerTypeListener(outboundSender));
     }
 
-    public void sendEvent(Object event)
+    public void sendEvent(Object theEvent)
     {
         synchronized (epService)
         {
-            epService.getEPRuntime().sendEvent(event);
+            epService.getEPRuntime().sendEvent(theEvent);
         }
     }
 

@@ -101,12 +101,12 @@ public class EventTypeIndex implements EventEvaluator
         return result;
     }
 
-    public void matchEvent(EventBean event, Collection<FilterHandle> matches)
+    public void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
-        EventType eventType = event.getEventType();
+        EventType eventType = theEvent.getEventType();
 
         // Attempt to match exact type
-        matchType(eventType, event, matches);
+        matchType(eventType, theEvent, matches);
 
         // No supertype means we are done
         if (eventType.getSuperTypes() == null)
@@ -117,7 +117,7 @@ public class EventTypeIndex implements EventEvaluator
         for (Iterator<EventType> it = eventType.getDeepSuperTypes(); it.hasNext();)
         {
             EventType superType = it.next();
-            matchType(superType, event, matches);
+            matchType(superType, theEvent, matches);
         }
     }
 
@@ -132,15 +132,19 @@ public class EventTypeIndex implements EventEvaluator
 
     protected int getFilterCountApprox() {
 
-        eventTypesRWLock.readLock().lock();
         int count = 0;
-        for (Map.Entry<EventType, FilterHandleSetNode> entry : eventTypes.entrySet()) {
-            count += entry.getValue().getFilterCallbackCount();
-            for (FilterParamIndexBase index : entry.getValue().getIndizes()) {
-                count += index.size();
+        eventTypesRWLock.readLock().lock();
+        try {
+            for (Map.Entry<EventType, FilterHandleSetNode> entry : eventTypes.entrySet()) {
+                count += entry.getValue().getFilterCallbackCount();
+                for (FilterParamIndexBase index : entry.getValue().getIndizes()) {
+                    count += index.size();
+                }
             }
         }
-        eventTypesRWLock.readLock().unlock();
+        finally {
+            eventTypesRWLock.readLock().unlock();
+        }
         return count;
     }
 

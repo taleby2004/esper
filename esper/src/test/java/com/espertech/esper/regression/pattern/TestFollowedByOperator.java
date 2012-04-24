@@ -204,19 +204,19 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         SupportCallEvent eventOne = sendEvent(epService.getEPRuntime(), 2000002601, "18", "123456789014795", dateToLong("2005-09-26 13:02:53.200"), dateToLong("2005-09-26 13:03:34.400"));
         SupportCallEvent eventTwo = sendEvent(epService.getEPRuntime(), 2000002607, "20", "123456789014795", dateToLong("2005-09-26 13:03:17.300"), dateToLong("2005-09-26 13:03:58.600"));
 
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertSame(eventOne, event.get("A"));
-        assertSame(eventTwo, event.get("B"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertSame(eventOne, theEvent.get("A"));
+        assertSame(eventTwo, theEvent.get("B"));
 
         SupportCallEvent eventThree = sendEvent(epService.getEPRuntime(), 2000002610, "22", "123456789014795", dateToLong("2005-09-26 13:03:31.300"), dateToLong("2005-09-26 13:04:12.100"));
         assertEquals(1, listener.getNewDataList().size());
         assertEquals(2, listener.getLastNewData().length);
-        event = listener.getLastNewData()[0];
-        assertSame(eventOne, event.get("A"));
-        assertSame(eventThree, event.get("B"));
-        event = listener.getLastNewData()[1];
-        assertSame(eventTwo, event.get("A"));
-        assertSame(eventThree, event.get("B"));
+        theEvent = listener.getLastNewData()[0];
+        assertSame(eventOne, theEvent.get("A"));
+        assertSame(eventThree, theEvent.get("B"));
+        theEvent = listener.getLastNewData()[1];
+        assertSame(eventTwo, theEvent.get("A"));
+        assertSame(eventThree, theEvent.get("B"));
     }
 
     public void testMemoryRFIDEvent()
@@ -246,11 +246,11 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
                 log.info(".testMemoryRFIDEvent now at " + i);
             }
             */
-            SupportRFIDEvent event = new SupportRFIDEvent("a", "111");
-            epService.getEPRuntime().sendEvent(event);
+            SupportRFIDEvent theEvent = new SupportRFIDEvent("a", "111");
+            epService.getEPRuntime().sendEvent(theEvent);
 
-            event = new SupportRFIDEvent("a", "111");
-            epService.getEPRuntime().sendEvent(event);
+            theEvent = new SupportRFIDEvent("a", "111");
+            epService.getEPRuntime().sendEvent(theEvent);
         }
     }
 
@@ -278,25 +278,25 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
-        SupportRFIDEvent event = new SupportRFIDEvent("a", "1");
-        epService.getEPRuntime().sendEvent(event);
+        SupportRFIDEvent theEvent = new SupportRFIDEvent("a", "1");
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.isInvoked());
 
-        event = new SupportRFIDEvent("a", "2");
-        epService.getEPRuntime().sendEvent(event);
-        assertEquals(event, listener.assertOneGetNewAndReset().get("b"));
+        theEvent = new SupportRFIDEvent("a", "2");
+        epService.getEPRuntime().sendEvent(theEvent);
+        assertEquals(theEvent, listener.assertOneGetNewAndReset().get("b"));
 
-        event = new SupportRFIDEvent("b", "1");
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportRFIDEvent("b", "1");
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.isInvoked());
 
-        event = new SupportRFIDEvent("b", "1");
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportRFIDEvent("b", "1");
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.isInvoked());
 
-        event = new SupportRFIDEvent("b", "2");
-        epService.getEPRuntime().sendEvent(event);
-        assertEquals(event, listener.assertOneGetNewAndReset().get("b"));
+        theEvent = new SupportRFIDEvent("b", "2");
+        epService.getEPRuntime().sendEvent(theEvent);
+        assertEquals(theEvent, listener.assertOneGetNewAndReset().get("b"));
     }
 
     public void testRFIDZoneEnter()
@@ -323,25 +323,25 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
 
-        SupportRFIDEvent event = new SupportRFIDEvent("a", "2");
-        epService.getEPRuntime().sendEvent(event);
+        SupportRFIDEvent theEvent = new SupportRFIDEvent("a", "2");
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.isInvoked());
 
-        event = new SupportRFIDEvent("a", "1");
-        epService.getEPRuntime().sendEvent(event);
-        assertEquals(event, listener.assertOneGetNewAndReset().get("b"));
+        theEvent = new SupportRFIDEvent("a", "1");
+        epService.getEPRuntime().sendEvent(theEvent);
+        assertEquals(theEvent, listener.assertOneGetNewAndReset().get("b"));
 
-        event = new SupportRFIDEvent("b", "2");
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportRFIDEvent("b", "2");
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.isInvoked());
 
-        event = new SupportRFIDEvent("b", "2");
-        epService.getEPRuntime().sendEvent(event);
+        theEvent = new SupportRFIDEvent("b", "2");
+        epService.getEPRuntime().sendEvent(theEvent);
         assertFalse(listener.isInvoked());
 
-        event = new SupportRFIDEvent("b", "1");
-        epService.getEPRuntime().sendEvent(event);
-        assertEquals(event, listener.assertOneGetNewAndReset().get("b"));
+        theEvent = new SupportRFIDEvent("b", "1");
+        epService.getEPRuntime().sendEvent(theEvent);
+        assertEquals(theEvent, listener.assertOneGetNewAndReset().get("b"));
     }
 
     public void testFollowedNotEvery()
@@ -442,10 +442,10 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
 
-        String pattern = "every s=SupportBean(string='E') -> " +
-                  "(timer:interval(10) and not SupportBean(string='C1'))" +
+        String pattern = "every s=SupportBean(theString='E') -> " +
+                  "(timer:interval(10) and not SupportBean(theString='C1'))" +
                   "or" +
-                  "(SupportBean(string='C2') and not timer:interval(10))";
+                  "(SupportBean(theString='C2') and not timer:interval(10))";
         EPStatement statement = epService.getEPAdministrator().createPattern(pattern);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);
@@ -470,9 +470,9 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
 
     private SupportCallEvent sendEvent(EPRuntime runtime, long callId, String source, String destination, long startTime, long endTime)
     {
-        SupportCallEvent event = new SupportCallEvent(callId, source, destination, startTime, endTime);
-        runtime.sendEvent(event);
-        return event;
+        SupportCallEvent theEvent = new SupportCallEvent(callId, source, destination, startTime, endTime);
+        runtime.sendEvent(theEvent);
+        return theEvent;
     }
 
     private SupportBean_A sendA(String id, EPServiceProvider epService)
@@ -496,8 +496,8 @@ public class TestFollowedByOperator extends TestCase implements SupportBeanConst
 
     private void sendTimer(long time, EPServiceProvider epService)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
-        epService.getEPRuntime().sendEvent(event);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private static Log log = LogFactory.getLog(TestFollowedByOperator.class);

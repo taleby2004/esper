@@ -29,8 +29,8 @@ public class EventUnderlyingCollection implements Collection<Object>
         if (buf == null) {
             Object[] objects = new Object[events.size()];
             int count = 0;
-            for (EventBean event : events) {
-                objects[count++] = event.getUnderlying();
+            for (EventBean theEvent : events) {
+                objects[count++] = theEvent.getUnderlying();
             }
             buf = Arrays.asList(objects);
         }
@@ -43,8 +43,8 @@ public class EventUnderlyingCollection implements Collection<Object>
 
     public <T> T[] toArray(T[] arr) {
         int count = 0;
-        for (EventBean event : events) {
-            arr[count++] = (T) event.getUnderlying();
+        for (EventBean theEvent : events) {
+            arr[count++] = (T) theEvent.getUnderlying();
         }
         return arr;
     }
@@ -52,8 +52,8 @@ public class EventUnderlyingCollection implements Collection<Object>
     public Object[] toArray() {
         Object[] arr = new Object[events.size()];
         int count = 0;
-        for (EventBean event : events) {
-            arr[count++] = event.getUnderlying();
+        for (EventBean theEvent : events) {
+            arr[count++] = theEvent.getUnderlying();
         }
         return arr;
     }

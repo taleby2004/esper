@@ -46,7 +46,7 @@ public class TestGroupByEventPerGroup extends TestCase
     public void testUnboundAggregationNoGroupRef() {
         String[] fields = "c0,c1".split(",");
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
-        String epl = "@Runtime({Instruction.GROUPBY_NOREF}) select string as c0, sum(intPrimitive) as c1 from SupportBean group by string";
+        String epl = "@Runtime({Instruction.GROUPBY_NOREF}) select theString as c0, sum(intPrimitive) as c1 from SupportBean group by theString";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
         
@@ -68,7 +68,7 @@ public class TestGroupByEventPerGroup extends TestCase
 
         // with output snapshot
         String[] fields = "c0,c1".split(",");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string as c0, sum(intPrimitive) as c1 from SupportBean group by string " +
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString as c0, sum(intPrimitive) as c1 from SupportBean group by theString " +
                 "output snapshot every 3 events");
         stmt.addListener(listener);
 
@@ -91,8 +91,8 @@ public class TestGroupByEventPerGroup extends TestCase
         stmt.destroy();
 
         // with order-by
-        stmt = epService.getEPAdministrator().createEPL("select string as c0, sum(intPrimitive) as c1 from SupportBean group by string " +
-                "output snapshot every 3 events order by string asc");
+        stmt = epService.getEPAdministrator().createEPL("select theString as c0, sum(intPrimitive) as c1 from SupportBean group by theString " +
+                "output snapshot every 3 events order by theString asc");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
@@ -131,7 +131,7 @@ public class TestGroupByEventPerGroup extends TestCase
 
         // test reclaim
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
-        stmt = epService.getEPAdministrator().createEPL("@Hint('reclaim_group_aged=1,reclaim_group_freq=1') select string as c0, sum(intPrimitive) as c1 from SupportBean group by string " +
+        stmt = epService.getEPAdministrator().createEPL("@Hint('reclaim_group_aged=1,reclaim_group_freq=1') select theString as c0, sum(intPrimitive) as c1 from SupportBean group by theString " +
                 "output snapshot every 3 events");
         stmt.addListener(listener);
 
@@ -157,11 +157,11 @@ public class TestGroupByEventPerGroup extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_B", SupportBean_B.class);
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as select * from SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
-        epService.getEPAdministrator().createEPL("on SupportBean_A a delete from MyWindow w where w.string = a.id");
+        epService.getEPAdministrator().createEPL("on SupportBean_A a delete from MyWindow w where w.theString = a.id");
         epService.getEPAdministrator().createEPL("on SupportBean_B delete from MyWindow");
 
-        String fields[] = "string,mysum".split(",");
-        String viewExpr = "@Hint('DISABLE_RECLAIM_GROUP') select string, sum(intPrimitive) as mysum from MyWindow group by string order by string";
+        String fields[] = "theString,mysum".split(",");
+        String viewExpr = "@Hint('DISABLE_RECLAIM_GROUP') select theString, sum(intPrimitive) as mysum from MyWindow group by theString order by theString";
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
@@ -170,7 +170,7 @@ public class TestGroupByEventPerGroup extends TestCase
         selectTestView.destroy();
         epService.getEPRuntime().sendEvent(new SupportBean_B("delete"));
 
-        viewExpr = "select string, sum(intPrimitive) as mysum from MyWindow group by string order by string";
+        viewExpr = "select theString, sum(intPrimitive) as mysum from MyWindow group by theString order by theString";
         selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
@@ -190,9 +190,9 @@ public class TestGroupByEventPerGroup extends TestCase
         for (int i = 0; i < 1000; i++)
         {
             sendTimer(1000 + i * 1000); // reduce factor if sending more events
-            SupportBean event = new SupportBean();
-            event.setLongPrimitive(i * 1000);
-            epService.getEPRuntime().sendEvent(event);
+            SupportBean theEvent = new SupportBean();
+            theEvent.setLongPrimitive(i * 1000);
+            epService.getEPRuntime().sendEvent(theEvent);
 
             //if (i % 100000 == 0)
             //{
@@ -204,17 +204,17 @@ public class TestGroupByEventPerGroup extends TestCase
 
         for (int i = 0; i < 964; i++)
         {
-            SupportBean event = new SupportBean();
-            event.setLongPrimitive(i * 1000);
-            epService.getEPRuntime().sendEvent(event);
+            SupportBean theEvent = new SupportBean();
+            theEvent.setLongPrimitive(i * 1000);
+            epService.getEPRuntime().sendEvent(theEvent);
             assertEquals("Failed at " + i, 1L, listener.assertOneGetNewAndReset().get("count(*)"));
         }
 
         for (int i = 965; i < 1000; i++)
         {
-            SupportBean event = new SupportBean();
-            event.setLongPrimitive(i * 1000);
-            epService.getEPRuntime().sendEvent(event);
+            SupportBean theEvent = new SupportBean();
+            theEvent.setLongPrimitive(i * 1000);
+            epService.getEPRuntime().sendEvent(theEvent);
             assertEquals("Failed at " + i, 2L, listener.assertOneGetNewAndReset().get("count(*)"));
         }
 
@@ -232,9 +232,9 @@ public class TestGroupByEventPerGroup extends TestCase
         for (int i = 0; i < 1000; i++)
         {
             sendTimer(2000000 + 1000 + i * 1000); // reduce factor if sending more events
-            SupportBean event = new SupportBean();
-            event.setLongPrimitive(i * 1000);
-            epService.getEPRuntime().sendEvent(event);
+            SupportBean theEvent = new SupportBean();
+            theEvent.setLongPrimitive(i * 1000);
+            epService.getEPRuntime().sendEvent(theEvent);
 
             if (i == 500)
             {
@@ -254,17 +254,17 @@ public class TestGroupByEventPerGroup extends TestCase
 
         for (int i = 0; i < 900; i++)
         {
-            SupportBean event = new SupportBean();
-            event.setLongPrimitive(i * 1000);
-            epService.getEPRuntime().sendEvent(event);
+            SupportBean theEvent = new SupportBean();
+            theEvent.setLongPrimitive(i * 1000);
+            epService.getEPRuntime().sendEvent(theEvent);
             assertEquals("Failed at " + i, 1L, listener.assertOneGetNewAndReset().get("count(*)"));
         }
 
         for (int i = 900; i < 1000; i++)
         {
-            SupportBean event = new SupportBean();
-            event.setLongPrimitive(i * 1000);
-            epService.getEPRuntime().sendEvent(event);
+            SupportBean theEvent = new SupportBean();
+            theEvent.setLongPrimitive(i * 1000);
+            epService.getEPRuntime().sendEvent(theEvent);
             assertEquals("Failed at " + i, 2L, listener.assertOneGetNewAndReset().get("count(*)"));
         }        
 
@@ -487,7 +487,7 @@ public class TestGroupByEventPerGroup extends TestCase
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                                     SupportMarketDataBean.class.getName() + ".win:length(3) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE') " +
-                          "       and one.string = two.symbol " +
+                          "       and one.theString = two.symbol " +
                           "group by symbol";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
@@ -662,9 +662,9 @@ public class TestGroupByEventPerGroup extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void tryInvalid(String epl, String message)

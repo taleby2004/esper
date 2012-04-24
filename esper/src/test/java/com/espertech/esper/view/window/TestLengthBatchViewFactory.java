@@ -31,7 +31,7 @@ public class TestLengthBatchViewFactory extends TestCase
         tryParameter(new Object[] {Short.parseShort("10")}, 10);
         tryParameter(new Object[] {100}, 100);
 
-        tryInvalidParameter("string");
+        tryInvalidParameter("theString");
         tryInvalidParameter(true);
         tryInvalidParameter(1.1d);
         tryInvalidParameter(0);

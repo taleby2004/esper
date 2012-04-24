@@ -24,18 +24,18 @@ import com.espertech.esper.client.EventPropertyGetter;
 public class AxiomEventBean implements EventBean
 {
 	private EventType eventType;
-	private OMNode event;
+	private OMNode theEvent;
 
 	/**
 	 * Ctor.
 	 *
-	 * @param event
+	 * @param theEvent
 	 *            is the node with event property information
 	 * @param type
 	 *            is the event type for this event wrapper
 	 */
-	public AxiomEventBean(OMNode event, EventType type) {
-		this.event = event;
+	public AxiomEventBean(OMNode theEvent, EventType type) {
+		this.theEvent = theEvent;
 		eventType = type;
 	}
 
@@ -54,7 +54,7 @@ public class AxiomEventBean implements EventBean
 	}
 
 	public Object getUnderlying() {
-		return event;
+		return theEvent;
 	}
 
     public Object getFragment(String propertyExpression) throws PropertyAccessException

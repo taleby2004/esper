@@ -188,9 +188,9 @@ public class EsperIODBAdapter
             DatabaseConnectionFactory connectionFactory = databaseConfigSvc.getConnectionFactory(dmlQuery.getConnection());
 
             Map<Integer, BindingEntry> bindings = new HashMap<Integer, BindingEntry>();
-            for (BindingParameter params : dmlQuery.getBindings()) {
-                EventPropertyGetter valueGetter = eventType.getGetter(params.getPropertyName());
-                bindings.put(params.getPosition(), new BindingEntry(valueGetter));
+            for (BindingParameter theParams : dmlQuery.getBindings()) {
+                EventPropertyGetter valueGetter = eventType.getGetter(theParams.getPropertyName());
+                bindings.put(theParams.getPosition(), new BindingEntry(valueGetter));
             }
 
             StoreExceptionHandler handler = new StoreExceptionHandler() {

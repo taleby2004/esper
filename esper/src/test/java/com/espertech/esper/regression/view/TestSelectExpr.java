@@ -64,11 +64,12 @@ public class TestSelectExpr extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBeanKeywords());
         EPAssertionUtil.assertEqualsExactOrder(stmt.getEventType().getPropertyNames(), fields.split(","));
 
-        EventBean event = testListener.assertOneGetNewAndReset();
+        EventBean theEvent = testListener.assertOneGetNewAndReset();
+
         String[] fieldsArr = fields.split(",");
         for (int i = 0; i < fieldsArr.length; i++)
         {
-            assertEquals(1, event.get(fieldsArr[i]));
+            assertEquals(1, theEvent.get(fieldsArr[i]));
         }
         stmt.destroy();
 
@@ -76,10 +77,10 @@ public class TestSelectExpr extends TestCase
         stmt.addListener(testListener);
         epService.getEPRuntime().sendEvent(new SupportBeanKeywords());
 
-        event = testListener.assertOneGetNewAndReset();
-        assertEquals(1, event.get("stddev"));
-        assertEquals(1L, event.get("count"));
-        assertEquals(1, event.get("last"));
+        theEvent = testListener.assertOneGetNewAndReset();
+        assertEquals(1, theEvent.get("stddev"));
+        assertEquals(1L, theEvent.get("count"));
+        assertEquals(1, theEvent.get("last"));
     }
 
     public void testEscapeString()
@@ -109,15 +110,15 @@ public class TestSelectExpr extends TestCase
         EPAssertionUtil.assertProps(testListener.assertOneGetNewAndReset(), new String[]{"field1", "field2", "unicodeA"}, new Object[]{"volume", "sleep", "A"});
         stmt.destroy();
 
-        tryStatementMatch("John's", "select * from SupportBean(string='John\\'s')");
-        tryStatementMatch("John's", "select * from SupportBean(string='John\\u0027s')");
-        tryStatementMatch("Quote \"Hello\"", "select * from SupportBean(string like \"Quote \\\"Hello\\\"\")");
-        tryStatementMatch("Quote \"Hello\"", "select * from SupportBean(string like \"Quote \\u0022Hello\\u0022\")");
+        tryStatementMatch("John's", "select * from SupportBean(theString='John\\'s')");
+        tryStatementMatch("John's", "select * from SupportBean(theString='John\\u0027s')");
+        tryStatementMatch("Quote \"Hello\"", "select * from SupportBean(theString like \"Quote \\\"Hello\\\"\")");
+        tryStatementMatch("Quote \"Hello\"", "select * from SupportBean(theString like \"Quote \\u0022Hello\\u0022\")");
     }
 
     private void tryEscapeMatch(String property, String escaped)
     {
-        String epl = "select * from SupportBean(string=" + escaped + ")";
+        String epl = "select * from SupportBean(theString=" + escaped + ")";
         String text = "trying >" + escaped + "< (" + escaped.length() + " chars) EPL " + epl;
         log.info("tryEscapeMatch for " + text);
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
@@ -140,7 +141,7 @@ public class TestSelectExpr extends TestCase
 
     public void testGetEventType()
     {
-        String viewExpr = "select string, boolBoxed as aBool, 3*intPrimitive, floatBoxed+floatPrimitive as result" +
+        String viewExpr = "select theString, boolBoxed as aBool, 3*intPrimitive, floatBoxed+floatPrimitive as result" +
                           " from " + SupportBean.class.getName() + ".win:length(3) " +
                           " where boolBoxed = true";
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
@@ -148,8 +149,8 @@ public class TestSelectExpr extends TestCase
 
         EventType type = selectTestView.getEventType();
         log.debug(".testGetEventType properties=" + Arrays.toString(type.getPropertyNames()));
-        EPAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[]{"(3*intPrimitive)", "string", "result", "aBool"});
-        assertEquals(String.class, type.getPropertyType("string"));
+        EPAssertionUtil.assertEqualsAnyOrder(type.getPropertyNames(), new String[]{"(3*intPrimitive)", "theString", "result", "aBool"});
+        assertEquals(String.class, type.getPropertyType("theString"));
         assertEquals(Boolean.class, type.getPropertyType("aBool"));
         assertEquals(Float.class, type.getPropertyType("result"));
         assertEquals(Integer.class, type.getPropertyType("(3*intPrimitive)"));
@@ -157,7 +158,7 @@ public class TestSelectExpr extends TestCase
 
     public void testWindowStats()
     {
-        String viewExpr = "select string, boolBoxed as aBool, 3*intPrimitive, floatBoxed+floatPrimitive as result" +
+        String viewExpr = "select theString, boolBoxed as aBool, 3*intPrimitive, floatBoxed+floatPrimitive as result" +
                           " from " + SupportBean.class.getName() + ".win:length(3) " +
                           " where boolBoxed = true";
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
@@ -171,7 +172,7 @@ public class TestSelectExpr extends TestCase
         sendEvent("c", true, 3, 10, 20);
 
         EventBean received = testListener.getAndResetLastNewData()[0];
-        assertEquals("c", received.get("string"));
+        assertEquals("c", received.get("theString"));
         assertEquals(true, received.get("aBool"));
         assertEquals(30f, received.get("result"));
     }
@@ -179,7 +180,7 @@ public class TestSelectExpr extends TestCase
     private void sendEvent(String s, boolean b, int i, float f1, float f2)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(s);
+        bean.setTheString(s);
         bean.setBoolBoxed(b);
         bean.setIntPrimitive(i);
         bean.setFloatPrimitive(f1);

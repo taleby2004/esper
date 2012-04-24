@@ -88,9 +88,9 @@ public class TestMTInsertIntoTimerConcurrency extends TestCase
     private void sendEvent()
     {
         long id = idCounter.getAndIncrement();
-        SupportBean event = new SupportBean();
-        event.setLongPrimitive(id);
-        epRuntime.sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setLongPrimitive(id);
+        epRuntime.sendEvent(theEvent);
     }
 
     class SendEventRunnable implements Callable<Object>

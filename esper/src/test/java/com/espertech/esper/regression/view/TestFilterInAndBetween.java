@@ -56,7 +56,7 @@ public class TestFilterInAndBetween extends TestCase
         stmt.stop();
 
         expr = "select * from pattern [a=" + SupportBean_S0.class.getName() + " -> every b=" + SupportBean.class.getName()
-                + "(string in (a.p00, a.p01, a.p02))]";
+                + "(theString in (a.p00, a.p01, a.p02))]";
         stmt = epService.getEPAdministrator().createEPL(expr);
         stmt.addListener(testListener);
 
@@ -96,9 +96,9 @@ public class TestFilterInAndBetween extends TestCase
         EPStatement inStmt = epService.getEPAdministrator().create( inPstmt );
         inStmt.addListener(testListener);
 
-        SupportBean event = new SupportBean();
-        event.setEnumValue(SupportEnum.ENUM_VALUE_2);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setEnumValue(SupportEnum.ENUM_VALUE_2);
+        epService.getEPRuntime().sendEvent(theEvent);
         
         assertTrue(testListener.isInvoked());
     }
@@ -117,14 +117,14 @@ public class TestFilterInAndBetween extends TestCase
 
     public void testInExpr()
     {
-        tryExpr("(string > 'b')", "string", new String[] {"a", "b", "c", "d"}, new boolean [] {false, false, true, true});
-        tryExpr("(string < 'b')", "string", new String[] {"a", "b", "c", "d"}, new boolean [] {true, false, false, false});
-        tryExpr("(string >= 'b')", "string", new String[] {"a", "b", "c", "d"}, new boolean [] {false, true, true, true});
-        tryExpr("(string <= 'b')", "string", new String[] {"a", "b", "c", "d"}, new boolean [] {true, true, false, false});
-        tryExpr("(string in ['b':'d'])", "string", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {false, true, true, true, false});
-        tryExpr("(string in ('b':'d'])", "string", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {false, false, true, true, false});
-        tryExpr("(string in ['b':'d'))", "string", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {false, true, true, false, false});
-        tryExpr("(string in ('b':'d'))", "string", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {false, false, true, false, false});
+        tryExpr("(theString > 'b')", "theString", new String[] {"a", "b", "c", "d"}, new boolean [] {false, false, true, true});
+        tryExpr("(theString < 'b')", "theString", new String[] {"a", "b", "c", "d"}, new boolean [] {true, false, false, false});
+        tryExpr("(theString >= 'b')", "theString", new String[] {"a", "b", "c", "d"}, new boolean [] {false, true, true, true});
+        tryExpr("(theString <= 'b')", "theString", new String[] {"a", "b", "c", "d"}, new boolean [] {true, true, false, false});
+        tryExpr("(theString in ['b':'d'])", "theString", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {false, true, true, true, false});
+        tryExpr("(theString in ('b':'d'])", "theString", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {false, false, true, true, false});
+        tryExpr("(theString in ['b':'d'))", "theString", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {false, true, true, false, false});
+        tryExpr("(theString in ('b':'d'))", "theString", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {false, false, true, false, false});
         tryExpr("(boolPrimitive in (false))", "boolPrimitive", new Object[] {true, false}, new boolean [] {false, true});
         tryExpr("(boolPrimitive in (false, false, false))", "boolPrimitive", new Object[] {true, false}, new boolean [] {false, true});
         tryExpr("(boolPrimitive in (false, true, false))", "boolPrimitive", new Object[] {true, false}, new boolean [] {true, true});
@@ -150,11 +150,11 @@ public class TestFilterInAndBetween extends TestCase
         tryExpr("(intBoxed not in (2:4])", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, true, true, false, false, true, true});
         tryExpr("(intBoxed not in [2:4))", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, true, false, false, true, true, true});
         tryExpr("(intBoxed not in (2:4))", "intBoxed", new Object[] {0, 1, 2, 3, 4, 5, 6}, new boolean [] {true, true, true, false, true, true, true});
-        tryExpr("(string not in ['b':'d'])", "string", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {true, false, false, false, true});
-        tryExpr("(string not in ('b':'d'])", "string", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {true, true, false, false, true});
-        tryExpr("(string not in ['b':'d'))", "string", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {true, false, false, true, true});
-        tryExpr("(string not in ('b':'d'))", "string", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {true, true, false, true, true});
-        tryExpr("(string not in ('a', 'b'))", "string", new String[] {"a", "x", "b", "y"}, new boolean [] {false, true, false, true});
+        tryExpr("(theString not in ['b':'d'])", "theString", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {true, false, false, false, true});
+        tryExpr("(theString not in ('b':'d'])", "theString", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {true, true, false, false, true});
+        tryExpr("(theString not in ['b':'d'))", "theString", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {true, false, false, true, true});
+        tryExpr("(theString not in ('b':'d'))", "theString", new String[] {"a", "b", "c", "d", "e"}, new boolean [] {true, true, false, true, true});
+        tryExpr("(theString not in ('a', 'b'))", "theString", new String[] {"a", "x", "b", "y"}, new boolean [] {false, true, false, true});
         tryExpr("(boolPrimitive not in (false))", "boolPrimitive", new Object[] {true, false}, new boolean [] {true, false});
         tryExpr("(boolPrimitive not in (false, false, false))", "boolPrimitive", new Object[] {true, false}, new boolean [] {true, false});
         tryExpr("(boolPrimitive not in (false, true, false))", "boolPrimitive", new Object[] {true, false}, new boolean [] {false, false});
@@ -287,16 +287,16 @@ public class TestFilterInAndBetween extends TestCase
 
     private void sendBeanInt(int intPrimitive)
     {
-        SupportBean event = new SupportBean();
-        event.setIntPrimitive(intPrimitive);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setIntPrimitive(intPrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendBeanString(String value)
     {
-        SupportBean event = new SupportBean();
-        event.setString(value);
-        epService.getEPRuntime().sendEvent(event);
+        SupportBean theEvent = new SupportBean();
+        theEvent.setTheString(value);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendBeanNumeric(int intOne, int intTwo)
@@ -307,24 +307,24 @@ public class TestFilterInAndBetween extends TestCase
 
     private void sendBean(String fieldName, Object value)
     {
-        SupportBean event = new SupportBean();
-        if (fieldName.equals("string"))
+        SupportBean theEvent = new SupportBean();
+        if (fieldName.equals("theString"))
         {
-            event.setString((String) value);
+            theEvent.setTheString((String) value);
         }
         if (fieldName.equals("boolPrimitive"))
         {
-            event.setBoolPrimitive((Boolean) value);
+            theEvent.setBoolPrimitive((Boolean) value);
         }
         if (fieldName.equals("intBoxed"))
         {
-            event.setIntBoxed((Integer) value);
+            theEvent.setIntBoxed((Integer) value);
         }
         if (fieldName.equals("longBoxed"))
         {
-            event.setLongBoxed((Long) value);
+            theEvent.setLongBoxed((Long) value);
         }
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void tryInvalid(String expr)

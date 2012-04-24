@@ -232,7 +232,7 @@ public class TestPreviousFunction extends TestCase
 
         // test length window overflow
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
-        epService.getEPAdministrator().createEPL("select prev(5,intPrimitive) as val0 from SupportBean.std:groupwin(string).win:length(5)").addListener(listener);
+        epService.getEPAdministrator().createEPL("select prev(5,intPrimitive) as val0 from SupportBean.std:groupwin(theString).win:length(5)").addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("A", 11));
         assertEquals(null, listener.assertOneGetNewAndReset().get("val0"));
@@ -691,7 +691,7 @@ public class TestPreviousFunction extends TestCase
 
     public void testPreviousTimeBatchWindowJoin()
     {
-        String viewExpr = "select string as currSymbol, " +
+        String viewExpr = "select theString as currSymbol, " +
                           " prev(2, symbol) as prevSymbol, " +
                           " prev(1, price) as prevPrice, " +
                           " prevtail(0, symbol) as prevTailSymbol, " +
@@ -846,31 +846,31 @@ public class TestPreviousFunction extends TestCase
 
     public void testPreviousLengthWindowDynamic()
     {
-        String viewExpr =   "select prev(intPrimitive, string) as sPrev " +
+        String viewExpr =   "select prev(intPrimitive, theString) as sPrev " +
                             "from " + SupportBean.class.getName() + ".win:length(100)";
 
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(viewExpr);
         selectTestView.addListener(listener);
 
         sendBeanEvent("A", 1);
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(null, event.get("sPrev"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(null, theEvent.get("sPrev"));
 
         sendBeanEvent("B", 0);
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("B", event.get("sPrev"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("B", theEvent.get("sPrev"));
 
         sendBeanEvent("C", 2);
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("A", event.get("sPrev"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("A", theEvent.get("sPrev"));
 
         sendBeanEvent("D", 1);
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("C", event.get("sPrev"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("C", theEvent.get("sPrev"));
 
         sendBeanEvent("E", 4);
-        event = listener.assertOneGetNewAndReset();
-        assertEquals("A", event.get("sPrev"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals("A", theEvent.get("sPrev"));
     }
 
     public void testPreviousSortWindow()
@@ -1028,8 +1028,8 @@ public class TestPreviousFunction extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
-        epService.getEPRuntime().sendEvent(event);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void sendMarketEvent(String symbol, double price)
@@ -1044,17 +1044,17 @@ public class TestPreviousFunction extends TestCase
         epService.getEPRuntime().sendEvent(bean);
     }
 
-    private void sendBeanEvent(String string)
+    private void sendBeanEvent(String theString)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         epService.getEPRuntime().sendEvent(bean);
     }
 
-    private void sendBeanEvent(String string, int intPrimitive)
+    private void sendBeanEvent(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
     }
@@ -1150,27 +1150,27 @@ public class TestPreviousFunction extends TestCase
                                 Double prevTail1Price, Double prevTail2Price,
                                 Long countPrice, Object[] windowPrice)
     {
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertReceived(event, symbol, prevPrice, prevPrevPrice, prevTail1Price, prevTail2Price, countPrice, windowPrice);
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertReceived(theEvent, symbol, prevPrice, prevPrevPrice, prevTail1Price, prevTail2Price, countPrice, windowPrice);
     }
 
-    private void assertReceived(EventBean event, String symbol, Double prevPrice, Double prevPrevPrice,
+    private void assertReceived(EventBean theEvent, String symbol, Double prevPrice, Double prevPrevPrice,
                                 Double prevTail0Price, Double prevTail1Price,
                                 Long countPrice, Object[] windowPrice)
     {
-        assertEquals(symbol, event.get("symbol"));
-        assertEquals(prevPrice, event.get("prevPrice"));
-        assertEquals(prevPrevPrice, event.get("prevPrevPrice"));
-        assertEquals(prevTail0Price, event.get("prevTail0Price"));
-        assertEquals(prevTail1Price, event.get("prevTail1Price"));
-        assertEquals(countPrice, event.get("countPrice"));
-        EPAssertionUtil.assertEqualsExactOrder(windowPrice, (Object[]) event.get("windowPrice"));
+        assertEquals(symbol, theEvent.get("symbol"));
+        assertEquals(prevPrice, theEvent.get("prevPrice"));
+        assertEquals(prevPrevPrice, theEvent.get("prevPrevPrice"));
+        assertEquals(prevTail0Price, theEvent.get("prevTail0Price"));
+        assertEquals(prevTail1Price, theEvent.get("prevTail1Price"));
+        assertEquals(countPrice, theEvent.get("countPrice"));
+        EPAssertionUtil.assertEqualsExactOrder(windowPrice, (Object[]) theEvent.get("windowPrice"));
     }
 
-    private void assertCountAndPrice(EventBean event, Long total, Double price)
+    private void assertCountAndPrice(EventBean theEvent, Long total, Double price)
     {
-        assertEquals(total, event.get("total"));
-        assertEquals(price, event.get("firstPrice"));
+        assertEquals(total, theEvent.get("total"));
+        assertEquals(price, theEvent.get("firstPrice"));
     }
 
     // Don't remove me, I'm dynamically referenced by EPL

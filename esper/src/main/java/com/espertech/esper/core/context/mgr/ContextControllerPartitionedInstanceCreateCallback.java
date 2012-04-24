@@ -15,5 +15,5 @@ import com.espertech.esper.client.EventBean;
 
 public interface ContextControllerPartitionedInstanceCreateCallback {
 
-    public void create(Object key, EventBean event);
+    public void create(Object key, EventBean theEvent);
 }

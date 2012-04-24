@@ -21,6 +21,7 @@ import com.espertech.esper.event.EventTypeSPI;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
@@ -63,11 +64,17 @@ public class TestNamedWindowViews extends TestCase
 
     public void testBeanBacked()
     {
+        runAssertionBeanBacked(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionBeanBacked(EventRepresentationEnum.MAP);
+        runAssertionBeanBacked(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionBeanBacked(EventRepresentationEnum eventRepresentationEnum) {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean_A", SupportBean_A.class);
 
         // Test create from class
-        EPStatement stmt = epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create window MyWindow.win:keepall() as SupportBean");
         stmt.addListener(listenerWindow);
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean");
 
@@ -79,7 +86,7 @@ public class TestNamedWindowViews extends TestCase
         assertEvent(listenerWindow.assertOneGetNewAndReset());
         assertEvent(listenerStmtOne.assertOneGetNewAndReset());
 
-        EPStatement stmtUpdate = epService.getEPAdministrator().createEPL("on SupportBean_A update MyWindow set string='s'");
+        EPStatement stmtUpdate = epService.getEPAdministrator().createEPL("on SupportBean_A update MyWindow set theString='s'");
         stmtUpdate.addListener(listenerStmtTwo);
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
         assertEvent(listenerStmtTwo.getLastNewData()[0]);
@@ -88,11 +95,18 @@ public class TestNamedWindowViews extends TestCase
         epService.getEPAdministrator().destroyAllStatements();
         listenerWindow.reset();
 
-        epService.getEPAdministrator().createEPL("create window MyWindowTwo.win:keepall() as (bean " + SupportBean_S0.class.getName() + ")").addListener(listenerWindow);
+        EPStatement stmtW = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create window MyWindowTwo.win:keepall() as (bean " + SupportBean_S0.class.getName() + ")");
+        stmtW.addListener(listenerWindow);
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmtW.getEventType().getUnderlyingType());
         epService.getEPAdministrator().createEPL("insert into MyWindowTwo select bean.* as bean from " + SupportBean_S0.class.getName() + " as bean");
         
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "E1"));
         EPAssertionUtil.assertProps(listenerWindow.assertOneGetNewAndReset(), "bean.p00".split(","), new Object[] {"E1"});
+
+        epService.getEPAdministrator().destroyAllStatements();
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyWindowOne", true);
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyWindowTwo", true);
+        listenerStmtOne.reset();
     }
 
     public void testBeanSchemaBacked() {
@@ -112,11 +126,11 @@ public class TestNamedWindowViews extends TestCase
         assertTrue(listenerStmtOne.isInvoked());
     }
 
-    private void assertEvent(EventBean event) {
-        assertTrue(event.getEventType() instanceof BeanEventType);
-        assertTrue(event.getUnderlying() instanceof SupportBean);
-        assertEquals(EventTypeMetadata.TypeClass.NAMED_WINDOW, ((EventTypeSPI) event.getEventType()).getMetadata().getTypeClass());
-        assertEquals("MyWindow", event.getEventType().getName());
+    private void assertEvent(EventBean theEvent) {
+        assertTrue(theEvent.getEventType() instanceof BeanEventType);
+        assertTrue(theEvent.getUnderlying() instanceof SupportBean);
+        assertEquals(EventTypeMetadata.TypeClass.NAMED_WINDOW, ((EventTypeSPI) theEvent.getEventType()).getMetadata().getTypeClass());
+        assertEquals("MyWindow", theEvent.getEventType().getName());
     }
 
     public void testDeepSupertypeInsert() {
@@ -151,7 +165,12 @@ public class TestNamedWindowViews extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 9));
 
         // fire trigger
-        epService.getEPRuntime().getEventSender("TypeTrigger").sendEvent(new HashMap());
+        if (EventRepresentationEnum.getEngineDefault(epService).isObjectArrayEvent()) {
+            epService.getEPRuntime().getEventSender("TypeTrigger").sendEvent(new Object[0]);
+        }
+        else {
+            epService.getEPRuntime().getEventSender("TypeTrigger").sendEvent(new HashMap());
+        }
 
         assertEquals(9, listenerStmtOne.assertOneGetNewAndReset().get("col2"));
     }
@@ -189,7 +208,7 @@ public class TestNamedWindowViews extends TestCase
         assertEquals(String.class, stmtCreate.getEventType().getPropertyType("key"));
         assertEquals(long.class, stmtCreate.getEventType().getPropertyType("value"));
 
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         EPStatement stmtInsert = epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         String stmtTextSelectOne = "select irstream key, value*2 as value from MyWindow";
@@ -297,7 +316,7 @@ public class TestNamedWindowViews extends TestCase
         EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -386,7 +405,7 @@ public class TestNamedWindowViews extends TestCase
         EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), fields, null);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -449,7 +468,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -510,7 +529,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -575,7 +594,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -643,7 +662,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -695,7 +714,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -819,7 +838,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -892,7 +911,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         sendTimer(0);
@@ -927,7 +946,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1015,7 +1034,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1094,7 +1113,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1173,7 +1192,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1249,7 +1268,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1288,10 +1307,10 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed+1 as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed+1 as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
-        stmtTextInsert = "insert into MyWindow select string as key, longBoxed+2 as value from " + SupportBean.class.getName();
+        stmtTextInsert = "insert into MyWindow select theString as key, longBoxed+2 as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1318,7 +1337,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1383,7 +1402,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1447,7 +1466,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1512,7 +1531,7 @@ public class TestNamedWindowViews extends TestCase
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1560,12 +1579,12 @@ public class TestNamedWindowViews extends TestCase
         String[] fields = new String[] {"key", "value"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.std:unique(key) as select string as key, intPrimitive as value from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.std:unique(key) as select theString as key, intPrimitive as value from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, intPrimitive as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, intPrimitive as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create consumer
@@ -1625,11 +1644,11 @@ public class TestNamedWindowViews extends TestCase
     public void testSelectGroupedViewLateStart()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.std:groupwin(string, intPrimitive).win:length(9) as select string, intPrimitive from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.std:groupwin(theString, intPrimitive).win:length(9) as select theString, intPrimitive from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string, intPrimitive from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString, intPrimitive from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // fill window
@@ -1648,12 +1667,12 @@ public class TestNamedWindowViews extends TestCase
         assertEquals(12, received.length);
 
         // create select stmt
-        String stmtTextSelect = "select string, intPrimitive, count(*) from MyWindow group by string, intPrimitive order by string, intPrimitive";
+        String stmtTextSelect = "select theString, intPrimitive, count(*) from MyWindow group by theString, intPrimitive order by theString, intPrimitive";
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
         received = EPAssertionUtil.iteratorToArray(stmtSelect.iterator());
         assertEquals(10, received.length);
 
-        EPAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,count(*)".split(","),
+        EPAssertionUtil.assertPropsPerRow(received, "theString,intPrimitive,count(*)".split(","),
                 new Object[][]{
                         {"c0", 0, 1L},
                         {"c0", 1, 2L},
@@ -1674,11 +1693,11 @@ public class TestNamedWindowViews extends TestCase
     public void testSelectGroupedViewLateStartVariableIterate()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.std:groupwin(string, intPrimitive).win:length(9) as select string, intPrimitive, longPrimitive, boolPrimitive from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.std:groupwin(theString, intPrimitive).win:length(9) as select theString, intPrimitive, longPrimitive, boolPrimitive from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string, intPrimitive, longPrimitive, boolPrimitive from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString, intPrimitive, longPrimitive, boolPrimitive from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // create variable
@@ -1706,8 +1725,8 @@ public class TestNamedWindowViews extends TestCase
         assertEquals(10, received.length);
 
         // create select stmt
-        String stmtTextSelect = "select string, intPrimitive, avg(longPrimitive) as avgLong, count(boolPrimitive) as cntBool" +
-                                " from MyWindow group by string, intPrimitive having string = var_1_1_1 order by string, intPrimitive";
+        String stmtTextSelect = "select theString, intPrimitive, avg(longPrimitive) as avgLong, count(boolPrimitive) as cntBool" +
+                                " from MyWindow group by theString, intPrimitive having theString = var_1_1_1 order by theString, intPrimitive";
         EPStatement stmtSelect = epService.getEPAdministrator().createEPL(stmtTextSelect);
 
         // set variable to C0
@@ -1716,7 +1735,7 @@ public class TestNamedWindowViews extends TestCase
         // get iterator results
         received = EPAssertionUtil.iteratorToArray(stmtSelect.iterator());
         assertEquals(3, received.length);
-        EPAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,avgLong,cntBool".split(","),
+        EPAssertionUtil.assertPropsPerRow(received, "theString,intPrimitive,avgLong,cntBool".split(","),
                 new Object[][]{
                         {"c0", 0, 0.0, 1L},
                         {"c0", 1, 1.0, 1L},
@@ -1728,7 +1747,7 @@ public class TestNamedWindowViews extends TestCase
 
         received = EPAssertionUtil.iteratorToArray(stmtSelect.iterator());
         assertEquals(3, received.length);
-        EPAssertionUtil.assertPropsPerRow(received, "string,intPrimitive,avgLong,cntBool".split(","),
+        EPAssertionUtil.assertPropsPerRow(received, "theString,intPrimitive,avgLong,cntBool".split(","),
                 new Object[][]{
                         {"c1", 0, 0.0, 1L},
                         {"c1", 1, 5.5, 2L},
@@ -1744,12 +1763,12 @@ public class TestNamedWindowViews extends TestCase
         String[] fields = new String[] {"sumvalue"};
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as key, intPrimitive as value from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as key, intPrimitive as value from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsert = "insert into MyWindow select string as key, intPrimitive as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, intPrimitive as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         sendSupportBeanInt("G1", 5);
@@ -1878,7 +1897,7 @@ public class TestNamedWindowViews extends TestCase
         assertEquals(String.class, stmtCreate.getEventType().getPropertyType("key"));
         assertEquals(long.class, stmtCreate.getEventType().getPropertyType("value"));
 
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         EPStatement stmtInsert = epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         String stmtTextSelectOne = "select prior(1, key) as priorKeyOne, prior(2, key) as priorKeyTwo from MyWindow";
@@ -1924,7 +1943,7 @@ public class TestNamedWindowViews extends TestCase
         assertEquals(String.class, stmtCreate.getEventType().getPropertyType("key"));
         assertEquals(long.class, stmtCreate.getEventType().getPropertyType("value"));
 
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         EPStatement stmtInsert = epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // send events
@@ -1975,7 +1994,7 @@ public class TestNamedWindowViews extends TestCase
         assertEquals(String.class, stmtCreate.getEventType().getPropertyType("key"));
         assertEquals(long.class, stmtCreate.getEventType().getPropertyType("value"));
 
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         // send events
@@ -2030,7 +2049,7 @@ public class TestNamedWindowViews extends TestCase
         EPStatement stmtPattern = epService.getEPAdministrator().createEPL(stmtTextPattern);
         stmtPattern.addListener(listenerStmtOne);
 
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsert);
 
         sendSupportBean("E1", 1L);
@@ -2049,19 +2068,19 @@ public class TestNamedWindowViews extends TestCase
         assertFalse(listenerStmtOne.isInvoked());
     }
 
-    private SupportBean sendSupportBean(String string, Long longBoxed)
+    private SupportBean sendSupportBean(String theString, Long longBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setLongBoxed(longBoxed);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
 
-    private SupportBean sendSupportBeanInt(String string, int intPrimitive)
+    private SupportBean sendSupportBeanInt(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
@@ -2081,8 +2100,8 @@ public class TestNamedWindowViews extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

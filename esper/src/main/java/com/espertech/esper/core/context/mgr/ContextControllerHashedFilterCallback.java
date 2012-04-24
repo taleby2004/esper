@@ -41,9 +41,9 @@ public class ContextControllerHashedFilterCallback implements FilterHandleCallba
         servicesContext.getFilterService().add(filterValueSet, filterHandle);
     }
 
-    public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches) {
-        int value = (Integer) getter.get(event);
-        callback.create(value, event);
+    public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches) {
+        int value = (Integer) getter.get(theEvent);
+        callback.create(value, theEvent);
     }
 
     public boolean isSubSelect() {

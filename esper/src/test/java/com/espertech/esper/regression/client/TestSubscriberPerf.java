@@ -37,7 +37,7 @@ public class TestSubscriberPerf extends TestCase
     public void testPerformanceSyntheticUndelivered()
     {
         final int NUM_LOOP = 100000;
-        epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
+        epService.getEPAdministrator().createEPL("select theString, intPrimitive from SupportBean(intPrimitive > 10)");
 
         long start = System.currentTimeMillis();
         for (int i = 0; i < NUM_LOOP; i++)
@@ -73,15 +73,15 @@ public class TestSubscriberPerf extends TestCase
     public void testPerformanceSynthetic()
     {
         final int NUM_LOOP = 100000;
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select string, intPrimitive from SupportBean(intPrimitive > 10)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select theString, intPrimitive from SupportBean(intPrimitive > 10)");
         final List<Object[]> results = new ArrayList<Object[]>();
 
         UpdateListener listener = new UpdateListener() {
             public void update(EventBean[] newEvents, EventBean[] oldEvents)
             {
-                String string = (String) newEvents[0].get("string");
+                String theString = (String) newEvents[0].get("theString");
                 int val = (Integer) newEvents[0].get("intPrimitive");
-                results.add(new Object[] {string, val});
+                results.add(new Object[] {theString, val});
             }
         };
         stmt.addListener(listener);

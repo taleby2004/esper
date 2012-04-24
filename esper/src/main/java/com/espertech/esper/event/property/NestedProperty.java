@@ -13,11 +13,12 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.PropertyAccessException;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeUtility;
+import com.espertech.esper.event.arr.ObjectArrayEventPropertyGetter;
 import com.espertech.esper.event.bean.BeanEventType;
 import com.espertech.esper.event.bean.NestedPropertyGetter;
 import com.espertech.esper.event.map.MapEventPropertyGetter;
-import com.espertech.esper.event.map.MapEventType;
-import com.espertech.esper.event.map.MapNestedPropertyGetter;
+import com.espertech.esper.event.map.MapNestedPropertyGetterMapOnly;
+import com.espertech.esper.event.map.MapNestedPropertyGetterMixedType;
 import com.espertech.esper.event.xml.*;
 
 import java.io.StringWriter;
@@ -188,8 +189,8 @@ public class NestedProperty implements Property
         {
             count++;
             Property property = it.next();
-            PropertyBase base = (PropertyBase) property;
-            String propertyName = base.getPropertyNameAtomic();
+            PropertyBase theBase = (PropertyBase) property;
+            String propertyName = theBase.getPropertyNameAtomic();
 
             Object nestedType = null;
             if (currentDictionary != null)
@@ -301,8 +302,8 @@ public class NestedProperty implements Property
             }
             getters.add(getter);
 
-            PropertyBase base = (PropertyBase) property;
-            String propertyName = base.getPropertyNameAtomic();
+            PropertyBase theBase = (PropertyBase) property;
+            String propertyName = theBase.getPropertyNameAtomic();
 
             // For the next property if there is one, check how to property type is defined
             if (!it.hasNext())
@@ -396,7 +397,18 @@ public class NestedProperty implements Property
             }
         }
 
-        return new MapNestedPropertyGetter(getters, eventAdapterService);
+        boolean hasNonmapGetters = false;
+        for (int i = 0; i < getters.size(); i++) {
+            if (!(getters.get(i) instanceof MapEventPropertyGetter)) {
+                hasNonmapGetters = true;
+            }
+        }
+        if (!hasNonmapGetters) {
+            return new MapNestedPropertyGetterMapOnly(getters, eventAdapterService);
+        }
+        else {
+            return new MapNestedPropertyGetterMixedType(getters, eventAdapterService);
+        }
     }
 
     public void toPropertyEPL(StringWriter writer)
@@ -515,6 +527,10 @@ public class NestedProperty implements Property
         }
 
         return lastProperty.getPropertyTypeSchema(complexElement, eventAdapterService);
+    }
+
+    public ObjectArrayEventPropertyGetter getGetterObjectArray(Map<String, Integer> indexPerProperty, Map<String, Object> nestableTypes, EventAdapterService eventAdapterService) {
+        throw new UnsupportedOperationException("Object array nested property getter not implemented as not implicitly nestable");
     }
 
     private static String toPropertyEPL(List<Property> property, int startFromIndex)

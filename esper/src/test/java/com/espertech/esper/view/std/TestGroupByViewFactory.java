@@ -36,7 +36,7 @@ public class TestGroupByViewFactory extends TestCase
         tryParameter(new Object[] {"doublePrimitive"}, new String[] {"doublePrimitive"});
         tryParameter(new Object[] {"doublePrimitive", "longPrimitive"}, new String[] {"doublePrimitive", "longPrimitive"});
 
-        tryInvalidParameter(new Object[] {"string", 1.1d});
+        tryInvalidParameter(new Object[] {"theString", 1.1d});
         tryInvalidParameter(new Object[] {1.1d});
         tryInvalidParameter(new Object[] {new String[] {}});
         tryInvalidParameter(new Object[] {new String[] {}, new String[] {}});
@@ -44,15 +44,15 @@ public class TestGroupByViewFactory extends TestCase
 
     public void testCanReuse() throws Exception
     {
-        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(new Object[] {"string", "longPrimitive"}));
+        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(new Object[] {"theString", "longPrimitive"}));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
         assertFalse(factory.canReuse(new FirstElementView()));
-        assertFalse(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("string"), null)));
-        assertTrue(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("string", "longPrimitive"), null)));
+        assertFalse(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("theString"), null)));
+        assertTrue(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("theString", "longPrimitive"), null)));
 
-        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(new Object[] {SupportExprNodeFactory.makeIdentNodesBean("string", "longPrimitive")}));
-        assertFalse(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("string"), null)));
-        assertTrue(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("string", "longPrimitive"), null)));
+        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(new Object[] {SupportExprNodeFactory.makeIdentNodesBean("theString", "longPrimitive")}));
+        assertFalse(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("theString"), null)));
+        assertTrue(factory.canReuse(new GroupByViewImpl(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), SupportExprNodeFactory.makeIdentNodesBean("theString", "longPrimitive"), null)));
     }
 
     public void testAttaches() throws Exception
@@ -64,12 +64,12 @@ public class TestGroupByViewFactory extends TestCase
         factory.attach(parentType, SupportStatementContextFactory.makeContext(), null, null);
     }
 
-    private void tryInvalidParameter(Object[] params) throws Exception
+    private void tryInvalidParameter(Object[] parameters) throws Exception
     {
         try
         {
             GroupByViewFactory factory = new GroupByViewFactory();
-            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(params));
+            factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(parameters));
             factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
             fail();
         }
@@ -79,10 +79,10 @@ public class TestGroupByViewFactory extends TestCase
         }
     }
 
-    private void tryParameter(Object[] params, String[] fieldNames) throws Exception
+    private void tryParameter(Object[] parameters, String[] fieldNames) throws Exception
     {
         GroupByViewFactory factory = new GroupByViewFactory();
-        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(params));
+        factory.setViewParameters(viewFactoryContext, TestViewSupport.toExprListBean(parameters));
         factory.attach(SupportEventTypeFactory.createBeanType(SupportBean.class), SupportStatementContextFactory.makeContext(), null, null);
         GroupByView view = (GroupByView) factory.makeView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext());
         assertEquals(fieldNames[0], view.getCriteriaExpressions()[0].toExpressionString());

@@ -187,7 +187,7 @@ public final class FilterSpecCompiler
         PropertyEvaluator optionalPropertyEvaluator = null;
         if (optionalPropertyEvalSpec != null)
         {
-            optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(optionalPropertyEvalSpec, eventType, optionalStreamName, eventAdapterService, methodResolutionService, timeProvider, variableService, streamTypeService.getEngineURIQualifier(), statementId, statementName, annotations, assignedTypeNumberStack);
+            optionalPropertyEvaluator = PropertyEvaluatorFactory.makeEvaluator(optionalPropertyEvalSpec, eventType, optionalStreamName, eventAdapterService, methodResolutionService, timeProvider, variableService, streamTypeService.getEngineURIQualifier(), statementId, statementName, annotations, assignedTypeNumberStack, configurationInformation);
         }
 
         FilterSpecCompiled spec = new FilterSpecCompiled(eventType, eventTypeName, filterParams, optionalPropertyEvaluator);
@@ -481,12 +481,12 @@ public final class FilterSpecCompiler
 
     // consolidate "val != 3 and val != 4 and val != 5"
     // to "val not in (3, 4, 5)"
-    private static void handleConsolidateNotEqual(List<FilterSpecParam> params, FilterParamExprMap filterParamExprMap, String statementName)
+    private static void handleConsolidateNotEqual(List<FilterSpecParam> parameters, FilterParamExprMap filterParamExprMap, String statementName)
     {
         List<FilterSpecParamInValue> values = new ArrayList<FilterSpecParamInValue>();
 
         ExprNode lastNotEqualsExprNode = null;
-        for (FilterSpecParam param : params)
+        for (FilterSpecParam param : parameters)
         {
             if (param instanceof FilterSpecParamConstant)
             {
@@ -514,7 +514,7 @@ public final class FilterSpecCompiler
             lastNotEqualsExprNode = filterParamExprMap.removeEntry(param);
         }
 
-        FilterSpecParamIn param = new FilterSpecParamIn(params.get(0).getLookupable(), FilterOperator.NOT_IN_LIST_OF_VALUES, values);
+        FilterSpecParamIn param = new FilterSpecParamIn(parameters.get(0).getLookupable(), FilterOperator.NOT_IN_LIST_OF_VALUES, values);
         filterParamExprMap.put(lastNotEqualsExprNode, param);
     }
 

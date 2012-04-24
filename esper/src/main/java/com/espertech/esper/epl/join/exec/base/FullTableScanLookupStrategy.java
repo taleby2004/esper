@@ -31,7 +31,7 @@ public class FullTableScanLookupStrategy implements JoinExecTableLookupStrategy
         this.eventIndex = eventIndex;
     }
 
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
     {
         Set<EventBean> result = eventIndex.getEventSet();
         if (result.isEmpty())

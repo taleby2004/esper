@@ -59,8 +59,8 @@ public class TestPatternStartStop extends TestCase
         assertFalse(patternStmt.iterator().hasNext());
 
         // Send event
-        SupportBean event = sendEvent();
-        assertSame(event, patternStmt.iterator().next().get("tag"));
+        SupportBean theEvent = sendEvent();
+        assertSame(theEvent, patternStmt.iterator().next().get("tag"));
 
         // Stop pattern
         patternStmt.stop();
@@ -97,27 +97,27 @@ public class TestPatternStartStop extends TestCase
         assertFalse(patternStmt.iterator().hasNext());
 
         // Send event
-        SupportBean event = sendEvent();
-        assertEquals(event, listener.getAndResetLastNewData()[0].get("tag"));
-        assertSame(event, patternStmt.iterator().next().get("tag"));
+        SupportBean theEvent = sendEvent();
+        assertEquals(theEvent, listener.getAndResetLastNewData()[0].get("tag"));
+        assertSame(theEvent, patternStmt.iterator().next().get("tag"));
 
         // Remove listener
         patternStmt.removeListener(listener);
-        event = sendEvent();
-        assertSame(event, patternStmt.iterator().next().get("tag"));
+        theEvent = sendEvent();
+        assertSame(theEvent, patternStmt.iterator().next().get("tag"));
         assertNull(listener.getLastNewData());
 
         // Add listener back
         patternStmt.addListener(listener);
-        event = sendEvent();
-        assertSame(event, patternStmt.iterator().next().get("tag"));
-        assertEquals(event, listener.getAndResetLastNewData()[0].get("tag"));
+        theEvent = sendEvent();
+        assertSame(theEvent, patternStmt.iterator().next().get("tag"));
+        assertEquals(theEvent, listener.getAndResetLastNewData()[0].get("tag"));
     }
 
     private SupportBean sendEvent()
     {
-        SupportBean event = new SupportBean();
-        epService.getEPRuntime().sendEvent(event);
-        return event;
+        SupportBean theEvent = new SupportBean();
+        epService.getEPRuntime().sendEvent(theEvent);
+        return theEvent;
     }
 }

@@ -8,7 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.epl.agg;
 
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
 /**
@@ -24,7 +23,7 @@ public class AggregationAccessUtil
      * @param groupKey group by key
      * @return array of accessors
      */
-    protected static AggregationAccess[] getNewAccesses(int agentInstanceId, boolean isJoin, int[] streams, MethodResolutionService methodResolutionService, MultiKeyUntyped groupKey) {
+    protected static AggregationAccess[] getNewAccesses(int agentInstanceId, boolean isJoin, int[] streams, MethodResolutionService methodResolutionService, Object groupKey) {
         AggregationAccess[] row = new AggregationAccess[streams.length];
         int i = 0;
         for (int stream : streams) {

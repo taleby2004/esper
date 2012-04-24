@@ -11,8 +11,10 @@ package com.espertech.esper.epl.spec;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.pattern.EvalFactoryNode;
+import com.espertech.esper.pattern.MatchedEventMapMeta;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -28,6 +30,7 @@ public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamS
     private final EvalFactoryNode evalFactoryNode;
     private final LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes;       // Stores types for filters with tags, single event
     private final LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes;       // Stores types for filters with tags, array event
+    private final LinkedHashSet<String> allTags;
     private static final long serialVersionUID = 1268004301792124753L;
 
     /**
@@ -39,10 +42,11 @@ public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamS
      * @param optionalStreamName - stream name, or null if none supplied
      * @param streamSpecOptions - additional stream options such as unidirectional stream in a join, applicable for joins
      */
-    public PatternStreamSpecCompiled(EvalFactoryNode evalFactoryNode, LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, List<ViewSpec> viewSpecs, String optionalStreamName, StreamSpecOptions streamSpecOptions)
+    public PatternStreamSpecCompiled(EvalFactoryNode evalFactoryNode, LinkedHashMap<String, Pair<EventType, String>> taggedEventTypes, LinkedHashMap<String, Pair<EventType, String>> arrayEventTypes, LinkedHashSet<String> allTags, List<ViewSpec> viewSpecs, String optionalStreamName, StreamSpecOptions streamSpecOptions)
     {
         super(optionalStreamName, viewSpecs, streamSpecOptions);
         this.evalFactoryNode = evalFactoryNode;
+        this.allTags = allTags;
 
         LinkedHashMap<String, Pair<EventType, String>> copy = new LinkedHashMap<String, Pair<EventType, String>>();
         copy.putAll(taggedEventTypes);
@@ -78,5 +82,14 @@ public class PatternStreamSpecCompiled extends StreamSpecBase implements StreamS
     public LinkedHashMap<String, Pair<EventType, String>> getArrayEventTypes()
     {
         return arrayEventTypes;
+    }
+
+    public MatchedEventMapMeta getMatchedEventMapMeta() {
+        String[] tags = allTags.toArray(new String[allTags.size()]);
+        return new MatchedEventMapMeta(tags, !arrayEventTypes.isEmpty());
+    }
+
+    public LinkedHashSet<String> getAllTags() {
+        return allTags;
     }
 }

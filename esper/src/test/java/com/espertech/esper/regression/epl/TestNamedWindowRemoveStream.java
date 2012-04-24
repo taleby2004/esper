@@ -30,7 +30,7 @@ public class TestNamedWindowRemoveStream extends TestCase
 
     public void testRemoveStream()
     {
-        String[] fields = new String[] {"string"};
+        String[] fields = new String[] {"theString"};
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         EPStatement stmt1 = epService.getEPAdministrator().createEPL("create window W1.win:length(2) as select * from SupportBean");
         EPStatement stmt2 = epService.getEPAdministrator().createEPL("create window W2.win:length(2) as select * from SupportBean");

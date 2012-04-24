@@ -61,11 +61,12 @@ public class TestConfiguration extends TestCase
 
     private void assertDefaultConfig()
     {
-        assertEquals(5, config.getImports().size());
+        assertEquals(6, config.getImports().size());
         assertEquals("java.lang.*", config.getImports().get(0));
         assertEquals("java.math.*", config.getImports().get(1));
         assertEquals("java.text.*", config.getImports().get(2));
         assertEquals("java.util.*", config.getImports().get(3));
         assertEquals("com.espertech.esper.client.annotation.*", config.getImports().get(4));
+        assertEquals("com.espertech.esper.graph.ops.*", config.getImports().get(5));
     }
 }

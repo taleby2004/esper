@@ -24,6 +24,6 @@ public class BeanEventPropertyWriterMapProp extends BeanEventPropertyWriter {
     }
 
     public void write(Object value, EventBean target) {
-        super.invoke(new Object[] {key, value}, target);
+        super.invoke(new Object[] {key, value}, target.getUnderlying());
     }
 }

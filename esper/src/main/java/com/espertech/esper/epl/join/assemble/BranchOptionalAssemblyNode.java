@@ -99,13 +99,13 @@ public class BranchOptionalAssemblyNode extends BaseAssemblyNode
         for (Node node : resultsForStream)
         {
             Set<EventBean> events = node.getEvents();
-            for (EventBean event : events)
+            for (EventBean theEvent : events)
             {
-                if (completedEvents.contains(event))
+                if (completedEvents.contains(theEvent))
                 {
                     continue;
                 }
-                processEvent(event, node);
+                processEvent(theEvent, node);
             }
         }
     }
@@ -132,10 +132,10 @@ public class BranchOptionalAssemblyNode extends BaseAssemblyNode
         indentWriter.println("BranchOptionalAssemblyNode streamNum=" + streamNum);
     }
 
-    private void processEvent(EventBean event, Node currentNode)
+    private void processEvent(EventBean theEvent, Node currentNode)
     {
         EventBean[] row = new EventBean[numStreams];
-        row[streamNum] = event;
+        row[streamNum] = theEvent;
         parentNode.result(row, streamNum, currentNode.getParentEvent(), currentNode.getParent());
     }
 }

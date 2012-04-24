@@ -38,6 +38,7 @@ import com.espertech.esper.event.xml.SchemaModel;
 import com.espertech.esper.event.xml.XSDSchemaMapper;
 import com.espertech.esper.filter.FilterServiceProvider;
 import com.espertech.esper.filter.FilterServiceSPI;
+import com.espertech.esper.dataflow.core.GraphServiceImpl;
 import com.espertech.esper.pattern.PatternNodeFactoryImpl;
 import com.espertech.esper.pattern.pool.PatternSubexpressionPoolEngineSvc;
 import com.espertech.esper.plugin.PlugInEventRepresentation;
@@ -174,7 +175,8 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
                 namedWindowService, variableService, timeSourceService, valueAddEventService, metricsReporting, statementEventTypeRef,
                 statementVariableRef, configSnapshot, threadingService, internalEventRouterImpl, statementIsolationService, schedulingMgmtService,
                 deploymentStateService, exceptionHandlingService, new PatternNodeFactoryImpl(), eventTypeIdGenerator, stmtMetadataFactory,
-                contextManagementService, schedulableAgentInstanceDirectory, patternSubexpressionPoolSvc);
+                contextManagementService, schedulableAgentInstanceDirectory, patternSubexpressionPoolSvc, new GraphServiceImpl(epServiceProvider) {
+        });
 
         // Circular dependency
         StatementLifecycleSvc statementLifecycleSvc = new StatementLifecycleSvcImpl(epServiceProvider, services);
@@ -360,7 +362,8 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
         Set<String> dependentMapOrder;
         try
         {
-            dependentMapOrder = GraphUtil.getTopDownOrder(configSnapshot.getMapTypeConfigurations());
+            Map<String, Set<String>> typesReferences = toTypesReferences(configSnapshot.getMapTypeConfigurations());
+            dependentMapOrder = GraphUtil.getTopDownOrder(typesReferences);
         }
         catch (GraphCircularDependencyException e)
         {
@@ -397,6 +400,34 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
             throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
         }
 
+        // Add object-array in dependency order such that supertypes are added before subtypes
+        Set<String> dependentObjectArrayOrder;
+        try
+        {
+            Map<String, Set<String>> typesReferences = toTypesReferences(configSnapshot.getObjectArrayTypeConfigurations());
+            dependentObjectArrayOrder = GraphUtil.getTopDownOrder(typesReferences);
+        }
+        catch (GraphCircularDependencyException e)
+        {
+            throw new ConfigurationException("Error configuring engine, dependency graph between object array type names is circular: " + e.getMessage(), e);
+        }
+        Map<String, Map<String, Object>> nestableObjectArrayNames = configSnapshot.getEventTypesNestableObjectArrayEvents();
+        dependentObjectArrayOrder.addAll(nestableObjectArrayNames.keySet());
+        try
+        {
+            for (String objectArrayName : dependentObjectArrayOrder)
+            {
+                ConfigurationEventTypeObjectArray objectArrayConfig = configSnapshot.getObjectArrayTypeConfigurations().get(objectArrayName);
+                Map<String, Object> propertyTypes = nestableObjectArrayNames.get(objectArrayName);
+                propertyTypes = resolveClassesForStringPropertyTypes(propertyTypes);
+                Map<String, Object> propertyTypesCompiled = EventTypeUtility.compileMapTypeProperties(propertyTypes, eventAdapterService);
+                eventAdapterService.addNestableObjectArrayType(objectArrayName, propertyTypesCompiled, objectArrayConfig, true, true, true, false, false);
+            }
+        }
+        catch (EventAdapterException ex)
+        {
+            throw new ConfigurationException("Error configuring engine: " + ex.getMessage(), ex);
+        }
 
         // Add plug-in event representations
         Map<URI, ConfigurationPlugInEventRepresentation> plugInReps = configSnapshot.getPlugInEventRepresentation();
@@ -458,6 +489,15 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
             eventAdapterService.addPlugInEventType(name, config.getEventRepresentationResolutionURIs(), config.getInitializer());
         }
     }
+
+    private static Map<String, Set<String>> toTypesReferences(Map<String, ? extends ConfigurationEventTypeWithSupertype> mapTypeConfigurations) {
+        Map<String, Set<String>> result = new LinkedHashMap<String, Set<String>>();
+        for (Map.Entry<String, ? extends ConfigurationEventTypeWithSupertype> entry : mapTypeConfigurations.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().getSuperTypes());
+        }
+        return result;
+    }
+
 
     /**
      * Constructs the auto import service.
@@ -526,7 +566,7 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
 
     private static Map<String, Object> createPropertyTypes(Properties properties)
     {
-        Map<String, Object> propertyTypes = new HashMap<String, Object>();
+        Map<String, Object> propertyTypes = new LinkedHashMap<String, Object>();
         for(Map.Entry entry : properties.entrySet())
         {
             String property = (String) entry.getKey();
@@ -536,6 +576,25 @@ public class EPServicesContextFactoryDefault implements EPServicesContextFactory
                 throw new ConfigurationException("The type '" + className + "' is not a recognized type");
             }
             propertyTypes.put(property, clazz);
+        }
+        return propertyTypes;
+    }
+
+    private static Map<String, Object> resolveClassesForStringPropertyTypes(Map<String, Object> properties)
+    {
+        Map<String, Object> propertyTypes = new LinkedHashMap<String, Object>();
+        for(Map.Entry entry : properties.entrySet())
+        {
+            String property = (String) entry.getKey();
+            propertyTypes.put(property, entry.getValue());
+            if (!(entry.getValue() instanceof String)) {
+                continue;
+            }
+            String className = (String) entry.getValue();
+            Class clazz = JavaClassHelper.getClassForSimpleName(className);
+            if (clazz != null) {
+                propertyTypes.put(property, clazz);
+            }
         }
         return propertyTypes;
     }

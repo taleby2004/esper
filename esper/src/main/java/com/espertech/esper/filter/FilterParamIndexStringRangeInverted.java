@@ -32,9 +32,9 @@ public final class FilterParamIndexStringRangeInverted extends FilterParamIndexS
         }
     }
 
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
-        Object objAttributeValue = lookupable.getGetter().get(eventBean);
+        Object objAttributeValue = lookupable.getGetter().get(theEvent);
 
         if (objAttributeValue == null)
         {
@@ -47,14 +47,14 @@ public final class FilterParamIndexStringRangeInverted extends FilterParamIndexS
         {
             for (Map.Entry<StringRange, EventEvaluator> entry : ranges.entrySet()) {
                 if (entry.getKey().getMin().compareTo(attributeValue) > 0 || entry.getKey().getMax().compareTo(attributeValue) < 0) {
-                    entry.getValue().matchEvent(eventBean, matches);
+                    entry.getValue().matchEvent(theEvent, matches);
                 }
             }
         }
         else if (this.getFilterOperator() == FilterOperator.NOT_RANGE_OPEN) {  // include neither endpoint
             for (Map.Entry<StringRange, EventEvaluator> entry : ranges.entrySet()) {
                 if (entry.getKey().getMin().compareTo(attributeValue) >= 0 || entry.getKey().getMax().compareTo(attributeValue) <= 0) {
-                    entry.getValue().matchEvent(eventBean, matches);
+                    entry.getValue().matchEvent(theEvent, matches);
                 }
             }
         }
@@ -62,7 +62,7 @@ public final class FilterParamIndexStringRangeInverted extends FilterParamIndexS
         {
             for (Map.Entry<StringRange, EventEvaluator> entry : ranges.entrySet()) {
                 if (entry.getKey().getMin().compareTo(attributeValue) >= 0 || entry.getKey().getMax().compareTo(attributeValue) < 0) {
-                    entry.getValue().matchEvent(eventBean, matches);
+                    entry.getValue().matchEvent(theEvent, matches);
                 }
             }
         }
@@ -70,7 +70,7 @@ public final class FilterParamIndexStringRangeInverted extends FilterParamIndexS
         {
             for (Map.Entry<StringRange, EventEvaluator> entry : ranges.entrySet()) {
                 if (entry.getKey().getMin().compareTo(attributeValue) > 0 || entry.getKey().getMax().compareTo(attributeValue) <= 0) {
-                    entry.getValue().matchEvent(eventBean, matches);
+                    entry.getValue().matchEvent(theEvent, matches);
                 }
             }
         }

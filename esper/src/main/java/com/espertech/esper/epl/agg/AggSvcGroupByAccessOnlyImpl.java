@@ -12,7 +12,6 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
@@ -26,7 +25,7 @@ import java.util.Map;
 public class AggSvcGroupByAccessOnlyImpl implements AggregationService, AggregationResultFuture
 {
     private final MethodResolutionService methodResolutionService;
-    private final Map<MultiKeyUntyped, AggregationAccess[]> accessMap;
+    private final Map<Object, AggregationAccess[]> accessMap;
     private final AggregationAccessorSlotPair[] accessors;
     private final int[] streams;
     private final boolean isJoin;
@@ -46,13 +45,13 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
                                                    boolean isJoin)
     {
         this.methodResolutionService = methodResolutionService;
-        this.accessMap = new HashMap<MultiKeyUntyped, AggregationAccess[]>();
+        this.accessMap = new HashMap<Object, AggregationAccess[]>();
         this.accessors = accessors;
         this.streams = streams;
         this.isJoin = isJoin;
     }
 
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped groupKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyEnter(EventBean[] eventsPerStream, Object groupKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         AggregationAccess[] row = getAssertRow(exprEvaluatorContext.getAgentInstanceId(), groupKey);
         for (AggregationAccess access : row) {
@@ -60,7 +59,7 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
         }
     }
 
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped groupKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyLeave(EventBean[] eventsPerStream, Object groupKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         AggregationAccess[] row = getAssertRow(exprEvaluatorContext.getAgentInstanceId(), groupKey);
         for (AggregationAccess access : row) {
@@ -68,7 +67,7 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupKey, int agentInstanceId)
+    public void setCurrentAccess(Object groupKey, int agentInstanceId)
     {
         currentAccess = getAssertRow(agentInstanceId, groupKey);
     }
@@ -94,7 +93,7 @@ public class AggSvcGroupByAccessOnlyImpl implements AggregationService, Aggregat
         accessMap.clear();
     }
 
-    private AggregationAccess[] getAssertRow(int agentInstanceId, MultiKeyUntyped groupKey) {
+    private AggregationAccess[] getAssertRow(int agentInstanceId, Object groupKey) {
         AggregationAccess[] row = accessMap.get(groupKey);
         if (row != null) {
             return row;

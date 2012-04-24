@@ -13,13 +13,13 @@ package com.espertech.esper.regression.view;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriber;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
 import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportSubscriber;
 import junit.framework.TestCase;
 
 import java.util.Calendar;
@@ -216,7 +216,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(listener.isInvoked());
         
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
-        assertEquals("E2", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E2", listener.assertOneGetNewAndReset().get("theString"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 4));
@@ -226,7 +226,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 5));
         sendTimeEvent(2, 8, 0, 1, 0);
-        assertEquals("E5", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("E5", listener.assertOneGetNewAndReset().get("theString"));
 
         epService.getEPRuntime().sendEvent(new SupportBean("E6", 6));
         assertFalse(listener.isInvoked());
@@ -235,7 +235,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
 
         // test count_total for insert and remove
         epService.getEPAdministrator().createEPL("create variable int var_cnt_total = 3");
-        String expressionTotal = "select string from SupportBean.win:length(2) output when count_insert_total = var_cnt_total or count_remove_total > 2";
+        String expressionTotal = "select theString from SupportBean.win:length(2) output when count_insert_total = var_cnt_total or count_remove_total > 2";
         EPStatement stmtTotal =  epService.getEPAdministrator().createEPL(expressionTotal);
         stmtTotal.addListener(listener);
         
@@ -244,7 +244,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 1));
-        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "string".split(","), new Object[][] {{"E1"}, {"E2"}, {"E3"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "theString".split(","), new Object[][] {{"E1"}, {"E2"}, {"E3"}});
 
         epService.getEPRuntime().setVariableValue("var_cnt_total", -1);
 
@@ -252,7 +252,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         assertFalse(listener.getAndClearIsInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", 1));
-        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "string".split(","), new Object[][] {{"E4"}, {"E5"}});
+        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "theString".split(","), new Object[][] {{"E4"}, {"E5"}});
         epService.getEPAdministrator().destroyAllStatements();
     }
 
@@ -300,7 +300,7 @@ public class TestOutputLimitCrontabWhen extends TestCase
         sendTimeEvent(1, 8, 0, 0, 0);
         epService.getEPAdministrator().getConfiguration().addVariable("myint", int.class, 0);
         epService.getEPAdministrator().getConfiguration().addVariable("mystring", String.class, "");
-        epService.getEPAdministrator().createEPL("on SupportBean set myint = intPrimitive, mystring = string");
+        epService.getEPAdministrator().createEPL("on SupportBean set myint = intPrimitive, mystring = theString");
 
         String expression = "select symbol from MarketData.win:length(2) output when myint = 1 and mystring like 'F%'";
         EPStatement stmt =  epService.getEPAdministrator().createEPL(expression);
@@ -466,8 +466,8 @@ public class TestOutputLimitCrontabWhen extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 }

@@ -38,7 +38,7 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
     private final PropertyGroupDesc groups[];
     private final EventType baseEventType;
     private final EventPropertyGetter[] fullKeyGetters;
-    private Map<MultiKeyUntyped, RevisionStateDeclared> statePerKey;
+    private Map<Object, RevisionStateDeclared> statePerKey;
 
     /**
      * Ctor.
@@ -59,7 +59,7 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
             }
         });
 
-        this.statePerKey = new HashMap<MultiKeyUntyped, RevisionStateDeclared>();
+        this.statePerKey = new HashMap<Object, RevisionStateDeclared>();
         this.baseEventType = spec.getBaseEventType();
         this.fullKeyGetters = PropertyUtility.getGetters(baseEventType, spec.getKeyPropertyNames());
 
@@ -72,9 +72,9 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
         revisionEventType = new RevisionEventType(metadata, eventTypeIdGenerator.getTypeId(revisionEventTypeName), propertyDesc, eventAdapterService);
     }
 
-    public EventBean getValueAddEventBean(EventBean event)
+    public EventBean getValueAddEventBean(EventBean theEvent)
     {
-        return new RevisionEventBeanDeclared(revisionEventType, event);
+        return new RevisionEventBeanDeclared(revisionEventType, theEvent);
     }
 
     public void onUpdate(EventBean[] newData, EventBean[] oldData, NamedWindowRootViewInstance namedWindowRootView, NamedWindowIndexRepository indexRepository)
@@ -84,7 +84,7 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
         {
             // we are removing an event
             RevisionEventBeanDeclared revisionEvent = (RevisionEventBeanDeclared) oldData[0];
-            MultiKeyUntyped key = revisionEvent.getKey();
+            Object key = revisionEvent.getKey();
             statePerKey.remove(key);
 
             // Insert into indexes for fast deletion, if there are any
@@ -105,7 +105,7 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
         EventType underyingEventType = underlyingEvent.getEventType();
 
         // obtain key values
-        MultiKeyUntyped key = null;
+        Object key = null;
         RevisionTypeDesc typesDesc = null;
         boolean isBaseEventType = false;
         if (underyingEventType == baseEventType)
@@ -146,12 +146,6 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
             else
             {
                 key = PropertyUtility.getKeys(underlyingEvent, typesDesc.getKeyPropertyGetters());
-            }
-
-            if (key == null)
-            {
-                log.warn("Ignoring event of event type '" + underyingEventType + "' for revision processing type '" + revisionEventTypeName);
-                return;
             }
         }
 
@@ -256,7 +250,7 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
             while (it.hasNext())
             {
                 RevisionEventBeanDeclared fullRevision = (RevisionEventBeanDeclared) it.next();
-                MultiKeyUntyped key = fullRevision.getKey();
+                Object key = fullRevision.getKey();
                 RevisionStateDeclared state = statePerKey.get(key);
                 list.add(state.getLastEvent());
             }
@@ -272,12 +266,12 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
     {
         for (int i = 0; i < oldData.length; i++)
         {
-            RevisionEventBeanDeclared event = (RevisionEventBeanDeclared) oldData[i];
+            RevisionEventBeanDeclared theEvent = (RevisionEventBeanDeclared) oldData[i];
 
             // If the remove event is the latest event, remove from all caches
-            if (event.isLatest())
+            if (theEvent.isLatest())
             {
-                MultiKeyUntyped key = event.getKey();
+                Object key = theEvent.getKey();
                 statePerKey.remove(key);
 
                 for (EventTable table : indexRepository.getTables())
@@ -317,14 +311,14 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
             EventPropertyGetter fullGetter = spec.getBaseEventType().getGetter(property);
             int propertyNumber = count;
             int[] propGroupsProperty = propsPerGroup.get(property);
-            final RevisionGetterParameters params = new RevisionGetterParameters(property, propertyNumber, fullGetter, propGroupsProperty);
+            final RevisionGetterParameters parameters = new RevisionGetterParameters(property, propertyNumber, fullGetter, propGroupsProperty);
 
             // if there are no groups (full event property only), then simply use the full event getter
             EventPropertyGetter revisionGetter = new EventPropertyGetter() {
                     public Object get(EventBean eventBean) throws PropertyAccessException
                     {
                         RevisionEventBeanDeclared riv = (RevisionEventBeanDeclared) eventBean;
-                        return riv.getVersionedValue(params);
+                        return riv.getVersionedValue(parameters);
                     }
 
                     public boolean isExistsProperty(EventBean eventBean)
@@ -339,7 +333,7 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
                 };
 
             Class type = spec.getBaseEventType().getPropertyType(property);
-            RevisionPropertyTypeDesc propertyTypeDesc = new RevisionPropertyTypeDesc(revisionGetter, params, type);
+            RevisionPropertyTypeDesc propertyTypeDesc = new RevisionPropertyTypeDesc(revisionGetter, parameters, type);
             propertyDesc.put(property, propertyTypeDesc);
             count++;
         }
@@ -378,23 +372,45 @@ public class VAERevisionProcessorDeclared extends VAERevisionProcessorBase imple
         {
             final int keyPropertyNumber = count;
 
-            EventPropertyGetter revisionGetter = new EventPropertyGetter() {
-                public Object get(EventBean eventBean) throws PropertyAccessException
-                {
-                    RevisionEventBeanDeclared riv = (RevisionEventBeanDeclared) eventBean;
-                    return riv.getKey().getKeys()[keyPropertyNumber];
-                }
+            EventPropertyGetter revisionGetter;
+            if (spec.getKeyPropertyNames().length == 1) {
+                revisionGetter = new EventPropertyGetter() {
+                    public Object get(EventBean eventBean) throws PropertyAccessException
+                    {
+                        RevisionEventBeanDeclared riv = (RevisionEventBeanDeclared) eventBean;
+                        return riv.getKey();
+                    }
 
-                public boolean isExistsProperty(EventBean eventBean)
-                {
-                    return true;
-                }
+                    public boolean isExistsProperty(EventBean eventBean)
+                    {
+                        return true;
+                    }
 
-                public Object getFragment(EventBean eventBean)
-                {
-                    return null;
-                }
-            };
+                    public Object getFragment(EventBean eventBean)
+                    {
+                        return null;
+                    }
+                };
+            }
+            else {
+                revisionGetter = new EventPropertyGetter() {
+                    public Object get(EventBean eventBean) throws PropertyAccessException
+                    {
+                        RevisionEventBeanDeclared riv = (RevisionEventBeanDeclared) eventBean;
+                        return ((MultiKeyUntyped) riv.getKey()).getKeys()[keyPropertyNumber];
+                    }
+
+                    public boolean isExistsProperty(EventBean eventBean)
+                    {
+                        return true;
+                    }
+
+                    public Object getFragment(EventBean eventBean)
+                    {
+                        return null;
+                    }
+                };
+            }
 
             Class type = spec.getBaseEventType().getPropertyType(property);
             RevisionPropertyTypeDesc propertyTypeDesc = new RevisionPropertyTypeDesc(revisionGetter, null, type);

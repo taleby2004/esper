@@ -58,7 +58,7 @@ public class TestOutputLimitRowForAll extends TestCase
     {
         String stmtText = "select sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol";
+                            "SupportBean.win:keepall() where theString=symbol";
         runAssertion12(stmtText, "none");
     }
 
@@ -74,7 +74,7 @@ public class TestOutputLimitRowForAll extends TestCase
     {
         String stmtText = "select sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             " having sum(price) > 100";
         runAssertion34(stmtText, "none");
     }
@@ -91,7 +91,7 @@ public class TestOutputLimitRowForAll extends TestCase
     {
         String stmtText = "select sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "output every 1 seconds";
         runAssertion56(stmtText, "default");
     }
@@ -109,7 +109,7 @@ public class TestOutputLimitRowForAll extends TestCase
     {
         String stmtText = "select sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "having sum(price) > 100" +
                             "output every 1 seconds";
         runAssertion78(stmtText, "default");
@@ -127,7 +127,7 @@ public class TestOutputLimitRowForAll extends TestCase
     {
         String stmtText = "select sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "output all every 1 seconds";
         runAssertion56(stmtText, "all");
     }
@@ -145,7 +145,7 @@ public class TestOutputLimitRowForAll extends TestCase
     {
         String stmtText = "select sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "having sum(price) > 100" +
                             "output all every 1 seconds";
         runAssertion78(stmtText, "all");
@@ -163,7 +163,7 @@ public class TestOutputLimitRowForAll extends TestCase
     {
         String stmtText = "select sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "output last every 1 seconds";
         runAssertion13_14(stmtText, "last");
     }
@@ -181,7 +181,7 @@ public class TestOutputLimitRowForAll extends TestCase
     {
         String stmtText = "select sum(price) " +
                             "from MarketData.win:time(5.5 sec), " +
-                            "SupportBean.win:keepall() where string=symbol " +
+                            "SupportBean.win:keepall() where theString=symbol " +
                             "having sum(price) > 100 " +
                             "output last every 1 seconds";
         runAssertion15_16(stmtText, "last");
@@ -392,7 +392,7 @@ public class TestOutputLimitRowForAll extends TestCase
         String stmtText = "select sum(volume) as result " +
                             "from " + SupportMarketDataBean.class.getName() + ".win:length(10) as one," +
                             SupportBean.class.getName() + ".win:length(10) as two " +
-                            "where one.symbol=two.string " +
+                            "where one.symbol=two.theString " +
                             "having sum(volume) > 0 " +
                             "output every 5 events";
 
@@ -419,7 +419,7 @@ public class TestOutputLimitRowForAll extends TestCase
 
         String viewExpr = "select irstream max(price) as maxVol" +
                           " from " + SupportMarketDataBean.class.getName() + ".ext:sort(1, volume desc) as s0, " +
-                          SupportBean.class.getName() + ".win:keepall() as s1 where s1.string = s0.symbol " +
+                          SupportBean.class.getName() + ".win:keepall() as s1 where s1.theString = s0.symbol " +
                           "output every 1.0d seconds";
         EPStatement stmt = epService.getEPAdministrator().createEPL(viewExpr);
         stmt.addListener(listener);
@@ -597,7 +597,7 @@ public class TestOutputLimitRowForAll extends TestCase
         sendTimer(0);
         String selectStmt = "select count(*) as cnt from " +
                 SupportBean.class.getName() + ".win:time(10 seconds) as s, " +
-                SupportMarketDataBean.class.getName() + ".win:keepall() as m where m.symbol = s.string and intPrimitive > 0 output snapshot every 1 seconds";
+                SupportMarketDataBean.class.getName() + ".win:keepall() as m where m.symbol = s.theString and intPrimitive > 0 output snapshot every 1 seconds";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(selectStmt);
         stmt.addListener(listener);
@@ -656,7 +656,7 @@ public class TestOutputLimitRowForAll extends TestCase
     private void sendEvent(String s)
 	{
 	    SupportBean bean = new SupportBean();
-	    bean.setString(s);
+	    bean.setTheString(s);
 	    bean.setDoubleBoxed(0.0);
 	    bean.setIntPrimitive(0);
 	    bean.setIntBoxed(0);
@@ -666,16 +666,16 @@ public class TestOutputLimitRowForAll extends TestCase
     private void sendEvent(String s, int intPrimitive)
 	{
 	    SupportBean bean = new SupportBean();
-	    bean.setString(s);
+	    bean.setTheString(s);
 	    bean.setIntPrimitive(intPrimitive);
 	    epService.getEPRuntime().sendEvent(bean);
 	}
 
     private void sendTimer(long time)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(time);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(time);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void sendEvent(String symbol, double price)

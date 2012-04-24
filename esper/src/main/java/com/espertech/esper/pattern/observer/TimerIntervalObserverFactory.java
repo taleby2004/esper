@@ -42,21 +42,21 @@ public class TimerIntervalObserverFactory implements ObserverFactory, MetaDefIte
      */
     protected long milliseconds;
 
-    public void setObserverParameters(List<ExprNode> params, MatchedEventConvertor convertor) throws ObserverParameterException
+    public void setObserverParameters(List<ExprNode> parameters, MatchedEventConvertor convertor) throws ObserverParameterException
     {
         String errorMessage = "Timer-interval observer requires a single numeric or time period parameter";
-        if (params.size() != 1)
+        if (parameters.size() != 1)
         {
             throw new ObserverParameterException(errorMessage);
         }
 
-        Class returnType = params.get(0).getExprEvaluator().getType();
+        Class returnType = parameters.get(0).getExprEvaluator().getType();
         if (!(JavaClassHelper.isNumeric(returnType)))
         {
             throw new ObserverParameterException(errorMessage);
         }
 
-        parameter = params.get(0);
+        parameter = parameters.get(0);
         this.convertor = convertor;
     }
 

@@ -823,6 +823,7 @@ public class ConfigurationEngineDefaults implements Serializable
 
         private Configuration.PropertyResolutionStyle classPropertyResolutionStyle;
         private ConfigurationEventTypeLegacy.AccessorStyle defaultAccessorStyle;
+        private Configuration.EventRepresentation defaultEventRepresentation;
 
         /**
          * Ctor.
@@ -831,6 +832,7 @@ public class ConfigurationEngineDefaults implements Serializable
         {
             this.classPropertyResolutionStyle = Configuration.PropertyResolutionStyle.getDefault();
             this.defaultAccessorStyle = ConfigurationEventTypeLegacy.AccessorStyle.JAVABEAN;
+            this.defaultEventRepresentation = Configuration.EventRepresentation.getDefault();
         }
 
         /**
@@ -869,6 +871,14 @@ public class ConfigurationEngineDefaults implements Serializable
         public void setClassPropertyResolutionStyle(Configuration.PropertyResolutionStyle classPropertyResolutionStyle)
         {
             this.classPropertyResolutionStyle = classPropertyResolutionStyle;
+        }
+
+        public void setDefaultEventRepresentation(Configuration.EventRepresentation defaultEventRepresentation) {
+            this.defaultEventRepresentation = defaultEventRepresentation;
+        }
+
+        public Configuration.EventRepresentation getDefaultEventRepresentation() {
+            return defaultEventRepresentation;
         }
     }
 
@@ -1525,6 +1535,9 @@ public class ConfigurationEngineDefaults implements Serializable
         private String eventTypeIdGeneratorFactory;
         private String virtualDataWindowViewFactory;
         private String statementMetadataFactory;
+        private String statementIdGeneratorFactory;
+        private Object userConfiguration;
+        private String memberName;
 
         /**
          * Class name of runtime provider.
@@ -1608,6 +1621,30 @@ public class ConfigurationEngineDefaults implements Serializable
          */
         public void setStatementMetadataFactory(String factory) {
             this.statementMetadataFactory = factory;
+        }
+
+        public String getStatementIdGeneratorFactory() {
+            return statementIdGeneratorFactory;
+        }
+
+        public void setStatementIdGeneratorFactory(String statementIdGeneratorFactory) {
+            this.statementIdGeneratorFactory = statementIdGeneratorFactory;
+        }
+
+        public Object getUserConfiguration() {
+            return userConfiguration;
+        }
+
+        public void setUserConfiguration(Object userConfiguration) {
+            this.userConfiguration = userConfiguration;
+        }
+
+        public String getMemberName() {
+            return memberName;
+        }
+
+        public void setMemberName(String memberName) {
+            this.memberName = memberName;
         }
     }
 

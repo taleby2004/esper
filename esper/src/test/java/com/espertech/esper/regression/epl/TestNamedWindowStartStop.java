@@ -52,19 +52,19 @@ public class TestNamedWindowStartStop extends TestCase
         ((EPServiceProviderSPI) epService).getNamedWindowService().addObserver(observer);
 
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         assertEquals(StatementType.CREATE_WINDOW, ((EPStatementSPI) stmtCreate).getStatementMetadata().getStatementType());
         stmtCreate.addListener(listenerWindow);
-        NamedWindowLifecycleEvent event = observer.getFirstAndReset();
-        assertEquals(NamedWindowLifecycleEvent.LifecycleEventType.CREATE, event.getEventType());
-        assertEquals("MyWindow", event.getName());
+        NamedWindowLifecycleEvent theEvent = observer.getFirstAndReset();
+        assertEquals(NamedWindowLifecycleEvent.LifecycleEventType.CREATE, theEvent.getEventType());
+        assertEquals("MyWindow", theEvent.getName());
 
         // stop and start, no consumers or deleters
         stmtCreate.stop();
-        event = observer.getFirstAndReset();
-        assertEquals(NamedWindowLifecycleEvent.LifecycleEventType.DESTROY, event.getEventType());
-        assertEquals("MyWindow", event.getName());
+        theEvent = observer.getFirstAndReset();
+        assertEquals(NamedWindowLifecycleEvent.LifecycleEventType.DESTROY, theEvent.getEventType());
+        assertEquals("MyWindow", theEvent.getName());
 
         stmtCreate.start();
         assertEquals(NamedWindowLifecycleEvent.LifecycleEventType.CREATE, observer.getFirstAndReset().getEventType());
@@ -74,7 +74,7 @@ public class TestNamedWindowStartStop extends TestCase
         EPStatement stmtDelete = epService.getEPAdministrator().createEPL(stmtTextDelete);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create consumer
@@ -126,12 +126,12 @@ public class TestNamedWindowStartStop extends TestCase
     public void testStartStopConsumer()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create consumer
@@ -248,12 +248,12 @@ public class TestNamedWindowStartStop extends TestCase
     public void testStartStopInserter()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate);
         stmtCreate.addListener(listenerWindow);
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtInsert = epService.getEPAdministrator().createEPL(stmtTextInsertOne);
 
         // create consumer
@@ -294,7 +294,7 @@ public class TestNamedWindowStartStop extends TestCase
     public void testStartStopCreator()
     {
         // create window
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate, "stmtCreateFirst");
         stmtCreate.addListener(listenerWindow);
 
@@ -303,7 +303,7 @@ public class TestNamedWindowStartStop extends TestCase
         EPStatement stmtDelete = epService.getEPAdministrator().createEPL(stmtTextDelete, "stmtDelete");
 
         // create insert into
-        String stmtTextInsertOne = "insert into MyWindow select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        String stmtTextInsertOne = "insert into MyWindow select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         EPStatement stmtInsert = epService.getEPAdministrator().createEPL(stmtTextInsertOne, "stmtInsert");
 
         // create consumer
@@ -355,7 +355,7 @@ public class TestNamedWindowStartStop extends TestCase
         EPAssertionUtil.assertPropsPerRow(stmtSelect.iterator(), fields, new Object[][]{{"E3", 3}, {"E4", 4}});
 
         // create window anew
-        stmtTextCreate = "create window MyWindow.win:keepall() as select string as a, intPrimitive as b from " + SupportBean.class.getName();
+        stmtTextCreate = "create window MyWindow.win:keepall() as select theString as a, intPrimitive as b from " + SupportBean.class.getName();
         stmtCreate = epService.getEPAdministrator().createEPL(stmtTextCreate, "stmtCreate");
         stmtCreate.addListener(listenerWindow);
 
@@ -426,10 +426,10 @@ public class TestNamedWindowStartStop extends TestCase
         return bean;
     }
 
-    private SupportBean sendSupportBean(String string, int intPrimitive)
+    private SupportBean sendSupportBean(String theString, int intPrimitive)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         epService.getEPRuntime().sendEvent(bean);
         return bean;

@@ -122,7 +122,10 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
 
 		// Get the types of the parameters for the first invocation
         boolean allowWildcard = validationContext.getStreamTypeService().getEventTypes().length == 1;
-        EventType streamZeroType = validationContext.getStreamTypeService().getEventTypes()[0];
+        EventType streamZeroType = null;
+        if (validationContext.getStreamTypeService().getEventTypes().length > 0) {
+            streamZeroType = validationContext.getStreamTypeService().getEventTypes()[0];
+        }
         final ExprNodeUtilSingleRowMethodDesc staticMethodDesc = ExprNodeUtility.resolveSingleRowPluginFunc(clazz.getName(), firstItem.getName(), firstItem.getParameters(), validationContext.getMethodResolutionService(), allowWildcard, streamZeroType, firstItem.getName(), true);
 
         if (config.getValueCache() == ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED) {

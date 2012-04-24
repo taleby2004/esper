@@ -25,10 +25,10 @@ public interface EventSender
      * <p>
      * Use the route method for sending events into the runtime from within UpdateListener code.
      * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
-     * @param event to process
+     * @param theEvent to process
      * @throws EPException if a runtime error occured.
      */
-    public void sendEvent(Object event) throws EPException;
+    public void sendEvent(Object theEvent) throws EPException;
 
     /**
      * Route the event object back to the event stream processing runtime for internal dispatching,
@@ -38,8 +38,8 @@ public interface EventSender
      * events sent to the runtime. In a single-threaded application the routed event is
      * processed before the next event is sent to the runtime through the
      * EPRuntime.sendEvent method.
-     * @param event to process
+     * @param theEvent to process
      * @throws EPException is thrown when the processing of the event lead to an error
      */
-    public void route(Object event) throws EPException;
+    public void route(Object theEvent) throws EPException;
 }

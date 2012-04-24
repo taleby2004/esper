@@ -61,8 +61,8 @@ public class ExprDotEvalTypeInfo {
         return new ExprDotEvalTypeInfo(null, null, null, eventColl);
     }
 
-    public static ExprDotEvalTypeInfo event(EventType event) {
-        return new ExprDotEvalTypeInfo(null, null, event, null);
+    public static ExprDotEvalTypeInfo event(EventType theEvent) {
+        return new ExprDotEvalTypeInfo(null, null, theEvent, null);
     }
 
     public Class getScalar() {

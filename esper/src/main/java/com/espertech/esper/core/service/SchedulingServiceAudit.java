@@ -11,6 +11,7 @@
 
 package com.espertech.esper.core.service;
 
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.schedule.*;
 import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.JavaClassHelper;
@@ -55,12 +56,12 @@ public class SchedulingServiceAudit implements SchedulingServiceSPI {
     public void add(long afterMSec, ScheduleHandle handle, ScheduleSlot slot) throws ScheduleServiceException {
         if (AuditPath.isInfoEnabled()) {
             StringWriter message = new StringWriter();
-            message.write("schedule after ");
+            message.write("after ");
             message.write(Long.toString(afterMSec));
             message.write(" handle ");
             printHandle(message, handle);
 
-            AuditPath.auditLog(engineUri, statementName, message.toString());
+            AuditPath.auditLog(engineUri, statementName, AuditEnum.SCHEDULE, message.toString());
 
             modifyCreateProxy(handle);
         }
@@ -70,12 +71,12 @@ public class SchedulingServiceAudit implements SchedulingServiceSPI {
     public void add(ScheduleSpec scheduleSpec, ScheduleHandle handle, ScheduleSlot slot) throws ScheduleServiceException {
         if (AuditPath.isInfoEnabled()) {
             StringWriter message = new StringWriter();
-            message.write("schedule add ");
+            message.write("add ");
             message.write(scheduleSpec.toString());
             message.write(" handle ");
             printHandle(message, handle);
 
-            AuditPath.auditLog(engineUri, statementName, message.toString());
+            AuditPath.auditLog(engineUri, statementName, AuditEnum.SCHEDULE, message.toString());
 
             modifyCreateProxy(handle);
         }
@@ -85,10 +86,10 @@ public class SchedulingServiceAudit implements SchedulingServiceSPI {
     public void remove(ScheduleHandle handle, ScheduleSlot slot) throws ScheduleServiceException {
         if (AuditPath.isInfoEnabled()) {
             StringWriter message = new StringWriter();
-            message.write("schedule remove handle ");
+            message.write("remove handle ");
             printHandle(message, handle);
 
-            AuditPath.auditLog(engineUri, statementName, message.toString());
+            AuditPath.auditLog(engineUri, statementName, AuditEnum.SCHEDULE, message.toString());
         }
         spi.remove(handle, slot);
     }

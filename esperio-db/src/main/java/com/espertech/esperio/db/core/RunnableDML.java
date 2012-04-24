@@ -22,18 +22,18 @@ public class RunnableDML implements Runnable
     private static Log log = LogFactory.getLog(RunnableDML.class);
 
     private final RunnableDMLContext context;
-    private final EventBean event;
+    private final EventBean theEvent;
 
-    public RunnableDML(RunnableDMLContext context, EventBean event)
+    public RunnableDML(RunnableDMLContext context, EventBean theEvent)
     {
         this.context = context;
-        this.event = event;
+        this.theEvent = theEvent;
     }
 
     public void run()
     {
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled() && (ExecutionPathDebugLog.isTimerDebugEnabled))) {
-            log.debug("Executing DML work unit for event " + event);
+            log.debug("Executing DML work unit for event " + theEvent);
         }
 
         int retryMax = context.getRetry() == null ? 1 : context.getRetry();
@@ -72,7 +72,7 @@ public class RunnableDML implements Runnable
     {
         Connection connection = context.getConnectionFactory().getConnection();
         try {
-            context.getDmlStatement().execute(connection, event);
+            context.getDmlStatement().execute(connection, theEvent);
         }
         finally {
             connection.close();

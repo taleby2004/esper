@@ -268,6 +268,23 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
+    public void addEventType(String eventTypeName, String[] propertyNames, Object[] propertyTypes) throws ConfigurationException {
+        addEventType(eventTypeName, propertyNames, propertyTypes, null);
+    }
+
+    public void addEventType(String eventTypeName, String[] propertyNames, Object[] propertyTypes, ConfigurationEventTypeObjectArray optionalConfiguration) throws ConfigurationException {
+        try
+        {
+            LinkedHashMap<String, Object> propertyTypesMap = EventTypeUtility.validateObjectArrayDef(propertyNames, propertyTypes);
+            Map<String, Object> compiledProperties = EventTypeUtility.compileMapTypeProperties(propertyTypesMap, eventAdapterService);
+            eventAdapterService.addNestableObjectArrayType(eventTypeName, compiledProperties, optionalConfiguration, false, true, true, false, false);
+        }
+        catch (EventAdapterException t)
+        {
+            throw new ConfigurationException(t.getMessage(), t);
+        }
+    }
+
     public void addEventType(String eventTypeName, ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc)
     {
         SchemaModel schemaModel = null;
@@ -359,6 +376,19 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
     }
 
+    public void updateObjectArrayEventType(String objectArrayEventTypeName, String[] propertyNames, Object[] propertyTypes) throws ConfigurationException
+    {
+        try
+        {
+            LinkedHashMap<String, Object> typeMap = EventTypeUtility.validateObjectArrayDef(propertyNames, propertyTypes);
+            eventAdapterService.updateObjectArrayEventType(objectArrayEventTypeName, typeMap);
+        }
+        catch (EventAdapterException e)
+        {
+            throw new ConfigurationException("Error updating Object-array event type: " + e.getMessage(), e);
+        }
+    }
+
     public void replaceXMLEventType(String xmlEventTypeName, ConfigurationEventTypeXMLDOM config) throws ConfigurationException {
         SchemaModel schemaModel = null;
         if (config.getSchemaResource() != null || config.getSchemaText() != null)
@@ -379,7 +409,7 @@ public class ConfigurationOperationsImpl implements ConfigurationOperations
         }
         catch (EventAdapterException e)
         {
-            throw new ConfigurationException("Error updating Map event type: " + e.getMessage(), e);
+            throw new ConfigurationException("Error updating XML event type: " + e.getMessage(), e);
         }
     }
 

@@ -85,7 +85,7 @@ public class EventStreamProxy implements java.lang.reflect.InvocationHandler {
                 else if (arg instanceof EventBean) {
                     events = EventBeanUtility.summarize((EventBean) arg);
                 }
-                AuditPath.auditLog(engineURI, statementName, "stream " + eventTypeAndFilter + " inserted " + events);
+                AuditPath.auditLog(engineURI, statementName, AuditEnum.STREAM, eventTypeAndFilter + " inserted " + events);
             }
         }
 

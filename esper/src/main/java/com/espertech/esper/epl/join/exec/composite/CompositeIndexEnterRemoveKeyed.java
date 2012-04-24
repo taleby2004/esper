@@ -40,23 +40,23 @@ public class CompositeIndexEnterRemoveKeyed implements CompositeIndexEnterRemove
         this.next = next;
     }
 
-    public void enter(EventBean event, Map parent) {
-        MultiKeyUntyped mk = EventBeanUtility.getMultiKey(event, propertyGetters, keyCoercionTypes);
+    public void enter(EventBean theEvent, Map parent) {
+        MultiKeyUntyped mk = EventBeanUtility.getMultiKey(theEvent, propertyGetters, keyCoercionTypes);
         Map innerIndex = (Map) parent.get(mk);
         if (innerIndex == null) {
             innerIndex = new TreeMap<Object, Object>();
             parent.put(mk, innerIndex);
         }
-        next.enter(event, innerIndex);
+        next.enter(theEvent, innerIndex);
     }
 
-    public void remove(EventBean event, Map parent) {
-        MultiKeyUntyped mk = EventBeanUtility.getMultiKey(event, propertyGetters, keyCoercionTypes);
+    public void remove(EventBean theEvent, Map parent) {
+        MultiKeyUntyped mk = EventBeanUtility.getMultiKey(theEvent, propertyGetters, keyCoercionTypes);
         Map innerIndex = (Map) parent.get(mk);
         if (innerIndex == null) {
             return;
         }
-        next.remove(event, innerIndex);
+        next.remove(theEvent, innerIndex);
         if (innerIndex.isEmpty()) {
             parent.remove(mk);
         }

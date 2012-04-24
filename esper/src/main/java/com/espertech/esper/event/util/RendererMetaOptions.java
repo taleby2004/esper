@@ -11,23 +11,29 @@
 
 package com.espertech.esper.event.util;
 
+import com.espertech.esper.client.util.EventPropertyRenderer;
+import com.espertech.esper.client.util.EventPropertyRendererContext;
+
 /**
  * Options for use by {@link RendererMeta} with rendering metadata.
  */
 public class RendererMetaOptions
 {
-    private final boolean isXMLOutput;
     private final boolean preventLooping;
+    private final boolean xmlOutput;
+    private final EventPropertyRenderer renderer;
+    private final EventPropertyRendererContext rendererContext;
 
     /**
      * Ctor.
      * @param preventLooping true to prevent looping
-     * @param isXMLOutput true for XML output
+     * @param xmlOutput true for XML output
      */
-    public RendererMetaOptions(boolean preventLooping, boolean isXMLOutput)
-    {
+    public RendererMetaOptions(boolean preventLooping, boolean xmlOutput, EventPropertyRenderer renderer, EventPropertyRendererContext rendererContext) {
         this.preventLooping = preventLooping;
-        this.isXMLOutput = isXMLOutput;
+        this.xmlOutput = xmlOutput;
+        this.renderer = renderer;
+        this.rendererContext = rendererContext;
     }
 
     /**
@@ -43,8 +49,16 @@ public class RendererMetaOptions
      * Returns true for XML output.
      * @return XML output flag
      */
-    public boolean isXMLOutput()
+    public boolean isXmlOutput()
     {
-        return isXMLOutput;
+        return xmlOutput;
+    }
+
+    public EventPropertyRenderer getRenderer() {
+        return renderer;
+    }
+
+    public EventPropertyRendererContext getRendererContext() {
+        return rendererContext;
     }
 }

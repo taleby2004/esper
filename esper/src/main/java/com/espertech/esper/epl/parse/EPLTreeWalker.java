@@ -60,6 +60,8 @@ public class EPLTreeWalker extends EsperEPL2Ast
 
     private final Map<Tree, RowRegexExprNode> astRowRegexNodeMap = new HashMap<Tree, RowRegexExprNode>();
 
+    private final Map<Tree, Object> astGOPNodeMap = new HashMap<Tree, Object>();
+
     private FilterSpecRaw filterSpec;
     private final List<ViewSpec> viewSpecs = new LinkedList<ViewSpec>();
 
@@ -537,6 +539,18 @@ public class EPLTreeWalker extends EsperEPL2Ast
             case CREATE_CTX:
                 leaveCreateContext(node);
                 break;
+            case CREATE_DATAFLOW:
+                leaveCreateDataflow(node);
+                break;
+            case GOPCFGITM:
+            case GOPCFGEXP:
+            case GOPCFGEPL:
+                leaveGraphDetail(node);
+                break;
+            case JSON_ARRAY:
+            case JSON_OBJECT:
+                leaveJsonConstant(node);
+                break;
             default:
                 throw new ASTWalkException("Unhandled node type encountered, type '" + node.getType() +
                         "' with text '" + node.getText() + '\'');
@@ -652,7 +666,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
         StreamSpecOptions streamSpecOptions = new StreamSpecOptions(false,isRetainUnion,isRetainIntersection);
 
         // handle table-create clause, i.e. (col1 type, col2 type)
-        List<ColumnDesc> colums = getColTypeList(node);
+        List<ColumnDesc> colums = ASTCreateSchemaHelper.getColTypeList(node);
 
         boolean isInsert = false;
         ExprNode insertWhereExpr = null;
@@ -673,25 +687,6 @@ public class EPLTreeWalker extends EsperEPL2Ast
         FilterSpecRaw rawFilterSpec = new FilterSpecRaw(eventName, new LinkedList<ExprNode>(), null);
         FilterStreamSpecRaw streamSpec = new FilterStreamSpecRaw(rawFilterSpec, new LinkedList<ViewSpec>(), null, streamSpecOptions);
         statementSpec.getStreamSpecs().add(streamSpec);
-    }
-
-    private List<ColumnDesc> getColTypeList(Tree node)
-    {
-        List<ColumnDesc> result = new ArrayList<ColumnDesc>();
-        for (int nodeNum = 0; nodeNum < node.getChildCount(); nodeNum++) {
-            if (node.getChild(nodeNum).getType() == CREATE_COL_TYPE_LIST)
-            {
-                Tree parent = node.getChild(nodeNum);
-                for (int i = 0; i < parent.getChildCount(); i++)
-                {
-                    String name = parent.getChild(i).getChild(0).getText();
-                    String type = parent.getChild(i).getChild(1).getText();
-                    boolean array = parent.getChild(i).getChildCount() > 2;
-                    result.add(new ColumnDesc(name, type, array));
-                }
-            }
-        }
-        return result;
     }
 
     private void leaveCreateIndex(Tree node)
@@ -730,73 +725,9 @@ public class EPLTreeWalker extends EsperEPL2Ast
     private void leaveCreateSchema(Tree node)
     {
         log.debug(".leaveCreateSchema");
-
-        String schemaName = node.getChild(0).getText();
-
-        List<ColumnDesc> columnTypes = getColTypeList(node);
-
-        // get model-after types (could be multiple for variants)
-        Set<String> typeNames = new LinkedHashSet<String>();
-        for (int i = 0; i < node.getChildCount(); i++) {
-            if (node.getChild(i).getType() == VARIANT_LIST) {
-                for (int j = 0; j < node.getChild(i).getChildCount(); j++) {
-                    typeNames.add(node.getChild(i).getChild(j).getText());
-                }
-            }
-        }
-
-        // get variant keyword
-        boolean variant = false;
-        for (int i = 0; i < node.getChildCount(); i++) {
-            Tree p = node.getChild(i);
-            if (p.getType() == CREATE_SCHEMA_EXPR_VAR) {
-                if (!p.getChild(0).getText().toLowerCase().equals("variant")) {
-                    throw new EPException("Expected 'variant' keyword after create-schema clause but encountered '" + p.getChild(0).getText() + "'");
-                }
-                variant = true;
-            }
-        }
-
-        // get inherited and start timestamp and end timestamps
-        String startTimestamp = null;
-        String endTimestamp = null;
-        Set<String> inherited = new LinkedHashSet<String>();
-        Set<String> copyFrom = new LinkedHashSet<String>();
-        for (int i = 0; i < node.getChildCount(); i++) {
-            Tree p = node.getChild(i);
-            if (p.getType() == CREATE_SCHEMA_EXPR_QUAL) {
-                String childName = p.getChild(0).getText().toLowerCase();
-                if (childName.equals("inherits")) {
-                    for (int j = 1; j < p.getChildCount(); j++) {
-                        if (p.getChild(j).getType() == EXPRCOL) {
-                            for (int k = 0; k < p.getChild(j).getChildCount(); k++) {
-                                inherited.add(p.getChild(j).getChild(k).getText());
-                            }
-                        }
-                    }
-                    continue;
-                }
-                else if (childName.equals("starttimestamp")) {
-                    startTimestamp = p.getChild(1).getChild(0).getText();
-                    continue;
-                }
-                else if (childName.equals("endtimestamp")) {
-                    endTimestamp = p.getChild(1).getChild(0).getText();
-                    continue;
-                }
-                else if (childName.equals("copyfrom")) {
-                    Tree parent = p.getChild(1);
-                    for (int j = 0; j < parent.getChildCount(); j++) {
-                        copyFrom.add(parent.getChild(j).getText());
-                    }
-                    continue;
-                }
-                throw new EPException("Expected 'inherits', 'starttimestamp', 'endtimestamp' or 'copyfrom' keyword after create-schema clause but encountered '" + p.getChild(0).getText() + "'");
-            }
-        }
-
+        CreateSchemaDesc createSchema = ASTCreateSchemaHelper.walkCreateSchema(node);
         statementSpec.getStreamSpecs().add(new FilterStreamSpecRaw(new FilterSpecRaw(Object.class.getName(), Collections.<ExprNode>emptyList(), null), Collections.<ViewSpec>emptyList(), null, new StreamSpecOptions()));
-        statementSpec.setCreateSchemaDesc(new CreateSchemaDesc(schemaName, typeNames, columnTypes, inherited, variant, startTimestamp, endTimestamp, copyFrom));
+        statementSpec.setCreateSchemaDesc(createSchema);
     }
 
     private void leaveCreateVariable(Tree node)
@@ -2217,6 +2148,13 @@ public class EPLTreeWalker extends EsperEPL2Ast
         astExprNodeMap.put(node, constantNode);
     }
 
+    private void leaveJsonConstant(Tree node)
+    {
+        log.debug(".leaveJsonConstant value '" + node.getText() + "'");
+        ExprConstantNode constantNode = new ExprConstantNodeImpl(ASTJsonHelper.walk(node));
+        astExprNodeMap.put(node, constantNode);
+    }
+
     private void leaveSubstitution(Tree node)
     {
         log.debug(".leaveSubstitution");
@@ -3043,6 +2981,38 @@ public class EPLTreeWalker extends EsperEPL2Ast
         filterSpec = null;
         propertyEvalSpec = null;
         statementSpec.setCreateContextDesc(contextDesc);
+    }
+
+    private void leaveCreateDataflow(Tree node)
+    {
+        if (log.isDebugEnabled()) {
+            log.debug(".leaveCreateDataflow");
+        }
+
+        CreateDataFlowDesc graphDesc = ASTGraphHelper.walkCreateDataFlow(node, astGOPNodeMap, engineImportService);
+        statementSpec.setCreateDataFlowDesc(graphDesc);
+    }
+
+    private void leaveGraphDetail(Tree node)
+    {
+        if (log.isDebugEnabled()) {
+            log.debug(".leaveGraphDetail");
+        }
+
+        Object value;
+        if (node.getType() == GOPCFGITM) {
+            value = astExprNodeMap.remove(node.getChild(1));
+        }
+        else if (node.getType() == GOPCFGEXP) {
+            value = astExprNodeMap.remove(node.getChild(0));
+        }
+        else {
+            StatementSpecRaw newSpec = new StatementSpecRaw(defaultStreamSelector);
+            value = statementSpec;
+            newSpec.getAnnotations().addAll(statementSpec.getAnnotations());
+            statementSpec = newSpec;
+        }
+        astGOPNodeMap.put(node, value);
     }
 
     private void leaveObserver(Tree node) throws ASTWalkException

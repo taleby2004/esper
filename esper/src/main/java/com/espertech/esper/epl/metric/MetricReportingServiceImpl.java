@@ -195,19 +195,19 @@ public class MetricReportingServiceImpl implements MetricReportingServiceSPI, Me
         return handle;
     }
 
-    public void observe(StatementLifecycleEvent event)
+    public void observe(StatementLifecycleEvent theEvent)
     {
         if (!MetricReportingPath.isMetricsEnabled)
         {
             return;
         }
 
-        if (event.getEventType() == StatementLifecycleEvent.LifecycleEventType.STATECHANGE)
+        if (theEvent.getEventType() == StatementLifecycleEvent.LifecycleEventType.STATECHANGE)
         {
-            if (event.getStatement().isDestroyed())
+            if (theEvent.getStatement().isDestroyed())
             {
-                stmtMetricRepository.removeStatement(event.getStatement().getName());
-                statementMetricHandles.remove(event.getStatement().getName());
+                stmtMetricRepository.removeStatement(theEvent.getStatement().getName());
+                statementMetricHandles.remove(theEvent.getStatement().getName());
             }
         }
     }

@@ -62,10 +62,10 @@ public class BindProcessor
 
                         public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
                         {
-                            EventBean event = eventsPerStream[streamNum];
-                            if (event != null)
+                            EventBean theEvent = eventsPerStream[streamNum];
+                            if (theEvent != null)
                             {
-                                return event.getUnderlying();
+                                return theEvent.getUnderlying();
                             }
                             else
                             {
@@ -97,10 +97,10 @@ public class BindProcessor
 
                     public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext exprEvaluatorContext)
                     {
-                        EventBean event = eventsPerStream[streamSpec.getStreamNumber()];
-                        if (event != null)
+                        EventBean theEvent = eventsPerStream[streamSpec.getStreamNumber()];
+                        if (theEvent != null)
                         {
-                            return event.getUnderlying();
+                            return theEvent.getUnderlying();
                         }
                         else
                         {

@@ -45,7 +45,7 @@ public class TestInsertIntoTransposeStream extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("custom", SupportStaticMethodLib.class.getName(), "makeSupportBean");
 
-        String stmtTextOne = "insert into MyStream select 1 as dummy, transpose(custom('O' || string, 10)) from SupportBean(string like 'I%')";
+        String stmtTextOne = "insert into MyStream select 1 as dummy, transpose(custom('O' || theString, 10)) from SupportBean(theString like 'I%')";
         epService.getEPAdministrator().createEPL(stmtTextOne);
 
         String stmtTextTwo = "select * from MyStream";
@@ -57,8 +57,8 @@ public class TestInsertIntoTransposeStream extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("I1", 1));
         EventBean result = listener.assertOneGetNewAndReset();
         Pair underlying = (Pair) result.getUnderlying();
-        EPAssertionUtil.assertProps(result, "dummy,string,intPrimitive".split(","), new Object[]{1, "OI1", 10});
-        assertEquals("OI1", ((SupportBean) underlying.getFirst()).getString());
+        EPAssertionUtil.assertProps(result, "dummy,theString,intPrimitive".split(","), new Object[]{1, "OI1", 10});
+        assertEquals("OI1", ((SupportBean) underlying.getFirst()).getTheString());
     }
 
     public void testTransposeFunctionToStream()
@@ -66,10 +66,10 @@ public class TestInsertIntoTransposeStream extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("custom", SupportStaticMethodLib.class.getName(), "makeSupportBean");
 
-        String stmtTextOne = "insert into OtherStream select transpose(custom('O' || string, 10)) from SupportBean(string like 'I%')";
+        String stmtTextOne = "insert into OtherStream select transpose(custom('O' || theString, 10)) from SupportBean(theString like 'I%')";
         epService.getEPAdministrator().createEPL(stmtTextOne);
 
-        String stmtTextTwo = "select * from OtherStream(string like 'O%')";
+        String stmtTextTwo = "select * from OtherStream(theString like 'O%')";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtTextTwo);
         stmt.addListener(listener);
         EventType type = stmt.getEventType();
@@ -77,8 +77,8 @@ public class TestInsertIntoTransposeStream extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("I1", 1));
         EventBean result = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(result, "string,intPrimitive".split(","), new Object[]{"OI1", 10});
-        assertEquals("OI1", ((SupportBean) result.getUnderlying()).getString());
+        EPAssertionUtil.assertProps(result, "theString,intPrimitive".split(","), new Object[]{"OI1", 10});
+        assertEquals("OI1", ((SupportBean) result.getUnderlying()).getTheString());
     }
 
     public void testTransposeSingleColumnInsert()
@@ -89,19 +89,19 @@ public class TestInsertIntoTransposeStream extends TestCase
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("customTwo", SupportStaticMethodLib.class.getName(), "makeSupportBeanNumeric");
 
         // with transpose and same input and output
-        String stmtTextOne = "insert into SupportBean select transpose(customOne('O' || string, 10)) from SupportBean(string like 'I%')";
+        String stmtTextOne = "insert into SupportBean select transpose(customOne('O' || theString, 10)) from SupportBean(theString like 'I%')";
         EPStatement stmtOne = epService.getEPAdministrator().createEPL(stmtTextOne);
         assertEquals(SupportBean.class, stmtOne.getEventType().getUnderlyingType());
         stmtOne.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("I1", 1));
         EventBean resultOne = listener.assertOneGetNewAndReset();
-        EPAssertionUtil.assertProps(resultOne, "string,intPrimitive".split(","), new Object[]{"OI1", 10});
-        assertEquals("OI1", ((SupportBean) resultOne.getUnderlying()).getString());
+        EPAssertionUtil.assertProps(resultOne, "theString,intPrimitive".split(","), new Object[]{"OI1", 10});
+        assertEquals("OI1", ((SupportBean) resultOne.getUnderlying()).getTheString());
         stmtOne.destroy();
 
         // with transpose but different input and output (also test ignore column name)
-        String stmtTextTwo = "insert into SupportBeanNumeric select transpose(customTwo(intPrimitive, intPrimitive+1)) as col1 from SupportBean(string like 'I%')";
+        String stmtTextTwo = "insert into SupportBeanNumeric select transpose(customTwo(intPrimitive, intPrimitive+1)) as col1 from SupportBean(theString like 'I%')";
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL(stmtTextTwo);
         assertEquals(SupportBeanNumeric.class, stmtTwo.getEventType().getUnderlyingType());
         stmtTwo.addListener(listener);

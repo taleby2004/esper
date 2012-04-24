@@ -36,17 +36,17 @@ public class AxionEventBeanFactory implements PlugInEventBeanFactory
         this.types = types;
     }
 
-    public EventBean create(Object node, URI resolutionURI)
+    public EventBean create(Object theEvent, URI resolutionURI)
     {
         // Check event type - only handle the Axiom types of OMDocument and OMElement
         OMElement namedNode;
-        if (node instanceof OMDocument)
+        if (theEvent instanceof OMDocument)
         {
-            namedNode = ((OMDocument) node).getOMDocumentElement();
+            namedNode = ((OMDocument) theEvent).getOMDocumentElement();
         }
-        else if (node instanceof OMElement)
+        else if (theEvent instanceof OMElement)
         {
-            namedNode = (OMElement)node;
+            namedNode = (OMElement) theEvent;
         }
         else
         {

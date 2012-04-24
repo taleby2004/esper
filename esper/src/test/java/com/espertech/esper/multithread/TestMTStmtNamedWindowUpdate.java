@@ -15,7 +15,6 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportMTUpdateListener;
 import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,11 +56,11 @@ public class TestMTStmtNamedWindowUpdate extends TestCase
         engine.initialize();
 
         // setup statements
-        engine.getEPAdministrator().createEPL("create window MyWindow.std:unique(string, intPrimitive) as select * from SupportBean");
+        engine.getEPAdministrator().createEPL("create window MyWindow.std:unique(theString, intPrimitive) as select * from SupportBean");
         engine.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean(boolPrimitive = true)");
         engine.getEPAdministrator().createEPL("on SupportBean(boolPrimitive = false) sb " +
                 "update MyWindow win set intBoxed = win.intBoxed + 1, doublePrimitive = win.doublePrimitive + sb.doublePrimitive" +
-                " where sb.string = win.string and sb.intPrimitive = win.intPrimitive");
+                " where sb.theString = win.theString and sb.intPrimitive = win.intPrimitive");
 
         // send primer events, initialize totals
         Map<MultiKeyUntyped, UpdateTotals> totals = new HashMap<MultiKeyUntyped, UpdateTotals>();
@@ -73,7 +72,7 @@ public class TestMTStmtNamedWindowUpdate extends TestCase
                 primer.setDoublePrimitive(0);
 
                 engine.getEPRuntime().sendEvent(primer);
-                MultiKeyUntyped key = new MultiKeyUntyped(primer.getString(), primer.getIntPrimitive());
+                MultiKeyUntyped key = new MultiKeyUntyped(primer.getTheString(), primer.getIntPrimitive());
                 totals.put(key, new UpdateTotals(0,0));
             }
         }
@@ -98,7 +97,7 @@ public class TestMTStmtNamedWindowUpdate extends TestCase
             StmtNamedWindowUpdateCallable.UpdateResult result = future[i].get();
             deltaCumulative += result.getDelta();
             for (StmtNamedWindowUpdateCallable.UpdateItem item : result.getUpdates()) {
-                MultiKeyUntyped key = new MultiKeyUntyped(item.getString(), item.getIntval());
+                MultiKeyUntyped key = new MultiKeyUntyped(item.getTheString(), item.getIntval());
                 UpdateTotals total = totals.get(key);
                 if (total == null) {
                     throw new RuntimeException("Totals not found for key " + key);
@@ -114,7 +113,7 @@ public class TestMTStmtNamedWindowUpdate extends TestCase
         long totalUpdates = 0;
         for (EventBean row : rows)
         {
-            UpdateTotals total = totals.get(new MultiKeyUntyped(row.get("string"), row.get("intPrimitive")));
+            UpdateTotals total = totals.get(new MultiKeyUntyped(row.get("theString"), row.get("intPrimitive")));
             assertEquals(total.getNum(), row.get("intBoxed"));
             assertEquals(total.getSum(), row.get("doublePrimitive"));
             totalUpdates += total.getNum();

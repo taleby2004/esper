@@ -84,26 +84,28 @@ public final class FilterHandleSetNode implements EventEvaluator
      * Evaluate an event by asking each index to match the event. Any filter callbacks at this node automatically
      * match the event and do not need to be further evaluated, and are thus added to the "matches" list of callbacks.
      * NOTE: This client should not use the lock before calling this method.
-     * @param eventBean is the event wrapper supplying the event property values
+     * @param theEvent is the event wrapper supplying the event property values
      * @param matches is the list of callbacks to add to for any matches found
      */
-    public final void matchEvent(EventBean eventBean, Collection<FilterHandle> matches)
+    public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
         nodeRWLock.readLock().lock();
+        try {
+            // Ask each of the indizes to match against the attribute values
+            for (FilterParamIndexBase index : indizes)
+            {
+                index.matchEvent(theEvent, matches);
+            }
 
-        // Ask each of the indizes to match against the attribute values
-        for (FilterParamIndexBase index : indizes)
-        {
-            index.matchEvent(eventBean, matches);
+            // Add each filter callback stored in this node to the matching list
+            for (FilterHandle filterCallback : callbackSet)
+            {
+                matches.add(filterCallback);
+            }
         }
-
-        // Add each filter callback stored in this node to the matching list
-        for (FilterHandle filterCallback : callbackSet)
-        {
-            matches.add(filterCallback);
+        finally {
+            nodeRWLock.readLock().unlock();
         }
-
-        nodeRWLock.readLock().unlock();
     }
 
     /**

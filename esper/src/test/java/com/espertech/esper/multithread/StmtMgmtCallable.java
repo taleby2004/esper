@@ -78,9 +78,9 @@ public class StmtMgmtCallable implements Callable
                     stmt.addListener(listener);
                     stmt.addListener(logListener);
 
-                    Object event = makeEvent();
-                    ThreadLogUtil.trace("sending event ", event);
-                    engine.getEPRuntime().sendEvent(event);
+                    Object theEvent = makeEvent();
+                    ThreadLogUtil.trace("sending event ", theEvent);
+                    engine.getEPRuntime().sendEvent(theEvent);
 
                     // Should have received one or more events, one of them must be mine
                     EventBean[] newEvents = listener.getNewDataListFlattened();
@@ -94,7 +94,7 @@ public class StmtMgmtCallable implements Callable
                         {
                             underlying = newEvents[i].get("a");
                         }
-                        if (underlying == event)
+                        if (underlying == theEvent)
                         {
                             found = true;
                         }
@@ -105,9 +105,9 @@ public class StmtMgmtCallable implements Callable
                     // Stopping statement, the event should not be received, another event may however
                     ThreadLogUtil.trace("stop statement");
                     stmt.stop();
-                    event = makeEvent();
-                    ThreadLogUtil.trace("send non-matching event ", event);
-                    engine.getEPRuntime().sendEvent(event);
+                    theEvent = makeEvent();
+                    ThreadLogUtil.trace("send non-matching event ", theEvent);
+                    engine.getEPRuntime().sendEvent(theEvent);
 
                     // Make sure the event was not received
                     newEvents = listener.getNewDataListFlattened();
@@ -119,7 +119,7 @@ public class StmtMgmtCallable implements Callable
                         {
                             underlying = newEvents[i].get("a");
                         }
-                        if (underlying == event)
+                        if (underlying == theEvent)
                         {
                             found = true;
                         }
@@ -143,8 +143,8 @@ public class StmtMgmtCallable implements Callable
 
     private SupportMarketDataBean makeEvent()
     {
-        SupportMarketDataBean event = new SupportMarketDataBean("IBM", 50, 1000L, "RT");
-        return event;
+        SupportMarketDataBean theEvent = new SupportMarketDataBean("IBM", 50, 1000L, "RT");
+        return theEvent;
     }
 
     private static final Log log = LogFactory.getLog(StmtMgmtCallable.class);

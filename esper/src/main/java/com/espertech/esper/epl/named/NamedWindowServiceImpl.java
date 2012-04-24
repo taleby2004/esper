@@ -153,10 +153,10 @@ public class NamedWindowServiceImpl implements NamedWindowService
 
         if (!observers.isEmpty())
         {
-            NamedWindowLifecycleEvent event = new NamedWindowLifecycleEvent(name, processor, NamedWindowLifecycleEvent.LifecycleEventType.CREATE);
+            NamedWindowLifecycleEvent theEvent = new NamedWindowLifecycleEvent(name, processor, NamedWindowLifecycleEvent.LifecycleEventType.CREATE);
             for (NamedWindowLifecycleObserver observer : observers)
             {
-                observer.observe(event);
+                observer.observe(theEvent);
             }
         }
 
@@ -173,10 +173,10 @@ public class NamedWindowServiceImpl implements NamedWindowService
 
             if (!observers.isEmpty())
             {
-                NamedWindowLifecycleEvent event = new NamedWindowLifecycleEvent(name, processor, NamedWindowLifecycleEvent.LifecycleEventType.DESTROY);
+                NamedWindowLifecycleEvent theEvent = new NamedWindowLifecycleEvent(name, processor, NamedWindowLifecycleEvent.LifecycleEventType.DESTROY);
                 for (NamedWindowLifecycleObserver observer : observers)
                 {
-                    observer.observe(event);
+                    observer.observe(theEvent);
                 }
             }
         }

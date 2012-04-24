@@ -13,6 +13,7 @@ package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriberMRD;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementFormatter;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
@@ -24,11 +25,12 @@ import com.espertech.esper.support.bean.SupportBean_S0;
 import com.espertech.esper.support.bean.SupportBean_ST0;
 import com.espertech.esper.support.bean.bookexample.OrderBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.util.SupportSubscriberMRD;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TestNamedWindowMerge extends TestCase {
@@ -58,10 +60,16 @@ public class TestNamedWindowMerge extends TestCase {
     }
 
     public void testInsertOtherStream() throws Exception {
-        String epl = "create schema MyEvent as (name string, value double);\n" +
-                     "create window MyWin.std:unique(name) as MyEvent;\n" +
+        runAssertionInsertOtherStream(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionInsertOtherStream(EventRepresentationEnum.MAP);
+        runAssertionInsertOtherStream(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionInsertOtherStream(EventRepresentationEnum eventRepresentationEnum) throws Exception {
+        String epl = eventRepresentationEnum.getAnnotationText() + " create schema MyEvent as (name string, value double);\n" +
+                     eventRepresentationEnum.getAnnotationText() + " create window MyWin.std:unique(name) as MyEvent;\n" +
                      "insert into MyWin select * from MyEvent;\n" +
-                     "create schema InputEvent as (col1 string, col2 double);\n" +
+                     eventRepresentationEnum.getAnnotationText() + " create schema InputEvent as (col1 string, col2 double);\n" +
                 "\n" +
                 "on MyEvent as eme\n" +
                 "merge MyWin as mywin\n" +
@@ -76,14 +84,16 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(epl, null, null, null);
         epService.getEPAdministrator().createEPL("select * from OtherStreamOne").addListener(mergeListener);
 
-        epService.getEPRuntime().sendEvent(makeMyEvent("name1", 10d), "MyEvent");
+        makeSendNameValueEvent(epService, eventRepresentationEnum, "MyEvent", "name1", 10d);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), "event_name,status".split(","), new Object[]{"name1", 0d});
 
-        epService.getEPRuntime().sendEvent(makeMyEvent("name1", 11d), "MyEvent");
+        makeSendNameValueEvent(epService, eventRepresentationEnum, "MyEvent", "name1", 11d);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), "event_name,status".split(","), new Object[]{"name1", 10d});
 
-        epService.getEPRuntime().sendEvent(makeMyEvent("name1", 12d), "MyEvent");
+        makeSendNameValueEvent(epService, eventRepresentationEnum, "MyEvent", "name1", 12d);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), "event_name,status".split(","), new Object[]{"name1", 11d});
+        
+        epService.initialize();
     }
 
     public void testMergeTriggeredByAnotherWindow() {
@@ -107,8 +117,8 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPAdministrator().createEPL("insert into WindowTwo select 'W2' as val0, id as val1 from SupportBean_S0");
 
         String epl = "on SupportBean sb merge WindowOne w1 " +
-                "where sb.string = w1.string " +
-                "when not matched then insert select 'Y' as string, (select val1 from WindowTwo as w2 where w2.val0 = sb.string) as intPrimitive";
+                "where sb.theString = w1.string " +
+                "when not matched then insert select 'Y' as string, (select val1 from WindowTwo as w2 where w2.val0 = sb.theString) as intPrimitive";
         epService.getEPAdministrator().createEPL(epl);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(50));  // WindowTwo now has a row {W2, 1}
@@ -125,7 +135,7 @@ public class TestNamedWindowMerge extends TestCase {
 
         EPStatement nmStmt = epService.getEPAdministrator().createEPL("create window Win.win:keepall() as SupportBean");
         epService.getEPAdministrator().createEPL("insert into Win select * from SupportBean");
-        String epl = "on SupportBean_ST0 as st0 merge Win as win where st0.key0 = win.string " +
+        String epl = "on SupportBean_ST0 as st0 merge Win as win where st0.key0 = win.theString " +
                 "when matched " +
                 "then delete where intPrimitive < 0 " +
                 "then update set intPrimitive = st0.p00 where intPrimitive = 3000 or p00 = 3000 " +
@@ -135,7 +145,7 @@ public class TestNamedWindowMerge extends TestCase {
                 "then delete where intPrimitive = 2000 ";
         String eplFormatted = "on SupportBean_ST0 as st0" + NEWLINE +
                 "merge Win as win" + NEWLINE +
-                "where st0.key0 = win.string" + NEWLINE +
+                "where st0.key0 = win.theString" + NEWLINE +
                 "when matched" + NEWLINE +
                 "then delete where intPrimitive < 0" + NEWLINE +
                 "then update set intPrimitive = st0.p00 where intPrimitive = 3000 or p00 = 3000" + NEWLINE +
@@ -144,7 +154,7 @@ public class TestNamedWindowMerge extends TestCase {
                 "then update set intPrimitive = 1999 where intPrimitive = 2000" + NEWLINE +
                 "then delete where intPrimitive = 2000";
         epService.getEPAdministrator().createEPL(epl);
-        String[] fields = "string,intPrimitive".split(",");
+        String[] fields = "theString,intPrimitive".split(",");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
         epService.getEPRuntime().sendEvent(new SupportBean_ST0("ST0", "E1", 0));
@@ -219,13 +229,19 @@ public class TestNamedWindowMerge extends TestCase {
     }
 
     public void testDocExample() throws Exception {
+        runAssertionDocExample(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionDocExample(EventRepresentationEnum.MAP);
+        runAssertionDocExample(EventRepresentationEnum.DEFAULT);
+    }
 
-        String baseModule = "create schema OrderEvent as (orderId string, productId string, price double, quantity int, deletedFlag boolean)";
+    public void runAssertionDocExample(EventRepresentationEnum eventRepresentationEnum) throws Exception {
+
+        String baseModule = eventRepresentationEnum.getAnnotationText() + " create schema OrderEvent as (orderId string, productId string, price double, quantity int, deletedFlag boolean)";
         epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(baseModule, null, null, null);
 
-        String appModuleOne = "create schema ProductTotalRec as (productId string, totalPrice double);" +
+        String appModuleOne = eventRepresentationEnum.getAnnotationText() + " create schema ProductTotalRec as (productId string, totalPrice double);" +
                 "" +
-                "@Name('nwProd') create window ProductWindow.std:unique(productId) as ProductTotalRec;" +
+                eventRepresentationEnum.getAnnotationText() + " @Name('nwProd') create window ProductWindow.std:unique(productId) as ProductTotalRec;" +
                 "" +
                 "on OrderEvent oe\n" +
                 "merge ProductWindow pw\n" +
@@ -236,7 +252,7 @@ public class TestNamedWindowMerge extends TestCase {
                 "then insert select productId, price as totalPrice;";
         epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(appModuleOne, null, null, null);
 
-        String appModuleTwo = "@Name('nwOrd') create window OrderWindow.win:keepall() as OrderEvent;" +
+        String appModuleTwo = eventRepresentationEnum.getAnnotationText() + " @Name('nwOrd') create window OrderWindow.win:keepall() as OrderEvent;" +
                 "" +
                 "on OrderEvent oe\n" +
                 "  merge OrderWindow pw\n" +
@@ -250,9 +266,9 @@ public class TestNamedWindowMerge extends TestCase {
 
         epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(appModuleTwo, null, null, null);
 
-        sendOrderEvent("O1", "P1", 10, 100, false);
-        sendOrderEvent("O1", "P1", 11, 200, false);
-        sendOrderEvent("O2", "P2", 3, 300, false);
+        sendOrderEvent(eventRepresentationEnum, "O1", "P1", 10, 100, false);
+        sendOrderEvent(eventRepresentationEnum, "O1", "P1", 11, 200, false);
+        sendOrderEvent(eventRepresentationEnum, "O2", "P2", 3, 300, false);
         EPAssertionUtil.assertPropsPerRowAnyOrder(epService.getEPAdministrator().getStatement("nwProd").iterator(), "productId,totalPrice".split(","), new Object[][]{{"P1", 21d}, {"P2", 3d}});
         EPAssertionUtil.assertPropsPerRowAnyOrder(epService.getEPAdministrator().getStatement("nwOrd").iterator(), "orderId,quantity".split(","), new Object[][]{{"O1", 200}, {"O2", 300}});
 
@@ -265,16 +281,23 @@ public class TestNamedWindowMerge extends TestCase {
                 "    when matched and ce.action = 'LEAVE' then update set StreetCarCountWindow.carcount = carcount - 1;" +
                 "    select * from StreetCarCountWindow;";
         epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(module, null, null, null);
+
+        epService.initialize();
     }
 
-    private void sendOrderEvent(String orderId, String productId, double price, int quantity, boolean deletedFlag) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("orderId", orderId);
-        event.put("productId", productId);
-        event.put("price", price);
-        event.put("quantity", quantity);
-        event.put("deletedFlag", deletedFlag);
-        epService.getEPRuntime().sendEvent(event, "OrderEvent");
+    private void sendOrderEvent(EventRepresentationEnum eventRepresentationEnum, String orderId, String productId, double price, int quantity, boolean deletedFlag) {
+        Map<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("orderId", orderId);
+        theEvent.put("productId", productId);
+        theEvent.put("price", price);
+        theEvent.put("quantity", quantity);
+        theEvent.put("deletedFlag", deletedFlag);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), "OrderEvent");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "OrderEvent");
+        }
     }
 
     public void testTypeReference() {
@@ -297,10 +320,18 @@ public class TestNamedWindowMerge extends TestCase {
     }
 
     public void testPerformance() {
-        EPStatement stmtNamedWindow = epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as (c1 string, c2 int)");
+        runAssertionPerformance(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionPerformance(EventRepresentationEnum.MAP);
+        runAssertionPerformance(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionPerformance(EventRepresentationEnum outputType) {
+
+        EPStatement stmtNamedWindow = epService.getEPAdministrator().createEPL(outputType.getAnnotationText() + " create window MyWindow.win:keepall() as (c1 string, c2 int)");
+        assertEquals(outputType.getOutputClass(), stmtNamedWindow.getEventType().getUnderlyingType());
 
         // preload events
-        EPStatement stmt = epService.getEPAdministrator().createEPL("insert into MyWindow select string as c1, intPrimitive as c2 from SupportBean");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("insert into MyWindow select theString as c1, intPrimitive as c2 from SupportBean");
         final int totalUpdated = 10000;
         for (int i = 0; i < totalUpdated; i++) {
             epService.getEPRuntime().sendEvent(new SupportBean("E" + i, 0));
@@ -309,9 +340,9 @@ public class TestNamedWindowMerge extends TestCase {
 
         String epl =  "on SupportBean sb " +
                       "merge MyWindow nw " +
-                      "where nw.c1 = sb.string " +
+                      "where nw.c1 = sb.theString " +
                       "when not matched then " +
-                      "insert select string as c1, intPrimitive as c2 " +
+                      "insert select theString as c1, intPrimitive as c2 " +
                       "when matched then " +
                       "update set nw.c2=sb.intPrimitive";
         stmt = epService.getEPAdministrator().createEPL(epl);
@@ -338,6 +369,9 @@ public class TestNamedWindowMerge extends TestCase {
         }
         assertEquals(totalUpdated, count);
         assertTrue(delta < 500);
+        
+        epService.getEPAdministrator().destroyAllStatements();
+        epService.getEPAdministrator().getConfiguration().removeEventType("MyWindow", true);
     }
 
     public void testPropertyEval() {
@@ -362,11 +396,11 @@ public class TestNamedWindowMerge extends TestCase {
         String[] fields = "c1,c2".split(",");
         EPStatement namedWindowStmt = epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as (c1 string, c2 string)");
 
-        String epl =  "on pattern[every a=SupportBean(string like 'A%') -> b=SupportBean(string like 'B%', intPrimitive = a.intPrimitive)] me " +
+        String epl =  "on pattern[every a=SupportBean(theString like 'A%') -> b=SupportBean(theString like 'B%', intPrimitive = a.intPrimitive)] me " +
                       "merge MyWindow mw " +
-                      "where me.a.string = mw.c1 and me.b.string = mw.c2 " +
+                      "where me.a.theString = mw.c1 and me.b.theString = mw.c2 " +
                       "when not matched then " +
-                      "insert select me.a.string as c1, me.b.string as c2 ";
+                      "insert select me.a.theString as c1, me.b.theString as c2 ";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(mergeListener);
 
@@ -382,9 +416,16 @@ public class TestNamedWindowMerge extends TestCase {
     }
 
     public void testInnerTypeAndVariable() {
-        epService.getEPAdministrator().createEPL("create schema MyInnerSchema(in1 string, in2 int)");
-        epService.getEPAdministrator().createEPL("create schema MyEventSchema(col1 string, col2 MyInnerSchema)");
-        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as (c1 string, c2 MyInnerSchema)");
+        runAssertionInnerTypeAndVariable(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionInnerTypeAndVariable(EventRepresentationEnum.MAP);
+        runAssertionInnerTypeAndVariable(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionInnerTypeAndVariable(EventRepresentationEnum eventRepresentationEnum) {
+
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyInnerSchema(in1 string, in2 int)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyEventSchema(col1 string, col2 MyInnerSchema)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create window MyWindow.win:keepall() as (c1 string, c2 MyInnerSchema)");
         epService.getEPAdministrator().createEPL("create variable boolean myvar");
 
         String epl =  "on MyEventSchema me " +
@@ -402,18 +443,18 @@ public class TestNamedWindowMerge extends TestCase {
         stmt.addListener(mergeListener);
         String[] fields = "c1,c2.in1,c2.in2".split(",");
 
-        sendMyInnerSchemaEvent("X1", "Y1", 10);
+        sendMyInnerSchemaEvent(eventRepresentationEnum, "X1", "Y1", 10);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"B", "Y1", 10});
 
-        sendMyInnerSchemaEvent("B", "0", 0);    // delete
+        sendMyInnerSchemaEvent(eventRepresentationEnum, "B", "0", 0);    // delete
         EPAssertionUtil.assertProps(mergeListener.assertOneGetOldAndReset(), fields, new Object[]{"B", "Y1", 10});
 
         epService.getEPRuntime().setVariableValue("myvar", true);
-        sendMyInnerSchemaEvent("X2", "Y2", 11);
+        sendMyInnerSchemaEvent(eventRepresentationEnum, "X2", "Y2", 11);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"X2", "Y2", 11});
 
         epService.getEPRuntime().setVariableValue("myvar", false);
-        sendMyInnerSchemaEvent("X3", "Y3", 12);
+        sendMyInnerSchemaEvent(eventRepresentationEnum, "X3", "Y3", 12);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"A", null, null});
 
         stmt.destroy();
@@ -422,40 +463,50 @@ public class TestNamedWindowMerge extends TestCase {
         stmt.setSubscriber(subscriber);
         epService.getEPRuntime().setVariableValue("myvar", true);
 
-        sendMyInnerSchemaEvent("X4", "Y4", 11);
+        sendMyInnerSchemaEvent(eventRepresentationEnum, "X4", "Y4", 11);
         Object[][] result = subscriber.getInsertStreamList().get(0);
-        Map map = (Map) result[0][0];
-        assertEquals("X4", map.get("c1"));
-        EventBean event = (EventBean) map.get("c2");
-        assertEquals("Y4", event.get("in1"));
+        if (!eventRepresentationEnum.isObjectArrayEvent()) {
+            Map map = (Map) result[0][0];
+            assertEquals("X4", map.get("c1"));
+            EventBean theEvent = (EventBean) map.get("c2");
+            assertEquals("Y4", theEvent.get("in1"));
+        }
+        else {
+            Object[] row = (Object[]) result[0][0];
+            assertEquals("X4", row[0]);
+            EventBean theEvent = (EventBean) row[1];
+            assertEquals("Y4", theEvent.get("in1"));
+        }
+
+        epService.initialize();
     }
 
     public void testPropertyInsertBean() {
-        EPStatement stmtWindow = epService.getEPAdministrator().createEPL("create window MergeWindow.std:unique(string) as SupportBean");
+        EPStatement stmtWindow = epService.getEPAdministrator().createEPL("create window MergeWindow.std:unique(theString) as SupportBean");
 
-        String epl = "on SupportBean as up merge MergeWindow as mv where mv.string=up.string when not matched then insert select intPrimitive";
+        String epl = "on SupportBean as up merge MergeWindow as mv where mv.theString=up.theString when not matched then insert select intPrimitive";
         EPStatement stmtMerge = epService.getEPAdministrator().createEPL(epl);
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
 
-        EventBean event = stmtWindow.iterator().next();
-        EPAssertionUtil.assertProps(event, "string,intPrimitive".split(","), new Object[]{null, 10});
+        EventBean theEvent = stmtWindow.iterator().next();
+        EPAssertionUtil.assertProps(theEvent, "theString,intPrimitive".split(","), new Object[]{null, 10});
         stmtMerge.destroy();
 
-        epl = "on SupportBean as up merge MergeWindow as mv where mv.string=up.string when not matched then insert select string, intPrimitive";
+        epl = "on SupportBean as up merge MergeWindow as mv where mv.theString=up.theString when not matched then insert select theString, intPrimitive";
         epService.getEPAdministrator().createEPL(epl);
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
 
-        EPAssertionUtil.assertPropsPerRow(stmtWindow.iterator(), "string,intPrimitive".split(","), new Object[][]{{null, 10}, {"E2", 20}});
+        EPAssertionUtil.assertPropsPerRow(stmtWindow.iterator(), "theString,intPrimitive".split(","), new Object[][]{{null, 10}, {"E2", 20}});
     }
 
     public void testInvalid() {
         String epl;
-        epService.getEPAdministrator().createEPL("create window MergeWindow.std:unique(string) as SupportBean");
+        epService.getEPAdministrator().createEPL("create window MergeWindow.std:unique(theString) as SupportBean");
         epService.getEPAdministrator().createEPL("create schema ABCSchema as (val int)");
         epService.getEPAdministrator().createEPL("create window ABCWindow.win:keepall() as ABCSchema");
 
-        epl = "on SupportBean_A merge MergeWindow as windowevent where id = string when not matched and exists(select * from MergeWindow mw where mw.string = windowevent.string) is not null then insert into ABC select '1'";
-        tryInvalid(epl, "Error starting statement: On-Merge not-matched filter expression may not use properties that are provided by the named window event [on SupportBean_A merge MergeWindow as windowevent where id = string when not matched and exists(select * from MergeWindow mw where mw.string = windowevent.string) is not null then insert into ABC select '1']");
+        epl = "on SupportBean_A merge MergeWindow as windowevent where id = theString when not matched and exists(select * from MergeWindow mw where mw.theString = windowevent.theString) is not null then insert into ABC select '1'";
+        tryInvalid(epl, "Error starting statement: On-Merge not-matched filter expression may not use properties that are provided by the named window event [on SupportBean_A merge MergeWindow as windowevent where id = theString when not matched and exists(select * from MergeWindow mw where mw.theString = windowevent.theString) is not null then insert into ABC select '1']");
 
         epl = "on SupportBean_A as up merge ABCWindow as mv when not matched then insert (col) select 1";
         tryInvalid(epl, "Error starting statement: Exception encountered in when-not-matched (clause 1): Event type named 'ABCWindow' has already been declared with differing column name or type information: The property 'val' is not provided but required [on SupportBean_A as up merge ABCWindow as mv when not matched then insert (col) select 1]");
@@ -463,8 +514,8 @@ public class TestNamedWindowMerge extends TestCase {
         epl = "on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then update set intPrimitive = 1";
         tryInvalid(epl, "Incorrect syntax near 'update' (a reserved keyword) expecting 'insert' but found 'update' at line 1 column 97 [on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then update set intPrimitive = 1]");
 
-        epl = "on SupportBean_A as up merge MergeWindow as mv where mv.string=id when matched then insert select *";
-        tryInvalid(epl, "Error starting statement: Exception encountered in when-not-matched (clause 1): Expression-returned event type 'SupportBean_A' with underlying type 'com.espertech.esper.support.bean.SupportBean_A' cannot be converted target event type 'MergeWindow' with underlying type 'com.espertech.esper.support.bean.SupportBean' [on SupportBean_A as up merge MergeWindow as mv where mv.string=id when matched then insert select *]");
+        epl = "on SupportBean_A as up merge MergeWindow as mv where mv.theString=id when matched then insert select *";
+        tryInvalid(epl, "Error starting statement: Exception encountered in when-not-matched (clause 1): Expression-returned event type 'SupportBean_A' with underlying type 'com.espertech.esper.support.bean.SupportBean_A' cannot be converted target event type 'MergeWindow' with underlying type 'com.espertech.esper.support.bean.SupportBean' [on SupportBean_A as up merge MergeWindow as mv where mv.theString=id when matched then insert select *]");
 
         epl = "on SupportBean as up merge MergeWindow as mv";
         tryInvalid(epl, "Unexpected end of input string, check for an invalid identifier or missing additional keywords near 'mv' at line 1 column 42  [on SupportBean as up merge MergeWindow as mv]");
@@ -481,8 +532,8 @@ public class TestNamedWindowMerge extends TestCase {
         epl = "on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then insert select intPrimitive";
         tryInvalid(epl, "Error starting statement: Property named 'intPrimitive' is not valid in any stream [on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then insert select intPrimitive]");
 
-        epl = "on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then insert select * where string = 'A'";
-        tryInvalid(epl, "Error starting statement: Property named 'string' is not valid in any stream [on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then insert select * where string = 'A']");
+        epl = "on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then insert select * where theString = 'A'";
+        tryInvalid(epl, "Error starting statement: Property named 'theString' is not valid in any stream [on SupportBean_A as up merge MergeWindow as mv where mv.boolPrimitive=true when not matched then insert select * where theString = 'A']");
     }
 
     public void tryInvalid(String epl, String expected) {
@@ -496,60 +547,68 @@ public class TestNamedWindowMerge extends TestCase {
     }
 
     public void testSubselect() {
+        runAssertionSubselect(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionSubselect(EventRepresentationEnum.MAP);
+        runAssertionSubselect(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionSubselect(EventRepresentationEnum eventRepresentationEnum) {
         String[] fields = "col1,col2".split(",");
-        epService.getEPAdministrator().createEPL("create schema MyEvent as (in1 string, in2 int)");
-        epService.getEPAdministrator().createEPL("create schema MySchema as (col1 string, col2 int)");
-        EPStatement namedWindowStmt = epService.getEPAdministrator().createEPL("create window MyWindow.std:lastevent() as MySchema");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MyEvent as (in1 string, in2 int)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MySchema as (col1 string, col2 int)");
+        EPStatement namedWindowStmt = epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create window MyWindow.std:lastevent() as MySchema");
         epService.getEPAdministrator().createEPL("on SupportBean_A delete from MyWindow");
 
         String epl =  "on MyEvent me " +
                       "merge MyWindow mw " +
-                      "when not matched and (select intPrimitive>0 from SupportBean(string like 'A%').std:lastevent()) then " +
-                      "insert(col1, col2) select (select string from SupportBean(string like 'A%').std:lastevent()), (select intPrimitive from SupportBean(string like 'A%').std:lastevent()) " +
-                      "when matched and (select intPrimitive>0 from SupportBean(string like 'B%').std:lastevent()) then " +
-                      "update set col1=(select string from SupportBean(string like 'B%').std:lastevent()), col2=(select intPrimitive from SupportBean(string like 'B%').std:lastevent()) " +
-                      "when matched and (select intPrimitive>0 from SupportBean(string like 'C%').std:lastevent()) then " +
+                      "when not matched and (select intPrimitive>0 from SupportBean(theString like 'A%').std:lastevent()) then " +
+                      "insert(col1, col2) select (select theString from SupportBean(theString like 'A%').std:lastevent()), (select intPrimitive from SupportBean(theString like 'A%').std:lastevent()) " +
+                      "when matched and (select intPrimitive>0 from SupportBean(theString like 'B%').std:lastevent()) then " +
+                      "update set col1=(select theString from SupportBean(theString like 'B%').std:lastevent()), col2=(select intPrimitive from SupportBean(theString like 'B%').std:lastevent()) " +
+                      "when matched and (select intPrimitive>0 from SupportBean(theString like 'C%').std:lastevent()) then " +
                       "delete";
         epService.getEPAdministrator().createEPL(epl);
 
         // no action tests
-        sendMyEvent("X1", 1);
+        sendMyEvent(eventRepresentationEnum, "X1", 1);
         epService.getEPRuntime().sendEvent(new SupportBean("A1", 0));   // ignored
-        sendMyEvent("X2", 2);
+        sendMyEvent(eventRepresentationEnum, "X2", 2);
         epService.getEPRuntime().sendEvent(new SupportBean("A2", 20));
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
-        sendMyEvent("X3", 3);
+        sendMyEvent(eventRepresentationEnum, "X3", 3);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A2", 20}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("Y1"));
         epService.getEPRuntime().sendEvent(new SupportBean("A3", 30));
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
-        sendMyEvent("X4", 4);
+        sendMyEvent(eventRepresentationEnum, "X4", 4);
         epService.getEPRuntime().sendEvent(new SupportBean("A4", 40));
-        sendMyEvent("X5", 5);   // ignored as matched (no where clause, no B event)
+        sendMyEvent(eventRepresentationEnum, "X5", 5);   // ignored as matched (no where clause, no B event)
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A3", 30}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B1", 50));
-        sendMyEvent("X6", 6);
+        sendMyEvent(eventRepresentationEnum, "X6", 6);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"B1", 50}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B2", 60));
-        sendMyEvent("X7", 7);
+        sendMyEvent(eventRepresentationEnum, "X7", 7);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"B2", 60}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("B2", 0));
-        sendMyEvent("X8", 8);
+        sendMyEvent(eventRepresentationEnum, "X8", 8);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"B2", 60}});
 
         epService.getEPRuntime().sendEvent(new SupportBean("C1", 1));
-        sendMyEvent("X9", 9);
+        sendMyEvent(eventRepresentationEnum, "X9", 9);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
         epService.getEPRuntime().sendEvent(new SupportBean("C1", 0));
-        sendMyEvent("X10", 10);
+        sendMyEvent(eventRepresentationEnum, "X10", 10);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A4", 40}});
+
+        epService.initialize();
     }
 
     public void testNoWhereClause() {
@@ -571,28 +630,28 @@ public class TestNamedWindowMerge extends TestCase {
                       "insert select \"x\" || me.in1 || \"x\" as col1, me.in2 * -1 as col2 ";
         epService.getEPAdministrator().createEPL(epl);
 
-        sendMyEvent("E1", 2);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "E1", 2);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"xE1x", -2}});
 
-        sendMyEvent("A1", 3);   // matched : no where clause
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "A1", 3);   // matched : no where clause
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"xE1x", -2}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("Ax1"));
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
-        sendMyEvent("A1", 4);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "A1", 4);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A1", 4}});
 
-        sendMyEvent("B1", 5);   // matched : no where clause
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "B1", 5);   // matched : no where clause
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"A1", 4}});
 
         epService.getEPRuntime().sendEvent(new SupportBean_A("Ax1"));
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, null);
 
-        sendMyEvent("B1", 5);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "B1", 5);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"B1", 5}});
 
-        sendMyEvent("C", 6);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "C", 6);
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"Z", -1}});
     }
 
@@ -617,22 +676,22 @@ public class TestNamedWindowMerge extends TestCase {
         EPStatement merged = epService.getEPAdministrator().createEPL(epl);
         merged.addListener(mergeListener);
 
-        sendMyEvent("E1", 0);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "E1", 0);
         assertFalse(mergeListener.isInvoked());
 
-        sendMyEvent("A1", 1);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "A1", 1);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"A1", 1});
 
-        sendMyEvent("B1", 2);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "B1", 2);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"B1", 2});
 
-        sendMyEvent("C1", 3);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "C1", 3);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"Z", -1});
 
-        sendMyEvent("D1", 4);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "D1", 4);
         EPAssertionUtil.assertProps(mergeListener.assertOneGetNewAndReset(), fields, new Object[]{"xD1x", -4});
 
-        sendMyEvent("B1", 2);
+        sendMyEvent(EventRepresentationEnum.getEngineDefault(epService), "B1", 2);
         assertFalse(mergeListener.isInvoked());
 
         EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(epl);
@@ -641,27 +700,37 @@ public class TestNamedWindowMerge extends TestCase {
         assertEquals(merged.getText().trim(), model.toEPL().trim());
     }
 
-    private void sendMyEvent(String in1, int in2) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("in1", in1);
-        event.put("in2", in2);
-        epService.getEPRuntime().sendEvent(event, "MyEvent");
+    private void sendMyEvent(EventRepresentationEnum eventRepresentationEnum, String in1, int in2) {
+        Map<String, Object> theEvent = new LinkedHashMap<String, Object>();
+        theEvent.put("in1", in1);
+        theEvent.put("in2", in2);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent.values().toArray(), "MyEvent");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "MyEvent");
+        }
     }
 
-    private void sendMyInnerSchemaEvent(String col1, String col2in1, int col2in2) {
-        Map<String, Object> inner = new HashMap<String, Object>();
-        inner.put("in1", col2in1);
-        inner.put("in2", col2in2);
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("col1", col1);
-        event.put("col2", inner);
-        epService.getEPRuntime().sendEvent(event, "MyEventSchema");
+    private void sendMyInnerSchemaEvent(EventRepresentationEnum eventRepresentationEnum, String col1, String col2in1, int col2in2) {
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {col1, new Object[] {col2in1, col2in2}}, "MyEventSchema");
+        }
+        else {
+            Map<String, Object> inner = new HashMap<String, Object>();
+            inner.put("in1", col2in1);
+            inner.put("in2", col2in2);
+            Map<String, Object> theEvent = new HashMap<String, Object>();
+            theEvent.put("col1", col1);
+            theEvent.put("col2", inner);
+            epService.getEPRuntime().sendEvent(theEvent, "MyEventSchema");
+        }
     }
 
     public void testFlow() throws Exception
     {
-        String[] fields = "string,intPrimitive,intBoxed".split(",");
-        EPStatement namedWindowStmt = epService.getEPAdministrator().createEPL("create window MergeWindow.std:unique(string) as SupportBean");
+        String[] fields = "theString,intPrimitive,intBoxed".split(",");
+        EPStatement namedWindowStmt = epService.getEPAdministrator().createEPL("create window MergeWindow.std:unique(theString) as SupportBean");
         namedWindowStmt.addListener(nwListener);
 
         epService.getEPAdministrator().createEPL("insert into MergeWindow select * from SupportBean(boolPrimitive)");
@@ -669,7 +738,7 @@ public class TestNamedWindowMerge extends TestCase {
 
         String epl =  "on SupportBean(boolPrimitive = false) as up " +
                       "merge MergeWindow as mv " +
-                      "where mv.string = up.string " +
+                      "where mv.theString = up.theString " +
                       "when matched and up.intPrimitive < 0 then " +
                       "delete " +
                       "when matched and up.intPrimitive = 0 then " +
@@ -681,7 +750,7 @@ public class TestNamedWindowMerge extends TestCase {
         EPStatement merged = epService.getEPAdministrator().createEPL(epl);
         merged.addListener(mergeListener);
 
-        runAssertion(namedWindowStmt, fields);
+        runAssertionFlow(namedWindowStmt, fields);
 
         merged.destroy();
         epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
@@ -694,14 +763,14 @@ public class TestNamedWindowMerge extends TestCase {
         assertEquals(merged.getText().trim(), model.toEPL().trim());
         merged.addListener(mergeListener);
 
-        runAssertion(namedWindowStmt, fields);
+        runAssertionFlow(namedWindowStmt, fields);
 
         // test stream wildcard
         epService.getEPRuntime().sendEvent(new SupportBean_A("A2"));
         merged.destroy();
         epl =  "on SupportBean(boolPrimitive = false) as up " +
                       "merge MergeWindow as mv " +
-                      "where mv.string = up.string " +
+                      "where mv.theString = up.theString " +
                       "when not matched then " +
                       "insert select up.*";
         merged = epService.getEPAdministrator().createEPL(epl);
@@ -723,7 +792,7 @@ public class TestNamedWindowMerge extends TestCase {
         epService.getEPAdministrator().createEPL(epl);
     }
 
-    private void runAssertion(EPStatement namedWindowStmt, String[] fields) {
+    private void runAssertionFlow(EPStatement namedWindowStmt, String[] fields) {
 
         sendSupportBeanEvent(true, "E1", 10, 200); // insert via insert-into
         EPAssertionUtil.assertProps(nwListener.assertOneGetNewAndReset(), fields, new Object[]{"E1", 10, 200});
@@ -787,17 +856,22 @@ public class TestNamedWindowMerge extends TestCase {
         EPAssertionUtil.assertPropsPerRowAnyOrder(namedWindowStmt.iterator(), fields, new Object[][]{{"E3", 0, 0}});
     }
 
-    private void sendSupportBeanEvent(boolean boolPrimitive, String string, int intPrimitive, Integer intBoxed) {
-        SupportBean event = new SupportBean(string, intPrimitive);
-        event.setIntBoxed(intBoxed);
-        event.setBoolPrimitive(boolPrimitive);
-        epService.getEPRuntime().sendEvent(event);
+    private void sendSupportBeanEvent(boolean boolPrimitive, String theString, int intPrimitive, Integer intBoxed) {
+        SupportBean theEvent = new SupportBean(theString, intPrimitive);
+        theEvent.setIntBoxed(intBoxed);
+        theEvent.setBoolPrimitive(boolPrimitive);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
-    private Map<String, Object> makeMyEvent(String name, double value) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("name", name);
-        event.put("value", value);
-        return event;
+    private void makeSendNameValueEvent(EPServiceProvider engine, EventRepresentationEnum eventRepresentationEnum, String typeName, String name, double value) {
+        Map<String, Object> theEvent = new HashMap<String, Object>();
+        theEvent.put("name", name);
+        theEvent.put("value", value);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            engine.getEPRuntime().sendEvent(theEvent.values().toArray(), typeName);
+        }
+        else {
+            engine.getEPRuntime().sendEvent(theEvent, typeName);
+        }
     }
 }

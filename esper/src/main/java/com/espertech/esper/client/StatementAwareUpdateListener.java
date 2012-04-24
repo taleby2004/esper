@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
-import com.espertech.esper.client.EventBean;
-
 /**
  * Defines an interface to notify of new and old events.
  * <p>

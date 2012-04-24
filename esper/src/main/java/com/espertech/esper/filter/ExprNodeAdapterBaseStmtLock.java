@@ -27,12 +27,12 @@ public class ExprNodeAdapterBaseStmtLock extends ExprNodeAdapterBase
     }
 
     @Override
-    public boolean evaluate(EventBean event)
+    public boolean evaluate(EventBean theEvent)
     {
         evaluatorContext.getAgentInstanceLock().acquireWriteLock(null);
         try {
             variableService.setLocalVersion();
-            return evaluatePerStream(new EventBean[] {event});
+            return evaluatePerStream(new EventBean[] {theEvent});
         }
         finally {
             evaluatorContext.getAgentInstanceLock().releaseWriteLock(null);

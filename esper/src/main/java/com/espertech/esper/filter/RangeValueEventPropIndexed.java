@@ -54,7 +54,7 @@ public class RangeValueEventPropIndexed implements FilterSpecParamRangeValue
 
     public final Double getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
-        EventBean[] events = (EventBean[]) matchedEvents.getMatchingEventAsObject(resultEventAsName);
+        EventBean[] events = (EventBean[]) matchedEvents.getMatchingEventAsObjectByTag(resultEventAsName);
 
         Number value;
         if (events == null)

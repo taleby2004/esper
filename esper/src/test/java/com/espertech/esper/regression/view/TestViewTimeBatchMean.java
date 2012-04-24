@@ -116,8 +116,8 @@ public class TestViewTimeBatchMean extends TestCase
 
     private void sendEvent(String symbol, long volume)
     {
-        SupportMarketDataBean event = new SupportMarketDataBean(symbol, 0, volume, "");
-        epService.getEPRuntime().sendEvent(event);
+        SupportMarketDataBean theEvent = new SupportMarketDataBean(symbol, 0, volume, "");
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private void checkMeanListener(double meanExpected)
@@ -141,9 +141,9 @@ public class TestViewTimeBatchMean extends TestCase
         assertTrue(DoubleValueAssertionUtil.equals(avg,  avgE, 6));
     }
 
-    private double getDoubleValue(ViewFieldEnum field, EventBean event)
+    private double getDoubleValue(ViewFieldEnum field, EventBean theEvent)
     {
-        return (Double) event.get(field.getName());
+        return (Double) theEvent.get(field.getName());
     }
 
     private void sleep(int msec)

@@ -14,9 +14,6 @@ package com.espertech.esper.epl.join.base;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.UniformPair;
-import com.espertech.esper.epl.join.base.ExecNodeQueryStrategy;
-import com.espertech.esper.epl.join.base.JoinSetComposerImpl;
-import com.espertech.esper.epl.join.base.QueryStrategy;
 import com.espertech.esper.epl.join.exec.base.FullTableScanLookupStrategy;
 import com.espertech.esper.epl.join.exec.base.TableLookupExecNode;
 import com.espertech.esper.epl.join.table.EventTable;
@@ -104,10 +101,10 @@ public class TestJoinSetComposerImpl extends TestCase
     {
         String delimiter = "";
         StringBuffer buf = new StringBuffer();
-        for (EventBean event : events)
+        for (EventBean theEvent : events)
         {
             buf.append(delimiter);
-            buf.append(((SupportBean) event.getUnderlying()).getString());
+            buf.append(((SupportBean) theEvent.getUnderlying()).getTheString());
             delimiter = "|";
         }
         return buf.toString();

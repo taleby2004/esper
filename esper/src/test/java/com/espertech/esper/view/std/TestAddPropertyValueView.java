@@ -42,7 +42,7 @@ public class TestAddPropertyValueView extends TestCase
         EventType mergeEventType = SupportEventAdapterService.getService().createAnonymousWrapperType("test", parentEventType, addProps);
 
         // Set up length window view and a test child view
-        myView = new AddPropertyValueView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), new String[] {"symbol"}, new Object[] {"IBM"}, mergeEventType);
+        myView = new AddPropertyValueView(SupportStatementContextFactory.makeAgentInstanceViewFactoryContext(), new String[] {"symbol"}, "IBM", mergeEventType);
 
         parentView = new SupportMapView(schema);
         parentView.addView(myView);

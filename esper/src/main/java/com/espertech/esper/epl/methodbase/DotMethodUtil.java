@@ -25,16 +25,16 @@ import java.util.List;
 public class DotMethodUtil {
 
     public static DotMethodFPProvided getProvidedFootprint(List<ExprNode> parameters) {
-        List<DotMethodFPProvidedParam> params = new ArrayList<DotMethodFPProvidedParam>();
+        List<DotMethodFPProvidedParam> paramsList = new ArrayList<DotMethodFPProvidedParam>();
         for (ExprNode node : parameters) {
             if (!(node instanceof ExprLambdaGoesNode)) {
-                params.add(new DotMethodFPProvidedParam(0, node.getExprEvaluator().getType(), node));
+                paramsList.add(new DotMethodFPProvidedParam(0, node.getExprEvaluator().getType(), node));
                 continue;
             }
             ExprLambdaGoesNode goesNode = (ExprLambdaGoesNode) node;
-            params.add(new DotMethodFPProvidedParam(goesNode.getGoesToNames().size(), null, goesNode));
+            paramsList.add(new DotMethodFPProvidedParam(goesNode.getGoesToNames().size(), null, goesNode));
         }
-        return new DotMethodFPProvided(params.toArray(new DotMethodFPProvidedParam[params.size()]));
+        return new DotMethodFPProvided(paramsList.toArray(new DotMethodFPProvidedParam[paramsList.size()]));
     }
 
     public static DotMethodFP validateParameters(DotMethodFP[] footprints, DotMethodTypeEnum methodType, String methodUsedName, DotMethodFPProvided providedFootprint)
@@ -45,8 +45,8 @@ public class DotMethodUtil {
         DotMethodFP bestMatch = null;
         for (DotMethodFP footprint : footprints) {
 
-            DotMethodFPParam[] requiredParams = footprint.getParams();
-            if (requiredParams.length != providedFootprint.getParams().length) {
+            DotMethodFPParam[] requiredParams = footprint.getParameters();
+            if (requiredParams.length != providedFootprint.getParameters().length) {
                 continue;
             }
 
@@ -58,7 +58,7 @@ public class DotMethodUtil {
             int count = 0;
             for (DotMethodFPParam requiredParam : requiredParams) {
 
-                DotMethodFPProvidedParam providedParam = providedFootprint.getParams()[count++];
+                DotMethodFPProvidedParam providedParam = providedFootprint.getParameters()[count++];
                 if (requiredParam.getLambdaParamNum() != providedParam.getLambdaParamNum()) {
                     paramMatch = false;
                 }
@@ -71,7 +71,7 @@ public class DotMethodUtil {
         }
 
         if (found != null) {
-            validateSpecificTypes(methodUsedName, methodType, found.getParams(), providedFootprint.getParams());
+            validateSpecificTypes(methodUsedName, methodType, found.getParameters(), providedFootprint.getParameters());
             return found;
         }
 
@@ -100,12 +100,12 @@ public class DotMethodUtil {
         }
     }
 
-    private static void validateSpecificTypes(String methodUsedName, DotMethodTypeEnum type, DotMethodFPParam[] foundParams, DotMethodFPProvidedParam[] params)
+    private static void validateSpecificTypes(String methodUsedName, DotMethodTypeEnum type, DotMethodFPParam[] foundParams, DotMethodFPProvidedParam[] parameters)
         throws ExprValidationException
     {
         for (int i = 0; i < foundParams.length; i++) {
             DotMethodFPParam found = foundParams[i];
-            DotMethodFPProvidedParam provided = params[i];
+            DotMethodFPProvidedParam provided = parameters[i];
 
             // Lambda-type expressions not validated here
             if (found.getLambdaParamNum() > 0) {

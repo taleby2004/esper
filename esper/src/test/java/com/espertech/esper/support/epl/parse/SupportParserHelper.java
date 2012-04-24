@@ -77,6 +77,19 @@ public class SupportParserHelper
         return parse(startRuleSelector, text);
     }
 
+    public static Pair<Tree, CommonTokenStream> parseJson(String text) throws Exception
+    {
+        ParseRuleSelector startRuleSelector = new ParseRuleSelector()
+        {
+            public Tree invokeParseRule(EsperEPL2GrammarParser parser) throws RecognitionException
+            {
+                EsperEPL2GrammarParser.startJsonValueRule_return r = parser.startJsonValueRule();
+                return (Tree) r.getTree();
+            }
+        };
+        return parse(startRuleSelector, text);
+    }
+
     public static Pair<Tree, CommonTokenStream> parse(ParseRuleSelector parseRuleSelector, String text) throws Exception
     {
         CharStream input;

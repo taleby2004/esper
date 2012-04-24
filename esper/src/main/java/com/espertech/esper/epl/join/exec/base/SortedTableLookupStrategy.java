@@ -49,9 +49,9 @@ public class SortedTableLookupStrategy implements JoinExecTableLookupStrategy
         return index;
     }
 
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext exprEvaluatorContext)
     {
-        return strategy.lookup(event, index, exprEvaluatorContext);
+        return strategy.lookup(theEvent, index, exprEvaluatorContext);
     }
 
     public String toString()

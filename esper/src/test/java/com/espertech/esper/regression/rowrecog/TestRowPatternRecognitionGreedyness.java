@@ -36,7 +36,7 @@ public class TestRowPatternRecognitionGreedyness extends TestCase {
         String[] fields = "a_string,b_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string " +
+                "  measures A.theString as a_string, B.theString as b_string " +
                 "  pattern (A?? B?) " +
                 "  define " +
                 "   A as A.value = 1," +
@@ -64,7 +64,7 @@ public class TestRowPatternRecognitionGreedyness extends TestCase {
         String[] fields = "a0,a1,a2,b,c".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A[0].string as a0, A[1].string as a1, A[2].string as a2, B.string as b, C.string as c" +
+                "  measures A[0].theString as a0, A[1].theString as a1, A[2].theString as a2, B.theString as b, C.theString as c" +
                 "  pattern (A*? B? C) " +
                 "  define " +
                 "   A as A.value = 1," +
@@ -111,7 +111,7 @@ public class TestRowPatternRecognitionGreedyness extends TestCase {
         String[] fields = "a0,a1,a2,b,c".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A[0].string as a0, A[1].string as a1, A[2].string as a2, B.string as b, C.string as c" +
+                "  measures A[0].theString as a0, A[1].theString as a1, A[2].theString as a2, B.theString as b, C.theString as c" +
                 "  pattern (A+? B? C) " +
                 "  define " +
                 "   A as A.value = 1," +

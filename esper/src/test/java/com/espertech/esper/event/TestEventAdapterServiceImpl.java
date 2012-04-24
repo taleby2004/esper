@@ -184,8 +184,8 @@ public class TestEventAdapterServiceImpl extends TestCase
     public void testWrap()
     {
         SupportBean bean = new SupportBean();
-        EventBean event = adapterService.adapterForBean(bean);
-        assertSame(event.getUnderlying(), bean);
+        EventBean theEvent = adapterService.adapterForBean(bean);
+        assertSame(theEvent.getUnderlying(), bean);
     }
 
     public void testAddXMLDOMType() throws Exception

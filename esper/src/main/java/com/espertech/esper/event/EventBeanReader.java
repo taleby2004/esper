@@ -20,8 +20,8 @@ public interface EventBeanReader
 {
     /**
      * Returns all event properties in the exact order they appear as properties.
-     * @param event to read
+     * @param theEvent to read
      * @return property values
      */
-    public Object[] read(EventBean event);
+    public Object[] read(EventBean theEvent);
 }

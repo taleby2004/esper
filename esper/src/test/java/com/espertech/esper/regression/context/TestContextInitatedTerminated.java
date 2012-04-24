@@ -58,12 +58,54 @@ public class TestContextInitatedTerminated extends TestCase {
         listener = null;
     }
 
-    public void testPatternInclusion() {
-        String[] fields = "string,intPrimitive".split(",");
+    public void testStartZeroInitiatedNow() {
+        String[] fieldsOne = "c0,c1".split(",");
+
+        // test start-after with immediate start
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
-        String contextExpr =  "create context CtxPerId initiated by pattern [every-distinct (a.string, 10 sec) a=SupportBean]@Inclusive terminated after 10 sec ";
+        String contextExpr =  "create context CtxPerId start after 0 sec end after 60 sec";
         epService.getEPAdministrator().createEPL(contextExpr);
-        String streamExpr = "context CtxPerId select * from SupportBean(string = context.a.string) output last when terminated";
+        EPStatement stream = epService.getEPAdministrator().createEPL("context CtxPerId select theString as c0, intPrimitive as c1 from SupportBean");
+        stream.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {"E1", 1});
+        
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(59999));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {"E2", 2});
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(60000));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 3));
+        assertFalse(listener.getAndClearIsInvoked());
+
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // test initiated-by pattern with immediate start
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(120000));
+        String contextExprTwo =  "create context CtxPerId initiated by pattern [timer:interval(0) or every timer:interval(1 min)] terminated after 60 sec";
+        epService.getEPAdministrator().createEPL(contextExprTwo);
+        EPStatement streamTwo = epService.getEPAdministrator().createEPL("context CtxPerId select theString as c0, sum(intPrimitive) as c1 from SupportBean");
+        streamTwo.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {"E1", 10});
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(120000+59999));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 20));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {"E2", 30});
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(120000+60000));
+        epService.getEPRuntime().sendEvent(new SupportBean("E3", 4));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsOne, new Object[] {"E3", 4});
+    }
+
+    public void testPatternInclusion() {
+        String[] fields = "theString,intPrimitive".split(",");
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        String contextExpr =  "create context CtxPerId initiated by pattern [every-distinct (a.theString, 10 sec) a=SupportBean]@Inclusive terminated after 10 sec ";
+        epService.getEPAdministrator().createEPL(contextExpr);
+        String streamExpr = "context CtxPerId select * from SupportBean(theString = context.a.theString) output last when terminated";
         EPStatement stream = epService.getEPAdministrator().createEPL(streamExpr);
         stream.addListener(listener);
 
@@ -137,13 +179,13 @@ public class TestContextInitatedTerminated extends TestCase {
 
         // same event terminates - included
         fields = "c1,c2,c3,c4".split(",");
-        epService.getEPAdministrator().createEPL("create schema MyCtxTerminate(string string)");
+        epService.getEPAdministrator().createEPL("create schema MyCtxTerminate(theString string)");
         epService.getEPAdministrator().createEPL("create context MyCtx as start SupportBean end MyCtxTerminate");
         stmt = epService.getEPAdministrator().createEPL("context MyCtx " +
                 "select min(intPrimitive) as c1, max(intPrimitive) as c2, sum(intPrimitive) as c3, avg(intPrimitive) as c4 from SupportBean " +
                 "output snapshot when terminated");
         stmt.addListener(listener);
-        epService.getEPAdministrator().createEPL("insert into MyCtxTerminate select string from SupportBean(intPrimitive=11)");
+        epService.getEPAdministrator().createEPL("insert into MyCtxTerminate select theString from SupportBean(intPrimitive=11)");
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
         assertFalse(listener.isInvoked());
@@ -156,7 +198,7 @@ public class TestContextInitatedTerminated extends TestCase {
         String[] fields = "c0,c1,c2,c3".split(",");
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
         epService.getEPAdministrator().createEPL("create context MyCtx as initiated by SupportBean_S0 s0 terminated by SupportBean_S1(id=s0.id)");
-        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, context.s0.p00 as c1, string as c2, sum(intPrimitive) as c3 from SupportBean.win:keepall() group by string");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("context MyCtx select context.id as c0, context.s0.p00 as c1, theString as c2, sum(intPrimitive) as c3 from SupportBean.win:keepall() group by theString");
 
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "S0_1"));
@@ -314,7 +356,7 @@ public class TestContextInitatedTerminated extends TestCase {
 
         String[] fields = "c1,c2,c3".split(",");
         EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("context EverySupportBean " +
-                "select context.a.id as c1, context.b.id as c2, string as c3 from SupportBean");
+                "select context.a.id as c1, context.b.id as c2, theString as c3 from SupportBean");
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2));
@@ -336,7 +378,7 @@ public class TestContextInitatedTerminated extends TestCase {
     public void testFilterInitiatedStraightEquals() {
         sendTimeEvent("2002-05-1T8:00:00.000");
         String ctxEPL = "create context EverySupportBean as " +
-                "initiated by SupportBean(string like \"I%\") as sb " +
+                "initiated by SupportBean(theString like \"I%\") as sb " +
                 "terminated after 1 minutes";
         epService.getEPAdministrator().createEPL(ctxEPL);
 
@@ -425,7 +467,7 @@ public class TestContextInitatedTerminated extends TestCase {
         FilterServiceSPI filterSpi = (FilterServiceSPI) spi.getFilterService();
 
         EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("context EverySupportBean " +
-                "select string as c0,intPrimitive as c1,context.sb.p00 as c2 " +
+                "select theString as c0,intPrimitive as c1,context.sb.p00 as c2 " +
                 "from SupportBean(" + operator + ")");
         stmt.addListener(listener);
 
@@ -465,7 +507,7 @@ public class TestContextInitatedTerminated extends TestCase {
 
         String[] fields = "c0,c1,c2".split(",");
         EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("context EverySupportBean " +
-                "select string as c0,intPrimitive as c1,context.sb.p00 as c2 " +
+                "select theString as c0,intPrimitive as c1,context.sb.p00 as c2 " +
                 "from SupportBean(intPrimitive + context.sb.id = 5)");
         stmt.addListener(listener);
 
@@ -502,7 +544,7 @@ public class TestContextInitatedTerminated extends TestCase {
         epService.getEPAdministrator().createEPL(eplContext);
 
         String[] fields = "c1,c2,c3".split(",");
-        String eplGrouped = "@Name('S1') context CtxInitiated select string as c1, sum(intPrimitive) as c2, context.sb0.p00 as c3 from SupportBean";
+        String eplGrouped = "@Name('S1') context CtxInitiated select theString as c1, sum(intPrimitive) as c2, context.sb0.p00 as c3 from SupportBean";
         epService.getEPAdministrator().createEPL(eplGrouped).addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 1));
@@ -604,7 +646,7 @@ public class TestContextInitatedTerminated extends TestCase {
         // test when-terminated and every 2 events output all with group by
         String[] fields = "c1,c2".split(",");
         EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL("context EveryMinute " +
-                "select string as c1, sum(intPrimitive) as c2 from SupportBean group by string output all every 2 events and when terminated order by string asc");
+                "select theString as c1, sum(intPrimitive) as c2 from SupportBean group by theString output all every 2 events and when terminated order by theString asc");
         stmt.addListener(listener);
 
         sendTimeEvent("2002-05-1T8:01:00.000");
@@ -651,7 +693,7 @@ public class TestContextInitatedTerminated extends TestCase {
         // test when-terminated and every 2 events output all with group by
         String[] fields = "c0".split(",");
         String epl = "context EveryMinute " +
-                "select string as c0 from SupportBean output when count_insert > 1 and when terminated and count_insert > 0";
+                "select theString as c0 from SupportBean output when count_insert > 1 and when terminated and count_insert > 0";
         EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -693,7 +735,7 @@ public class TestContextInitatedTerminated extends TestCase {
         // test when-terminated and every 2 events output all with group by
         String[] fields = "c0".split(",");
         String epl = "context EveryMinute " +
-                "select string as c0 from SupportBean output when terminated and count_insert > 0";
+                "select theString as c0 from SupportBean output when terminated and count_insert > 0";
         EPStatementSPI stmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
 
@@ -720,7 +762,7 @@ public class TestContextInitatedTerminated extends TestCase {
 
         // include then-set and both real-time and terminated output
         epService.getEPAdministrator().createEPL("create variable int myvar = 0");
-        String eplOne = "context EveryMinute select string as c0 from SupportBean " +
+        String eplOne = "context EveryMinute select theString as c0 from SupportBean " +
                 "output when true " +
                 "then set myvar = 1 " +
                 "and when terminated " +
@@ -751,7 +793,7 @@ public class TestContextInitatedTerminated extends TestCase {
 
         // include only-terminated output with set
         epService.getEPRuntime().setVariableValue("myvar", 0);
-        String eplTwo = "context EverySupportBeanS0 select string as c0 from SupportBean " +
+        String eplTwo = "context EverySupportBeanS0 select theString as c0 from SupportBean " +
                 "output when terminated " +
                 "then set myvar = 10";
         EPStatementSPI stmtTwo = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplTwo);
@@ -778,7 +820,7 @@ public class TestContextInitatedTerminated extends TestCase {
                 "terminated after 3 min");
 
         String[] fields = "c1,c2".split(",");
-        EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context EveryMinute select string as c1, sum(intPrimitive) as c2 from SupportBean");
+        EPStatementSPI statement = (EPStatementSPI) epService.getEPAdministrator().createEPL("context EveryMinute select theString as c1, sum(intPrimitive) as c2 from SupportBean");
         statement.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
@@ -855,8 +897,8 @@ public class TestContextInitatedTerminated extends TestCase {
         epService.getEPRuntime().sendEvent(new CurrentTimeEvent(DateTime.parseDefaultMSec(time)));
     }
 
-    private SupportBean makeEvent(String string, int intPrimitive, long longPrimitive) {
-        SupportBean bean = new SupportBean(string, intPrimitive);
+    private SupportBean makeEvent(String theString, int intPrimitive, long longPrimitive) {
+        SupportBean bean = new SupportBean(theString, intPrimitive);
         bean.setLongPrimitive(longPrimitive);
         return bean;
     }

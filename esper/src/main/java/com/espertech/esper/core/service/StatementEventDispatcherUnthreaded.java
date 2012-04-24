@@ -39,16 +39,16 @@ public class StatementEventDispatcherUnthreaded implements StatementLifecycleObs
         this.statementListeners = statementListeners;
     }
 
-    public void observe(StatementLifecycleEvent event)
+    public void observe(StatementLifecycleEvent theEvent)
     {
-        if (event.getEventType() == StatementLifecycleEvent.LifecycleEventType.CREATE)
+        if (theEvent.getEventType() == StatementLifecycleEvent.LifecycleEventType.CREATE)
         {
             Iterator<EPStatementStateListener> it = statementListeners.iterator();
             for (;it.hasNext();)
             {
                 try
                 {
-                    it.next().onStatementCreate(serviceProvider, event.getStatement());
+                    it.next().onStatementCreate(serviceProvider, theEvent.getStatement());
                 }
                 catch (RuntimeException ex)
                 {
@@ -56,14 +56,14 @@ public class StatementEventDispatcherUnthreaded implements StatementLifecycleObs
                 }
             }
         }
-        else if (event.getEventType() == StatementLifecycleEvent.LifecycleEventType.STATECHANGE)
+        else if (theEvent.getEventType() == StatementLifecycleEvent.LifecycleEventType.STATECHANGE)
         {
             Iterator<EPStatementStateListener> it = statementListeners.iterator();
             for (;it.hasNext();)
             {
                 try
                 {
-                    it.next().onStatementStateChange(serviceProvider, event.getStatement());
+                    it.next().onStatementStateChange(serviceProvider, theEvent.getStatement());
                 }
                 catch (RuntimeException ex)
                 {

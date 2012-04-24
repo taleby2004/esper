@@ -151,9 +151,9 @@ public class StreamFactorySvcImpl implements StreamFactoryService
                     return statementId;
                 }
 
-                public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+                public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
                 {
-                    EventBean[] result = filterSpec.getOptionalPropertyEvaluator().getProperty(event, exprEvaluatorContext);
+                    EventBean[] result = filterSpec.getOptionalPropertyEvaluator().getProperty(theEvent, exprEvaluatorContext);
                     if (result == null)
                     {
                         return;
@@ -176,9 +176,9 @@ public class StreamFactorySvcImpl implements StreamFactoryService
                     return statementId;
                 }
 
-                public void matchFound(EventBean event, Collection<FilterHandleCallback> allStmtMatches)
+                public void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)
                 {
-                    eventStream.insert(event);
+                    eventStream.insert(theEvent);
                 }
                 public boolean isSubSelect()
                 {

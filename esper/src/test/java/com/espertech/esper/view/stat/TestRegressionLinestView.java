@@ -111,9 +111,9 @@ public class TestRegressionLinestView extends TestCase
         assertTrue(DoubleValueAssertionUtil.equals(yintercept,  yinterceptE, 6));
     }
 
-    private double getDoubleValue(ViewFieldEnum field, EventBean event)
+    private double getDoubleValue(ViewFieldEnum field, EventBean theEvent)
     {
-        return (Double) event.get(field.getName());
+        return (Double) theEvent.get(field.getName());
     }
 
     private EventBean makeBean(String symbol, double price, long volume)

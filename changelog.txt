@@ -4,6 +4,15 @@ Esper Changelog
 Changes in version 4.5.0
 ------------------------
 Major API or EPL changes
+  - Support for object-array event types; An application can now send Object[] rows as events and can receive Object[] rows as output.
+  - For class and package imports through configuration or API, the default imports are no longer replaced and instead the imports are added.
+  - Changes CSV adapter to remove dependency on Commons Beanutils (commons-beanutils-1.8.3.jar) which is no longer required for the CSV/File adapter
+  - Allow XML and JSON event renderers to take a custom property value renderer
+  - New "ranked" data window that retains the events according to rank and uniqueness criteria
+
+Changes in version 4.5.0
+------------------------
+Major API or EPL changes
   - We have made a change to the behavior of intersection data windows (multiple data windows in intersection) when one of the data windows is a batch window.
     The engine now provides batching behavior, when one of the data windows is a batch window, and not continuous stream behavior.
   - Support for declaring a hashed context that uses a consistent-hash algorithm to target context partitions for declarative parallelism in statement execution

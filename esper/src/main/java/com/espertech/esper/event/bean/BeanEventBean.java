@@ -8,10 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.event.bean;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.EventPropertyGetter;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.EventBeanSPI;
 
 /**
  * Wrapper for Java bean (POJO or regular) Java objects the represent events.
@@ -20,25 +20,29 @@ import com.espertech.esper.client.PropertyAccessException;
  * Two BeanEventBean instances are equal if they have the same event type and refer to the same instance of event object.
  * Clients that need to compute equality between Java beans wrapped by this class need to obtain the underlying object.
  */
-public class BeanEventBean implements EventBean
+public class BeanEventBean implements EventBeanSPI
 {
     private EventType eventType;
-    private Object event;
+    private Object theEvent;
 
     /**
      * Constructor.
-     * @param event is the event object
+     * @param theEvent is the event object
      * @param eventType is the schema information for the event object.
      */
-    public BeanEventBean(Object event, EventType eventType)
+    public BeanEventBean(Object theEvent, EventType eventType)
     {
         this.eventType = eventType;
-        this.event = event;
+        this.theEvent = theEvent;
     }
 
     public Object getUnderlying()
     {
-        return event;
+        return theEvent;
+    }
+
+    public void setUnderlying(Object underlying) {
+        theEvent = underlying;
     }
 
     public EventType getEventType()
@@ -60,7 +64,7 @@ public class BeanEventBean implements EventBean
     {
         return "BeanEventBean" +
                " eventType=" + eventType +
-               " bean=" + event;
+               " bean=" + theEvent;
     }
 
     public Object getFragment(String propertyExpression)

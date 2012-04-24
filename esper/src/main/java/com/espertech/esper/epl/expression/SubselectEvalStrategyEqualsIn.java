@@ -80,9 +80,9 @@ public class SubselectEvalStrategyEqualsIn implements SubselectEvalStrategy
             // Evaluate each select until we have a match
             boolean hasNonNullRow = false;
             boolean hasNullRow = false;
-            for (EventBean event : matchingEvents)
+            for (EventBean theEvent : matchingEvents)
             {
-                events[0] = event;
+                events[0] = theEvent;
 
                 Object rightResult;
                 if (selectClauseExpr != null)

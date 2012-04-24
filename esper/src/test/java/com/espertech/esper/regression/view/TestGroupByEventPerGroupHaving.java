@@ -46,7 +46,7 @@ public class TestGroupByEventPerGroupHaving extends TestCase
     public void testHavingCount()
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
-        String text = "select * from SupportBean(intPrimitive = 3).win:length(10) as e1 group by string having count(*) > 2";
+        String text = "select * from SupportBean(intPrimitive = 3).win:length(10) as e1 group by theString having count(*) > 2";
         EPStatement selectTestView = epService.getEPAdministrator().createEPL(text);
         selectTestView.addListener(testListener);
 
@@ -63,7 +63,7 @@ public class TestGroupByEventPerGroupHaving extends TestCase
                           "from " + SupportBeanString.class.getName() + ".win:length(100) as one, " +
                           " " + SupportMarketDataBean.class.getName() + ".win:length(3) as two " +
                           "where (symbol='DELL' or symbol='IBM' or symbol='GE')" +
-                          "       and one.string = two.symbol " +
+                          "       and one.theString = two.symbol " +
                           "group by symbol " +
                           "having sum(price) >= 100";
 

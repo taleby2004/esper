@@ -196,17 +196,17 @@ public class QueryPlanIndexBuilder
                             end = relOpOther.getExpression();
                         }
                         boolean allowRangeReversal = relOpOther.isBetweenPart() && relOpThis.isBetweenPart();
-                        QueryGraphValueEntryRangeIn in = new QueryGraphValueEntryRangeIn(opsDesc.getType(), start, end, allowRangeReversal);
+                        QueryGraphValueEntryRangeIn rangeIn = new QueryGraphValueEntryRangeIn(opsDesc.getType(), start, end, allowRangeReversal);
 
                         Class indexedPropType = JavaClassHelper.getBoxedType(allStreamTypesZeroIndexed[0].getPropertyType(rangeIndexProp));
                         Class coercionType = indexedPropType;
-                        Class proposedType = CoercionUtil.getCoercionTypeRangeIn(indexedPropType, in.getExprStart(), in.getExprEnd());
+                        Class proposedType = CoercionUtil.getCoercionTypeRangeIn(indexedPropType, rangeIn.getExprStart(), rangeIn.getExprEnd());
                         if (proposedType != null && proposedType != indexedPropType)
                         {
                             coercionType = proposedType;
                         }
 
-                        subqRangeDesc = new SubordPropRangeKey(in, coercionType);
+                        subqRangeDesc = new SubordPropRangeKey(rangeIn, coercionType);
                         rangeProps.put(rangeIndexProp, subqRangeDesc);
                     }
                     // ignore
@@ -215,10 +215,10 @@ public class QueryPlanIndexBuilder
 
                 // an existing entry has not been found
                 if (rangeDesc.getType().isRange()) {
-                    QueryGraphValueEntryRangeIn in = (QueryGraphValueEntryRangeIn) rangeDesc;
+                    QueryGraphValueEntryRangeIn rangeIn = (QueryGraphValueEntryRangeIn) rangeDesc;
                     Class indexedPropType = JavaClassHelper.getBoxedType(allStreamTypesZeroIndexed[0].getPropertyType(rangeIndexProp));
                     Class coercionType = indexedPropType;
-                    Class proposedType = CoercionUtil.getCoercionTypeRangeIn(indexedPropType, in.getExprStart(), in.getExprEnd());
+                    Class proposedType = CoercionUtil.getCoercionTypeRangeIn(indexedPropType, rangeIn.getExprStart(), rangeIn.getExprEnd());
                     if (proposedType != null && proposedType != indexedPropType)
                     {
                         coercionType = proposedType;

@@ -27,9 +27,9 @@ public class MyPlugInPropertiesBeanFactory implements PlugInEventBeanFactory
         knownTypes = types;
     }
 
-    public EventBean create(Object event, URI resolutionURI)
+    public EventBean create(Object theEvent, URI resolutionURI)
     {
-        Properties properties = (Properties) event;
+        Properties properties = (Properties) theEvent;
 
         // use the known types to determine the type of the object
         for (MyPlugInPropertiesEventType type : knownTypes)

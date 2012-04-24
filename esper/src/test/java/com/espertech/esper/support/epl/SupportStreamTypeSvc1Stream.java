@@ -27,27 +27,27 @@ public class SupportStreamTypeSvc1Stream implements StreamTypeService
         impl = new StreamTypeServiceImpl(getEventTypes(), getStreamNames(), new boolean[10], "default", false);
     }
 
-    public PropertyResolutionDescriptor resolveByPropertyName(String propertyName) throws DuplicatePropertyException, PropertyNotFoundException
+    public PropertyResolutionDescriptor resolveByPropertyName(String propertyName, boolean obtainFragment) throws DuplicatePropertyException, PropertyNotFoundException
     {
-        return impl.resolveByPropertyName(propertyName);
+        return impl.resolveByPropertyName(propertyName, false);
     }
 
-    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamName, String propertyName) throws PropertyNotFoundException, StreamNotFoundException
+    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamName, String propertyName, boolean obtainFragment) throws PropertyNotFoundException, StreamNotFoundException
     {
-        return impl.resolveByStreamAndPropName(streamName, propertyName);
+        return impl.resolveByStreamAndPropName(streamName, propertyName, false);
     }
 
-    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamAndPropertyName) throws DuplicatePropertyException, PropertyNotFoundException
+    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamAndPropertyName, boolean obtainFragment) throws DuplicatePropertyException, PropertyNotFoundException
     {
-        return impl.resolveByStreamAndPropName(streamAndPropertyName);
+        return impl.resolveByStreamAndPropName(streamAndPropertyName, false);
     }
 
-    public PropertyResolutionDescriptor resolveByPropertyNameExplicitProps(String propertyName) throws PropertyNotFoundException, DuplicatePropertyException {
-        return impl.resolveByPropertyNameExplicitProps(propertyName);
+    public PropertyResolutionDescriptor resolveByPropertyNameExplicitProps(String propertyName, boolean obtainFragment) throws PropertyNotFoundException, DuplicatePropertyException {
+        return impl.resolveByPropertyNameExplicitProps(propertyName, false);
     }
 
-    public PropertyResolutionDescriptor resolveByStreamAndPropNameExplicitProps(String streamName, String propertyName) throws PropertyNotFoundException, StreamNotFoundException {
-        return impl.resolveByStreamAndPropNameExplicitProps(streamName, propertyName);
+    public PropertyResolutionDescriptor resolveByStreamAndPropNameExplicitProps(String streamName, String propertyName, boolean obtainFragment) throws PropertyNotFoundException, StreamNotFoundException {
+        return impl.resolveByStreamAndPropNameExplicitProps(streamName, propertyName, false);
     }
 
     public String[] getStreamNames()

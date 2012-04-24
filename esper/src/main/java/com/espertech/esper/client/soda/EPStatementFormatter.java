@@ -155,6 +155,10 @@ public class EPStatementFormatter
         setDelimiter();
     }
 
+    public void beginCreateDataFlow(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
     public void beginCreateVariable(StringWriter writer) {
         writeDelimiter(writer);
     }
@@ -176,6 +180,26 @@ public class EPStatementFormatter
     }
 
     public void beginCreateIndex(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void beginDataFlowSchema(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void beginDataFlowOperator(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void beginDataFlowOperatorDetails(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void endDataFlowOperatorConfig(StringWriter writer) {
+        writeDelimiter(writer);
+    }
+
+    public void endDataFlowOperatorDetails(StringWriter writer) {
         writeDelimiter(writer);
     }
 }

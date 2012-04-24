@@ -20,12 +20,14 @@ public interface StreamTypeService
      * by looking through the types offered and matching up.
      * <p>
      * This method considers only a property name and looks at all streams to resolve the property name.
+     *
      * @param propertyName - property name in event
+     * @param obtainFragment
      * @return descriptor with stream number, property type and property name
      * @throws DuplicatePropertyException to indicate property was found twice
      * @throws PropertyNotFoundException to indicate property could not be resolved
      */
-    public PropertyResolutionDescriptor resolveByPropertyName(String propertyName)
+    public PropertyResolutionDescriptor resolveByPropertyName(String propertyName, boolean obtainFragment)
             throws DuplicatePropertyException, PropertyNotFoundException;
 
     /**
@@ -33,12 +35,14 @@ public interface StreamTypeService
      * by looking through the types offered considering only explicitly listed properties and matching up.
      * <p>
      * This method considers only a property name and looks at all streams to resolve the property name.
+     *
      * @param propertyName - property name in event
+     * @param obtainFragment
      * @return descriptor with stream number, property type and property name
      * @throws DuplicatePropertyException to indicate property was found twice
      * @throws PropertyNotFoundException to indicate property could not be resolved
      */
-    public PropertyResolutionDescriptor resolveByPropertyNameExplicitProps(String propertyName)
+    public PropertyResolutionDescriptor resolveByPropertyNameExplicitProps(String propertyName, boolean obtainFragment)
             throws PropertyNotFoundException, DuplicatePropertyException;
 
     /**
@@ -46,13 +50,15 @@ public interface StreamTypeService
      * by using the specified stream name to resolve the property.
      * <p>
      * This method considers and explicit stream name and property name, both parameters are required.
+     *
      * @param streamName - name of stream, required
      * @param propertyName - property name in event, , required
+     * @param obtainFragment
      * @return descriptor with stream number, property type and property name
      * @throws PropertyNotFoundException to indicate property could not be resolved
      * @throws StreamNotFoundException to indicate stream name could not be resolved
      */
-    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamName, String propertyName)
+    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamName, String propertyName, boolean obtainFragment)
             throws PropertyNotFoundException, StreamNotFoundException;
 
     /**
@@ -60,13 +66,15 @@ public interface StreamTypeService
      * by using the specified stream name to resolve the property and considering only explicitly listed properties.
      * <p>
      * This method considers and explicit stream name and property name, both parameters are required.
+     *
      * @param streamName - name of stream, required
      * @param propertyName - property name in event, , required
+     * @param obtainFragment
      * @return descriptor with stream number, property type and property name
      * @throws PropertyNotFoundException to indicate property could not be resolved
      * @throws StreamNotFoundException to indicate stream name could not be resolved
      */
-    public PropertyResolutionDescriptor resolveByStreamAndPropNameExplicitProps(String streamName, String propertyName)
+    public PropertyResolutionDescriptor resolveByStreamAndPropNameExplicitProps(String streamName, String propertyName, boolean obtainFragment)
             throws PropertyNotFoundException, StreamNotFoundException;
 
     /**
@@ -76,12 +84,14 @@ public interface StreamTypeService
      * This method considers a single property name that may or may not be prefixed by a stream name.
      * The resolution first attempts to find the property name itself, then attempts
      * to consider a stream name that may be part of the property name.
+     *
      * @param streamAndPropertyName - stream name and property name (e.g. s0.p0) or just a property name (p0)
+     * @param obtainFragment
      * @return descriptor with stream number, property type and property name
      * @throws DuplicatePropertyException to indicate property was found twice
      * @throws PropertyNotFoundException to indicate property could not be resolved
      */
-    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamAndPropertyName)
+    public PropertyResolutionDescriptor resolveByStreamAndPropName(String streamAndPropertyName, boolean obtainFragment)
             throws DuplicatePropertyException, PropertyNotFoundException;
 
     /**

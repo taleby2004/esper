@@ -11,8 +11,8 @@
 
 package com.espertech.esper.event;
 
-import java.util.Set;
 import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Provides metadata for event types.
@@ -147,14 +147,14 @@ public class EventTypeMetadata
      * @param configured whether the made known or is discovered
      * @return instance
      */
-    public static EventTypeMetadata createMapType(String name, boolean preconfiguredStatic, boolean preconfigured, boolean configured, boolean namedWindow, boolean insertInto)
+    public static EventTypeMetadata createNonPojoApplicationType(ApplicationType providedType, String name, boolean preconfiguredStatic, boolean preconfigured, boolean configured, boolean namedWindow, boolean insertInto)
     {
         TypeClass typeClass;
         ApplicationType applicationType = null;
         if (configured)
         {
             typeClass = TypeClass.APPLICATION;
-            applicationType = ApplicationType.MAP;
+            applicationType = providedType;
         }
         else if (namedWindow)
         {
@@ -316,6 +316,11 @@ public class EventTypeMetadata
          * Map type.
          */
         MAP,
+
+        /**
+         * Object Array type.
+         */
+        OBJECTARR,
 
         /**
          * Class type.

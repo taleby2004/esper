@@ -67,10 +67,10 @@ public class TestRowPatternRecognitionDelete extends TestCase {
         String[] fields = "a_string,b_string".split(",");
         String text = "select * from MyNamedWindow " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string" +
+                "  measures A.theString as a_string, B.theString as b_string" +
                 "  all matches pattern (A B) " +
                 "  define " +
-                "    A as PREV(A.string, 3) = 'P3' and PREV(A.string, 2) = 'P2' and PREV(A.string, 4) = 'P4'," +
+                "    A as PREV(A.theString, 3) = 'P3' and PREV(A.theString, 2) = 'P2' and PREV(A.theString, 4) = 'P4'," +
                 "    B as B.value in (PREV(B.value, 4), PREV(B.value, 2))" +
                 ")";
 
@@ -133,12 +133,12 @@ public class TestRowPatternRecognitionDelete extends TestCase {
 
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportRecogBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportRecogBean");
-        epService.getEPAdministrator().createEPL("on SupportBean as s delete from MyWindow as w where s.string = w.string");
+        epService.getEPAdministrator().createEPL("on SupportBean as s delete from MyWindow as w where s.theString = w.theString");
 
         String[] fields = "a0,a1,b0,b1,c".split(",");
         String text = "select * from MyWindow " +
                 "match_recognize (" +
-                "  measures A[0].string as a0, A[1].string as a1, B[0].string as b0, B[1].string as b1, C.string as c" +
+                "  measures A[0].theString as a0, A[1].theString as a1, B[0].theString as b0, B[1].theString as b1, C.theString as c" +
                 "  pattern ( A+ B* C ) " +
                 "  define " +
                 "    A as (A.value = 1)," +
@@ -207,12 +207,12 @@ public class TestRowPatternRecognitionDelete extends TestCase {
 
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportRecogBean");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportRecogBean");
-        epService.getEPAdministrator().createEPL("on SupportBean as s delete from MyWindow as w where s.string = w.string");
+        epService.getEPAdministrator().createEPL("on SupportBean as s delete from MyWindow as w where s.theString = w.theString");
 
         String[] fields = "a0,a1,b".split(",");
         String text = "select * from MyWindow " +
                 "match_recognize (" +
-                "  measures A[0].string as a0, A[1].string as a1, B.string as b" +
+                "  measures A[0].theString as a0, A[1].theString as a1, B.theString as b" +
                 "  pattern ( A* B ) " +
                 "  define " +
                 "    A as (A.value = 1)," +

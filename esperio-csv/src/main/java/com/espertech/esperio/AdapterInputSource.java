@@ -195,9 +195,13 @@ public class AdapterInputSource
     		stream = CSVReader.class.getClassLoader().getResourceAsStream( path );
     	}
     	if ( stream == null ) {
-    		throw new EPException( path + " not found" );
+    		throw new EPException("Resource '" + path + "' not found in classpath" );
     	}
 
     	return stream;
+    }
+
+    public void close() {
+
     }
 }

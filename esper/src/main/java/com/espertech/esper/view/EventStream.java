@@ -23,7 +23,7 @@ public interface EventStream extends Viewable
 
     /**
      * Insert a new event onto the stream.
-     * @param event to insert
+     * @param theEvent to insert
      */
-    public void insert(EventBean event);
+    public void insert(EventBean theEvent);
 }

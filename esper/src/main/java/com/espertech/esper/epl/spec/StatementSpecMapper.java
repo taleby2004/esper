@@ -120,6 +120,7 @@ public class StatementSpecMapper
         mapCreateIndex(sodaStatement.getCreateIndex(), raw, mapContext);
         mapCreateVariable(sodaStatement.getCreateVariable(), raw, mapContext);
         mapCreateSchema(sodaStatement.getCreateSchema(), raw, mapContext);
+        mapCreateGraph(sodaStatement.getCreateDataFlow(), raw, mapContext);
         mapOnTrigger(sodaStatement.getOnExpr(), raw, mapContext);
         InsertIntoDesc desc = mapInsertInto(sodaStatement.getInsertInto());
         raw.setInsertIntoDesc(desc);
@@ -151,7 +152,12 @@ public class StatementSpecMapper
     public static StatementSpecUnMapResult unmap(StatementSpecRaw statementSpec)
     {
         StatementSpecUnMapContext unmapContext = new StatementSpecUnMapContext();
+        EPStatementObjectModel model = unmapInternal(statementSpec, unmapContext);
+        return new StatementSpecUnMapResult(model, unmapContext.getIndexedParams());
+    }
 
+    private static EPStatementObjectModel unmapInternal(StatementSpecRaw statementSpec, StatementSpecUnMapContext unmapContext)
+    {
         EPStatementObjectModel model = new EPStatementObjectModel();
         List<AnnotationPart> annotations = unmapAnnotations(statementSpec.getAnnotations());
         model.setAnnotations(annotations);
@@ -165,6 +171,7 @@ public class StatementSpecMapper
         unmapCreateIndex(statementSpec.getCreateIndexDesc(), model, unmapContext);
         unmapCreateVariable(statementSpec.getCreateVariableDesc(), model, unmapContext);
         unmapCreateSchema(statementSpec.getCreateSchemaDesc(), model, unmapContext);
+        unmapCreateGraph(statementSpec.getCreateDataFlowDesc(), model, unmapContext);
         unmapUpdateClause(statementSpec.getStreamSpecs(), statementSpec.getUpdateDesc(), model, unmapContext);
         unmapOnClause(statementSpec.getOnTriggerDesc(), model, unmapContext);
         InsertIntoClause insertIntoClause = unmapInsertInto(statementSpec.getInsertIntoDesc());
@@ -181,8 +188,7 @@ public class StatementSpecMapper
         unmapMatchRecognize(statementSpec.getMatchRecognizeSpec(), model, unmapContext);
         unmapForClause(statementSpec.getForClauseSpec(), model, unmapContext);
         unmapSQLParameters(statementSpec.getSqlParameters(), unmapContext);
-
-        return new StatementSpecUnMapResult(model, unmapContext.getIndexedParams());
+        return model;
     }
 
     // Collect substitution parameters
@@ -466,12 +472,88 @@ public class StatementSpecMapper
         {
             return;
         }
+        model.setCreateSchema(unmapCreateSchemaInternal(desc, unmapContext));
+    }
+
+    private static CreateSchemaClause unmapCreateSchemaInternal(CreateSchemaDesc desc, StatementSpecUnMapContext unmapContext)
+    {
         List<SchemaColumnDesc> columns = unmapColumns(desc.getColumns());
-        CreateSchemaClause clause = new CreateSchemaClause(desc.getSchemaName(), desc.getTypes(), columns, desc.getInherits(), desc.isVariant());
+        CreateSchemaClause clause = new CreateSchemaClause(desc.getSchemaName(), desc.getTypes(), columns, desc.getInherits(), desc.getAssignedType().mapToSoda());
         clause.setStartTimestampPropertyName(desc.getStartTimestampProperty());
         clause.setEndTimestampPropertyName(desc.getEndTimestampProperty());
         clause.setCopyFrom(desc.getCopyFrom());
-        model.setCreateSchema(clause);
+        return clause;
+    }
+
+    private static void unmapCreateGraph(CreateDataFlowDesc desc, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
+    {
+        if (desc == null)
+        {
+            return;
+        }
+
+        List<CreateSchemaClause> schemas = new ArrayList<CreateSchemaClause>();
+        for (CreateSchemaDesc schema : desc.getSchemas()) {
+            schemas.add(unmapCreateSchemaInternal(schema, unmapContext));
+        }
+
+        List<DataFlowOperator> operators = new ArrayList<DataFlowOperator>();
+        for (GraphOperatorSpec spec : desc.getOperators()) {
+            operators.add(unmapGraphOperator(spec, unmapContext));
+        }
+
+        CreateDataFlowClause clause = new CreateDataFlowClause(desc.getGraphName(), schemas, operators);
+        model.setCreateDataFlow(clause);
+    }
+
+    private static DataFlowOperator unmapGraphOperator(GraphOperatorSpec spec, StatementSpecUnMapContext unmapContext) {
+        DataFlowOperator op = new DataFlowOperator();
+        op.setOperatorName(spec.getOperatorName());
+        op.setAnnotations(unmapAnnotations(spec.getAnnotations()));
+
+        List<DataFlowOperatorInput> inputs = new ArrayList<DataFlowOperatorInput>();
+        for (GraphOperatorInputNamesAlias in : spec.getInput().getStreamNamesAndAliases()) {
+            inputs.add(new DataFlowOperatorInput(Arrays.asList(in.getInputStreamNames()), in.getOptionalAsName()));
+        }
+        op.setInput(inputs);
+
+        List<DataFlowOperatorOutput> outputs = new ArrayList<DataFlowOperatorOutput>();
+        for (GraphOperatorOutputItem out : spec.getOutput().getItems()) {
+            List<DataFlowOperatorOutputType> types = out.getTypeInfo().isEmpty() ? null : Collections.singletonList(unmapTypeInfo(out.getTypeInfo().get(0)));
+            outputs.add(new DataFlowOperatorOutput(out.getStreamName(), types));
+        }
+        op.setOutput(outputs);
+
+        if (spec.getDetail() != null) {
+            Map<String, Object> parameters = new LinkedHashMap<String, Object>();
+            for (Map.Entry<String, Object> param : spec.getDetail().getConfigs().entrySet()) {
+                Object value = param.getValue();
+                if (value instanceof StatementSpecRaw) {
+                    value = unmapInternal((StatementSpecRaw) value, unmapContext);
+                }
+                if (value instanceof ExprNode) {
+                    value = unmapExpressionDeep((ExprNode) value, unmapContext);
+                }
+                parameters.put(param.getKey(), value);
+            }
+            op.setParameters(parameters);
+        }
+        else {
+            op.setParameters(Collections.<String, Object>emptyMap());
+        }
+
+        return op;
+    }
+
+    private static DataFlowOperatorOutputType unmapTypeInfo(GraphOperatorOutputItemType typeInfo) {
+        List<DataFlowOperatorOutputType> types = Collections.emptyList();
+        if (!typeInfo.getTypeParameters().isEmpty()) {
+            types = new ArrayList<DataFlowOperatorOutputType>();
+        }
+        for (GraphOperatorOutputItemType type : typeInfo.getTypeParameters()) {
+            types.add(unmapTypeInfo(type));
+        }
+        return new DataFlowOperatorOutputType(typeInfo.isWildcard(), typeInfo.getTypeOrClassname(), types);
     }
 
     private static void unmapOrderBy(List<OrderByItem> orderByList, EPStatementObjectModel model, StatementSpecUnMapContext unmapContext)
@@ -1313,8 +1395,78 @@ public class StatementSpecMapper
         {
             return;
         }
+        CreateSchemaDesc desc = mapCreateSchemaInternal(clause, raw, mapContext);
+        raw.setCreateSchemaDesc(desc);
+    }
+
+    private static CreateSchemaDesc mapCreateSchemaInternal(CreateSchemaClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
+    {
         List<ColumnDesc> columns = mapColumns(clause.getColumns());
-        raw.setCreateSchemaDesc(new CreateSchemaDesc(clause.getSchemaName(), clause.getTypes(), columns, clause.getInherits(), clause.isVariant(), clause.getStartTimestampPropertyName(), clause.getEndTimestampPropertyName(), clause.getCopyFrom()));
+        return new CreateSchemaDesc(clause.getSchemaName(), clause.getTypes(), columns, clause.getInherits(), CreateSchemaDesc.AssignedType.mapFrom(clause.getTypeDefinition()), clause.getStartTimestampPropertyName(), clause.getEndTimestampPropertyName(), clause.getCopyFrom());
+    }
+
+    private static void mapCreateGraph(CreateDataFlowClause clause, StatementSpecRaw raw, StatementSpecMapContext mapContext)
+    {
+        if (clause == null)
+        {
+            return;
+        }
+
+        List<CreateSchemaDesc> schemas = new ArrayList<CreateSchemaDesc>();
+        for (CreateSchemaClause schema : clause.getSchemas()) {
+            schemas.add(mapCreateSchemaInternal(schema, raw, mapContext));
+        }
+
+        List<GraphOperatorSpec> ops = new ArrayList<GraphOperatorSpec>();
+        for (DataFlowOperator op : clause.getOperators()) {
+            ops.add(mapGraphOperator(op, mapContext));
+        }
+
+        CreateDataFlowDesc desc = new CreateDataFlowDesc(clause.getDataFlowName(), ops, schemas);
+        raw.setCreateDataFlowDesc(desc);
+    }
+
+    private static GraphOperatorSpec mapGraphOperator(DataFlowOperator op, StatementSpecMapContext mapContext) {
+        List<AnnotationDesc> annotations = mapAnnotations(op.getAnnotations());
+
+        GraphOperatorInput input = new GraphOperatorInput();
+        for (DataFlowOperatorInput in : op.getInput()) {
+            input.getStreamNamesAndAliases().add(new GraphOperatorInputNamesAlias(in.getInputStreamNames().toArray(new String[in.getInputStreamNames().size()]), in.getOptionalAsName()));
+        }
+
+        GraphOperatorOutput output = new GraphOperatorOutput();
+        for (DataFlowOperatorOutput out : op.getOutput()) {
+            output.getItems().add(new GraphOperatorOutputItem(out.getStreamName(), mapGraphOpType(out.getTypeInfo())));
+        }
+
+        Map<String, Object> detail = new LinkedHashMap<String, Object>();
+        for (Map.Entry<String, Object> entry : op.getParameters().entrySet()) {
+            Object value = entry.getValue();
+            if (value instanceof EPStatementObjectModel) {
+                value = map((EPStatementObjectModel) value, mapContext);
+            }
+            else if (value instanceof Expression) {
+                value = mapExpressionDeep((Expression) value, mapContext);
+            }
+            else {
+                // no action
+            }
+            detail.put(entry.getKey(), value);
+        }
+
+        return new GraphOperatorSpec(op.getOperatorName(), input, output, new GraphOperatorDetail(detail), annotations);
+    }
+
+    private static List<GraphOperatorOutputItemType> mapGraphOpType(List<DataFlowOperatorOutputType> typeInfos) {
+        if (typeInfos == null) {
+            return Collections.emptyList();
+        }
+        List<GraphOperatorOutputItemType> types = new ArrayList<GraphOperatorOutputItemType>();
+        for (DataFlowOperatorOutputType info : typeInfos) {
+            GraphOperatorOutputItemType type = new GraphOperatorOutputItemType(info.isWildcard(), info.getTypeOrClassname(), mapGraphOpType(info.getTypeParameters()));
+            types.add(type);
+        }
+        return types;
     }
 
     private static List<ColumnDesc> mapColumns(List<SchemaColumnDesc> columns) {
@@ -1642,8 +1794,8 @@ public class StatementSpecMapper
         }
         else if (expr instanceof InExpression)
         {
-            InExpression in = (InExpression) expr;
-            return new ExprInNodeImpl(in.isNotIn());
+            InExpression inExpr = (InExpression) expr;
+            return new ExprInNodeImpl(inExpr.isNotIn());
         }
         else if (expr instanceof CoalesceExpression)
         {
@@ -1859,7 +2011,7 @@ public class StatementSpecMapper
             return new ExprNumberSetCronParam(operator);
         }
         else if (expr instanceof AccessProjectionExpressionBase) {
-            AccessProjectionExpressionBase base = (AccessProjectionExpressionBase) expr;
+            AccessProjectionExpressionBase theBase = (AccessProjectionExpressionBase) expr;
             AggregationAccessType type;
             if (expr instanceof FirstProjectionExpression) {
                 type = AggregationAccessType.FIRST;
@@ -1871,11 +2023,11 @@ public class StatementSpecMapper
                 type = AggregationAccessType.WINDOW;
             }
 
-            return new ExprAccessAggNode(type, base.isWildcard(), base.getStreamWildcard());
+            return new ExprAccessAggNode(type, theBase.isWildcard(), theBase.getStreamWildcard());
         }
         else if (expr instanceof DotExpression) {
-            DotExpression base = (DotExpression) expr;
-            List<ExprChainedSpec> chain = mapChains(base.getChain(), mapContext);
+            DotExpression theBase = (DotExpression) expr;
+            List<ExprChainedSpec> chain = mapChains(theBase.getChain(), mapContext);
             if (chain.size() == 1) {
                 String name = chain.get(0).getName();
                 if (mapContext.getExpressionDeclarations() != null && mapContext.getExpressionDeclarations().containsKey(name)) {
@@ -1890,8 +2042,8 @@ public class StatementSpecMapper
                     mapContext.getConfiguration().getEngineDefaults().getExpression().isUdfCache());
         }
         else if (expr instanceof LambdaExpression) {
-            LambdaExpression base = (LambdaExpression) expr;
-            return new ExprLambdaGoesNode(new ArrayList<String>(base.getParameters()));
+            LambdaExpression theBase = (LambdaExpression) expr;
+            return new ExprLambdaGoesNode(new ArrayList<String>(theBase.getParameters()));
         }
         throw new IllegalArgumentException("Could not map expression node of type " + expr.getClass().getSimpleName());
     }
@@ -2128,8 +2280,8 @@ public class StatementSpecMapper
         }
         else if (expr instanceof ExprInNode)
         {
-            ExprInNode in = (ExprInNode) expr;
-            return new InExpression(in.isNotIn());
+            ExprInNode inExpr = (ExprInNode) expr;
+            return new InExpression(inExpr.isNotIn());
         }
         else if (expr instanceof ExprCoalesceNode)
         {

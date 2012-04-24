@@ -12,13 +12,12 @@
 package com.espertech.esper.event.map;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.PropertyAccessException;
-import com.espertech.esper.event.bean.BaseNativePropertyGetter;
+import com.espertech.esper.event.BaseNestableEventUtil;
 import com.espertech.esper.event.EventAdapterService;
+import com.espertech.esper.event.bean.BaseNativePropertyGetter;
 
 import java.util.Map;
-import java.lang.reflect.Array;
 
 /**
  * A getter that works on arrays residing within a Map as an event property.
@@ -51,20 +50,7 @@ public class MapArrayPOJOEntryIndexedPropertyGetter extends BaseNativePropertyGe
     {
         // If the map does not contain the key, this is allowed and represented as null
         Object value = map.get(propertyMap);
-
-        if (value == null)
-        {
-            return null;
-        }
-        if (!value.getClass().isArray())
-        {
-            return null;
-        }
-        if (Array.getLength(value) <= index)
-        {
-            return null;
-        }
-        return Array.get(value, index);
+        return BaseNestableEventUtil.getIndexedValue(value, index);
     }
 
     public boolean isMapExistsProperty(Map<String, Object> map)
@@ -73,46 +59,18 @@ public class MapArrayPOJOEntryIndexedPropertyGetter extends BaseNativePropertyGe
     }
 
     public Object get(EventBean eventBean, int index) throws PropertyAccessException {
-        Object underlying = eventBean.getUnderlying();
-
-        // The underlying is expected to be a map
-        if (!(underlying instanceof Map))
-        {
-            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                    "the underlying data object is not of type java.lang.Map");
-        }
-
-        Map<String, Object> map = (Map<String, Object>) underlying;
+        Map<String, Object> map = BaseNestableEventUtil.checkedCastUnderlyingMap(eventBean);
         return getMapInternal(map, index);
     }
 
     public Object get(EventBean obj)
     {
-        Object underlying = obj.getUnderlying();
-
-        // The underlying is expected to be a map
-        if (!(underlying instanceof Map))
-        {
-            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                    "the underlying data object is not of type java.lang.Map");
-        }
-
-        Map<String, Object> map = (Map<String, Object>) underlying;
-        return getMap(map);
+        return getMap(BaseNestableEventUtil.checkedCastUnderlyingMap(obj));
     }
 
     public boolean isExistsProperty(EventBean eventBean)
     {
-        Object underlying = eventBean.getUnderlying();
-
-        // The underlying is expected to be a map
-        if (!(underlying instanceof Map))
-        {
-            throw new PropertyAccessException("Mismatched property getter to event bean type, " +
-                    "the underlying data object is not of type java.lang.Map");
-        }
-
-        Map map = (Map) underlying;
+        Map map = BaseNestableEventUtil.checkedCastUnderlyingMap(eventBean);
         return map.containsKey(propertyMap);
     }
 }

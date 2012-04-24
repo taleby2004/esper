@@ -26,7 +26,7 @@ public class SampleVirtualDataWindowLookup implements VirtualDataWindowLookup {
         eventData.put("key2", "sample2");
         eventData.put("value1", 100);
         eventData.put("value2", 1.5d);
-        EventBean event = context.getEventFactory().wrap(eventData);
-        return Collections.singleton(event);
+        EventBean theEvent = context.getEventFactory().wrap(eventData);
+        return Collections.singleton(theEvent);
     }
 }

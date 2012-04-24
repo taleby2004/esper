@@ -10,6 +10,7 @@ package com.espertech.esper.event.map;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.PropertyAccessException;
+import com.espertech.esper.event.BaseNestableEventUtil;
 
 import java.util.Map;
 
@@ -34,77 +35,40 @@ public class MapMappedPropertyGetter implements MapEventPropertyGetter, MapEvent
 
     public Object getMap(Map<String, Object> map) throws PropertyAccessException
     {
-        Object value = map.get(fieldName);
-        if (value == null)
-        {
-            return null;
-        }
-        if (!(value instanceof Map))
-        {
-            return null;
-        }
-        Map innerMap = (Map) value;
-        return innerMap.get(key);
-    }
-
-    public Object get(EventBean eventBean, String mapKey) throws PropertyAccessException {
-        Object underlying = eventBean.getUnderlying();
-        if (!(underlying instanceof Map))
-        {
-            return null;
-        }
-        Object value = ((Map)underlying).get(fieldName);
-        if (value == null)
-        {
-            return null;
-        }
-        if (!(value instanceof Map))
-        {
-            return null;
-        }
-        Map innerMap = (Map) value;
-        return innerMap.get(mapKey);
+        return getMapInternal(map, key);
     }
 
     public boolean isMapExistsProperty(Map<String, Object> map)
     {
         Object value = map.get(fieldName);
-        if (value == null)
-        {
-            return false;
-        }
-        if (!(value instanceof Map))
-        {
-            return false;
-        }
-        Map innerMap = (Map) value;
-        return innerMap.containsKey(key);
+        return BaseNestableEventUtil.getMappedPropertyExists(value, key);
+    }
+
+    public Object get(EventBean eventBean, String mapKey) throws PropertyAccessException {
+        Map<String, Object> data = BaseNestableEventUtil.checkedCastUnderlyingMap(eventBean);
+        return getMapInternal(data, mapKey);
     }
 
     public Object get(EventBean eventBean) throws PropertyAccessException
     {
-        Object underlying = eventBean.getUnderlying();
-        if (!(underlying instanceof Map))
-        {
-            return null;
-        }
-        Map<String, Object> map = (Map<String, Object>) underlying;
-        return getMap(map);
+        Map<String, Object> data = BaseNestableEventUtil.checkedCastUnderlyingMap(eventBean);
+        return getMap(data);
     }
 
     public boolean isExistsProperty(EventBean eventBean)
     {
-        Object underlying = eventBean.getUnderlying();
-        if (!(underlying instanceof Map))
-        {
-            return false;
-        }
-        Map<String, Object> map = (Map<String, Object>) underlying;
-        return isMapExistsProperty(map);
+        Map<String, Object> data = BaseNestableEventUtil.checkedCastUnderlyingMap(eventBean);
+        return isMapExistsProperty(data);
     }
 
     public Object getFragment(EventBean eventBean)
     {
         return null;
+    }
+
+    private Object getMapInternal(Map<String, Object> map, String providedKey) throws PropertyAccessException
+    {
+        Object value = map.get(fieldName);
+        return BaseNestableEventUtil.getMappedPropertyValue(value, providedKey);
     }
 }

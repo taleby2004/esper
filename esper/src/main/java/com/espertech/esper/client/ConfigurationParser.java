@@ -223,6 +223,10 @@ class ConfigurationParser {
             {
             	handleMap(name, configuration, eventTypeElement);
             }
+            else if(nodeName.equals("objectarray"))
+            {
+            	handleObjectArray(name, configuration, eventTypeElement);
+            }
             else if (nodeName.equals("legacy-type"))
             {
                 handleLegacy(name, optionalClassName, configuration, eventTypeElement);
@@ -232,7 +236,7 @@ class ConfigurationParser {
 
     private static void handleMap(String name, Configuration configuration, Element eventTypeElement)
     {
-        ConfigurationEventTypeMap config = null;
+        ConfigurationEventTypeMap config;
         String startTimestampProp = getOptionalAttribute(eventTypeElement, "start-timestamp-property-name");
         String endTimestampProp = getOptionalAttribute(eventTypeElement, "end-timestamp-property-name");
         Node superTypesList = eventTypeElement.getAttributes().getNamedItem("supertype-names");
@@ -261,6 +265,41 @@ class ConfigurationParser {
 	        propertyTypeNames.put(nameProperty, clazz);
 	    }
     	configuration.addEventType(name, propertyTypeNames);
+    }
+
+    private static void handleObjectArray(String name, Configuration configuration, Element eventTypeElement)
+    {
+        ConfigurationEventTypeObjectArray config;
+        String startTimestampProp = getOptionalAttribute(eventTypeElement, "start-timestamp-property-name");
+        String endTimestampProp = getOptionalAttribute(eventTypeElement, "end-timestamp-property-name");
+        Node superTypesList = eventTypeElement.getAttributes().getNamedItem("supertype-names");
+        if (superTypesList != null || startTimestampProp != null || endTimestampProp != null)
+        {
+            config = new ConfigurationEventTypeObjectArray();
+            if (superTypesList != null) {
+                String value = superTypesList.getTextContent();
+                String[] names = value.split(",");
+                for (String superTypeName : names)
+                {
+                    config.getSuperTypes().add(superTypeName.trim());
+                }
+            }
+            config.setEndTimestampPropertyName(endTimestampProp);
+            config.setStartTimestampPropertyName(startTimestampProp);
+            configuration.addObjectArrayConfiguration(name, config);
+        }
+
+        List<String> propertyNames = new ArrayList<String>();
+        List<Object> propertyTypes = new ArrayList<Object>();
+		NodeList propertyList = eventTypeElement.getElementsByTagName("objectarray-property");
+		for (int i = 0; i < propertyList.getLength(); i++)
+	    {
+	        String nameProperty = getRequiredAttribute(propertyList.item(i), "name");
+	        String clazz = getRequiredAttribute(propertyList.item(i), "class");
+	        propertyNames.add(nameProperty);
+            propertyTypes.add(clazz);
+	    }
+    	configuration.addEventType(name, propertyNames.toArray(new String[propertyNames.size()]), propertyTypes.toArray());
     }
 
     private static void handleXMLDOM(String name, Configuration configuration, Element xmldomElement)
@@ -1466,6 +1505,16 @@ class ConfigurationParser {
                     String accessorStyleText = accessorStyleNode.getTextContent();
                     ConfigurationEventTypeLegacy.AccessorStyle value = ConfigurationEventTypeLegacy.AccessorStyle.valueOf(accessorStyleText.toUpperCase());
                     configuration.getEngineDefaults().getEventMeta().setDefaultAccessorStyle(value);
+                }
+            }
+
+            if (subElement.getNodeName().equals("event-representation"))
+            {
+                Node typeNode = subElement.getAttributes().getNamedItem("type");
+                if (typeNode != null) {
+                    String typeText = typeNode.getTextContent();
+                    Configuration.EventRepresentation value = Configuration.EventRepresentation.valueOf(typeText.toUpperCase());
+                    configuration.getEngineDefaults().getEventMeta().setDefaultEventRepresentation(value);
                 }
             }
         }

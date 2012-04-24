@@ -45,19 +45,19 @@ public class TestViewInheritAndInterface extends TestCase
         testView.addListener(testListener);
 
         epService.getEPRuntime().sendEvent(new SupportOverrideOneA("valA", "valOne", "valBase"));
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals("valA", event.get("value"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("valA", theEvent.get("value"));
 
         epService.getEPRuntime().sendEvent(new SupportOverrideBase("x"));
         assertFalse(testListener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportOverrideOneB("valB", "valTwo", "valBase2"));
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("valB", event.get("value"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("valB", theEvent.get("value"));
 
         epService.getEPRuntime().sendEvent(new SupportOverrideOne("valThree", "valBase3"));
-        event = testListener.getAndResetLastNewData()[0];
-        assertEquals("valThree", event.get("value"));
+        theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("valThree", theEvent.get("value"));
     }
 
     public void testImplementationClass()
@@ -93,12 +93,12 @@ public class TestViewInheritAndInterface extends TestCase
         for (int i = 0; i < listeners.length; i++)
         {
             assertTrue(listeners[i].isInvoked());
-            EventBean event = listeners[i].getAndResetLastNewData()[0];
+            EventBean theEvent = listeners[i].getAndResetLastNewData()[0];
 
             for (int j = 0; j < expected[i].length; j++)
             {
-                assertTrue("failed property valid check for stmt=" + viewExpr[i], event.getEventType().isProperty(expected[i][j]));
-                assertEquals("failed property check for stmt=" + viewExpr[i], expected[i][j], event.get(expected[i][j]));
+                assertTrue("failed property valid check for stmt=" + viewExpr[i], theEvent.getEventType().isProperty(expected[i][j]));
+                assertEquals("failed property check for stmt=" + viewExpr[i], expected[i][j], theEvent.get(expected[i][j]));
             }
         }
     }

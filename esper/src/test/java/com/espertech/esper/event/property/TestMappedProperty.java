@@ -22,7 +22,7 @@ import junit.framework.TestCase;
 public class TestMappedProperty extends TestCase
 {
     private MappedProperty[] mapped;
-    private EventBean event;
+    private EventBean theEvent;
     private BeanEventType eventType;
 
     public void setUp()
@@ -31,8 +31,8 @@ public class TestMappedProperty extends TestCase
         mapped[0] = new MappedProperty("mapped", "keyOne");
         mapped[1] = new MappedProperty("mapped", "keyTwo");
 
-        event = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
-        eventType = (BeanEventType)event.getEventType();
+        theEvent = SupportEventBeanFactory.createObject(SupportBeanComplexProps.makeDefaultBean());
+        eventType = (BeanEventType) theEvent.getEventType();
     }
 
     public void testGetGetter()
@@ -41,7 +41,7 @@ public class TestMappedProperty extends TestCase
         for (int i = 0; i < mapped.length; i++)
         {
             EventPropertyGetter getter = mapped[i].getGetter(eventType, SupportEventAdapterService.getService());
-            assertEquals(expected[i], getter.get(event));
+            assertEquals(expected[i], getter.get(theEvent));
         }
 
         // try invalid case

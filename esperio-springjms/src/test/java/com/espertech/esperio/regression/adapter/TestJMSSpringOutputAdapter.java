@@ -8,13 +8,13 @@
  **************************************************************************************/
 package com.espertech.esperio.regression.adapter;
 
-import junit.framework.TestCase;
-import com.espertech.esperio.SpringContext;
-import com.espertech.esperio.SpringContextLoader;
 import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esperio.SpringContext;
+import com.espertech.esperio.SpringContextLoader;
 import com.espertech.esperio.support.util.SupportSerializableBean;
+import junit.framework.TestCase;
 
 import javax.jms.MapMessage;
 import javax.jms.Message;
@@ -55,7 +55,7 @@ public class TestJMSSpringOutputAdapter extends TestCase
 
         service.getEPAdministrator().createEPL(
                 "insert into MyOutputStream " +
-                "select string as prop1, '>' || string || '<' as prop2 from " + SupportSerializableBean.class.getName());
+                "select theString as prop1, '>' || theString || '<' as prop2 from " + SupportSerializableBean.class.getName());
 
         service.getEPRuntime().sendEvent(new SupportSerializableBean("x1"));
         Message result = jmsReceiver.receiveMessage();

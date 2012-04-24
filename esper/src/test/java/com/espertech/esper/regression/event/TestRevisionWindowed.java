@@ -83,7 +83,7 @@ public class TestRevisionWindowed extends TestCase
         epService.getEPAdministrator().createEPL("insert into MyInterfaceWindow select * from ISupportRevisionFull");
         epService.getEPAdministrator().createEPL("insert into MyInterfaceWindow select * from ISupportDeltaFive");
 
-        EPStatement consumerOne = epService.getEPAdministrator().createEPL("select irstream k0,p0,p1 from MyInterfaceWindow");
+        EPStatement consumerOne = epService.getEPAdministrator().createEPL("@Audit select irstream k0,p0,p1 from MyInterfaceWindow");
         consumerOne.addListener(listenerOne);
         String fields[] = "k0,p0,p1".split(",");
         EPAssertionUtil.assertEqualsAnyOrder(consumerOne.getEventType().getPropertyNames(), fields);
@@ -261,9 +261,9 @@ public class TestRevisionWindowed extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private Map<String, Object> makeMap(Object[][] entries)

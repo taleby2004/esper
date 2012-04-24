@@ -654,9 +654,9 @@ public class DatabasePollingViewableFactory
                 }
             }
         }
-        String[] params = eventPropertyParams.toArray(new String[eventPropertyParams.size()]);
+        String[] parameters = eventPropertyParams.toArray(new String[eventPropertyParams.size()]);
         String[] builtin = eventPropertyParams.toArray(new String[eventPropertyParams.size()]);
-        return new SQLParameterDesc(params, builtin);
+        return new SQLParameterDesc(parameters, builtin);
     }
 
     private static Map<String, DBOutputTypeDesc> compileResultMetaData(ResultSetMetaData resultMetaData,

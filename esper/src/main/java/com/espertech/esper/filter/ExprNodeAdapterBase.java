@@ -39,12 +39,12 @@ public class ExprNodeAdapterBase
     /**
      * Evaluate the boolean expression given the event as a stream zero event.
      *
-     * @param event is the stream zero event (current event)
+     * @param theEvent is the stream zero event (current event)
      * @return boolean result of the expression
      */
-    public boolean evaluate(EventBean event)
+    public boolean evaluate(EventBean theEvent)
     {
-        return evaluatePerStream(new EventBean[] {event});
+        return evaluatePerStream(new EventBean[] {theEvent});
     }
 
     protected boolean evaluatePerStream(EventBean[] eventsPerStream) {

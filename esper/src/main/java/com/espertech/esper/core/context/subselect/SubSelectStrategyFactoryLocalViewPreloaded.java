@@ -148,8 +148,8 @@ public class SubSelectStrategyFactoryLocalViewPreloaded implements SubSelectStra
             ArrayList<EventBean> eventsInWindow = new ArrayList<EventBean>();
             if (namedSpec.getFilterExpressions() != null) {
                 EventBean[] events = new EventBean[1];
-                for (EventBean event : consumerView) {
-                    events[0] = event;
+                for (EventBean theEvent : consumerView) {
+                    events[0] = theEvent;
                     boolean add = true;
                     for (ExprNode filter : namedSpec.getFilterExpressions()) {
                         Object result = filter.getExprEvaluator().evaluate(events, true, agentInstanceContext);

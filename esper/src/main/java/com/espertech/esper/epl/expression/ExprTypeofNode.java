@@ -118,14 +118,14 @@ public class ExprTypeofNode extends ExprNodeBase
 
         @Override
         public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
-            EventBean event = eventsPerStream[streamNum];
-            if (event == null) {
+            EventBean theEvent = eventsPerStream[streamNum];
+            if (theEvent == null) {
                 return null;
             }
-            if (event instanceof VariantEvent) {
-                return ((VariantEvent) event).getUnderlyingEventBean().getEventType().getName();
+            if (theEvent instanceof VariantEvent) {
+                return ((VariantEvent) theEvent).getUnderlyingEventBean().getEventType().getName();
             }
-            return event.getEventType().getName();
+            return theEvent.getEventType().getName();
         }
 
         @Override
@@ -153,11 +153,11 @@ public class ExprTypeofNode extends ExprNodeBase
 
         @Override
         public Object evaluate(EventBean[] eventsPerStream, boolean isNewData, ExprEvaluatorContext context) {
-            EventBean event = eventsPerStream[streamId];
-            if (event == null) {
+            EventBean theEvent = eventsPerStream[streamId];
+            if (theEvent == null) {
                 return null;
             }
-            Object fragment = getter.getFragment(event);
+            Object fragment = getter.getFragment(theEvent);
             if (fragment == null) {
                 return null;
             }

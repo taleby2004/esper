@@ -11,6 +11,7 @@
 
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.ConfigurationEngineDefaults;
 import com.espertech.esper.core.service.StatementResultService;
 import com.espertech.esper.core.service.StatementResultServiceImpl;
@@ -45,7 +46,7 @@ public class TestSelectExprProcessorFactory extends TestCase
         try
         {
             SelectExprProcessorFactory.getProcessor(Collections.<Integer>emptyList(), selectionList, false, null, null,
-                    new SupportStreamTypeSvc3Stream(), null, null, null, null, null, null, null, null, null, null, null, null, null);
+                    new SupportStreamTypeSvc3Stream(), null, null, null, null, null, null, null, null, null, null, null, null, null, new Configuration(), null);
             fail();
         }
         catch (ExprValidationException ex)
@@ -59,7 +60,7 @@ public class TestSelectExprProcessorFactory extends TestCase
         List<SelectClauseElementCompiled> selectionList = new LinkedList<SelectClauseElementCompiled>();
         selectionList.add(new SelectClauseElementWildcard());
         SelectExprProcessor processor = SelectExprProcessorFactory.getProcessor(Collections.<Integer>emptyList(), selectionList, false, null, null,
-                new SupportStreamTypeSvc3Stream(), SupportEventAdapterService.getService(), statementResultService, null, selectExprEventTypeRegistry, null, null, null, null, null, null, null, null, null);
+                new SupportStreamTypeSvc3Stream(), SupportEventAdapterService.getService(), statementResultService, null, selectExprEventTypeRegistry, null, null, null, null, null, null, null, null, null, new Configuration(), null);
         assertTrue(processor instanceof SelectExprResultProcessor);
     }
 
@@ -69,7 +70,7 @@ public class TestSelectExprProcessorFactory extends TestCase
         ExprNode identNode = SupportExprNodeFactory.makeIdentNode("doubleBoxed", "s0");
         selectionList.add(new SelectClauseExprCompiledSpec(identNode, "result", null));
         SelectExprProcessor processor = SelectExprProcessorFactory.getProcessor(Collections.<Integer>emptyList(), selectionList, false, null, null,
-                new SupportStreamTypeSvc3Stream(), SupportEventAdapterService.getService(), statementResultService, null, selectExprEventTypeRegistry, null, null, null, null, null, null, null, null, null);
+                new SupportStreamTypeSvc3Stream(), SupportEventAdapterService.getService(), statementResultService, null, selectExprEventTypeRegistry, null, null, null, null, null, null, null, null, null, new Configuration(), null);
         assertTrue(processor != null);
     }
 

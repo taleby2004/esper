@@ -243,4 +243,13 @@ public class PropertyParser
                 throw new IllegalStateException("Event property AST node not recognized, type=" + child.getType());
         }
     }
+
+    public static String unescapeBacktick(String unescapedPropertyName) {
+        if (unescapedPropertyName.startsWith("`") && unescapedPropertyName.endsWith("`")) {
+            return unescapedPropertyName.substring(1, unescapedPropertyName.length() - 1);
+        }
+        else {
+            return unescapedPropertyName;
+        }
+    }
 }

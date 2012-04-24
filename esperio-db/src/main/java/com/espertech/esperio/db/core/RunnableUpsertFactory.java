@@ -31,7 +31,7 @@ public class RunnableUpsertFactory implements RunnableFactory
         return context;
     }
 
-    public Runnable makeRunnable(EventBean eventBean) {
-        return new RunnableUpsert(context, eventBean);
+    public Runnable makeRunnable(EventBean theEvent) {
+        return new RunnableUpsert(context, theEvent);
     }
 }

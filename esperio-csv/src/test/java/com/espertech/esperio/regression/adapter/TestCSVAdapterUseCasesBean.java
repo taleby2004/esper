@@ -12,9 +12,14 @@ import com.espertech.esper.client.Configuration;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.dataflow.EPDataFlowInstance;
+import com.espertech.esper.client.dataflow.EPDataFlowInstantiationOptions;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.dataflow.util.DefaultSupportCaptureOp;
+import com.espertech.esper.dataflow.util.DefaultSupportGraphOpProvider;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.csv.CSVInputAdapter;
+import com.espertech.esperio.graph.FileSourceCSV;
 import com.espertech.esperio.support.util.ExampleMarketDataBeanReadWrite;
 
 /**
@@ -31,6 +36,7 @@ public class TestCSVAdapterUseCasesBean extends TestCSVAdapterUseCases {
     {
         Configuration configuration = new Configuration();
         configuration.addEventType("ReadWrite", ExampleMarketDataBeanReadWrite.class);
+        configuration.addImport(FileSourceCSV.class.getPackage().getName() + ".*");
 
         epService = EPServiceProviderManager.getProvider("testExistingTypeNoOptions", configuration);
         epService.initialize();
@@ -45,5 +51,18 @@ public class TestCSVAdapterUseCasesBean extends TestCSVAdapterUseCases {
         EventBean eb = listener.getNewDataList().get(0)[0];
         assertTrue(ExampleMarketDataBeanReadWrite.class == eb.getUnderlying().getClass());
         assertEquals(55.5 * 1000, eb.get("value"));
+
+        // test graph
+        String graph = "create dataflow ReadCSV " +
+                "FileSource -> mystream<ReadWrite> { file: '" + CSV_FILENAME_ONELINE_TRADE + "', hasTitleLine: true, classpathFile: true }" +
+                "DefaultSupportCaptureOp(mystream) {}";
+        epService.getEPAdministrator().createEPL(graph);
+
+        DefaultSupportCaptureOp<Object> outputOp = new DefaultSupportCaptureOp<Object>();
+        EPDataFlowInstance instance = epService.getEPRuntime().getDataFlowRuntime().instantiate("ReadCSV", new EPDataFlowInstantiationOptions().operatorProvider(new DefaultSupportGraphOpProvider(outputOp)));
+        instance.run();
+        Object[] received = outputOp.getAndReset().get(0).toArray();
+        assertEquals(1, received.length);
+        assertEquals(55.5 * 1000, ((ExampleMarketDataBeanReadWrite) received[0]).getValue());
     }
 }

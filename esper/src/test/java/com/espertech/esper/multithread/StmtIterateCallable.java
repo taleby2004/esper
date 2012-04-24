@@ -58,8 +58,8 @@ public class StmtIterateCallable implements Callable
                     boolean found = false;
                     for (;it.hasNext();)
                     {
-                        EventBean event = it.next();
-                        if (event.get("string").equals(id))
+                        EventBean theEvent = it.next();
+                        if (theEvent.get("theString").equals(id))
                         {
                             found = true;
                         }

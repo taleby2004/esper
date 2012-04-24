@@ -33,8 +33,8 @@ public abstract class SortedAccessStrategyRelOpBase {
         }
     }
 
-    public Object evaluateLookup(EventBean event, ExprEvaluatorContext context) {
-        events[lookupStream] = event;
+    public Object evaluateLookup(EventBean theEvent, ExprEvaluatorContext context) {
+        events[lookupStream] = theEvent;
         return keyEval.evaluate(events, true, context);
     }
 

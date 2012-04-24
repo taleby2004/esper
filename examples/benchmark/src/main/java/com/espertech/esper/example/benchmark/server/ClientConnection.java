@@ -80,24 +80,24 @@ public class ClientConnection extends Thread {
                     ;//System.err.println("partial packet");
                 } else {
                     packet.flip();
-                    final MarketData event = MarketData.fromByteBuffer(packet);
+                    final MarketData theEvent = MarketData.fromByteBuffer(packet);
                     if (executor == null) {
                         long ns = System.nanoTime();
-                        cepProvider.sendEvent(event);
+                        cepProvider.sendEvent(theEvent);
                         long nsDone = System.nanoTime();
                         long msDone = System.currentTimeMillis();
                         StatsHolder.getEngine().update(nsDone - ns);
-                        StatsHolder.getEndToEnd().update(msDone - event.getTime());
+                        StatsHolder.getEndToEnd().update(msDone - theEvent.getTime());
                     } else {
                         executor.execute(new Runnable() {
                             public void run() {
                                 long ns = System.nanoTime();
-                                cepProvider.sendEvent(event);
+                                cepProvider.sendEvent(theEvent);
                                 long nsDone = System.nanoTime();
                                 long msDone = System.currentTimeMillis();
                                 StatsHolder.getEngine().update(nsDone - ns);
-                                StatsHolder.getServer().update(nsDone - event.getInTime());
-                                StatsHolder.getEndToEnd().update(msDone - event.getTime());
+                                StatsHolder.getServer().update(nsDone - theEvent.getInTime());
+                                StatsHolder.getEndToEnd().update(msDone - theEvent.getTime());
                             }
                         });
                     }

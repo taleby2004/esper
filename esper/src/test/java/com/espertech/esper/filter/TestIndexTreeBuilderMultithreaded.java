@@ -111,18 +111,18 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
         }
 
         // None of the not-matching events should cause any match
-        for (EventBean event : unmatchedEvents)
+        for (EventBean theEvent : unmatchedEvents)
         {
             List<FilterHandle> matches = new LinkedList<FilterHandle>();
-            topNode.matchEvent(event, matches);
+            topNode.matchEvent(theEvent, matches);
             assertTrue(matches.size() == 0);
         }
 
         // All of the matching events should cause exactly one match
-        for (EventBean event : matchedEvents)
+        for (EventBean theEvent : matchedEvents)
         {
             List<FilterHandle> matches = new LinkedList<FilterHandle>();
-            topNode.matchEvent(event, matches);
+            topNode.matchEvent(theEvent, matches);
             assertTrue(matches.size() == 1);
         }
 
@@ -135,10 +135,10 @@ public class TestIndexTreeBuilderMultithreaded extends TestCase
         }
 
         // After the remove no matches are expected
-        for (EventBean event : matchedEvents)
+        for (EventBean theEvent : matchedEvents)
         {
             List<FilterHandle> matches = new LinkedList<FilterHandle>();
-            topNode.matchEvent(event, matches);
+            topNode.matchEvent(theEvent, matches);
             assertTrue(matches.size() == 0);
         }
     }

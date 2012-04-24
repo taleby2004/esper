@@ -97,14 +97,14 @@ public class TestVariablesEventTyped extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("A", SupportBean_A.class);
         epService.getEPAdministrator().createEPL("create variable SupportBean varbean");
 
-        String[] fields = "varbean.string,varbean.intPrimitive".split(",");
-        EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select varbean.string,varbean.intPrimitive from S0");
+        String[] fields = "varbean.theString,varbean.intPrimitive".split(",");
+        EPStatement stmtSelect = epService.getEPAdministrator().createEPL("select varbean.theString,varbean.intPrimitive from S0");
         stmtSelect.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
 
-        EPStatement stmtSet = epService.getEPAdministrator().createEPL("on A set varbean.string = 'A', varbean.intPrimitive = 1");
+        EPStatement stmtSet = epService.getEPAdministrator().createEPL("on A set varbean.theString = 'A', varbean.intPrimitive = 1");
         stmtSet.addListener(listenerSet);
         epService.getEPRuntime().sendEvent(new SupportBean_A("E1"));
         listenerSet.reset();
@@ -119,15 +119,15 @@ public class TestVariablesEventTyped extends TestCase
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"A", 1});
         assertNotSame(setBean, epService.getEPRuntime().getVariableValue("varbean"));
         assertEquals(1, ((SupportBean) epService.getEPRuntime().getVariableValue("varbean")).getIntPrimitive());
-        EPAssertionUtil.assertProps(listenerSet.assertOneGetNewAndReset(), "varbean.string,varbean.intPrimitive".split(","), new Object[]{"A", 1});
-        EPAssertionUtil.assertProps(stmtSet.iterator().next(), "varbean.string,varbean.intPrimitive".split(","), new Object[]{"A", 1});
+        EPAssertionUtil.assertProps(listenerSet.assertOneGetNewAndReset(), "varbean.theString,varbean.intPrimitive".split(","), new Object[]{"A", 1});
+        EPAssertionUtil.assertProps(stmtSet.iterator().next(), "varbean.theString,varbean.intPrimitive".split(","), new Object[]{"A", 1});
 
         // test self evaluate
         stmtSet.destroy();
-        stmtSet = epService.getEPAdministrator().createEPL("on A set varbean.string = A.id, varbean.string = '>'||varbean.string||'<'");
+        stmtSet = epService.getEPAdministrator().createEPL("on A set varbean.theString = A.id, varbean.theString = '>'||varbean.theString||'<'");
         stmtSet.addListener(listenerSet);
         epService.getEPRuntime().sendEvent(new SupportBean_A("E3"));
-        assertEquals(">E3<", ((SupportBean) epService.getEPRuntime().getVariableValue("varbean")).getString());
+        assertEquals(">E3<", ((SupportBean) epService.getEPRuntime().getVariableValue("varbean")).getTheString());
 
         // test widen
         stmtSet.destroy();

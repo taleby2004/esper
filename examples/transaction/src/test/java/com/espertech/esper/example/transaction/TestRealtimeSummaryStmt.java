@@ -118,16 +118,16 @@ public class TestRealtimeSummaryStmt extends TestStmtBase
     {
         assertEquals(1, listenerTotals.getNewDataList().size());
         assertEquals(1, listenerTotals.getLastNewData().length);
-        EventBean event = listenerTotals.getLastNewData()[0];
-        assertEquals(minAC, event.get("minLatencyAC"));
-        assertEquals(maxAC, event.get("maxLatencyAC"));
-        assertEquals(avgAC, event.get("avgLatencyAC"));
-        assertEquals(minBC, event.get("minLatencyBC"));
-        assertEquals(maxBC, event.get("maxLatencyBC"));
-        assertEquals(avgBC, event.get("avgLatencyBC"));
-        assertEquals(minAB, event.get("minLatencyAB"));
-        assertEquals(maxAB, event.get("maxLatencyAB"));
-        assertEquals(avgAB, event.get("avgLatencyAB"));
+        EventBean theEvent = listenerTotals.getLastNewData()[0];
+        assertEquals(minAC, theEvent.get("minLatencyAC"));
+        assertEquals(maxAC, theEvent.get("maxLatencyAC"));
+        assertEquals(avgAC, theEvent.get("avgLatencyAC"));
+        assertEquals(minBC, theEvent.get("minLatencyBC"));
+        assertEquals(maxBC, theEvent.get("maxLatencyBC"));
+        assertEquals(avgBC, theEvent.get("avgLatencyBC"));
+        assertEquals(minAB, theEvent.get("minLatencyAB"));
+        assertEquals(maxAB, theEvent.get("maxLatencyAB"));
+        assertEquals(avgAB, theEvent.get("avgLatencyAB"));
         listenerTotals.reset();
     }
 
@@ -135,11 +135,11 @@ public class TestRealtimeSummaryStmt extends TestStmtBase
     {
         assertEquals(1, listenerByCustomer.getNewDataList().size());
         assertEquals(1, listenerByCustomer.getLastNewData().length);
-        EventBean event = listenerByCustomer.getLastNewData()[0];
-        assertEquals(customerId, event.get("customerId"));
-        assertEquals(minAC, event.get("minLatency"));
-        assertEquals(maxAC, event.get("maxLatency"));
-        assertEquals(avgAC, event.get("avgLatency"));
+        EventBean theEvent = listenerByCustomer.getLastNewData()[0];
+        assertEquals(customerId, theEvent.get("customerId"));
+        assertEquals(minAC, theEvent.get("minLatency"));
+        assertEquals(maxAC, theEvent.get("maxLatency"));
+        assertEquals(avgAC, theEvent.get("avgLatency"));
         listenerByCustomer.reset();
     }
 
@@ -147,11 +147,11 @@ public class TestRealtimeSummaryStmt extends TestStmtBase
     {
         assertEquals(1, listenerBySupplier.getNewDataList().size());
         assertEquals(1, listenerBySupplier.getLastNewData().length);
-        EventBean event = listenerBySupplier.getLastNewData()[0];
-        assertEquals(supplierId, event.get("supplierId"));
-        assertEquals(minAC, event.get("minLatency"));
-        assertEquals(maxAC, event.get("maxLatency"));
-        assertEquals(avgAC, event.get("avgLatency"));
+        EventBean theEvent = listenerBySupplier.getLastNewData()[0];
+        assertEquals(supplierId, theEvent.get("supplierId"));
+        assertEquals(minAC, theEvent.get("minLatency"));
+        assertEquals(maxAC, theEvent.get("maxLatency"));
+        assertEquals(avgAC, theEvent.get("avgLatency"));
         listenerBySupplier.reset();
     }
 }

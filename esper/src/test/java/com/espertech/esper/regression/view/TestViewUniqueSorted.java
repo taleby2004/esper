@@ -18,6 +18,7 @@ import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.bean.SupportSensorEvent;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.support.util.HeapAndTime;
 import junit.framework.TestCase;
 
 import java.util.Iterator;
@@ -61,7 +62,7 @@ public class TestViewUniqueSorted extends TestCase
         sendEvent("E2", -10);
         sendEvent("E3", -5);
         sendEvent("E4", 5);
-        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "string".split(","), new Object[][]{{"E2"}, {"E4"}});
+        EPAssertionUtil.assertPropsPerRow(stmt.iterator(), "theString".split(","), new Object[][]{{"E2"}, {"E4"}});
     }
 
     public void testWindowStats()
@@ -138,8 +139,8 @@ public class TestViewUniqueSorted extends TestCase
         EPAssertionUtil.assertUnderlyingPerRow(testListener.assertInvokedAndReset(), new Object[] {eventThree}, new Object[] {eventTwo});
 
         Iterator<EventBean> it = stmt.iterator();
-        SupportSensorEvent event = (SupportSensorEvent) it.next().getUnderlying();
-        assertEquals (3,event.getId());
+        SupportSensorEvent theEvent = (SupportSensorEvent) it.next().getUnderlying();
+        assertEquals(3,theEvent.getId());
     }
 
     public void testReuseUnique()
@@ -168,13 +169,13 @@ public class TestViewUniqueSorted extends TestCase
 
     private Object makeEvent(String symbol, double price)
     {
-        SupportMarketDataBean event = new SupportMarketDataBean(symbol, price, 0L, "");
-        return event;
+        SupportMarketDataBean theEvent = new SupportMarketDataBean(symbol, price, 0L, "");
+        return theEvent;
     }
 
-    private void sendEvent(String string, int intPrimitive)
+    private void sendEvent(String theString, int intPrimitive)
     {
-        epService.getEPRuntime().sendEvent(new SupportBean(string, intPrimitive));
+        epService.getEPRuntime().sendEvent(new SupportBean(theString, intPrimitive));
     }
 
     private Object[] toObjectArray(Iterator<EventBean> it)
@@ -182,8 +183,8 @@ public class TestViewUniqueSorted extends TestCase
         List<Object> result = new LinkedList<Object>();
         for (;it.hasNext();)
         {
-            EventBean event = it.next();
-            result.add(event.getUnderlying());
+            EventBean theEvent = it.next();
+            result.add(theEvent.getUnderlying());
         }
         return result.toArray();
     }

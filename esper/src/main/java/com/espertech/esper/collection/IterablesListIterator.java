@@ -10,6 +10,7 @@ package com.espertech.esper.collection;
 
 import com.espertech.esper.client.EventBean;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,7 +32,7 @@ public final class IterablesListIterator implements Iterator<EventBean>
      * Constructor - takes a list of Iterable that supply the iterators to iterate over.
      * @param iterables is a list of Iterable instances for which iterators to iterator over
      */
-    public IterablesListIterator(List<Iterable<EventBean>> iterables)
+    public IterablesListIterator(Collection<Iterable<EventBean>> iterables)
     {
         listIterator = iterables.iterator();
 

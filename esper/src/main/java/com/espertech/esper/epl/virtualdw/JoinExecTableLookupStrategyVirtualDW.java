@@ -62,9 +62,9 @@ public class JoinExecTableLookupStrategyVirtualDW implements JoinExecTableLookup
         }
     }
 
-    public Set<EventBean> lookup(EventBean event, Cursor cursor, ExprEvaluatorContext context) {
+    public Set<EventBean> lookup(EventBean theEvent, Cursor cursor, ExprEvaluatorContext context) {
 
-        eventsPerStream[lookupStream] = event;
+        eventsPerStream[lookupStream] = theEvent;
 
         Object[] keys = new Object[evaluators.length];
         for (int i = 0; i < evaluators.length; i++) {

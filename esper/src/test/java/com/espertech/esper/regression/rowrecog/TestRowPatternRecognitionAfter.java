@@ -37,12 +37,12 @@ public class TestRowPatternRecognitionAfter extends TestCase {
 
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                " measures A.string as a, B[0].string as b0, B[1].string as b1" +
+                " measures A.theString as a, B[0].theString as b0, B[1].theString as b1" +
                 " after match skip to current row" +
                 " pattern (A B*)" +
                 " define" +
-                " A as A.string like \"A%\"," +
-                " B as B.string like \"B%\"" +
+                " A as A.theString like \"A%\"," +
+                " B as B.theString like \"B%\"" +
                 ")";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -90,12 +90,12 @@ public class TestRowPatternRecognitionAfter extends TestCase {
         String[] fields = "a,b0,b1".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a, B[0].string as b0, B[1].string as b1" +
+                "  measures A.theString as a, B[0].theString as b0, B[1].theString as b1" +
                 "  AFTER MATCH SKIP TO NEXT ROW " +
                 "  pattern (A B*) " +
                 "  define " +
-                "    A as A.string like 'A%'," +
-                "    B as B.string like 'B%'" +
+                "    A as A.theString like 'A%'," +
+                "    B as B.theString like 'B%'" +
                 ")";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);
@@ -125,7 +125,7 @@ public class TestRowPatternRecognitionAfter extends TestCase {
         String[] fields = "a_string,b_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string " +
+                "  measures A.theString as a_string, B.theString as b_string " +
                 "  all matches " +
                 "  after match skip to next row " +
                 "  pattern (A B) " +
@@ -184,7 +184,7 @@ public class TestRowPatternRecognitionAfter extends TestCase {
         String[] fields = "a0,b,a1".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A[0].string as a0, B.string as b, A[1].string as a1 " +
+                "  measures A[0].theString as a0, B.theString as b, A[1].theString as a1 " +
                 "  all matches " +
                 "  after match skip to next row " +
                 "  pattern ( A B A ) " +
@@ -230,8 +230,8 @@ public class TestRowPatternRecognitionAfter extends TestCase {
         String[] fields = "a_string,a_value,b_value".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  partition by string" +
-                "  measures A.string as a_string, A.value as a_value, B.value as b_value " +
+                "  partition by theString" +
+                "  measures A.theString as a_string, A.value as a_value, B.value as b_value " +
                 "  all matches " +
                 "  after match skip to next row " +
                 "  pattern (A B) " +
@@ -317,7 +317,7 @@ public class TestRowPatternRecognitionAfter extends TestCase {
         String[] fields = "a_string,b_string".split(",");
         String text = "select * from MyEvent.win:keepall() " +
                 "match_recognize (" +
-                "  measures A.string as a_string, B.string as b_string " +
+                "  measures A.theString as a_string, B.theString as b_string " +
                 "  all matches " +
                 "  after match skip past last row" +
                 "  pattern (A B) " +

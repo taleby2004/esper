@@ -52,12 +52,12 @@ public class TerminalMDB implements MessageDrivenBean, MessageListener
 
     public void onMessage(Message message)
     {
-        Object event = null;
+        Object theEvent = null;
         try
         {
             ObjectMessage objMessage = (ObjectMessage) message;
             //System.out.println("onMessage received event=" + objMessage.getObject());
-            event = objMessage.getObject();
+            theEvent = objMessage.getObject();
         }
         catch (JMSException ex)
         {
@@ -68,11 +68,11 @@ public class TerminalMDB implements MessageDrivenBean, MessageListener
 
         try
         {
-            mdbAdapter.sendEvent(event);
+            mdbAdapter.sendEvent(theEvent);
         }
         catch (RuntimeException ex)
         {
-            String messageText = "Error processing event, event=" + event;
+            String messageText = "Error processing event, event=" + theEvent;
             System.out.println(messageText + ":" + ex);
             return;
         }

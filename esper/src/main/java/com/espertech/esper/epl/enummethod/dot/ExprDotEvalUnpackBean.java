@@ -28,8 +28,8 @@ public class ExprDotEvalUnpackBean implements ExprDotEval {
         if (target == null) {
             return null;
         }
-        EventBean event = (EventBean) target;
-        return event.getUnderlying();
+        EventBean theEvent = (EventBean) target;
+        return theEvent.getUnderlying();
     }
 
     public ExprDotEvalTypeInfo getTypeInfo() {

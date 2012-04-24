@@ -10,6 +10,7 @@ package com.espertech.esper.view.std;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.event.EventAdapterService;
@@ -29,7 +30,7 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
 {
     private final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final String[] propertyNames;
-    private final Object[] propertyValues;
+    private final Object propertyValues;
     private final EventType eventType;
     private boolean mustAddProperty;
 
@@ -44,7 +45,7 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
      * @param mergedResultEventType is the event type that the merge view reports to it's child views
      * @param agentInstanceContext contains required view services
      */
-    public AddPropertyValueView(AgentInstanceViewFactoryChainContext agentInstanceContext, String[] propertyNames, Object[] mergeValues, EventType mergedResultEventType)
+    public AddPropertyValueView(AgentInstanceViewFactoryChainContext agentInstanceContext, String[] propertyNames, Object mergeValues, EventType mergedResultEventType)
     {
         this.propertyNames = propertyNames;
         this.propertyValues = mergeValues;
@@ -89,7 +90,7 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
      * Returns the value to set for the field.
      * @return value to set
      */
-    public final Object[] getPropertyValues()
+    public final Object getPropertyValues()
     {
         return propertyValues;
     }
@@ -112,10 +113,10 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
             int index = 0;
             for (EventBean newEvent : newData)
             {
-                EventBean event = addProperty(newEvent, propertyNames, propertyValues, eventType, agentInstanceContext.getStatementContext().getEventAdapterService());
-                newEvents[index++] = event;
+                EventBean theEvent = addProperty(newEvent, propertyNames, propertyValues, eventType, agentInstanceContext.getStatementContext().getEventAdapterService());
+                newEvents[index++] = theEvent;
 
-                newToOldEventMap.put(newEvent, event);
+                newToOldEventMap.put(newEvent, theEvent);
             }
         }
 
@@ -133,8 +134,8 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
                 }
                 else
                 {
-                    EventBean event = addProperty(oldEvent, propertyNames, propertyValues, eventType, agentInstanceContext.getStatementContext().getEventAdapterService());
-                    oldEvents[index++] = event;
+                    EventBean theEvent = addProperty(oldEvent, propertyNames, propertyValues, eventType, agentInstanceContext.getStatementContext().getEventAdapterService());
+                    oldEvents[index++] = theEvent;
                 }
             }
         }
@@ -202,14 +203,22 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
      */
     protected static EventBean addProperty(EventBean originalEvent,
                                        String[] propertyNames,
-                                       Object[] propertyValues,
+                                       Object propertyValues,
                                        EventType targetEventType,
                                        EventAdapterService eventAdapterService)
     {
         Map<String, Object> values = new HashMap<String, Object>();
-        for (int i = 0; i < propertyNames.length; i++)
-        {
-            values.put(propertyNames[i], propertyValues[i]);
+        if (propertyValues instanceof MultiKeyUntyped) {
+            MultiKeyUntyped props = (MultiKeyUntyped) propertyValues;
+            Object[] propertyValuesArr = props.getKeys();
+
+            for (int i = 0; i < propertyNames.length; i++)
+            {
+                values.put(propertyNames[i], propertyValuesArr[i]);
+            }
+        }
+        else {
+            values.put(propertyNames[0], propertyValues);
         }
 
         return eventAdapterService.adapterForTypedWrapper(originalEvent, values, targetEventType);
@@ -218,7 +227,7 @@ public final class AddPropertyValueView extends ViewSupport implements Cloneable
     public final String toString()
     {
         return this.getClass().getName() + " propertyNames=" + Arrays.toString(propertyNames) +
-                " propertyValue=" + Arrays.toString(propertyValues);
+                " propertyValue=" + propertyValues;
     }
 
     private static final Log log = LogFactory.getLog(AddPropertyValueView.class);

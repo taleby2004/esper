@@ -551,15 +551,15 @@ public class TestViewTimeLengthBatch extends TestCase
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
-    private void assertData(EventBean event, double price, Double prevPrice, Double priorPrice)
+    private void assertData(EventBean theEvent, double price, Double prevPrice, Double priorPrice)
     {
-        assertEquals(price, event.get("price"));
-        assertEquals(prevPrice, event.get("prevPrice"));
-        assertEquals(priorPrice, event.get("priorPrice"));
+        assertEquals(price, theEvent.get("price"));
+        assertEquals(prevPrice, theEvent.get("prevPrice"));
+        assertEquals(priorPrice, theEvent.get("priorPrice"));
     }
 }

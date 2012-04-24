@@ -199,9 +199,9 @@ public class TestSubselectIn extends TestCase
 
     public void testInNullableCoercion()
     {
-        String stmtText = "select longBoxed from " + SupportBean.class.getName() + "(string='A') as s0 " +
+        String stmtText = "select longBoxed from " + SupportBean.class.getName() + "(theString='A') as s0 " +
                           "where longBoxed in " +
-                          "(select intBoxed from " + SupportBean.class.getName() + "(string='B').win:length(1000))";
+                          "(select intBoxed from " + SupportBean.class.getName() + "(theString='B').win:length(1000))";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -232,9 +232,9 @@ public class TestSubselectIn extends TestCase
 
     public void testInNullRow()
     {
-        String stmtText = "select intBoxed from " + SupportBean.class.getName() + "(string='A') as s0 " +
+        String stmtText = "select intBoxed from " + SupportBean.class.getName() + "(theString='A') as s0 " +
                           "where intBoxed in " +
-                          "(select longBoxed from " + SupportBean.class.getName() + "(string='B').win:length(1000))";
+                          "(select longBoxed from " + SupportBean.class.getName() + "(theString='B').win:length(1000))";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -258,9 +258,9 @@ public class TestSubselectIn extends TestCase
 
     public void testNotInNullRow()
     {
-        String stmtText = "select intBoxed from " + SupportBean.class.getName() + "(string='A') as s0 " +
+        String stmtText = "select intBoxed from " + SupportBean.class.getName() + "(theString='A') as s0 " +
                           "where intBoxed not in " +
-                          "(select longBoxed from " + SupportBean.class.getName() + "(string='B').win:length(1000))";
+                          "(select longBoxed from " + SupportBean.class.getName() + "(theString='B').win:length(1000))";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -309,9 +309,9 @@ public class TestSubselectIn extends TestCase
 
     public void testNotInNullableCoercion()
     {
-        String stmtText = "select longBoxed from " + SupportBean.class.getName() + "(string='A') as s0 " +
+        String stmtText = "select longBoxed from " + SupportBean.class.getName() + "(theString='A') as s0 " +
                           "where longBoxed not in " +
-                          "(select intBoxed from " + SupportBean.class.getName() + "(string='B').win:length(1000))";
+                          "(select intBoxed from " + SupportBean.class.getName() + "(theString='B').win:length(1000))";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -362,10 +362,10 @@ public class TestSubselectIn extends TestCase
         }
     }
 
-    private void sendBean(String string, Integer intBoxed, Long longBoxed)
+    private void sendBean(String theString, Integer intBoxed, Long longBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntBoxed(intBoxed);
         bean.setLongBoxed(longBoxed);
         epService.getEPRuntime().sendEvent(bean);

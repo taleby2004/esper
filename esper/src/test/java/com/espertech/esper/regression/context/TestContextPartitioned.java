@@ -51,7 +51,7 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testIterateTargetedCP() {
-        epService.getEPAdministrator().createEPL("create context PartitionedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("create context PartitionedByString partition by theString from SupportBean");
         String[] fields = "c0,c1".split(",");
         EPStatement stmt = epService.getEPAdministrator().createEPL("@Name('StmtOne') context PartitionedByString select context.key1 as c0, sum(intPrimitive) as c1 from SupportBean.win:length(5)");
 
@@ -102,15 +102,15 @@ public class TestContextPartitioned extends TestCase {
         tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' property name 'dummy' not found on type SupportBean [");
 
         // mismatch number pf properties
-        epl = "create context SegmentedByAString partition by string from SupportBean, id, p00 from SupportBean_S0";
-        tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' expected the same number of property names for each event type, found 1 properties for event type 'SupportBean' and 2 properties for event type 'SupportBean_S0' [create context SegmentedByAString partition by string from SupportBean, id, p00 from SupportBean_S0]");
+        epl = "create context SegmentedByAString partition by theString from SupportBean, id, p00 from SupportBean_S0";
+        tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' expected the same number of property names for each event type, found 1 properties for event type 'SupportBean' and 2 properties for event type 'SupportBean_S0' [create context SegmentedByAString partition by theString from SupportBean, id, p00 from SupportBean_S0]");
 
         // incompatible property types
-        epl = "create context SegmentedByAString partition by string from SupportBean, id from SupportBean_S0";
-        tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' for context 'SegmentedByAString' found mismatch of property types, property 'string' of type 'java.lang.String' compared to property 'id' of type 'java.lang.Integer' [");
+        epl = "create context SegmentedByAString partition by theString from SupportBean, id from SupportBean_S0";
+        tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' for context 'SegmentedByAString' found mismatch of property types, property 'theString' of type 'java.lang.String' compared to property 'id' of type 'java.lang.Integer' [");
 
         // duplicate type specification
-        epl = "create context SegmentedByAString partition by string from SupportBean, string from SupportBean";
+        epl = "create context SegmentedByAString partition by theString from SupportBean, theString from SupportBean";
         tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' the event type 'SupportBean' is listed twice [");
 
         // duplicate type: subtype
@@ -120,7 +120,7 @@ public class TestContextPartitioned extends TestCase {
         tryInvalid(epl, "Error starting statement: For context 'SegmentedByAString' the event type 'ISupportA' is listed twice: Event type 'ISupportA' is a subtype or supertype of event type 'ISupportBaseAB' [");
 
         // validate statement not applicable filters
-        epService.getEPAdministrator().createEPL("create context SegmentedByAString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("create context SegmentedByAString partition by theString from SupportBean");
         epl = "context SegmentedByAString select * from SupportBean_S0";
         tryInvalid(epl, "Error starting statement: Segmented context 'SegmentedByAString' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement [");
     }
@@ -139,7 +139,7 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testLargeNumberContexts() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByAString  partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByAString  partition by theString from SupportBean");
 
         String[] fields = "col1".split(",");
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("context SegmentedByAString " +
@@ -159,7 +159,7 @@ public class TestContextPartitioned extends TestCase {
     public void testAdditionalFilters() {
         FilterServiceSPI filterSPI = (FilterServiceSPI) spi.getFilterService();
         epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByAString " +
-                "partition by string from SupportBean(intPrimitive>0), p00 from SupportBean_S0(id > 0)");
+                "partition by theString from SupportBean(intPrimitive>0), p00 from SupportBean_S0(id > 0)");
 
         // first send a view events
         epService.getEPRuntime().sendEvent(new SupportBean("B1", -1));
@@ -203,7 +203,7 @@ public class TestContextPartitioned extends TestCase {
     public void testMultiStatementFilterCount() {
         FilterServiceSPI filterSPI = (FilterServiceSPI) spi.getFilterService();
         EPStatement stmtContext = epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByAString " +
-                "partition by string from SupportBean, p00 from SupportBean_S0");
+                "partition by theString from SupportBean, p00 from SupportBean_S0");
         assertEquals(0, filterSPI.getFilterCountApprox());
 
         // first send a view events
@@ -280,11 +280,11 @@ public class TestContextPartitioned extends TestCase {
 
     public void testSegmentedJoinMultitypeMultifield() {
         epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedBy2Fields " +
-                "partition by string and intPrimitive from SupportBean, p00 and id from SupportBean_S0");
+                "partition by theString and intPrimitive from SupportBean, p00 and id from SupportBean_S0");
 
         String[] fields = "c1,c2,c3,c4,c5,c6".split(",");
         EPStatement stmt = epService.getEPAdministrator().createEPL("context SegmentedBy2Fields " +
-                "select string as c1, intPrimitive as c2, id as c3, p00 as c4, context.key1 as c5, context.key2 as c6 " +
+                "select theString as c1, intPrimitive as c2, id as c3, p00 as c4, context.key1 as c5, context.key2 as c6 " +
                 "from SupportBean.std:lastevent(), SupportBean_S0.std:lastevent()");
         stmt.addListener(listener);
 
@@ -308,11 +308,11 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testSegmentedSubselectPrevPrior() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
-        String[] fieldsPrev = new String[] {"string", "col1"};
+        String[] fieldsPrev = new String[] {"theString", "col1"};
         EPStatement stmtPrev = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
-                "select string, (select prev(0, id) from SupportBean_S0.win:keepall()) as col1 from SupportBean");
+                "select theString, (select prev(0, id) from SupportBean_S0.win:keepall()) as col1 from SupportBean");
         stmtPrev.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
@@ -334,9 +334,9 @@ public class TestContextPartitioned extends TestCase {
 
         stmtPrev.stop();
 
-        String[] fieldsPrior = new String[] {"string", "col1"};
+        String[] fieldsPrior = new String[] {"theString", "col1"};
         EPStatement stmtPrior = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
-                "select string, (select prior(0, id) from SupportBean_S0.win:keepall()) as col1 from SupportBean");
+                "select theString, (select prior(0, id) from SupportBean_S0.win:keepall()) as col1 from SupportBean");
         stmtPrior.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
@@ -358,7 +358,7 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testSegmentedPrior() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
         String[] fields = new String[] {"val0", "val1"};
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
@@ -380,11 +380,11 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testSegmentedSubqueryFiltered() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
-        String[] fields = new String[] {"string", "intPrimitive", "val0"};
+        String[] fields = new String[] {"theString", "intPrimitive", "val0"};
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
-                "select string, intPrimitive, (select p00 from SupportBean_S0.std:lastevent() as s0 where sb.intPrimitive = s0.id) as val0 " +
+                "select theString, intPrimitive, (select p00 from SupportBean_S0.std:lastevent() as s0 where sb.intPrimitive = s0.id) as val0 " +
                 "from SupportBean as sb");
         stmtOne.addListener(listener);
 
@@ -411,12 +411,12 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testSegmentedSubqueryNamedWindowIndexShared() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
         epService.getEPAdministrator().createEPL("@Hint('enable_window_subquery_indexshare') create window MyWindow.win:keepall() as SupportBean_S0");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean_S0");
 
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
-                "select string, intPrimitive, (select p00 from MyWindow as s0 where sb.intPrimitive = s0.id) as val0 " +
+                "select theString, intPrimitive, (select p00 from MyWindow as s0 where sb.intPrimitive = s0.id) as val0 " +
                 "from SupportBean as sb");
         stmtOne.addListener(listener);
 
@@ -424,12 +424,12 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testSegmentedSubqueryNamedWindowIndexUnShared() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
         epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as SupportBean_S0");
         epService.getEPAdministrator().createEPL("insert into MyWindow select * from SupportBean_S0");
 
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
-                "select string, intPrimitive, (select p00 from MyWindow as s0 where sb.intPrimitive = s0.id) as val0 " +
+                "select theString, intPrimitive, (select p00 from MyWindow as s0 where sb.intPrimitive = s0.id) as val0 " +
                 "from SupportBean as sb");
         stmtOne.addListener(listener);
 
@@ -437,7 +437,7 @@ public class TestContextPartitioned extends TestCase {
     }
 
     private void runAssertionSubqueryNW() {
-        String[] fields = new String[] {"string", "intPrimitive", "val0"};
+        String[] fields = new String[] {"theString", "intPrimitive", "val0"};
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(10, "s1"));
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 10));
@@ -458,9 +458,9 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testSegmentedJoin() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
-        String[] fields = new String[] {"sb.string", "sb.intPrimitive", "s0.id"};
+        String[] fields = new String[] {"sb.theString", "sb.intPrimitive", "s0.id"};
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
                 "select * from SupportBean.win:keepall() as sb, SupportBean_S0.win:keepall() as s0 " +
                 "where intPrimitive = id");
@@ -485,9 +485,9 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testSegmentedPattern() {
-        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by string from SupportBean");
+        epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedByString partition by theString from SupportBean");
 
-        String[] fields = new String[] {"a.string", "a.intPrimitive", "b.string", "b.intPrimitive"};
+        String[] fields = new String[] {"a.theString", "a.intPrimitive", "b.theString", "b.intPrimitive"};
         EPStatement stmtOne = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
                 "select * from pattern [every a=SupportBean -> b=SupportBean(intPrimitive=a.intPrimitive+1)]");
         stmtOne.addListener(listener);
@@ -532,7 +532,7 @@ public class TestContextPartitioned extends TestCase {
         stmtTwo.destroy();
 
         // test truly segmented consume
-        String[] fieldsThree = new String[] {"a.string", "a.intPrimitive", "b.id", "b.p00"};
+        String[] fieldsThree = new String[] {"a.theString", "a.intPrimitive", "b.id", "b.p00"};
         EPStatement stmtThree = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
                 "select * from pattern [every a=SupportBean -> b=SupportBean_S0(id=a.intPrimitive)@Consume]");
         stmtThree.addListener(listener);
@@ -546,7 +546,7 @@ public class TestContextPartitioned extends TestCase {
     }
 
     public void testSegmentedViews() {
-        String contextEPL = "@Name('context') create context SegmentedByString as partition by string from SupportBean";
+        String contextEPL = "@Name('context') create context SegmentedByString as partition by theString from SupportBean";
         epService.getEPAdministrator().createEPL(contextEPL);
 
         String[] fieldsIterate = "intPrimitive".split(",");
@@ -587,7 +587,7 @@ public class TestContextPartitioned extends TestCase {
         String[] fields = "c1,c2,c3,c4".split(",");
         String ctx = "SegmentedByString";
         EPStatement stmtTwo = epService.getEPAdministrator().createEPL("@Name('A') context SegmentedByString " +
-                "select context.name as c1, context.id as c2, context.key1 as c3, string as c4 " +
+                "select context.name as c1, context.id as c2, context.key1 as c3, theString as c4 " +
                 "from SupportBean.win:length(2) as items");
         stmtTwo.addListener(listener);
 
@@ -601,7 +601,7 @@ public class TestContextPartitioned extends TestCase {
         SupportBean[] beans = (SupportBean[]) listener.getLastNewData()[0].get("pw");
         assertEquals(newArrayExpected.length, beans.length);
         for (int i = 0; i < beans.length; i++) {
-            assertEquals(newArrayExpected[i][0], beans[i].getString());
+            assertEquals(newArrayExpected[i][0], beans[i].getTheString());
             assertEquals(newArrayExpected[i][1], beans[i].getIntPrimitive());
         }
 

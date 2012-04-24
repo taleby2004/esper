@@ -8,8 +8,9 @@
  **************************************************************************************/
 package com.espertech.esper.collection;
 
-import java.util.*;
 import com.espertech.esper.client.EventBean;
+
+import java.util.*;
 
 /**
  * Container for events per time slot. The time is provided as long milliseconds by client classes.
@@ -23,9 +24,9 @@ import com.espertech.esper.client.EventBean;
  */
 public final class TimeWindow implements Iterable
 {
-    private final ArrayDeque<Pair<Long, ArrayDeque<EventBean>>> window;
+    private final ArrayDeque<Pair<Long, Object>> window;
     private Long oldestTimestamp;
-    private Map<EventBean, ArrayDeque<EventBean>> reverseIndex;
+    private Map<EventBean, Pair<Long, Object>> reverseIndex;
 
     /**
      * Ctor.
@@ -34,12 +35,12 @@ public final class TimeWindow implements Iterable
      */
     public TimeWindow(boolean isSupportRemoveStream)
     {
-        this.window = new ArrayDeque<Pair<Long, ArrayDeque<EventBean>>>();
+        this.window = new ArrayDeque<Pair<Long, Object>>();
         this.oldestTimestamp = null;
 
         if (isSupportRemoveStream)
         {
-            reverseIndex = new HashMap<EventBean, ArrayDeque<EventBean>>();
+            reverseIndex = new HashMap<EventBean, Pair<Long, Object>>();
         }
     }
 
@@ -49,7 +50,7 @@ public final class TimeWindow implements Iterable
      */
     public void adjust(long delta)
     {
-        for (Pair<Long, ArrayDeque<EventBean>> data : window)
+        for (Pair<Long, Object> data : window)
         {
             data.setFirst(data.getFirst() + delta);
         }
@@ -75,58 +76,72 @@ public final class TimeWindow implements Iterable
         // Empty window
         if (window.isEmpty())
         {
-            ArrayDeque<EventBean> listOfBeans = new ArrayDeque<EventBean>();
-            listOfBeans.add(bean);
-            Pair<Long, ArrayDeque<EventBean>> pair = new Pair<Long, ArrayDeque<EventBean>>(timestamp, listOfBeans);
+            Pair<Long, Object> pair = new Pair<Long, Object>(timestamp, bean);
             window.add(pair);
 
             if (reverseIndex != null)
             {
-                reverseIndex.put(bean, listOfBeans);
+                reverseIndex.put(bean, pair);
             }
             return;
         }
 
-        Pair<Long, ArrayDeque<EventBean>> lastPair = window.getLast();
+        Pair<Long, Object> lastPair = window.getLast();
 
         // Windows last timestamp matches the one supplied
         if (lastPair.getFirst() == timestamp)
         {
-            lastPair.getSecond().add(bean);
+            if (lastPair.getSecond() instanceof List) {
+                List<EventBean> list = (List<EventBean>) lastPair.getSecond();
+                list.add(bean);
+            }
+            else if (lastPair.getSecond() == null) {
+                lastPair.setSecond(bean);
+            }
+            else {
+                EventBean existing = (EventBean) lastPair.getSecond();
+                List<EventBean> list = new ArrayList<EventBean>(4);
+                list.add(existing);
+                list.add(bean);
+                lastPair.setSecond(list);
+            }
             if (reverseIndex != null)
             {
-                reverseIndex.put(bean, lastPair.getSecond());
+                reverseIndex.put(bean, lastPair);
             }
             return;
         }
 
         // Append to window
-        ArrayDeque<EventBean> listOfBeans = new ArrayDeque<EventBean>();
-        listOfBeans.add(bean);
-        Pair<Long, ArrayDeque<EventBean>> pair = new Pair<Long, ArrayDeque<EventBean>>(timestamp, listOfBeans);
+        Pair<Long, Object> pair = new Pair<Long, Object>(timestamp, bean);
         if (reverseIndex != null)
         {
-            reverseIndex.put(bean, listOfBeans);
+            reverseIndex.put(bean, pair);
         }
         window.add(pair);
     }
 
     /**
      * Removes the event from the window, if remove stream handling is enabled.
-     * @param event to remove
+     * @param theEvent to remove
      */
-    public final void remove(EventBean event)
+    public final void remove(EventBean theEvent)
     {
         if (reverseIndex == null)
         {
             throw new UnsupportedOperationException("Time window does not accept event removal");
         }
-        ArrayDeque<EventBean> list = reverseIndex.get(event);
-        if (list != null)
-        {
-            list.remove(event);
+        Pair<Long, Object> pair = reverseIndex.get(theEvent);
+        if (pair != null) {
+            if (pair.getSecond() == theEvent) {
+                pair.setSecond(null);
+            }
+            else if (pair.getSecond() != null) {
+                List<EventBean> list = (List<EventBean>) pair.getSecond();
+                list.remove(theEvent);
+            }
+            reverseIndex.remove(theEvent);
         }
-        reverseIndex.remove(event);
     }
 
     /**
@@ -142,7 +157,7 @@ public final class TimeWindow implements Iterable
             return null;
         }
 
-        Pair<Long, ArrayDeque<EventBean>> pair = window.getFirst();
+        Pair<Long, Object> pair = window.getFirst();
 
         // If the first entry's timestamp is after the expiry date, nothing to expire
         if (pair.getFirst() >= expireBefore)
@@ -155,7 +170,15 @@ public final class TimeWindow implements Iterable
         // Repeat until the window is empty or the timestamp is above the expiry time
         do
         {
-            resultBeans.addAll(pair.getSecond());
+            if (pair.getSecond() != null) {
+                if (pair.getSecond() instanceof EventBean) {
+                    resultBeans.add((EventBean) pair.getSecond());
+                }
+                else {
+                    resultBeans.addAll((List<EventBean>) pair.getSecond());
+                }
+            }
+
             window.removeFirst();
 
             if (window.isEmpty())
@@ -219,7 +242,7 @@ public final class TimeWindow implements Iterable
      * Returns the reverse index, for testing purposes.
      * @return reverse index
      */
-    protected Map<EventBean, ArrayDeque<EventBean>> getReverseIndex()
+    protected Map<EventBean, Pair<Long, Object>> getReverseIndex()
     {
         return reverseIndex;
     }

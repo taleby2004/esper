@@ -29,5 +29,5 @@ import org.apache.commons.logging.LogFactory;
 
 public interface RunnableFactory
 {
-    public Runnable makeRunnable(EventBean event);
+    public Runnable makeRunnable(EventBean theEvent);
 }

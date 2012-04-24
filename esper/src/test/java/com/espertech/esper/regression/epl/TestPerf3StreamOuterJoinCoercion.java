@@ -40,11 +40,11 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
     public void testPerfCoercion3waySceneOne()
     {
         String stmtText = "select s1.intBoxed as v1, s2.longBoxed as v2, s3.doubleBoxed as v3 from " +
-                SupportBean.class.getName() + "(string='A').win:length(1000000) s1 " +
+                SupportBean.class.getName() + "(theString='A').win:length(1000000) s1 " +
                 " left outer join " +
-                SupportBean.class.getName() + "(string='B').win:length(1000000) s2 on s1.intBoxed=s2.longBoxed " +
+                SupportBean.class.getName() + "(theString='B').win:length(1000000) s2 on s1.intBoxed=s2.longBoxed " +
                 " left outer join " +
-                SupportBean.class.getName() + "(string='C').win:length(1000000) s3 on s1.intBoxed=s3.doubleBoxed";
+                SupportBean.class.getName() + "(theString='C').win:length(1000000) s3 on s1.intBoxed=s3.doubleBoxed";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -61,10 +61,10 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
         {
             int index = 5000 + i % 1000;
             sendEvent("A", index, 0, 0);
-            EventBean event = listener.assertOneGetNewAndReset();
-            assertEquals(index, event.get("v1"));
-            assertEquals((long)index, event.get("v2"));
-            assertEquals((double)index, event.get("v3"));
+            EventBean theEvent = listener.assertOneGetNewAndReset();
+            assertEquals(index, theEvent.get("v1"));
+            assertEquals((long)index, theEvent.get("v2"));
+            assertEquals((double) index, theEvent.get("v3"));
         }
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
@@ -75,11 +75,11 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
     public void testPerfCoercion3waySceneTwo()
     {
         String stmtText = "select s1.intBoxed as v1, s2.longBoxed as v2, s3.doubleBoxed as v3 from " +
-                SupportBean.class.getName() + "(string='A').win:length(1000000) s1 " +
+                SupportBean.class.getName() + "(theString='A').win:length(1000000) s1 " +
                 " left outer join " +
-                SupportBean.class.getName() + "(string='B').win:length(1000000) s2 on s1.intBoxed=s2.longBoxed " +
+                SupportBean.class.getName() + "(theString='B').win:length(1000000) s2 on s1.intBoxed=s2.longBoxed " +
                 " left outer join " +
-                SupportBean.class.getName() + "(string='C').win:length(1000000) s3 on s1.intBoxed=s3.doubleBoxed";
+                SupportBean.class.getName() + "(theString='C').win:length(1000000) s3 on s1.intBoxed=s3.doubleBoxed";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -97,10 +97,10 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
         {
             int index = 5000 + i % 1000;
             sendEvent("C", 0, 0, index);
-            EventBean event = listener.assertOneGetNewAndReset();
-            assertEquals(index, event.get("v1"));
-            assertEquals((long)index, event.get("v2"));
-            assertEquals((double)index, event.get("v3"));
+            EventBean theEvent = listener.assertOneGetNewAndReset();
+            assertEquals(index, theEvent.get("v1"));
+            assertEquals((long)index, theEvent.get("v2"));
+            assertEquals((double) index, theEvent.get("v3"));
         }
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
@@ -111,11 +111,11 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
     public void testPerfCoercion3waySceneThree() throws Exception
     {
         String stmtText = "select s1.intBoxed as v1, s2.longBoxed as v2, s3.doubleBoxed as v3 from " +
-                SupportBean.class.getName() + "(string='A').win:length(1000000) s1 " +
+                SupportBean.class.getName() + "(theString='A').win:length(1000000) s1 " +
                 " left outer join " +
-                SupportBean.class.getName() + "(string='B').win:length(1000000) s2 on s1.intBoxed=s2.longBoxed " +
+                SupportBean.class.getName() + "(theString='B').win:length(1000000) s2 on s1.intBoxed=s2.longBoxed " +
                 " left outer join " +
-                SupportBean.class.getName() + "(string='C').win:length(1000000) s3 on s1.intBoxed=s3.doubleBoxed";
+                SupportBean.class.getName() + "(theString='C').win:length(1000000) s3 on s1.intBoxed=s3.doubleBoxed";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -133,10 +133,10 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
         {
             int index = 5000 + i % 1000;
             sendEvent("B", 0, index, 0);
-            EventBean event = listener.assertOneGetNewAndReset();
-            assertEquals(index, event.get("v1"));
-            assertEquals((long)index, event.get("v2"));
-            assertEquals((double)index, event.get("v3"));
+            EventBean theEvent = listener.assertOneGetNewAndReset();
+            assertEquals(index, theEvent.get("v1"));
+            assertEquals((long)index, theEvent.get("v2"));
+            assertEquals((double) index, theEvent.get("v3"));
         }
         long endTime = System.currentTimeMillis();
         long delta = endTime - startTime;
@@ -193,10 +193,10 @@ public class TestPerf3StreamOuterJoinCoercion extends TestCase
     }
 
 
-    private void sendEvent(String string, int intBoxed, long longBoxed, double doubleBoxed)
+    private void sendEvent(String theString, int intBoxed, long longBoxed, double doubleBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntBoxed(intBoxed);
         bean.setLongBoxed(longBoxed);
         bean.setDoubleBoxed(doubleBoxed);

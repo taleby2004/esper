@@ -58,11 +58,11 @@ public class RollingEventBuffer
 
     /**
      * Add an event to the buffer.
-     * @param event to add
+     * @param theEvent to add
      */
-    public void add(EventBean event)
+    public void add(EventBean theEvent)
     {
-        buffer[nextFreeIndex] = event;
+        buffer[nextFreeIndex] = theEvent;
         nextFreeIndex++;
 
         if (nextFreeIndex == size)

@@ -32,11 +32,11 @@ public class CompositeIndexQueryRange implements CompositeIndexQuery {
         QueryGraphValueEntryRange rangeProp = subqRangeKey.getRangeInfo();
 
         if (rangeProp.getType().isRange()) {
-            QueryGraphValueEntryRangeIn in = (QueryGraphValueEntryRangeIn) rangeProp;
-            ExprEvaluator start = in.getExprStart().getExprEvaluator();
+            QueryGraphValueEntryRangeIn rangeIn = (QueryGraphValueEntryRangeIn) rangeProp;
+            ExprEvaluator start = rangeIn.getExprStart().getExprEvaluator();
             boolean includeStart = rangeProp.getType().isIncludeStart();
 
-            ExprEvaluator end = in.getExprEnd().getExprEvaluator();
+            ExprEvaluator end = rangeIn.getExprEnd().getExprEvaluator();
             boolean includeEnd = rangeProp.getType().isIncludeEnd();
 
             if (!rangeProp.getType().isRangeInverted()) {
@@ -67,23 +67,23 @@ public class CompositeIndexQueryRange implements CompositeIndexQuery {
         }
     }
 
-    public void add(EventBean event, Map parent, Set<EventBean> result) {
-        strategy.lookup(event, parent, result, next, null);
+    public void add(EventBean theEvent, Map parent, Set<EventBean> result) {
+        strategy.lookup(theEvent, parent, result, next, null);
     }
 
     public void add(EventBean[] eventsPerStream, Map parent, Collection<EventBean> result) {
         strategy.lookup(eventsPerStream, parent, result, next, null);
     }
 
-    public Set<EventBean> get(EventBean event, Map parent, ExprEvaluatorContext context) {
-        return strategy.lookup(event, parent, null, next, context);
+    public Set<EventBean> get(EventBean theEvent, Map parent, ExprEvaluatorContext context) {
+        return strategy.lookup(theEvent, parent, null, next, context);
     }
 
     public Collection<EventBean> get(EventBean[] eventsPerStream, Map parent, ExprEvaluatorContext context) {
         return strategy.lookup(eventsPerStream, parent, null, next, context);
     }
 
-    protected static Set<EventBean> handle(EventBean event, SortedMap sortedMapOne, SortedMap sortedMapTwo, Set<EventBean> result, CompositeIndexQuery next) {
+    protected static Set<EventBean> handle(EventBean theEvent, SortedMap sortedMapOne, SortedMap sortedMapTwo, Set<EventBean> result, CompositeIndexQuery next) {
         if (next == null) {
             if (result == null) {
                 result = new HashSet<EventBean>();
@@ -97,12 +97,12 @@ public class CompositeIndexQueryRange implements CompositeIndexQuery {
             }
             Map<Object, Map> map = (Map<Object, Map>) sortedMapOne;
             for (Map.Entry<Object, Map> entry : map.entrySet()) {
-                next.add(event, entry.getValue(), result);
+                next.add(theEvent, entry.getValue(), result);
             }
             if (sortedMapTwo != null) {
                 map = (Map<Object, Map>) sortedMapTwo;
                 for (Map.Entry<Object, Map> entry : map.entrySet()) {
-                    next.add(event, entry.getValue(), result);
+                    next.add(theEvent, entry.getValue(), result);
                 }
             }
             return result;

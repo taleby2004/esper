@@ -38,9 +38,9 @@ public class PropertyEvaluatorSelect implements PropertyEvaluator
         this.accumulative = accumulative;
     }
 
-    public EventBean[] getProperty(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
+    public EventBean[] getProperty(EventBean theEvent, ExprEvaluatorContext exprEvaluatorContext)
     {
-        ArrayDeque<EventBean[]> rows = accumulative.getAccumulative(event, exprEvaluatorContext);
+        ArrayDeque<EventBean[]> rows = accumulative.getAccumulative(theEvent, exprEvaluatorContext);
         if ((rows == null) || (rows.isEmpty()))
         {
             return null;

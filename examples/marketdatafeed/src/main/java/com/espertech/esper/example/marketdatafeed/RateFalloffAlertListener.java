@@ -22,11 +22,11 @@ public class RateFalloffAlertListener implements UpdateListener
             return; // ignore old events for events leaving the window
         }
 
-        EventBean event = newEvents[0];
+        EventBean theEvent = newEvents[0];
 
-        log.info("Rate fall-off detected for feed=" + event.get("feed").toString() +
-                  " and rate=" + event.get("feedCnt") +
-                  " and average=" + event.get("avgCnt"));
+        log.info("Rate fall-off detected for feed=" + theEvent.get("feed").toString() +
+                  " and rate=" + theEvent.get("feedCnt") +
+                  " and average=" + theEvent.get("avgCnt"));
     }
 
     private static final Log log = LogFactory.getLog(RateFalloffAlertListener.class);

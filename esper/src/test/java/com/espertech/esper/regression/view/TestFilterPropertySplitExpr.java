@@ -20,6 +20,7 @@ import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -41,14 +42,27 @@ public class TestFilterPropertySplitExpr extends TestCase
     }
 
     public void testSingleRowSplitAndType() {
-        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("splitSentence", this.getClass().getName(), "splitSentenceMethod");
-        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("splitSentenceBean", this.getClass().getName(), "splitSentenceBeanMethod");
-        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("splitWord", this.getClass().getName(), "splitWordMethod");
+        runAssertionSingleRowSplitAndType(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionSingleRowSplitAndType(EventRepresentationEnum.MAP);
+        runAssertionSingleRowSplitAndType(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionSingleRowSplitAndType(EventRepresentationEnum eventRepresentationEnum) {
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("splitSentence", this.getClass().getName(), "splitSentenceMethodReturnObjectArray");
+            epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("splitSentenceBean", this.getClass().getName(), "splitSentenceBeanMethodReturnObjectArray");
+            epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("splitWord", this.getClass().getName(), "splitWordMethodReturnObjectArray");
+        }
+        else {
+            epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("splitSentence", this.getClass().getName(), "splitSentenceMethodReturnMap");
+            epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("splitSentenceBean", this.getClass().getName(), "splitSentenceBeanMethodReturnMap");
+            epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("splitWord", this.getClass().getName(), "splitWordMethodReturnMap");
+        }
         epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("invalidSentence", this.getClass().getName(), "invalidSentenceMethod");
 
-        epService.getEPAdministrator().createEPL("create schema SentenceEvent(sentence String)");
-        epService.getEPAdministrator().createEPL("create schema WordEvent(word String)");
-        epService.getEPAdministrator().createEPL("create schema CharacterEvent(char String)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema SentenceEvent(sentence String)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema WordEvent(word String)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema CharacterEvent(char String)");
 
         String stmtText;
         EPStatement stmt;
@@ -59,11 +73,12 @@ public class TestFilterPropertySplitExpr extends TestCase
         stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
         assertEquals("WordEvent", stmt.getEventType().getName());
+        assertEquals(eventRepresentationEnum.getOutputClass(), stmt.getEventType().getUnderlyingType());
 
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("sentence", "I am testing this code"), "SentenceEvent");
+        sendSentenceEvent(eventRepresentationEnum, "I am testing this code");
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"I"}, {"am"}, {"testing"}, {"this"}, {"code"}});
 
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("sentence", "the second event"), "SentenceEvent");
+        sendSentenceEvent(eventRepresentationEnum, "the second event");
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"the"}, {"second"}, {"event"}});
 
         stmt.destroy();
@@ -75,28 +90,30 @@ public class TestFilterPropertySplitExpr extends TestCase
         assertEquals(stmtText, stmt.getText());
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("sentence", "the third event"), "SentenceEvent");
+        sendSentenceEvent(eventRepresentationEnum, "the third event");
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"the"}, {"third"}, {"event"}});
 
         stmt.destroy();
 
         // test script
-        stmtText = "expression Collection js:splitSentenceJS(sentence) [" +
-                "  importPackage(java.util);" +
-                "  var words = new ArrayList();" +
-                "  words.add(Collections.singletonMap('word', 'wordOne'));" +
-                "  words.add(Collections.singletonMap('word', 'wordTwo'));" +
-                "  words;" +
-                "]" +
-                "select * from SentenceEvent[splitSentenceJS(sentence)@type(WordEvent)]";
-        stmt = epService.getEPAdministrator().createEPL(stmtText);
-        stmt.addListener(listener);
-        assertEquals("WordEvent", stmt.getEventType().getName());
+        if (!eventRepresentationEnum.isObjectArrayEvent()) {
+            stmtText = "expression Collection js:splitSentenceJS(sentence) [" +
+                    "  importPackage(java.util);" +
+                    "  var words = new ArrayList();" +
+                    "  words.add(Collections.singletonMap('word', 'wordOne'));" +
+                    "  words.add(Collections.singletonMap('word', 'wordTwo'));" +
+                    "  words;" +
+                    "]" +
+                    "select * from SentenceEvent[splitSentenceJS(sentence)@type(WordEvent)]";
+            stmt = epService.getEPAdministrator().createEPL(stmtText);
+            stmt.addListener(listener);
+            assertEquals("WordEvent", stmt.getEventType().getName());
 
-        epService.getEPRuntime().sendEvent(Collections.emptyMap(), "SentenceEvent");
-        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"wordOne"}, {"wordTwo"}});
+            epService.getEPRuntime().sendEvent(Collections.emptyMap(), "SentenceEvent");
+            EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"wordOne"}, {"wordTwo"}});
 
-        stmt.destroy();
+            stmt.destroy();
+        }
 
         // test multiple splitters
         stmtText = "select * from SentenceEvent[splitSentence(sentence)@type(WordEvent)][splitWord(word)@type(CharacterEvent)]";
@@ -104,7 +121,7 @@ public class TestFilterPropertySplitExpr extends TestCase
         stmt.addListener(listener);
         assertEquals("CharacterEvent", stmt.getEventType().getName());
 
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("sentence", "I am"), "SentenceEvent");
+        sendSentenceEvent(eventRepresentationEnum, "I am");
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), "char".split(","), new Object[][]{{"I"}, {"a"}, {"m"}});
 
         stmt.destroy();
@@ -115,26 +132,38 @@ public class TestFilterPropertySplitExpr extends TestCase
         stmt.addListener(listener);
         assertEquals("WordEvent", stmt.getEventType().getName());
 
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("sentence", "another test sentence"), "SentenceEvent");
+        sendSentenceEvent(eventRepresentationEnum, "another test sentence");
         EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"another"}, {"test"}, {"sentence"}});
 
         stmt.destroy();
 
         // test property returning untyped collection
-        epService.getEPAdministrator().getConfiguration().addEventType(CollectionEvent.class);
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPAdministrator().getConfiguration().addEventType(ObjectArrayEvent.class);
+            stmtText = eventRepresentationEnum.getAnnotationText() + " select * from ObjectArrayEvent[someObjectArray@type(WordEvent)]";
+            stmt = epService.getEPAdministrator().createEPL(stmtText);
+            stmt.addListener(listener);
+            assertEquals("WordEvent", stmt.getEventType().getName());
 
-        stmtText = "select * from CollectionEvent[someCollection@type(WordEvent)]";
-        stmt = epService.getEPAdministrator().createEPL(stmtText);
-        stmt.addListener(listener);
-        assertEquals("WordEvent", stmt.getEventType().getName());
+            Object[][] rows = new Object[][] {{"this"}, {"is"}, {"collection"}};
+            epService.getEPRuntime().sendEvent(new ObjectArrayEvent(rows));
+            EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"this"}, {"is"}, {"collection"}});
+        }
+        else {
+            epService.getEPAdministrator().getConfiguration().addEventType(CollectionEvent.class);
+            stmtText = eventRepresentationEnum.getAnnotationText() + " select * from CollectionEvent[someCollection@type(WordEvent)]";
+            stmt = epService.getEPAdministrator().createEPL(stmtText);
+            stmt.addListener(listener);
+            assertEquals("WordEvent", stmt.getEventType().getName());
 
-        Collection<Map> coll = new ArrayList<Map>();
-        coll.add(Collections.singletonMap("word", "this"));
-        coll.add(Collections.singletonMap("word", "is"));
-        coll.add(Collections.singletonMap("word", "collection"));
-        
-        epService.getEPRuntime().sendEvent(new CollectionEvent(coll));
-        EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"this"}, {"is"}, {"collection"}});
+            Collection<Map> coll = new ArrayList<Map>();
+            coll.add(Collections.singletonMap("word", "this"));
+            coll.add(Collections.singletonMap("word", "is"));
+            coll.add(Collections.singletonMap("word", "collection"));
+
+            epService.getEPRuntime().sendEvent(new CollectionEvent(coll));
+            EPAssertionUtil.assertPropsPerRow(listener.getAndResetLastNewData(), fields, new Object[][]{{"this"}, {"is"}, {"collection"}});
+        }
 
         // invalid: event type not found
         tryInvalid("select * from SentenceEvent[splitSentence(sentence)@type(XYZ)]",
@@ -145,15 +174,32 @@ public class TestFilterPropertySplitExpr extends TestCase
                    "Missing @type(name) declaration providing the event type name of the return type for expression 'splitSentence(sentence)' [select * from SentenceEvent[splitSentence(sentence)@dummy(WordEvent)]]");
         
         // invalid type assignment to event type
-        tryInvalid("select * from SentenceEvent[invalidSentence(sentence)@type(WordEvent)]",
-                   "Event type 'WordEvent' underlying type java.util.Map cannot be assigned a value of type");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            tryInvalid("select * from SentenceEvent[invalidSentence(sentence)@type(WordEvent)]",
+                       "Event type 'WordEvent' underlying type [Ljava.lang.Object; cannot be assigned a value of type");
+        }
+        else {
+            tryInvalid("select * from SentenceEvent[invalidSentence(sentence)@type(WordEvent)]",
+                       "Event type 'WordEvent' underlying type java.util.Map cannot be assigned a value of type");
+        }
 
         // invalid subquery
         tryInvalid("select * from SentenceEvent[splitSentence((select * from SupportBean.win:keepall()))@type(WordEvent)]",
-                   "Invalid contained-event expression: Aggregation, sub-select, previous or prior functions are not supported in this context [select * from SentenceEvent[splitSentence((select * from SupportBean.win:keepall()))@type(WordEvent)]]");
+                   "Invalid expression 'contained-event expression': Aggregation, sub-select, previous or prior functions are not supported in this context [select * from SentenceEvent[splitSentence((select * from SupportBean.win:keepall()))@type(WordEvent)]]");
+
+        epService.initialize();
     }
 
-    public static Map[] splitSentenceMethod(String sentence) {
+    private void sendSentenceEvent(EventRepresentationEnum eventRepresentationEnum, String sentence) {
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {sentence}, "SentenceEvent");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(Collections.singletonMap("sentence", sentence), "SentenceEvent");
+        }
+    }
+
+    public static Map[] splitSentenceMethodReturnMap(String sentence) {
         String[] words = sentence.split(" ");
         Map[] events = new Map[words.length];
         for (int i = 0; i < words.length; i++) {
@@ -162,11 +208,33 @@ public class TestFilterPropertySplitExpr extends TestCase
         return events;
     }
 
-    public static Map[] splitSentenceBeanMethod(Map sentenceEvent) {
-        return splitSentenceMethod((String) sentenceEvent.get("sentence"));
+    public static Object[][] splitSentenceMethodReturnObjectArray(String sentence) {
+        String[] words = sentence.split(" ");
+        Object[][] events = new Object[words.length][];
+        for (int i = 0; i < words.length; i++) {
+            events[i] = new Object[] {words[i]};
+        }
+        return events;
     }
 
-    public static Map[] splitWordMethod(String word) {
+    public static Map[] splitSentenceBeanMethodReturnMap(Map sentenceEvent) {
+        return splitSentenceMethodReturnMap((String) sentenceEvent.get("sentence"));
+    }
+
+    public static Object[][] splitSentenceBeanMethodReturnObjectArray(Object[] sentenceEvent) {
+        return splitSentenceMethodReturnObjectArray((String) sentenceEvent[0]);
+    }
+
+    public static Object[][] splitWordMethodReturnObjectArray(String word) {
+        int count = word.length();
+        Object[][] events = new Object[count][];
+        for (int i = 0; i < word.length(); i++) {
+            events[i] = new Object[] {Character.toString(word.charAt(i))};
+        }
+        return events;
+    }
+
+    public static Map[] splitWordMethodReturnMap(String word) {
         List<Map> maps = new ArrayList<Map>();
         for (int i = 0; i < word.length(); i++) {
             maps.add(Collections.singletonMap("char", Character.toString(word.charAt(i))));
@@ -202,6 +270,18 @@ public class TestFilterPropertySplitExpr extends TestCase
 
         public void setSomeCollection(Collection someCollection) {
             this.someCollection = someCollection;
+        }
+    }
+
+    public static class ObjectArrayEvent {
+        private Object[][] someObjectArray;
+
+        public ObjectArrayEvent(Object[][] someObjectArray) {
+            this.someObjectArray = someObjectArray;
+        }
+
+        public Object[][] getSomeObjectArray() {
+            return someObjectArray;
         }
     }
 }

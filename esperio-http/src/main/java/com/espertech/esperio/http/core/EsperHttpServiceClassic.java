@@ -19,7 +19,7 @@ public class EsperHttpServiceClassic extends EsperHttpServiceBase {
     private static Log log = LogFactory.getLog(EsperHttpServiceClassic.class);
 
     private ServerSocket serversocket;
-    private HttpParams params;
+    private HttpParams parameters;
     private HttpService httpService;
     private EsperHttpServiceClassicRunnable runnable;
     private Thread socketThread;
@@ -30,8 +30,8 @@ public class EsperHttpServiceClassic extends EsperHttpServiceBase {
 
     public void start(EPServiceProviderSPI engine) throws IOException {
         this.serversocket = new ServerSocket(this.getServiceConfig().getPort());
-        this.params = new BasicHttpParams();
-        this.params
+        this.parameters = new BasicHttpParams();
+        this.parameters
             .setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
             .setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE, 8 * 1024)
             .setBooleanParameter(CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
@@ -53,10 +53,10 @@ public class EsperHttpServiceClassic extends EsperHttpServiceBase {
                 httpproc,
                 new DefaultConnectionReuseStrategy(),
                 new DefaultHttpResponseFactory());
-        this.httpService.setParams(this.params);
+        this.httpService.setParams(this.parameters);
         this.httpService.setHandlerResolver(reqistry);
 
-        runnable = new EsperHttpServiceClassicRunnable(this.getServiceName(), serversocket, params, httpService);
+        runnable = new EsperHttpServiceClassicRunnable(this.getServiceName(), serversocket, parameters, httpService);
         socketThread = new Thread(runnable);
         socketThread.setDaemon(true);
         socketThread.start();

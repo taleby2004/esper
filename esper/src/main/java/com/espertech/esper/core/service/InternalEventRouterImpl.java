@@ -66,35 +66,35 @@ public class InternalEventRouterImpl implements InternalEventRouter
 
     /**
      * Pre-process the event.
-     * @param eventBean to preprocess
+     * @param theEvent to preprocess
      * @param exprEvaluatorContext expression evaluation context
      * @return preprocessed event
      */
-    public EventBean preprocess(EventBean eventBean, ExprEvaluatorContext exprEvaluatorContext)
+    public EventBean preprocess(EventBean theEvent, ExprEvaluatorContext exprEvaluatorContext)
     {
-        return getPreprocessedEvent(eventBean, exprEvaluatorContext);
+        return getPreprocessedEvent(theEvent, exprEvaluatorContext);
     }
 
     public void setInsertIntoListener(InsertIntoListener insertIntoListener) {
         this.insertIntoListener = insertIntoListener;
     }
 
-    public void route(EventBean event, EPStatementHandle statementHandle, InternalEventRouteDest routeDest, ExprEvaluatorContext exprEvaluatorContext, boolean addToFront)
+    public void route(EventBean theEvent, EPStatementHandle statementHandle, InternalEventRouteDest routeDest, ExprEvaluatorContext exprEvaluatorContext, boolean addToFront)
     {
         if (!hasPreprocessing)
         {
             if (insertIntoListener != null) {
-                insertIntoListener.inserted(event, statementHandle);
+                insertIntoListener.inserted(theEvent, statementHandle);
             }
-            routeDest.route(event, statementHandle, addToFront);
+            routeDest.route(theEvent, statementHandle, addToFront);
             return;
         }
 
-        EventBean preprocessed = getPreprocessedEvent(event, exprEvaluatorContext);
+        EventBean preprocessed = getPreprocessedEvent(theEvent, exprEvaluatorContext);
         if (preprocessed != null)
         {
             if (insertIntoListener != null) {
-                insertIntoListener.inserted(event, statementHandle);
+                insertIntoListener.inserted(theEvent, statementHandle);
             }
             routeDest.route(preprocessed, statementHandle, addToFront);
         }
@@ -169,25 +169,25 @@ public class InternalEventRouterImpl implements InternalEventRouter
         }
     }
 
-    private EventBean getPreprocessedEvent(EventBean event, ExprEvaluatorContext exprEvaluatorContext)
+    private EventBean getPreprocessedEvent(EventBean theEvent, ExprEvaluatorContext exprEvaluatorContext)
     {
-        NullableObject<InternalEventRouterPreprocessor> processor = preprocessors.get(event.getEventType());
+        NullableObject<InternalEventRouterPreprocessor> processor = preprocessors.get(theEvent.getEventType());
         if (processor == null)
         {
             synchronized (this)
             {
-                processor = initialize(event.getEventType());
-                preprocessors.put(event.getEventType(), processor);
+                processor = initialize(theEvent.getEventType());
+                preprocessors.put(theEvent.getEventType(), processor);
             }
         }
 
         if (processor.getObject() == null)
         {
-            return event;
+            return theEvent;
         }
         else
         {
-            return processor.getObject().process(event, exprEvaluatorContext);
+            return processor.getObject().process(theEvent, exprEvaluatorContext);
         }
     }
 

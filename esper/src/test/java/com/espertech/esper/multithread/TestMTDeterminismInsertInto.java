@@ -94,14 +94,14 @@ public class TestMTDeterminismInsertInto extends TestCase
         // assert result
         EventBean newEvents[] = listener.getNewDataListFlattened();
         ArrayList resultsPerIdent[] = new ArrayList[numStatements];
-        for (EventBean event : newEvents)
+        for (EventBean theEvent : newEvents)
         {
-            int ident = (Integer)event.get("ident");
+            int ident = (Integer)theEvent.get("ident");
             if (resultsPerIdent[ident] == null)
             {
                 resultsPerIdent[ident] = new ArrayList();
             }
-            long mysum = (Long) event.get("mysum");
+            long mysum = (Long) theEvent.get("mysum");
             resultsPerIdent[ident].add(mysum);
         }
 

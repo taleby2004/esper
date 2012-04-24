@@ -44,8 +44,8 @@ public class TransformEventIterator implements Iterator<EventBean>
 
     public EventBean next()
     {
-        EventBean event = sourceIterator.next();
-        return transformEventMethod.transform(event);
+        EventBean theEvent = sourceIterator.next();
+        return transformEventMethod.transform(theEvent);
     }
 
     public void remove()

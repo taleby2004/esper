@@ -24,7 +24,7 @@ public abstract class PropertyBase implements Property
      */
     public PropertyBase(String propertyName)
     {
-        this.propertyNameAtomic = propertyName;
+        this.propertyNameAtomic = PropertyParser.unescapeBacktick(propertyName);
     }
 
     /**
@@ -34,5 +34,9 @@ public abstract class PropertyBase implements Property
     public String getPropertyNameAtomic()
     {
         return propertyNameAtomic;
+    }
+
+    public boolean isDynamic() {
+        return false;
     }
 }

@@ -44,8 +44,8 @@ public class TestPerfSubselectIn extends TestCase
 
     public void testPerformanceWhereClauseCoercion()
     {
-        String stmtText = "select intPrimitive from MyEvent(string='A') as s0 where intPrimitive in (" +
-                            "select longBoxed from MyEvent(string='B').win:length(10000) where s0.intPrimitive = longBoxed)";
+        String stmtText = "select intPrimitive from MyEvent(theString='A') as s0 where intPrimitive in (" +
+                            "select longBoxed from MyEvent(theString='B').win:length(10000) where s0.intPrimitive = longBoxed)";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
@@ -54,7 +54,7 @@ public class TestPerfSubselectIn extends TestCase
         for (int i = 0; i < 10000; i++)
         {
             SupportBean bean = new SupportBean();
-            bean.setString("B");
+            bean.setTheString("B");
             bean.setLongBoxed((long)i);
             epService.getEPRuntime().sendEvent(bean);
         }
@@ -64,7 +64,7 @@ public class TestPerfSubselectIn extends TestCase
         {
             int index = 5000 + i % 1000;
             SupportBean bean = new SupportBean();
-            bean.setString("A");
+            bean.setTheString("A");
             bean.setIntPrimitive(index);
             epService.getEPRuntime().sendEvent(bean);
             //assertEquals(index, listener.assertOneGetNewAndReset().get("intPrimitive"));

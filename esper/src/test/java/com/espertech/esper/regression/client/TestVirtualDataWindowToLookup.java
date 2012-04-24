@@ -63,12 +63,12 @@ public class TestVirtualDataWindowToLookup extends TestCase {
         SupportBean supportBean = new SupportBean("E1", 100);
         window.setData(Collections.singleton(supportBean));
 
-        EPStatement stmt = epService.getEPAdministrator().createEPL("select (select sum(intPrimitive) from MyVDW vdw where vdw.string = s0.p00) from SupportBean_S0 s0");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select (select sum(intPrimitive) from MyVDW vdw where vdw.theString = s0.p00) from SupportBean_S0 s0");
         stmt.addListener(listener);
         VirtualDataWindowLookupContextSPI spiContext = (VirtualDataWindowLookupContextSPI) window.getLastRequestedIndex();
 
         // CM side
-        epService.getEPAdministrator().createEPL("create window MyWin.std:unique(string) as SupportBean");
+        epService.getEPAdministrator().createEPL("create window MyWin.std:unique(theString) as SupportBean");
         epService.getEPAdministrator().createEPL("insert into MyWin select * from SupportBean");
         NamedWindowProcessor processor = spi.getNamedWindowService().getProcessor("MyWin");
         NamedWindowProcessorInstance processorInstance = processor.getProcessorInstance(null);

@@ -49,12 +49,12 @@ public class EventRendererImpl implements EventRenderer
      * Use the #getJSONRenderer to obtain a renderer instance that allows repeated rendering of the same type of event.
      * For performance reasons obtaining a dedicated renderer instance is the preferred method compared to repeated rendering via this method.
      * @param title the JSON root title
-     * @param event the event to render
+     * @param theEvent the event to render
      * @return JSON formatted text
      */
-    public String renderJSON(String title, EventBean event)
+    public String renderJSON(String title, EventBean theEvent)
     {
-        return renderJSON(title, event, new JSONRenderingOptions());
+        return renderJSON(title, theEvent, new JSONRenderingOptions());
     }
 
     /**
@@ -63,17 +63,17 @@ public class EventRendererImpl implements EventRenderer
      * Use the #getJSONRenderer to obtain a renderer instance that allows repeated rendering of the same type of event.
      * For performance reasons obtaining a dedicated renderer instance is the preferred method compared to repeated rendering via this method.
      * @param title the JSON root title
-     * @param event the event to render
+     * @param theEvent the event to render
      * @param options are JSON rendering options
      * @return JSON formatted text
      */
-    public String renderJSON(String title, EventBean event, JSONRenderingOptions options)
+    public String renderJSON(String title, EventBean theEvent, JSONRenderingOptions options)
     {
-        if (event == null)
+        if (theEvent == null)
         {
             return null;
         }
-        return getJSONRenderer(event.getEventType(), options).render(title, event);
+        return getJSONRenderer(theEvent.getEventType(), options).render(title, theEvent);
     }
 
     /**
@@ -103,12 +103,12 @@ public class EventRendererImpl implements EventRenderer
      * Use the #getXMLRenderer to obtain a renderer instance that allows repeated rendering of the same type of event.
      * For performance reasons obtaining a dedicated renderer instance is the preferred method compared to repeated rendering via this method.
      * @param rootElementName the root element name that may also include namespace information
-     * @param event the event to render
+     * @param theEvent the event to render
      * @return XML formatted text
      */
-    public String renderXML(String rootElementName, EventBean event)
+    public String renderXML(String rootElementName, EventBean theEvent)
     {
-        return renderXML(rootElementName, event, new XMLRenderingOptions());
+        return renderXML(rootElementName, theEvent, new XMLRenderingOptions());
     }
 
     /**
@@ -117,16 +117,16 @@ public class EventRendererImpl implements EventRenderer
      * Use the #getXMLRenderer to obtain a renderer instance that allows repeated rendering of the same type of event.
      * For performance reasons obtaining a dedicated renderer instance is the preferred method compared to repeated rendering via this method.
      * @param rootElementName the root element name that may also include namespace information
-     * @param event the event to render
+     * @param theEvent the event to render
      * @param options are XML rendering options
      * @return XML formatted text
      */
-    public String renderXML(String rootElementName, EventBean event, XMLRenderingOptions options)
+    public String renderXML(String rootElementName, EventBean theEvent, XMLRenderingOptions options)
     {
-        if (event == null)
+        if (theEvent == null)
         {
             return null;
         }
-        return getXMLRenderer(event.getEventType(), options).render(rootElementName, event);
+        return getXMLRenderer(theEvent.getEventType(), options).render(rootElementName, theEvent);
     }
 }

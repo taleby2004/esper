@@ -50,18 +50,18 @@ public class TestNamedWindowOM extends TestCase
     public void testCompile()
     {
         String[] fields = new String[] {"key", "value"};
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as key, longBoxed as value from " + SupportBean.class.getName();
         EPStatementObjectModel modelCreate = epService.getEPAdministrator().compileEPL(stmtTextCreate);
         EPStatement stmtCreate = epService.getEPAdministrator().create(modelCreate);
         stmtCreate.addListener(listenerWindow);
-        assertEquals("create window MyWindow.win:keepall() as select string as key, longBoxed as value from com.espertech.esper.support.bean.SupportBean", modelCreate.toEPL());
+        assertEquals("create window MyWindow.win:keepall() as select theString as key, longBoxed as value from com.espertech.esper.support.bean.SupportBean", modelCreate.toEPL());
 
         String stmtTextOnSelect = "on " + SupportBean_B.class.getName() + " select mywin.* from MyWindow as mywin";
         EPStatementObjectModel modelOnSelect = epService.getEPAdministrator().compileEPL(stmtTextOnSelect);
         EPStatement stmtOnSelect = epService.getEPAdministrator().create(modelOnSelect);
         stmtOnSelect.addListener(listenerOnSelect);
 
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         EPStatementObjectModel modelInsert = epService.getEPAdministrator().compileEPL(stmtTextInsert);
         EPStatement stmtInsert = epService.getEPAdministrator().create(modelInsert);
 
@@ -127,17 +127,17 @@ public class TestNamedWindowOM extends TestCase
         EPStatementObjectModel model = new EPStatementObjectModel();
         model.setCreateWindow(CreateWindowClause.create("MyWindow").addView("win", "keepall"));
         model.setSelectClause(SelectClause.create()
-                .addWithAsProvidedName("string", "key")
+                .addWithAsProvidedName("theString", "key")
                 .addWithAsProvidedName("longBoxed", "value"));
         model.setFromClause(FromClause.create(FilterStream.create(SupportBean.class.getName())));
 
         EPStatement stmtCreate = epService.getEPAdministrator().create(model);
         stmtCreate.addListener(listenerWindow);
 
-        String stmtTextCreate = "create window MyWindow.win:keepall() as select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextCreate = "create window MyWindow.win:keepall() as select theString as key, longBoxed as value from " + SupportBean.class.getName();
         assertEquals(stmtTextCreate, model.toEPL());
 
-        String stmtTextInsert = "insert into MyWindow select string as key, longBoxed as value from " + SupportBean.class.getName();
+        String stmtTextInsert = "insert into MyWindow select theString as key, longBoxed as value from " + SupportBean.class.getName();
         EPStatementObjectModel modelInsert = epService.getEPAdministrator().compileEPL(stmtTextInsert);
         EPStatement stmtInsert = epService.getEPAdministrator().create(modelInsert);
 
@@ -231,10 +231,10 @@ public class TestNamedWindowOM extends TestCase
         assertEquals(expected, stmtCreate.getText());
     }
 
-    private SupportBean sendSupportBean(String string, Long longBoxed)
+    private SupportBean sendSupportBean(String theString, Long longBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setLongBoxed(longBoxed);
         epService.getEPRuntime().sendEvent(bean);
         return bean;

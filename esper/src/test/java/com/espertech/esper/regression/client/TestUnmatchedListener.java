@@ -36,9 +36,9 @@ public class TestUnmatchedListener extends TestCase
         epService.getEPRuntime().setUnmatchedListener(listener);
 
         // no statement, should be unmatched
-        SupportBean event = sendEvent();
+        SupportBean theEvent = sendEvent();
         assertEquals(1, listener.getReceived().size());
-        assertSame(event, listener.getReceived().get(0).getUnderlying());
+        assertSame(theEvent, listener.getReceived().get(0).getUnderlying());
         listener.reset();
 
         // no unmatched listener
@@ -54,9 +54,9 @@ public class TestUnmatchedListener extends TestCase
 
         // stop statement
         stmt.stop();
-        event = sendEvent();
+        theEvent = sendEvent();
         assertEquals(1, listener.getReceived().size());
-        assertSame(event, listener.getReceived().get(0).getUnderlying());
+        assertSame(theEvent, listener.getReceived().get(0).getUnderlying());
         listener.reset();
 
         // start statement
@@ -66,9 +66,9 @@ public class TestUnmatchedListener extends TestCase
 
         // destroy statement
         stmt.destroy();
-        event = sendEvent();
+        theEvent = sendEvent();
         assertEquals(1, listener.getReceived().size());
-        assertSame(event, listener.getReceived().get(0).getUnderlying());
+        assertSame(theEvent, listener.getReceived().get(0).getUnderlying());
         listener.reset();
     }
 
@@ -94,25 +94,25 @@ public class TestUnmatchedListener extends TestCase
         epService.getEPRuntime().setUnmatchedListener(listener);
 
         // create insert into
-        EPStatement insertInto = epService.getEPAdministrator().createEPL("insert into MyEvent select string from SupportBean");
+        EPStatement insertInto = epService.getEPAdministrator().createEPL("insert into MyEvent select theString from SupportBean");
 
         // no statement, should be unmatched
         sendEvent("E1");
         assertEquals(1, listener.getReceived().size());
-        assertEquals("E1", listener.getReceived().get(0).get("string"));
+        assertEquals("E1", listener.getReceived().get(0).get("theString"));
         listener.reset();
 
         // stop insert into, now SupportBean itself is unmatched
         insertInto.stop();
-        SupportBean event = sendEvent("E2");
+        SupportBean theEvent = sendEvent("E2");
         assertEquals(1, listener.getReceived().size());
-        assertSame(event, listener.getReceived().get(0).getUnderlying());
+        assertSame(theEvent, listener.getReceived().get(0).getUnderlying());
         listener.reset();
 
         // start insert-into
         sendEvent("E3");
         assertEquals(1, listener.getReceived().size());
-        assertEquals("E3", listener.getReceived().get(0).get("string"));
+        assertEquals("E3", listener.getReceived().get(0).get("theString"));
         listener.reset();
     }
 
@@ -123,10 +123,10 @@ public class TestUnmatchedListener extends TestCase
         return bean;
     }
 
-    private SupportBean sendEvent(String string)
+    private SupportBean sendEvent(String theString)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         epService.getEPRuntime().sendEvent(bean);
         return bean;
     }
@@ -140,9 +140,9 @@ public class TestUnmatchedListener extends TestCase
             this.received = new ArrayList<EventBean>();
         }
 
-        public void update(EventBean event)
+        public void update(EventBean theEvent)
         {
-            received.add(event);
+            received.add(theEvent);
         }
 
         public List<EventBean> getReceived()
@@ -166,8 +166,8 @@ public class TestUnmatchedListener extends TestCase
             this.received = new ArrayList<EventBean>();
         }
 
-        public void update(EventBean event) {
-            received.add(event);
+        public void update(EventBean theEvent) {
+            received.add(theEvent);
             engine.getEPAdministrator().createEPL("select * from SupportBean");
         }
 

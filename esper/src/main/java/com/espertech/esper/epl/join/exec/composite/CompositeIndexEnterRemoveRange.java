@@ -52,14 +52,14 @@ public class CompositeIndexEnterRemoveRange implements CompositeIndexEnterRemove
         }
     }
 
-    public void enter(EventBean event, Map parent) {
-        Object sortable = propertyGetter.get(event);
+    public void enter(EventBean theEvent, Map parent) {
+        Object sortable = propertyGetter.get(theEvent);
 
         if (sortable == null) {
             if (nullKeys == null) {
                 nullKeys = new HashSet<EventBean>();
             }
-            nullKeys.add(event);
+            nullKeys.add(theEvent);
             return;
         }
 
@@ -75,7 +75,7 @@ public class CompositeIndexEnterRemoveRange implements CompositeIndexEnterRemove
                 events = new HashSet<EventBean>();
                 eventMap.put(sortable, events);
             }
-            events.add(event);
+            events.add(theEvent);
         }
         else {
             Map innerIndex = (Map) parent.get(sortable);
@@ -83,16 +83,16 @@ public class CompositeIndexEnterRemoveRange implements CompositeIndexEnterRemove
                 innerIndex = new TreeMap();
                 parent.put(sortable, innerIndex);
             }
-            next.enter(event, innerIndex);
+            next.enter(theEvent, innerIndex);
         }
     }
 
-    public void remove(EventBean event, Map parent) {
-        Object sortable = propertyGetter.get(event);
+    public void remove(EventBean theEvent, Map parent) {
+        Object sortable = propertyGetter.get(theEvent);
 
         if (sortable == null) {
             if (nullKeys != null) {
-                nullKeys.remove(event);
+                nullKeys.remove(theEvent);
             }
             return;
         }
@@ -113,7 +113,7 @@ public class CompositeIndexEnterRemoveRange implements CompositeIndexEnterRemove
                 return;
             }
 
-            if (!events.remove(event))
+            if (!events.remove(theEvent))
             {
                 return;
             }
@@ -128,7 +128,7 @@ public class CompositeIndexEnterRemoveRange implements CompositeIndexEnterRemove
             if (innerIndex == null) {
                 return;
             }
-            next.remove(event, innerIndex);
+            next.remove(theEvent, innerIndex);
             if (innerIndex.isEmpty()) {
                 parent.remove(sortable);
             }

@@ -9,7 +9,6 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -28,7 +27,7 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
     private final boolean isJoin;
 
     // maintain for each group a row of aggregator states that the expression node canb pull the data from via index
-    private Map<MultiKeyUntyped, AggregationRowPair> aggregatorsPerGroup;
+    private Map<Object, AggregationRowPair> aggregatorsPerGroup;
 
     // maintain a current row for random access into the aggregator state table
     // (row=groups, columns=expression nodes that have aggregation functions)
@@ -58,7 +57,7 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
         this.streams = streams;
         this.isJoin = isJoin;
         this.methodResolutionService = methodResolutionService;
-        this.aggregatorsPerGroup = new HashMap<MultiKeyUntyped, AggregationRowPair>();
+        this.aggregatorsPerGroup = new HashMap<Object, AggregationRowPair>();
     }
 
     public void clearResults(ExprEvaluatorContext exprEvaluatorContext)
@@ -66,7 +65,7 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
         aggregatorsPerGroup.clear();
     }
 
-    public void applyEnter(EventBean[] eventsPerStream, MultiKeyUntyped groupByKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyEnter(EventBean[] eventsPerStream, Object groupByKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         AggregationRowPair groupAggregators = aggregatorsPerGroup.get(groupByKey);
 
@@ -92,7 +91,7 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
         }
     }
 
-    public void applyLeave(EventBean[] eventsPerStream, MultiKeyUntyped groupByKey, ExprEvaluatorContext exprEvaluatorContext)
+    public void applyLeave(EventBean[] eventsPerStream, Object groupByKey, ExprEvaluatorContext exprEvaluatorContext)
     {
         AggregationRowPair groupAggregators = aggregatorsPerGroup.get(groupByKey);
 
@@ -118,7 +117,7 @@ public class AggSvcGroupByMixedAccessImpl extends AggregationServiceBaseGrouped
         }
     }
 
-    public void setCurrentAccess(MultiKeyUntyped groupByKey, int agentInstanceId)
+    public void setCurrentAccess(Object groupByKey, int agentInstanceId)
     {
         currentAggregatorRow = aggregatorsPerGroup.get(groupByKey);
 

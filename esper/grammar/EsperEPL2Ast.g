@@ -93,7 +93,7 @@ startEPLExpressionRule
 	;
 
 eplExpressionRule
-	:	(contextExpr? (selectExpr | createWindowExpr | createIndexExpr | createVariableExpr | createSchemaExpr | onExpr | updateExpr) forExpr?)
+	:	(contextExpr? (selectExpr | createWindowExpr | createIndexExpr | createVariableExpr | createSchemaExpr[true] | onExpr | updateExpr | createDataflow) forExpr?)
 	|	createContextExpr
 	;
 	
@@ -223,7 +223,70 @@ createSelectionListElement
 createVariableExpr
 	:	^(i=CREATE_VARIABLE_EXPR CLASS_IDENT IDENT IDENT? valueExpr? { leaveNode($i); } )
 	;
+			
+//----------------------------------------------------------------------------
+// Dataflow Declaration
+//----------------------------------------------------------------------------
+createDataflow
+	:	^(s=CREATE_DATAFLOW IDENT gop+ { leaveNode($s); })
+	;
+	
+gop
+	:	^(GOP (IDENT|SELECT) gopParam? gopOut? gopDetail? (annotation[false])*)
+	|	createSchemaExpr[false]
+	;	
+	
+gopParam
+	:	^(GOPPARAM gopParamItem*)
+	;
 
+gopParamItem
+	:	^(GOPPARAMITM CLASS_IDENT+ (^(AS IDENT))?)
+	;
+
+gopOut
+	:	^(GOPOUT gopOutItem*)
+	;
+
+gopOutItem
+	:	^(GOPOUTITM CLASS_IDENT gopOutTypeParam*)
+	;
+	
+gopOutTypeParam
+	:	^(GOPOUTTYP ((CLASS_IDENT gopOutTypeParam*) | QUESTION))
+	;
+
+gopDetail
+	:	^(GOPCFG gopConfig+)
+	;
+
+gopConfig
+	:	^(a=GOPCFGITM IDENT valueExpr { leaveNode($a); })
+	|	^(b=GOPCFGEXP valueExpr { leaveNode($b); })
+	|	^(c=GOPCFGEPL selectExpr { leaveNode($c); })
+	;
+	
+jsonvalue
+	: 	constant[false]
+	| 	jsonobject[false]
+	| 	jsonarray[false]
+	;
+
+jsonobject[boolean isLeaveNode]
+	: 	^(o=JSON_OBJECT jsonpair* { if ($isLeaveNode) leaveNode($o); })
+	;
+	
+jsonarray[boolean isLeaveNode]	
+        : 	^(a=JSON_ARRAY jsonvalue* { if ($isLeaveNode) leaveNode($a); })
+	;
+	
+jsonpair
+	: 	^(JSON_FIELD (constant[false] | IDENT) jsonvalue) 
+	;
+	
+//----------------------------------------------------------------------------
+// Context Declaration
+//----------------------------------------------------------------------------
 createContextExpr
 	:	^(s=CREATE_CTX IDENT createContextDetail { leaveNode($s); } )
 	;
@@ -264,10 +327,14 @@ createContextCategoryItem
 	:	^(CREATE_CTX_CATITEM valueExpr IDENT)	
 	;	
 
-createSchemaExpr
-	:	^(s=CREATE_SCHEMA_EXPR IDENT (variantList|createColTypeList?) (^(CREATE_SCHEMA_EXPR_VAR IDENT))? createSchemaQual* { leaveNode($s); } )
+createSchemaExpr[boolean isLeaveNode]
+	:	^(s=CREATE_SCHEMA_EXPR createSchemaDef IDENT? { if ($isLeaveNode) leaveNode($s); })
 	;
 	
+createSchemaDef
+	:	^(CREATE_SCHEMA_DEF IDENT (variantList|createColTypeList?) createSchemaQual* )
+	;
+
 createSchemaQual
 	:	^(CREATE_SCHEMA_EXPR_QUAL IDENT exprCol)
 	;	
@@ -537,6 +604,8 @@ valueExpr
 	| 	subSelectExistsExpr
 	|	dotExpr
 	|	newExpr
+	|	jsonarray[true]
+	|	jsonobject[true]
 	;
 
 valueExprWithTime

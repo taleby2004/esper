@@ -54,17 +54,17 @@ public class TestSubselectFiltered extends TestCase
         epService.getEPAdministrator().getConfiguration().addEventType("ST2", SupportBean_ST2.class);
 
         String epl = "select (" +
-                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where string = st2.key2 and intPrimitive between s0.p01Long and s1.p11Long) " +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where theString = st2.key2 and intPrimitive between s0.p01Long and s1.p11Long) " +
                 "from ST2.std:lastevent() st2, ST0.std:lastevent() s0, ST1.std:lastevent() s1";
         runAssertion3StreamKeyRangeCoercion(epl, true);
 
         epl = "select (" +
-                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where string = st2.key2 and s1.p11Long >= intPrimitive and s0.p01Long <= intPrimitive) " +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where theString = st2.key2 and s1.p11Long >= intPrimitive and s0.p01Long <= intPrimitive) " +
                 "from ST2.std:lastevent() st2, ST0.std:lastevent() s0, ST1.std:lastevent() s1";
         runAssertion3StreamKeyRangeCoercion(epl, false);
 
         epl = "select (" +
-                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where string = st2.key2 and s1.p11Long > intPrimitive) " +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where theString = st2.key2 and s1.p11Long > intPrimitive) " +
                 "from ST2.std:lastevent() st2, ST0.std:lastevent() s0, ST1.std:lastevent() s1";
         EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -78,7 +78,7 @@ public class TestSubselectFiltered extends TestCase
 
         stmt.destroy();
         epl = "select (" +
-                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where string = st2.key2 and s1.p11Long < intPrimitive) " +
+                "select sum(intPrimitive) as sumi from SupportBean.win:keepall() where theString = st2.key2 and s1.p11Long < intPrimitive) " +
                 "from ST2.std:lastevent() st2, ST0.std:lastevent() s0, ST1.std:lastevent() s1";
         stmt = epService.getEPAdministrator().createEPL(epl);
         stmt.addListener(listener);
@@ -226,10 +226,10 @@ public class TestSubselectFiltered extends TestCase
         EventType type = stmt.getEventType();
         assertEquals(SupportBean_S1.class, type.getPropertyType("events1"));
 
-        Object event = new SupportBean_S1(-1, "Y");
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(theEvent);
         EventBean result = listener.assertOneGetNewAndReset();
-        assertSame(event, result.get("events1"));
+        assertSame(theEvent, result.get("events1"));
     }
 
     public void testSameEventOM() throws Exception
@@ -252,10 +252,10 @@ public class TestSubselectFiltered extends TestCase
         EventType type = stmt.getEventType();
         assertEquals(SupportBean_S1.class, type.getPropertyType("events1"));
 
-        Object event = new SupportBean_S1(-1, "Y");
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(theEvent);
         EventBean result = listener.assertOneGetNewAndReset();
-        assertSame(event, result.get("events1"));
+        assertSame(theEvent, result.get("events1"));
     }
 
     public void testSameEvent()
@@ -268,10 +268,10 @@ public class TestSubselectFiltered extends TestCase
         EventType type = stmt.getEventType();
         assertEquals(SupportBean_S1.class, type.getPropertyType("events1"));
 
-        Object event = new SupportBean_S1(-1, "Y");
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(theEvent);
         EventBean result = listener.assertOneGetNewAndReset();
-        assertSame(event, result.get("events1"));
+        assertSame(theEvent, result.get("events1"));
     }
 
     public void testSelectWildcard()
@@ -284,11 +284,11 @@ public class TestSubselectFiltered extends TestCase
         EventType type = stmt.getEventType();
         assertEquals(SupportBean_S1.class, type.getPropertyType("events1"));
 
-        Object event = new SupportBean_S1(-1, "Y");
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(theEvent);
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
         EventBean result = listener.assertOneGetNewAndReset();
-        assertSame(event, result.get("events1"));
+        assertSame(theEvent, result.get("events1"));
     }
 
     public void testSelectWildcardNoName()
@@ -301,11 +301,11 @@ public class TestSubselectFiltered extends TestCase
         EventType type = stmt.getEventType();
         assertEquals(SupportBean_S1.class, type.getPropertyType("*"));
 
-        Object event = new SupportBean_S1(-1, "Y");
-        epService.getEPRuntime().sendEvent(event);
+        Object theEvent = new SupportBean_S1(-1, "Y");
+        epService.getEPRuntime().sendEvent(theEvent);
         epService.getEPRuntime().sendEvent(new SupportBean_S0(0));
         EventBean result = listener.assertOneGetNewAndReset();
-        assertSame(event, result.get("*"));
+        assertSame(theEvent, result.get("*"));
     }
 
     public void testWhereConstant()
@@ -345,7 +345,7 @@ public class TestSubselectFiltered extends TestCase
         stmt.destroy();
 
         // single range
-        stmtText = "select (select string from SupportBean.std:lastevent() where intPrimitive between 10 and 20) as ids1 from S0";
+        stmtText = "select (select theString from SupportBean.std:lastevent() where intPrimitive between 10 and 20) as ids1 from S0";
         stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
@@ -527,38 +527,38 @@ public class TestSubselectFiltered extends TestCase
     public void testSelectWhereJoined4Coercion()
     {
         String stmtText = "select " +
-          "(select intPrimitive from MyEvent(string='S').win:length(1000) " +
+          "(select intPrimitive from MyEvent(theString='S').win:length(1000) " +
           "  where intBoxed=s1.longBoxed and " +
                    "intBoxed=s2.doubleBoxed and " +
                    "doubleBoxed=s3.intBoxed" +
           ") as ids0 from " +
-          "MyEvent(string='A').win:keepall() as s1, " +
-          "MyEvent(string='B').win:keepall() as s2, " +
-          "MyEvent(string='C').win:keepall() as s3 " +
+          "MyEvent(theString='A').win:keepall() as s1, " +
+          "MyEvent(theString='B').win:keepall() as s2, " +
+          "MyEvent(theString='C').win:keepall() as s3 " +
           "where s1.intPrimitive = s2.intPrimitive and s2.intPrimitive = s3.intPrimitive";
         trySelectWhereJoined4Coercion(stmtText);
 
         stmtText = "select " +
-          "(select intPrimitive from MyEvent(string='S').win:length(1000) " +
+          "(select intPrimitive from MyEvent(theString='S').win:length(1000) " +
           "  where doubleBoxed=s3.intBoxed and " +
                    "intBoxed=s2.doubleBoxed and " +
                    "intBoxed=s1.longBoxed" +
           ") as ids0 from " +
-          "MyEvent(string='A').win:keepall() as s1, " +
-          "MyEvent(string='B').win:keepall() as s2, " +
-          "MyEvent(string='C').win:keepall() as s3 " +
+          "MyEvent(theString='A').win:keepall() as s1, " +
+          "MyEvent(theString='B').win:keepall() as s2, " +
+          "MyEvent(theString='C').win:keepall() as s3 " +
           "where s1.intPrimitive = s2.intPrimitive and s2.intPrimitive = s3.intPrimitive";
         trySelectWhereJoined4Coercion(stmtText);
 
         stmtText = "select " +
-          "(select intPrimitive from MyEvent(string='S').win:length(1000) " +
+          "(select intPrimitive from MyEvent(theString='S').win:length(1000) " +
           "  where doubleBoxed=s3.intBoxed and " +
                    "intBoxed=s1.longBoxed and " +
                    "intBoxed=s2.doubleBoxed" +
           ") as ids0 from " +
-          "MyEvent(string='A').win:keepall() as s1, " +
-          "MyEvent(string='B').win:keepall() as s2, " +
-          "MyEvent(string='C').win:keepall() as s3 " +
+          "MyEvent(theString='A').win:keepall() as s1, " +
+          "MyEvent(theString='B').win:keepall() as s2, " +
+          "MyEvent(theString='C').win:keepall() as s3 " +
           "where s1.intPrimitive = s2.intPrimitive and s2.intPrimitive = s3.intPrimitive";
         trySelectWhereJoined4Coercion(stmtText);
     }
@@ -566,26 +566,26 @@ public class TestSubselectFiltered extends TestCase
     public void testSelectWhereJoined4BackCoercion()
     {
         String stmtText = "select " +
-          "(select intPrimitive from MyEvent(string='S').win:length(1000) " +
+          "(select intPrimitive from MyEvent(theString='S').win:length(1000) " +
           "  where longBoxed=s1.intBoxed and " +
                    "longBoxed=s2.doubleBoxed and " +
                    "intBoxed=s3.longBoxed" +
           ") as ids0 from " +
-          "MyEvent(string='A').win:keepall() as s1, " +
-          "MyEvent(string='B').win:keepall() as s2, " +
-          "MyEvent(string='C').win:keepall() as s3 " +
+          "MyEvent(theString='A').win:keepall() as s1, " +
+          "MyEvent(theString='B').win:keepall() as s2, " +
+          "MyEvent(theString='C').win:keepall() as s3 " +
           "where s1.intPrimitive = s2.intPrimitive and s2.intPrimitive = s3.intPrimitive";
         trySelectWhereJoined4CoercionBack(stmtText);
 
         stmtText = "select " +
-          "(select intPrimitive from MyEvent(string='S').win:length(1000) " +
+          "(select intPrimitive from MyEvent(theString='S').win:length(1000) " +
           "  where longBoxed=s2.doubleBoxed and " +
                    "intBoxed=s3.longBoxed and " +
                    "longBoxed=s1.intBoxed " +
           ") as ids0 from " +
-          "MyEvent(string='A').win:keepall() as s1, " +
-          "MyEvent(string='B').win:keepall() as s2, " +
-          "MyEvent(string='C').win:keepall() as s3 " +
+          "MyEvent(theString='A').win:keepall() as s1, " +
+          "MyEvent(theString='B').win:keepall() as s2, " +
+          "MyEvent(theString='C').win:keepall() as s3 " +
           "where s1.intPrimitive = s2.intPrimitive and s2.intPrimitive = s3.intPrimitive";
         trySelectWhereJoined4CoercionBack(stmtText);
     }
@@ -739,20 +739,20 @@ public class TestSubselectFiltered extends TestCase
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportSensorEvent(4,"Temperature","B",55,88.0));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(2, event.get("a.id"));
-        assertEquals(4, event.get("b.id"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(2, theEvent.get("a.id"));
+        assertEquals(4, theEvent.get("b.id"));
 
-        epService.getEPRuntime().sendEvent(new SupportSensorEvent(5,"Temperature","B",65,85.0));
+        epService.getEPRuntime().sendEvent(new SupportSensorEvent(5, "Temperature", "B", 65, 85.0));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportSensorEvent(6,"Temperature","B",49,87.0));
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportSensorEvent(7,"Temperature","A",51,99.5));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(7, event.get("a.id"));
-        assertEquals(6, event.get("b.id"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(7, theEvent.get("a.id"));
+        assertEquals(6, theEvent.get("b.id"));
     }
 
     public void testSubselectMixMax()
@@ -766,19 +766,19 @@ public class TestSubselectFiltered extends TestCase
         stmt.addListener(listener);
 
         epService.getEPRuntime().sendEvent(new SupportSensorEvent(1, "Temp", "Dev1", 68.0, 96.5));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(68.0, ((SupportSensorEvent) event.get("high")).getMeasurement());
-        assertEquals(68.0, ((SupportSensorEvent) event.get("low")).getMeasurement());
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(68.0, ((SupportSensorEvent) theEvent.get("high")).getMeasurement());
+        assertEquals(68.0, ((SupportSensorEvent) theEvent.get("low")).getMeasurement());
 
         epService.getEPRuntime().sendEvent(new SupportSensorEvent(2, "Temp", "Dev2", 70.0, 98.5));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(70.0, ((SupportSensorEvent) event.get("high")).getMeasurement());
-        assertEquals(68.0, ((SupportSensorEvent) event.get("low")).getMeasurement());
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(70.0, ((SupportSensorEvent) theEvent.get("high")).getMeasurement());
+        assertEquals(68.0, ((SupportSensorEvent) theEvent.get("low")).getMeasurement());
 
         epService.getEPRuntime().sendEvent(new SupportSensorEvent(3, "Temp", "Dev2", 65.0, 99.5));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(70.0, ((SupportSensorEvent) event.get("high")).getMeasurement());
-        assertEquals(65.0, ((SupportSensorEvent) event.get("low")).getMeasurement());
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(70.0, ((SupportSensorEvent) theEvent.get("high")).getMeasurement());
+        assertEquals(65.0, ((SupportSensorEvent) theEvent.get("low")).getMeasurement());
     }
 
     private void tryJoinFiltered(String stmtText)
@@ -793,28 +793,28 @@ public class TestSubselectFiltered extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean_S2(1, "ab"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "a"));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(1, "b"));
-        EventBean event = listener.assertOneGetNewAndReset();
-        assertEquals(1, event.get("s0id"));
-        assertEquals(1, event.get("s1id"));
-        assertEquals("ab", event.get("s2p20"));
-        assertEquals(null, event.get("s2p20Prior"));
-        assertEquals(null, event.get("s2p20Prev"));
+        EventBean theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(1, theEvent.get("s0id"));
+        assertEquals(1, theEvent.get("s1id"));
+        assertEquals("ab", theEvent.get("s2p20"));
+        assertEquals(null, theEvent.get("s2p20Prior"));
+        assertEquals(null, theEvent.get("s2p20Prev"));
 
         epService.getEPRuntime().sendEvent(new SupportBean_S2(2, "qx"));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(2, "q"));
         epService.getEPRuntime().sendEvent(new SupportBean_S1(2, "x"));
-        event = listener.assertOneGetNewAndReset();
-        assertEquals(2, event.get("s0id"));
-        assertEquals(2, event.get("s1id"));
-        assertEquals("qx", event.get("s2p20"));
-        assertEquals("ab", event.get("s2p20Prior"));
-        assertEquals("ab", event.get("s2p20Prev"));
+        theEvent = listener.assertOneGetNewAndReset();
+        assertEquals(2, theEvent.get("s0id"));
+        assertEquals(2, theEvent.get("s1id"));
+        assertEquals("qx", theEvent.get("s2p20"));
+        assertEquals("ab", theEvent.get("s2p20Prior"));
+        assertEquals("ab", theEvent.get("s2p20Prev"));
     }
 
-    private void sendBean(String string, int intPrimitive, int intBoxed, long longBoxed, double doubleBoxed)
+    private void sendBean(String theString, int intPrimitive, int intBoxed, long longBoxed, double doubleBoxed)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(string);
+        bean.setTheString(theString);
         bean.setIntPrimitive(intPrimitive);
         bean.setIntBoxed(intBoxed);
         bean.setLongBoxed(longBoxed);

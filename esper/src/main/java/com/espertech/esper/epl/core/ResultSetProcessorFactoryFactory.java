@@ -54,7 +54,7 @@ public class ResultSetProcessorFactoryFactory
     /**
      * Returns the result set process for the given select expression, group-by clause and
      * having clause given a set of types describing each stream in the from-clause.
-     * @param statementSpecCompiled - the statement specification
+     * @param statementSpec - a subset of the statement specification
      * @param stmtContext - engine and statement and agent-instance level services
      * @param typeService - for information about the streams in the from clause
      * @param viewResourceDelegate - delegates views resource factory to expression resources requirements
@@ -63,22 +63,23 @@ public class ResultSetProcessorFactoryFactory
      * @return result set processor instance
      * @throws ExprValidationException when any of the expressions is invalid
      */
-    public static ResultSetProcessorFactoryDesc getProcessorPrototype(StatementSpecCompiled statementSpecCompiled,
+    public static ResultSetProcessorFactoryDesc getProcessorPrototype(StatementSpecCompiled statementSpec,
                                                            StatementContext stmtContext,
                                                            StreamTypeService typeService,
                                                            ViewResourceDelegateUnverified viewResourceDelegate,
                                                            boolean[] isUnidirectionalStream,
                                                            boolean allowAggregation,
-                                                           ContextPropertyRegistry contextPropertyRegistry
+                                                           ContextPropertyRegistry contextPropertyRegistry,
+                                                           SelectExprProcessorDeliveryCallback selectExprProcessorCallback
     )
             throws ExprValidationException
     {
-        SelectClauseSpecCompiled selectClauseSpec = statementSpecCompiled.getSelectClauseSpec();
-        InsertIntoDesc insertIntoDesc = statementSpecCompiled.getInsertIntoDesc();
-        List<ExprNode> groupByNodes = statementSpecCompiled.getGroupByExpressions();
-        ExprNode optionalHavingNode = statementSpecCompiled.getHavingExprRootNode();
-        OutputLimitSpec outputLimitSpec = statementSpecCompiled.getOutputLimitSpec();
-        List<OrderByItem> orderByList = statementSpecCompiled.getOrderByList();
+        List<OrderByItem> orderByListUnexpanded = statementSpec.getOrderByList();
+        SelectClauseSpecCompiled selectClauseSpec = statementSpec.getSelectClauseSpec();
+        InsertIntoDesc insertIntoDesc = statementSpec.getInsertIntoDesc();
+        List<ExprNode> groupByNodes = statementSpec.getGroupByExpressions();
+        ExprNode optionalHavingNode = statementSpec.getHavingExprRootNode();
+        OutputLimitSpec outputLimitSpec = statementSpec.getOutputLimitSpec();
 
         if (log.isDebugEnabled())
         {
@@ -96,7 +97,7 @@ public class ResultSetProcessorFactoryFactory
 
         // Expand any instances of select-clause names in the
         // order-by clause with the full expression
-        expandColumnNames(selectClauseSpec.getSelectExprList(), orderByList);
+        List<OrderByItem> orderByList = expandColumnNames(selectClauseSpec.getSelectExprList(), orderByListUnexpanded);
 
         // Validate selection expressions, if any (could be wildcard i.e. empty list)
         List<SelectClauseExprCompiledSpec> namedSelectionList = new LinkedList<SelectClauseExprCompiledSpec>();
@@ -167,7 +168,7 @@ public class ResultSetProcessorFactoryFactory
                 PropertyResolutionDescriptor desc = null;
                 try
                 {
-                    desc = typeService.resolveByPropertyName(streamSelectSpec.getStreamName());
+                    desc = typeService.resolveByPropertyName(streamSelectSpec.getStreamName(), false);
                 }
                 catch (StreamTypesException e)
                 {
@@ -292,8 +293,8 @@ public class ResultSetProcessorFactoryFactory
 
         // Construct the appropriate aggregation service
         boolean hasGroupBy = !groupByNodes.isEmpty();
-        AggregationServiceFactoryDesc aggregationServiceFactory = AggregationServiceFactoryFactory.getService(selectAggregateExprNodes, havingAggregateExprNodes, orderByAggregateExprNodes, hasGroupBy, evaluatorContextStmt, statementSpecCompiled.getAnnotations(), stmtContext.getVariableService(), typeService.getEventTypes().length > 1,
-                statementSpecCompiled.getFilterRootNode(), statementSpecCompiled.getHavingExprRootNode());
+        AggregationServiceFactoryDesc aggregationServiceFactory = AggregationServiceFactoryFactory.getService(selectAggregateExprNodes, havingAggregateExprNodes, orderByAggregateExprNodes, hasGroupBy, evaluatorContextStmt, statementSpec.getAnnotations(), stmtContext.getVariableService(), typeService.getEventTypes().length > 1,
+                statementSpec.getFilterRootNode(), statementSpec.getHavingExprRootNode());
 
         boolean useCollatorSort = false;
         if (stmtContext.getConfigSnapshot() != null)
@@ -303,12 +304,12 @@ public class ResultSetProcessorFactoryFactory
 
         // Construct the processor for sorting output events
         OrderByProcessorFactory orderByProcessorFactory = OrderByProcessorFactoryFactory.getProcessor(namedSelectionList,
-                groupByNodes, orderByList, statementSpecCompiled.getRowLimitSpec(), stmtContext.getVariableService(), useCollatorSort);
+                groupByNodes, orderByList, statementSpec.getRowLimitSpec(), stmtContext.getVariableService(), useCollatorSort);
 
         // Construct the processor for evaluating the select clause
         SelectExprEventTypeRegistry selectExprEventTypeRegistry = new SelectExprEventTypeRegistry(stmtContext.getDynamicReferenceEventTypes());
-        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(Collections.<Integer>emptyList(), selectClauseSpec.getSelectExprList(), isUsingWildcard, insertIntoDesc, statementSpecCompiled.getForClauseSpec(), typeService, stmtContext.getEventAdapterService(), stmtContext.getStatementResultService(), stmtContext.getValueAddEventService(), selectExprEventTypeRegistry, stmtContext.getMethodResolutionService(), evaluatorContextStmt,
-                stmtContext.getVariableService(), stmtContext.getTimeProvider(), stmtContext.getEngineURI(), stmtContext.getStatementId(), stmtContext.getStatementName(), stmtContext.getAnnotations(), stmtContext.getContextDescriptor());
+        SelectExprProcessor selectExprProcessor = SelectExprProcessorFactory.getProcessor(Collections.<Integer>emptyList(), selectClauseSpec.getSelectExprList(), isUsingWildcard, insertIntoDesc, statementSpec.getForClauseSpec(), typeService, stmtContext.getEventAdapterService(), stmtContext.getStatementResultService(), stmtContext.getValueAddEventService(), selectExprEventTypeRegistry, stmtContext.getMethodResolutionService(), evaluatorContextStmt,
+                stmtContext.getVariableService(), stmtContext.getTimeProvider(), stmtContext.getEngineURI(), stmtContext.getStatementId(), stmtContext.getStatementName(), stmtContext.getAnnotations(), stmtContext.getContextDescriptor(), stmtContext.getConfigSnapshot(), selectExprProcessorCallback);
 
         // Get a list of event properties being aggregated in the select clause, if any
         Set<Pair<Integer, String>> propertiesGroupBy = getGroupByProperties(groupByNodes);
@@ -329,9 +330,9 @@ public class ResultSetProcessorFactoryFactory
         }
 
         // We only generate Remove-Stream events if they are explicitly selected, or the insert-into requires them
-        boolean isSelectRStream = (statementSpecCompiled.getSelectStreamSelectorEnum() == SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH
-                || statementSpecCompiled.getSelectStreamSelectorEnum() == SelectClauseStreamSelectorEnum.RSTREAM_ONLY);
-        if ((statementSpecCompiled.getInsertIntoDesc() != null) && (!statementSpecCompiled.getInsertIntoDesc().isIStream()))
+        boolean isSelectRStream = (statementSpec.getSelectStreamSelectorEnum() == SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH
+                || statementSpec.getSelectStreamSelectorEnum() == SelectClauseStreamSelectorEnum.RSTREAM_ONLY);
+        if ((statementSpec.getInsertIntoDesc() != null) && (!statementSpec.getInsertIntoDesc().isIStream()))
         {
             isSelectRStream = true;
         }
@@ -352,7 +353,7 @@ public class ResultSetProcessorFactoryFactory
             // (1a)
             // There is no need to perform select expression processing, the single view itself (no join) generates
             // events in the desired format, therefore there is no output processor. There are no order-by expressions.
-            if (orderByNodes.isEmpty() && optionalHavingNode == null && !isOutputLimiting && statementSpecCompiled.getRowLimitSpec() == null)
+            if (orderByNodes.isEmpty() && optionalHavingNode == null && !isOutputLimiting && statementSpec.getRowLimitSpec() == null)
             {
                 log.debug(".getProcessor Using no result processor");
                 ResultSetProcessorHandThrougFactory factory = new ResultSetProcessorHandThrougFactory(selectExprProcessor, isSelectRStream);
@@ -370,7 +371,7 @@ public class ResultSetProcessorFactoryFactory
 
         // (2)
         // A wildcard select-clause has been specified and the group-by is ignored since no aggregation functions are used, and no having clause
-        boolean isLast = statementSpecCompiled.getOutputLimitSpec() != null && statementSpecCompiled.getOutputLimitSpec().getDisplayLimit() == OutputLimitLimitType.LAST;
+        boolean isLast = statementSpec.getOutputLimitSpec() != null && statementSpec.getOutputLimitSpec().getDisplayLimit() == OutputLimitLimitType.LAST;
         if ((namedSelectionList.isEmpty()) && (propertiesAggregatedHaving.isEmpty()) && (havingAggregateExprNodes.isEmpty()) && (!isLast))
         {
             log.debug(".getProcessor Using ResultSetProcessorSimple");
@@ -383,7 +384,7 @@ public class ResultSetProcessorFactoryFactory
             // (3)
             // There is no group-by clause and there are aggregate functions with event properties in the select clause (aggregation case)
             // or having class, and all event properties are aggregated (all properties are under aggregation functions).
-            if ((nonAggregatedProps.isEmpty()) && (!isUsingWildcard) && (!isUsingStreamSelect))
+            if ((nonAggregatedProps.isEmpty()) && (!isUsingWildcard) && (!isUsingStreamSelect) && (viewResourceDelegate == null || viewResourceDelegate.getPreviousRequests().isEmpty()))
             {
                 log.debug(".getProcessor Using ResultSetProcessorRowForAll");
                 ResultSetProcessorRowForAllFactory factory = new ResultSetProcessorRowForAllFactory(selectExprProcessor, optionHavingEval, isSelectRStream, isUnidirectional);
@@ -529,8 +530,19 @@ public class ResultSetProcessorFactoryFactory
         return propertiesGroupBy;
     }
 
-    private static void expandColumnNames(List<SelectClauseElementCompiled> selectionList, List<OrderByItem> orderByList)
+    private static List<OrderByItem> expandColumnNames(List<SelectClauseElementCompiled> selectionList, List<OrderByItem> orderByUnexpanded)
     {
+        if (orderByUnexpanded.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // copy list to modify
+        List<OrderByItem> expanded = new ArrayList<OrderByItem>();
+        for (OrderByItem item : orderByUnexpanded) {
+            expanded.add(item.copy());
+        }
+
+        // expand
     	for(SelectClauseElementCompiled selectElement : selectionList)
     	{
             // process only expressions
@@ -544,7 +556,7 @@ public class ResultSetProcessorFactoryFactory
     		if(name != null)
     		{
     			ExprNode fullExpr = selectExpr.getSelectExpression();
-    			for(ListIterator<OrderByItem> iterator = orderByList.listIterator(); iterator.hasNext(); )
+    			for(ListIterator<OrderByItem> iterator = expanded.listIterator(); iterator.hasNext(); )
     			{
     				OrderByItem orderByElement = iterator.next();
     				ExprNode swapped = ColumnNamedNodeSwapper.swap(orderByElement.getExprNode(), name, fullExpr);
@@ -553,6 +565,8 @@ public class ResultSetProcessorFactoryFactory
     			}
     		}
     	}
+
+        return expanded;
     }
 
     private static final Log log = LogFactory.getLog(ResultSetProcessorFactoryFactory.class);

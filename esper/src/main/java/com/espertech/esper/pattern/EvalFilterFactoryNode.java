@@ -24,6 +24,8 @@ public class EvalFilterFactoryNode extends EvalNodeFactoryBase
     private transient FilterSpecCompiled filterSpec;
     private final Integer consumptionLevel;
 
+    private int eventAsTagNumber = -1;
+
     /**
      * Constructor.
      * @param filterSpecification specifies the filter properties
@@ -95,6 +97,14 @@ public class EvalFilterFactoryNode extends EvalNodeFactoryBase
 
     public boolean isFilterChildNonQuitting() {
         return false;
+    }
+
+    public int getEventAsTagNumber() {
+        return eventAsTagNumber;
+    }
+
+    public void setEventAsTagNumber(int eventAsTagNumber) {
+        this.eventAsTagNumber = eventAsTagNumber;
     }
 
     private static final Log log = LogFactory.getLog(EvalFilterFactoryNode.class);

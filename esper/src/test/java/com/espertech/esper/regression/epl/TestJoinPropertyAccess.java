@@ -55,10 +55,10 @@ public class TestJoinPropertyAccess extends TestCase
         epService.getEPRuntime().sendEvent(combined);
         epService.getEPRuntime().sendEvent(complex);
 
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertSame(complex.getNested(), event.get("nested.nested"));
-        assertSame(combined.getIndexed(0), event.get("s1.indexed[0]"));
-        assertEquals(complex.getIndexed(1), event.get("nested.indexed[1]"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertSame(complex.getNested(), theEvent.get("nested.nested"));
+        assertSame(combined.getIndexed(0), theEvent.get("s1.indexed[0]"));
+        assertEquals(complex.getIndexed(1), theEvent.get("nested.indexed[1]"));
     }
 
     public void testOuterJoin()
@@ -81,9 +81,9 @@ public class TestJoinPropertyAccess extends TestCase
         // double check that outer join criteria match
         assertEquals(complex.getMapped("keyOne"), combined.getIndexed(2).getMapped("2ma").getValue());
 
-        EventBean event = testListener.getAndResetLastNewData()[0];
-        assertEquals("simple", event.get("s0.simpleProperty"));
-        assertSame(complex, event.get("s0"));
-        assertSame(combined, event.get("s1"));
+        EventBean theEvent = testListener.getAndResetLastNewData()[0];
+        assertEquals("simple", theEvent.get("s0.simpleProperty"));
+        assertSame(complex, theEvent.get("s0"));
+        assertSame(combined, theEvent.get("s1"));
     }
 }

@@ -73,8 +73,8 @@ public class SubordIndexedTableLookupStrategyProp implements SubordTableLookupSt
         for (int i = 0; i < propertyGetters.length; i++)
         {
             int streamNum = keyStreamNums[i];
-            EventBean event = eventsPerStream[streamNum];
-            keyValues[i] = propertyGetters[i].get(event);
+            EventBean theEvent = eventsPerStream[streamNum];
+            keyValues[i] = propertyGetters[i].get(theEvent);
         }
         return keyValues;
     }

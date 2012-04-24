@@ -62,7 +62,7 @@ public class ResourceLoader
      * @param resource is the classpath-relative filename to resolve into a URL
      * @return URL for resource
      */
-    protected static URL getClasspathResourceAsURL(String resourceName, String resource)
+    public static URL getClasspathResourceAsURL(String resourceName, String resource)
     {
         String stripped = resource.startsWith("/") ?
                 resource.substring(1) : resource;

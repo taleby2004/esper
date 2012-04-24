@@ -16,21 +16,21 @@ import java.io.Serializable;
 // For testing variant streams to act as a variant of SupportBean
 public class SupportBeanVariantStream implements Serializable
 {
-    private String string;
+    private String theString;
     private boolean boolBoxed;
     private Integer intPrimitive;
     private int longPrimitive;
     private float doublePrimitive;
     private SupportEnum enumValue;
 
-    public SupportBeanVariantStream(String string)
+    public SupportBeanVariantStream(String theString)
     {
-        this.string = string;
+        this.theString = theString;
     }
 
-    public SupportBeanVariantStream(String string, boolean boolBoxed, Integer intPrimitive, int longPrimitive, float doublePrimitive, SupportEnum enumValue)
+    public SupportBeanVariantStream(String theString, boolean boolBoxed, Integer intPrimitive, int longPrimitive, float doublePrimitive, SupportEnum enumValue)
     {
-        this.string = string;
+        this.theString = theString;
         this.boolBoxed = boolBoxed;
         this.intPrimitive = intPrimitive;
         this.longPrimitive = longPrimitive;
@@ -38,9 +38,9 @@ public class SupportBeanVariantStream implements Serializable
         this.enumValue = enumValue;
     }
 
-    public String getString()
+    public String getTheString()
     {
-        return string;
+        return theString;
     }
 
     public boolean isBoolBoxed()

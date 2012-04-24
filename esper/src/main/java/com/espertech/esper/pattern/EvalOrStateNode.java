@@ -12,7 +12,7 @@ package com.espertech.esper.pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,7 +35,7 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
     {
         super(parentNode, null);
 
-        this.childNodes = new LinkedList<EvalStateNode>();
+        this.childNodes = new ArrayList<EvalStateNode>();
         this.evalOrNode = evalOrNode;
 
         // In an "or" expression we need to create states for all child expressions/listeners,
@@ -60,7 +60,8 @@ public final class EvalOrStateNode extends EvalStateNode implements Evaluator
         }
 
         // In an "or" expression we start all child listeners
-        for (EvalStateNode child : childNodes)
+        EvalStateNode[] nodes = childNodes.toArray(new EvalStateNode[childNodes.size()]);
+        for (EvalStateNode child : nodes)
         {
             child.start();
         }

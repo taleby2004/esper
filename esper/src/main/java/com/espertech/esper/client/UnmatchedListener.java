@@ -22,7 +22,7 @@ public interface UnmatchedListener
     /**
      * Called upon the engine encountering an event not matched to any of the event stream filters
      * of any active statement.
-     * @param event unmatched event
+     * @param theEvent unmatched event
      */
-    public void update(EventBean event);
+    public void update(EventBean theEvent);
 }

@@ -135,7 +135,7 @@ public class EPAdministratorHelper
         {
             String message = "Error in expression";
             log.debug(message, ex);
-            throw new EPStatementException(getNullableErrortext(message, ex.getMessage()), eplStatementForErrorMsg);
+            throw new EPStatementException(getNullableErrortext(message, ex.getMessage()), ex, eplStatementForErrorMsg);
         }
 
         if (log.isDebugEnabled())

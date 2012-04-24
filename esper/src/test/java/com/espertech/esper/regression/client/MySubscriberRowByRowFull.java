@@ -28,14 +28,14 @@ public class MySubscriberRowByRowFull
         indicateStart.add(new UniformPair<Integer>(lengthIStream, lengthRStream));
     }
 
-    public void update(String string, int intPrimitive)
+    public void update(String theString, int intPrimitive)
     {
-        indicateIStream.add(new Object[] {string, intPrimitive});
+        indicateIStream.add(new Object[] {theString, intPrimitive});
     }
 
-    public void updateRStream(String string, int intPrimitive)
+    public void updateRStream(String theString, int intPrimitive)
     {
-        indicateRStream.add(new Object[] {string, intPrimitive});
+        indicateRStream.add(new Object[] {theString, intPrimitive});
     }
 
     public void updateEnd()

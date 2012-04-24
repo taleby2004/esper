@@ -70,9 +70,9 @@ public class TestASTFilterSpecHelper extends TestCase
 
         for (int i = 0; i < inout.length; i++)
         {
-            String in = inout[i][0];
+            String input = inout[i][0];
             String expected = inout[i][1];
-            assertEquals("for input " + in, expected, ASTFilterSpecHelper.escapeDot(in));
+            assertEquals("for input " + input, expected, ASTFilterSpecHelper.escapeDot(input));
         }
     }
 
@@ -97,9 +97,9 @@ public class TestASTFilterSpecHelper extends TestCase
 
         for (int i = 0; i < inout.length; i++)
         {
-            String in = (String) inout[i][0];
+            String input = (String) inout[i][0];
             int expected = (Integer) inout[i][1];
-            assertEquals("for input " + in, expected, ASTFilterSpecHelper.unescapedIndexOfDot(in));
+            assertEquals("for input " + input, expected, ASTFilterSpecHelper.unescapedIndexOfDot(input));
         }
     }
 
@@ -126,9 +126,9 @@ public class TestASTFilterSpecHelper extends TestCase
 
         for (int i = 0; i < inout.length; i++)
         {
-            String in = inout[i][0];
+            String input = inout[i][0];
             String expected = inout[i][1];
-            assertEquals("for input " + in, expected, ASTFilterSpecHelper.unescapeDot(in));
+            assertEquals("for input " + input, expected, ASTFilterSpecHelper.unescapeDot(input));
         }
     }
 

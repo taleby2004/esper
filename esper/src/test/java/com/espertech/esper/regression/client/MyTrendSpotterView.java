@@ -117,8 +117,8 @@ public class MyTrendSpotterView extends ViewSupport
 
     public final Iterator<EventBean> iterator()
     {
-        EventBean event = populateMap(trendcount);
-        return new SingleEventIterator(event);
+        EventBean theEvent = populateMap(trendcount);
+        return new SingleEventIterator(theEvent);
     }
 
     public final String toString()

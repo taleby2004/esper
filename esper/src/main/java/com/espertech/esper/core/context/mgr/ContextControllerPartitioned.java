@@ -126,7 +126,7 @@ public class ContextControllerPartitioned implements ContextController, ContextC
         filterCallbacks.clear();
     }
 
-    public synchronized void create(Object key, EventBean event) {
+    public synchronized void create(Object key, EventBean theEvent) {
         boolean exists = partitionKeys.containsKey(key);
         if (exists) {
             return;
@@ -136,7 +136,7 @@ public class ContextControllerPartitioned implements ContextController, ContextC
 
         ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
         Map<String, Object> props = ContextPropertyEventType.getPartitionBean(factoryContext.getContextName(), 0, key, factory.getSegmentedSpec().getItems().get(0).getPropertyNames());
-        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, event, null, key, props, null);
+        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, theEvent, null, key, props, null);
 
         partitionKeys.put(key, handle);
 

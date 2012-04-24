@@ -20,6 +20,7 @@ import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import com.espertech.esper.util.EventRepresentationEnum;
 import junit.framework.TestCase;
 
 import java.util.Collections;
@@ -58,7 +59,7 @@ public class TestTypeOfExpr extends TestCase
     }
 
     public void testDynamicProps() {
-        epService.getEPAdministrator().createEPL("create schema MySchema as (key string)");
+        epService.getEPAdministrator().createEPL(EventRepresentationEnum.MAP.getAnnotationText() + " create schema MySchema as (key string)");
 
         String stmtText = "select typeof(prop?), typeof(key) from MySchema as s0";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
@@ -90,20 +91,32 @@ public class TestTypeOfExpr extends TestCase
     }
 
     private void sendSchemaEvent(Object prop, String key) {
-        Map<String, Object> event = new HashMap<String, Object>();
-        event.put("prop", prop);
-        event.put("key", key);
-        epService.getEPRuntime().sendEvent(event, "MySchema");
+        Map<String, Object> theEvent = new HashMap<String, Object>();
+        theEvent.put("prop", prop);
+        theEvent.put("key", key);
+
+        if (EventRepresentationEnum.getEngineDefault(epService).isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(theEvent, "MySchema");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(theEvent, "MySchema");
+        }
     }
 
-    public void testVariantStream()
+    public void testVariantStream() {
+        runAssertionVariantStream(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionVariantStream(EventRepresentationEnum.MAP);
+        runAssertionVariantStream(EventRepresentationEnum.DEFAULT);
+    }
+
+    private void runAssertionVariantStream(EventRepresentationEnum eventRepresentationEnum)
     {
         epService.getEPAdministrator().getConfiguration().addEventType("SupportBean", SupportBean.class);
         
-        epService.getEPAdministrator().createEPL("create schema EventOne as (key string)");
-        epService.getEPAdministrator().createEPL("create schema EventTwo as (key string)");
-        epService.getEPAdministrator().createEPL("create schema S0 as " + SupportBean_S0.class.getName());
-        epService.getEPAdministrator().createEPL("create variant schema VarSchema as *");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema EventOne as (key string)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema EventTwo as (key string)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema S0 as " + SupportBean_S0.class.getName());
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create variant schema VarSchema as *");
 
         epService.getEPAdministrator().createEPL("insert into VarSchema select * from EventOne");
         epService.getEPAdministrator().createEPL("insert into VarSchema select * from EventTwo");
@@ -114,10 +127,20 @@ public class TestTypeOfExpr extends TestCase
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("key", "value"), "EventOne");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {"value"}, "EventOne");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(Collections.singletonMap("key", "value"), "EventOne");
+        }
         assertEquals("EventOne", listener.assertOneGetNewAndReset().get("t0"));
 
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("key", "value"), "EventTwo");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {"value"}, "EventTwo");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(Collections.singletonMap("key", "value"), "EventTwo");
+        }
         assertEquals("EventTwo", listener.assertOneGetNewAndReset().get("t0"));
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1));
@@ -136,9 +159,18 @@ public class TestTypeOfExpr extends TestCase
                 "  )");
         stmt.addListener(listener);
 
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("key", "value"), "EventOne");
-        epService.getEPRuntime().sendEvent(Collections.singletonMap("key", "value"), "EventTwo");
-        assertTrue(listener.isInvoked());
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {"value"}, "EventOne");
+            epService.getEPRuntime().sendEvent(new Object[] {"value"}, "EventTwo");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(Collections.singletonMap("key", "value"), "EventOne");
+            epService.getEPRuntime().sendEvent(Collections.singletonMap("key", "value"), "EventTwo");
+        }
+        assertTrue(listener.getAndClearIsInvoked());
+
+        listener.reset();
+        epService.initialize();
     }
 
     public void testNamedUnnamedPOJO() {
@@ -158,26 +190,50 @@ public class TestTypeOfExpr extends TestCase
     }
 
     public void testFragment() {
-        epService.getEPAdministrator().createEPL("create schema InnerSchema as (key string)");
-        epService.getEPAdministrator().createEPL("create schema MySchema as (inside InnerSchema, insidearr InnerSchema[])");
+        runAssertionFragment(EventRepresentationEnum.DEFAULT);
+        runAssertionFragment(EventRepresentationEnum.OBJECTARRAY);
+        runAssertionFragment(EventRepresentationEnum.MAP);
+    }
+
+    public void runAssertionFragment(EventRepresentationEnum eventRepresentationEnum) {
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema InnerSchema as (key string)");
+        epService.getEPAdministrator().createEPL(eventRepresentationEnum.getAnnotationText() + " create schema MySchema as (inside InnerSchema, insidearr InnerSchema[])");
 
         String[] fields = new String[] {"t0", "t1"};
-        String stmtText = "select typeof(s0.inside) as t0, typeof(s0.insidearr) as t1 from MySchema as s0";
+        String stmtText = eventRepresentationEnum.getAnnotationText() + " select typeof(s0.inside) as t0, typeof(s0.insidearr) as t1 from MySchema as s0";
         EPStatement stmt = epService.getEPAdministrator().createEPL(stmtText);
         stmt.addListener(listener);
-        
-        Map<String, Object> event = new HashMap<String, Object>();
-        epService.getEPRuntime().sendEvent(event, "MySchema");
+
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[2], "MySchema");
+        }
+        else {
+            epService.getEPRuntime().sendEvent(new HashMap<String, Object>(), "MySchema");
+        }
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, null});
 
-        event = new HashMap<String, Object>();
-        event.put("inside", new HashMap<String, Object>());
-        epService.getEPRuntime().sendEvent(event, "MySchema");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {new Object[0], null}, "MySchema");
+        }
+        else {
+            Map<String, Object> theEvent = new HashMap<String, Object>();
+            theEvent.put("inside", new HashMap<String, Object>());
+            epService.getEPRuntime().sendEvent(theEvent, "MySchema");
+        }
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"InnerSchema", null});
 
-        event = new HashMap<String, Object>();
-        event.put("insidearr", new Map[0]);
-        epService.getEPRuntime().sendEvent(event, "MySchema");
+        if (eventRepresentationEnum.isObjectArrayEvent()) {
+            epService.getEPRuntime().sendEvent(new Object[] {null, new Object[0][]}, "MySchema");
+        }
+        else {
+            Map<String, Object> theEvent = new HashMap<String, Object>();
+            theEvent.put("insidearr", new Map[0]);
+            epService.getEPRuntime().sendEvent(theEvent, "MySchema");
+        }
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{null, "InnerSchema[]"});
+        
+        epService.getEPAdministrator().destroyAllStatements();
+        epService.getEPAdministrator().getConfiguration().removeEventType("InnerSchema", true);
+        epService.getEPAdministrator().getConfiguration().removeEventType("MySchema", true);
     }
 }

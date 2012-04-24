@@ -24,22 +24,22 @@ public class ThreadWorkQueue
 
     /**
      * Adds event to the back queue.
-     * @param event to add
+     * @param theEvent to add
      */
-    public void addBack(Object event)
+    public void addBack(Object theEvent)
     {
         DualWorkQueue queue = threadQueue.get();
-        queue.getBackQueue().addLast(event);
+        queue.getBackQueue().addLast(theEvent);
     }
 
     /**
      * Adds event to the front queue.
-     * @param event to add
+     * @param theEvent to add
      */
-    public void addFront(Object event)
+    public void addFront(Object theEvent)
     {
         DualWorkQueue queue = threadQueue.get();
-        queue.getFrontQueue().addLast(event);
+        queue.getFrontQueue().addLast(theEvent);
     }
 
     public DualWorkQueue getThreadQueue() {

@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
+import com.espertech.esper.client.ConfigurationInformation;
+import com.espertech.esper.client.EventType;
 import com.espertech.esper.client.soda.ForClauseKeyword;
 import com.espertech.esper.core.context.util.ContextDescriptor;
 import com.espertech.esper.core.service.StatementResultService;
@@ -66,10 +68,22 @@ public class SelectExprProcessorFactory
                                                    String statementId,
                                                    String statementName,
                                                    Annotation[] annotations,
-                                                   ContextDescriptor contextDescriptor)
+                                                   ContextDescriptor contextDescriptor,
+                                                   ConfigurationInformation configuration,
+                                                   SelectExprProcessorDeliveryCallback selectExprProcessorCallback)
         throws ExprValidationException
     {
-        SelectExprProcessor synthetic = getProcessorInternal(assignedTypeNumberStack, selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext, statementId);
+        if (selectExprProcessorCallback != null) {
+            BindProcessor bindProcessor = new BindProcessor(selectionList, typeService.getEventTypes(), typeService.getStreamNames());
+            Map<String, Object> properties = new LinkedHashMap<String, Object>();
+            for (int i = 0; i < bindProcessor.getColumnNamesAssigned().length; i++) {
+                properties.put(bindProcessor.getColumnNamesAssigned()[i], bindProcessor.getExpressionTypes()[i]);
+            }
+            EventType eventType = eventAdapterService.createAnonymousObjectArrayType("Output_" + statementName, properties);
+            return new SelectExprProcessorWDeliveryCallback(eventType, bindProcessor, selectExprProcessorCallback);
+        }
+
+        SelectExprProcessor synthetic = getProcessorInternal(assignedTypeNumberStack, selectionList, isUsingWildcard, insertIntoDesc, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, statementId, annotations, configuration);
 
         // Handle binding as an optional service
         if (statementResultService != null)
@@ -126,8 +140,9 @@ public class SelectExprProcessorFactory
                                                    ValueAddEventService valueAddEventService,
                                                    SelectExprEventTypeRegistry selectExprEventTypeRegistry,
                                                    MethodResolutionService methodResolutionService,
-                                                   ExprEvaluatorContext exprEvaluatorContext,
-                                                   String statementId)
+                                                   String statementId,
+                                                   Annotation[] annotations,
+                                                   ConfigurationInformation configuration)
         throws ExprValidationException
     {
         // Wildcard not allowed when insert into specifies column order
@@ -143,7 +158,7 @@ public class SelectExprProcessorFactory
             if (typeService.getStreamNames().length > 1)
             {
                 log.debug(".getProcessor Using SelectExprJoinWildcardProcessor");
-                return new SelectExprJoinWildcardProcessor(assignedTypeNumberStack, statementId, typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService, insertIntoDesc, selectExprEventTypeRegistry, methodResolutionService);
+                return SelectExprJoinWildcardProcessorFactory.create(assignedTypeNumberStack, statementId, typeService.getStreamNames(), typeService.getEventTypes(), eventAdapterService, insertIntoDesc, selectExprEventTypeRegistry, methodResolutionService, annotations, configuration);
             }
             // Single-table selects with no insert-into
             // don't need extra processing
@@ -160,7 +175,7 @@ public class SelectExprProcessorFactory
         // Construct processor
         SelectExprBuckets buckets = getSelectExpressionBuckets(selectionList);
 
-        SelectExprProcessorHelper factory = new SelectExprProcessorHelper(assignedTypeNumberStack, buckets.expressions, buckets.selectedStreams, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, exprEvaluatorContext, statementId);
+        SelectExprProcessorHelper factory = new SelectExprProcessorHelper(assignedTypeNumberStack, buckets.expressions, buckets.selectedStreams, insertIntoDesc, isUsingWildcard, typeService, eventAdapterService, valueAddEventService, selectExprEventTypeRegistry, methodResolutionService, statementId, annotations, configuration);
         SelectExprProcessor processor = factory.getEvaluator();
 
         // add reference to the type obtained

@@ -12,11 +12,10 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.util.AuditPath;
 import com.espertech.esper.util.JavaClassHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -54,7 +53,7 @@ public class ExprEvaluatorProxy implements java.lang.reflect.InvocationHandler {
         if (m.equals(targetEvaluate)) {
             Object result = m.invoke(evaluator, args);
             if (AuditPath.isInfoEnabled()) {
-                AuditPath.auditLog(engineURI, statementName, "expression " + expressionToString + " result " + result);
+                AuditPath.auditLog(engineURI, statementName, AuditEnum.EXPRESSION, expressionToString + " result " + result);
             }
             return result;
         }
@@ -63,24 +62,24 @@ public class ExprEvaluatorProxy implements java.lang.reflect.InvocationHandler {
             Object result = m.invoke(evaluator, args);
             if (AuditPath.isInfoEnabled()) {
                 Collection<EventBean> resultBeans = (Collection<EventBean>) result;
-                String out = "null";
+                String outStr = "null";
                 if (resultBeans != null) {
                     if (resultBeans.isEmpty()) {
-                        out = "{}";
+                        outStr = "{}";
                     }
                     else {
                         StringWriter buf = new StringWriter();
                         int count = 0;
-                        for (EventBean event : resultBeans) {
+                        for (EventBean theEvent : resultBeans) {
                             buf.append(" Event ");
                             buf.append(Integer.toString(count++));
                             buf.append(":");
-                            EventBeanUtility.appendEvent(buf, event);
+                            EventBeanUtility.appendEvent(buf, theEvent);
                         }
-                        out = buf.toString();
+                        outStr = buf.toString();
                     }
                 }
-                AuditPath.auditLog(engineURI, statementName, "expression " + expressionToString + " result " + out);
+                AuditPath.auditLog(engineURI, statementName, AuditEnum.EXPRESSION, expressionToString + " result " + outStr);
             }
             return result;
         }
@@ -88,7 +87,7 @@ public class ExprEvaluatorProxy implements java.lang.reflect.InvocationHandler {
         if (m.equals(targetEvaluateCollScalar)) {
             Object result = m.invoke(evaluator, args);
             if (AuditPath.isInfoEnabled()) {
-                AuditPath.auditLog(engineURI, statementName, "expression " + expressionToString + " result " + result);
+                AuditPath.auditLog(engineURI, statementName, AuditEnum.EXPRESSION, expressionToString + " result " + result);
             }
             return result;
         }
@@ -96,13 +95,13 @@ public class ExprEvaluatorProxy implements java.lang.reflect.InvocationHandler {
         if (m.equals(targetEvaluateBean)) {
             Object result = m.invoke(evaluator, args);
             if (AuditPath.isInfoEnabled()) {
-                String out = "null";
+                String outStr = "null";
                 if (result != null) {
                     StringWriter buf = new StringWriter();
                     EventBeanUtility.appendEvent(buf, (EventBean) result);
-                    out = buf.toString();
+                    outStr = buf.toString();
                 }
-                AuditPath.auditLog(engineURI, statementName, "expression " + expressionToString + " result " + out);
+                AuditPath.auditLog(engineURI, statementName, AuditEnum.EXPRESSION, expressionToString + " result " + outStr);
             }
             return result;
         }

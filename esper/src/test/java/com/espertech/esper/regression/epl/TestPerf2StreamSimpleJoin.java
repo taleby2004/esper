@@ -39,7 +39,7 @@ public class TestPerf2StreamSimpleJoin extends TestCase
         String joinStatement = "select * from " +
                 SupportMarketDataBean.class.getName() + ".win:length(1000000)," +
                 SupportBean.class.getName() + ".win:length(1000000)" +
-            " where symbol=string";
+            " where symbol=theString";
 
         joinView = epService.getEPAdministrator().createEPL(joinStatement);
         joinView.addListener(updateListener);
@@ -120,15 +120,15 @@ public class TestPerf2StreamSimpleJoin extends TestCase
         assertTrue((endTime - startTime) < 25);
     }
 
-    private void sendEvent(Object event)
+    private void sendEvent(Object theEvent)
     {
-        epService.getEPRuntime().sendEvent(event);
+        epService.getEPRuntime().sendEvent(theEvent);
     }
 
     private Object makeSupportEvent(String id)
     {
         SupportBean bean = new SupportBean();
-        bean.setString(id);
+        bean.setTheString(id);
         return bean;
     }
 

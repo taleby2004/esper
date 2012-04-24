@@ -40,8 +40,8 @@ public class TestRowPatternRecognitionEmptyPartition extends TestCase {
                 "  measures E1.value as value" +
                 "  pattern (E1 E2 | E2 E1 ) " +
                 "  define " +
-                "    E1 as E1.string = 'A', " +
-                "    E2 as E2.string = 'B' " +
+                "    E1 as E1.theString = 'A', " +
+                "    E2 as E2.theString = 'B' " +
                 ")";
 
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);

@@ -63,7 +63,7 @@ public class JoinSetComposerPrototypeFactory
             throws ExprValidationException
     {
         // Determine if there is a historical stream, and what dependencies exist
-        DependencyGraph historicalDependencyGraph = new DependencyGraph(streamTypes.length);
+        DependencyGraph historicalDependencyGraph = new DependencyGraph(streamTypes.length, false);
         for (int i = 0; i < streamTypes.length; i++)
         {
             if (historicalViewableDesc.getHistorical()[i]) {
@@ -183,7 +183,7 @@ public class JoinSetComposerPrototypeFactory
         boolean isAllHistoricalNoSubordinate = false;
         if ((historicalViewableDesc.getHistorical()[0]) && historicalViewableDesc.getHistorical()[1])
         {
-            DependencyGraph graph = new DependencyGraph(2);
+            DependencyGraph graph = new DependencyGraph(2, false);
             graph.addDependency(0, historicalViewableDesc.getDependenciesPerHistorical()[0]);
             graph.addDependency(1, historicalViewableDesc.getDependenciesPerHistorical()[1]);
             if (graph.getFirstCircularDependency() != null)

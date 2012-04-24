@@ -11,15 +11,17 @@
 
 package com.espertech.esper.regression.event;
 
-import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import junit.framework.TestCase;
 import com.espertech.esper.client.*;
+import com.espertech.esper.client.scopetest.SupportUpdateListener;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBeanCombinedProps;
+import com.espertech.esper.support.bean.SupportBeanComplexProps;
 import com.espertech.esper.support.client.SupportConfigFactory;
-import com.espertech.esper.support.bean.*;
 import com.espertech.esper.support.event.EventTypeAssertionUtil;
+import junit.framework.TestCase;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 public class TestPropertyResolutionFragment extends TestCase
 {
@@ -71,7 +73,35 @@ public class TestPropertyResolutionFragment extends TestCase
         assertNull(eventBean.getFragment("p0map('a')?"));
     }
 
-    public void testWrapperFragment()
+    public void testObjectArraySimpleTypes()
+    {
+        String[] props = {"p0int", "p0intarray", "p0map"};
+        Object[] types = {int.class, int[].class, Map.class};
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeRoot", props, types);
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from TypeRoot");
+        stmt.addListener(listener);
+
+        Map<String, Object> dataInner = new HashMap<String, Object>();
+        dataInner.put("p1someval", "A");
+        Object[] dataRoot = new Object[] {99, new int[] {101, 102}, dataInner};
+
+        // send event
+        epService.getEPRuntime().sendEvent(dataRoot, "TypeRoot");
+        EventBean eventBean = listener.assertOneGetNewAndReset();
+        //System.out.println(EventTypeAssertionUtil.print(eventBean));    //comment me in
+        EventType eventType = eventBean.getEventType();
+        EventTypeAssertionUtil.assertConsistency(eventType);
+
+        // resolve property via fragment
+        assertNull(eventType.getFragmentType("p0int"));
+        assertNull(eventType.getFragmentType("p0intarray"));
+        assertNull(eventBean.getFragment("p0map?"));
+        assertNull(eventBean.getFragment("p0intarray[0]?"));
+        assertNull(eventBean.getFragment("p0map('a')?"));
+    }
+
+    public void testWrapperFragmentWithMap()
     {
         Map<String, Object> typeLev0 = new HashMap<String, Object>();
         typeLev0.put("p1id", int.class);
@@ -94,6 +124,34 @@ public class TestPropertyResolutionFragment extends TestCase
 
         // send event
         epService.getEPRuntime().sendEvent(dataRoot, "TypeRoot");
+        EventBean eventBean = listener.assertOneGetNewAndReset();
+        //  System.out.println(EventTypeAssertionUtil.print(eventBean));    comment me in
+        EventType eventType = eventBean.getEventType();
+        EventTypeAssertionUtil.assertConsistency(eventType);
+
+        // resolve property via fragment
+        assertTrue(eventType.getPropertyDescriptor("p0simple").isFragment());
+        assertEquals(11, eventBean.get("plusone"));
+        assertEquals(10, eventBean.get("p0simple.p1id"));
+
+        EventBean innerSimpleEvent = (EventBean) eventBean.getFragment("p0simple");
+        assertEquals(10, innerSimpleEvent.get("p1id"));
+
+        EventBean innerBeanEvent = (EventBean) eventBean.getFragment("mybean");
+        assertEquals("nestedNestedValue", innerBeanEvent.get("nested.nestedNested.nestedNestedValue"));
+        assertEquals("nestedNestedValue", ((EventBean)eventBean.getFragment("mybean.nested.nestedNested")).get("nestedNestedValue"));
+    }
+
+    public void testWrapperFragmentWithObjectArray()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeLev0", new String[] {"p1id"}, new Object[] {int.class});
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeRoot", new String[] {"p0simple", "p0bean"}, new Object[] {"TypeLev0", SupportBeanComplexProps.class});
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select *, p0simple.p1id + 1 as plusone, p0bean as mybean from TypeRoot");
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new Object[] {new Object[]{10}, SupportBeanComplexProps.makeDefaultBean()}, "TypeRoot");
+
         EventBean eventBean = listener.assertOneGetNewAndReset();
         //  System.out.println(EventTypeAssertionUtil.print(eventBean));    comment me in
         EventType eventType = eventBean.getEventType();
@@ -205,6 +263,43 @@ public class TestPropertyResolutionFragment extends TestCase
         assertNull(eventType.getFragmentType("p0array[0].p1id"));
     }
 
+    public void testObjectArrayFragmentObjectArrayNested()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeLev0", new String[] {"p1id"}, new Object[] {int.class});
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeRoot", new String[] {"p0simple", "p0array"}, new Object[] {"TypeLev0", "TypeLev0[]"});
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from TypeRoot");
+        stmt.addListener(listener);
+        assertEquals(Object[].class, stmt.getEventType().getUnderlyingType());
+
+        epService.getEPRuntime().sendEvent(new Object[] {new Object[] {10}, new Object[] {new Object[] {20}, new Object[] {21}}}, "TypeRoot");
+
+        EventBean eventBean = listener.assertOneGetNewAndReset();
+        //  System.out.println(EventTypeAssertionUtil.print(eventBean));    comment me in
+        EventType eventType = eventBean.getEventType();
+        EventTypeAssertionUtil.assertConsistency(eventType);
+
+        // resolve property via fragment
+        assertTrue(eventType.getPropertyDescriptor("p0simple").isFragment());
+        assertTrue(eventType.getPropertyDescriptor("p0array").isFragment());
+
+        EventBean innerSimpleEvent = (EventBean) eventBean.getFragment("p0simple");
+        assertEquals(10, innerSimpleEvent.get("p1id"));
+
+        EventBean[] innerArrayAllEvent = (EventBean[]) eventBean.getFragment("p0array");
+        assertEquals(20, innerArrayAllEvent[0].get("p1id"));
+
+        EventBean innerArrayElementEvent = (EventBean) eventBean.getFragment("p0array[0]");
+        assertEquals(20, innerArrayElementEvent.get("p1id"));
+
+        // resolve property via getter
+        assertEquals(10, eventBean.get("p0simple.p1id"));
+        assertEquals(21, eventBean.get("p0array[1].p1id"));
+
+        assertNull(eventType.getFragmentType("p0array.p1id"));
+        assertNull(eventType.getFragmentType("p0array[0].p1id"));
+    }
+
     public void testMapFragmentMapUnnamed()
     {
         Map<String, Object> typeLev0 = new HashMap<String, Object>();
@@ -289,12 +384,73 @@ public class TestPropertyResolutionFragment extends TestCase
         assertEquals(2, ((EventBean)eventBean.getFragment("one[1]")).get("id"));
         assertEquals(3, ((EventBean)eventBean.getFragment("two")).get("id"));
 
-        assertEquals("E1", ((EventBean)eventBean.getFragment("one[0].bean")).get("string"));
-        assertEquals("E1", ((EventBean)eventBean.getFragment("one[1].bean")).get("string"));
-        assertEquals("E1", ((EventBean)eventBean.getFragment("two.bean")).get("string"));
+        assertEquals("E1", ((EventBean)eventBean.getFragment("one[0].bean")).get("theString"));
+        assertEquals("E1", ((EventBean)eventBean.getFragment("one[1].bean")).get("theString"));
+        assertEquals("E1", ((EventBean)eventBean.getFragment("two.bean")).get("theString"));
 
-        assertEquals("E2", ((EventBean)eventBean.getFragment("one[0].beanarray[1]")).get("string"));
-        assertEquals("E2", ((EventBean)eventBean.getFragment("two.beanarray[1]")).get("string"));
+        assertEquals("E2", ((EventBean)eventBean.getFragment("one[0].beanarray[1]")).get("theString"));
+        assertEquals("E2", ((EventBean)eventBean.getFragment("two.beanarray[1]")).get("theString"));
+
+        assertEquals("nestedNestedValue", ((EventBean)eventBean.getFragment("one[0].complex.nested.nestedNested")).get("nestedNestedValue"));
+        assertEquals("nestedNestedValue", ((EventBean)eventBean.getFragment("two.complex.nested.nestedNested")).get("nestedNestedValue"));
+
+        assertEquals("nestedNestedValue", ((EventBean)eventBean.getFragment("one[0].complexarray[0].nested.nestedNested")).get("nestedNestedValue"));
+        assertEquals("nestedNestedValue", ((EventBean)eventBean.getFragment("two.complexarray[0].nested.nestedNested")).get("nestedNestedValue"));
+
+        assertEquals(2000, ((EventBean)eventBean.getFragment("one[0].map")).get("p2id"));
+        assertEquals(2000, ((EventBean)eventBean.getFragment("two.map")).get("p2id"));
+
+        assertEquals(2000, ((EventBean)eventBean.getFragment("one[0].maparray[1]")).get("p2id"));
+        assertEquals(2000, ((EventBean)eventBean.getFragment("two.maparray[1]")).get("p2id"));
+    }
+
+    public void testObjectArrayFragmentTransposedMapEventBean()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeInner", new String[] {"p2id"}, new Object[] {int.class});
+
+        String[] props = {"id", "bean", "beanarray", "complex", "complexarray", "map", "maparray"};
+        Object[] types = {int.class, SupportBean.class, SupportBean[].class, SupportBeanComplexProps.class, SupportBeanComplexProps[].class, "TypeInner", "TypeInner[]"};
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeMapOne", props, types);
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeMapTwo", props, types);
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from pattern[one=TypeMapOne until two=TypeMapTwo]");
+        stmt.addListener(listener);
+
+        Object[] dataInner = new Object[] {2000};
+        Object[] dataArray = new Object[] {1, new SupportBean("E1", 100),
+                new SupportBean[] {new SupportBean("E1", 100), new SupportBean("E2", 200)},
+                SupportBeanComplexProps.makeDefaultBean(),
+                new SupportBeanComplexProps[] {SupportBeanComplexProps.makeDefaultBean()},
+                dataInner, new Object[] {dataInner, dataInner}};
+
+        // send event
+        epService.getEPRuntime().sendEvent(dataArray, "TypeMapOne");
+
+        Object[] dataArrayTwo = new Object[dataArray.length];
+        System.arraycopy(dataArray, 0, dataArrayTwo, 0, dataArray.length);
+        dataArrayTwo[0] = 2;
+        epService.getEPRuntime().sendEvent(dataArrayTwo, "TypeMapOne");
+
+        Object[] dataArrayThree = new Object[dataArray.length];
+        System.arraycopy(dataArray, 0, dataArrayThree, 0, dataArray.length);
+        dataArrayThree[0] = 3;
+        epService.getEPRuntime().sendEvent(dataArrayThree, "TypeMapTwo");
+
+        EventBean eventBean = listener.assertOneGetNewAndReset();
+        // System.out.println(EventTypeAssertionUtil.print(eventBean));
+        EventType eventType = eventBean.getEventType();
+        EventTypeAssertionUtil.assertConsistency(eventType);
+
+        assertEquals(1, ((EventBean) eventBean.getFragment("one[0]")).get("id"));
+        assertEquals(2, ((EventBean) eventBean.getFragment("one[1]")).get("id"));
+        assertEquals(3, ((EventBean) eventBean.getFragment("two")).get("id"));
+
+        assertEquals("E1", ((EventBean)eventBean.getFragment("one[0].bean")).get("theString"));
+        assertEquals("E1", ((EventBean)eventBean.getFragment("one[1].bean")).get("theString"));
+        assertEquals("E1", ((EventBean)eventBean.getFragment("two.bean")).get("theString"));
+
+        assertEquals("E2", ((EventBean)eventBean.getFragment("one[0].beanarray[1]")).get("theString"));
+        assertEquals("E2", ((EventBean)eventBean.getFragment("two.beanarray[1]")).get("theString"));
 
         assertEquals("nestedNestedValue", ((EventBean)eventBean.getFragment("one[0].complex.nested.nestedNested")).get("nestedNestedValue"));
         assertEquals("nestedNestedValue", ((EventBean)eventBean.getFragment("two.complex.nested.nestedNested")).get("nestedNestedValue"));
@@ -344,25 +500,74 @@ public class TestPropertyResolutionFragment extends TestCase
         EventTypeAssertionUtil.assertConsistency(eventType);
 
         assertEquals(11, ((EventBean) eventBean.getFragment("p0simple.p1simple")).get("intPrimitive"));
-        assertEquals("A2", ((EventBean) eventBean.getFragment("p0simple.p1array[1]")).get("string"));
+        assertEquals("A2", ((EventBean) eventBean.getFragment("p0simple.p1array[1]")).get("theString"));
         assertEquals("simple", ((EventBean) eventBean.getFragment("p0simple.p1complex")).get("simpleProperty"));
         assertEquals("simple", ((EventBean) eventBean.getFragment("p0simple.p1complexarray[0]")).get("simpleProperty"));
         assertEquals("nestedValue", ((EventBean) eventBean.getFragment("p0simple.p1complexarray[0].nested")).get("nestedValue"));
         assertEquals("nestedNestedValue", ((EventBean) eventBean.getFragment("p0simple.p1complexarray[0].nested.nestedNested")).get("nestedNestedValue"));
 
         EventBean assertEvent = (EventBean) eventBean.getFragment("p0simple");
-        assertEquals("E1", assertEvent.get("p1simple.string"));
+        assertEquals("E1", assertEvent.get("p1simple.theString"));
         assertEquals(11, ((EventBean) assertEvent.getFragment("p1simple")).get("intPrimitive"));
         assertEquals(22, ((EventBean) assertEvent.getFragment("p1array[1]")).get("intPrimitive"));
         assertEquals("nestedNestedValue", ((EventBean) assertEvent.getFragment("p1complex.nested.nestedNested")).get("nestedNestedValue"));
 
         assertEvent = ((EventBean[]) eventBean.getFragment("p0array"))[0];
-        assertEquals("E1", assertEvent.get("p1simple.string"));
+        assertEquals("E1", assertEvent.get("p1simple.theString"));
         assertEquals(11, ((EventBean) assertEvent.getFragment("p1simple")).get("intPrimitive"));
         assertEquals(22, ((EventBean) assertEvent.getFragment("p1array[1]")).get("intPrimitive"));
 
         assertEvent = (EventBean) eventBean.getFragment("p0array[0]");
-        assertEquals("E1", assertEvent.get("p1simple.string"));
+        assertEquals("E1", assertEvent.get("p1simple.theString"));
+        assertEquals(11, ((EventBean) assertEvent.getFragment("p1simple")).get("intPrimitive"));
+        assertEquals(22, ((EventBean) assertEvent.getFragment("p1array[1]")).get("intPrimitive"));
+    }
+
+    public void testObjectArrayFragmentBeans()
+    {
+        String[] propsLev0 = {"p1simple", "p1array", "p1complex", "p1complexarray"};
+        Object[] typesLev0 = {SupportBean.class, SupportBean[].class, SupportBeanComplexProps.class, SupportBeanComplexProps[].class};
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeLev0", propsLev0, typesLev0);
+
+        String[] propsOuter = {"p0simple", "p0array"};
+        Object[] typesOuter = {"TypeLev0", "TypeLev0[]"};
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeRoot", propsOuter, typesOuter);
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from TypeRoot");
+        stmt.addListener(listener);
+        assertEquals(Object[].class, stmt.getEventType().getUnderlyingType());
+
+        Object[] dataInner = {new SupportBean("E1", 11), new SupportBean[] {new SupportBean("A1", 21), new SupportBean("A2", 22)},
+            SupportBeanComplexProps.makeDefaultBean(), new SupportBeanComplexProps[] {SupportBeanComplexProps.makeDefaultBean(), SupportBeanComplexProps.makeDefaultBean()}};
+        Object[] dataRoot = new Object[] {dataInner, new Object[] {dataInner,dataInner}};
+
+        // send event
+        epService.getEPRuntime().sendEvent(dataRoot, "TypeRoot");
+        EventBean eventBean = listener.assertOneGetNewAndReset();
+        //  System.out.println(EventTypeAssertionUtil.print(eventBean));    comment me in
+        EventType eventType = eventBean.getEventType();
+        EventTypeAssertionUtil.assertConsistency(eventType);
+
+        assertEquals(11, ((EventBean) eventBean.getFragment("p0simple.p1simple")).get("intPrimitive"));
+        assertEquals("A2", ((EventBean) eventBean.getFragment("p0simple.p1array[1]")).get("theString"));
+        assertEquals("simple", ((EventBean) eventBean.getFragment("p0simple.p1complex")).get("simpleProperty"));
+        assertEquals("simple", ((EventBean) eventBean.getFragment("p0simple.p1complexarray[0]")).get("simpleProperty"));
+        assertEquals("nestedValue", ((EventBean) eventBean.getFragment("p0simple.p1complexarray[0].nested")).get("nestedValue"));
+        assertEquals("nestedNestedValue", ((EventBean) eventBean.getFragment("p0simple.p1complexarray[0].nested.nestedNested")).get("nestedNestedValue"));
+
+        EventBean assertEvent = (EventBean) eventBean.getFragment("p0simple");
+        assertEquals("E1", assertEvent.get("p1simple.theString"));
+        assertEquals(11, ((EventBean) assertEvent.getFragment("p1simple")).get("intPrimitive"));
+        assertEquals(22, ((EventBean) assertEvent.getFragment("p1array[1]")).get("intPrimitive"));
+        assertEquals("nestedNestedValue", ((EventBean) assertEvent.getFragment("p1complex.nested.nestedNested")).get("nestedNestedValue"));
+
+        assertEvent = ((EventBean[]) eventBean.getFragment("p0array"))[0];
+        assertEquals("E1", assertEvent.get("p1simple.theString"));
+        assertEquals(11, ((EventBean) assertEvent.getFragment("p1simple")).get("intPrimitive"));
+        assertEquals(22, ((EventBean) assertEvent.getFragment("p1array[1]")).get("intPrimitive"));
+
+        assertEvent = (EventBean) eventBean.getFragment("p0array[0]");
+        assertEquals("E1", assertEvent.get("p1simple.theString"));
         assertEquals(11, ((EventBean) assertEvent.getFragment("p1simple")).get("intPrimitive"));
         assertEquals(22, ((EventBean) assertEvent.getFragment("p1array[1]")).get("intPrimitive"));
     }
@@ -396,6 +601,54 @@ public class TestPropertyResolutionFragment extends TestCase
         Map<String, Object> dataRoot = new HashMap<String, Object>();
         dataRoot.put("p0simple", dataLev0);
         dataRoot.put("p0array", new Map[] {dataLev0,dataLev0});
+
+        // send event
+        epService.getEPRuntime().sendEvent(dataRoot, "TypeRoot");
+        EventBean eventBean = listener.assertOneGetNewAndReset();
+        //  System.out.println(EventTypeAssertionUtil.print(eventBean));    comment me in
+        EventType eventType = eventBean.getEventType();
+        EventTypeAssertionUtil.assertConsistency(eventType);
+
+        assertEquals(10, ((EventBean)eventBean.getFragment("p0simple.p1simple")).get("p2id"));
+        assertEquals(10, ((EventBean)eventBean.getFragment("p0array[1].p1simple")).get("p2id"));
+        assertEquals(10, ((EventBean)eventBean.getFragment("p0array[1].p1array[0]")).get("p2id"));
+        assertEquals(10, ((EventBean)eventBean.getFragment("p0simple.p1array[0]")).get("p2id"));
+
+        // resolve property via fragment
+        EventBean assertEvent = (EventBean) eventBean.getFragment("p0simple");
+        assertEquals(10, assertEvent.get("p1simple.p2id"));
+        assertEquals(10, ((EventBean)assertEvent.getFragment("p1simple")).get("p2id"));
+
+        assertEvent = ((EventBean[]) eventBean.getFragment("p0array"))[1];
+        assertEquals(10, assertEvent.get("p1simple.p2id"));
+        assertEquals(10, ((EventBean)assertEvent.getFragment("p1simple")).get("p2id"));
+
+        assertEvent = (EventBean) eventBean.getFragment("p0array[0]");
+        assertEquals(10, assertEvent.get("p1simple.p2id"));
+        assertEquals(10, ((EventBean)assertEvent.getFragment("p1simple")).get("p2id"));
+
+        assertEquals("TypeLev1", eventType.getFragmentType("p0array.p1simple").getFragmentType().getName());
+        assertEquals(int.class, eventType.getFragmentType("p0array.p1simple").getFragmentType().getPropertyType("p2id"));
+        assertEquals(int.class, eventType.getFragmentType("p0array[0].p1array[0]").getFragmentType().getPropertyDescriptor("p2id").getPropertyType());
+        assertFalse(eventType.getFragmentType("p0simple.p1simple").isIndexed());
+        assertTrue(eventType.getFragmentType("p0simple.p1array").isIndexed());
+
+        tryInvalid((EventBean) eventBean.getFragment("p0simple"), "p1simple.p1id");
+    }
+
+    public void testObjectArrayFragment3Level()
+    {
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeLev1", new String[] {"p2id"}, new Object[] {int.class});
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeLev0", new String[] {"p1simple", "p1array"}, new Object[] {"TypeLev1", "TypeLev1[]"});
+        epService.getEPAdministrator().getConfiguration().addEventType("TypeRoot", new String[] {"p0simple", "p0array"}, new Object[] {"TypeLev0", "TypeLev0[]"});
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select * from TypeRoot");
+        stmt.addListener(listener);
+        assertEquals(Object[].class, stmt.getEventType().getUnderlyingType());
+
+        Object[] dataLev1 = new Object[] {10};
+        Object[] dataLev0 = new Object[] {dataLev1, new Object[] {dataLev1,dataLev1}};
+        Object[] dataRoot = new Object[] {dataLev0, new Object[] {dataLev0,dataLev0}};
 
         // send event
         epService.getEPRuntime().sendEvent(dataRoot, "TypeRoot");
@@ -484,22 +737,22 @@ public class TestPropertyResolutionFragment extends TestCase
         // Fragment-to-bean
         EventBean[] p0arrayEvents = (EventBean[]) eventBean.getFragment("p0array");
         assertSame(p0arrayEvents[0].getEventType(), p0simpleEvent.getEventType());
-        assertEquals("string1", eventBean.get("p0array[0].p1bean.string"));
-        assertEquals("string1", ((EventBean) eventBean.getFragment("p0array[0].p1bean")).get("string"));
+        assertEquals("string1", eventBean.get("p0array[0].p1bean.theString"));
+        assertEquals("string1", ((EventBean) eventBean.getFragment("p0array[0].p1bean")).get("theString"));
 
         EventBean innerOne = (EventBean) eventBean.getFragment("p0array[0]");
-        assertEquals("string1", ((EventBean) innerOne.getFragment("p1bean")).get("string"));
-        assertEquals("string1", innerOne.get("p1bean.string"));
+        assertEquals("string1", ((EventBean) innerOne.getFragment("p1bean")).get("theString"));
+        assertEquals("string1", innerOne.get("p1bean.theString"));
         innerOne = (EventBean) eventBean.getFragment("p0simple");
-        assertEquals("string1", ((EventBean) innerOne.getFragment("p1bean")).get("string"));
-        assertEquals("string1", innerOne.get("p1bean.string"));
+        assertEquals("string1", ((EventBean) innerOne.getFragment("p1bean")).get("theString"));
+        assertEquals("string1", innerOne.get("p1bean.theString"));
     }
 
-    private void tryInvalid(EventBean event, String property)
+    private void tryInvalid(EventBean theEvent, String property)
     {
         try
         {
-            event.get(property);
+            theEvent.get(property);
             fail();
         }
         catch (PropertyAccessException ex)

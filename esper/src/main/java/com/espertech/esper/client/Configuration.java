@@ -8,7 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.client;
 
-import com.espertech.esper.client.annotation.Name;
+import com.espertech.esper.dataflow.ops.BeaconSource;
+import com.espertech.esper.event.EventTypeUtility;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -73,9 +74,23 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     protected Map<String, Map<String, Object>> nestableMapNames;
 
     /**
+     * The type names for events that are backed by java.util.Map,
+     * possibly containing strongly-typed nested maps.
+     * <p>
+     * Each entrie's value must be either a Class or a Map<String,Object> to
+     * define nested maps.
+     */
+    protected Map<String, Map<String, Object>> nestableObjectArrayNames;
+
+    /**
      * Map event types additional configuration information.
      */
     protected Map<String, ConfigurationEventTypeMap> mapTypeConfigurations;
+
+    /**
+     * Map event types additional configuration information.
+     */
+    protected Map<String, ConfigurationEventTypeObjectArray> objectArrayTypeConfigurations;
 
 	/**
 	 * The class and package name imports that
@@ -88,11 +103,6 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
      * will be used to resolve partial class names.
      */
     protected Map<String, ConfigurationDBRef> databaseReferences;
-
-	/**
-	 * True until the user calls addAutoImport().
-	 */
-	private boolean isUsingDefaultImports = true;
 
     /**
      * Optional classname to use for constructing services context.
@@ -251,6 +261,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         return eventClasses.containsKey(eventTypeName)
                 || mapNames.containsKey(eventTypeName)
                 || nestableMapNames.containsKey(eventTypeName)
+                || nestableObjectArrayNames.containsKey(eventTypeName)
                 || eventTypesXMLDOM.containsKey(eventTypeName);
         //note: no need to check legacy as they get added as class event type
     }
@@ -340,12 +351,42 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     }
 
     /**
+     * Add, for a given Object-array event type identified by the first parameter, the supertype (by its event type name).
+     * <p>
+     * Each Object array event type may have any number of supertypes, each supertype must also be of a Object-array-type event.
+     * @param eventTypeName the name of a Map event type, that is to have a supertype
+     * @param supertypeName the name of a Map event type that is the supertype
+     */
+    public void addObjectArraySuperType(String eventTypeName, String supertypeName)
+    {
+        ConfigurationEventTypeObjectArray current = objectArrayTypeConfigurations.get(eventTypeName);
+        if (current == null) {
+            current = new ConfigurationEventTypeObjectArray();
+            objectArrayTypeConfigurations.put(eventTypeName, current);
+        }
+        Set<String> superTypes = current.getSuperTypes();
+        if (!superTypes.isEmpty()) {
+            throw new ConfigurationException("Object-array event types may not have multiple supertypes");
+        }
+        superTypes.add(supertypeName);
+    }
+
+    /**
      * Add configuration for a map event type.
      * @param mapeventTypeName configuration to add
      * @param config map type configuration
      */
     public void addMapConfiguration(String mapeventTypeName, ConfigurationEventTypeMap config) {
         mapTypeConfigurations.put(mapeventTypeName, config);
+    }
+
+    /**
+     * Add configuration for a object array event type.
+     * @param objectArrayeventTypeName configuration to add
+     * @param config map type configuration
+     */
+    public void addObjectArrayConfiguration(String objectArrayeventTypeName, ConfigurationEventTypeObjectArray config) {
+        objectArrayTypeConfigurations.put(objectArrayeventTypeName, config);
     }
 
     /**
@@ -356,6 +397,17 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public void addEventType(String eventTypeName, ConfigurationEventTypeXMLDOM xmlDOMEventTypeDesc)
     {
         eventTypesXMLDOM.put(eventTypeName, xmlDOMEventTypeDesc);
+    }
+
+    public void addEventType(String eventTypeName, String[] propertyNames, Object[] propertyTypes) throws ConfigurationException {
+        LinkedHashMap<String, Object> propertyTypesMap = EventTypeUtility.validateObjectArrayDef(propertyNames, propertyTypes);
+        nestableObjectArrayNames.put(eventTypeName, propertyTypesMap);
+    }
+
+    public void addEventType(String eventTypeName, String[] propertyNames, Object[] propertyTypes, ConfigurationEventTypeObjectArray config) throws ConfigurationException {
+        LinkedHashMap<String, Object> propertyTypesMap = EventTypeUtility.validateObjectArrayDef(propertyNames, propertyTypes);
+        nestableObjectArrayNames.put(eventTypeName, propertyTypesMap);
+        objectArrayTypeConfigurations.put(eventTypeName, config);
     }
 
     public void addRevisionEventType(String revisioneventTypeName, ConfigurationRevisionEventType revisionEventTypeConfig)
@@ -387,18 +439,17 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 
     public void addImport(String autoImport)
     {
-		if(isUsingDefaultImports)
-		{
-			isUsingDefaultImports = false;
-			imports.clear();
-            imports.add(Name.class.getPackage().getName() + ".*");
-		}
     	imports.add(autoImport);
     }
 
     public void addImport(Class autoImport)
     {
         addImport(autoImport.getName());
+    }
+
+    public void removeImport(String name)
+    {
+    	imports.remove(name);
     }
 
     /**
@@ -436,6 +487,10 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     	return nestableMapNames;
     }
 
+    public Map<String, Map<String, Object>> getEventTypesNestableObjectArrayEvents() {
+        return nestableObjectArrayNames;
+    }
+
     public Map<String, ConfigurationEventTypeXMLDOM> getEventTypesXMLDOM()
     {
         return eventTypesXMLDOM;
@@ -459,6 +514,10 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public List<ConfigurationPlugInView> getPlugInViews()
     {
         return plugInViews;
+    }
+
+    public Map<String, ConfigurationEventTypeObjectArray> getObjectArrayTypeConfigurations() {
+        return objectArrayTypeConfigurations;
     }
 
     public List<ConfigurationPlugInVirtualDataWindow> getPlugInVirtualDataWindows() {
@@ -507,6 +566,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 
     /**
      * Add a plugin loader (f.e. an input/output adapter loader).
+     * <p>The class is expected to implement {@link com.espertech.esper.plugin.PluginLoader}</p>.
      * @param loaderName is the name of the loader
      * @param className is the fully-qualified classname of the loader class
      * @param configuration is loader cofiguration entries
@@ -517,7 +577,8 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     }
 
     /**
-     * Add a plugin loader (f.e. an input/output adapter loader) without any additional loader configuration.
+     * Add a plugin loader (f.e. an input/output adapter loader) without any additional loader configuration
+     * <p>The class is expected to implement {@link com.espertech.esper.plugin.PluginLoader}</p>.
      * @param loaderName is the name of the loader
      * @param className is the fully-qualified classname of the loader class
      */
@@ -528,6 +589,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
 
     /**
      * Add a plugin loader (f.e. an input/output adapter loader).
+     * <p>The class is expected to implement {@link com.espertech.esper.plugin.PluginLoader}</p>.
      * @param loaderName is the name of the loader
      * @param className is the fully-qualified classname of the loader class
      * @param configuration is loader cofiguration entries
@@ -726,6 +788,10 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     public void updateMapEventType(String mapeventTypeName, Map<String, Object> typeMap) throws ConfigurationException
     {
         throw new UnsupportedOperationException("Map type update is only available in runtime configuration");
+    }
+
+    public void updateObjectArrayEventType(String myEvent, String[] namesNew, Object[] typesNew) {
+        throw new UnsupportedOperationException("Object-array type update is only available in runtime configuration");
     }
 
     public void replaceXMLEventType(String xmlEventTypeName, ConfigurationEventTypeXMLDOM config) throws ConfigurationException {
@@ -984,12 +1050,12 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         eventClasses = new HashMap<String, String>();
         mapNames = new HashMap<String, Properties>();
         nestableMapNames = new HashMap<String, Map<String, Object>>();
+        nestableObjectArrayNames = new HashMap<String, Map<String, Object>>();
         eventTypesXMLDOM = new HashMap<String, ConfigurationEventTypeXMLDOM>();
         eventTypesLegacy = new HashMap<String, ConfigurationEventTypeLegacy>();
         databaseReferences = new HashMap<String, ConfigurationDBRef>();
         imports = new ArrayList<String>();
         addDefaultImports();
-        isUsingDefaultImports = true;
         plugInViews = new ArrayList<ConfigurationPlugInView>();
         plugInVirtualDataWindows = new ArrayList<ConfigurationPlugInVirtualDataWindow>();
         pluginLoaders = new ArrayList<ConfigurationPluginLoader>();
@@ -1005,6 +1071,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         revisionEventTypes = new HashMap<String, ConfigurationRevisionEventType>();
         variantStreams = new HashMap<String, ConfigurationVariantStream>();
         mapTypeConfigurations = new HashMap<String, ConfigurationEventTypeMap>();
+        objectArrayTypeConfigurations = new HashMap<String, ConfigurationEventTypeObjectArray>();
     }
 
     /**
@@ -1017,6 +1084,7 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
     	imports.add("java.text.*");
     	imports.add("java.util.*");
         imports.add("com.espertech.esper.client.annotation.*");
+        imports.add(BeaconSource.class.getPackage().getName() + ".*");
     }
 
     /**
@@ -1056,5 +1124,29 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         }
     }
 
-    
+    /**
+     * Enumeration of event representation.
+     */
+    public static enum EventRepresentation
+    {
+        /**
+         * Event representation is object-array (Object[]).
+         */
+        OBJECTARRAY,
+
+        /**
+         * Event representation is Map (any java.util.Map interface implementation).
+         */
+        MAP;
+
+        /**
+         * Returns the default property resolution style.
+         * @return is the case-sensitive resolution
+         */
+        public static EventRepresentation getDefault()
+        {
+            return MAP;
+        }
+    }
+
 }

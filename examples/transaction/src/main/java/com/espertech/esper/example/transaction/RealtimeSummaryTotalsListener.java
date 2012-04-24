@@ -23,17 +23,17 @@ public class RealtimeSummaryTotalsListener implements UpdateListener
             return;
         }
 
-        EventBean event = newEvents[0];
+        EventBean theEvent = newEvents[0];
         log.debug(
-                " Totals minAC=" + event.get("minLatencyAC") +
-                " maxAC=" + event.get("maxLatencyAC") +
-                " avgAC=" + event.get("avgLatencyAC") +
-                " minAB=" + event.get("minLatencyAB") +
-                " maxAB=" + event.get("maxLatencyAB") +
-                " avgAB=" + event.get("avgLatencyAB") +
-                " minBC=" + event.get("minLatencyBC") +
-                " maxBC=" + event.get("maxLatencyBC") +
-                " avgBC=" + event.get("avgLatencyBC")
+                " Totals minAC=" + theEvent.get("minLatencyAC") +
+                " maxAC=" + theEvent.get("maxLatencyAC") +
+                " avgAC=" + theEvent.get("avgLatencyAC") +
+                " minAB=" + theEvent.get("minLatencyAB") +
+                " maxAB=" + theEvent.get("maxLatencyAB") +
+                " avgAB=" + theEvent.get("avgLatencyAB") +
+                " minBC=" + theEvent.get("minLatencyBC") +
+                " maxBC=" + theEvent.get("maxLatencyBC") +
+                " avgBC=" + theEvent.get("avgLatencyBC")
                 );
     }
 

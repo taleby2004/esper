@@ -20,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Map;
 
-public class EvalInsertWildcardWrapper extends EvalBase implements SelectExprProcessor {
+public class EvalInsertWildcardWrapper extends EvalBaseMap implements SelectExprProcessor {
 
     private static final Log log = LogFactory.getLog(EvalInsertWildcardWrapper.class);
 
@@ -30,9 +30,9 @@ public class EvalInsertWildcardWrapper extends EvalBase implements SelectExprPro
 
     public EventBean processSpecific(Map<String, Object> props, EventBean[] eventsPerStream, boolean isNewData, boolean isSynthesize, ExprEvaluatorContext exprEvaluatorContext)
     {
-        EventBean event = eventsPerStream[0];
+        EventBean theEvent = eventsPerStream[0];
         // Using a wrapper bean since we cannot use the same event type else same-type filters match.
         // Wrapping it even when not adding properties is very inexpensive.
-        return super.getEventAdapterService().adapterForTypedWrapper(event, props, super.getResultEventType());
+        return super.getEventAdapterService().adapterForTypedWrapper(theEvent, props, super.getResultEventType());
     }
 }

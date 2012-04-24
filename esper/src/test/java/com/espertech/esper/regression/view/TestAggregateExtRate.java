@@ -98,10 +98,10 @@ public class TestAggregateExtRate extends TestCase {
                 "Error starting statement: The rate aggregation function in the timestamp-property notation requires data windows [select rate(longPrimitive) as myrate from SupportBean]");
         tryInvalid("select rate(current_timestamp) as myrate from SupportBean.win:time(20)",
                 "Error starting statement: The rate aggregation function does not allow the current engine timestamp as a parameter [select rate(current_timestamp) as myrate from SupportBean.win:time(20)]");
-        tryInvalid("select rate(string) as myrate from SupportBean.win:time(20)",
-                "Error starting statement: The rate aggregation function requires a property or expression returning a non-constant long-type value as the first parameter in the timestamp-property notation [select rate(string) as myrate from SupportBean.win:time(20)]");
-        tryInvalid("select rate(string) as myrate from SupportBean.win:time(20)",
-                "Error starting statement: The rate aggregation function requires a property or expression returning a non-constant long-type value as the first parameter in the timestamp-property notation [select rate(string) as myrate from SupportBean.win:time(20)]");
+        tryInvalid("select rate(theString) as myrate from SupportBean.win:time(20)",
+                "Error starting statement: The rate aggregation function requires a property or expression returning a non-constant long-type value as the first parameter in the timestamp-property notation [select rate(theString) as myrate from SupportBean.win:time(20)]");
+        tryInvalid("select rate(theString) as myrate from SupportBean.win:time(20)",
+                "Error starting statement: The rate aggregation function requires a property or expression returning a non-constant long-type value as the first parameter in the timestamp-property notation [select rate(theString) as myrate from SupportBean.win:time(20)]");
     }
 
     private void runAssertion() {
@@ -182,9 +182,9 @@ public class TestAggregateExtRate extends TestCase {
 
     private void sendTimer(long timeInMSec)
     {
-        CurrentTimeEvent event = new CurrentTimeEvent(timeInMSec);
+        CurrentTimeEvent theEvent = new CurrentTimeEvent(timeInMSec);
         EPRuntime runtime = epService.getEPRuntime();
-        runtime.sendEvent(event);
+        runtime.sendEvent(theEvent);
     }
 
     private void sendEvent(long longPrimitive, int intPrimitive)
