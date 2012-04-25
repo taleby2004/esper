@@ -204,18 +204,64 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
             // If property then treat it as such
             if (propertyInfoPair != null) {
 
+                String propertyName = propertyInfoPair.getFirst().getPropertyName();
                 int streamId = propertyInfoPair.getFirst().getStreamNum();
                 EventType streamType = streamTypeService.getEventTypes()[streamId];
-                EventPropertyGetter getter = streamType.getGetter(propertyInfoPair.getFirst().getPropertyName());
+                ExprDotEvalTypeInfo typeInfo = null;
+                ExprEvaluatorEnumeration enumerationEval = null;
+                ExprDotEvalTypeInfo inputType;
+                ExprEvaluator rootNodeEvaluator = null;
+                EventPropertyGetter getter;
 
-                Pair<ExprEvaluatorEnumeration, ExprDotEvalTypeInfo> propertyEval = getPropertyEnumerationSource(propertyInfoPair.getFirst().getPropertyName(), streamId, streamType, hasEnumerationMethod);
-                ExprEvaluator rootNodeEvaluator = new PropertyExprEvaluatorNonLambda(streamId, getter, propertyInfoPair.getFirst().getPropertyType());
+                if (firstItem.getParameters().isEmpty()) {
+                    getter = streamType.getGetter(propertyInfoPair.getFirst().getPropertyName());
+
+                    Pair<ExprEvaluatorEnumeration, ExprDotEvalTypeInfo> propertyEval = getPropertyEnumerationSource(propertyInfoPair.getFirst().getPropertyName(), streamId, streamType, hasEnumerationMethod);
+                    typeInfo = propertyEval.getSecond();
+                    enumerationEval = propertyEval.getFirst();
+                    inputType = propertyEval.getSecond();
+                    rootNodeEvaluator = new PropertyExprEvaluatorNonLambda(streamId, getter, propertyInfoPair.getFirst().getPropertyType());
+                }
+                else {
+                    // property with parameter - mapped or indexed property
+                    EventPropertyDescriptor desc = streamTypeService.getEventTypes()[propertyInfoPair.getFirst().getStreamNum()].getPropertyDescriptor(firstItem.getName());
+                    if (firstItem.getParameters().size() > 1) {
+                        throw new ExprValidationException("Property '" + firstItem.getName() + "' may not be accessed passing 2 or more parameters");
+                    }
+                    ExprEvaluator paramEval = firstItem.getParameters().get(0).getExprEvaluator();
+                    typeInfo = ExprDotEvalTypeInfo.scalarOrUnderlying(desc.getPropertyComponentType());
+                    inputType = typeInfo;
+                    getter = null;
+                    if (desc.isMapped()) {
+                        if (paramEval.getType() != String.class) {
+                            throw new ExprValidationException("Parameter expression to mapped property '" + propertyName + "' is expected to return a string-type value but returns " + JavaClassHelper.getClassNameFullyQualPretty(paramEval.getType()));
+                        }
+                        EventPropertyGetterMapped mappedGetter = propertyInfoPair.getFirst().getStreamEventType().getGetterMapped(propertyInfoPair.getFirst().getPropertyName());
+                        if (mappedGetter == null) {
+                            throw new ExprValidationException("Mapped property named '" + propertyName + "' failed to obtain getter-object");
+                        }
+                        rootNodeEvaluator = new PropertyExprEvaluatorNonLambdaMapped(streamId, mappedGetter, paramEval, desc.getPropertyComponentType());
+                    }
+                    if (desc.isIndexed()) {
+                        if (JavaClassHelper.getBoxedType(paramEval.getType()) != Integer.class) {
+                            throw new ExprValidationException("Parameter expression to mapped property '" + propertyName + "' is expected to return a Integer-type value but returns " + JavaClassHelper.getClassNameFullyQualPretty(paramEval.getType()));
+                        }
+                        EventPropertyGetterIndexed indexedGetter = propertyInfoPair.getFirst().getStreamEventType().getGetterIndexed(propertyInfoPair.getFirst().getPropertyName());
+                        if (indexedGetter == null) {
+                            throw new ExprValidationException("Mapped property named '" + propertyName + "' failed to obtain getter-object");
+                        }
+                        rootNodeEvaluator = new PropertyExprEvaluatorNonLambdaIndexed(streamId, indexedGetter, paramEval, desc.getPropertyComponentType());
+                    }
+                }
+                if (typeInfo == null) {
+                    throw new ExprValidationException("Property '" + propertyName + "' is not a mapped or indexed property");
+                }
 
                 // try to build chain based on the input (non-fragment)
                 ExprDotNodeRealizedChain evals;
                 ExprDotNodeFilterAnalyzerInputProp filterAnalyzerInputProp = new ExprDotNodeFilterAnalyzerInputProp(propertyInfoPair.getFirst().getStreamNum(), propertyInfoPair.getFirst().getPropertyName());
                 try {
-                    evals = ExprDotNodeUtility.getChainEvaluators(propertyEval.getSecond(), modifiedChain, validationContext, isDuckTyping, filterAnalyzerInputProp);
+                    evals = ExprDotNodeUtility.getChainEvaluators(inputType, modifiedChain, validationContext, isDuckTyping, filterAnalyzerInputProp);
                 }
                 catch (ExprValidationException ex) {
 
@@ -237,7 +283,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
                     rootNodeEvaluator = new PropertyExprEvaluatorNonLambdaFragment(streamId, getter, fragment.getFragmentType().getUnderlyingType());
                 }
 
-                exprEvaluator = new ExprDotEvalRootChild(rootNodeEvaluator, propertyEval.getFirst(), propertyEval.getSecond(), evals.getChain(), evals.getChainWithUnpack());
+                exprEvaluator = new ExprDotEvalRootChild(rootNodeEvaluator, enumerationEval, inputType, evals.getChain(), evals.getChainWithUnpack());
                 exprDotNodeFilterAnalyzerDesc = evals.getFilterAnalyzerDesc();
             }
             else {
@@ -287,7 +333,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
             if (mappedGetter == null) {
                 throw new ExprValidationException("Mapped property named '" + propertyName + "' failed to obtain getter-object");
             }
-            return new ExprDotEvalPropertyExprMapped(validationContext.getStatementName(), propertyDesc.getPropertyName(), streamNum, parameterEval, propertyDesc.getPropertyType(), mappedGetter);
+            return new ExprDotEvalPropertyExprMapped(validationContext.getStatementName(), propertyDesc.getPropertyName(), streamNum, parameterEval, propertyDesc.getPropertyComponentType(), mappedGetter);
         }
         else {
             if (JavaClassHelper.getBoxedType(parameterEval.getType()) != Integer.class) {
@@ -297,7 +343,7 @@ public class ExprDotNode extends ExprNodeBase implements ExprNodeInnerNodeProvid
             if (indexedGetter == null) {
                 throw new ExprValidationException("Indexed property named '" + propertyName + "' failed to obtain getter-object");
             }
-            return new ExprDotEvalPropertyExprIndexed(validationContext.getStatementName(), propertyDesc.getPropertyName(), streamNum, parameterEval, propertyDesc.getPropertyType(), indexedGetter);
+            return new ExprDotEvalPropertyExprIndexed(validationContext.getStatementName(), propertyDesc.getPropertyName(), streamNum, parameterEval, propertyDesc.getPropertyComponentType(), indexedGetter);
         }
     }
 

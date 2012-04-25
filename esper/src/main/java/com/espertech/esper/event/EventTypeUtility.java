@@ -283,6 +283,10 @@ public class EventTypeUtility {
                 {
                     componentType = classType.getComponentType();
                 }
+                boolean isMapped = JavaClassHelper.isImplementsInterface(classType, Map.class);
+                if (isMapped) {
+                    componentType = Object.class; // Cannot determine the type at runtime
+                }
                 boolean isFragment = JavaClassHelper.isFragmentableType(classType);
                 BeanEventType nativeFragmentType = null;
                 if (isFragment)
@@ -302,7 +306,7 @@ public class EventTypeUtility {
                 {
                     eventTypeFragments.put(name, null);
                 }
-                propertyDescriptors.add(new EventPropertyDescriptor(name, classType, componentType, false, false, isArray, false, isFragment));
+                propertyDescriptors.add(new EventPropertyDescriptor(name, classType, componentType, false, false, isArray, isMapped, isFragment));
 
                 EventPropertyGetter getter = factory.getGetterProperty(name, nativeFragmentType, eventAdapterService);
                 propertyGetters.put(name, getter);

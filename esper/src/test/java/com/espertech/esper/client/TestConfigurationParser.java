@@ -127,7 +127,7 @@ public class TestConfigurationParser extends TestCase
         assertEquals("java.text.*", config.getImports().get(2));
         assertEquals("java.util.*", config.getImports().get(3));
         assertEquals("com.espertech.esper.client.annotation.*", config.getImports().get(4));
-        assertEquals("com.espertech.esper.graph.ops.*", config.getImports().get(5));
+        assertEquals("com.espertech.esper.dataflow.ops.*", config.getImports().get(5));
         assertEquals("com.mycompany.myapp.*", config.getImports().get(6));
         assertEquals("com.mycompany.myapp.ClassOne", config.getImports().get(7));
 

@@ -197,6 +197,10 @@
 			Combinations are also possible. For example, a valid combination could be <literal>person.address('home').street[0]</literal>.
 		</para>
 
+		<para>
+			You may use any expression as a mapped property key or indexed property index by putting the expression within parenthesis after the mapped or index property name. Please find examples below.
+		</para>
+
 		<sect2 xml:id="eventrep-properties-escaping">
 		   <title>Escape Characters</title>
 			<para>
@@ -227,6 +231,72 @@
 			</para>
 			<programlisting>select `candidate book` , `children's books`[0], `book select`('isbn') from MyEventType</programlisting> 
   
+		</sect2>
+
+		<sect2 id="eventrep-properties-expression">
+		   <title>Expression as Key or Index Value</title>
+	   
+			<para>
+				The key or index expression must be placed in parenthesis.  When using an expression as key for a mapped property, the expression must return a <literal>String</literal>-typed value. When using an expression as index for an indexed property, the expression must return an <literal>int</literal>-typed value.				
+			</para>
+	
+			<para>
+				This example below uses Java classes to illustrate;The same principles apply to all event representations.
+			</para>
+
+			<para>
+				Assume a class declares these properties (getters not shown for brevity):
+			</para>
+			<programlisting><![CDATA[public class MyEventType {
+  String myMapKey;
+  int myIndexValue;
+  int myInnerIndexValue;
+  Map<String, InnerType> innerTypesMap;	// mapped property
+  InnerType[] innerTypesArray; // indexed property
+}
+
+public class InnerType {
+  String name;
+  int[] ids;
+}]]></programlisting>
+
+			<para>
+				A sample EPL statement demonstrating expressions as map keys or indexes is:
+			</para>
+			<programlisting><![CDATA[select innerTypesMap('somekey'),  // returns map value for 'somekey'
+  innerTypesMap(myMapKey),        // returns map value for myMapKey value (an expression)
+  innerTypesArray[1],             // returns array value at index 1
+  innerTypesArray(myIndexValue)   // returns array value at index myIndexValue (an expression)
+  from MyEventType]]></programlisting>
+
+			<para>
+				The dot-operator can be used to access methods on the value objects returned by the mapped or indexed properties. By using the dot-operator the syntax follows the chained method invocation described at <xref linkend="epl-operator-ref-dot"/>.
+			</para>
+	
+			<para>
+				A sample EPL statement demonstrating the dot-operator as well as expressions as map keys or indexes is:
+			</para>
+			<programlisting><![CDATA[ select innerTypesMap('somekey').ids[1],
+  innerTypesMap(myMapKey).getIds(myIndexValue),
+  innerTypesArray[1].ids[2],
+  innerTypesArray(myIndexValue).getIds(myInnerIndexValue)
+  from MyEventType]]></programlisting>
+		
+			 <para>
+				Please note the following limitations:
+			</para>
+			<itemizedlist spacing="compact">
+				<listitem>
+					<para>
+						The square brackets-syntax for indexed properties does now allow expressions and requires a constant index value.
+					</para>
+				</listitem>
+				<listitem>
+					<para>
+						When using the dot-operator with mapped or indexed properties that have expressions as map keys or indexes you must follow the chained method invocation syntax.
+					</para>
+				</listitem>
+			</itemizedlist>
 		</sect2>
 	</sect1>
 		

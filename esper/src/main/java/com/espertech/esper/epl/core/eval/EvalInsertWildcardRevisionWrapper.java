@@ -21,7 +21,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Map;
 
-public class EvalInsertWildcardRevisionWrapper extends EvalBase implements SelectExprProcessor {
+public class EvalInsertWildcardRevisionWrapper extends EvalBaseMap implements SelectExprProcessor {
 
     private static final Log log = LogFactory.getLog(EvalInsertWildcardRevisionWrapper.class);
 

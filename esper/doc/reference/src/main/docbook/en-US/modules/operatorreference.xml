@@ -537,7 +537,11 @@
 			<para>
 				An example for the <literal>regexp</literal> keyword is below.
 			</para>
-			<programlisting><![CDATA[select * from PersonLocationEvent where name regexp '*Jack*']]></programlisting>
+			<programlisting><![CDATA[select * from PersonLocationEvent where name regexp '.*Jack.*']]></programlisting>
+			
+			<para>
+			  The <literal>rexexp</literal> function matches the entire region against the pattern via <literal>java.util.regex.Matcher.matches()</literal> method. Please consult the Java API documentation for more information or refer to <ulink url="http://www.regular-expressions.info/refflavors.html">Regular Expression Flavors</ulink>.
+			 </para>
 		</sect1>		
 
 		<sect1 xml:id="epl-operator-anysome">

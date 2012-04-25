@@ -81,7 +81,7 @@ public class TestEPLTreeWalker extends TestCase
 
         type = tryWalkGraphTypes("out<eventbean<?>>");
         assertFalse(type.isWildcard());
-        assertEquals("event", type.getTypeOrClassname());
+        assertEquals("eventbean", type.getTypeOrClassname());
         assertEquals(1, type.getTypeParameters().size());
         assertTrue(type.getTypeParameters().get(0).isWildcard());
         assertNull(type.getTypeParameters().get(0).getTypeOrClassname());
@@ -89,7 +89,7 @@ public class TestEPLTreeWalker extends TestCase
 
         type = tryWalkGraphTypes("out<eventbean<someschema>>");
         assertFalse(type.isWildcard());
-        assertEquals("event", type.getTypeOrClassname());
+        assertEquals("eventbean", type.getTypeOrClassname());
         assertEquals(1, type.getTypeParameters().size());
         assertFalse(type.getTypeParameters().get(0).isWildcard());
         assertEquals("someschema", type.getTypeParameters().get(0).getTypeOrClassname());

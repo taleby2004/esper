@@ -13,8 +13,8 @@ package com.espertech.esper.client;
 
 import junit.framework.TestCase;
 
-import java.net.URL;
 import java.io.File;
+import java.net.URL;
 
 public class TestConfiguration extends TestCase
 {
@@ -67,6 +67,6 @@ public class TestConfiguration extends TestCase
         assertEquals("java.text.*", config.getImports().get(2));
         assertEquals("java.util.*", config.getImports().get(3));
         assertEquals("com.espertech.esper.client.annotation.*", config.getImports().get(4));
-        assertEquals("com.espertech.esper.graph.ops.*", config.getImports().get(5));
+        assertEquals("com.espertech.esper.dataflow.ops.*", config.getImports().get(5));
     }
 }
