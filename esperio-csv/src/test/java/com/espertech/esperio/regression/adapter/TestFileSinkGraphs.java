@@ -69,22 +69,6 @@ public class TestFileSinkGraphs extends TestCase
         stmtGraph.destroy();
     }
 
-    private void tryInvalidRun(String dataflowName, String epl, String message) {
-        EPStatement stmtGraph = epService.getEPAdministrator().createEPL(epl);
-        DefaultSupportCaptureOp<Object> outputOp = new DefaultSupportCaptureOp<Object>();
-        EPDataFlowInstance df = epService.getEPRuntime().getDataFlowRuntime().instantiate(dataflowName,
-                new EPDataFlowInstantiationOptions().operatorProvider(new DefaultSupportGraphOpProvider(outputOp)));
-        try {
-            df.run();
-            fail();
-        }
-        catch (EPDataFlowExecutionException ex) {
-            assertEquals(message, ex.getMessage());
-        }
-
-        stmtGraph.destroy();
-    }
-
     public void testWriteCSV() throws Exception {
         runAssertion("MyXMLEvent", DefaultSupportGraphEventUtil.getXMLEvents(), true);
         runAssertion("MyOAEvent", DefaultSupportGraphEventUtil.getOAEvents(), true);
