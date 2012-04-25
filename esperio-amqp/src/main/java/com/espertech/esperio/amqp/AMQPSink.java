@@ -32,7 +32,11 @@ public class AMQPSink implements DataFlowOpLifecycle {
 
     private transient Connection connection;
     private transient Channel channel;
-
+    private ThreadLocal<ObjectToAMQPCollectorContext> collectorDataTL = new ThreadLocal<ObjectToAMQPCollectorContext>() {
+        protected synchronized ObjectToAMQPCollectorContext initialValue() {
+            return null;
+        }
+    };
 
     public DataFlowOpInitializeResult initialize(DataFlowOpInitializateContext context) throws Exception {
         return null;
@@ -85,13 +89,28 @@ public class AMQPSink implements DataFlowOpLifecycle {
     }
 
     public void onInput(Object event) {
-        byte[] bytes = settings.getObjectToAmqpTransform().transform(event);
-        try {
-            channel.basicPublish("", settings.getQueueName(), null, bytes);
+
+        ObjectToAMQPCollectorContext holder = collectorDataTL.get();
+        if (holder == null) {
+            holder = new ObjectToAMQPCollectorContext(new AMQPEmitter() {
+                public void send(byte[] bytes) {
+                    try {
+                        channel.basicPublish("", settings.getQueueName(), null, bytes);
+                    }
+                    catch (IOException e) {
+                        String message = "Failed to publish to AMQP: " + e.getMessage();
+                        log.error(message, e);
+                        throw new RuntimeException(message);
+                    }
+                }
+            }, event);
+            collectorDataTL.set(holder);
         }
-        catch (IOException e) {
-            log.error("Failed to publish to AMQP: " + e.getMessage(), e);
+        else {
+            holder.setObject(event);
         }
+
+        settings.getCollector().collect(holder);
     }
 
     public void close(DataFlowOpCloseContext openContext) {

@@ -482,7 +482,7 @@ epService.getEPAdministrator().createEPL(epl);]]></programlisting>
 				</thead>
 				<tbody>
 					<row>
-						<entry>AmqpSource</entry>
+						<entry>AMQPSource</entry>
 						<entry>
 							<para>
 								Attaches to AMQP broker to receive messages to process. 
@@ -490,7 +490,7 @@ epService.getEPAdministrator().createEPL(epl);]]></programlisting>
 						</entry>
 					</row>
 					<row>
-						<entry>AmqpSink</entry>
+						<entry>AMQPSink</entry>
 						<entry>
 							<para>
 								Attaches to AMQP broker to send messages.
@@ -696,7 +696,7 @@ epService.getEPAdministrator().createEPL(epl);]]></programlisting>
 			<title>EventBusSink</title>		
 			
 			<para>
-			  The EventBusSink operator send events received from a data flow into the event bus.
+			  The EventBusSink operator send events received from a data flow into the event bus. Any statement that looks for any of the events gets triggered, equivalent to <literal>EPRuntime.sendEvent</literal> or the <literal>insert into</literal> clause.
 			</para>
 			
 			<para>
@@ -758,7 +758,7 @@ epService.getEPAdministrator().createEPL(epl);]]></programlisting>
 			<title>EventBusSource</title>		
 			
 			<para>
-			  The EventBusSource operator receives events from the event bus and produces an output stream of the events received.
+			  The EventBusSource operator receives events from the event bus and produces an output stream of the events received. With the term event bus we mean any event visible to the engine either because the application send the event via <literal>EPRuntime.sendEvent</literal> or because statements populated streams as a result of <literal>insert into</literal>.
 			</para>
 			
 			<para>

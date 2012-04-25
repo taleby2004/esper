@@ -11,6 +11,6 @@
 
 package com.espertech.esperio.amqp;
 
-public interface ObjectToAMQPTransform {
-    public byte[] transform(Object object);
+public interface AMQPToObjectCollector {
+    public void collect(AMQPToObjectCollectorContext context);
 }

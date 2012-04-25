@@ -13,19 +13,19 @@ package com.espertech.esperio.amqp;
 
 public class AMQPSettingsSource extends AMQPSettingsBase
 {
-    private AMQPToObjectTransform amqpToObjectTransform;
+    private AMQPToObjectCollector collector;
     private int prefetchCount = 100;
     private boolean consumeAutoAck = true;
 
     public AMQPSettingsSource() {
     }
 
-    public AMQPToObjectTransform getAmqpToObjectTransform() {
-        return amqpToObjectTransform;
+    public AMQPToObjectCollector getCollector() {
+        return collector;
     }
 
-    public void setAmqpToObjectTransform(AMQPToObjectTransform amqpToObjectTransform) {
-        this.amqpToObjectTransform = amqpToObjectTransform;
+    public void setCollector(AMQPToObjectCollector collector) {
+        this.collector = collector;
     }
 
     public int getPrefetchCount() {
@@ -46,7 +46,7 @@ public class AMQPSettingsSource extends AMQPSettingsBase
 
     public String toString() {
         return super.toString() + "  AMQPSettingsSource{" +
-                "amqpToObjectTransform=" + amqpToObjectTransform +
+                "amqpToObjectTransform=" + collector +
                 ", prefetchCount=" + prefetchCount +
                 ", consumeAutoAck=" + consumeAutoAck +
                 '}';

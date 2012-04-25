@@ -11,10 +11,24 @@
 
 package com.espertech.esperio.amqp;
 
-import com.espertech.esper.util.SerializerUtil;
+public class ObjectToAMQPCollectorContext {
+    private final AMQPEmitter emitter;
+    private Object object;
 
-public class ObjectToAMQPTransformSerializable implements ObjectToAMQPTransform {
-    public byte[] transform(Object object) {
-        return SerializerUtil.objectToByteArr(object);
+    public ObjectToAMQPCollectorContext(AMQPEmitter emitter, Object object) {
+        this.emitter = emitter;
+        this.object = object;
+    }
+
+    public Object getObject() {
+        return object;
+    }
+
+    public void setObject(Object object) {
+        this.object = object;
+    }
+
+    public AMQPEmitter getEmitter() {
+        return emitter;
     }
 }

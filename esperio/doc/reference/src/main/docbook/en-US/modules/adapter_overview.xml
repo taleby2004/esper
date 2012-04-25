@@ -11,6 +11,10 @@
     </para>
     
     <para>
+        Most adapters present their own configuration as well as API. Some adapters also provide operators for use in data flows.
+    </para>
+
+    <para>
         The following input and output adapters exist:
     </para>
 
@@ -27,10 +31,10 @@
 			</thead>
 			<tbody>
 				<row>
-					<entry>CSV Input Adapter</entry>
+					<entry>File Input and Output Adapter</entry>
 					<entry>
 						<para>
-							The CSV input adapter can read one or more CSV-formatted input sources, transform the textual values into events, and play the events into the engine. The adapter also makes it possible to run complete simulations of events arriving in time-order from different input streams.
+							The file input and output adapter can read and wirte files, transform the textual values into events, play the events into the engine and write events into a file. The adapter also makes it possible to run complete simulations of events arriving in time-order from different input streams.
 						</para>
 					</entry>
 				</row>

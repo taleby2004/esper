@@ -22,7 +22,7 @@ import com.espertech.esper.dataflow.util.DefaultSupportGraphEventUtil;
 import com.espertech.esper.dataflow.util.DefaultSupportGraphOpProvider;
 import com.espertech.esper.dataflow.util.DefaultSupportSourceOp;
 import com.espertech.esper.util.FileUtil;
-import com.espertech.esperio.graph.FileSinkFactory;
+import com.espertech.esperio.dataflow.FileSinkFactory;
 import junit.framework.TestCase;
 
 public class TestFileSinkGraphs extends TestCase

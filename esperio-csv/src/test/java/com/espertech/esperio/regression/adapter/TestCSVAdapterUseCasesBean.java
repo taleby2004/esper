@@ -19,7 +19,7 @@ import com.espertech.esper.dataflow.util.DefaultSupportCaptureOp;
 import com.espertech.esper.dataflow.util.DefaultSupportGraphOpProvider;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.csv.CSVInputAdapter;
-import com.espertech.esperio.graph.FileSourceCSV;
+import com.espertech.esperio.dataflow.FileSourceCSV;
 import com.espertech.esperio.support.util.ExampleMarketDataBeanReadWrite;
 
 /**

@@ -26,7 +26,7 @@ import com.espertech.esperio.AdapterCoordinatorImpl;
 import com.espertech.esperio.AdapterInputSource;
 import com.espertech.esperio.csv.CSVInputAdapter;
 import com.espertech.esperio.csv.CSVInputAdapterSpec;
-import com.espertech.esperio.graph.FileSourceCSV;
+import com.espertech.esperio.dataflow.FileSourceCSV;
 import junit.framework.TestCase;
 
 import java.io.ByteArrayInputStream;

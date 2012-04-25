@@ -9,7 +9,7 @@
  * *************************************************************************************
  */
 
-package com.espertech.esperio.graph;
+package com.espertech.esperio.dataflow;
 
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventType;

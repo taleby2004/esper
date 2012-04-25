@@ -11,6 +11,10 @@
 
 package com.espertech.esperio.amqp;
 
-public interface AMQPToObjectTransform {
-    public Object transform(byte[] bytes);
+import com.espertech.esper.util.SerializerUtil;
+
+public class AMQPToObjectCollectorSerializable implements AMQPToObjectCollector {
+    public void collect(AMQPToObjectCollectorContext context) {
+        context.getEmitter().submit(SerializerUtil.byteArrToObject(context.getBytes()));
+    }
 }

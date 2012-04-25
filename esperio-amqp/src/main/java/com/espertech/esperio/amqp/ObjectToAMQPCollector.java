@@ -11,24 +11,6 @@
 
 package com.espertech.esperio.amqp;
 
-public class AMQPSettingsSink extends AMQPSettingsBase
-{
-    private ObjectToAMQPCollector collector;
-
-    public AMQPSettingsSink() {
-    }
-
-    public ObjectToAMQPCollector getCollector() {
-        return collector;
-    }
-
-    public void setCollector(ObjectToAMQPCollector collector) {
-        this.collector = collector;
-    }
-
-    public String toString() {
-        return super.toString() + "  AMQPSettingsSink{" +
-            "objectToAmqpTransform=" + collector +
-            '}';
-    }
+public interface ObjectToAMQPCollector {
+    public void collect(ObjectToAMQPCollectorContext context);
 }

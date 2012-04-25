@@ -53,7 +53,7 @@ public class TestAMQPGraphs extends TestCase
                 "AMQPSource -> outstream<MyMapEvent> {" +
                 "  host: 'localhost'," +
                 "  queueName: '" + queueName + "', " +
-                "  amqpToObjectTransform: {class: 'AMQPToObjectTransformSerializable'}," +
+                "  collector: {class: 'AMQPToObjectCollectorSerializable'}," +
                 "  logMessages: true, " +
                 "}" +
                 "DefaultSupportCaptureOp(outstream) {}";
@@ -84,7 +84,7 @@ public class TestAMQPGraphs extends TestCase
                 "AMQPSink(outstream) {" +
                 "  host: 'localhost', " +
                 "  queueName: '" + queueName + "', " +
-                "  objectToAmqpTransform: {class: 'ObjectToAMQPTransformSerializable'}, " +
+                "  collector: {class: 'ObjectToAMQPCollectorSerializable'}, " +
                 "}";
         epService.getEPAdministrator().createEPL(graph);
 

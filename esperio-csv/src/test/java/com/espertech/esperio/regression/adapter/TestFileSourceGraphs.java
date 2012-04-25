@@ -17,7 +17,7 @@ import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.dataflow.util.DefaultSupportCaptureOp;
 import com.espertech.esper.dataflow.util.DefaultSupportGraphOpProvider;
 import com.espertech.esper.util.EventRepresentationEnum;
-import com.espertech.esperio.graph.FileSourceFactory;
+import com.espertech.esperio.dataflow.FileSourceFactory;
 import junit.framework.TestCase;
 
 import java.util.HashMap;

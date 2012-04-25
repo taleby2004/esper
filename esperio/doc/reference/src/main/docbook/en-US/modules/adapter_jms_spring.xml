@@ -4,7 +4,7 @@
          xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink"
          xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:ns="http://docbook.org/ns/docbook">
 
-    <title>The Spring JMS Input and Output Adapters</title>
+    <title>The Spring JMS Input and Output Adapter</title>
     
     <para>
         This chapter discusses the input and output adapters for JMS based on the Spring JmsTemplate technology. 

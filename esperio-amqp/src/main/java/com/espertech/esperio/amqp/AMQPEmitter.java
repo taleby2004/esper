@@ -11,10 +11,6 @@
 
 package com.espertech.esperio.amqp;
 
-import com.espertech.esper.util.SerializerUtil;
-
-public class AMQPToObjectTransformSerializable implements AMQPToObjectTransform {
-    public Object transform(byte[] bytes) {
-        return SerializerUtil.byteArrToObject(bytes);
-    }
+public interface AMQPEmitter {
+    public void send(byte[] bytes);
 }

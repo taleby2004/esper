@@ -36,6 +36,12 @@ public class AMQPSource implements DataFlowSourceOperator {
     @DataFlowContext
     protected EPDataFlowEmitter graphContext;
 
+    private ThreadLocal<AMQPToObjectCollectorContext> collectorDataTL = new ThreadLocal<AMQPToObjectCollectorContext>() {
+        protected synchronized AMQPToObjectCollectorContext initialValue() {
+            return null;
+        }
+    };
+
     public AMQPSource() {
     }
 
@@ -108,17 +114,22 @@ public class AMQPSource implements DataFlowSourceOperator {
                 return;
             }
             final byte[] bytes = msg.getBody();
-            Object transformed = settings.getAmqpToObjectTransform().transform(bytes);
+
             if (settings.isLogMessages() && log.isDebugEnabled()) {
-                log.debug("Received " + bytes.length + " bytes, to be processed by " + settings.getAmqpToObjectTransform() + ", output is " + transformed);
+                log.debug("Received " + bytes.length + " bytes, to be processed by " + settings.getCollector());
             }
 
-            if (transformed instanceof Object[]) {
-                graphContext.submit((Object[]) transformed);
+            AMQPToObjectCollectorContext holder = collectorDataTL.get();
+            if (holder == null) {
+                holder = new AMQPToObjectCollectorContext(graphContext, bytes, msg);
+                collectorDataTL.set(holder);
             }
             else {
-                graphContext.submit(transformed);
+                holder.setBytes(bytes);
+                holder.setDelivery(msg);
             }
+
+            settings.getCollector().collect(holder);
         }
     }
 

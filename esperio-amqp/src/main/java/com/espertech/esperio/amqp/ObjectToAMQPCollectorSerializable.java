@@ -11,24 +11,11 @@
 
 package com.espertech.esperio.amqp;
 
-public class AMQPSettingsSink extends AMQPSettingsBase
-{
-    private ObjectToAMQPCollector collector;
+import com.espertech.esper.util.SerializerUtil;
 
-    public AMQPSettingsSink() {
-    }
+public class ObjectToAMQPCollectorSerializable implements ObjectToAMQPCollector {
 
-    public ObjectToAMQPCollector getCollector() {
-        return collector;
-    }
-
-    public void setCollector(ObjectToAMQPCollector collector) {
-        this.collector = collector;
-    }
-
-    public String toString() {
-        return super.toString() + "  AMQPSettingsSink{" +
-            "objectToAmqpTransform=" + collector +
-            '}';
+    public void collect(ObjectToAMQPCollectorContext context) {
+        context.getEmitter().send(SerializerUtil.objectToByteArr(context.getObject()));
     }
 }
