@@ -68,9 +68,9 @@ public class DefaultSupportSourceOp implements DataFlowSourceOperator {
         return null;
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
     }
 }

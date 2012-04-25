@@ -58,7 +58,7 @@ public class FileSourceLineUnformatted implements DataFlowSourceOperator {
         return null;
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         if (inputSource.getAsReader() != null) {
             reader = inputSource.getAsReader();
             brd = new BufferedReader(reader);
@@ -70,7 +70,7 @@ public class FileSourceLineUnformatted implements DataFlowSourceOperator {
         }
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         try {
             if (bis != null) {
                 bis.close();

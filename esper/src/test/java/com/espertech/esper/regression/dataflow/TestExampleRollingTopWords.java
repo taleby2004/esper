@@ -128,10 +128,10 @@ public class TestExampleRollingTopWords extends TestCase {
             return null;
         }
 
-        public void open(DataFlowComponentOpenContext openContext) {
+        public void open(DataFlowOpOpenContext openContext) {
         }
 
-        public void close(DataFlowComponentCloseContext openContext) {
+        public void close(DataFlowOpCloseContext openContext) {
         }
     }
 }

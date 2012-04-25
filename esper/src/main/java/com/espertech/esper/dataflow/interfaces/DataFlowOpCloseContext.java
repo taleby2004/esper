@@ -11,6 +11,5 @@
 
 package com.espertech.esper.dataflow.interfaces;
 
-public class DataFlowComponentOpenContext {
-
+public class DataFlowOpCloseContext {
 }

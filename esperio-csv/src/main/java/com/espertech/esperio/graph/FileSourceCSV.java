@@ -91,7 +91,7 @@ public class FileSourceCSV implements DataFlowSourceOperator {
         return null;
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         reader = new CSVReader(adapterInputSource);
     }
 
@@ -149,7 +149,7 @@ public class FileSourceCSV implements DataFlowSourceOperator {
         }
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         if (reader != null) {
             reader.close();
             reader = null;

@@ -509,7 +509,7 @@ public class GraphServiceImpl implements GraphService {
                                                 EPRuntimeEventSender runtimeEventSender)
         throws ExprValidationException
     {
-        if (!(operator instanceof DataFlowComponentLifecycle)) {
+        if (!(operator instanceof DataFlowOpLifecycle)) {
             return null;
         }
 
@@ -547,7 +547,7 @@ public class GraphServiceImpl implements GraphService {
         // determine output ports to build up the output port metadata
         Map<Integer, DataFlowOpOutputPort> outputPorts = getDeclaredOutputPorts(operatorSpec, types, servicesContext);
 
-        DataFlowComponentLifecycle preparable = (DataFlowComponentLifecycle) operator;
+        DataFlowOpLifecycle preparable = (DataFlowOpLifecycle) operator;
         DataFlowOpInitializateContext context = new DataFlowOpInitializateContext(dataFlowName, options.getDataFlowInstanceId(), options.getDataFlowInstanceUserObject(), inputPorts, outputPorts, statementContext, servicesContext, agentInstanceContext, runtimeEventSender, epService, meta.getOperatorAnnotations());
 
         DataFlowOpInitializeResult prepareResult;

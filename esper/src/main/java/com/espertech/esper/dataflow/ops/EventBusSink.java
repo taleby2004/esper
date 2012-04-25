@@ -28,7 +28,7 @@ import org.w3c.dom.Node;
 import java.util.Map;
 
 @DataFlowOperator
-public class EventBusSink implements DataFlowComponentLifecycle {
+public class EventBusSink implements DataFlowOpLifecycle {
 
     private EventAdapterService eventAdapterService;
     private EPRuntimeEventSender runtimeEventSender;
@@ -111,11 +111,11 @@ public class EventBusSink implements DataFlowComponentLifecycle {
         }
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         // no action
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         // no action
     }
 }

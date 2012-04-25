@@ -11,6 +11,6 @@
 
 package com.espertech.esper.dataflow.interfaces;
 
-public interface DataFlowSourceOperator extends DataFlowComponentLifecycle {
+public interface DataFlowSourceOperator extends DataFlowOpLifecycle {
     public void next() throws InterruptedException;
 }

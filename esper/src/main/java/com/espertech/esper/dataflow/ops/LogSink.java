@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @DataFlowOperator
-public class LogSink implements DataFlowComponentLifecycle {
+public class LogSink implements DataFlowOpLifecycle {
 
     private static final Log logme = LogFactory.getLog(LogSink.class);
 
@@ -92,10 +92,10 @@ public class LogSink implements DataFlowComponentLifecycle {
         return null;
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
     }
 
     public void onInput(int port, Object theEvent) {

@@ -39,7 +39,7 @@ public class MyLineFeedSource implements DataFlowSourceOperator {
         return null;
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
     }
 
     public void next() {
@@ -51,6 +51,6 @@ public class MyLineFeedSource implements DataFlowSourceOperator {
         }
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
     }
 }

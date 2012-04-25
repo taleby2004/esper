@@ -56,7 +56,7 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 
 @DataFlowOperator
-public class Select implements OutputProcessViewCallback, DataFlowComponentLifecycle {
+public class Select implements OutputProcessViewCallback, DataFlowOpLifecycle {
 
     private static final Log log = LogFactory.getLog(Select.class);
 
@@ -277,11 +277,11 @@ public class Select implements OutputProcessViewCallback, DataFlowComponentLifec
         }
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         // no action
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         if (selectResult != null) {
             StatementAgentInstanceUtil.stopSafe(selectResult.getStopCallback(), agentInstanceContext.getStatementContext());
         }

@@ -24,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.IOException;
 
 @DataFlowOperator
-public class AMQPSink implements DataFlowComponentLifecycle {
+public class AMQPSink implements DataFlowOpLifecycle {
     private static final Log log = LogFactory.getLog(AMQPSource.class);
 
     @DataFlowOpPropertyHolder
@@ -38,7 +38,7 @@ public class AMQPSink implements DataFlowComponentLifecycle {
         return null;
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         log.info("Opening AMQP, settings are: " + settings.toString());
 
         try {
@@ -94,7 +94,7 @@ public class AMQPSink implements DataFlowComponentLifecycle {
         }
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         try {
             if (channel != null) {
               channel.close();

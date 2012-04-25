@@ -17,7 +17,6 @@ import com.espertech.esper.dataflow.annotations.DataFlowOperator;
 import com.espertech.esper.dataflow.annotations.OutputType;
 import com.espertech.esper.dataflow.annotations.OutputTypes;
 import com.espertech.esper.dataflow.interfaces.EPDataFlowEmitter;
-import com.espertech.esper.dataflow.interfaces.EPDataFlowSignalHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,7 +24,7 @@ import org.apache.commons.logging.LogFactory;
 @OutputTypes(value = {
     @OutputType(name = "stats", type = MyWordCountStats.class)
     })
-public class MyWordCountAggregator implements EPDataFlowSignalHandler {
+public class MyWordCountAggregator {
     private static final Log log = LogFactory.getLog(MyWordCountAggregator.class);
 
     @DataFlowContext

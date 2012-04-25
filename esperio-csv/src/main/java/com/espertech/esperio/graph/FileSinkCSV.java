@@ -27,7 +27,7 @@ import com.espertech.esper.util.FileUtil;
 import java.io.*;
 import java.util.Stack;
 
-public class FileSinkCSV implements DataFlowComponentLifecycle, EPDataFlowSignalHandler {
+public class FileSinkCSV implements DataFlowOpLifecycle, EPDataFlowSignalHandler {
     private final static String NEWLINE = System.getProperty("line.separator");
 
     private final String filename;
@@ -62,7 +62,7 @@ public class FileSinkCSV implements DataFlowComponentLifecycle, EPDataFlowSignal
         return null;
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         File file;
         if (classpathFile) {
             String filenameCPDir = filename;
@@ -141,7 +141,7 @@ public class FileSinkCSV implements DataFlowComponentLifecycle, EPDataFlowSignal
         }
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         destroy();
     }
 

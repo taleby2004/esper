@@ -86,11 +86,11 @@ public class TestAPIOpLifecycle extends TestCase {
 
         events = SupportGraphSource.getAndResetLifecycle();
         assertEquals(5, events.size());
-        assertTrue(events.get(0) instanceof DataFlowComponentOpenContext); // called open (GraphSource only)
+        assertTrue(events.get(0) instanceof DataFlowOpOpenContext); // called open (GraphSource only)
         assertEquals("next(numrows=0)", events.get(1));
         assertEquals("next(numrows=1)", events.get(2));
         assertEquals("next(numrows=2)", events.get(3));
-        assertTrue(events.get(4) instanceof DataFlowComponentCloseContext); // called close (GraphSource only)
+        assertTrue(events.get(4) instanceof DataFlowOpCloseContext); // called close (GraphSource only)
     }
 
     public void testFlowGraphOperator() throws Exception {
@@ -130,10 +130,10 @@ public class TestAPIOpLifecycle extends TestCase {
 
         events = SupportOperator.getAndResetLifecycle();
         assertEquals(4, events.size());
-        assertTrue(events.get(0) instanceof DataFlowComponentOpenContext); // called open (GraphSource only)
+        assertTrue(events.get(0) instanceof DataFlowOpOpenContext); // called open (GraphSource only)
         assertEquals("abc", ((Object[]) events.get(1))[0]);
         assertEquals("def", ((Object[]) events.get(2))[0]);
-        assertTrue(events.get(3) instanceof DataFlowComponentCloseContext); // called close (GraphSource only)
+        assertTrue(events.get(3) instanceof DataFlowOpCloseContext); // called close (GraphSource only)
     }
 
     public static class SupportGraphSource implements DataFlowSourceOperator {
@@ -156,11 +156,11 @@ public class TestAPIOpLifecycle extends TestCase {
             return null;
         }
 
-        public void open(DataFlowComponentOpenContext openContext) {
+        public void open(DataFlowOpOpenContext openContext) {
             lifecycle.add(openContext);
         }
 
-        public void close(DataFlowComponentCloseContext closeContext) {
+        public void close(DataFlowOpCloseContext closeContext) {
             lifecycle.add(closeContext);
         }
 
@@ -197,7 +197,7 @@ public class TestAPIOpLifecycle extends TestCase {
     }
 
     @DataFlowOperator
-    public static class SupportOperator implements DataFlowComponentLifecycle {
+    public static class SupportOperator implements DataFlowOpLifecycle {
 
         private String propOne;
 
@@ -239,17 +239,17 @@ public class TestAPIOpLifecycle extends TestCase {
             lifecycle.add(abc);
         }
 
-        public void open(DataFlowComponentOpenContext openContext) {
+        public void open(DataFlowOpOpenContext openContext) {
             lifecycle.add(openContext);
         }
 
-        public void close(DataFlowComponentCloseContext closeContext) {
+        public void close(DataFlowOpCloseContext closeContext) {
             lifecycle.add(closeContext);
         }
     }
 
     @DataFlowOperator
-    public static class MyCaptureOutputPortOp implements DataFlowComponentLifecycle {
+    public static class MyCaptureOutputPortOp implements DataFlowOpLifecycle {
         private static DataFlowOpOutputPort port;
 
         public static DataFlowOpOutputPort getPort() {
@@ -265,11 +265,11 @@ public class TestAPIOpLifecycle extends TestCase {
             return null;
         }
 
-        public void open(DataFlowComponentOpenContext openContext) {
+        public void open(DataFlowOpOpenContext openContext) {
 
         }
 
-        public void close(DataFlowComponentCloseContext openContext) {
+        public void close(DataFlowOpCloseContext openContext) {
 
         }
     }

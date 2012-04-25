@@ -12,9 +12,9 @@
 package com.espertech.esper.dataflow.core;
 
 import com.espertech.esper.client.dataflow.*;
-import com.espertech.esper.dataflow.interfaces.DataFlowComponentCloseContext;
-import com.espertech.esper.dataflow.interfaces.DataFlowComponentLifecycle;
-import com.espertech.esper.dataflow.interfaces.DataFlowComponentOpenContext;
+import com.espertech.esper.dataflow.interfaces.DataFlowOpCloseContext;
+import com.espertech.esper.dataflow.interfaces.DataFlowOpLifecycle;
+import com.espertech.esper.dataflow.interfaces.DataFlowOpOpenContext;
 import com.espertech.esper.dataflow.ops.Emitter;
 import com.espertech.esper.dataflow.runnables.CompletionListener;
 import com.espertech.esper.dataflow.runnables.GraphSourceRunnable;
@@ -240,10 +240,10 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
     private void callOperatorClose() {
         for (Integer opNum : operatorBuildOrder) {
             Object operator = operators.get(opNum);
-            if (operator instanceof DataFlowComponentLifecycle) {
+            if (operator instanceof DataFlowOpLifecycle) {
                 try {
-                    DataFlowComponentLifecycle lf = (DataFlowComponentLifecycle) operator;
-                    lf.close(new DataFlowComponentCloseContext());
+                    DataFlowOpLifecycle lf = (DataFlowOpLifecycle) operator;
+                    lf.close(new DataFlowOpCloseContext());
                 }
                 catch (RuntimeException ex) {
                     log.error("Exception encountered closing data flow '" + dataFlowName + "': " + ex.getMessage(), ex);
@@ -255,10 +255,10 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
     private void callOperatorOpen() {
         for (Integer opNum : operatorBuildOrder) {
             Object operator = operators.get(opNum);
-            if (operator instanceof DataFlowComponentLifecycle) {
+            if (operator instanceof DataFlowOpLifecycle) {
                 try {
-                    DataFlowComponentLifecycle lf = (DataFlowComponentLifecycle) operator;
-                    lf.open(new DataFlowComponentOpenContext());
+                    DataFlowOpLifecycle lf = (DataFlowOpLifecycle) operator;
+                    lf.open(new DataFlowOpOpenContext());
                 }
                 catch (RuntimeException ex) {
                     throw new EPDataFlowExecutionException("Exception encountered opening data flow 'FlowOne' in operator " + operator.getClass().getSimpleName() + ": " + ex.getMessage(), ex, dataFlowName);

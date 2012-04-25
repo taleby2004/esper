@@ -43,7 +43,7 @@ public class AMQPSource implements DataFlowSourceOperator {
         return null;
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         log.info("Opening AMQP, settings are: " + settings.toString());
 
         try {
@@ -122,7 +122,7 @@ public class AMQPSource implements DataFlowSourceOperator {
         }
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         try {
             if (channel != null) {
               if (consumerTag != null) {

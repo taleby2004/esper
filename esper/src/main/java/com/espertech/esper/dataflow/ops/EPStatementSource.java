@@ -32,7 +32,7 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 @DataFlowOperator
-public class EPStatementSource implements DataFlowSourceOperator, DataFlowComponentLifecycle, StatementLifecycleObserver {
+public class EPStatementSource implements DataFlowSourceOperator, DataFlowOpLifecycle, StatementLifecycleObserver {
     private static final Log log = LogFactory.getLog(EPStatementSource.class);
 
     @DataFlowOpParameter
@@ -95,7 +95,7 @@ public class EPStatementSource implements DataFlowSourceOperator, DataFlowCompon
         }
     }
 
-    public synchronized void open(DataFlowComponentOpenContext openContext) {
+    public synchronized void open(DataFlowOpOpenContext openContext) {
         // start observing statement management
         statementLifecycleSvc.addObserver(this);
 
@@ -140,7 +140,7 @@ public class EPStatementSource implements DataFlowSourceOperator, DataFlowCompon
         }
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         for (Map.Entry<EPStatement, StatementAwareUpdateListener> entry : listeners.entrySet()) {
             try {
                 entry.getKey().removeListener(entry.getValue());

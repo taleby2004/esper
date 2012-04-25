@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 
 @DataFlowOperator
-public class EventBusSource implements DataFlowSourceOperator, DataFlowComponentLifecycle, FilterHandleCallback {
+public class EventBusSource implements DataFlowSourceOperator, DataFlowOpLifecycle, FilterHandleCallback {
 
     @DataFlowOpParameter
     private ExprNode filter;
@@ -114,7 +114,7 @@ public class EventBusSource implements DataFlowSourceOperator, DataFlowComponent
         return agentInstanceContext.getStatementId();
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         FilterValueSet valueSet;
         try {
             List<ExprNode> filters = Collections.emptyList();
@@ -134,7 +134,7 @@ public class EventBusSource implements DataFlowSourceOperator, DataFlowComponent
         agentInstanceContext.getStatementContext().getFilterService().add(valueSet, callbackHandle);
     }
 
-    public synchronized void close(DataFlowComponentCloseContext openContext) {
+    public synchronized void close(DataFlowOpCloseContext openContext) {
         if (callbackHandle != null) {
             agentInstanceContext.getStatementContext().getFilterService().remove(callbackHandle);
             callbackHandle = null;

@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.Arrays;
 
 @DataFlowOperator
-public class Filter implements DataFlowComponentLifecycle {
+public class Filter implements DataFlowOpLifecycle {
 
     private static final Log log = LogFactory.getLog(Filter.class);
 
@@ -103,11 +103,11 @@ public class Filter implements DataFlowComponentLifecycle {
         }
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         // no action
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         // no action
     }
 }

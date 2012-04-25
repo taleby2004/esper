@@ -229,11 +229,11 @@ public class BeaconSource implements DataFlowSourceOperator {
         }
     }
 
-    public void open(DataFlowComponentOpenContext openContext) {
+    public void open(DataFlowOpOpenContext openContext) {
         // no action
     }
 
-    public void close(DataFlowComponentCloseContext openContext) {
+    public void close(DataFlowOpCloseContext openContext) {
         // no action
     }
 

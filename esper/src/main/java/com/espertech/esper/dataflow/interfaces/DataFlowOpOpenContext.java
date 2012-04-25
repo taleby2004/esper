@@ -11,8 +11,6 @@
 
 package com.espertech.esper.dataflow.interfaces;
 
-public interface DataFlowComponentLifecycle {
-    public DataFlowOpInitializeResult initialize(DataFlowOpInitializateContext context) throws Exception;
-    public void open(DataFlowComponentOpenContext openContext);
-    public void close(DataFlowComponentCloseContext openContext);
+public class DataFlowOpOpenContext {
+
 }
