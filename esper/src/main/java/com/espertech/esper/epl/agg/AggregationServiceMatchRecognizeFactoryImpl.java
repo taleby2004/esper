@@ -62,8 +62,7 @@ public class AggregationServiceMatchRecognizeFactoryImpl implements AggregationS
         AggregationMethod[] aggregatorsAll = new AggregationMethod[count];
         count = 0;
         for (int stream = 0; stream < factoryEachStream.length; stream++) {
-            AggregationMethodFactory[] thatStream = factoryEachStream[stream];
-            if (thatStream != null) {
+            if (factoryEachStream[stream] != null) {
                 for (int aggId = 0; aggId < factoryEachStream[stream].length; aggId++) {
                     aggregatorsAll[count] = aggregatorsEachStream[stream][aggId];
                     count++;

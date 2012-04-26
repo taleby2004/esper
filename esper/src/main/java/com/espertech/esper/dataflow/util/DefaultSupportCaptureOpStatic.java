@@ -34,7 +34,7 @@ public class DefaultSupportCaptureOpStatic<T> implements EPDataFlowSignalHandler
     }
 
     public void onSignal(EPDataFlowSignal signal) {
-        current.add(current);
+        current.add(signal);
     }
 
     public static List<DefaultSupportCaptureOpStatic> getInstances() {
