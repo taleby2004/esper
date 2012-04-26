@@ -12,7 +12,7 @@
 package com.espertech.esper.util;
 
 import com.espertech.esper.client.dataflow.EPDataFlowOperatorParameterProvider;
-import com.espertech.esper.client.dataflow.EPGraphOperatorParameterProviderContext;
+import com.espertech.esper.client.dataflow.EPDataFlowOperatorParameterProviderContext;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.event.WriteablePropertyDescriptor;
@@ -156,7 +156,7 @@ public class PopulateUtil {
                 try {
                     annotatedField.setAccessible(true);
                     Object provided = annotatedField.get(top);
-                    Object value = optionalParameterProvider.provide(new EPGraphOperatorParameterProviderContext(operatorName, annotatedField.getName(), top, operatorNum, provided, dataFlowName));
+                    Object value = optionalParameterProvider.provide(new EPDataFlowOperatorParameterProviderContext(operatorName, annotatedField.getName(), top, operatorNum, provided, dataFlowName));
                     if (value != null) {
                         annotatedField.set(top, value);
                     }

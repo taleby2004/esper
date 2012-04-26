@@ -317,10 +317,19 @@ public class EPStatementObjectModel implements Serializable
         return writer.toString();
     }
 
+    /**
+     * Rendering using the provided writer.
+     * @param writer to use
+     */
     public void toEPL(StringWriter writer) {
         toEPL(new EPStatementFormatter(false), writer);
     }
 
+    /**
+     * Rendering using the provided formatter.
+     * @param formatter to use
+     * @return rendered string
+     */
     public String toEPL(EPStatementFormatter formatter) {
         StringWriter writer = new StringWriter();
         toEPL(formatter, writer);
@@ -330,7 +339,7 @@ public class EPStatementObjectModel implements Serializable
     /**
      * Renders the object model in it's EPL syntax textual representation, using a whitespace-formatter as provided.
      * @param formatter the formatter to use
-     * @return EPL representing the statement object model
+     * @param writer writer to use
      * @throws IllegalStateException if required clauses do not exist
      */
     public void toEPL(EPStatementFormatter formatter, StringWriter writer)
@@ -765,10 +774,18 @@ public class EPStatementObjectModel implements Serializable
         this.scriptExpressions = scriptExpressions;
     }
 
+    /**
+     * Returns the "create dataflow" part, if present.
+     * @return create dataflow clause
+     */
     public CreateDataFlowClause getCreateDataFlow() {
         return createDataFlow;
     }
 
+    /**
+     * Sets the "create dataflow" part,.
+     * @param createDataFlow create dataflow clause
+     */
     public void setCreateDataFlow(CreateDataFlowClause createDataFlow) {
         this.createDataFlow = createDataFlow;
     }

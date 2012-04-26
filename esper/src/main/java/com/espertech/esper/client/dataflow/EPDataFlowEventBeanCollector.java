@@ -11,6 +11,13 @@
 
 package com.espertech.esper.client.dataflow;
 
+/**
+ * Collector for use with the {@link com.espertech.esper.dataflow.ops.EventBusSource} operator.
+ */
 public interface EPDataFlowEventBeanCollector {
+    /**
+     * Collect: use the context to transform an event bean to a data flow event.
+     * @param context contains event bean, emitter and related information
+     */
     public void collect(EPDataFlowEventBeanCollectorContext context);
 }

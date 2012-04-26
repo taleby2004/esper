@@ -18,4 +18,5 @@ import java.util.*;
  */
 public class ConfigurationEventTypeMap extends ConfigurationEventTypeWithSupertype
 {
+    private static final long serialVersionUID = 7908506327712155191L;
 }

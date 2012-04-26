@@ -15,6 +15,12 @@ import java.util.Set;
  */
 public class ConfigurationEventTypeObjectArray extends ConfigurationEventTypeWithSupertype
 {
+    private static final long serialVersionUID = -5404892001689512405L;
+
+    /**
+     * Ctor.
+     * @param superTypes super types
+     */
     public ConfigurationEventTypeObjectArray(Set<String> superTypes) {
         super(superTypes);
         if (superTypes.size() > 1) {
@@ -22,6 +28,9 @@ public class ConfigurationEventTypeObjectArray extends ConfigurationEventTypeWit
         }
     }
 
+    /**
+     * Ctor.
+     */
     public ConfigurationEventTypeObjectArray() {
     }
 }

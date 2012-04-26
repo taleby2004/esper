@@ -361,7 +361,7 @@ public class AnnotationUtil
         String valMixed = value.trim();
         String val = valMixed.toUpperCase();
 
-        if (val.indexOf(",") == -1)
+        if (!val.contains(","))
         {
             if (val.indexOf('=') == -1)
             {

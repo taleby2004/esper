@@ -53,7 +53,7 @@ public class MatchedEventConvertorImpl implements MatchedEventConvertor
         {
             this.arrayEventTypes = new LinkedHashMap<String, Pair<EventType, String>>();
         }
-        this.matchedEventMapMeta = new MatchedEventMapMeta(allTags.toArray(new String[allTags.size()]), !arrayEventTypes.isEmpty());
+        this.matchedEventMapMeta = new MatchedEventMapMeta(allTags.toArray(new String[allTags.size()]), !this.arrayEventTypes.isEmpty());
     }
 
     public EventBean[] convert(MatchedEventMap events)

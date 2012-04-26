@@ -11,7 +11,15 @@
 
 package com.espertech.esper.client.dataflow;
 
+/**
+ * For use in data flow instantiation, may provide operator instances.
+ */
 public interface EPDataFlowOperatorProvider {
 
-    public Object provide(EPGraphOperatorProviderContext context);
+    /**
+     * Called to see if the provider would like to provide the operator instance as described in the context.
+     * @param context operator instance requested
+     * @return operator instance, or null if the default empty construct instantiation for the operator class should be used
+     */
+    public Object provide(EPDataFlowOperatorProviderContext context);
 }

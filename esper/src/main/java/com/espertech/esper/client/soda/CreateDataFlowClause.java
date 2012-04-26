@@ -23,32 +23,68 @@ public class CreateDataFlowClause implements Serializable
     private List<CreateSchemaClause> schemas;
     private List<DataFlowOperator> operators;
 
+    /**
+     * Ctor.
+     */
+    public CreateDataFlowClause() {
+    }
+
+    /**
+     * Ctor.
+     * @param dataFlowName data flow name
+     * @param schemas schemas
+     * @param operators operators
+     */
     public CreateDataFlowClause(String dataFlowName, List<CreateSchemaClause> schemas, List<DataFlowOperator> operators) {
         this.dataFlowName = dataFlowName;
         this.schemas = schemas;
         this.operators = operators;
     }
 
+    /**
+     * Returns the data flow name.
+     * @return name
+     */
     public String getDataFlowName() {
         return dataFlowName;
     }
 
+    /**
+     * Sets the data flow name.
+     * @param dataFlowName name
+     */
     public void setDataFlowName(String dataFlowName) {
         this.dataFlowName = dataFlowName;
     }
 
+    /**
+     * Returns schemas.
+     * @return schemas
+     */
     public List<CreateSchemaClause> getSchemas() {
         return schemas;
     }
 
+    /**
+     * Sets schemas.
+     * @param schemas schemas to set
+     */
     public void setSchemas(List<CreateSchemaClause> schemas) {
         this.schemas = schemas;
     }
 
+    /**
+     * Returns operators.
+     * @return operator definitions
+     */
     public List<DataFlowOperator> getOperators() {
         return operators;
     }
 
+    /**
+     * Sets operators.
+     * @param operators to define
+     */
     public void setOperators(List<DataFlowOperator> operators) {
         this.operators = operators;
     }
@@ -56,7 +92,7 @@ public class CreateDataFlowClause implements Serializable
     /**
      * Render as EPL.
      * @param writer to output to
-     * @param formatter
+     * @param formatter to use
      */
     public void toEPL(StringWriter writer, EPStatementFormatter formatter)
     {

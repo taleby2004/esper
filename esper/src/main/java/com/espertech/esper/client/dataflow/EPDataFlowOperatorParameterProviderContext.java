@@ -11,7 +11,10 @@
 
 package com.espertech.esper.client.dataflow;
 
-public class EPGraphOperatorParameterProviderContext {
+/**
+ * Context for use with {@link EPDataFlowOperatorParameterProvider} describes the operator and parameters to provide.
+ */
+public class EPDataFlowOperatorParameterProviderContext {
 
     private final String operatorName;
     private final String parameterName;
@@ -20,7 +23,16 @@ public class EPGraphOperatorParameterProviderContext {
     private final Object providedValue;
     private final String dataFlowName;
 
-    public EPGraphOperatorParameterProviderContext(String operatorName, String parameterName, Object operatorInstance, int operatorNum, Object providedValue, String dataFlowName) {
+    /**
+     * Ctor.
+     * @param operatorName operator name
+     * @param parameterName parameter name
+     * @param operatorInstance operator instance
+     * @param operatorNum operator number
+     * @param providedValue value if any was provided as part of the declaration
+     * @param dataFlowName data flow name
+     */
+    public EPDataFlowOperatorParameterProviderContext(String operatorName, String parameterName, Object operatorInstance, int operatorNum, Object providedValue, String dataFlowName) {
         this.operatorName = operatorName;
         this.parameterName = parameterName;
         this.operatorInstance = operatorInstance;
@@ -29,26 +41,50 @@ public class EPGraphOperatorParameterProviderContext {
         this.dataFlowName = dataFlowName;
     }
 
+    /**
+     * Returns the operator name.
+     * @return operator name
+     */
     public String getOperatorName() {
         return operatorName;
     }
 
+    /**
+     * Returns the parameter name.
+     * @return parameter name
+     */
     public String getParameterName() {
         return parameterName;
     }
 
+    /**
+     * Returns the operator instance.
+     * @return operator instance
+     */
     public Object getOperatorInstance() {
         return operatorInstance;
     }
 
+    /**
+     * Returns the operator number
+     * @return operator num
+     */
     public int getOperatorNum() {
         return operatorNum;
     }
 
+    /**
+     * Returns the parameters declared value, if any
+     * @return value
+     */
     public Object getProvidedValue() {
         return providedValue;
     }
 
+    /**
+     * Returns the data flow name.
+     * @return data flow name
+     */
     public String getDataFlowName() {
         return dataFlowName;
     }

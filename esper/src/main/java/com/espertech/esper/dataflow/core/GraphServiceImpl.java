@@ -20,6 +20,10 @@ import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPRuntimeEventSender;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.dataflow.annotations.*;
+import com.espertech.esper.dataflow.interfaces.*;
+import com.espertech.esper.dataflow.runnables.GraphSourceRunnable;
+import com.espertech.esper.dataflow.util.*;
 import com.espertech.esper.epl.annotation.AnnotationUtil;
 import com.espertech.esper.epl.core.EngineImportException;
 import com.espertech.esper.epl.core.EngineImportService;
@@ -28,10 +32,6 @@ import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeUtility;
 import com.espertech.esper.event.arr.ObjectArrayEventType;
-import com.espertech.esper.dataflow.annotations.*;
-import com.espertech.esper.dataflow.interfaces.*;
-import com.espertech.esper.dataflow.runnables.GraphSourceRunnable;
-import com.espertech.esper.dataflow.util.*;
 import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.util.DependencyGraph;
 import com.espertech.esper.util.JavaClassHelper;
@@ -188,7 +188,7 @@ public class GraphServiceImpl implements GraphService {
             dataFlowSignalManager.addSignalListener(operatorEntry.getKey(), runnable);
         }
 
-        return new EPDataFlowInstanceImpl(dataFlowName, EPDataFlowState.INSTANTIATED, sourceRunnables, operators, operatorBuildOrder, startDesc.getStatisticsProvider());
+        return new EPDataFlowInstanceImpl(dataFlowName, options.getDataFlowInstanceUserObject(), options.getDataFlowInstanceId(), EPDataFlowState.INSTANTIATED, sourceRunnables, operators, operatorBuildOrder, startDesc.getStatisticsProvider());
     }
 
     private Map<String, EventType> resolveTypes(CreateDataFlowDesc desc, StatementContext statementContext, EPServicesContext servicesContext)
@@ -698,7 +698,7 @@ public class GraphServiceImpl implements GraphService {
 
             // see if the operator is already provided by options
             if (options.getOperatorProvider() != null) {
-                Object operator = options.getOperatorProvider().provide(new EPGraphOperatorProviderContext(graphDesc.getGraphName(), operatorSpec.getOperatorName(), operatorSpec));
+                Object operator = options.getOperatorProvider().provide(new EPDataFlowOperatorProviderContext(graphDesc.getGraphName(), operatorSpec.getOperatorName(), operatorSpec));
                 if (operator != null) {
                     OperatorMetadataDescriptor descriptor = new OperatorMetadataDescriptor(operatorSpec, i, operator.getClass(), null, operator, operatorPrettyPrint, operatorAnnotation);
                     operatorClasses.put(i, descriptor);

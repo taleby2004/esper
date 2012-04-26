@@ -11,8 +11,6 @@
 
 package com.espertech.esper.client.util;
 
-import java.io.StringWriter;
-
 /**
  * Interface for use with the JSON or XML event renderes to handle custom event property rendering.
  * <p>
@@ -25,5 +23,9 @@ import java.io.StringWriter;
  */
 public interface EventPropertyRenderer
 {
+    /**
+     * Render an event property.
+     * @param context provides information about the property
+     */
     public void render(EventPropertyRendererContext context);
 }

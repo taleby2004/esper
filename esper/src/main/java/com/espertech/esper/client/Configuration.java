@@ -238,6 +238,15 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         addPlugInSingleRowFunction(functionName, className, methodName, ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED, filterOptimizable);
     }
 
+    /**
+     * Add single-row function with configurations.
+     * @param functionName EPL name of function
+     * @param className providing fully-qualified class name
+     * @param methodName providing method name
+     * @param valueCache value cache settings
+     * @param filterOptimizable settings whether subject to optimizations
+     * @throws ConfigurationException thrown to indicate that the configuration is invalid
+     */
     public void addPlugInSingleRowFunction(String functionName, String className, String methodName,
                                            ConfigurationPlugInSingleRowFunction.ValueCache valueCache,
                                            ConfigurationPlugInSingleRowFunction.FilterOptimizable filterOptimizable) throws ConfigurationException
@@ -447,6 +456,10 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         addImport(autoImport.getName());
     }
 
+    /**
+     * Remove an import.
+     * @param name to remove
+     */
     public void removeImport(String name)
     {
     	imports.remove(name);
@@ -690,6 +703,13 @@ public class Configuration implements ConfigurationOperations, ConfigurationInfo
         addVariable(variableName, type.getName(), initializationValue, false);
     }
 
+    /**
+     * Add variable that can be a constant.
+     * @param variableName name of variable
+     * @param type variable type
+     * @param initializationValue initial value
+     * @param constant constant indicator
+     */
     public void addVariable(String variableName, Class type, Object initializationValue, boolean constant)
     {
         addVariable(variableName, type.getName(), initializationValue, constant);

@@ -11,5 +11,8 @@
 
 package com.espertech.esper.client.dataflow;
 
+/**
+ * Base marker interface for data flow signals.
+ */
 public interface EPDataFlowSignal {
 }

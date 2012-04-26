@@ -20,6 +20,7 @@ import java.util.Comparator;
  */
 public final class MultiKeyCastingComparator implements Comparator<Object>, MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = 2914561149171499446L;
     private final Comparator<MultiKeyUntyped> comparator;
 
     public MultiKeyCastingComparator(Comparator<MultiKeyUntyped> comparator) {

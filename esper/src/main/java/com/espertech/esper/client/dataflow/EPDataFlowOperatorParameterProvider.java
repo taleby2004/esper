@@ -11,7 +11,15 @@
 
 package com.espertech.esper.client.dataflow;
 
+/**
+ * Handles setting or overriding properties for operators in a data flow.
+ */
 public interface EPDataFlowOperatorParameterProvider {
 
-    public Object provide(EPGraphOperatorParameterProviderContext context);
+    /**
+     * Return new value for operator
+     * @param context operator and parameter information
+     * @return value
+     */
+    public Object provide(EPDataFlowOperatorParameterProviderContext context);
 }

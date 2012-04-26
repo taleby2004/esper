@@ -186,13 +186,13 @@ public class LogSink implements DataFlowOpLifecycle {
         public void render(EventBean eventBean, StringWriter writer);
     }
 
-    public class ConsoleOpRendererSummary implements ConsoleOpRenderer {
+    public static class ConsoleOpRendererSummary implements ConsoleOpRenderer {
         public void render(EventBean theEvent, StringWriter writer) {
             EventBeanUtility.summarize(theEvent, writer);
         }
     }
 
-    public class ConsoleOpRendererXmlJSon implements ConsoleOpRenderer {
+    public static class ConsoleOpRendererXmlJSon implements ConsoleOpRenderer {
         private final LogSinkOutputFormat format;
         private final EPRuntime runtime;
 

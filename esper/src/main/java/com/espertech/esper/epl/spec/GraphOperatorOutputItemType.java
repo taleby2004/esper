@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class GraphOperatorOutputItemType implements Serializable {
+    private static final long serialVersionUID = 9021595021369141198L;
     private final boolean isWildcard;
     private final String typeOrClassname;
     private final List<GraphOperatorOutputItemType> typeParameters;

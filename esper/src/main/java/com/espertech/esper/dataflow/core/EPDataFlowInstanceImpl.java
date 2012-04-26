@@ -29,6 +29,8 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
     private static final Log log = LogFactory.getLog(EPDataFlowInstanceImpl.class);
 
     private final String dataFlowName;
+    private final Object userObject;
+    private final String instanceId;
     private volatile EPDataFlowState state;
     private final List<GraphSourceRunnable> sourceRunnables;
     private final Map<Integer, Object> operators;
@@ -39,8 +41,10 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
     private List<Thread> threads;
     private Thread runCurrentThread;
 
-    public EPDataFlowInstanceImpl(String dataFlowName, EPDataFlowState state, List<GraphSourceRunnable> sourceRunnables, Map<Integer, Object> operators, Set<Integer> operatorBuildOrder, EPDataFlowInstanceStatistics statisticsProvider) {
+    public EPDataFlowInstanceImpl(String dataFlowName, Object userObject, String instanceId, EPDataFlowState state, List<GraphSourceRunnable> sourceRunnables, Map<Integer, Object> operators, Set<Integer> operatorBuildOrder, EPDataFlowInstanceStatistics statisticsProvider) {
         this.dataFlowName = dataFlowName;
+        this.userObject = userObject;
+        this.instanceId = instanceId;
         this.state = state;
         this.sourceRunnables = sourceRunnables;
         this.operators = operators;
@@ -54,6 +58,14 @@ public class EPDataFlowInstanceImpl implements EPDataFlowInstance, CompletionLis
 
     public EPDataFlowState getState() {
         return state;
+    }
+
+    public Object getUserObject() {
+        return userObject;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
     }
 
     public synchronized EPDataFlowInstanceCaptive startCaptive() {

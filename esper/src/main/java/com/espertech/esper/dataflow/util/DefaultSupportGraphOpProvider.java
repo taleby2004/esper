@@ -12,7 +12,7 @@
 package com.espertech.esper.dataflow.util;
 
 import com.espertech.esper.client.dataflow.EPDataFlowOperatorProvider;
-import com.espertech.esper.client.dataflow.EPGraphOperatorProviderContext;
+import com.espertech.esper.client.dataflow.EPDataFlowOperatorProviderContext;
 
 public class DefaultSupportGraphOpProvider implements EPDataFlowOperatorProvider {
     private final Object[] ops;
@@ -25,7 +25,7 @@ public class DefaultSupportGraphOpProvider implements EPDataFlowOperatorProvider
         this.ops = ops;
     }
 
-    public Object provide(EPGraphOperatorProviderContext context) {
+    public Object provide(EPDataFlowOperatorProviderContext context) {
         for (Object op : ops) {
             if (context.getOperatorName().equals(op.getClass().getSimpleName())) {
                 return op;

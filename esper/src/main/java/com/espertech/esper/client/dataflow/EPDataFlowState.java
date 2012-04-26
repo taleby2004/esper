@@ -11,9 +11,27 @@
 
 package com.espertech.esper.client.dataflow;
 
+/**
+ * Data flow instance states.
+ */
 public enum EPDataFlowState {
+    /**
+     * Start state: the state a data flow instance is in when it gets instantiated.
+     */
+    INSTANTIATED,
+
+    /**
+     * Running means the data flow instance is currently executing.
+     */
     RUNNING,
+
+    /**
+     * Complete means the data flow instance completed.
+     */
     COMPLETE,
+
+    /**
+     * Cancelled means the data flow instance was cancelled.
+     */
     CANCELLED,
-    INSTANTIATED
 }

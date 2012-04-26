@@ -15,7 +15,7 @@ import com.espertech.esper.client.EventType;
 
 import java.io.Serializable;
 
-public class GraphTypeDesc implements Serializable {
+public class GraphTypeDesc {
 
     private final boolean wildcard;
     private final boolean underlying;

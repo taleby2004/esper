@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GraphOperatorOutput implements Serializable {
+    private static final long serialVersionUID = 6972206796605218643L;
     private final List<GraphOperatorOutputItem> items;
 
     public GraphOperatorOutput() {

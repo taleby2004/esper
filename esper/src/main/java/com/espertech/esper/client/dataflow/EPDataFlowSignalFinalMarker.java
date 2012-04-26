@@ -11,5 +11,8 @@
 
 package com.espertech.esper.client.dataflow;
 
+/**
+ * Final marker for data flows.
+ */
 public interface EPDataFlowSignalFinalMarker extends EPDataFlowSignal {
 }

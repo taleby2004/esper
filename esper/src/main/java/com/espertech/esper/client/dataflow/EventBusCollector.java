@@ -15,6 +15,9 @@ import com.espertech.esper.client.EPException;
 
 import java.util.Map;
 
+/**
+ * Collector for send events into the event bus.
+ */
 public interface EventBusCollector {
     /**
      * Send an event represented by a plain Java object to the event stream processing runtime.

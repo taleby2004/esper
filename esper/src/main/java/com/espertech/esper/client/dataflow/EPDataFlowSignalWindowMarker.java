@@ -11,5 +11,8 @@
 
 package com.espertech.esper.client.dataflow;
 
+/**
+ * Window marker for data flows.
+ */
 public interface EPDataFlowSignalWindowMarker extends EPDataFlowSignal {
 }

@@ -379,7 +379,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
         if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
         {
-            log.debug(".route Processing event " + objectArray);
+            log.debug(".route Processing event " + Arrays.toString(objectArray));
         }
 
         // Process event

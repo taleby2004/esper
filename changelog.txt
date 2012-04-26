@@ -1,14 +1,34 @@
 Esper Changelog
 ===================
 
-Changes in version 4.5.0
+Changes in version 4.6.0
 ------------------------
 Major API or EPL changes
   - Support for object-array event types; An application can now send Object[] rows as events and can receive Object[] rows as output.
-  - For class and package imports through configuration or API, the default imports are no longer replaced and instead the imports are added.
-  - Changes CSV adapter to remove dependency on Commons Beanutils (commons-beanutils-1.8.3.jar) which is no longer required for the CSV/File adapter
-  - Allow XML and JSON event renderers to take a custom property value renderer
-  - New "ranked" data window that retains the events according to rank and uniqueness criteria
+  - This release introduces a syntax and API for declarative data flow execution.
+  - Support for XML and JSON event renderers to take a custom property value renderer.
+  - Support for a new "ranked" data window that retains the events according to rank and uniqueness criteria.
+  - Many internal changes related to increasing performance and reducing memory use.
+  - For class and package imports through configuration or API, the default imports are no longer removed when the first import is added. Imports can be removed explicitly instead.
+  - The CSV adapter no longer has a dependency on Commons Beanutils (commons-beanutils-1.8.3.jar).
+  - The documentation has a new look and feel.
+
+Bug fixes
+  - Fixed issue ESPER-648 NullPointerException with "utput Every" & "for discrete_delivery" when no output is available
+  - Fixed issue ESPER-641 Add SupportSubscriber and SupportSubscriberMRD to Public Test Framework
+  - Fixed issue ESPER-642 Log destination for @Audit logs moved to "com.espertech.esper.util.AuditPath" but should be "com.espertech.esper.audit"
+  - Fixed issue ESPER-643 Use expression as mapped-property key or indexed-property index
+  - Fixed issue ESPER-644 Infinite loop when restarting a statement
+  - Fixed issue ESPER-652 regexp matches whole pattern
+  - Fixed issue ESPER-653 ExprDotNode.validate does not handle empty array returned by validationContext.getStreamTypeService().getEventTypes()
+  - Fixed issue ESPER-654 Allow backtick notation for any identifier
+  - Fixed issue ESPER-655 Copy method for bean-backed events should prefered configured method over Serializable
+  - Fixed issue ESPER-656 Variant stream of type ANY when inserting columns and the underlying event in combination the result is not carrying the inserted columns
+  - Fixed issue ESPER-658 context with "start after 0 seconds" starts only after next time tick
+  - Fixed issue ESPER-659 Inherit timestamp properties from event super types
+  - Fixed issue ESPER-660 Allow fragment event type to perform datetime methods
+  - Fixed issue ESPER-661 EPStatementException in on-select with virtual data window and where-clause using greater-than (less-than) operator
+
 
 Changes in version 4.5.0
 ------------------------

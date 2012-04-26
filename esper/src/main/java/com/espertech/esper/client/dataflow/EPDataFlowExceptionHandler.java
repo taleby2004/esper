@@ -11,7 +11,14 @@
 
 package com.espertech.esper.client.dataflow;
 
+/**
+ * Handler for exceptions thrown by data flow operators.
+ */
 public interface EPDataFlowExceptionHandler {
 
+    /**
+     * Handle exception.
+     * @param context provides all exception information
+     */
     public void handle(EPDataFlowExceptionContext context);
 }

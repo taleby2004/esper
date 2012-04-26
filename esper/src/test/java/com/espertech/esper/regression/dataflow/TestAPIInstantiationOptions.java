@@ -53,7 +53,7 @@ public class TestAPIInstantiationOptions extends TestCase {
         assertEquals(3, myParameterProvider.contextMap.size());
         assertNotNull(myParameterProvider.contextMap.get("propOne"));
 
-        EPGraphOperatorParameterProviderContext context = myParameterProvider.contextMap.get("propTwo");
+        EPDataFlowOperatorParameterProviderContext context = myParameterProvider.contextMap.get("propTwo");
         assertEquals("propTwo", context.getParameterName());
         assertEquals("MyOp", context.getOperatorName());
         assertSame(myOp, context.getOperatorInstance());
@@ -79,7 +79,7 @@ public class TestAPIInstantiationOptions extends TestCase {
         epService.getEPRuntime().getDataFlowRuntime().instantiate("MyDataFlowOne", options);
 
         assertEquals(1, myOperatorProvider.contextMap.size());
-        EPGraphOperatorProviderContext context = myOperatorProvider.contextMap.get("MyOp");
+        EPDataFlowOperatorProviderContext context = myOperatorProvider.contextMap.get("MyOp");
         assertEquals("MyOp", context.getOperatorName());
         assertNotNull(context.getSpec());
         assertEquals("MyDataFlowOne", context.getDataFlowName());
@@ -138,23 +138,23 @@ public class TestAPIInstantiationOptions extends TestCase {
 
     public static class MyParameterProvider implements EPDataFlowOperatorParameterProvider {
 
-        private Map<String, EPGraphOperatorParameterProviderContext> contextMap = new HashMap<String, EPGraphOperatorParameterProviderContext>();
+        private Map<String, EPDataFlowOperatorParameterProviderContext> contextMap = new HashMap<String, EPDataFlowOperatorParameterProviderContext>();
         private final Map<String, Object> values;
 
         public MyParameterProvider(Map<String, Object> values) {
             this.values = values;
         }
 
-        public Object provide(EPGraphOperatorParameterProviderContext context) {
+        public Object provide(EPDataFlowOperatorParameterProviderContext context) {
             contextMap.put(context.getParameterName(), context);
             return values.get(context.getParameterName());
         }
     }
 
     public static class MyOperatorProvider implements EPDataFlowOperatorProvider {
-        private Map<String, EPGraphOperatorProviderContext> contextMap = new HashMap<String, EPGraphOperatorProviderContext>();
+        private Map<String, EPDataFlowOperatorProviderContext> contextMap = new HashMap<String, EPDataFlowOperatorProviderContext>();
 
-        public Object provide(EPGraphOperatorProviderContext context) {
+        public Object provide(EPDataFlowOperatorProviderContext context) {
             contextMap.put(context.getOperatorName(), context);
             return new MyOp("test");
         }

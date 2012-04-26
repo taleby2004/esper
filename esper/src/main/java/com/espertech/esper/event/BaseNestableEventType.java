@@ -300,8 +300,7 @@ public abstract class BaseNestableEventType implements EventTypeSPI
             {
                 continue;
             }
-            if (((setTwoType == null) && (setOneType != null)) ||
-                 (setTwoType != null) && (setOneType == null))
+            if (setOneType == null)
             {
                 return "Type by name '" + otherName + "' in property '" + propName + "' incompatible with null-type or property name not found in target";
             }

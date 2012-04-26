@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class CreateDataFlowDesc implements Serializable {
+    private static final long serialVersionUID = -3919668393146597813L;
     private final String graphName;
     private final List<GraphOperatorSpec> operators;
     private final List<CreateSchemaDesc> schemas;

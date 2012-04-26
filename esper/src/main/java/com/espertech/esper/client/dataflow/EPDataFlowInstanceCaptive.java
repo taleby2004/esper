@@ -17,19 +17,35 @@ import com.espertech.esper.dataflow.runnables.GraphSourceRunnable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Holder for captive data flow execution.
+ */
 public class EPDataFlowInstanceCaptive {
     private final Map<String, Emitter> emitters;
     private final List<GraphSourceRunnable> runnables;
 
+    /**
+     * Ctor.
+     * @param emitters any emitters that are part of the data flow
+     * @param runnables any runnables that represent source operators
+     */
     public EPDataFlowInstanceCaptive(Map<String, Emitter> emitters, List<GraphSourceRunnable> runnables) {
         this.emitters = emitters;
         this.runnables = runnables;
     }
 
+    /**
+     * Map of named emitters.
+     * @return emitters
+     */
     public Map<String, Emitter> getEmitters() {
         return emitters;
     }
 
+    /**
+     * List of operator source runnables.
+     * @return runnables
+     */
     public List<GraphSourceRunnable> getRunnables() {
         return runnables;
     }

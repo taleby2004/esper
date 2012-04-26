@@ -1367,7 +1367,7 @@ public class AbstractHashedMap extends AbstractMap implements IterableMap {
         if (size() == 0) {
             return "{}";
         }
-        StringBuffer buf = new StringBuffer(32 * size());
+        StringBuilder buf = new StringBuilder(32 * size());
         buf.append('{');
 
         MapIterator it = mapIterator();

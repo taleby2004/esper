@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class GraphOperatorSpec implements Serializable {
+    private static final long serialVersionUID = 7606589198404851791L;
     private final String operatorName;
     private final GraphOperatorInput input;
     private final GraphOperatorOutput output;

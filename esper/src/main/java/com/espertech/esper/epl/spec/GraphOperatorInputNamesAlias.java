@@ -14,6 +14,7 @@ package com.espertech.esper.epl.spec;
 import java.io.Serializable;
 
 public class GraphOperatorInputNamesAlias implements Serializable {
+    private static final long serialVersionUID = -1755557830393035854L;
     private final String[] inputStreamNames;
     private final String optionalAsName;
 

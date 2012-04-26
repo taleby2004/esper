@@ -183,9 +183,17 @@ public interface ConfigurationInformation
      */
     public Map<String, ConfigurationEventTypeMap> getMapTypeConfigurations();
 
+    /**
+     * Returns the object-array event type configurations.
+     * @return type configs
+     */
     public Map<String, ConfigurationEventTypeObjectArray> getObjectArrayTypeConfigurations();
 
-    public Map<String,Map<String, Object>> getEventTypesNestableObjectArrayEvents();
+    /**
+     * Returns the object-array event types.
+     * @return object-array event types
+     */
+    public Map<String, Map<String, Object>> getEventTypesNestableObjectArrayEvents();
 }
 
 

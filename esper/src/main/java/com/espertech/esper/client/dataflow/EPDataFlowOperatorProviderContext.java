@@ -13,26 +13,47 @@ package com.espertech.esper.client.dataflow;
 
 import com.espertech.esper.epl.spec.GraphOperatorSpec;
 
-public class EPGraphOperatorProviderContext {
+/**
+ * Context for use with {@link EPDataFlowOperatorProvider}.
+ */
+public class EPDataFlowOperatorProviderContext {
 
     private final String dataFlowName;
     private final String operatorName;
     private final GraphOperatorSpec spec;
 
-    public EPGraphOperatorProviderContext(String dataFlowName, String operatorName, GraphOperatorSpec spec) {
+    /**
+     * Ctor.
+     * @param dataFlowName data flow name
+     * @param operatorName operator name
+     * @param spec specification
+     */
+    public EPDataFlowOperatorProviderContext(String dataFlowName, String operatorName, GraphOperatorSpec spec) {
         this.dataFlowName = dataFlowName;
         this.operatorName = operatorName;
         this.spec = spec;
     }
 
+    /**
+     * Operator name.
+     * @return name
+     */
     public String getOperatorName() {
         return operatorName;
     }
 
+    /**
+     * Data flow name
+     * @return name
+     */
     public String getDataFlowName() {
         return dataFlowName;
     }
 
+    /**
+     * Operator specification
+     * @return spec
+     */
     public GraphOperatorSpec getSpec() {
         return spec;
     }

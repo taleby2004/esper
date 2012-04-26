@@ -13,6 +13,14 @@ package com.espertech.esper.client.dataflow;
 
 import com.espertech.esper.client.EPStatement;
 
+/**
+ * Filter for use with {@link com.espertech.esper.dataflow.ops.EPStatementSource} operator.
+ */
 public interface EPDataFlowEPStatementFilter {
+    /**
+     * Pass or skip the statement.
+     * @param statement to test
+     * @return indicator whether to include (true) or exclude (false) the statement.
+     */
     public boolean pass(EPStatement statement);
 }

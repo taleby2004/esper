@@ -25,6 +25,10 @@ public class ConfigurationEventTypeWithSupertype implements MetaDefItem, Seriali
     private String startTimestampPropertyName;
     private String endTimestampPropertyName;
 
+    /**
+     * Ctor.
+     * @param superTypes super types
+     */
     protected ConfigurationEventTypeWithSupertype(Set<String> superTypes) {
         this.superTypes = superTypes;
     }

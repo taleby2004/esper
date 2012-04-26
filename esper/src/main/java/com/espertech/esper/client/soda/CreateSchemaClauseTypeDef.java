@@ -10,19 +10,36 @@ package com.espertech.esper.client.soda;
 
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Represents a type definition for use with the create-schema syntax for creating a new event type.
  */
 public enum CreateSchemaClauseTypeDef implements Serializable
 {
+    /**
+     * Variant type.
+     */
     VARIANT,
+
+    /**
+     * Map underlying type.
+     */
     MAP,
+
+    /**
+     * Object-array underlying type.
+     */
     OBJECTARRAY,
+
+    /**
+     * Undefined (system default) underlying type.
+     */
     NONE;
 
+    /**
+     * Write keyword according to type def.
+     * @param writer to write to
+     */
     public void write(StringWriter writer) {
         if (this == VARIANT) {
             writer.write(" variant");

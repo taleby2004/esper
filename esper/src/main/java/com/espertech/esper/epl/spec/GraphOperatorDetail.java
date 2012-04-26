@@ -15,6 +15,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 public class GraphOperatorDetail implements Serializable {
+    private static final long serialVersionUID = 8897181288959361822L;
     private final Map<String, Object> configs;
 
     public GraphOperatorDetail(Map<String, Object> configs) {

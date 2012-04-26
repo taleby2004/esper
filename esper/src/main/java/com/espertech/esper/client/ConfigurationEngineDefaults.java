@@ -873,10 +873,18 @@ public class ConfigurationEngineDefaults implements Serializable
             this.classPropertyResolutionStyle = classPropertyResolutionStyle;
         }
 
+        /**
+         * Sets the default event representation.
+         * @param defaultEventRepresentation to set
+         */
         public void setDefaultEventRepresentation(Configuration.EventRepresentation defaultEventRepresentation) {
             this.defaultEventRepresentation = defaultEventRepresentation;
         }
 
+        /**
+         * Returns the default event representation.
+         * @return setting
+         */
         public Configuration.EventRepresentation getDefaultEventRepresentation() {
             return defaultEventRepresentation;
         }
@@ -1623,26 +1631,50 @@ public class ConfigurationEngineDefaults implements Serializable
             this.statementMetadataFactory = factory;
         }
 
+        /**
+         * Returns the class name of the class for statement id generation, or null if using default.
+         * @return class
+         */
         public String getStatementIdGeneratorFactory() {
             return statementIdGeneratorFactory;
         }
 
+        /**
+         * Sets the class name of the class for statement id generation, or null if using default.
+         * @param statementIdGeneratorFactory class
+         */
         public void setStatementIdGeneratorFactory(String statementIdGeneratorFactory) {
             this.statementIdGeneratorFactory = statementIdGeneratorFactory;
         }
 
+        /**
+         * Returns the application-provided configurarion object carried as part of the configurations.
+         * @return config user object
+         */
         public Object getUserConfiguration() {
             return userConfiguration;
         }
 
+        /**
+         * Sets an application-provided configurarion object carried as part of the configurations.
+         * @param userConfiguration to set
+         */
         public void setUserConfiguration(Object userConfiguration) {
             this.userConfiguration = userConfiguration;
         }
 
+        /**
+         * Returns the member name.
+         * @return member name
+         */
         public String getMemberName() {
             return memberName;
         }
 
+        /**
+         * Sets the member name.
+         * @param memberName member name
+         */
         public void setMemberName(String memberName) {
             this.memberName = memberName;
         }

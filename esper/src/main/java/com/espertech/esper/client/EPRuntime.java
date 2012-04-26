@@ -285,6 +285,10 @@ public interface EPRuntime
      * @return time of next schedule if any
      */
     public Long getNextScheduledTime();
-    
+
+    /**
+     * Returns the data flow runtime.
+     * @return data flow runtime
+     */
     public EPDataFlowRuntime getDataFlowRuntime();
 }

@@ -41,7 +41,7 @@ public class ObjectArrayDynamicPropertyGetter implements ObjectArrayEventPropert
     }
 
     public boolean isExistsProperty(EventBean eventBean) {
-        ObjectArrayEventType objectArrayEventType = (ObjectArrayEventType) eventBean;
+        ObjectArrayEventType objectArrayEventType = (ObjectArrayEventType) eventBean.getEventType();
         Integer index = objectArrayEventType.getPropertiesIndexes().get(propertyName);
         return index != null;
     }

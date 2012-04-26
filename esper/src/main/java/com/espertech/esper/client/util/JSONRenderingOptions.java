@@ -55,10 +55,18 @@ public class JSONRenderingOptions
         return this;
     }
 
+    /**
+     * Returns the event property renderer to use.
+     * @return event property renderer
+     */
     public EventPropertyRenderer getRenderer() {
         return renderer;
     }
 
+    /**
+     * Sets the event property renderer to use.
+     * @param renderer event property renderer
+     */
     public void setRenderer(EventPropertyRenderer renderer) {
         this.renderer = renderer;
     }

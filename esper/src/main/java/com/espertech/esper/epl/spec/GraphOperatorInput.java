@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GraphOperatorInput implements Serializable {
+    private static final long serialVersionUID = -8341400118423881624L;
     private final List<GraphOperatorInputNamesAlias> streamNamesAndAliases = new ArrayList<GraphOperatorInputNamesAlias>();
 
     public List<GraphOperatorInputNamesAlias> getStreamNamesAndAliases() {

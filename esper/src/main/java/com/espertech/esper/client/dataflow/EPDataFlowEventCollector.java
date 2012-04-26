@@ -11,6 +11,13 @@
 
 package com.espertech.esper.client.dataflow;
 
+/**
+ * Collector for use with the {@link com.espertech.esper.dataflow.ops.EventBusSink} operator.
+ */
 public interface EPDataFlowEventCollector {
+    /**
+     * Collect: use the context to transform insert and remove stream events to data flow events.
+     * @param context contains event beans, emitter and related information
+     */
     public void collect(EPDataFlowEventCollectorContext context);
 }

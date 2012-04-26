@@ -176,6 +176,8 @@ public interface ConfigurationOperations
     /**
      * Add an event type that represents Object-array (Object[]) events.
      * @param eventTypeName is the name for the event type
+     * @param propertyNames name of each property, length must match number of types
+     * @param propertyTypes type of each property, length must match number of names
      * @throws ConfigurationException if the name is already in used for a different type
      */
     public void addEventType(String eventTypeName, String[] propertyNames, Object[] propertyTypes)
@@ -184,6 +186,9 @@ public interface ConfigurationOperations
     /**
      * Add an event type that represents Object-array (Object[]) events.
      * @param eventTypeName is the name for the event type
+     * @param propertyNames name of each property, length must match number of types
+     * @param propertyTypes type of each property, length must match number of names
+     * @param optionalConfiguration object-array type configuration
      * @throws ConfigurationException if the name is already in used for a different type
      */
     public void addEventType(String eventTypeName, String[] propertyNames, Object[] propertyTypes, ConfigurationEventTypeObjectArray optionalConfiguration)
@@ -542,5 +547,20 @@ public interface ConfigurationOperations
      */
     public void setPatternMaxSubexpressions(Long maxSubexpressions);
 
+    /**
+     * Updates an existing Object-array event type with additional properties.
+     * <p>
+     * Does not update existing properties of the updated Object-array event type.
+     * <p>
+     * Adds additional nested properties to nesting levels, if any.
+     * <p>
+     * Object-array event types can only be updated at runtime, at configuration time updates are not allowed.
+     * <p>
+     * The type properties may list previously declared properties or can also contain only the new properties to be added.
+     * @param myEvent the name of the object-array event type to update
+     * @param namesNew property names
+     * @param typesNew property types
+     * @throws ConfigurationException if the event type name could not be found or is not a Map
+     */
     public void updateObjectArrayEventType(String myEvent, String[] namesNew, Object[] typesNew);
 }

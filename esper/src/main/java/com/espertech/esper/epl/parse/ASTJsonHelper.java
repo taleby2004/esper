@@ -91,6 +91,8 @@ public class ASTJsonHelper
                 case '/':
                     sb.replace(slashIndex, slashIndex + 2, "/");
                     break;
+                default:
+                    break;
             }
             startPoint = slashIndex+1;
         }

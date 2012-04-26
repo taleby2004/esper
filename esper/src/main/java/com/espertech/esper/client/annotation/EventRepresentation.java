@@ -11,7 +11,14 @@
 
 package com.espertech.esper.client.annotation;
 
+/**
+ * Annotation that can be attached to specify which underlying event representation to use for events.
+ */
 public @interface EventRepresentation
 {
+    /**
+     * True for object-array, false for Map.
+     * @return array indicator
+     */
     public boolean array();
 }

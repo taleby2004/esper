@@ -12,7 +12,7 @@
 package com.espertech.esper.dataflow.util;
 
 import com.espertech.esper.client.dataflow.EPDataFlowOperatorParameterProvider;
-import com.espertech.esper.client.dataflow.EPGraphOperatorParameterProviderContext;
+import com.espertech.esper.client.dataflow.EPDataFlowOperatorParameterProviderContext;
 
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public class DefaultSupportGraphParamProvider implements EPDataFlowOperatorParam
         this.params = params;
     }
 
-    public Object provide(EPGraphOperatorParameterProviderContext context) {
+    public Object provide(EPDataFlowOperatorParameterProviderContext context) {
         return params.get(context.getParameterName());
     }
 }

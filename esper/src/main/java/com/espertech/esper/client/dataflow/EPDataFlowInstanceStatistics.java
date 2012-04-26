@@ -13,6 +13,13 @@ package com.espertech.esper.client.dataflow;
 
 import java.util.List;
 
+/**
+ * Interface for statictics of data flow instance.
+ */
 public interface EPDataFlowInstanceStatistics {
+    /**
+     * Returns operator stats.
+     * @return stats
+     */
     public List<EPDataFlowInstanceOperatorStat> getOperatorStatistics();
 }

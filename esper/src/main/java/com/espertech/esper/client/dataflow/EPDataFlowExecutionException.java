@@ -13,20 +13,40 @@ package com.espertech.esper.client.dataflow;
 
 import com.espertech.esper.client.EPException;
 
+/**
+ * Thrown to indicate a data flow execution exception.
+ */
 public class EPDataFlowExecutionException extends EPException {
 
+    private static final long serialVersionUID = 5107965774689594350L;
     private final String dataFlowName;
 
+    /**
+     * Ctor.
+     * @param message error message
+     * @param dataFlowName data flow name
+     */
     public EPDataFlowExecutionException(String message, String dataFlowName) {
         super(message);
         this.dataFlowName = dataFlowName;
     }
 
+    /**
+     * Ctor.
+     * @param message error message
+     * @param cause cuase
+     * @param dataFlowName data flow name
+     */
     public EPDataFlowExecutionException(String message, Throwable cause, String dataFlowName) {
         super(message, cause);
         this.dataFlowName = dataFlowName;
     }
 
+    /**
+     * Ctor.
+     * @param cause cuase
+     * @param dataFlowName data flow name
+     */
     public EPDataFlowExecutionException(Throwable cause, String dataFlowName) {
         super(cause);
         this.dataFlowName = dataFlowName;

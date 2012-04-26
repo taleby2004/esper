@@ -19,6 +19,7 @@ import java.util.Comparator;
  */
 public final class ObjectComparator implements Comparator<Object>, MetaDefItem, Serializable
 {
+    private static final long serialVersionUID = -2139033245746311007L;
     private final boolean isDescendingValue;
 
     /**

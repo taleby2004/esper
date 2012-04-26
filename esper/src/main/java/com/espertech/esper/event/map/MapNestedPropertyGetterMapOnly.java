@@ -120,7 +120,9 @@ public class MapNestedPropertyGetterMapOnly implements MapEventPropertyGetter
                 if (result instanceof EventBean) {
                     result = getter.get((EventBean) result);
                 }
-                return null;
+                else {
+                    return null;
+                }
             }
             else {
                 result = getter.getMap((Map<String, Object>) result);

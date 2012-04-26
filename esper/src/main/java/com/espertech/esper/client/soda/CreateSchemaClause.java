@@ -39,7 +39,7 @@ public class CreateSchemaClause implements Serializable
      * Ctor.
      * @param schemaName name of type
      * @param types are for model-after, could be multiple when declaring a variant stream, or a single fully-qualified class name
-     * @param typeDefinition
+     * @param typeDefinition type definition
      */
     public CreateSchemaClause(String schemaName, Set<String> types, CreateSchemaClauseTypeDef typeDefinition)
     {
@@ -150,10 +150,18 @@ public class CreateSchemaClause implements Serializable
         this.inherits = inherits;
     }
 
+    /**
+     * returns the type definition.
+     * @return type definition
+     */
     public CreateSchemaClauseTypeDef getTypeDefinition() {
         return typeDefinition;
     }
 
+    /**
+     * Sets the type definition.
+     * @param typeDefinition type definition to set
+     */
     public void setTypeDefinition(CreateSchemaClauseTypeDef typeDefinition) {
         this.typeDefinition = typeDefinition;
     }
