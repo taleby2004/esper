@@ -24,12 +24,20 @@ cd esper
 mvn install
 ----------------------------------------	
 
+  Running all tests may take about 10 minutes. The Maven command to install but skip tests is:
+  
+----------------------------------------
+mvn -DskipTests install
+----------------------------------------	
+
   <Note>, in order to run all tests successfully, the following preconditions must be met:
   
     * For tests performing database joins to work, MySQL must be installed and available at connection string 
       "jdbc:mysql://localhost/test?user=root&password=password" and the test table must be created from etc/regression/create_testdb.sql
       
     * For performance tests that assert against execution times the recommended minimum configuration is 1GB and Dual Core 2x1.8 GHz
+    
+    * Access to the full Subversion trunk file system is required as tests will read external files that may not be part of the source distribution.
     
     * If you are running the test suite from within an IDE, please use the following parameters:
       -Dlog4j.configuration=etc/infoonly_log4j.xml -Xms512M -Xmx512M
