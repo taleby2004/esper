@@ -24,6 +24,39 @@ Version 4.5.0
     
 * Major changes
 
+  * Support for object-array event types; An application can now send Object[] rows as events and can receive Object[] rows as output.
+  
+  * This release introduces a syntax and API for declarative data flow execution.
+  
+  * Support for XML and JSON event renderers to take a custom property value renderer.
+  
+  * Support for a new "ranked" data window that retains the events according to rank and uniqueness criteria.
+  
+  * Many internal changes related to increasing performance and reducing memory use.
+  
+  * For class and package imports through configuration or API, the default imports are no longer removed when the first import is added. Imports can be removed explicitly instead.
+  
+  * The CSV adapter no longer has a dependency on Commons Beanutils (commons-beanutils-1.8.3.jar).
+  
+  * The documentation has a new look and feel.
+  
+  * Many bug fixes and other improvements; Please see history or changelog.txt for additional information.
+
+  []
+  
+
+Version 4.5.0
+
+	Released January 19, 2012
+	
+	Built and tested with JDK 6.0 Update 29
+
+* API changes
+
+  * None.
+    
+* Major changes
+
   * We have made a change to the behavior of intersection data windows (multiple data windows in intersection) when one of the data windows is a batch window.
     The engine now provides batching behavior, when one of the data windows is a batch window, and not continuous stream behavior.
     

@@ -1448,6 +1448,10 @@ public class MyLineFeedSource implements DataFlowSourceOperator {
     @DataFlowContext
     private EPDataFlowEmitter dataFlowEmitter;
 
+    // Mark a parameter using the DataFlowOpParameter annotation
+    @DataFlowOpParameter
+    private String myStringParameter;
+
     private final Iterator<String> lines;
 
     public MyLineFeedSource(Iterator<String> lines) {

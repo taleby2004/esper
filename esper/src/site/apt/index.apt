@@ -119,9 +119,9 @@ Core Esper Features
 
 * Event Representations
 	
-        * Supports event-type inheritance and polymorphism as provided by the Java language, for Java object events as well as for Map-type events
+        * Supports event-type inheritance and polymorphism as provided by the Java language, for Java object events as well as for Map-type and object-array type events
 
-        * Events can be plain Java objects, XML (DOM and streaming through Apache Axiom) and java.util.Map including nested objects and hierarchical maps
+        * Events can be plain Java objects, XML (DOM and streaming through Apache Axiom), object-array (Object[]) and java.util.Map including nested objects and hierarchical maps
 
         * Event properties can be simple, indexed, mapped or nested - allows querying of deep Java object graphs and XML structures
         
@@ -225,6 +225,8 @@ Core Esper Features
     	
     	[]
 
+    * << Data Flow Programming>>
+    
     * <<Variables>> and <<Constants>> can occur in any expression and can dynamically control output rate
 
         * Guarantees of consistency and atomicity of variable updates
