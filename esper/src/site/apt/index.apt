@@ -240,7 +240,8 @@ Core Esper Features
  
     * <<Concurrency-safe iterator>> provides complete query capability for all statements, with read-write locking
     
-    * Supports <<externally-provided time>> as well as Java system time, allowing applications full control over the concept of time within an engine
+    * Supports <<externally-provided time>> as well as Java system time, allowing applications full control over the concept of time within an engine and 
+      full control over which thread(s) evaluate timer schedule for statements
     		
     * <<Multithread-safe>> as of release 1.5
     
