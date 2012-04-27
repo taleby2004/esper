@@ -35,8 +35,8 @@
 
   <xsl:param name="siteHref" select="'http://www.jboss.org'"/>
   <xsl:param name="docHref" select="'http://docs.jboss.org/'"/>
-  <xsl:param name="siteLinkText" select="'JBoss.org'"/>
-  <xsl:param name="docLinkText" select="'Community Documentation'"/>
+  <xsl:param name="siteLinkText" select="'esper.codehaus.org and espertech.com'"/>
+  <xsl:param name="docLinkText" select="'Documentation'"/>
 
   <xsl:param name="graphicsize.extension">0</xsl:param>
 
