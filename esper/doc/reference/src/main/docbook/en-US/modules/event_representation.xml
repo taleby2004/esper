@@ -1898,7 +1898,7 @@ select fname, lname, 'HIRED' as type from HRSystemEvent(type='NEW')</programlist
 	</sect1>
 
     <sect1 xml:id="eventrep_comparing">
-        <title>Comparing Event Types</title>
+        <title>Comparing Event Representations</title>
         
         <para>
 			Each of the event representations of Java object, Map and XML document has advantages and disadvantages that are summarized in the table below:
