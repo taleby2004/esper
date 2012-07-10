@@ -5317,6 +5317,11 @@ select * from TickEventWindow where symbol='GE' and buyPrice between 10 and 20]]
 			    The expiry policy as specified by view definitions applies to each distinct key value, or multiple distinct key values for composite keys. An expiry policy re-evaluates when new versions arrive. In the example, user profile events expire from the time window when no creation or update event for a given user id has been received for 1 hour.
 			</para>
 
+			<tip>				
+			    It usually does not make sense to configure a revision event type without delta event types. Use the unique data window (<literal>std:unique</literal>) or unique data window in intersection with other data windows
+			    instead (i.e. <literal>std:unique(field).win:time(1 hour)</literal>).
+			</tip>
+
 			<para>				
 			    Several strategies are available for merging or overlaying events as the configuration chapter describes in greater detail.
 			</para>
