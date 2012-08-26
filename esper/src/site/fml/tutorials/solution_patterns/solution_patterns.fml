@@ -1042,6 +1042,22 @@ where login.accountNumber = null</pre></div>
       </answer>
     </faq>    
 
+    <faq id="absence-8">
+      <question>How do I detect when a sensor value holds a threshold for X seconds?</question>
+      <answer>
+        <p>
+          Use a pattern to detect the absence of an event indicating that the sensor value falls below the threshold.
+        </p>
+	    <div class="source"><pre>select * from pattern [ [1] every (timer:interval(10 sec) and not Sensor(temp &lt; 100)) ]</pre></div>      
+        <p>
+    	  Using the "[1]" repeat operator we can tell the pattern engine to look for the first match.
+    	  Using "every" the pattern engine restarts the interval when the temperature sensor value falls below 100. 
+	  Therefore the pattern can handle a dip or multiple dips where the temperature falls below 100. 
+	  The pattern fires exactly once and only when the temperature stays at 100 or more for at least 10 seconds.
+        </p>
+      </answer>
+    </faq>    
+
     <faq id="triple-bottom-pattern">
       <question>How do I detect something really complex, like a triple-bottom pattern?</question>
       <answer>

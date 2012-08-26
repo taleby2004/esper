@@ -590,6 +590,52 @@ public class TestMatchUntilExpr extends TestCase implements SupportBeanConstants
         EPPreparedStatement prepared = epService.getEPAdministrator().prepareEPL(epl);
         prepared.setObject(1, 2);
         epService.getEPAdministrator().create(prepared);
+
+        // test exactly-1
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+        String eplExact1 = "select * from pattern [a=A -> [1] every (timer:interval(10) and not B)]";
+        EPStatement stmtExact1 = epService.getEPAdministrator().createEPL(eplExact1);
+        stmtExact1.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(5000));
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(6000));
+        epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(15999));
+        assertFalse(listener.isInvoked());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(16000));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.id".split(","), new Object[] {"A1"});
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(999999));
+        assertFalse(listener.isInvoked());
+        stmtExact1.destroy();
+
+        // test until
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1000000));
+        String eplUntilOne = "select * from pattern [a=A -> b=B until ([1] every (timer:interval(10) and not C))]";
+        epService.getEPAdministrator().createEPL(eplUntilOne).addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1005000));
+        epService.getEPRuntime().sendEvent(new SupportBean_A("A1"));
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1006000));
+        epService.getEPRuntime().sendEvent(new SupportBean_B("B1"));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1014999));
+        epService.getEPRuntime().sendEvent(new SupportBean_B("B2"));
+        epService.getEPRuntime().sendEvent(new SupportBean_C("C1"));
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1015000));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1024998));
+        assertFalse(listener.isInvoked());
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1024999));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "a.id,b[0].id,b[1].id".split(","), new Object[] {"A1", "B1", "B2"});
+
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(1999999));
+        assertFalse(listener.isInvoked());
     }
 
     private void validateStmt(EPServiceProvider engine, String stmtText, int numEventsA, boolean match, Integer matchCount)
