@@ -33,8 +33,8 @@
               doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
               standalone="no"/>
 
-  <xsl:param name="siteHref" select="'http://www.jboss.org'"/>
-  <xsl:param name="docHref" select="'http://docs.jboss.org/'"/>
+  <xsl:param name="siteHref" select="'http://www.espertech.com'"/>
+  <xsl:param name="docHref" select="'http://esper.codehaus.org/esper/documentation/documentation.html'"/>
   <xsl:param name="siteLinkText" select="'esper.codehaus.org and espertech.com'"/>
   <xsl:param name="docLinkText" select="'Documentation'"/>
 
