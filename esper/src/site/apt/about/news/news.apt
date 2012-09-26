@@ -1,5 +1,14 @@
 News
 
+* September 26, 2012  -  NEsper 4.5.2 for .NET
+	      
+  * Feature equivalent to Esper version 4.5.0
+  
+  * Many performance-related updates.
+
+  []  
+
+
 * April 27, 2012  -  Esper 4.6.0 - Update release
 
   * Support for object-array event types; An application can now send Object[] rows as events and can receive Object[] rows as output.
