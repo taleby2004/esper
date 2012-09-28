@@ -11,16 +11,31 @@
 
 package com.espertech.esper.core.context.mgr;
 
-import java.util.TreeMap;
+import com.espertech.esper.client.EventBean;
 
-public class ContextControllerState {
-    private final TreeMap<ContextStatePathKey, ContextStatePathValue> states;
+import java.util.Map;
 
-    public ContextControllerState(TreeMap<ContextStatePathKey, ContextStatePathValue> states) {
-        this.states = states;
+public class ContextControllerInitTermState {
+
+    private final long startTime;
+    private final Map<String, Object> patternData;
+    private final EventBean filterEvent;
+
+    public ContextControllerInitTermState(long startTime, Map<String, Object> patternData, EventBean filterEvent) {
+        this.startTime = startTime;
+        this.patternData = patternData;
+        this.filterEvent = filterEvent;
     }
 
-    public TreeMap<ContextStatePathKey, ContextStatePathValue> getStates() {
-        return states;
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public Map<String, Object> getPatternData() {
+        return patternData;
+    }
+
+    public EventBean getFilterEvent() {
+        return filterEvent;
     }
 }

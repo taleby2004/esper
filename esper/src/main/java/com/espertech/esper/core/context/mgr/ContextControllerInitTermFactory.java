@@ -31,13 +31,18 @@ import java.util.*;
 public class ContextControllerInitTermFactory extends ContextControllerFactoryBase implements ContextControllerFactory {
 
     private final ContextDetailInitiatedTerminated detail;
+    private final ContextStateCache stateCache;
+
+    private final ContextStatePathValueBinding binding;
 
     private Map<String, Object> contextBuiltinProps;
     private MatchedEventMapMeta matchedEventMapMeta;
 
-    public ContextControllerInitTermFactory(ContextControllerFactoryContext factoryContext, ContextDetailInitiatedTerminated detail) {
+    public ContextControllerInitTermFactory(ContextControllerFactoryContext factoryContext, ContextDetailInitiatedTerminated detail, ContextStateCache stateCache) {
         super(factoryContext);
         this.detail = detail;
+        this.stateCache = stateCache;
+        this.binding = stateCache.getBinding(detail);
     }
 
     public void validateFactory() throws ExprValidationException {
@@ -46,6 +51,14 @@ public class ContextControllerInitTermFactory extends ContextControllerFactoryBa
         ContextPropertyEventType.addEndpointTypes(factoryContext.getContextName(), detail.getStart(), contextBuiltinProps, allTags);
         ContextPropertyEventType.addEndpointTypes(factoryContext.getContextName(), detail.getEnd(), contextBuiltinProps, allTags);
         matchedEventMapMeta = new MatchedEventMapMeta(allTags, false);
+    }
+
+    public ContextStateCache getStateCache() {
+        return stateCache;
+    }
+
+    public ContextStatePathValueBinding getBinding() {
+        return binding;
     }
 
     public Map<String, Object> getContextBuiltinProps() {

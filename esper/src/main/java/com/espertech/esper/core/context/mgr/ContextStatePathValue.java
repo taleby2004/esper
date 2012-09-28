@@ -11,16 +11,21 @@
 
 package com.espertech.esper.core.context.mgr;
 
-import java.util.TreeMap;
+public class ContextStatePathValue {
+    private final Integer optionalContextPartitionId;
+    private final byte[] blob;
 
-public class ContextControllerState {
-    private final TreeMap<ContextStatePathKey, ContextStatePathValue> states;
-
-    public ContextControllerState(TreeMap<ContextStatePathKey, ContextStatePathValue> states) {
-        this.states = states;
+    public ContextStatePathValue(Integer optionalContextPartitionId, byte[] blob) {
+        this.optionalContextPartitionId = optionalContextPartitionId;
+        this.blob = blob;
     }
 
-    public TreeMap<ContextStatePathKey, ContextStatePathValue> getStates() {
-        return states;
+    public Integer getOptionalContextPartitionId() {
+        return optionalContextPartitionId;
+    }
+
+    public byte[] getBlob() {
+        return blob;
     }
 }
+

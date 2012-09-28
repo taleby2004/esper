@@ -20,6 +20,7 @@ import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.core.context.util.ContextControllerSelectorUtil;
 import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
 import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
+import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.type.NumberSetParameter;
 
 import java.util.*;
@@ -89,7 +90,7 @@ public class ContextControllerPartitioned implements ContextController, ContextC
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[]{ContextPartitionSelectorSegmented.class}, contextPartitionSelector);
     }
 
-    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states, ContextInternalFilterAddendum filterAddendum) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState controllerState, ContextInternalFilterAddendum filterAddendum) {
         ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
         this.activationFilterAddendum = filterAddendum;
 
@@ -105,6 +106,34 @@ public class ContextControllerPartitioned implements ContextController, ContextC
                 }
             }
         }
+
+        if (factoryContext.getNestingLevel() == 1) {
+            controllerState = ContextControllerStateUtil.getRecoveryStates(factory.getStateCache(), factoryContext.getOutermostContextName());
+        }
+        if (controllerState == null) {
+            return;
+        }
+        TreeMap<ContextStatePathKey, ContextStatePathValue> states = controllerState.getStates();
+
+        // restart if there are states
+        int maxSubpathId = Integer.MIN_VALUE;
+        ContextStatePathKey start = new ContextStatePathKey(factoryContext.getOutermostContextName(), factoryContext.getNestingLevel(), pathId, Integer.MIN_VALUE);
+        ContextStatePathKey end = new ContextStatePathKey(factoryContext.getOutermostContextName(), factoryContext.getNestingLevel(), pathId, Integer.MAX_VALUE);
+        NavigableMap<ContextStatePathKey, ContextStatePathValue> childContexts = states.subMap(start, true, end, true);
+        EventAdapterService eventAdapterService = factory.getFactoryContext().getServicesContext().getEventAdapterService();
+
+        for (Map.Entry<ContextStatePathKey, ContextStatePathValue> entry : childContexts.entrySet()) {
+            String key = (String) factory.getBinding().byteArrayToObject(entry.getValue().getBlob(), eventAdapterService);
+            Map<String, Object> props = ContextPropertyEventType.getPartitionBean(factoryContext.getContextName(), 0, key, factory.getSegmentedSpec().getItems().get(0).getPropertyNames());
+            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(entry.getValue().getOptionalContextPartitionId(), entry.getKey().getSubPath(), this, optionalTriggeringEvent, optionalTriggeringPattern, key, props, controllerState, filterAddendum, factoryContext.isRecoveringResilient());
+            partitionKeys.put(key, handle);
+
+            int subPathId = entry.getKey().getSubPath();
+            if (entry.getKey().getSubPath() > maxSubpathId) {
+                maxSubpathId = subPathId;
+            }
+        }
+        currentSubpathId = maxSubpathId != Integer.MIN_VALUE ? maxSubpathId : 0;
     }
 
     public ContextControllerFactory getFactory() {
@@ -126,6 +155,7 @@ public class ContextControllerPartitioned implements ContextController, ContextC
         }
         partitionKeys.clear();
         filterCallbacks.clear();
+        factory.getStateCache().removeContextParentPath(factoryContext.getOutermostContextName(), factoryContext.getNestingLevel(), pathId);
     }
 
     public synchronized void create(Object key, EventBean theEvent) {
@@ -151,9 +181,6 @@ public class ContextControllerPartitioned implements ContextController, ContextC
 
         partitionKeys.put(key, handle);
 
-        postCreation(handle, key);
-    }
-
-    protected void postCreation(ContextControllerInstanceHandle handle, Object key) {
+        factory.getStateCache().addContextPath(factoryContext.getOutermostContextName(), factoryContext.getNestingLevel(), pathId, currentSubpathId, handle.getContextPartitionOrPathId(), key, factory.getBinding());
     }
 }

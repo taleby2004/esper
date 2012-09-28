@@ -20,17 +20,22 @@ import java.util.*;
 public class ContextControllerFactoryServiceImpl implements ContextControllerFactoryService {
 
     public final static ContextControllerFactoryServiceImpl DEFAULT_FACTORY = new ContextControllerFactoryServiceImpl();
+    private final static ContextStateCache CACHE_NO_SAVE = new ContextStateCacheNoSave();
 
     public ContextControllerFactory[] getFactory(ContextControllerFactoryServiceContext serviceContext) throws ExprValidationException {
+        return getFactory(serviceContext, CACHE_NO_SAVE);
+    }
+
+    public static ContextControllerFactory[] getFactory(ContextControllerFactoryServiceContext serviceContext, ContextStateCache contextStateCache) throws ExprValidationException {
         if (!(serviceContext.getDetail() instanceof ContextDetailNested)) {
-            ContextControllerFactory factory = buildContextFactory(serviceContext, serviceContext.getContextName(), serviceContext.getDetail(), 1, null);
+            ContextControllerFactory factory = buildContextFactory(serviceContext, serviceContext.getContextName(), serviceContext.getDetail(), 1, null, contextStateCache);
             factory.validateFactory();
             return new ContextControllerFactory[] {factory};
         }
-        return buildNestedContextFactories(serviceContext);
+        return buildNestedContextFactories(serviceContext, contextStateCache);
     }
 
-    private ContextControllerFactory[] buildNestedContextFactories(ContextControllerFactoryServiceContext serviceContext) throws ExprValidationException {
+    private static ContextControllerFactory[] buildNestedContextFactories(ContextControllerFactoryServiceContext serviceContext, ContextStateCache contextStateCache) throws ExprValidationException {
         ContextDetailNested nestedSpec = (ContextDetailNested) serviceContext.getDetail();
         // determine nested filter use
         Map<CreateContextDesc, List<FilterSpecCompiled>> filtersPerNestedContext = null;
@@ -73,31 +78,31 @@ public class ContextControllerFactoryServiceImpl implements ContextControllerFac
                 optFiltersNested = filtersPerNestedContext.get(context);
             }
 
-            hierarchy[i] = buildContextFactory(serviceContext, context.getContextName(), context.getContextDetail(), nestingLevel, optFiltersNested);
+            hierarchy[i] = buildContextFactory(serviceContext, context.getContextName(), context.getContextDetail(), nestingLevel, optFiltersNested, contextStateCache);
             hierarchy[i].validateFactory();
         }
         return hierarchy;
     }
 
-    private ContextControllerFactory buildContextFactory(ContextControllerFactoryServiceContext serviceContext, String contextName, ContextDetail detail, int nestingLevel, List<FilterSpecCompiled> optFiltersNested) throws ExprValidationException {
+    private static ContextControllerFactory buildContextFactory(ContextControllerFactoryServiceContext serviceContext, String contextName, ContextDetail detail, int nestingLevel, List<FilterSpecCompiled> optFiltersNested, ContextStateCache contextStateCache) throws ExprValidationException {
         ContextControllerFactoryContext factoryContext = new ContextControllerFactoryContext(serviceContext.getContextName(), contextName, serviceContext.getServicesContext(), serviceContext.getAgentInstanceContextCreate(), nestingLevel, serviceContext.isRecoveringResilient());
-        return buildContextFactory(factoryContext, detail, optFiltersNested);
+        return buildContextFactory(factoryContext, detail, optFiltersNested, contextStateCache);
     }
 
-    protected ContextControllerFactory buildContextFactory(ContextControllerFactoryContext factoryContext, ContextDetail detail, List<FilterSpecCompiled> optFiltersNested) throws ExprValidationException {
+    private static ContextControllerFactory buildContextFactory(ContextControllerFactoryContext factoryContext, ContextDetail detail, List<FilterSpecCompiled> optFiltersNested, ContextStateCache contextStateCache) throws ExprValidationException {
 
         ContextControllerFactory factory;
         if (detail instanceof ContextDetailInitiatedTerminated) {
-            factory = new ContextControllerInitTermFactory(factoryContext, (ContextDetailInitiatedTerminated) detail);
+            factory = new ContextControllerInitTermFactory(factoryContext, (ContextDetailInitiatedTerminated) detail, contextStateCache);
         }
         else if (detail instanceof ContextDetailPartitioned) {
-            factory = new ContextControllerPartitionedFactory(factoryContext, (ContextDetailPartitioned) detail, optFiltersNested);
+            factory = new ContextControllerPartitionedFactory(factoryContext, (ContextDetailPartitioned) detail, optFiltersNested, contextStateCache);
         }
         else if (detail instanceof ContextDetailCategory) {
             factory = new ContextControllerCategoryFactory(factoryContext, (ContextDetailCategory) detail, optFiltersNested);
         }
         else if (detail instanceof ContextDetailHash) {
-            factory = new ContextControllerHashFactory(factoryContext, (ContextDetailHash) detail, optFiltersNested);
+            factory = new ContextControllerHashFactory(factoryContext, (ContextDetailHash) detail, optFiltersNested, contextStateCache);
         }
         else {
             throw new UnsupportedOperationException("Context detail " + detail + " is not yet supported in a nested context");

@@ -69,31 +69,70 @@ public class ContextControllerHash implements ContextController, ContextControll
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[]{ContextPartitionSelectorHash.class}, contextPartitionSelector);
     }
 
-    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states, ContextInternalFilterAddendum activationFilterAddendum) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState controllerState, ContextInternalFilterAddendum activationFilterAddendum) {
         ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
         this.activationFilterAddendum = activationFilterAddendum;
 
-        // handle preallocate
-        if (factory.getHashedSpec().isPreallocate()) {
-            for (int i = 0; i < factory.getHashedSpec().getGranularity(); i++) {
-                Map<String, Object> properties = ContextPropertyEventType.getHashBean(factoryContext.getContextName(), i);
-                currentSubpathId++;
+        if (factoryContext.getNestingLevel() == 1) {
+            controllerState = ContextControllerStateUtil.getRecoveryStates(factory.getStateCache(), factoryContext.getOutermostContextName());
+        }
+        if (controllerState == null || factory.getHashedSpec().isPreallocate()) {
 
-                // merge filter addendum, if any
-                ContextInternalFilterAddendum filterAddendumToUse = activationFilterAddendum;
-                if (factory.hasFiltersSpecsNestedContexts()) {
-                    filterAddendumToUse = activationFilterAddendum != null ? activationFilterAddendum.deepCopy() : new ContextInternalFilterAddendum();
-                    factory.populateContextInternalFilterAddendums(filterAddendumToUse, i);
+            // handle preallocate
+            if (factory.getHashedSpec().isPreallocate()) {
+                for (int i = 0; i < factory.getHashedSpec().getGranularity(); i++) {
+                    Map<String, Object> properties = ContextPropertyEventType.getHashBean(factoryContext.getContextName(), i);
+                    currentSubpathId++;
+
+                    // merge filter addendum, if any
+                    ContextInternalFilterAddendum filterAddendumToUse = activationFilterAddendum;
+                    if (factory.hasFiltersSpecsNestedContexts()) {
+                        filterAddendumToUse = activationFilterAddendum != null ? activationFilterAddendum.deepCopy() : new ContextInternalFilterAddendum();
+                        factory.populateContextInternalFilterAddendums(filterAddendumToUse, i);
+                    }
+
+                    ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, null, i, properties, controllerState, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient());
+                    partitionKeys.put(i, handle);
                 }
-
-                ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, null, i, properties, states, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient());
-                partitionKeys.put(i, handle);
+                return;
             }
+
+            // start filters if not preallocated
+            activateFilters(optionalTriggeringEvent);
+
             return;
         }
 
-        // start filters if not preallocated
-        activateFilters(optionalTriggeringEvent);
+        // get state
+        TreeMap<ContextStatePathKey, ContextStatePathValue> states = controllerState.getStates();
+        NavigableMap<ContextStatePathKey, ContextStatePathValue> childContexts = ContextControllerStateUtil.getChildContexts(factoryContext, pathId, states);
+
+        // Not preallocated, match existing path ids to
+        int maxSubpathId = Integer.MIN_VALUE;
+        for (Map.Entry<ContextStatePathKey, ContextStatePathValue> entry : childContexts.entrySet()) {
+
+            Integer hashAlgoGeneratedId = (Integer) factory.getBinding().byteArrayToObject(entry.getValue().getBlob(), null);
+            Map<String, Object> properties = ContextPropertyEventType.getHashBean(factoryContext.getContextName(), hashAlgoGeneratedId);
+
+            // merge filter addendum, if any
+            ContextInternalFilterAddendum filterAddendumToUse = activationFilterAddendum;
+            if (factory.hasFiltersSpecsNestedContexts()) {
+                filterAddendumToUse = activationFilterAddendum != null ? activationFilterAddendum.deepCopy() : new ContextInternalFilterAddendum();
+                factory.populateContextInternalFilterAddendums(filterAddendumToUse, hashAlgoGeneratedId);
+            }
+
+            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(entry.getValue().getOptionalContextPartitionId(), entry.getKey().getSubPath(), this, optionalTriggeringEvent, optionalTriggeringPattern, hashAlgoGeneratedId, properties, controllerState, filterAddendumToUse, factoryContext.isRecoveringResilient());
+            partitionKeys.put(hashAlgoGeneratedId, handle);
+
+            int subPathId = entry.getKey().getSubPath();
+            if (entry.getKey().getSubPath() > maxSubpathId) {
+                maxSubpathId = subPathId;
+            }
+        }
+        currentSubpathId = maxSubpathId != Integer.MIN_VALUE ? maxSubpathId : 0;
+
+        // activate filters
+        activateFilters(null);
     }
 
     protected void activateFilters(EventBean optionalTriggeringEvent) {
@@ -148,6 +187,7 @@ public class ContextControllerHash implements ContextController, ContextControll
 
         ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, theEvent, null, id, properties, null, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient());
         partitionKeys.put(id, handle);
+        factory.getStateCache().addContextPath(factoryContext.getOutermostContextName(), factoryContext.getNestingLevel(), pathId, currentSubpathId, handle.getContextPartitionOrPathId(), id, factory.getBinding());
     }
 
     public ContextControllerFactory getFactory() {
@@ -165,5 +205,6 @@ public class ContextControllerHash implements ContextController, ContextControll
         }
         partitionKeys.clear();
         filterCallbacks.clear();
+        factory.getStateCache().removeContextParentPath(factoryContext.getOutermostContextName(), factoryContext.getNestingLevel(), pathId);
     }
 }
