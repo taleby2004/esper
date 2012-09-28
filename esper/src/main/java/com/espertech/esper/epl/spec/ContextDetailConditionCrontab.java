@@ -12,6 +12,7 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.schedule.ScheduleSpec;
 
 import java.util.List;
@@ -35,5 +36,9 @@ public class ContextDetailConditionCrontab implements ContextDetailCondition {
 
     public void setSchedule(ScheduleSpec schedule) {
         this.schedule = schedule;
+    }
+
+    public List<FilterSpecCompiled> getFilterSpecIfAny() {
+        return null;
     }
 }

@@ -27,22 +27,22 @@ import java.util.LinkedHashSet;
 /**
  * Same as the {@link TimeBatchView}, this view also supports fast-remove from the batch for remove stream events.
  */
-public final class TimeBatchViewRStream extends ViewSupport implements CloneableView, StoppableView, StopCallback, DataWindowView {
+public class TimeBatchViewRStream extends ViewSupport implements CloneableView, StoppableView, StopCallback, DataWindowView {
     // View parameters
     private final TimeBatchViewFactory timeBatchViewFactory;
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
-    private final long msecIntervalSize;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceContext;
+    protected final long msecIntervalSize;
     private final Long initialReferencePoint;
-    private final ScheduleSlot scheduleSlot;
+    protected final ScheduleSlot scheduleSlot;
     private final boolean isForceOutput;
     private final boolean isStartEager;
-    private EPStatementHandleCallback handle;
+    protected EPStatementHandleCallback handle;
 
     // Current running parameters
-    private Long currentReferencePoint;
-    private LinkedHashSet<EventBean> lastBatch = null;
-    private LinkedHashSet<EventBean> currentBatch = new LinkedHashSet<EventBean>();
-    private boolean isCallbackScheduled;
+    protected Long currentReferencePoint;
+    protected LinkedHashSet<EventBean> lastBatch = null;
+    protected LinkedHashSet<EventBean> currentBatch = new LinkedHashSet<EventBean>();
+    protected boolean isCallbackScheduled;
 
     /**
      * Constructor.
@@ -125,13 +125,14 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
         return parent.getEventType();
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         if (oldData != null)
         {
             for (int i = 0; i < oldData.length; i++)
             {
                 currentBatch.remove(oldData[i]);
+                internalHandleRemoved(oldData[i]);
             }
         }
 
@@ -162,7 +163,9 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
         }
 
         // add data points to the timeWindow
-        currentBatch.addAll(Arrays.asList(newData));
+        for (EventBean newEvent : newData) {
+            currentBatch.add(newEvent);
+        }
 
         // We do not update child views, since we batch the events.
     }
@@ -171,7 +174,7 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
      * This method updates child views and clears the batch of events.
      * We schedule a new callback at this time if there were events in the batch.
      */
-    protected final void sendBatch()
+    protected void sendBatch()
     {
         isCallbackScheduled = false;
 
@@ -239,7 +242,7 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
                 " initialReferencePoint=" + initialReferencePoint;
     }
 
-    private void scheduleCallback()
+    protected void scheduleCallback()
     {
         long current = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         long afterMSec = TimeBatchView.computeWaitMSec(current, this.currentReferencePoint, this.msecIntervalSize);
@@ -267,6 +270,10 @@ public final class TimeBatchViewRStream extends ViewSupport implements Cloneable
         if (handle != null) {
             agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
+    }
+
+    public void internalHandleRemoved(EventBean eventBean) {
+        // no action required
     }
 
     private static final Log log = LogFactory.getLog(TimeBatchViewRStream.class);

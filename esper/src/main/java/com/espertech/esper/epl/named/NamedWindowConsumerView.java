@@ -123,7 +123,7 @@ public class NamedWindowConsumerView extends ViewSupport implements StopCallback
             for (ExprEvaluator filter : filterList)
             {
                 Boolean result = (Boolean) filter.evaluate(eventPerStream, isNewData, exprEvaluatorContext);
-                if ((result != null) && (!result))
+                if (result == null || !result)
                 {
                     pass = false;
                     break;

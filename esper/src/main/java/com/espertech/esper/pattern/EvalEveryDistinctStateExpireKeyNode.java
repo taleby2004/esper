@@ -20,30 +20,25 @@ import java.util.Map;
  * Contains the state collected by an "every" operator. The state includes handles to any sub-listeners
  * started by the operator.
  */
-public final class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode implements Evaluator
+public class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode implements Evaluator
 {
-    private final EvalEveryDistinctNode everyNode;
-    private final Map<EvalStateNode, LinkedHashMap<Object, Long>> spawnedNodes;
-    private final MatchedEventMap beginState;
+    protected final EvalEveryDistinctNode everyNode;
+    protected final Map<EvalStateNode, LinkedHashMap<Object, Long>> spawnedNodes;
+    protected MatchedEventMap beginState;
 
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
-     * @param beginState contains the events that make up prior matches
      * @param everyNode is the factory node associated to the state
      */
     public EvalEveryDistinctStateExpireKeyNode(Evaluator parentNode,
-                                  EvalEveryDistinctNode everyNode,
-                                  MatchedEventMap beginState)
+                                  EvalEveryDistinctNode everyNode)
     {
-        super(parentNode, null);
+        super(parentNode);
 
         this.everyNode = everyNode;
         this.spawnedNodes = new LinkedHashMap<EvalStateNode, LinkedHashMap<Object, Long>>();
-        this.beginState = beginState.shallowCopy();
 
-        EvalStateNode child = everyNode.getChildNode().newState(this, beginState, null);
-        spawnedNodes.put(child, new LinkedHashMap<Object, Long>());
     }
 
     @Override
@@ -51,29 +46,27 @@ public final class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode imp
         return everyNode;
     }
 
-    public final void start()
+    public final void start(MatchedEventMap beginState)
     {
-        if (spawnedNodes.size() != 1)
-        {
-            throw new IllegalStateException("EVERY state node is expected to have single child state node");
-        }
+        this.beginState = beginState.shallowCopy();
+        EvalStateNode childState = everyNode.getChildNode().newState(this, null, 0L);
+        spawnedNodes.put(childState, new LinkedHashMap<Object, Long>());
 
         // During the start of the child we need to use the temporary evaluator to catch any event created during a start.
         // Events created during the start would likely come from the "not" operator.
         // Quit the new child again if
         EvalEveryStateSpawnEvaluator spawnEvaluator = new EvalEveryStateSpawnEvaluator(everyNode.getContext().getPatternContext().getStatementName());
-        EvalStateNode child = spawnedNodes.keySet().iterator().next();
-        child.setParentEvaluator(spawnEvaluator);
-        child.start();
+        childState.setParentEvaluator(spawnEvaluator);
+        childState.start(beginState);
 
         // If the spawned expression turned true already, just quit it
         if (spawnEvaluator.isEvaluatedTrue())
         {
-            child.quit();
+            childState.quit();
         }
         else
         {
-            child.setParentEvaluator(this);
+            childState.setParentEvaluator(this);
         }
     }
 
@@ -86,8 +79,8 @@ public final class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode imp
         // During the start of a child we need to use the temporary evaluator to catch any event created during a start
         // Such events can be raised when the "not" operator is used.
         EvalEveryStateSpawnEvaluator spawnEvaluator = new EvalEveryStateSpawnEvaluator(everyNode.getContext().getPatternContext().getStatementName());
-        EvalStateNode spawned = everyNode.getChildNode().newState(spawnEvaluator, beginState, null);
-        spawned.start();
+        EvalStateNode spawned = everyNode.getChildNode().newState(spawnEvaluator, null, 0L);
+        spawned.start(beginState);
 
         // If the whole spawned expression already turned true, quit it again
         if (spawnEvaluator.isEvaluatedTrue())
@@ -148,8 +141,8 @@ public final class EvalEveryDistinctStateExpireKeyNode extends EvalStateNode imp
             // During the start of a child we need to use the temporary evaluator to catch any event created during a start
             // Such events can be raised when the "not" operator is used.
             EvalEveryStateSpawnEvaluator spawnEvaluator = new EvalEveryStateSpawnEvaluator(everyNode.getContext().getPatternContext().getStatementName());
-            EvalStateNode spawned = everyNode.getChildNode().newState(spawnEvaluator, beginState, null);
-            spawned.start();
+            EvalStateNode spawned = everyNode.getChildNode().newState(spawnEvaluator, null, 0L);
+            spawned.start(beginState);
 
             // If the whole spawned expression already turned true, quit it again
             if (spawnEvaluator.isEvaluatedTrue())

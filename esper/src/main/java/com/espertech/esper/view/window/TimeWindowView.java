@@ -37,13 +37,13 @@ import java.util.Iterator;
  * as the system-time-based timeWindow moves on. However child views receive updates containing new data
  * as soon as the new data arrives.
  */
-public final class TimeWindowView extends ViewSupport implements CloneableView, DataWindowView, ScheduleAdjustmentCallback, StoppableView, StopCallback
+public class TimeWindowView extends ViewSupport implements CloneableView, DataWindowView, ScheduleAdjustmentCallback, StoppableView, StopCallback
 {
     private final TimeWindowViewFactory timeWindowViewFactory;
     private final long millisecondsBeforeExpiry;
-    private final TimeWindow timeWindow;
+    protected final TimeWindow timeWindow;
     private final ViewUpdatedCollection viewUpdatedCollection;
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final ScheduleSlot scheduleSlot;
     private final EPStatementHandleCallback handle;
 
@@ -175,6 +175,10 @@ public final class TimeWindowView extends ViewSupport implements CloneableView, 
             }
         }
 
+        scheduleExpiryCallback();
+    }
+
+    protected void scheduleExpiryCallback() {
         // If we still have events in the window, schedule new callback
         if (timeWindow.isEmpty())
         {

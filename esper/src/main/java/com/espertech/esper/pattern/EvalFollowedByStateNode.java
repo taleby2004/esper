@@ -17,29 +17,23 @@ import java.util.HashMap;
 /**
  * This class represents the state of a followed-by operator in the evaluation state tree.
  */
-public final class EvalFollowedByStateNode extends EvalStateNode implements Evaluator
+public class EvalFollowedByStateNode extends EvalStateNode implements Evaluator
 {
-    private final EvalFollowedByNode evalFollowedByNode;
-    private final HashMap<EvalStateNode, Integer> nodes;
+    protected final EvalFollowedByNode evalFollowedByNode;
+    protected final HashMap<EvalStateNode, Integer> nodes;
 
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
-     * @param beginState contains the events that make up prior matches
      * @param evalFollowedByNode is the factory node associated to the state
      */
     public EvalFollowedByStateNode(Evaluator parentNode,
-                                         EvalFollowedByNode evalFollowedByNode,
-                                         MatchedEventMap beginState)
+                                         EvalFollowedByNode evalFollowedByNode)
     {
-        super(parentNode, null);
+        super(parentNode);
 
         this.evalFollowedByNode = evalFollowedByNode;
         this.nodes = new HashMap<EvalStateNode, Integer>();
-
-        EvalNode child = evalFollowedByNode.getChildNodes()[0];
-        EvalStateNode childState = child.newState(this, beginState, null);
-        nodes.put(childState, 0);
     }
 
     @Override
@@ -47,17 +41,12 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
         return evalFollowedByNode;
     }
 
-    public final void start()
+    public final void start(MatchedEventMap beginState)
     {
-        if (nodes.isEmpty())
-        {
-            throw new IllegalStateException("Followed by state node is inactive");
-        }
-
-        for (EvalStateNode child : nodes.keySet())
-        {
-            child.start();
-        }
+        EvalNode child = evalFollowedByNode.getChildNodes()[0];
+        EvalStateNode childState = child.newState(this, null, 0L);
+        nodes.put(childState, 0);
+        childState.start(beginState);
     }
 
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
@@ -92,9 +81,9 @@ public final class EvalFollowedByStateNode extends EvalStateNode implements Eval
         else
         {
             EvalNode child = evalFollowedByNode.getChildNodes()[index + 1];
-            EvalStateNode childState = child.newState(this, matchEvent, null);
+            EvalStateNode childState = child.newState(this, null, 0L);
             nodes.put(childState, index + 1);
-            childState.start();
+            childState.start(matchEvent);
         }
     }
 

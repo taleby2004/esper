@@ -33,6 +33,7 @@ public class ContextControllerPartitioned implements ContextController, ContextC
     protected final List<ContextControllerPartitionedFilterCallback> filterCallbacks = new ArrayList<ContextControllerPartitionedFilterCallback>();
     protected final HashMap<Object, ContextControllerInstanceHandle> partitionKeys = new HashMap<Object, ContextControllerInstanceHandle>();
 
+    private ContextInternalFilterAddendum activationFilterAddendum;
     protected int currentSubpathId;
 
     public ContextControllerPartitioned(int pathId, ContextControllerLifecycleCallback activationCallback, ContextControllerPartitionedFactory factory) {
@@ -88,11 +89,12 @@ public class ContextControllerPartitioned implements ContextController, ContextC
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[]{ContextPartitionSelectorSegmented.class}, contextPartitionSelector);
     }
 
-    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states, ContextInternalFilterAddendum filterAddendum) {
         ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
+        this.activationFilterAddendum = filterAddendum;
 
         for (ContextDetailPartitionItem item : factory.getSegmentedSpec().getItems()) {
-            ContextControllerPartitionedFilterCallback callback = new ContextControllerPartitionedFilterCallback(factoryContext.getServicesContext(), factoryContext.getAgentInstanceContextCreate(), item, this);
+            ContextControllerPartitionedFilterCallback callback = new ContextControllerPartitionedFilterCallback(factoryContext.getServicesContext(), factoryContext.getAgentInstanceContextCreate(), item, this, filterAddendum);
             filterCallbacks.add(callback);
 
             if (optionalTriggeringEvent != null) {
@@ -134,9 +136,18 @@ public class ContextControllerPartitioned implements ContextController, ContextC
 
         currentSubpathId++;
 
+        // determine properties available for querying
         ContextControllerFactoryContext factoryContext = factory.getFactoryContext();
         Map<String, Object> props = ContextPropertyEventType.getPartitionBean(factoryContext.getContextName(), 0, key, factory.getSegmentedSpec().getItems().get(0).getPropertyNames());
-        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, theEvent, null, key, props, null);
+
+        // merge filter addendum, if any
+        ContextInternalFilterAddendum filterAddendum = activationFilterAddendum;
+        if (factory.hasFiltersSpecsNestedContexts()) {
+            filterAddendum = activationFilterAddendum != null ? activationFilterAddendum.deepCopy() : new ContextInternalFilterAddendum();
+            factory.populateContextInternalFilterAddendums(filterAddendum, key);
+        }
+
+        ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, theEvent, null, key, props, null, filterAddendum, false);
 
         partitionKeys.put(key, handle);
 

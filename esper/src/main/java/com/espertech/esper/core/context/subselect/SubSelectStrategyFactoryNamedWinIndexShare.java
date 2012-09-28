@@ -10,8 +10,8 @@ package com.espertech.esper.core.context.subselect;
 
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPServicesContext;
-import com.espertech.esper.epl.agg.AggregationService;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
+import com.espertech.esper.epl.agg.service.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryDesc;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.lookup.SubordTableLookupStrategy;
 import com.espertech.esper.util.StopCallback;
@@ -45,6 +45,6 @@ public class SubSelectStrategyFactoryNamedWinIndexShare implements SubSelectStra
             subselectAggregationPreprocessor = new SubselectAggregationPreprocessor(aggregationService, filterExprEval);
         }
 
-        return new SubSelectStrategyRealization(namedWindowSubqueryLookup, subselectAggregationPreprocessor, aggregationService, Collections.<ExprPriorNode, ExprPriorEvalStrategy>emptyMap(), Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap());
+        return new SubSelectStrategyRealization(namedWindowSubqueryLookup, subselectAggregationPreprocessor, aggregationService, Collections.<ExprPriorNode, ExprPriorEvalStrategy>emptyMap(), Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap(), null, null);
     }
 }

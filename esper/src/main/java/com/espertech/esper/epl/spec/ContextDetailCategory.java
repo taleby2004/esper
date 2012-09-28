@@ -15,6 +15,7 @@ import com.espertech.esper.filter.FilterSpecCompiled;
 import com.espertech.esper.filter.FilterValueSetParam;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ContextDetailCategory implements ContextDetail {
@@ -29,6 +30,12 @@ public class ContextDetailCategory implements ContextDetail {
     public ContextDetailCategory(List<ContextDetailCategoryItem> items, FilterSpecRaw filterSpecRaw) {
         this.items = items;
         this.filterSpecRaw = filterSpecRaw;
+    }
+
+    public List<FilterSpecCompiled> getFilterSpecsIfAny() {
+        List<FilterSpecCompiled> filters = new ArrayList<FilterSpecCompiled>(1);
+        filters.add(filterSpecCompiled);
+        return filters;
     }
 
     public FilterSpecRaw getFilterSpecRaw() {

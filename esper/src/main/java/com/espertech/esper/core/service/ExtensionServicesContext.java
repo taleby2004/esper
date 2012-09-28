@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.core.service;
 
+import com.espertech.esper.client.EPServiceProvider;
+
 /**
  * Marker interface for extension services that provide additional engine or statement-level extensions,
  * such as views backed by a write-behind store.
@@ -17,7 +19,7 @@ public interface ExtensionServicesContext
     /**
      * Invoked to initialize extension services after engine services initialization.
      */
-    public void init();
+    public void init(EPServicesContext engine);
 
     /**
      * Invoked to destroy the extension services, when an existing engine is initialized.

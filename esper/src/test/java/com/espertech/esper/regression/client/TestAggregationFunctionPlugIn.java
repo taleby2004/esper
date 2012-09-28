@@ -16,8 +16,8 @@ import com.espertech.esper.client.hook.AggregationFunctionFactory;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.*;
-import com.espertech.esper.epl.agg.AggregationMethod;
-import com.espertech.esper.epl.agg.AggregationValidationContext;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
+import com.espertech.esper.epl.agg.service.AggregationValidationContext;
 import com.espertech.esper.support.bean.SupportBean;
 import com.espertech.esper.support.bean.SupportBean_A;
 import com.espertech.esper.support.client.SupportConfigFactory;
@@ -127,11 +127,34 @@ public class TestAggregationFunctionPlugIn extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean("d", -1));
         EPAssertionUtil.assertPropsPerRow(listener.assertInvokedAndReset(), "val", new Object[] {"c d"}, new Object[] {"b c"});
+        epService.getEPAdministrator().destroyAllStatements();
     }
 
-    public void testDistinct()
+    public void testDistinctAndStarParam()
     {
-        String text = "select irstream concatstring(distinct theString) as val from " + SupportBean.class.getName();
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+
+        // test *-parameter
+        String textTwo = "select concatstring(*) as val from SupportBean";
+        EPStatement statementTwo = epService.getEPAdministrator().createEPL(textTwo);
+        SupportUpdateListener listenerTwo = new SupportUpdateListener();
+        statementTwo.addListener(listenerTwo);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("d", -1));
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), "val".split(","), new Object[] {"SupportBean(d, -1)"});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("e", 2));
+        EPAssertionUtil.assertProps(listenerTwo.assertOneGetNewAndReset(), "val".split(","), new Object[] {"SupportBean(d, -1) SupportBean(e, 2)"});
+
+        try {
+            epService.getEPAdministrator().createEPL("select concatstring(*) as val from SupportBean.std:lastevent(), SupportBean unidirectional");
+        }
+        catch (EPStatementException ex) {
+            assertEquals("Error starting statement: Invalid use of wildcard (*) for stream selection in a join or an empty from-clause, please use the stream-alias syntax to select a specific stream instead [select concatstring(*) as val from SupportBean.std:lastevent(), SupportBean unidirectional]", ex.getMessage());
+        }
+
+        // test distinct
+        String text = "select irstream concatstring(distinct theString) as val from SupportBean";
         EPStatement statement = epService.getEPAdministrator().createEPL(text);
         SupportUpdateListener listener = new SupportUpdateListener();
         statement.addListener(listener);

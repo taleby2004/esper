@@ -29,17 +29,23 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
     private final AgentInstanceContext agentInstanceContext;
     private final ContextDetailConditionPattern endpointPatternSpec;
     private final ContextControllerConditionCallback callback;
+    private final ContextInternalFilterAddendum filterAddendum;
+    private final boolean isStartEndpoint;
+    private final int subPathId;
 
-    protected PatternStopCallback patternStopCallback;
+    protected EvalRootState patternStopCallback;
 
-    public ContextControllerConditionPattern(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, ContextDetailConditionPattern endpointPatternSpec, ContextControllerConditionCallback callback) {
+    public ContextControllerConditionPattern(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, ContextDetailConditionPattern endpointPatternSpec, ContextControllerConditionCallback callback, ContextInternalFilterAddendum filterAddendum, boolean startEndpoint, int subPathId) {
         this.servicesContext = servicesContext;
         this.agentInstanceContext = agentInstanceContext;
         this.endpointPatternSpec = endpointPatternSpec;
         this.callback = callback;
+        this.filterAddendum = filterAddendum;
+        this.isStartEndpoint = startEndpoint;
+        this.subPathId = subPathId;
     }
 
-    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset) {
+    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset, boolean isRecoveringReslient) {
         if (patternStopCallback != null) {
             patternStopCallback.stop();
         }
@@ -60,8 +66,12 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
 
         // capture any callbacks that may occur right after start
         ConditionPatternMatchCallback callback = new ConditionPatternMatchCallback(this);
-        patternStopCallback = rootNode.start(callback, patternContext, priorMatches);
+        patternStopCallback = rootNode.start(callback, patternContext, priorMatches, isRecoveringReslient);
         callback.forwardCalls = true;
+
+        if (agentInstanceContext.getStatementContext().getExtensionServicesContext() != null) {
+            agentInstanceContext.getStatementContext().getExtensionServicesContext().startContextPattern(patternStopCallback, isStartEndpoint, subPathId);
+        }
 
         if (callback.isInvoked) {
             matchFound(Collections.<String, Object>emptyMap());
@@ -86,13 +96,16 @@ public class ContextControllerConditionPattern implements ContextControllerCondi
                 matchEventInclusive = ordered;
             }
         }
-        callback.rangeNotification(matchEvent, this, null, matchEventInclusive);
+        callback.rangeNotification(matchEvent, this, null, matchEventInclusive, filterAddendum);
     }
 
     public void deactivate() {
         if (patternStopCallback != null) {
             patternStopCallback.stop();
             patternStopCallback = null;
+            if (agentInstanceContext.getStatementContext().getExtensionServicesContext() != null) {
+                agentInstanceContext.getStatementContext().getExtensionServicesContext().stopContextPattern(patternStopCallback, isStartEndpoint, subPathId);
+            }
         }
     }
 

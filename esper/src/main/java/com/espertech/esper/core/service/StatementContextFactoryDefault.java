@@ -16,6 +16,7 @@ import com.espertech.esper.client.annotation.Priority;
 import com.espertech.esper.core.context.mgr.ContextControllerFactoryServiceImpl;
 import com.espertech.esper.core.context.stmt.StatementAIResourceRegistry;
 import com.espertech.esper.core.context.util.ContextDescriptor;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryServiceImpl;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.metric.StatementMetricHandle;
@@ -198,7 +199,8 @@ public class StatementContextFactoryDefault implements StatementContextFactory
                 patternSubexpressionPoolStmtSvc,
                 stateless,
                 ContextControllerFactoryServiceImpl.DEFAULT_FACTORY,
-                defaultAgentInstanceScriptContext);
+                defaultAgentInstanceScriptContext,
+                AggregationServiceFactoryServiceImpl.DEFAULT_FACTORY);
     }
 
     /**

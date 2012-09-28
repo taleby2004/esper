@@ -14,5 +14,5 @@ package com.espertech.esper.core.context.activator;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 
 public interface ViewableActivator {
-    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect);
+    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect, boolean isRecoveringResilient);
 }

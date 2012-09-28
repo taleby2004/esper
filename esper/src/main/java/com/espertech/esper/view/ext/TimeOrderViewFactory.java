@@ -93,7 +93,7 @@ public class TimeOrderViewFactory implements DataWindowViewFactory, DataWindowVi
 
     public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        IStreamTimeOrderRandomAccess sortedRandomAccess = ViewServiceHelper.getOptPreviousExprTimeOrderAccess(agentInstanceViewFactoryContext);
+        IStreamSortRankRandomAccess sortedRandomAccess = ViewServiceHelper.getOptPreviousExprSortedRankedAccess(agentInstanceViewFactoryContext);
         return new TimeOrderView(agentInstanceViewFactoryContext, this, timestampExpression, timestampExpression.getExprEvaluator(), intervalSize, sortedRandomAccess);
     }
 

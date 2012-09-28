@@ -58,7 +58,7 @@ public class RelativeAccessByEventNIndexMap implements IStreamRelativeAccess.ISt
         IStreamRelativeAccess iStreamRelativeAccess = accessorByEvent.get(theEvent);
         if (iStreamRelativeAccess == null)
         {
-            throw new IllegalStateException("Accessor for window random access not found for event " + theEvent);
+            return null;
         }
         return iStreamRelativeAccess;
     }

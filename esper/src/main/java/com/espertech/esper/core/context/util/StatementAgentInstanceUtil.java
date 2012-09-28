@@ -14,7 +14,10 @@ package com.espertech.esper.core.context.util;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.core.context.factory.StatementAgentInstanceFactoryResult;
 import com.espertech.esper.core.context.factory.StatementAgentInstancePreload;
-import com.espertech.esper.core.context.mgr.*;
+import com.espertech.esper.core.context.mgr.AgentInstance;
+import com.espertech.esper.core.context.mgr.AgentInstanceFilterProxy;
+import com.espertech.esper.core.context.mgr.ContextControllerStatementBase;
+import com.espertech.esper.core.context.mgr.ContextControllerTreeAgentInstanceList;
 import com.espertech.esper.core.context.stmt.AIRegistryAggregation;
 import com.espertech.esper.core.context.stmt.AIRegistryExpr;
 import com.espertech.esper.core.context.subselect.SubSelectStrategyHolder;
@@ -23,7 +26,6 @@ import com.espertech.esper.core.start.EPStatementStopMethodImpl;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.epl.view.OutputProcessViewTerminable;
-import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.event.MappedEventBean;
 import com.espertech.esper.filter.FilterHandle;
 import com.espertech.esper.util.StopCallback;
@@ -31,7 +33,10 @@ import com.espertech.esper.view.Viewable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class StatementAgentInstanceUtil {
 
@@ -111,6 +116,10 @@ public class StatementAgentInstanceUtil {
 
             // cause any filters, that may concide with the caller's filters, to be ignored
             agentInstanceContext.getEpStatementAgentInstanceHandle().getStatementFilterVersion().setStmtFilterVersion(Long.MAX_VALUE);
+
+            if (agentInstanceContext.getStatementContext().getExtensionServicesContext() != null) {
+                agentInstanceContext.getStatementContext().getExtensionServicesContext().endContextPartition(agentInstanceContext.getAgentInstanceId());
+            }
         }
         finally {
             lock.releaseWriteLock(null);
@@ -122,7 +131,8 @@ public class StatementAgentInstanceUtil {
                                                      boolean isSingleInstanceContext,
                                                      int agentInstanceId,
                                                      MappedEventBean agentInstanceProperties,
-                                                     AgentInstanceFilterProxy agentInstanceFilterProxy)
+                                                     AgentInstanceFilterProxy agentInstanceFilterProxy,
+                                                     boolean isRecoveringResilient)
     {
         StatementContext statementContext = statement.getStatementContext();
 
@@ -152,7 +162,7 @@ public class StatementAgentInstanceUtil {
 
         try {
             // start
-            StatementAgentInstanceFactoryResult startResult = statement.getFactory().newContext(agentInstanceContext);
+            StatementAgentInstanceFactoryResult startResult = statement.getFactory().newContext(agentInstanceContext, isRecoveringResilient);
 
             // hook up with listeners+subscribers
             startResult.getFinalView().addView(statement.getMergeView()); // hook output to merge view
@@ -197,6 +207,10 @@ public class StatementAgentInstanceUtil {
             // execute preloads, if any
             for (StatementAgentInstancePreload preload : startResult.getPreloadList()) {
                 preload.executePreload();
+            }
+
+            if (statementContext.getExtensionServicesContext() != null) {
+                statementContext.getExtensionServicesContext().startContextPartition(startResult, agentInstanceId);
             }
 
             // instantiate

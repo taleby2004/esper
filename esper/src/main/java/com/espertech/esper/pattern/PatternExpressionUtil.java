@@ -30,7 +30,7 @@ public class PatternExpressionUtil
     public static Object getKeys(MatchedEventMap currentState, EvalEveryDistinctNode everyDistinctNode)
     {
         EventBean[] eventsPerStream = everyDistinctNode.getFactoryNode().getConvertor().convert(currentState);
-        ExprEvaluator[] expressions = everyDistinctNode.getFactoryNode().getExpressionsArray();
+        ExprEvaluator[] expressions = everyDistinctNode.getFactoryNode().getDistinctExpressionsArray();
         if (expressions.length == 1) {
             return expressions[0].evaluate(eventsPerStream, true, everyDistinctNode.getContext().getAgentInstanceContext());
         }

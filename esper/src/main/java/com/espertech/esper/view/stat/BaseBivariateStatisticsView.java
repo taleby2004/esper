@@ -42,15 +42,16 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
     protected final AgentInstanceContext agentInstanceContext;
 
     /**
-     * Add tional properties.
+     * Additional properties.
      */
     protected final StatViewAdditionalProps additionalProps;
+
     /**
      * Event type.
      */
     protected final EventType eventType;
 
-    private Object[] lastValuesEventNew;
+    protected Object[] lastValuesEventNew;
     private EventBean lastNewEvent;
 
     /**
@@ -97,7 +98,7 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
         {
             if (this.hasViews())
             {
-                oldValues = populateMap(statisticsBean, agentInstanceContext.getStatementContext().getEventAdapterService(), eventType, additionalProps, null);
+                oldValues = populateMap(statisticsBean, agentInstanceContext.getStatementContext().getEventAdapterService(), eventType, additionalProps, lastValuesEventNew);
             }
         }
 
@@ -183,5 +184,21 @@ public abstract class BaseBivariateStatisticsView extends ViewSupport
     public final ExprNode getExpressionY()
     {
         return expressionY;
+    }
+
+    public BaseStatisticsBean getStatisticsBean() {
+        return statisticsBean;
+    }
+
+    public Object[] getLastValuesEventNew() {
+        return lastValuesEventNew;
+    }
+
+    public void setLastValuesEventNew(Object[] lastValuesEventNew) {
+        this.lastValuesEventNew = lastValuesEventNew;
+    }
+
+    public StatViewAdditionalProps getAdditionalProps() {
+        return additionalProps;
     }
 }

@@ -8,8 +8,6 @@
  **************************************************************************************/
 package com.espertech.esper.pattern;
 
-import com.espertech.esper.epl.spec.PatternGuardSpec;
-import com.espertech.esper.pattern.guard.GuardFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -18,17 +16,13 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalGuardNode extends EvalNodeBase
 {
-    private final EvalGuardFactoryNode factoryNode;
+    protected final EvalGuardFactoryNode factoryNode;
     private final EvalNode childNode;
 
     public EvalGuardNode(PatternAgentInstanceContext context, EvalGuardFactoryNode factoryNode, EvalNode childNode) {
         super(context);
         this.factoryNode = factoryNode;
         this.childNode = childNode;
-    }
-
-    public EvalNodeNumber getNodeNumber() {
-        return factoryNode.getNodeNumber();
     }
 
     public EvalGuardFactoryNode getFactoryNode() {
@@ -40,10 +34,9 @@ public class EvalGuardNode extends EvalNodeBase
     }
 
     public EvalStateNode newState(Evaluator parentNode,
-                                  MatchedEventMap beginState,
-                                  EvalStateNodeNumber stateNodeId)
+                                  EvalStateNodeNumber stateNodeNumber, long stateNodeId)
     {
-        return new EvalGuardStateNode(parentNode, this, beginState, stateNodeId);
+        return new EvalGuardStateNode(parentNode, this);
     }
 
     private static final Log log = LogFactory.getLog(EvalGuardNode.class);

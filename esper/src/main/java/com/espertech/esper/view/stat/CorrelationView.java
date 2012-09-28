@@ -27,7 +27,7 @@ import java.util.Map;
  * This class accepts most of its behaviour from its parent, {@link com.espertech.esper.view.stat.BaseBivariateStatisticsView}. It adds
  * the usage of the correlation bean and the appropriate schema.
  */
-public final class CorrelationView extends BaseBivariateStatisticsView implements CloneableView
+public class CorrelationView extends BaseBivariateStatisticsView implements CloneableView
 {
     /**
      * Constructor.

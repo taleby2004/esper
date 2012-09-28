@@ -11,7 +11,7 @@ package com.espertech.esper.core.start;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.core.OrderByProcessor;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.core.ResultSetProcessorFactoryDesc;

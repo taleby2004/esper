@@ -121,6 +121,10 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
         // called after services are activated, to begin statement loading from store
     }
 
+    public Map<String, EPStatement> getStmtNameToStmt() {
+        return stmtNameToStmtMap;
+    }
+
     public synchronized EPStatement createAndStart(StatementSpecRaw statementSpec, String expression, boolean isPattern, String optStatementName, Object userObject, EPIsolationUnitServices isolationUnitServices, String statementId, EPStatementObjectModel optionalModel)
     {
         String assignedStatementId = statementId;
@@ -1056,7 +1060,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
                     selectFromType = filterStreamSpec.getFilterSpec().getFilterForEventType();
                     selectFromTypeName = filterStreamSpec.getFilterSpec().getFilterForEventTypeName();
 
-                    if (spec.getCreateWindowDesc().getInsertFilter() != null)
+                    if (spec.getCreateWindowDesc().isInsert() || spec.getCreateWindowDesc().getInsertFilter() != null)
                     {
                         throw new EPStatementException("A named window by name '" + selectFromTypeName + "' could not be located, use the insert-keyword with an existing named window", eplStatement);
                     }
@@ -1373,7 +1377,7 @@ public class StatementLifecycleSvcImpl implements StatementLifecycleSvc
             }
             catch (ExprValidationException e)
             {
-                throw new EPStatementException(e.getMessage(), eplStatement);
+                throw new EPStatementException(e.getMessage(), e, eplStatement);
             }
 
             // determine an element name if none assigned

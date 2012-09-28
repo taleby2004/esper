@@ -42,7 +42,7 @@ public class ViewableActivatorFilterProxy implements ViewableActivator {
         isSubSelect = subSelect;
     }
 
-    public ViewableActivationResult activate(final AgentInstanceContext agentInstanceContext, boolean isSubselect) {
+    public ViewableActivationResult activate(final AgentInstanceContext agentInstanceContext, boolean isSubselect, boolean isRecoveringResilient) {
 
         // New event stream
         EventType resultEventType = filterSpec.getResultEventType();
@@ -109,7 +109,7 @@ public class ViewableActivatorFilterProxy implements ViewableActivator {
         services.getFilterService().add(filterValueSet, filterHandle);
 
         ViewableActivatorFilterProxyStopCallback stopCallback = new ViewableActivatorFilterProxyStopCallback(this, filterHandle);
-        return new ViewableActivationResult(inputStream, stopCallback, null);
+        return new ViewableActivationResult(inputStream, stopCallback, null, null);
     }
 
     public EPServicesContext getServices() {

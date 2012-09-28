@@ -72,12 +72,12 @@ public class EPStatementStartMethodCreateVariable extends EPStatementStartMethod
             // for new statement we don't allow creating the same variable
             if (isNewStatement)
             {
-                throw new ExprValidationException("Cannot create variable: " + ex.getMessage());
+                throw new ExprValidationException("Cannot create variable: " + ex.getMessage(), ex);
             }
         }
         catch (VariableDeclarationException ex)
         {
-            throw new ExprValidationException("Cannot create variable: " + ex.getMessage());
+            throw new ExprValidationException("Cannot create variable: " + ex.getMessage(), ex);
         }
 
         final CreateVariableView createView = new CreateVariableView(statementContext.getStatementId(), services.getEventAdapterService(), services.getVariableService(), createDesc.getVariableName(), statementContext.getStatementResultService());

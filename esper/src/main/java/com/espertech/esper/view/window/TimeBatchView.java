@@ -40,23 +40,23 @@ import java.util.ArrayDeque;
  * If there are no events in the current and prior batch, the view will not invoke the update method of child views.
  * In that case also, no next callback is scheduled with the scheduling service until the next event arrives.
  */
-public final class TimeBatchView extends ViewSupport implements CloneableView, StoppableView, StopCallback, DataWindowView {
+public class TimeBatchView extends ViewSupport implements CloneableView, StoppableView, StopCallback, DataWindowView {
     // View parameters
     private final TimeBatchViewFactory timeBatchViewFactory;
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
-    private final long msecIntervalSize;
-    private final Long initialReferencePoint;
-    private final boolean isForceOutput;
-    private final boolean isStartEager;
-    private final ViewUpdatedCollection viewUpdatedCollection;
-    private final ScheduleSlot scheduleSlot;
-    private EPStatementHandleCallback handle;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceContext;
+    protected final long msecIntervalSize;
+    protected final Long initialReferencePoint;
+    protected final boolean isForceOutput;
+    protected final boolean isStartEager;
+    protected final ViewUpdatedCollection viewUpdatedCollection;
+    protected final ScheduleSlot scheduleSlot;
+    protected EPStatementHandleCallback handle;
 
     // Current running parameters
-    private Long currentReferencePoint;
-    private ArrayDeque<EventBean> lastBatch = null;
-    private ArrayDeque<EventBean> currentBatch = new ArrayDeque<EventBean>();
-    private boolean isCallbackScheduled;
+    protected Long currentReferencePoint;
+    protected ArrayDeque<EventBean> lastBatch = null;
+    protected ArrayDeque<EventBean> currentBatch = new ArrayDeque<EventBean>();
+    protected boolean isCallbackScheduled;
 
     /**
      * Constructor.
@@ -146,7 +146,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, S
         return parent.getEventType();
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         // we don't care about removed data from a prior view
         if ((newData == null) || (newData.length == 0))
@@ -175,7 +175,9 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, S
         }
 
         // add data points to the timeWindow
-        currentBatch.addAll(Arrays.asList(newData));
+        for (EventBean newEvent : newData) {
+            currentBatch.add(newEvent);
+        }
 
         // We do not update child views, since we batch the events.
     }
@@ -184,7 +186,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, S
      * This method updates child views and clears the batch of events.
      * We schedule a new callback at this time if there were events in the batch.
      */
-    protected final void sendBatch()
+    protected void sendBatch()
     {
         isCallbackScheduled = false;
 
@@ -257,7 +259,7 @@ public final class TimeBatchView extends ViewSupport implements CloneableView, S
                 " initialReferencePoint=" + initialReferencePoint;
     }
 
-    private void scheduleCallback()
+    protected void scheduleCallback()
     {
         long current = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
         long afterMSec = computeWaitMSec(current, this.currentReferencePoint, this.msecIntervalSize);

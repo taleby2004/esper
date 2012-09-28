@@ -19,8 +19,8 @@ import java.util.Collection;
  */
 public final class EvalFilterStateNodeConsumeImpl extends EvalFilterStateNode implements EvalFilterStateNodeConsume
 {
-    public EvalFilterStateNodeConsumeImpl(Evaluator parentNode, EvalFilterNode evalFilterNode, MatchedEventMap beginState) {
-        super(parentNode, evalFilterNode, beginState);
+    public EvalFilterStateNodeConsumeImpl(Evaluator parentNode, EvalFilterNode evalFilterNode) {
+        super(parentNode, evalFilterNode);
     }
 
     public final void matchFound(EventBean theEvent, Collection<FilterHandleCallback> allStmtMatches)

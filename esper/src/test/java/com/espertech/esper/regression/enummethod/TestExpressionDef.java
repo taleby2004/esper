@@ -443,6 +443,35 @@ public class TestExpressionDef extends TestCase {
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeString("E1,E2,E3,E4"));
         LambdaAssertionUtil.assertValuesArrayScalar(listener, "val1", "E3", "E4");
+
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // test with cast and with on-select and where-clause use
+        epService.getEPAdministrator().getConfiguration().addEventType(MyEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+
+        listener.reset();
+        epService.getEPAdministrator().createEPL("create window MyWindow.win:keepall() as (myObject long)");
+        epService.getEPAdministrator().createEPL("insert into MyWindow(myObject) select cast(intPrimitive, long) from SupportBean");
+        stmt = epService.getEPAdministrator().createEPL("expression theExpression {" +
+                "  myEvent => case when myEvent.myObject = 'X' " +
+                "    then 0 else cast(myEvent.myObject, long) end " +
+                "} " +
+                "on MyEvent as myEvent select mw.* from MyWindow as mw where mw.myObject = theExpression(myEvent)");
+        stmt.addListener(listener);
+        String[] props = new String[] {"myObject"};
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+
+        epService.getEPRuntime().sendEvent(new MyEvent(2));
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new MyEvent("X"));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), props, new Object[] {0L});
+
+        epService.getEPRuntime().sendEvent(new MyEvent(1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), props, new Object[] {1L});
     }
 
     public void testEventTypeAndSODA() {
@@ -634,4 +663,17 @@ public class TestExpressionDef extends TestCase {
         }
         return result.toArray(new Map[result.size()]);
     }
+
+    public static class MyEvent {
+        private final Object myObject;
+
+        public MyEvent(Object myObject) {
+            this.myObject = myObject;
+        }
+
+        public Object getMyObject() {
+            return myObject;
+        }
+    }
+
 }

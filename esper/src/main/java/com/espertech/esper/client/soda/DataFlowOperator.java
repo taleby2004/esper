@@ -26,7 +26,7 @@ public class DataFlowOperator implements Serializable {
     private String operatorName;
     private List<DataFlowOperatorInput> input;
     private List<DataFlowOperatorOutput> output;
-    private Map<String, Object> parameters;
+    private List<DataFlowOperatorParameter> parameters;
 
     /**
      * Ctor
@@ -36,7 +36,7 @@ public class DataFlowOperator implements Serializable {
      * @param output output stream definitions
      * @param parameters parameters
      */
-    public DataFlowOperator(List<AnnotationPart> annotations, String operatorName, List<DataFlowOperatorInput> input, List<DataFlowOperatorOutput> output, Map<String, Object> parameters) {
+    public DataFlowOperator(List<AnnotationPart> annotations, String operatorName, List<DataFlowOperatorInput> input, List<DataFlowOperatorOutput> output, List<DataFlowOperatorParameter> parameters) {
         this.annotations = annotations;
         this.operatorName = operatorName;
         this.input = input;
@@ -121,7 +121,7 @@ public class DataFlowOperator implements Serializable {
      * </p>
      * @return map of parameters
      */
-    public Map<String, Object> getParameters() {
+    public List<DataFlowOperatorParameter> getParameters() {
         return parameters;
     }
 
@@ -132,7 +132,7 @@ public class DataFlowOperator implements Serializable {
      * </p>
      * @param parameters map of parameters
      */
-    public void setParameters(Map<String, Object> parameters) {
+    public void setParameters(List<DataFlowOperatorParameter> parameters) {
         this.parameters = parameters;
     }
 
@@ -166,7 +166,7 @@ public class DataFlowOperator implements Serializable {
                 writer.write(delimiter);
                 writer.write(outputItem.getStreamName());
                 writeTypes(outputItem.getTypeInfo(), writer);
-                delimiter = ",";
+                delimiter = ", ";
             }
         }
 
@@ -177,23 +177,14 @@ public class DataFlowOperator implements Serializable {
         else {
             writer.write(" {");
             formatter.beginDataFlowOperatorDetails(writer);
-            String delimiter = "";
-            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                writer.write(delimiter);
-                writer.write(entry.getKey());
-                writer.write(": ");
-                if (entry.getValue() instanceof EPStatementObjectModel) {
-                    writer.write("(");
-                    ((EPStatementObjectModel) entry.getValue()).toEPL(writer);
-                    writer.write(")");
+            String delimiter = ",";
+            int count = 0;
+            for (DataFlowOperatorParameter parameter : parameters) {
+                parameter.toEpl(writer);
+                count++;
+                if (parameters.size() > count) {
+                    writer.write(delimiter);
                 }
-                else if (entry.getValue() instanceof Expression) {
-                    ((Expression) entry.getValue()).toEPL(writer, ExpressionPrecedenceEnum.MINIMUM);
-                }
-                else {
-                    writer.write(entry.getValue().toString());
-                }
-                delimiter = ",";
                 formatter.endDataFlowOperatorConfig(writer);
             }
             writer.write("}");
@@ -208,7 +199,7 @@ public class DataFlowOperator implements Serializable {
             for (String name : inputItem.getInputStreamNames()) {
                 writer.write(delimiterNames);
                 writer.write(name);
-                delimiterNames = ",";
+                delimiterNames = ", ";
             }
             writer.write(")");
         }

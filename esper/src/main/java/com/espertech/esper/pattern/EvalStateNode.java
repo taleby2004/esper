@@ -16,14 +16,14 @@ package com.espertech.esper.pattern;
 public abstract class EvalStateNode
 {
     private Evaluator parentEvaluator;
-    private final EvalStateNodeNumber stateObjectId;
 
     /**
      * Starts the event expression or an instance of it.
      * Child classes are expected to initialize and start any event listeners
      * or schedule any time-based callbacks as needed.
+     * @param beginState
      */
-    public abstract void start();
+    public abstract void start(MatchedEventMap beginState);
 
     /**
      * Stops the event expression or an instance of it. Child classes are expected to free resources
@@ -61,12 +61,10 @@ public abstract class EvalStateNode
     /**
      * Constructor.
      * @param parentNode is the evaluator for this node on which to indicate a change in truth value
-     * @param stateObjectId is the state object id assigned to state node
      */
-    public EvalStateNode(Evaluator parentNode, EvalStateNodeNumber stateObjectId)
+    public EvalStateNode(Evaluator parentNode)
     {
         this.parentEvaluator = parentNode;
-        this.stateObjectId = stateObjectId;
     }
 
     /**
@@ -76,15 +74,6 @@ public abstract class EvalStateNode
     public final Evaluator getParentEvaluator()
     {
         return parentEvaluator;
-    }
-
-    /**
-     * Returns the state nodes object id.
-     * @return object id
-     */
-    public EvalStateNodeNumber getStateObjectId()
-    {
-        return stateObjectId;
     }
 
     /**

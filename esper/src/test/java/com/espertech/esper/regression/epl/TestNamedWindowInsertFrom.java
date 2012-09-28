@@ -248,6 +248,16 @@ public class TestNamedWindowInsertFrom extends TestCase
 
         try
         {
+            epService.getEPAdministrator().createEPL("create window testWindow3.win:keepall() as SupportBean insert");
+            fail();
+        }
+        catch (EPStatementException ex)
+        {
+            assertEquals("A named window by name 'SupportBean' could not be located, use the insert-keyword with an existing named window [create window testWindow3.win:keepall() as SupportBean insert]", ex.getMessage());
+        }
+
+        try
+        {
             epService.getEPAdministrator().createEPL("create window testWindow3.win:keepall() as select * from " + SupportBean.class.getName() + " insert where (intPrimitive = 10)");
             fail();
         }

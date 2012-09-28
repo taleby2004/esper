@@ -8,8 +8,12 @@
  **************************************************************************************/
 package com.espertech.esper.core.service;
 
+import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPSubscriberException;
+import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.util.JavaClassHelper;
+import com.espertech.esper.util.TypeWidener;
+import com.espertech.esper.util.TypeWidenerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -66,70 +70,119 @@ public class ResultDeliveryStrategyFactory
         boolean isSingleRowMap = false;
         boolean isSingleRowObjectArr = false;
         boolean isTypeArrayDelivery = false;
+
+        // find an exact-matching method: no conversions and not even unboxing/boxing
         for (Method method : updateMethods)
         {
             Class[] parameters = method.getParameterTypes();
-
-            if (parameters.length == selectClauseTypes.length)
-            {
-                boolean fitsParameters = true;
-                for (int i = 0; i < parameters.length; i++)
-                {
-                    Class boxedExpressionType = JavaClassHelper.getBoxedType(selectClauseTypes[i]);
-                    Class boxedParameterType = JavaClassHelper.getBoxedType(parameters[i]);
-                    if ((boxedExpressionType != null) && (!JavaClassHelper.isAssignmentCompatible(boxedExpressionType, boxedParameterType)))
-                    {
-                        fitsParameters = false;
+            if (parameters.length == selectClauseTypes.length) {
+                boolean fits = true;
+                for (int i = 0; i < parameters.length; i++) {
+                    if ((selectClauseTypes[i] != null) && (selectClauseTypes[i] != parameters[i])) {
+                        fits = false;
                         break;
                     }
                 }
-                if (fitsParameters)
-                {
+                if (fits) {
                     subscriptionMethod = method;
                     break;
                 }
             }
+        }
 
-            if ((parameters.length == 1) && (parameters[0] == Map.class))
+        // when not yet resolved, find an exact-matching method with boxing/unboxing
+        if (subscriptionMethod == null) {
+            for (Method method : updateMethods)
             {
-                isSingleRowMap = true;
-                subscriptionMethod = method;
-                break;
-            }
-            if ((parameters.length == 1) && (parameters[0] == Object[].class))
-            {
-                isSingleRowObjectArr = true;
-                subscriptionMethod = method;
-                break;
-            }
-
-            if ((parameters.length == 2) && (parameters[0] == Map[].class) && (parameters[1] == Map[].class))
-            {
-                subscriptionMethod = method;
-                isMapArrayDelivery = true;
-                break;
-            }
-            if ((parameters.length == 2) && (parameters[0] == Object[][].class) && (parameters[1] == Object[][].class))
-            {
-                subscriptionMethod = method;
-                isObjectArrayDelivery = true;
-                break;
-            }
-            // Handle uniform underlying or column type array dispatch
-            if ((parameters.length == 2) && (parameters[0].equals(parameters[1])) && (parameters[0].isArray())
-                    && (selectClauseTypes.length == 1))
-            {
-                Class componentType = parameters[0].getComponentType();
-                if (JavaClassHelper.isAssignmentCompatible(selectClauseTypes[0], componentType))
-                {
-                    subscriptionMethod = method;
-                    isTypeArrayDelivery = true;
-                    break;
+                Class[] parameters = method.getParameterTypes();
+                if (parameters.length == selectClauseTypes.length) {
+                    boolean fits = true;
+                    for (int i = 0; i < parameters.length; i++) {
+                        Class boxedExpressionType = JavaClassHelper.getBoxedType(selectClauseTypes[i]);
+                        Class boxedParameterType = JavaClassHelper.getBoxedType(parameters[i]);
+                        if ((boxedExpressionType != null) && (boxedExpressionType != boxedParameterType)) {
+                            fits = false;
+                            break;
+                        }
+                    }
+                    if (fits) {
+                        subscriptionMethod = method;
+                        break;
+                    }
                 }
             }
-                        
-            if ((parameters.length == 0) && (selectClauseTypes.length == 1) && (selectClauseTypes[0] == null)) {
-                subscriptionMethod = method;
+        }
+
+        // when not yet resolved, find assignment-compatible methods that may require widening (including Integer to Long etc.)
+        boolean checkWidening = false;
+        if (subscriptionMethod == null) {
+            for (Method method : updateMethods) {
+                Class[] parameters = method.getParameterTypes();
+                if (parameters.length == selectClauseTypes.length) {
+                    boolean fits = true;
+                    for (int i = 0; i < parameters.length; i++) {
+                        Class boxedExpressionType = JavaClassHelper.getBoxedType(selectClauseTypes[i]);
+                        Class boxedParameterType = JavaClassHelper.getBoxedType(parameters[i]);
+                        if ((boxedExpressionType != null) && (!JavaClassHelper.isAssignmentCompatible(boxedExpressionType, boxedParameterType))) {
+                            fits = false;
+                            break;
+                        }
+                    }
+                    if (fits) {
+                        subscriptionMethod = method;
+                        checkWidening = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // when not yet resolved, find first-fit wildcard method
+        if (subscriptionMethod == null) {
+            for (Method method : updateMethods)
+            {
+                Class[] parameters = method.getParameterTypes();
+                if ((parameters.length == 1) && (parameters[0] == Map.class))
+                {
+                    isSingleRowMap = true;
+                    subscriptionMethod = method;
+                    break;
+                }
+                if ((parameters.length == 1) && (parameters[0] == Object[].class))
+                {
+                    isSingleRowObjectArr = true;
+                    subscriptionMethod = method;
+                    break;
+                }
+
+                if ((parameters.length == 2) && (parameters[0] == Map[].class) && (parameters[1] == Map[].class))
+                {
+                    subscriptionMethod = method;
+                    isMapArrayDelivery = true;
+                    break;
+                }
+                if ((parameters.length == 2) && (parameters[0] == Object[][].class) && (parameters[1] == Object[][].class))
+                {
+                    subscriptionMethod = method;
+                    isObjectArrayDelivery = true;
+                    break;
+                }
+                // Handle uniform underlying or column type array dispatch
+                if ((parameters.length == 2) && (parameters[0].equals(parameters[1])) && (parameters[0].isArray())
+                        && (selectClauseTypes.length == 1))
+                {
+                    Class componentType = parameters[0].getComponentType();
+                    if (JavaClassHelper.isAssignmentCompatible(selectClauseTypes[0], componentType))
+                    {
+                        subscriptionMethod = method;
+                        isTypeArrayDelivery = true;
+                        break;
+                    }
+                }
+
+                if ((parameters.length == 0) && (selectClauseTypes.length == 1) && (selectClauseTypes[0] == null)) {
+                    subscriptionMethod = method;
+                }
             }
         }
 
@@ -222,9 +275,50 @@ public class ResultDeliveryStrategyFactory
         }
         else
         {
-            convertor = new DeliveryConvertorNull();
+            if (checkWidening) {
+                convertor = determineWideningDeliveryConvertor(selectClauseTypes, subscriptionMethod.getParameterTypes(), subscriptionMethod);
+            }
+            else {
+                convertor = DeliveryConvertorNull.INSTANCE;
+            }
         }
 
         return new ResultDeliveryStrategyImpl(statementName, subscriber, convertor, subscriptionMethod, startMethod, endMethod, rStreamMethod);
     }
+
+    private static DeliveryConvertor determineWideningDeliveryConvertor(Class[] selectClauseTypes, Class[] parameterTypes, Method method) {
+        boolean needWidener = false;
+        for (int i = 0; i < selectClauseTypes.length; i++) {
+            TypeWidener optionalWidener = getWidener(i, selectClauseTypes[i], parameterTypes[i], method);
+            if (optionalWidener != null) {
+                needWidener = true;
+                break;
+            }
+        }
+        if (!needWidener) {
+            return DeliveryConvertorNull.INSTANCE;
+        }
+        TypeWidener[] wideners = new TypeWidener[selectClauseTypes.length];
+        for (int i = 0; i < selectClauseTypes.length; i++) {
+            wideners[i] = getWidener(i, selectClauseTypes[i], parameterTypes[i], method);
+        }
+        return new DeliveryConvertorWidener(wideners);
+    }
+
+    private static TypeWidener getWidener(int columnNum, Class selectClauseType, Class parameterType, Method method) {
+        if (selectClauseType == null || parameterType == null) {
+            return null;
+        }
+        if (selectClauseType == parameterType) {
+            return null;
+        }
+        try {
+            return TypeWidenerFactory.getCheckPropertyAssignType("Select-Clause Column " + columnNum, selectClauseType, parameterType, "Method Parameter " + columnNum);
+        }
+        catch (ExprValidationException e) {
+            throw new EPException("Unexpected exception assigning select clause columns to subscriber method " + method + ": " + e.getMessage(), e);
+        }
+    }
+
+
 }

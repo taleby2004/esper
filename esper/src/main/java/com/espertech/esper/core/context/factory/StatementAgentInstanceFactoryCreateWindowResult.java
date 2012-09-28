@@ -20,11 +20,31 @@ import com.espertech.esper.view.Viewable;
 import java.util.Collections;
 
 public class StatementAgentInstanceFactoryCreateWindowResult extends StatementAgentInstanceFactoryResult {
-    public StatementAgentInstanceFactoryCreateWindowResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext) {
+
+    private final Viewable eventStreamParentViewable;
+    private final StatementAgentInstancePostLoad postLoad;
+    private final Viewable topView;
+
+    public StatementAgentInstanceFactoryCreateWindowResult(Viewable finalView, StopCallback stopCallback, AgentInstanceContext agentInstanceContext, Viewable eventStreamParentViewable, StatementAgentInstancePostLoad postLoad, Viewable topView) {
         super(finalView, stopCallback, agentInstanceContext,
                     null, Collections.<ExprSubselectNode, SubSelectStrategyHolder>emptyMap(),
                 Collections.<ExprPriorNode, ExprPriorEvalStrategy>emptyMap(), Collections.<ExprPreviousNode, ExprPreviousEvalStrategy>emptyMap(),
                 Collections.<StatementAgentInstancePreload>emptyList()
         );
+        this.eventStreamParentViewable = eventStreamParentViewable;
+        this.postLoad = postLoad;
+        this.topView = topView;
+    }
+
+    public Viewable getEventStreamParentViewable() {
+        return eventStreamParentViewable;
+    }
+
+    public StatementAgentInstancePostLoad getPostLoad() {
+        return postLoad;
+    }
+
+    public Viewable getTopView() {
+        return topView;
     }
 }

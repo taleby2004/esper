@@ -12,6 +12,7 @@
 package com.espertech.esper.epl.agg;
 
 import com.espertech.esper.client.EventBean;
+import com.espertech.esper.epl.agg.service.AggSvcGroupAllNoAccessImpl;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.support.epl.SupportAggregator;
 import com.espertech.esper.support.epl.SupportExprNode;

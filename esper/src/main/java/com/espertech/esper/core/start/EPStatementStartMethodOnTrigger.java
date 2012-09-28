@@ -28,7 +28,7 @@ import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.context.util.ContextMergeView;
 import com.espertech.esper.core.context.util.ContextPropertyRegistry;
 import com.espertech.esper.core.service.*;
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.core.ResultSetProcessorFactoryDesc;
 import com.espertech.esper.epl.core.ResultSetProcessorFactoryFactory;
 import com.espertech.esper.epl.core.StreamTypeService;
@@ -334,14 +334,14 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
             for (ExprSubselectNode node : subSelectStrategyCollection.getSubqueries().keySet()) {
                 AIRegistrySubselect specificService = aiRegistryExpr.allocateSubselect(node);
                 node.setStrategy(specificService);
-                subselectStrategyInstances.put(node, new SubSelectStrategyHolder(specificService, null, null, null));
+                subselectStrategyInstances.put(node, new SubSelectStrategyHolder(specificService, null, null, null, null, null));
             }
 
             ContextMergeView mergeView = new ContextMergeView(resultSetProcessorPrototype.getResultSetProcessorFactory().getResultEventType());
             finalViewable = mergeView;
 
             ContextManagedStatementOnTriggerDesc statement = new ContextManagedStatementOnTriggerDesc(statementSpec, statementContext, mergeView, contextFactory);
-            services.getContextManagementService().addStatement(contextName, statement);
+            services.getContextManagementService().addStatement(contextName, statement, isRecoveringResilient);
             stopStatementMethod = new EPStatementStopMethod(){
                 public void stop()
                 {
@@ -359,7 +359,7 @@ public class EPStatementStartMethodOnTrigger extends EPStatementStartMethodBase
         // Without context - start here
         else {
             AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
-            final StatementAgentInstanceFactoryOnTriggerResult resultOfStart = contextFactory.newContext(agentInstanceContext);
+            final StatementAgentInstanceFactoryOnTriggerResult resultOfStart = contextFactory.newContext(agentInstanceContext, false);
             finalViewable = resultOfStart.getFinalView();
             stopStatementMethod = new EPStatementStopMethod() {
                 public void stop() {

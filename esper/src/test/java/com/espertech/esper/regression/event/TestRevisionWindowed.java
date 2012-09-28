@@ -140,9 +140,8 @@ public class TestRevisionWindowed extends TestCase
                 new Object[][]{{"E3", "p1_2", "p5_1", "M1"}, {"E4", "p1_1", "p5_1", "M0"}, {"E5", "p1_1", "p5_2", "M2"}});
 
         epService.getEPRuntime().sendEvent(new SupportDeltaOne("E6", "p1_1", "p5_2"));
-        EPAssertionUtil.assertProps(listenerOne.getLastNewData()[0], fields, new Object[]{"E6", "p1_1", "p5_2", "M2"});
-        EPAssertionUtil.assertProps(listenerOne.getLastOldData()[1], fields, new Object[]{"E5", "p1_1", "p5_2", "M2"});
-        EPAssertionUtil.assertProps(listenerOne.getLastOldData()[0], fields, new Object[]{"E3", "p1_2", "p5_1", "M1"});
+        EPAssertionUtil.assertProps(listenerOne.assertPairGetIRAndReset(), fields,
+                new Object[]{"E6", "p1_1", "p5_2", "M2"}, new Object[]{"E5", "p1_1", "p5_2", "M2"});
     }
 
     public void testTimeWindow()

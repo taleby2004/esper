@@ -12,7 +12,9 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.filter.FilterSpecCompiled;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ContextDetailPartitioned implements ContextDetail {
@@ -26,5 +28,13 @@ public class ContextDetailPartitioned implements ContextDetail {
 
     public List<ContextDetailPartitionItem> getItems() {
         return items;
+    }
+
+    public List<FilterSpecCompiled> getFilterSpecsIfAny() {
+        List<FilterSpecCompiled> filters = new ArrayList<FilterSpecCompiled>(items.size());
+        for (ContextDetailPartitionItem item : items) {
+            filters.add(item.getFilterSpecCompiled());
+        }
+        return filters;
     }
 }

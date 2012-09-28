@@ -8,6 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.named;
 
+import com.espertech.esper.core.context.factory.StatementAgentInstancePostLoad;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 
 /**
@@ -59,5 +60,13 @@ public class NamedWindowProcessorInstance
 
     public Integer getAgentInstanceId() {
         return agentInstanceId;
+    }
+
+    public StatementAgentInstancePostLoad getPostLoad() {
+        return new StatementAgentInstancePostLoad() {
+            public void executePostLoad() {
+                rootViewInstance.postLoad();
+            }
+        };
     }
 }

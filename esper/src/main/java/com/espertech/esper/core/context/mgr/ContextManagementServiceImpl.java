@@ -35,7 +35,7 @@ public class ContextManagementServiceImpl implements ContextManagementService {
         contexts = new HashMap<String, ContextManagerEntry>();
     }
 
-    public void addContextSpec(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, CreateContextDesc contextDesc) throws ExprValidationException {
+    public void addContextSpec(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, CreateContextDesc contextDesc, boolean isRecoveringResilient) throws ExprValidationException {
 
         ContextManagerEntry mgr = contexts.get(contextDesc.getContextName());
         if (mgr != null) {
@@ -45,7 +45,7 @@ public class ContextManagementServiceImpl implements ContextManagementService {
             throw new ExprValidationException("Context by name '" + contextDesc.getContextName() + "' already exists");
         }
 
-        ContextControllerFactoryServiceContext factoryServiceContext = new ContextControllerFactoryServiceContext(contextDesc.getContextName(), servicesContext, contextDesc.getContextDetail(), agentInstanceContext);
+        ContextControllerFactoryServiceContext factoryServiceContext = new ContextControllerFactoryServiceContext(contextDesc.getContextName(), servicesContext, contextDesc.getContextDetail(), agentInstanceContext, isRecoveringResilient);
         ContextManager contextManager;
         if (contextDesc.getContextDetail() instanceof ContextDetailNested) {
             contextManager = new ContextManagerNested(factoryServiceContext);
@@ -79,13 +79,13 @@ public class ContextManagementServiceImpl implements ContextManagementService {
         return entry.getContextManager();
     }
 
-    public void addStatement(String contextName, ContextControllerStatementBase statement) throws ExprValidationException {
+    public void addStatement(String contextName, ContextControllerStatementBase statement, boolean isRecoveringResilient) throws ExprValidationException {
         ContextManagerEntry entry = contexts.get(contextName);
         if (entry == null) {
             throw new ExprValidationException(getNotDecaredText(contextName));
         }
         entry.addStatement(statement.getStatementContext().getStatementId());
-        entry.getContextManager().addStatement(statement);
+        entry.getContextManager().addStatement(statement, isRecoveringResilient);
     }
 
     public void destroyedStatement(String contextName, String statementName, String statementId) {

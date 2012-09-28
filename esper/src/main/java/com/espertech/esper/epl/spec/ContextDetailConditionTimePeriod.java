@@ -12,6 +12,9 @@
 package com.espertech.esper.epl.spec;
 
 import com.espertech.esper.epl.expression.ExprTimePeriod;
+import com.espertech.esper.filter.FilterSpecCompiled;
+
+import java.util.List;
 
 public class ContextDetailConditionTimePeriod implements ContextDetailCondition {
     private static final long serialVersionUID = 5140498109356559324L;
@@ -27,5 +30,9 @@ public class ContextDetailConditionTimePeriod implements ContextDetailCondition 
 
     public void setTimePeriod(ExprTimePeriod timePeriod) {
         this.timePeriod = timePeriod;
+    }
+
+    public List<FilterSpecCompiled> getFilterSpecIfAny() {
+        return null;
     }
 }

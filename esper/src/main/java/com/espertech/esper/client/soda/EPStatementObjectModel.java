@@ -65,6 +65,7 @@ public class EPStatementObjectModel implements Serializable
     private RowLimitClause rowLimitClause;
     private MatchRecognizeClause matchRecognizeClause;
     private ForClause forClause;
+    private String treeObjectName;
 
     /**
      * Ctor.
@@ -788,5 +789,23 @@ public class EPStatementObjectModel implements Serializable
      */
     public void setCreateDataFlow(CreateDataFlowClause createDataFlow) {
         this.createDataFlow = createDataFlow;
+    }
+
+    /**
+     * Returns the internal expression id assigned for tools to identify the expression.
+     * @return object name
+     */
+    public String getTreeObjectName()
+    {
+        return treeObjectName;
+    }
+
+    /**
+     * Sets an internal expression id assigned for tools to identify the expression.
+     * @param treeObjectName object name
+     */
+    public void setTreeObjectName(String treeObjectName)
+    {
+        this.treeObjectName = treeObjectName;
     }
 }

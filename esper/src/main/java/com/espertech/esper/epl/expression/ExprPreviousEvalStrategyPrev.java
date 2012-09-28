@@ -108,6 +108,9 @@ public class ExprPreviousEvalStrategyPrev implements ExprPreviousEvalStrategy
         {
             EventBean evalEvent = eventsPerStream[streamNumber];
             RelativeAccessByEventNIndex relativeAccess = relativeAccessGetter.getAccessor(evalEvent);
+            if (relativeAccess == null) {
+                return null;
+            }
             if (!isTail) {
                 substituteEvent = relativeAccess.getRelativeToEvent(evalEvent, index);
             }

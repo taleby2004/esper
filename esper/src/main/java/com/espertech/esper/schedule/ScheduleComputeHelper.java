@@ -8,12 +8,14 @@
  **************************************************************************************/
 package com.espertech.esper.schedule;
 
-import java.util.*;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
-import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.type.ScheduleUnit;
+import com.espertech.esper.util.ExecutionPathDebugLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.SortedSet;
 
 /**
  * For a crontab-like schedule, this class computes the next occurance given a start time and a specification of
@@ -60,17 +62,22 @@ public final class ScheduleComputeHelper
             afterTimeInMillis += 60 * MIN_OFFSET_MSEC;
         }
 
-        Date result = compute(spec, afterTimeInMillis);
-
-        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
-        {
-            log.debug(".computeNextOccurance Completed, result=" + result + "  long=" + result.getTime());
-        }
-
-        return result.getTime();
+        return compute(spec, afterTimeInMillis);
     }
 
-    private static Date compute(ScheduleSpec spec, long afterTimeInMillis)
+    /**
+     * Computes the next lowest date in milliseconds based on a specification and the
+     * from-time passed in and returns the delta from the current time.
+     * @param spec defines the schedule
+     * @param afterTimeInMillis defines the start time
+     * @return a long millisecond value representing the delta between current time and the next schedule occurance matching the spec
+     */
+    public static long computeDeltaNextOccurance(ScheduleSpec spec, long afterTimeInMillis)
+    {
+        return computeNextOccurance(spec, afterTimeInMillis) - afterTimeInMillis;
+    }
+
+    private static long compute(ScheduleSpec spec, long afterTimeInMillis)
     {
         while (true)
         {
@@ -252,12 +259,12 @@ public final class ScheduleComputeHelper
         return dayOfMonth;
     }
 
-    private static Date getTime(ScheduleCalendar result, int year)
+    private static long getTime(ScheduleCalendar result, int year)
     {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, result.getMonth() - 1, result.getDayOfMonth(), result.getHour(), result.getMinute(), result.getSecond());
         calendar.set(Calendar.MILLISECOND, result.getMilliseconds());
-        return calendar.getTime();
+        return calendar.getTimeInMillis();
     }
 
     /*

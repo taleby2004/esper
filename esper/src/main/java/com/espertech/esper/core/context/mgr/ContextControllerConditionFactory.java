@@ -18,24 +18,24 @@ import com.espertech.esper.schedule.ScheduleSlot;
 
 public class ContextControllerConditionFactory {
 
-    public static ContextControllerCondition getEndpoint(String contextName, EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, ContextDetailCondition endpoint, ContextControllerConditionCallback callback) {
+    public static ContextControllerCondition getEndpoint(String contextName, EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, ContextDetailCondition endpoint, ContextControllerConditionCallback callback, ContextInternalFilterAddendum filterAddendum, boolean isStartEndpoint, int subPathId) {
         if (endpoint instanceof ContextDetailConditionCrontab) {
             ContextDetailConditionCrontab crontab = (ContextDetailConditionCrontab) endpoint;
             ScheduleSlot scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
-            return new ContextControllerConditionCrontab(agentInstanceContext.getStatementContext(), scheduleSlot, crontab, callback);
+            return new ContextControllerConditionCrontab(agentInstanceContext.getStatementContext(), scheduleSlot, crontab, callback, filterAddendum);
         }
         else if (endpoint instanceof ContextDetailConditionFilter) {
             ContextDetailConditionFilter filter = (ContextDetailConditionFilter) endpoint;
-            return new ContextControllerConditionFilter(servicesContext, agentInstanceContext, filter, callback);
+            return new ContextControllerConditionFilter(servicesContext, agentInstanceContext, filter, callback, filterAddendum);
         }
         else if (endpoint instanceof ContextDetailConditionPattern) {
             ContextDetailConditionPattern pattern = (ContextDetailConditionPattern) endpoint;
-            return new ContextControllerConditionPattern(servicesContext, agentInstanceContext, pattern, callback);
+            return new ContextControllerConditionPattern(servicesContext, agentInstanceContext, pattern, callback, filterAddendum, isStartEndpoint, subPathId);
         }
         else if (endpoint instanceof ContextDetailConditionTimePeriod) {
             ContextDetailConditionTimePeriod timePeriond = (ContextDetailConditionTimePeriod) endpoint;
             ScheduleSlot scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
-            return new ContextControllerConditionTimePeriod(contextName, agentInstanceContext, scheduleSlot, timePeriond, callback);
+            return new ContextControllerConditionTimePeriod(contextName, agentInstanceContext, scheduleSlot, timePeriond, callback, filterAddendum);
         }
         throw new IllegalStateException("Unrecognized context range endpoint " + endpoint.getClass());
     }

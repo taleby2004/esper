@@ -24,7 +24,7 @@ import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.core.start.EPStatementStartMethodCreateWindow;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperSubselect;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperUtil;
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.core.ResultSetProcessorFactoryDesc;
 import com.espertech.esper.epl.expression.ExprNode;
@@ -81,7 +81,7 @@ public class StatementAgentInstanceFactoryOnTrigger implements StatementAgentIns
         this.recoveringStatement = recoveringStatement;
     }
 
-    public StatementAgentInstanceFactoryOnTriggerResult newContext(final AgentInstanceContext agentInstanceContext)
+    public StatementAgentInstanceFactoryOnTriggerResult newContext(final AgentInstanceContext agentInstanceContext, boolean isRecoveringResilient)
     {
         final List<StopCallback> stopCallbacks = new ArrayList<StopCallback>();
         StopCallback stopCallback = new StopCallback() {
@@ -138,7 +138,7 @@ public class StatementAgentInstanceFactoryOnTrigger implements StatementAgentIns
             }
 
             // attach stream to view
-            final ViewableActivationResult activationResult = activator.activate(agentInstanceContext, false);
+            final ViewableActivationResult activationResult = activator.activate(agentInstanceContext, false, isRecoveringResilient);
             activationResult.getViewable().addView(onExprView);
             stopCallbacks.add(activationResult.getStopCallback());
 

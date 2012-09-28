@@ -14,6 +14,9 @@ package com.espertech.esper.regression.dataflow;
 import com.espertech.esper.client.EPServiceProvider;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.client.dataflow.EPDataFlowInstance;
+import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.soda.EPStatementFormatter;
+import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
@@ -87,6 +90,28 @@ public class TestDocSamples extends TestCase {
                 "    myValue : 'sample'\n" +
                 "  }\n" +
                 "}");
+    }
+
+    public void testSODA() {
+
+        String soda = "@Name('create dataflow full')\n" +
+                "create dataflow DFFull\n" +
+                "create map schema ABC1 as (col1 int, col2 int),\n" +
+                "create map schema ABC2 as (col1 int, col2 int),\n" +
+                "MyOperatorOne(instream.one) -> outstream.one {}\n" +
+                "MyOperatorTwo(instream.two as IN1, input.three as IN2) -> outstream.one<Test>, outstream.two<EventBean<TestTwo>> {}\n" +
+                "MyOperatorThree((instream.two, input.three) as IN1) {}\n" +
+                "MyOperatorFour -> teststream {}\n" +
+                "MyOperatorFive {\n" +
+                "const_str: \"abc\",\n" +
+                "somevalue: def * 2,\n" +
+                "select: (select * from ABC where 1 = 2),\n" +
+                "jsonarr: [\"a\", \"b\"],\n" +
+                "jsonobj: {a: \"a\", b: \"b\"}\n" +
+                "}\n";
+        EPStatementObjectModel model = epService.getEPAdministrator().compileEPL(soda);
+        EPAssertionUtil.assertEqualsIgnoreNewline(soda, model.toEPL(new EPStatementFormatter(true)));
+        epService.getEPAdministrator().create(model);
     }
 
     private void tryEpl(String epl) {

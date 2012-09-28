@@ -18,7 +18,6 @@ import com.espertech.esper.client.context.ContextPartitionSelectorFiltered;
 import com.espertech.esper.core.context.util.ContextControllerSelectorUtil;
 import com.espertech.esper.epl.spec.ContextDetailCondition;
 import com.espertech.esper.epl.spec.ContextDetailConditionCrontab;
-import com.espertech.esper.epl.spec.ContextDetailConditionTimePeriod;
 import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.pattern.MatchedEventMapImpl;
 import com.espertech.esper.schedule.ScheduleComputeHelper;
@@ -45,9 +44,9 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         this.factory = factory;
     }
 
-    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states, ContextInternalFilterAddendum filterAddendum) {
 
-        startCondition = makeEndpoint(factory.getContextDetail().getStart());
+        startCondition = makeEndpoint(factory.getContextDetail().getStart(), filterAddendum, true, 0);
 
         // if this is single-instance mode, check if we are currently running according to schedule
         boolean currentlyRunning = false;
@@ -56,23 +55,23 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         }
         
         if (currentlyRunning) {
-            ContextControllerCondition endEndpoint = makeEndpoint(factory.getContextDetail().getEnd());
-            endEndpoint.activate(optionalTriggeringEvent, null, 0);
             currentSubpathId++;
+            ContextControllerCondition endEndpoint = makeEndpoint(factory.getContextDetail().getEnd(), filterAddendum, false, currentSubpathId);
+            endEndpoint.activate(optionalTriggeringEvent, null, 0, factory.getFactoryContext().isRecoveringResilient());
             long startTime = factory.getSchedulingService().getTime();
             long endTime = endEndpoint.getExpectedEndTime();
             Map<String, Object> builtinProps = getBuiltinProperties(factory, startTime, endTime, Collections.<String, Object>emptyMap());
-            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, optionalTriggeringPattern, null, builtinProps, states);
+            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, optionalTriggeringPattern, null, builtinProps, states, filterAddendum, factory.getFactoryContext().isRecoveringResilient());
             endConditions.put(endEndpoint, new ContextControllerInitTermInstance(instanceHandle, null, startTime, endTime));
         }
         else {
-            startCondition.activate(optionalTriggeringEvent, null, 0);
+            startCondition.activate(optionalTriggeringEvent, null, 0, factory.getFactoryContext().isRecoveringResilient());
         }
     }
 
-    protected ContextControllerCondition makeEndpoint(ContextDetailCondition endpoint) {
+    protected ContextControllerCondition makeEndpoint(ContextDetailCondition endpoint, ContextInternalFilterAddendum filterAddendum, boolean isStartEndpoint, int subPathId) {
         return ContextControllerConditionFactory.getEndpoint(factory.getFactoryContext().getContextName(), factory.getFactoryContext().getServicesContext(), factory.getFactoryContext().getAgentInstanceContextCreate(),
-                endpoint, this);
+                endpoint, this, filterAddendum, isStartEndpoint, subPathId);
     }
 
     public Collection<Integer> getSelectedContextPartitionPathIds(ContextPartitionSelector contextPartitionSelector) {
@@ -94,7 +93,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[0], contextPartitionSelector);
     }
 
-    public void rangeNotification(Map<String, Object> builtinProperties, ContextControllerCondition originCondition, EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern) {
+    public void rangeNotification(Map<String, Object> builtinProperties, ContextControllerCondition originCondition, EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextInternalFilterAddendum filterAddendum) {
         // handle start-condition notification
         if (originCondition == startCondition) {
 
@@ -107,18 +106,18 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
             // For overlapping mode, make sure we activate again or stay activated
             else {
                 if (!startCondition.isRunning()) {
-                    startCondition.activate(null, null, 0);
+                    startCondition.activate(null, null, 0, factory.getFactoryContext().isRecoveringResilient());
                 }
             }
 
-            ContextControllerCondition endEndpoint = makeEndpoint(factory.getContextDetail().getEnd());
-            MatchedEventMap matchedEventMap = getMatchedEventMap(builtinProperties);
-            endEndpoint.activate(null, matchedEventMap, 0);
             currentSubpathId++;
+            ContextControllerCondition endEndpoint = makeEndpoint(factory.getContextDetail().getEnd(), filterAddendum, false, currentSubpathId);
+            MatchedEventMap matchedEventMap = getMatchedEventMap(builtinProperties);
+            endEndpoint.activate(null, matchedEventMap, 0, factory.getFactoryContext().isRecoveringResilient());
             long startTime = factory.getSchedulingService().getTime();
             Long endTime = endEndpoint.getExpectedEndTime();
             Map<String, Object> builtinProps = getBuiltinProperties(factory, startTime, endTime, builtinProperties);
-            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, optionalTriggeringPattern, null, builtinProps, null);
+            ContextControllerInstanceHandle instanceHandle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, optionalTriggeringEvent, optionalTriggeringPattern, null, builtinProps, null, filterAddendum, factory.getFactoryContext().isRecoveringResilient());
             endConditions.put(endEndpoint, new ContextControllerInitTermInstance(instanceHandle, builtinProperties, startTime, endTime));
         }
         else {
@@ -135,13 +134,13 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
 
             // re-activate start condition if not overlapping
             if (!factory.getContextDetail().isOverlapping()) {
-                startCondition.activate(optionalTriggeringEvent, null, 0);
+                startCondition.activate(optionalTriggeringEvent, null, 0, factory.getFactoryContext().isRecoveringResilient());
             }
         }
     }
 
     protected MatchedEventMap getMatchedEventMap(Map<String, Object> builtinProperties) {
-        Object[] props = new Object[factory.getContextBuiltinProps().size()];
+        Object[] props = new Object[factory.getMatchedEventMapMeta().getTagsPerIndex().length];
         int count = 0;
         for (String name : factory.getMatchedEventMapMeta().getTagsPerIndex()) {
             props[count++] = builtinProperties.get(name);
@@ -153,7 +152,7 @@ public class ContextControllerInitTerm implements ContextController, ContextCont
         throw new UnsupportedOperationException();
     }
 
-    private boolean determineCurrentlyRunning(ContextControllerCondition startCondition) {
+    protected boolean determineCurrentlyRunning(ContextControllerCondition startCondition) {
 
         // we are not currently running if either of the endpoints is not crontab-triggered
         if ((factory.getContextDetail().getStart() instanceof ContextDetailConditionCrontab) &&

@@ -168,8 +168,8 @@ public class EPStatementStartMethodSelectUtil
                 historicalEventViewables[i] = historicalEventViewable;
                 unmaterializedViewChain[i] = new ViewFactoryChain(historicalEventViewable.getEventType(), new LinkedList<ViewFactory>());
                 eventStreamParentViewableActivators[i] = new ViewableActivator() {
-                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
-                        return new ViewableActivationResult(historicalEventViewable, CollectionUtil.STOP_CALLBACK_NONE, null);
+                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect, boolean isRecoveringResilient) {
+                        return new ViewableActivationResult(historicalEventViewable, CollectionUtil.STOP_CALLBACK_NONE, null, null);
                     }
                 };
                 stopCallbacks.add(historicalEventViewable);
@@ -188,8 +188,8 @@ public class EPStatementStartMethodSelectUtil
                 historicalEventViewables[i] = historicalEventViewable;
                 unmaterializedViewChain[i] = new ViewFactoryChain(historicalEventViewable.getEventType(), new LinkedList<ViewFactory>());
                 eventStreamParentViewableActivators[i] = new ViewableActivator() {
-                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
-                        return new ViewableActivationResult(historicalEventViewable, CollectionUtil.STOP_CALLBACK_NONE, null);
+                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect, boolean isRecoveringResilient) {
+                        return new ViewableActivationResult(historicalEventViewable, CollectionUtil.STOP_CALLBACK_NONE, null, null);
                     }
                 };
                 stopCallbacks.add(historicalEventViewable);

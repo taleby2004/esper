@@ -134,14 +134,14 @@ public class EPStatementStartMethodUpdate extends EPStatementStartMethodBase
             for (ExprSubselectNode node : subSelectStrategyCollection.getSubqueries().keySet()) {
                 AIRegistrySubselect specificService = aiRegistryExpr.allocateSubselect(node);
                 node.setStrategy(specificService);
-                subselectStrategyInstances.put(node, new SubSelectStrategyHolder(null, null, null, null));
+                subselectStrategyInstances.put(node, new SubSelectStrategyHolder(null, null, null, null, null, null));
             }
 
             ContextMergeView mergeView = new ContextMergeView(onExprView.getEventType());
             finalViewable = mergeView;
 
             ContextManagedStatementOnTriggerDesc statement = new ContextManagedStatementOnTriggerDesc(statementSpec, statementContext, mergeView, contextFactory);
-            services.getContextManagementService().addStatement(statementSpec.getOptionalContextName(), statement);
+            services.getContextManagementService().addStatement(statementSpec.getOptionalContextName(), statement, isRecoveringResilient);
             stopStatementMethod = new EPStatementStopMethod(){
                 public void stop()
                 {
@@ -159,7 +159,7 @@ public class EPStatementStartMethodUpdate extends EPStatementStartMethodBase
         // Without context - start here
         else {
             AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
-            final StatementAgentInstanceFactoryUpdateResult resultOfStart = contextFactory.newContext(agentInstanceContext);
+            final StatementAgentInstanceFactoryUpdateResult resultOfStart = contextFactory.newContext(agentInstanceContext, isRecoveringResilient);
             finalViewable = resultOfStart.getFinalView();
             stopStatementMethod = new EPStatementStopMethod() {
                 public void stop() {

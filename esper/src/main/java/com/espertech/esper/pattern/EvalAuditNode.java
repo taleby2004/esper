@@ -30,14 +30,9 @@ public class EvalAuditNode extends EvalNodeBase
         return childNode;
     }
 
-    public EvalNodeNumber getNodeNumber() {
-        return childNode.getNodeNumber();
-    }
-
     public EvalStateNode newState(Evaluator parentNode,
-                                  MatchedEventMap beginState,
-                                  EvalStateNodeNumber stateNodeId)
+                                  EvalStateNodeNumber stateNodeNumber, long stateNodeId)
     {
-        return new EvalAuditStateNode(parentNode, this, beginState);
+        return new EvalAuditStateNode(parentNode, this);
     }
 }

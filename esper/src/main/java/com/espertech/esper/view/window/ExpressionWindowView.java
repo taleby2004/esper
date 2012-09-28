@@ -12,8 +12,8 @@ import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.collection.ViewUpdatedCollection;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
-import com.espertech.esper.epl.agg.AggregationServiceAggExpressionDesc;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceAggExpressionDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryDesc;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.event.map.MapEventBean;
 import com.espertech.esper.view.View;
@@ -25,10 +25,10 @@ import java.util.Set;
 /**
  * This view is a moving window extending the into the past until the expression passed to it returns false.
  */
-public final class ExpressionWindowView extends ExpressionViewBase {
+public class ExpressionWindowView extends ExpressionViewBase {
 
     private final ExpressionWindowViewFactory dataWindowViewFactory;
-    private final ArrayDeque<TimestampEventPair> window = new ArrayDeque<TimestampEventPair>();
+    protected final ArrayDeque<ExpressionWindowTimestampEventPair> window = new ArrayDeque<ExpressionWindowTimestampEventPair>();
     private final EventBean[] removedEvents = new EventBean[1];
 
     /**
@@ -73,7 +73,9 @@ public final class ExpressionWindowView extends ExpressionViewBase {
         if (newData != null)
         {
             for (EventBean newEvent : newData) {
-                window.add(new TimestampEventPair(agentInstanceContext.getTimeProvider().getTime(), newEvent));
+                ExpressionWindowTimestampEventPair pair = new ExpressionWindowTimestampEventPair(agentInstanceContext.getTimeProvider().getTime(), newEvent);
+                window.add(pair);
+                internalHandleAdd(pair);
             }
 
             if (aggregationService != null) {
@@ -82,15 +84,16 @@ public final class ExpressionWindowView extends ExpressionViewBase {
         }
 
         if (oldData != null) {
-            Iterator<TimestampEventPair> it = window.iterator();
+            Iterator<ExpressionWindowTimestampEventPair> it = window.iterator();
             for (;it.hasNext();) {
-                TimestampEventPair pair = it.next();
+                ExpressionWindowTimestampEventPair pair = it.next();
                 for (EventBean anOldData : oldData) {
                     if (pair.getTheEvent() == anOldData) {
                         it.remove();
                         break;
                     }
                 }
+                internalHandleRemoved(pair);
             }
             if (aggregationService != null) {
                 aggregationService.applyLeave(oldData, null, agentInstanceContext);
@@ -99,6 +102,18 @@ public final class ExpressionWindowView extends ExpressionViewBase {
 
         // expire events
         expire(newData, oldData);
+    }
+
+    public void internalHandleRemoved(ExpressionWindowTimestampEventPair pair) {
+        // no action required
+    }
+
+    public void internalHandleExpired(ExpressionWindowTimestampEventPair pair) {
+        // no action required
+    }
+
+    public void internalHandleAdd(ExpressionWindowTimestampEventPair pair) {
+        // no action required
     }
 
     // Called based on schedule evaluation registered when a variable changes (new data is null).
@@ -112,10 +127,10 @@ public final class ExpressionWindowView extends ExpressionViewBase {
         }
         int expiredCount = 0;
         if (!window.isEmpty()) {
-            TimestampEventPair newest = window.getLast();
+            ExpressionWindowTimestampEventPair newest = window.getLast();
 
             while (true) {
-                TimestampEventPair first = window.getFirst();
+                ExpressionWindowTimestampEventPair first = window.getFirst();
 
                 boolean pass = checkEvent(first, newest, expiredCount);
                 if (!pass) {
@@ -129,6 +144,7 @@ public final class ExpressionWindowView extends ExpressionViewBase {
                         aggregationService.applyLeave(removedEvents, null, agentInstanceContext);
                     }
                     expiredCount++;
+                    internalHandleExpired(first);
                 }
                 else {
                     break;
@@ -163,7 +179,7 @@ public final class ExpressionWindowView extends ExpressionViewBase {
         }
     }
 
-    private boolean checkEvent(TimestampEventPair pair, TimestampEventPair newest, int numExpired) {
+    private boolean checkEvent(ExpressionWindowTimestampEventPair pair, ExpressionWindowTimestampEventPair newest, int numExpired) {
 
         builtinEventProps.getProperties().put(ExpressionViewUtil.CURRENT_COUNT, window.size());
         builtinEventProps.getProperties().put(ExpressionViewUtil.OLDEST_TIMESTAMP, pair.getTimestamp());
@@ -185,7 +201,7 @@ public final class ExpressionWindowView extends ExpressionViewBase {
 
     public final Iterator<EventBean> iterator()
     {
-        return new TimestampEventPairIterator(window.iterator());
+        return new ExpressionWindowTimestampEventPairIterator(window.iterator());
     }
 
     // Handle variable updates by scheduling a re-evaluation with timers
@@ -195,41 +211,7 @@ public final class ExpressionWindowView extends ExpressionViewBase {
         }
     }
 
-    private static class TimestampEventPair {
-        private final long timestamp;
-        private final EventBean theEvent;
-
-        private TimestampEventPair(long timestamp, EventBean theEvent) {
-            this.timestamp = timestamp;
-            this.theEvent = theEvent;
-        }
-
-        public long getTimestamp() {
-            return timestamp;
-        }
-
-        public EventBean getTheEvent() {
-            return theEvent;
-        }
-    }
-
-    private static class TimestampEventPairIterator implements Iterator<EventBean> {
-        private final Iterator<TimestampEventPair> events;
-
-        private TimestampEventPairIterator(Iterator<TimestampEventPair> events) {
-            this.events = events;
-        }
-
-        public boolean hasNext() {
-            return events.hasNext();
-        }
-
-        public EventBean next() {
-            return events.next().getTheEvent();
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
+    public ArrayDeque<ExpressionWindowTimestampEventPair> getWindow() {
+        return window;
     }
 }

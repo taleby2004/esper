@@ -37,24 +37,24 @@ import java.util.*;
  *
  * Old values removed from a another view are removed from the sort view.
  */
-public final class RankWindowView extends ViewSupport implements DataWindowView, CloneableView
+public class RankWindowView extends ViewSupport implements DataWindowView, CloneableView
 {
     private final RankWindowViewFactory rankWindowViewFactory;
-    private final ExprEvaluator[] sortCriteriaEvaluators;
+    protected final ExprEvaluator[] sortCriteriaEvaluators;
     private final ExprNode[] sortCriteriaExpressions;
-    private final ExprEvaluator[] uniqueCriteriaEvaluators;
+    protected final ExprEvaluator[] uniqueCriteriaEvaluators;
     private final ExprNode[] uniqueCriteriaExpressions;
     private final EventBean[] eventsPerStream = new EventBean[1];
     private final boolean[] isDescendingValues;
     private final int sortWindowSize;
     private final IStreamSortRankRandomAccess optionalRankedRandomAccess;
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
 
     private final Comparator<Object> comparator;
 
-    private TreeMap<Object, Object> sortedEvents;   // key is computed sort-key, value is either List<EventBean> or EventBean
-    private Map<Object, Object> uniqueKeySortKeys;  // key is computed unique-key, value is computed sort-key
-    private int numberOfEvents;
+    protected TreeMap<Object, Object> sortedEvents;   // key is computed sort-key, value is either List<EventBean> or EventBean
+    protected Map<Object, Object> uniqueKeySortKeys;  // key is computed unique-key, value is computed sort-key
+    protected int numberOfEvents;
 
     /**
      * Ctor.
@@ -92,42 +92,6 @@ public final class RankWindowView extends ViewSupport implements DataWindowView,
         uniqueKeySortKeys = new HashMap<Object, Object>();
     }
 
-    /**
-     * Returns the field names supplying the values to sort by.
-     * @return field names to sort by
-     */
-    protected final ExprNode[] getSortCriteriaExpressions()
-    {
-        return sortCriteriaExpressions;
-    }
-
-    /**
-     * Returns the flags indicating whether to sort in descending order on each property.
-     * @return the isDescending value for each sort property
-     */
-    protected final boolean[] getIsDescendingValues()
-    {
-    	return isDescendingValues;
-    }
-
-    /**
-     * Returns the number of elements kept by the sort window.
-     * @return size of window
-     */
-    protected final int getSortWindowSize()
-    {
-        return sortWindowSize;
-    }
-
-    /**
-     * Returns the friend handling the random access, cal be null if not required.
-     * @return random accessor to sort window contents
-     */
-    protected IStreamSortRankRandomAccess getOptionalRankedRandomAccess()
-    {
-        return optionalRankedRandomAccess;
-    }
-
     public View cloneView()
     {
         return rankWindowViewFactory.makeView(agentInstanceViewFactoryContext);
@@ -160,6 +124,7 @@ public final class RankWindowView extends ViewSupport implements DataWindowView,
                     numberOfEvents--;
                     uniqueKeySortKeys.remove(uniqueKey);
                     removedEvents.add(event);
+                    internalHandleRemovedKey(existingSortKey, oldData[i]);
                 }
             }
         }
@@ -186,12 +151,14 @@ public final class RankWindowView extends ViewSupport implements DataWindowView,
                         if (replaced != null) {
                             removedEvents.add(replaced);
                         }
+                        internalHandleReplacedKey(newSortKey, newData[i], replaced);
                     }
                     else {
                         EventBean removed = removeFromSortedEvents(existingSortKey, uniqueKey);
                         if (removed != null) {
                             numberOfEvents--;
                             removedEvents.add(removed);
+                            internalHandleRemovedKey(existingSortKey, removed);
                         }
                         compareAndAddOrPassthru(newData[i], uniqueKey, newSortKey, removedEvents);
                     }
@@ -213,6 +180,7 @@ public final class RankWindowView extends ViewSupport implements DataWindowView,
                         uniqueKeySortKeys.remove(uniqueKey);
                         numberOfEvents--;
                         removedEvents.add(newestEvent);
+                        internalHandleRemovedKey(existing, newestEvent);
                     }
                     if (existingList.isEmpty()) {
                         sortedEvents.remove(lastKey);
@@ -225,6 +193,7 @@ public final class RankWindowView extends ViewSupport implements DataWindowView,
                     numberOfEvents--;
                     removedEvents.add(lastSortedEvent);
                     sortedEvents.remove(lastKey);
+                    internalHandleRemovedKey(lastKey, lastSortedEvent);
                 }
             }
         }
@@ -246,6 +215,18 @@ public final class RankWindowView extends ViewSupport implements DataWindowView,
         }
     }
 
+    public void internalHandleReplacedKey(Object newSortKey, EventBean newEvent, EventBean oldEvent) {
+        // no action
+    }
+
+    public void internalHandleRemovedKey(Object sortKey, EventBean eventBean) {
+        // no action
+    }
+
+    public void internalHandleAddedKey(Object sortKey, EventBean eventBean) {
+        // no action
+    }
+
     private void compareAndAddOrPassthru(EventBean eventBean, Object uniqueKey, Object newSortKey, OneEventCollection removedEvents) {
         // determine full or not
         if (numberOfEvents >= sortWindowSize) {
@@ -259,14 +240,16 @@ public final class RankWindowView extends ViewSupport implements DataWindowView,
             else {
                 uniqueKeySortKeys.put(uniqueKey, newSortKey);
                 numberOfEvents++;
-                addToSortedEvents(newSortKey, eventBean);
+                CollectionUtil.addEventByKeyLazyListMapBack(newSortKey, eventBean, sortedEvents);
+                internalHandleAddedKey(newSortKey, eventBean);
             }
         }
         // not yet filled, need to add
         else {
             uniqueKeySortKeys.put(uniqueKey, newSortKey);
             numberOfEvents++;
-            addToSortedEvents(newSortKey, eventBean);
+            CollectionUtil.addEventByKeyLazyListMapBack(newSortKey, eventBean, sortedEvents);
+            internalHandleAddedKey(newSortKey, eventBean);
         }
     }
 
@@ -325,25 +308,6 @@ public final class RankWindowView extends ViewSupport implements DataWindowView,
         return replaced;
     }
 
-    private void addToSortedEvents(Object sortKey, EventBean eventBean) {
-        Object existing = sortedEvents.get(sortKey);
-        if (existing == null) {
-            sortedEvents.put(sortKey, eventBean);
-        }
-        else {
-            if (existing instanceof List) {
-                List<EventBean> existingList = (List<EventBean>) existing;
-                existingList.add(eventBean);
-            }
-            else {
-                List<EventBean> existingList = new LinkedList<EventBean>();
-                existingList.add((EventBean)existing);
-                existingList.add(eventBean);
-                sortedEvents.put(sortKey, existingList);
-            }
-        }
-    }
-
     public final Iterator<EventBean> iterator()
     {
         return new RankWindowIterator(sortedEvents);
@@ -358,11 +322,11 @@ public final class RankWindowView extends ViewSupport implements DataWindowView,
                 " sortWindowSize=" + sortWindowSize;
     }
 
-    private Object getUniqueValues(EventBean theEvent) {
+    public Object getUniqueValues(EventBean theEvent) {
         return getCriteriaKey(eventsPerStream, uniqueCriteriaEvaluators, theEvent, agentInstanceViewFactoryContext);
     }
 
-    private Object getSortValues(EventBean theEvent) {
+    public Object getSortValues(EventBean theEvent) {
         return getCriteriaKey(eventsPerStream, sortCriteriaEvaluators, theEvent, agentInstanceViewFactoryContext);
     }
 

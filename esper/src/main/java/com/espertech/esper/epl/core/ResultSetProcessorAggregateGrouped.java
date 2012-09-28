@@ -15,8 +15,8 @@ import com.espertech.esper.collection.MultiKey;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
-import com.espertech.esper.epl.agg.AggregationRowRemovedCallback;
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationRowRemovedCallback;
+import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.OutputLimitLimitType;
@@ -324,10 +324,6 @@ public class ResultSetProcessorAggregateGrouped implements ResultSetProcessor, A
         {
             EventBean[] eventsPerStream = row.getArray();
 
-            if (prototype.isUnidirectional())
-            {
-                this.clear();
-            }
             aggregationService.setCurrentAccess(groupByKeys[count], agentInstanceContext.getAgentInstanceId());
 
             // Filter the having clause

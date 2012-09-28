@@ -13,7 +13,7 @@ import com.espertech.esper.client.ConfigurationPlugInAggregationFunction;
 import com.espertech.esper.client.ConfigurationPlugInSingleRowFunction;
 import com.espertech.esper.client.hook.AggregationFunctionFactory;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.epl.agg.AggregationSupport;
+import com.espertech.esper.epl.agg.service.AggregationSupport;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.util.JavaClassHelper;
 import com.espertech.esper.util.MethodResolver;

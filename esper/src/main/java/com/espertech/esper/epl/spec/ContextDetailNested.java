@@ -11,6 +11,8 @@
 
 package com.espertech.esper.epl.spec;
 
+import com.espertech.esper.filter.FilterSpecCompiled;
+
 import java.util.List;
 
 public class ContextDetailNested implements ContextDetail {
@@ -23,5 +25,9 @@ public class ContextDetailNested implements ContextDetail {
 
     public List<CreateContextDesc> getContexts() {
         return contexts;
+    }
+
+    public List<FilterSpecCompiled> getFilterSpecsIfAny() {
+        return null;
     }
 }

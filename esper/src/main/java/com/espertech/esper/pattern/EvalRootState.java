@@ -21,4 +21,6 @@ public interface EvalRootState extends PatternStopCallback
      * @param callback is a pattern result call
      */
     public void setCallback(PatternMatchCallback callback);
+
+    public void startRecoverable(boolean startRecoverable, MatchedEventMap beginState);
 }

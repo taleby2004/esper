@@ -16,7 +16,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalNotNode extends EvalNodeBase
 {
-    private final EvalNotFactoryNode factoryNode;
+    protected final EvalNotFactoryNode factoryNode;
     private final EvalNode childNode;
 
     public EvalNotNode(PatternAgentInstanceContext context, EvalNotFactoryNode factoryNode, EvalNode childNode) {
@@ -33,15 +33,10 @@ public class EvalNotNode extends EvalNodeBase
         return childNode;
     }
 
-    public EvalNodeNumber getNodeNumber() {
-        return factoryNode.getNodeNumber();
-    }
-
     public EvalStateNode newState(Evaluator parentNode,
-                                  MatchedEventMap beginState,
-                                  EvalStateNodeNumber stateNodeId)
+                                  EvalStateNodeNumber stateNodeNumber, long stateNodeId)
     {
-        return new EvalNotStateNode(parentNode, this, beginState);
+        return new EvalNotStateNode(parentNode, this);
     }
 
     private static final Log log = LogFactory.getLog(EvalNotNode.class);

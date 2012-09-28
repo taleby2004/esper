@@ -12,9 +12,8 @@
 package com.espertech.esper.example.runtimeconfig;
 
 import com.espertech.esper.client.hook.AggregationFunctionFactory;
-import com.espertech.esper.epl.agg.AggregationMethod;
-import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.epl.agg.AggregationValidationContext;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
+import com.espertech.esper.epl.agg.service.AggregationValidationContext;
 
 public class MyConcatAggregationFunctionFactory implements AggregationFunctionFactory {
 

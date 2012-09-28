@@ -30,14 +30,17 @@ public abstract class EvalNodeBase implements EvalNode
      * Create the evaluation state node containing the truth value state for each operator in an
      * event expression.
      *
+     *
+     *
+     *
      * @param parentNode is the parent evaluator node that this node indicates a change in truth value to
-     * @param beginState is the container for events that makes up the start state
-     * @param stateNodeId is the new state object's identifier
+     * @param stateNodeNumber
+     * @param stateNodeId
      * @return state node containing the truth value state for the operator
      */
     public abstract EvalStateNode newState(Evaluator parentNode,
-                                           MatchedEventMap beginState,
-                                           EvalStateNodeNumber stateNodeId);
+                                           EvalStateNodeNumber stateNodeNumber,
+                                           long stateNodeId);
 
     public final PatternAgentInstanceContext getContext() {
         return context;

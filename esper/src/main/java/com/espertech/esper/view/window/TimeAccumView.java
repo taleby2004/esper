@@ -35,19 +35,19 @@ import java.util.Iterator;
  * The view is continuous, the insert stream consists of arriving events. The remove stream
  * only posts current window contents when no more events arrive for a given timer interval.
  */
-public final class TimeAccumView extends ViewSupport implements CloneableView, DataWindowView, StoppableView, StopCallback
+public class TimeAccumView extends ViewSupport implements CloneableView, DataWindowView, StoppableView, StopCallback
 {
     // View parameters
     private final TimeAccumViewFactory factory;
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
-    private final long msecIntervalSize;
-    private final ViewUpdatedCollection viewUpdatedCollection;
-    private final ScheduleSlot scheduleSlot;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceContext;
+    protected final long msecIntervalSize;
+    protected final ViewUpdatedCollection viewUpdatedCollection;
+    protected final ScheduleSlot scheduleSlot;
 
     // Current running parameters
-    private ArrayList<EventBean> currentBatch = new ArrayList<EventBean>();
-    private long callbackScheduledTime;
-    private EPStatementHandleCallback handle;
+    protected ArrayList<EventBean> currentBatch = new ArrayList<EventBean>();
+    protected long callbackScheduledTime;
+    protected EPStatementHandleCallback handle;
 
     /**
      * Constructor.
@@ -97,7 +97,7 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
         return parent.getEventType();
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         // we don't care about removed data from a prior view
         if ((newData == null) || (newData.length == 0))
@@ -136,7 +136,9 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
         }
 
         // add data points to the window
-        currentBatch.addAll(Arrays.asList(newData));
+        for (EventBean newEvent : newData) {
+            currentBatch.add(newEvent);
+        }
 
         // forward insert stream to child views
         if (viewUpdatedCollection != null)
@@ -154,7 +156,7 @@ public final class TimeAccumView extends ViewSupport implements CloneableView, D
     /**
      * This method sends the remove stream for all accumulated events.
      */
-    protected final void sendRemoveStream()
+    protected void sendRemoveStream()
     {
         callbackScheduledTime = -1;
 

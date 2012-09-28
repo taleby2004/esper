@@ -68,21 +68,6 @@ public class SchedulingServiceAudit implements SchedulingServiceSPI {
         spi.add(afterMSec, handle, slot);
     }
 
-    public void add(ScheduleSpec scheduleSpec, ScheduleHandle handle, ScheduleSlot slot) throws ScheduleServiceException {
-        if (AuditPath.isInfoEnabled()) {
-            StringWriter message = new StringWriter();
-            message.write("add ");
-            message.write(scheduleSpec.toString());
-            message.write(" handle ");
-            printHandle(message, handle);
-
-            AuditPath.auditLog(engineUri, statementName, AuditEnum.SCHEDULE, message.toString());
-
-            modifyCreateProxy(handle);
-        }
-        spi.add(scheduleSpec, handle, slot);
-    }
-
     public void remove(ScheduleHandle handle, ScheduleSlot slot) throws ScheduleServiceException {
         if (AuditPath.isInfoEnabled()) {
             StringWriter message = new StringWriter();

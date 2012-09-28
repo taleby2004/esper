@@ -48,6 +48,17 @@ public class TestSocketAdapterCSV extends TestCase
 
         adapter.start();
 
+
+        ConfigurationSocketAdapter adapterConfigTwo = new ConfigurationSocketAdapter();
+        SocketConfig socketConfigTwo = new SocketConfig();
+        socketConfigTwo.setDataType(DataType.CSV);
+        socketConfigTwo.setPort(port);
+        adapterConfigTwo.getSockets().put("SocketService", socket);
+
+        EsperIOSocketAdapter adapterTwo = new EsperIOSocketAdapter(adapterConfig, engineURI);
+        adapterTwo.start();
+
+
         EPStatement stmt = provider.getEPAdministrator().createEPL("select * from SupportBean");
         stmt.addListener(listener);
 

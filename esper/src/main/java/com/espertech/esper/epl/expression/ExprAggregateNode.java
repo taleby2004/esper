@@ -8,8 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.agg.AggregationMethodFactory;
-import com.espertech.esper.epl.agg.AggregationResultFuture;
+import com.espertech.esper.epl.agg.service.AggregationMethodFactory;
+import com.espertech.esper.epl.agg.service.AggregationResultFuture;
 
 /**
  * Base expression node that represents an aggregation function such as 'sum' or 'count'.

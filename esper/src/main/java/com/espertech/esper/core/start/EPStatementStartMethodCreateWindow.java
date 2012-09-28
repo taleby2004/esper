@@ -91,77 +91,91 @@ public class EPStatementStartMethodCreateWindow extends EPStatementStartMethodBa
         final VirtualDWViewFactory virtualDataWindowFactory = determineVirtualDataWindow(unmaterializedViewChain.getViewFactoryChain());
         NamedWindowProcessor processor = services.getNamedWindowService().addProcessor(windowName, contextName, singleInstanceContext, filterStreamSpec.getFilterSpec().getResultEventType(), statementContext.getStatementResultService(), optionalRevisionProcessor, statementContext.getExpression(), statementContext.getStatementName(), isPrioritized, isEnableSubqueryIndexShare, isBatchingDataWindow, virtualDataWindowFactory != null, statementContext.getEpStatementHandle().getMetricsHandle());
 
-        // add stop callback
-        stopCallbacks.add(new StopCallback() {
-            public void stop() {
-                services.getNamedWindowService().removeProcessor(windowName);
-                if (virtualDataWindowFactory != null) {
-                    virtualDataWindowFactory.destroyNamedWindow();
-                }
-            }
-        });
-
-        // Add a wildcard to the select clause as subscribers received the window contents
-        statementSpec.getSelectClauseSpec().getSelectExprList().clear();
-        statementSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
-        statementSpec.setSelectStreamDirEnum(SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH);
-
-        // obtain result set processor factory
-        StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {processor.getNamedWindowType()}, new String[] {windowName}, new boolean[] {true}, services.getEngineURI(), false);
-        ResultSetProcessorFactoryDesc resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(
-                statementSpec, statementContext, typeService, null, new boolean[0], true, null, null);
-
-        // obtain factory for output limiting
-        OutputProcessViewFactory outputViewFactory = OutputProcessViewFactoryFactory.make(statementSpec, services.getInternalEventRouter(), statementContext, resultSetProcessorPrototype.getResultSetProcessorFactory().getResultEventType(), null);
-
-        // create context factory
-        StatementAgentInstanceFactoryCreateWindow contextFactory = new StatementAgentInstanceFactoryCreateWindow(statementContext, statementSpec, services, activator, unmaterializedViewChain, resultSetProcessorPrototype, outputViewFactory, isRecoveringStatement);
-
         Viewable finalViewable;
         EPStatementStopMethod stopStatementMethod;
         EPStatementDestroyMethod destroyStatementMethod;
 
-        // With context - delegate instantiation to context
-        if (statementSpec.getOptionalContextName() != null) {
-
-            ContextMergeView mergeView = new ContextMergeView(processor.getNamedWindowType());
-            finalViewable = mergeView;
-
-            ContextManagedStatementCreateWindowDesc statement = new ContextManagedStatementCreateWindowDesc(statementSpec, statementContext, mergeView, contextFactory);
-            services.getContextManagementService().addStatement(contextName, statement);
-            stopStatementMethod = new EPStatementStopMethod(){
-                public void stop()
-                {
-                    services.getContextManagementService().stoppedStatement(contextName, statementContext.getStatementName(), statementContext.getStatementId());
-                    stopMethod.stop();
-                }
-            };
-
-            destroyStatementMethod = new EPStatementDestroyMethod(){
-                public void destroy() {
-                    services.getContextManagementService().destroyedStatement(contextName, statementContext.getStatementName(), statementContext.getStatementId());
-                }
-            };
-        }
-        // Without context - start here
-        else {
-            AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
-            final StatementAgentInstanceFactoryCreateWindowResult resultOfStart;
-            try {
-                resultOfStart = contextFactory.newContext(agentInstanceContext);
-            }
-            catch (RuntimeException ex) {
-                services.getNamedWindowService().removeProcessor(windowName);
-                throw ex;
-            }
-            finalViewable = resultOfStart.getFinalView();
-            stopStatementMethod = new EPStatementStopMethod() {
+        try {
+            // add stop callback
+            stopCallbacks.add(new StopCallback() {
                 public void stop() {
-                    resultOfStart.getStopCallback().stop();
-                    stopMethod.stop();
+                    services.getNamedWindowService().removeProcessor(windowName);
+                    if (virtualDataWindowFactory != null) {
+                        virtualDataWindowFactory.destroyNamedWindow();
+                    }
                 }
-            };
-            destroyStatementMethod = null;
+            });
+
+            // Add a wildcard to the select clause as subscribers received the window contents
+            statementSpec.getSelectClauseSpec().getSelectExprList().clear();
+            statementSpec.getSelectClauseSpec().add(new SelectClauseElementWildcard());
+            statementSpec.setSelectStreamDirEnum(SelectClauseStreamSelectorEnum.RSTREAM_ISTREAM_BOTH);
+
+            // obtain result set processor factory
+            StreamTypeService typeService = new StreamTypeServiceImpl(new EventType[] {processor.getNamedWindowType()}, new String[] {windowName}, new boolean[] {true}, services.getEngineURI(), false);
+            ResultSetProcessorFactoryDesc resultSetProcessorPrototype = ResultSetProcessorFactoryFactory.getProcessorPrototype(
+                    statementSpec, statementContext, typeService, null, new boolean[0], true, null, null);
+
+            // obtain factory for output limiting
+            OutputProcessViewFactory outputViewFactory = OutputProcessViewFactoryFactory.make(statementSpec, services.getInternalEventRouter(), statementContext, resultSetProcessorPrototype.getResultSetProcessorFactory().getResultEventType(), null);
+
+            // create context factory
+            StatementAgentInstanceFactoryCreateWindow contextFactory = new StatementAgentInstanceFactoryCreateWindow(statementContext, statementSpec, services, activator, unmaterializedViewChain, resultSetProcessorPrototype, outputViewFactory, isRecoveringStatement);
+
+            // With context - delegate instantiation to context
+            if (statementSpec.getOptionalContextName() != null) {
+
+                ContextMergeView mergeView = new ContextMergeView(processor.getNamedWindowType());
+                finalViewable = mergeView;
+
+                ContextManagedStatementCreateWindowDesc statement = new ContextManagedStatementCreateWindowDesc(statementSpec, statementContext, mergeView, contextFactory);
+                services.getContextManagementService().addStatement(contextName, statement, isRecoveringResilient);
+                stopStatementMethod = new EPStatementStopMethod(){
+                    public void stop()
+                    {
+                        services.getContextManagementService().stoppedStatement(contextName, statementContext.getStatementName(), statementContext.getStatementId());
+                        stopMethod.stop();
+                    }
+                };
+
+                destroyStatementMethod = new EPStatementDestroyMethod(){
+                    public void destroy() {
+                        services.getContextManagementService().destroyedStatement(contextName, statementContext.getStatementName(), statementContext.getStatementId());
+                    }
+                };
+            }
+            // Without context - start here
+            else {
+                AgentInstanceContext agentInstanceContext = getDefaultAgentInstanceContext();
+                final StatementAgentInstanceFactoryCreateWindowResult resultOfStart;
+                try {
+                    resultOfStart = contextFactory.newContext(agentInstanceContext, false);
+                }
+                catch (RuntimeException ex) {
+                    services.getNamedWindowService().removeProcessor(windowName);
+                    throw ex;
+                }
+                finalViewable = resultOfStart.getFinalView();
+                stopStatementMethod = new EPStatementStopMethod() {
+                    public void stop() {
+                        resultOfStart.getStopCallback().stop();
+                        stopMethod.stop();
+                    }
+                };
+                destroyStatementMethod = null;
+
+                if (statementContext.getExtensionServicesContext() != null) {
+                    statementContext.getExtensionServicesContext().startContextPartition(resultOfStart, 0);
+                }
+            }
+        }
+        catch (ExprValidationException ex) {
+            services.getNamedWindowService().removeProcessor(windowName);
+            throw ex;
+        }
+        catch (RuntimeException ex) {
+            services.getNamedWindowService().removeProcessor(windowName);
+            throw ex;
         }
 
         return new EPStatementStartResult(finalViewable, stopStatementMethod, destroyStatementMethod);

@@ -403,6 +403,9 @@ public final class EPServicesContext
         if (graphService != null) {
             graphService.destroy();
         }
+        if (variableService != null) {
+            variableService.destroy();
+        }
         if (metricsReportingService != null)
         {
             metricsReportingService.destroy();

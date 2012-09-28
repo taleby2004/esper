@@ -186,7 +186,7 @@ public class TestNamedWindowIndexFAFPerf extends TestCase
         }
         long end = System.currentTimeMillis();
         long delta = end - start;
-        assertTrue("delta=" + delta, delta < 200);
+        assertTrue("delta=" + delta, delta < 500);
         
         // test no value returned
         queryText = "select * from MyWindowOne where f1='KX'";
@@ -203,12 +203,11 @@ public class TestNamedWindowIndexFAFPerf extends TestCase
         // insert null and test null
         epService.getEPRuntime().sendEvent(new SupportBean(null, -2));
         result = query.execute();
-        assertEquals(1, result.getArray().length);
-        assertEquals(-2, result.getArray()[0].get("f2"));
+        assertEquals(0, result.getArray().length);
 
         // test two values
         epService.getEPRuntime().sendEvent(new SupportBean(null, -1));
-        query = epService.getEPRuntime().prepareQuery("select * from MyWindowOne where f1=null order by f2 asc");
+        query = epService.getEPRuntime().prepareQuery("select * from MyWindowOne where f1 is null order by f2 asc");
         result = query.execute();
         assertEquals(2, result.getArray().length);
         assertEquals(-2, result.getArray()[0].get("f2"));

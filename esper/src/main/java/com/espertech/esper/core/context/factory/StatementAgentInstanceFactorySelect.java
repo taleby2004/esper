@@ -27,7 +27,7 @@ import com.espertech.esper.core.start.EPStatementStartMethodHelperPrevious;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperPrior;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperSubselect;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperUtil;
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.core.ResultSetProcessor;
 import com.espertech.esper.epl.core.ResultSetProcessorFactoryDesc;
 import com.espertech.esper.epl.core.StreamTypeService;
@@ -44,9 +44,11 @@ import com.espertech.esper.epl.spec.StreamSpecCompiled;
 import com.espertech.esper.epl.view.FilterExprView;
 import com.espertech.esper.epl.view.OutputProcessViewBase;
 import com.espertech.esper.epl.view.OutputProcessViewFactory;
+import com.espertech.esper.pattern.EvalRootState;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.ViewFactory;
 import com.espertech.esper.view.ViewFactoryChain;
+import com.espertech.esper.view.ViewServiceCreateResult;
 import com.espertech.esper.view.Viewable;
 import com.espertech.esper.view.internal.BufferView;
 import com.espertech.esper.view.internal.PriorEventViewFactory;
@@ -72,7 +74,6 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
     private final ViewFactoryChain[] unmaterializedViewChain;
     private final ResultSetProcessorFactoryDesc resultSetProcessorFactoryDesc;
     private final StreamJoinAnalysisResult joinAnalysisResult;
-    private final boolean isRecoveringResilient;
     private final JoinSetComposerPrototype joinSetComposerPrototype;
     private final SubSelectStrategyCollection subSelectStrategyCollection;
     private final ViewResourceDelegateVerified viewResourceDelegate;
@@ -88,14 +89,13 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
         this.unmaterializedViewChain = unmaterializedViewChain;
         this.resultSetProcessorFactoryDesc = resultSetProcessorFactoryDesc;
         this.joinAnalysisResult = joinAnalysisResult;
-        isRecoveringResilient = recoveringResilient;
         this.joinSetComposerPrototype = joinSetComposerPrototype;
         this.subSelectStrategyCollection = subSelectStrategyCollection;
         this.viewResourceDelegate = viewResourceDelegate;
         this.outputProcessViewFactory = outputProcessViewFactory;
     }
 
-    public StatementAgentInstanceFactorySelectResult newContext(final AgentInstanceContext agentInstanceContext)
+    public StatementAgentInstanceFactorySelectResult newContext(final AgentInstanceContext agentInstanceContext, boolean isRecoveringResilient)
     {
         // register agent instance resources for use in HA
         if (services.getSchedulableAgentInstanceDirectory() != null) {
@@ -114,19 +114,25 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
         Map<ExprSubselectNode, SubSelectStrategyHolder> subselectStrategies;
         AggregationService aggregationService;
         Viewable[] streamViews;
+        Viewable[] eventStreamParentViewable;
+        Viewable[] topViews;
         Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies;
         Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies;
         List<StatementAgentInstancePreload> preloadList = new ArrayList<StatementAgentInstancePreload>();
+        EvalRootState[] patternRoots;
+        StatementAgentInstancePostLoad postLoadJoin = null;
 
         try {
             // create root viewables
-            Viewable[] eventStreamParentViewable = new Viewable[numStreams];
+            eventStreamParentViewable = new Viewable[numStreams];
+            patternRoots = new EvalRootState[numStreams];
             for (int stream = 0; stream < eventStreamParentViewableActivators.length; stream++) {
-                ViewableActivationResult activationResult = eventStreamParentViewableActivators[stream].activate(agentInstanceContext, false);
+                ViewableActivationResult activationResult = eventStreamParentViewableActivators[stream].activate(agentInstanceContext, false, isRecoveringResilient);
                 viewableActivationResult[stream] = activationResult;
                 stopCallbacks.add(activationResult.getStopCallback());
 
                 eventStreamParentViewable[stream] = activationResult.getViewable();
+                patternRoots[stream] = activationResult.getOptionalPatternRoot();
 
                 if (activationResult.getOptionalLock() != null) {
                     agentInstanceContext.getEpStatementAgentInstanceHandle().setStatementAgentInstanceLock(activationResult.getOptionalLock());
@@ -165,9 +171,12 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
 
             // materialize views
             streamViews = new Viewable[numStreams];
+            topViews = new Viewable[numStreams];
             for (int i = 0; i < numStreams; i++) {
                 boolean hasPreviousNode = viewResourceDelegate.getPerStream()[i].getPreviousRequests() != null && !viewResourceDelegate.getPerStream()[i].getPreviousRequests().isEmpty();
-                streamViews[i] = services.getViewService().createViews(eventStreamParentViewable[i], viewFactoryChains[i], viewFactoryChainContexts[i], hasPreviousNode);
+                ViewServiceCreateResult createResult = services.getViewService().createViews(eventStreamParentViewable[i], viewFactoryChains[i], viewFactoryChainContexts[i], hasPreviousNode);
+                topViews[i] = createResult.getTopViewable();
+                streamViews[i] = createResult.getFinalViewable();
             }
 
             // start subselects
@@ -180,6 +189,7 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
 
             // for just 1 event stream without joins, handle the one-table process separatly.
             final JoinPreloadMethod joinPreloadMethod;
+            JoinSetComposerDesc joinSetComposer = null;
             if (streamViews.length == 1)
             {
                 finalView = handleSimpleSelect(streamViews[0], resultSetProcessor, agentInstanceContext);
@@ -187,10 +197,11 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
             }
             else
             {
-                Pair<Viewable, JoinPreloadMethod> pair = handleJoin(typeService.getStreamNames(), streamViews, resultSetProcessor,
+                JoinPlanResult joinPlanResult = handleJoin(typeService.getStreamNames(), streamViews, resultSetProcessor,
                         agentInstanceContext, stopCallbacks, joinAnalysisResult);
-                finalView = pair.getFirst();
-                joinPreloadMethod = pair.getSecond();
+                finalView = joinPlanResult.getViewable();
+                joinPreloadMethod = joinPlanResult.getPreloadMethod();
+                joinSetComposer = joinPlanResult.getJoinSetComposerDesc();
             }
 
             // Replay any named window data, for later consumers of named data windows
@@ -261,13 +272,17 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
                     }
                 });
             }
+
+            if (isRecoveringResilient) {
+                postLoadJoin = new StatementAgentInstancePostLoadSelect(streamViews, joinSetComposer);
+            }
         }
         catch (RuntimeException ex) {
             StatementAgentInstanceUtil.stopSafe(stopCallback, statementContext);
             throw ex;
         }
 
-        return new StatementAgentInstanceFactorySelectResult(finalView, stopCallback, agentInstanceContext, aggregationService, subselectStrategies, priorNodeStrategies, previousNodeStrategies, preloadList);
+        return new StatementAgentInstanceFactorySelectResult(finalView, stopCallback, agentInstanceContext, aggregationService, subselectStrategies, priorNodeStrategies, previousNodeStrategies, preloadList, patternRoots, postLoadJoin, topViews, eventStreamParentViewable);
     }
 
     private Viewable handleSimpleSelect(Viewable view,
@@ -300,7 +315,7 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
         return finalView;
     }
 
-    private Pair<Viewable, JoinPreloadMethod> handleJoin(String[] streamNames,
+    private JoinPlanResult handleJoin(String[] streamNames,
                                                          Viewable[] streamViews,
                                                          ResultSetProcessor resultSetProcessor,
                                                          AgentInstanceContext agentInstanceContext,
@@ -348,6 +363,30 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
             preloadMethod.setBuffer(buffer, i);
         }
 
-        return new Pair<Viewable, JoinPreloadMethod>(indicatorView, preloadMethod);
+        return new JoinPlanResult(indicatorView, preloadMethod, joinSetComposerDesc);
+    }
+
+    private static class JoinPlanResult {
+        private final Viewable viewable;
+        private final JoinPreloadMethod preloadMethod;
+        private final JoinSetComposerDesc joinSetComposerDesc;
+
+        private JoinPlanResult(Viewable viewable, JoinPreloadMethod preloadMethod, JoinSetComposerDesc joinSetComposerDesc) {
+            this.viewable = viewable;
+            this.preloadMethod = preloadMethod;
+            this.joinSetComposerDesc = joinSetComposerDesc;
+        }
+
+        public Viewable getViewable() {
+            return viewable;
+        }
+
+        public JoinPreloadMethod getPreloadMethod() {
+            return preloadMethod;
+        }
+
+        public JoinSetComposerDesc getJoinSetComposerDesc() {
+            return joinSetComposerDesc;
+        }
     }
 }

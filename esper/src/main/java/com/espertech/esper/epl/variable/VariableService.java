@@ -107,4 +107,6 @@ public interface VariableService
     public void removeVariable(String name);
 
     public String getVariableName(int variableNum);
+
+    public void destroy();
 }

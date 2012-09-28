@@ -47,7 +47,7 @@ public interface ConfigurationOperations
      * <p>
      * Use {@link #addPlugInAggregationFunctionFactory} instead.
      * <p>
-     * The aggregation class must extends the base class {@link com.espertech.esper.epl.agg.AggregationSupport}.
+     * The aggregation class must extends the base class {@link com.espertech.esper.epl.agg.service.AggregationSupport}.
      * <p>
      * The same function name cannot be added twice.
      * @param functionName is the new aggregation function name for use in EPL

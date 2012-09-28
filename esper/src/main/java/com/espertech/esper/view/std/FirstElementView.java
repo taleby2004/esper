@@ -46,15 +46,6 @@ public class FirstElementView extends ViewSupport implements CloneableView
         EventBean[] newDataToPost = null;
         EventBean[] oldDataToPost = null;
 
-        if ((newData != null) && (newData.length != 0))
-        {
-            if (firstEvent == null)
-            {
-                firstEvent = newData[0];
-                newDataToPost = new EventBean[] {firstEvent};
-            }
-        }
-
         if (oldData != null)
         {
             for (int i = 0; i < oldData.length; i++)
@@ -64,6 +55,15 @@ public class FirstElementView extends ViewSupport implements CloneableView
                     oldDataToPost = new EventBean[] {firstEvent};
                     firstEvent = null;
                 }
+            }
+        }
+
+        if ((newData != null) && (newData.length != 0))
+        {
+            if (firstEvent == null)
+            {
+                firstEvent = newData[0];
+                newDataToPost = new EventBean[] {firstEvent};
             }
         }
 
@@ -81,5 +81,9 @@ public class FirstElementView extends ViewSupport implements CloneableView
     public final String toString()
     {
         return this.getClass().getName();
+    }
+
+    public void setFirstEvent(EventBean firstEvent) {
+        this.firstEvent = firstEvent;
     }
 }

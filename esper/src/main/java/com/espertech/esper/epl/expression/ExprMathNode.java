@@ -73,7 +73,15 @@ public class ExprMathNode extends ExprNodeBase implements ExprEvaluator
         Class childTypeOne = evaluatorLeft.getType();
         Class childTypeTwo = evaluatorRight.getType();
 
-        if (childTypeOne.equals(childTypeTwo))
+        if ((childTypeOne == short.class || childTypeOne == Short.class) &&
+            (childTypeTwo == short.class || childTypeTwo == Short.class)) {
+            resultType = Integer.class;
+        }
+        else if ((childTypeOne == byte.class || childTypeOne == Byte.class) &&
+                 (childTypeTwo == byte.class || childTypeTwo == Byte.class)) {
+            resultType = Integer.class;
+        }
+        else if (childTypeOne.equals(childTypeTwo))
         {
             resultType = JavaClassHelper.getBoxedType(childTypeTwo);
         }

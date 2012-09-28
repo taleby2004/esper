@@ -11,7 +11,7 @@
 
 package com.espertech.esper.core.context.stmt;
 
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationService;
 
 public interface AIRegistryAggregation extends AggregationService {
     public void assignService(int serviceId, AggregationService aggregationService);

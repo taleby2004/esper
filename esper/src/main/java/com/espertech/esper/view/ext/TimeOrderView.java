@@ -17,12 +17,16 @@ import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Window retaining timestamped events up to a given number of seconds such that
@@ -38,22 +42,21 @@ import java.util.*;
  * The view accepts 2 parameters. The first parameter is the field name to get the event timestamp value from,
  * the second parameter defines the interval size.
  */
-public final class TimeOrderView extends ViewSupport implements DataWindowView, CloneableView, StoppableView, StopCallback
+public class TimeOrderView extends ViewSupport implements DataWindowView, CloneableView, StoppableView, StopCallback
 {
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final TimeOrderViewFactory timeOrderViewFactory;
     private final ExprNode timestampExpression;
     private final ExprEvaluator timestampEvaluator;
-    private final long intervalSize;
-    private final IStreamTimeOrderRandomAccess optionalSortedRandomAccess;
-    private final ScheduleSlot scheduleSlot;
-    private final EPStatementHandleCallback handle;
+    protected final long intervalSize;
+    protected final IStreamSortRankRandomAccess optionalSortedRandomAccess;
+    protected final ScheduleSlot scheduleSlot;
+    protected final EPStatementHandleCallback handle;
 
     private EventBean[] eventsPerStream = new EventBean[1];
-    private TreeMap<Long, ArrayList<EventBean>> sortedEvents;
-    private boolean isCallbackScheduled;
-    private int eventCount;
-    private Map<EventBean, ArrayList<EventBean>> reverseIndex;
+    protected TreeMap<Object, Object> sortedEvents;
+    protected boolean isCallbackScheduled;
+    protected int eventCount;
 
     /**
      * Ctor.
@@ -68,7 +71,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                           ExprNode timestampExpr,
                           ExprEvaluator timestampEvaluator,
                           long intervalSize,
-                          IStreamTimeOrderRandomAccess optionalSortedRandomAccess)
+                          IStreamSortRankRandomAccess optionalSortedRandomAccess)
     {
         this.agentInstanceContext = agentInstanceContext;
         this.timeOrderViewFactory = timeOrderViewFactory;
@@ -77,12 +80,8 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
         this.intervalSize = intervalSize;
         this.optionalSortedRandomAccess = optionalSortedRandomAccess;
         this.scheduleSlot = agentInstanceContext.getStatementContext().getScheduleBucket().allocateSlot();
-        if (agentInstanceContext.isRemoveStream())
-        {
-            reverseIndex = new HashMap<EventBean, ArrayList<EventBean>>();
-        }
 
-        sortedEvents = new TreeMap<Long, ArrayList<EventBean>>();
+        sortedEvents = new TreeMap<Object, Object>();
 
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
@@ -112,15 +111,6 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
         return intervalSize;
     }
 
-    /**
-     * Returns the friend handling the random access, cal be null if not required.
-     * @return random accessor to sort window contents
-     */
-    protected IStreamTimeOrderRandomAccess getOptionalSortedRandomAccess()
-    {
-        return optionalSortedRandomAccess;
-    }
-
     public View cloneView()
     {
         return timeOrderViewFactory.makeView(agentInstanceContext);
@@ -136,16 +126,37 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
     {
         EventBean[] postOldEventsArray = null;
 
+        // Remove old data
+        if (oldData != null)
+        {
+            for (int i = 0; i < oldData.length; i++)
+            {
+                EventBean oldDataItem = oldData[i];
+                Object sortValues = getTimestamp(oldDataItem);
+                boolean result = CollectionUtil.removeEventByKeyLazyListMap(sortValues, oldDataItem, sortedEvents);
+                if (result)
+                {
+                    eventCount--;
+                    if (postOldEventsArray == null) {
+                        postOldEventsArray = oldData;
+                    }
+                    else {
+                        postOldEventsArray = CollectionUtil.addArrayWithSetSemantics(postOldEventsArray, oldData);
+                    }
+                    internalHandleRemoved(sortValues, oldDataItem);
+                }
+            }
+        }
+
         if ((newData != null) && (newData.length > 0))
         {
-
             // figure out the current tail time
             long engineTime = agentInstanceContext.getStatementContext().getSchedulingService().getTime();
             long windowTailTime = engineTime - intervalSize + 1;
             long oldestEvent = Long.MAX_VALUE;
             if (!sortedEvents.isEmpty())
             {
-                oldestEvent = sortedEvents.firstKey();
+                oldestEvent = (Long) sortedEvents.firstKey();
             }
             boolean addedOlderEvent = false;
 
@@ -155,8 +166,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
             {
                 // get timestamp of event
                 EventBean newEvent = newData[i];
-                eventsPerStream[0] = newEvent;
-                Long timestamp = (Long) timestampEvaluator.evaluate(eventsPerStream, true, agentInstanceContext);
+                Long timestamp = getTimestamp(newEvent);
 
                 // if the event timestamp indicates its older then the tail of the window, release it
                 if (timestamp < windowTailTime)
@@ -176,23 +186,9 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                     }
 
                     // add to list
-                    ArrayList<EventBean> listOfBeans = sortedEvents.get(timestamp);
-                    if (listOfBeans != null)
-                    {
-                        listOfBeans.add(newEvent);
-                    }
-                    else
-                    {
-                        listOfBeans = new ArrayList<EventBean>(2);
-                        listOfBeans.add(newEvent);
-                        sortedEvents.put(timestamp, listOfBeans);
-                    }
-
-                    if (reverseIndex != null)
-                    {
-                        reverseIndex.put(newEvent, listOfBeans);
-                    }
+                    CollectionUtil.addEventByKeyLazyListMapBack(timestamp, newEvent, sortedEvents);
                     eventCount++;
+                    internalHandleAdd(timestamp, newEvent);
                 }
             }
 
@@ -211,7 +207,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                     // We may need to reschedule, and older event may have been added
                     if (addedOlderEvent)
                     {
-                        oldestEvent = sortedEvents.firstKey();
+                        oldestEvent = (Long) sortedEvents.firstKey();
                         long callbackWait = oldestEvent - windowTailTime + 1;
                         agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
                         agentInstanceContext.getStatementContext().getSchedulingService().add(callbackWait, handle, scheduleSlot);
@@ -227,31 +223,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
 
             if (optionalSortedRandomAccess != null)
             {
-                optionalSortedRandomAccess.refresh(sortedEvents, eventCount);
-            }
-        }
-
-        if ((oldData != null) && (reverseIndex != null))
-        {
-            for (EventBean old : oldData)
-            {
-                ArrayList<EventBean> list = reverseIndex.remove(old);
-                if (list != null)
-                {
-                    list.remove(old);
-                }
-            }
-
-            if (postOldEventsArray == null)
-            {
-                postOldEventsArray = oldData;
-            }
-            else
-            {
-                Set<EventBean> oldDataSet = new HashSet<EventBean>();
-                oldDataSet.addAll(Arrays.asList(postOldEventsArray));
-                oldDataSet.addAll(Arrays.asList(oldData));
-                postOldEventsArray = oldDataSet.toArray(new EventBean[oldDataSet.size()]);
+                optionalSortedRandomAccess.refresh(sortedEvents, eventCount, eventCount);
             }
         }
 
@@ -260,6 +232,27 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
         {
             updateChildren(newData, postOldEventsArray);
         }
+    }
+
+    public void internalHandleAdd(Object sortValues, EventBean newDataItem) {
+        // no action required
+    }
+
+    public void internalHandleRemoved(Object sortValues, EventBean oldDataItem) {
+        // no action required
+    }
+
+    public void internalHandleExpired(Object sortValues, EventBean oldDataItem) {
+        // no action required
+    }
+
+    public void internalHandleExpired(Object sortValues, List<EventBean> oldDataItems) {
+        // no action required
+    }
+
+    protected Long getTimestamp(EventBean newEvent) {
+        eventsPerStream[0] = newEvent;
+        return (Long) timestampEvaluator.evaluate(eventsPerStream, true, agentInstanceContext);
     }
 
     /**
@@ -273,7 +266,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
 
     public final Iterator<EventBean> iterator()
     {
-        return new TimeOrderViewIterator(sortedEvents);
+        return new SortWindowIterator(sortedEvents);
     }
 
     public final String toString()
@@ -292,7 +285,7 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
         long expireBeforeTimestamp = agentInstanceContext.getStatementContext().getSchedulingService().getTime() - intervalSize + 1;
         isCallbackScheduled = false;
 
-        ArrayList<EventBean> releaseEvents = null;
+        List<EventBean> releaseEvents = null;
         Long oldestKey;
         while(true)
         {
@@ -302,36 +295,40 @@ public final class TimeOrderView extends ViewSupport implements DataWindowView, 
                 break;
             }
 
-            oldestKey = sortedEvents.firstKey();
+            oldestKey = (Long) sortedEvents.firstKey();
             if (oldestKey >= expireBeforeTimestamp)
             {
                 break;
             }
 
-            ArrayList<EventBean> expireEvents = sortedEvents.get(oldestKey);
-            if (releaseEvents == null)
-            {
-                releaseEvents = expireEvents;
-            }
-            else
-            {
-                releaseEvents.addAll(expireEvents);
-            }
-            eventCount -= expireEvents.size();
-            sortedEvents.remove(oldestKey);
-
-            if (reverseIndex != null)
-            {
-                for (EventBean released : releaseEvents)
-                {
-                    reverseIndex.remove(released);
+            Object released = sortedEvents.remove(oldestKey);
+            if (released != null) {
+                if (released instanceof List) {
+                    List<EventBean> releasedEventList = (List<EventBean>) released;
+                    if (releaseEvents == null) {
+                        releaseEvents = releasedEventList;
+                    }
+                    else {
+                        releaseEvents.addAll(releasedEventList);
+                    }
+                    eventCount -= releasedEventList.size();
+                    internalHandleExpired(oldestKey, releasedEventList);
+                }
+                else {
+                    EventBean releasedEvent = (EventBean) released;
+                    if (releaseEvents == null) {
+                        releaseEvents = new ArrayList<EventBean>(4);
+                    }
+                    releaseEvents.add(releasedEvent);
+                    eventCount--;
+                    internalHandleExpired(oldestKey, releasedEvent);
                 }
             }
         }
 
         if (optionalSortedRandomAccess != null)
         {
-            optionalSortedRandomAccess.refresh(sortedEvents, eventCount);
+            optionalSortedRandomAccess.refresh(sortedEvents, eventCount, eventCount);
         }
 
         // If there are child views, do the update method

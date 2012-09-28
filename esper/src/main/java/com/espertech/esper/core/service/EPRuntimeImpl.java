@@ -71,27 +71,13 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     private AtomicLong routedInternal;
     private AtomicLong routedExternal;
     private EventRenderer eventRenderer;
-    private ThreadLocal<Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>> matchesPerStmtThreadLocal;
-    private ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>> schedulePerStmtThreadLocal;
     private InternalEventRouter internalEventRouter;
     private ExprEvaluatorContext engineFilterAndDispatchTimeContext;
     private ThreadWorkQueue threadWorkQueue;
-
-    private ThreadLocal<ArrayBackedCollection<FilterHandle>> matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
-    {
-        protected synchronized ArrayBackedCollection<FilterHandle> initialValue()
-        {
-            return new ArrayBackedCollection<FilterHandle>(100);
-        }
-    };
-
-    private ThreadLocal<ArrayBackedCollection<ScheduleHandle>> scheduleArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<ScheduleHandle>>()
-    {
-        protected synchronized ArrayBackedCollection<ScheduleHandle> initialValue()
-        {
-            return new ArrayBackedCollection<ScheduleHandle>(100);
-        }
-    };
+    private ThreadLocal<ArrayBackedCollection<FilterHandle>> matchesArrayThreadLocal;
+    private ThreadLocal<ArrayBackedCollection<ScheduleHandle>> scheduleArrayThreadLocal;
+    private ThreadLocal<Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>> matchesPerStmtThreadLocal;
+    private ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>> schedulePerStmtThreadLocal;
 
     /**
      * Constructor.
@@ -148,36 +134,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             }
         };
 
-        matchesPerStmtThreadLocal =
-            new ThreadLocal<Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>>()
-            {
-                protected synchronized Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>> initialValue()
-                {
-                    if (isPrioritized)
-                    {
-                        return new TreeMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(EPStatementAgentInstanceHandleComparator.INSTANCE);
-                    }
-                    else
-                    {
-                        return new HashMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(10000);
-                    }
-                }
-            };
-
-        schedulePerStmtThreadLocal = new ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>>()
-            {
-                protected synchronized Map<EPStatementAgentInstanceHandle, Object> initialValue()
-                {
-                    if (isPrioritized)
-                    {
-                        return new TreeMap<EPStatementAgentInstanceHandle, Object>(EPStatementAgentInstanceHandleComparator.INSTANCE);
-                    }
-                    else
-                    {
-                        return new HashMap<EPStatementAgentInstanceHandle, Object>(10000);
-                    }
-                }
-            };
+        initThreadLocals();
 
         services.getThreadingService().initThreading(services, this);
     }
@@ -1290,19 +1247,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     {
         services = null;
 
-        if (matchesArrayThreadLocal != null) {
-            matchesArrayThreadLocal.remove();
-        }
-        if (matchesPerStmtThreadLocal != null) {
-            matchesPerStmtThreadLocal.remove();
-        }
-        if (scheduleArrayThreadLocal != null) {
-            scheduleArrayThreadLocal.remove();
-        }
-        if (schedulePerStmtThreadLocal != null) {
-            schedulePerStmtThreadLocal.remove();
-        }
-
+        removeFromThreadLocals();
         matchesArrayThreadLocal = null;
         matchesPerStmtThreadLocal = null;
         scheduleArrayThreadLocal = null;
@@ -1310,22 +1255,7 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
     }
 
     public void initialize() {
-        matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
-        {
-            protected synchronized ArrayBackedCollection<FilterHandle> initialValue()
-            {
-                return new ArrayBackedCollection<FilterHandle>(100);
-            }
-        };
-
-        scheduleArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<ScheduleHandle>>()
-        {
-            protected synchronized ArrayBackedCollection<ScheduleHandle> initialValue()
-            {
-                return new ArrayBackedCollection<ScheduleHandle>(100);
-            }
-        };
-
+        initThreadLocals();
         threadWorkQueue = new ThreadWorkQueue();
     }
 
@@ -1344,8 +1274,14 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
             throw new VariableConstantValueException("Variable by name '" + variableName + "' is declared as constant and may not be assigned a new value");
         }
 
-        services.getVariableService().checkAndWrite(reader.getVariableNumber(), variableValue);
-        services.getVariableService().commit();
+        services.getVariableService().getReadWriteLock().writeLock().lock();
+        try {
+            services.getVariableService().checkAndWrite(reader.getVariableNumber(), variableValue);
+            services.getVariableService().commit();
+        }
+        finally {
+            services.getVariableService().getReadWriteLock().writeLock().unlock();
+        }
     }
 
     public void setVariableValue(Map<String, Object> variableValues) throws EPException
@@ -1364,22 +1300,27 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
         }
 
         // set values
-        for (Map.Entry<String, Object> entry : variableValues.entrySet())
-        {
-            String variableName = entry.getKey();
-            VariableReader reader = services.getVariableService().getReader(variableName);
-            try
+        services.getVariableService().getReadWriteLock().writeLock().lock();
+        try {
+            for (Map.Entry<String, Object> entry : variableValues.entrySet())
             {
-                services.getVariableService().checkAndWrite(reader.getVariableNumber(), entry.getValue());
+                String variableName = entry.getKey();
+                VariableReader reader = services.getVariableService().getReader(variableName);
+                try
+                {
+                    services.getVariableService().checkAndWrite(reader.getVariableNumber(), entry.getValue());
+                }
+                catch (RuntimeException ex)
+                {
+                    services.getVariableService().rollback();
+                    throw ex;
+                }
             }
-            catch (RuntimeException ex)
-            {
-                services.getVariableService().rollback();
-                throw ex;
-            }
+            services.getVariableService().commit();
         }
-
-        services.getVariableService().commit();
+        finally {
+            services.getVariableService().getReadWriteLock().writeLock().unlock();
+        }
     }
 
     public Object getVariableValue(String variableName) throws EPException
@@ -1587,6 +1528,72 @@ public class EPRuntimeImpl implements EPRuntimeSPI, EPRuntimeEventSender, TimerC
 
     public EPDataFlowRuntime getDataFlowRuntime() {
         return services.getGraphService();
+    }
+
+    private void removeFromThreadLocals() {
+        if (matchesArrayThreadLocal != null) {
+            matchesArrayThreadLocal.remove();
+        }
+        if (matchesPerStmtThreadLocal != null) {
+            matchesPerStmtThreadLocal.remove();
+        }
+        if (scheduleArrayThreadLocal != null) {
+            scheduleArrayThreadLocal.remove();
+        }
+        if (schedulePerStmtThreadLocal != null) {
+            schedulePerStmtThreadLocal.remove();
+        }
+    }
+
+    private void initThreadLocals() {
+        removeFromThreadLocals();
+
+        matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
+        {
+            protected synchronized ArrayBackedCollection<FilterHandle> initialValue()
+            {
+                return new ArrayBackedCollection<FilterHandle>(100);
+            }
+        };
+
+        scheduleArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<ScheduleHandle>>()
+        {
+            protected synchronized ArrayBackedCollection<ScheduleHandle> initialValue()
+            {
+                return new ArrayBackedCollection<ScheduleHandle>(100);
+            }
+        };
+
+        matchesPerStmtThreadLocal =
+                new ThreadLocal<Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>>()
+                {
+                    protected synchronized Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>> initialValue()
+                    {
+                        if (isPrioritized)
+                        {
+                            return new TreeMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(EPStatementAgentInstanceHandleComparator.INSTANCE);
+                        }
+                        else
+                        {
+                            return new HashMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(10000);
+                        }
+                    }
+                };
+
+        schedulePerStmtThreadLocal = new ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>>()
+        {
+            protected synchronized Map<EPStatementAgentInstanceHandle, Object> initialValue()
+            {
+                if (isPrioritized)
+                {
+                    return new TreeMap<EPStatementAgentInstanceHandle, Object>(EPStatementAgentInstanceHandleComparator.INSTANCE);
+                }
+                else
+                {
+                    return new HashMap<EPStatementAgentInstanceHandle, Object>(10000);
+                }
+            }
+        };
     }
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);

@@ -21,31 +21,30 @@ import java.util.Map;
  * This class represents the state of a followed-by operator in the evaluation state tree, with a maximum number of instances provided, and
  * with the additional capability to engine-wide report on pattern instances.
  */
-public final class EvalFollowedByWithMaxStateNodeManaged extends EvalStateNode implements Evaluator
+public class EvalFollowedByWithMaxStateNodeManaged extends EvalStateNode implements Evaluator
 {
-    private final EvalFollowedByNode evalFollowedByNode;
-    private final HashMap<EvalStateNode, Integer> nodes;
-    private final int[] countActivePerChild;
+    protected final EvalFollowedByNode evalFollowedByNode;
+    protected final HashMap<EvalStateNode, Integer> nodes;
+    protected final int[] countActivePerChild;
 
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
-     * @param beginState contains the events that make up prior matches
      * @param evalFollowedByNode is the factory node associated to the state
      */
     public EvalFollowedByWithMaxStateNodeManaged(Evaluator parentNode,
-                                                 EvalFollowedByNode evalFollowedByNode,
-                                                 MatchedEventMap beginState)
+                                                 EvalFollowedByNode evalFollowedByNode)
     {
-        super(parentNode, null);
+        super(parentNode);
 
         this.evalFollowedByNode = evalFollowedByNode;
         this.nodes = new HashMap<EvalStateNode, Integer>();
-        this.countActivePerChild = new int[evalFollowedByNode.getChildNodes().length - 1];
-
-        EvalNode child = evalFollowedByNode.getChildNodes()[0];
-        EvalStateNode childState = child.newState(this, beginState, null);
-        nodes.put(childState, 0);
+        if (evalFollowedByNode.isTrackWithMax()) {
+            this.countActivePerChild = new int[evalFollowedByNode.getChildNodes().length - 1];
+        }
+        else {
+            this.countActivePerChild = null;
+        }
     }
 
     @Override
@@ -53,17 +52,12 @@ public final class EvalFollowedByWithMaxStateNodeManaged extends EvalStateNode i
         return evalFollowedByNode;
     }
 
-    public final void start()
+    public final void start(MatchedEventMap beginState)
     {
-        if (nodes.isEmpty())
-        {
-            throw new IllegalStateException("Followed by state node is inactive");
-        }
-
-        for (EvalStateNode child : nodes.keySet())
-        {
-            child.start();
-        }
+        EvalNode child = evalFollowedByNode.getChildNodes()[0];
+        EvalStateNode childState = child.newState(this, null, 0L);
+        nodes.put(childState, 0);
+        childState.start(beginState);
     }
 
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
@@ -74,10 +68,14 @@ public final class EvalFollowedByWithMaxStateNodeManaged extends EvalStateNode i
         {
             nodes.remove(fromNode);
             if (index != null && index > 0) {
-                countActivePerChild[index - 1]--;
-                PatternSubexpressionPoolStmtSvc poolSvc = evalFollowedByNode.getContext().getStatementContext().getPatternSubexpressionPoolSvc();
-                poolSvc.getEngineSvc().decreaseCount(evalFollowedByNode);
-                poolSvc.getStmtHandler().decreaseCount();
+                if (evalFollowedByNode.isTrackWithMax()) {
+                    countActivePerChild[index - 1]--;
+                }
+                if (evalFollowedByNode.isTrackWithPool()) {
+                    PatternSubexpressionPoolStmtSvc poolSvc = evalFollowedByNode.getContext().getStatementContext().getPatternSubexpressionPoolSvc();
+                    poolSvc.getEngineSvc().decreaseCount(evalFollowedByNode);
+                    poolSvc.getStmtHandler().decreaseCount();
+                }
             }
         }
 
@@ -103,25 +101,33 @@ public final class EvalFollowedByWithMaxStateNodeManaged extends EvalStateNode i
         // Else start a new sub-expression for the next-in-line filter
         else
         {
-            int max = evalFollowedByNode.getFactoryNode().getMax(index);
-            if ((max != -1) && (max >=0)) {
-                if (countActivePerChild[index] >= max) {
-                    evalFollowedByNode.getContext().getAgentInstanceContext().getStatementContext().getExceptionHandlingService().handleCondition(new ConditionPatternSubexpressionMax(max), evalFollowedByNode.getContext().getAgentInstanceContext().getStatementContext().getEpStatementHandle());
-                    return;
+            if (evalFollowedByNode.isTrackWithMax()) {
+                int max = evalFollowedByNode.getFactoryNode().getMax(index);
+                if ((max != -1) && (max >=0)) {
+                    if (countActivePerChild[index] >= max) {
+                        evalFollowedByNode.getContext().getAgentInstanceContext().getStatementContext().getExceptionHandlingService().handleCondition(new ConditionPatternSubexpressionMax(max), evalFollowedByNode.getContext().getAgentInstanceContext().getStatementContext().getEpStatementHandle());
+                        return;
+                    }
                 }
             }
-            PatternSubexpressionPoolStmtSvc poolSvc = evalFollowedByNode.getContext().getStatementContext().getPatternSubexpressionPoolSvc();
-            boolean allow = poolSvc.getEngineSvc().tryIncreaseCount(evalFollowedByNode);
-            if (!allow) {
-                return;
+
+            if (evalFollowedByNode.isTrackWithPool()) {
+                PatternSubexpressionPoolStmtSvc poolSvc = evalFollowedByNode.getContext().getStatementContext().getPatternSubexpressionPoolSvc();
+                boolean allow = poolSvc.getEngineSvc().tryIncreaseCount(evalFollowedByNode);
+                if (!allow) {
+                    return;
+                }
+                poolSvc.getStmtHandler().increaseCount();
             }
-            poolSvc.getStmtHandler().increaseCount();
-            countActivePerChild[index]++;
+
+            if (evalFollowedByNode.isTrackWithMax()) {
+                countActivePerChild[index]++;
+            }
 
             EvalNode child = evalFollowedByNode.getChildNodes()[index + 1];
-            EvalStateNode childState = child.newState(this, matchEvent, null);
+            EvalStateNode childState = child.newState(this, null, 0L);
             nodes.put(childState, index + 1);
-            childState.start();
+            childState.start(matchEvent);
         }
     }
 
@@ -130,10 +136,14 @@ public final class EvalFollowedByWithMaxStateNodeManaged extends EvalStateNode i
         fromNode.quit();
         Integer index = nodes.remove(fromNode);
         if (index != null && index > 0) {
-            countActivePerChild[index - 1]--;
-            PatternSubexpressionPoolStmtSvc poolSvc = evalFollowedByNode.getContext().getStatementContext().getPatternSubexpressionPoolSvc();
-            poolSvc.getEngineSvc().decreaseCount(evalFollowedByNode);
-            poolSvc.getStmtHandler().decreaseCount();
+            if (evalFollowedByNode.isTrackWithMax()) {
+                countActivePerChild[index - 1]--;
+            }
+            if (evalFollowedByNode.isTrackWithPool()) {
+                PatternSubexpressionPoolStmtSvc poolSvc = evalFollowedByNode.getContext().getStatementContext().getPatternSubexpressionPoolSvc();
+                poolSvc.getEngineSvc().decreaseCount(evalFollowedByNode);
+                poolSvc.getStmtHandler().decreaseCount();
+            }
         }
 
         if (nodes.isEmpty())
@@ -160,10 +170,12 @@ public final class EvalFollowedByWithMaxStateNodeManaged extends EvalStateNode i
         for (Map.Entry<EvalStateNode, Integer> entry : nodes.entrySet())
         {
             entry.getKey().quit();
-            if (entry.getValue() > 0) {
-                PatternSubexpressionPoolStmtSvc poolSvc = evalFollowedByNode.getContext().getStatementContext().getPatternSubexpressionPoolSvc();
-                poolSvc.getEngineSvc().decreaseCount(evalFollowedByNode);
-                poolSvc.getStmtHandler().decreaseCount();
+            if (evalFollowedByNode.isTrackWithPool()) {
+                if (entry.getValue() > 0) {
+                    PatternSubexpressionPoolStmtSvc poolSvc = evalFollowedByNode.getContext().getStatementContext().getPatternSubexpressionPoolSvc();
+                    poolSvc.getEngineSvc().decreaseCount(evalFollowedByNode);
+                    poolSvc.getStmtHandler().decreaseCount();
+                }
             }
         }
     }

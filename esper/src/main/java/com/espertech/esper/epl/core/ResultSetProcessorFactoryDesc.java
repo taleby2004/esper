@@ -8,7 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
-import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryDesc;
 
 /**
  * Processor prototype for result sets for instances that apply the select-clause, group-by-clause and having-clauses

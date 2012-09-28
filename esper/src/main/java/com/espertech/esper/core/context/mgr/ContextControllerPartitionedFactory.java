@@ -12,7 +12,6 @@
 package com.espertech.esper.core.context.mgr;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.client.context.ContextPartitionSelector;
 import com.espertech.esper.core.context.stmt.AIRegistryAggregationMultiPerm;
 import com.espertech.esper.core.context.stmt.AIRegistryExprMultiPerm;
 import com.espertech.esper.core.context.stmt.StatementAIResourceRegistry;
@@ -32,13 +31,18 @@ import java.util.*;
 public class ContextControllerPartitionedFactory extends ContextControllerFactoryBase implements ContextControllerFactory {
 
     private final ContextDetailPartitioned segmentedSpec;
+    private final List<FilterSpecCompiled> filtersSpecsNestedContexts;
     
     private Map<String, Object> contextBuiltinProps;
 
-    public ContextControllerPartitionedFactory(ContextControllerFactoryContext factoryContext, ContextDetailPartitioned segmentedSpec)
-    {
+    public ContextControllerPartitionedFactory(ContextControllerFactoryContext factoryContext, ContextDetailPartitioned segmentedSpec, List<FilterSpecCompiled> filtersSpecsNestedContexts) {
         super(factoryContext);
         this.segmentedSpec = segmentedSpec;
+        this.filtersSpecsNestedContexts = filtersSpecsNestedContexts;
+    }
+
+    public boolean hasFiltersSpecsNestedContexts() {
+        return filtersSpecsNestedContexts != null && !filtersSpecsNestedContexts.isEmpty();
     }
 
     public void validateFactory() throws ExprValidationException {
@@ -48,13 +52,20 @@ public class ContextControllerPartitionedFactory extends ContextControllerFactor
 
     public ContextControllerStatementCtxCache validateStatement(ContextControllerStatementBase statement) throws ExprValidationException {
         StatementSpecCompiledAnalyzerResult streamAnalysis = StatementSpecCompiledAnalyzer.analyzeFilters(statement.getStatementSpec());
-        ContextControllerPartitionedUtil.validateStatementForContext(factoryContext.getContextName(), statement, streamAnalysis, getItemEventTypes(segmentedSpec));
+        ContextControllerPartitionedUtil.validateStatementForContext(factoryContext.getContextName(), statement, streamAnalysis, getItemEventTypes(segmentedSpec), factoryContext.getServicesContext().getNamedWindowService());
         return new ContextControllerStatementCtxCacheFilters(streamAnalysis.getFilters());
     }
 
     public void populateFilterAddendums(IdentityHashMap<FilterSpecCompiled, List<FilterValueSetParam>> filterAddendum, ContextControllerStatementDesc statement, Object key, int contextId) {
         ContextControllerStatementCtxCacheFilters statementInfo = (ContextControllerStatementCtxCacheFilters) statement.getCaches()[factoryContext.getNestingLevel() - 1];
         ContextControllerPartitionedUtil.populateAddendumFilters(key, statementInfo.getFilterSpecs(), segmentedSpec, statement.getStatement().getStatementSpec(), filterAddendum);
+    }
+
+    public void populateContextInternalFilterAddendums(ContextInternalFilterAddendum filterAddendum, Object key) {
+        if (filtersSpecsNestedContexts == null || filtersSpecsNestedContexts.isEmpty()) {
+            return;
+        }
+        ContextControllerPartitionedUtil.populateAddendumFilters(key, filtersSpecsNestedContexts, segmentedSpec, null, filterAddendum.getFilterAddendum());
     }
 
     public FilterSpecLookupable getFilterLookupable(EventType eventType) {
@@ -99,12 +110,5 @@ public class ContextControllerPartitionedFactory extends ContextControllerFactor
             itemEventTypes.add(item.getFilterSpecCompiled().getFilterForEventType());
         }
         return itemEventTypes;
-    }
-
-    public Collection<Integer> getSelectedContextPartitions(Map<Integer, ContextControllerTreeAgentInstanceList> agentInstances, ContextPartitionSelector contextPartitionSelector) {
-        for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> entry : agentInstances.entrySet()) {
-            
-        }
-        return null;
     }
 }

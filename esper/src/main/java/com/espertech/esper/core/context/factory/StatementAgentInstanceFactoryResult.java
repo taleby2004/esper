@@ -13,7 +13,7 @@ package com.espertech.esper.core.context.factory;
 
 import com.espertech.esper.core.context.subselect.SubSelectStrategyHolder;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.Viewable;

@@ -278,7 +278,7 @@ public class TestContextPartitioned extends TestCase {
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{3L});
     }
 
-    public void testSegmentedJoinMultitypeMultifield() {
+    public void testSegmentedJoinMultitypeMultifield() throws Exception {
         epService.getEPAdministrator().createEPL("@Name('context') create context SegmentedBy2Fields " +
                 "partition by theString and intPrimitive from SupportBean, p00 and id from SupportBean_S0");
 
@@ -305,6 +305,38 @@ public class TestContextPartitioned extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("G1", 2));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"G1", 2, 2, "G1", "G1", 2});
+
+        // ESPER-663
+        epService.getEPAdministrator().getConfiguration().addEventType("Event", Event.class);
+        String epl =
+            "@Audit @Name('CTX') create context Ctx partition by grp, subGrp from Event;\n" +
+            "@Audit @Name('Window') context Ctx create window EventData.std:unique(type) as Event;" +
+            "@Audit @Name('Insert') context Ctx insert into EventData select * from Event;" +
+            "@Audit @Name('Test') context Ctx select irstream * from EventData;";
+        epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(epl);
+        epService.getEPAdministrator().getStatement("Test").addListener(listener);
+        epService.getEPRuntime().sendEvent(new Event("G1", "SG1", 1, 10.45));
+        assertTrue(listener.isInvoked());
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // Esper-695
+        String eplTwo =
+                "create context Ctx partition by theString from SupportBean;\n" +
+                "context Ctx create window MyWindow.std:unique(intPrimitive) as SupportBean;" +
+                "context Ctx select irstream * from pattern [MyWindow];";
+        epService.getEPAdministrator().getDeploymentAdmin().parseDeploy(eplTwo);
+        tryInvalidCreateWindow();
+        tryInvalidCreateWindow(); // making sure all is cleaned up
+    }
+
+    private void tryInvalidCreateWindow() {
+        try {
+            epService.getEPAdministrator().createEPL("context Ctx create window MyInvalidWindow.std:unique(p00) as SupportBean_S0");
+            fail();
+        }
+        catch (EPException ex) {
+            assertEquals("Error starting statement: Segmented context 'Ctx' requires that any of the event types that are listed in the segmented context also appear in any of the filter expressions of the statement [context Ctx create window MyInvalidWindow.std:unique(p00) as SupportBean_S0]", ex.getMessage());
+        }
     }
 
     public void testSegmentedSubselectPrevPrior() {
@@ -640,4 +672,71 @@ public class TestContextPartitioned extends TestCase {
             return contexts;
         }
     }
+
+    public static class Event {
+   		public String grp;
+   		public String subGrp;
+   		public int type;
+   		public double value;
+
+   		public Event() {}
+
+   		public Event(final String group, final String subGroup, final int type, final double value) {
+   			grp = group;
+   			subGrp = subGroup;
+   			this.type = type;
+   			this.value = value;
+   		}
+
+   		public String getGrp() {
+   			return grp;
+   		}
+
+   		public void setGrp(final String group) {
+   			grp = group;
+   		}
+
+   		public String getSubGrp() {
+   			return subGrp;
+   		}
+
+   		public void setSubGrp(final String subGroup) {
+   			subGrp = subGroup;
+   		}
+
+   		public int getType() {
+   			return type;
+   		}
+
+   		public void setType(final int type) {
+   			this.type = type;
+   		}
+
+   		public double getValue() {
+   			return value;
+   		}
+
+   		public void setValue(final double value) {
+   			this.value = value;
+   		}
+
+   		@Override
+   		public boolean equals(final Object obj) {
+   			if (this == obj) {
+   				return true;
+   			}
+   			if (obj instanceof Event) {
+   				final Event evt = (Event) obj;
+   				return grp.equals(evt.grp) && subGrp.equals(evt.subGrp) && type == evt.type && Math.abs(value - evt.value) < 1e-6;
+   			}
+
+   			return false;
+   		}
+
+   		@Override
+   		public String toString() {
+   			return "(" + grp + ", " + subGrp + ")@" + type + "=" + value;
+   		}
+
+   	}
 }

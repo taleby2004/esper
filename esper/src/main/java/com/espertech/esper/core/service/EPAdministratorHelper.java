@@ -125,7 +125,7 @@ public class EPAdministratorHelper
         catch (ASTWalkException ex)
         {
             log.error(".createEPL Error validating expression", ex);
-            throw new EPStatementException(ex.getMessage(), eplStatementForErrorMsg);
+            throw new EPStatementException(ex.getMessage(), ex, eplStatementForErrorMsg);
         }
         catch (EPStatementSyntaxException ex)
         {

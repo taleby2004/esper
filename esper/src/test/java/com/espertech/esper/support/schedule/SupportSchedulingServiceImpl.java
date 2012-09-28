@@ -48,12 +48,6 @@ public class SupportSchedulingServiceImpl implements SchedulingService
         added.put(afterMSec, callback);
     }
 
-    public void add(ScheduleSpec scheduleSpecification, ScheduleHandle callback, ScheduleSlot slot)
-    {
-        log.debug(".add Not implemented, scheduleSpecification=" + scheduleSpecification +
-                " callback=" + callback.getClass().getName());
-    }
-
     public void remove(ScheduleHandle callback, ScheduleSlot slot)
     {
         log.debug(".remove Not implemented, callback=" + callback.getClass().getName());

@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -36,24 +35,24 @@ import java.util.Iterator;
  * <p>
  * The view starts the first interval when the view is created.
  */
-public final class TimeLengthBatchView extends ViewSupport implements CloneableView, StoppableView, StopCallback, DataWindowView {
+public class TimeLengthBatchView extends ViewSupport implements CloneableView, StoppableView, StopCallback, DataWindowView {
     private static final Log log = LogFactory.getLog(TimeLengthBatchView.class);
 
     // View parameters
     private final TimeLengthBatchViewFactory timeLengthBatchViewFactory;
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
-    private final long msecIntervalSize;
-    private final long numberOfEvents;
-    private final boolean isForceOutput;
-    private final boolean isStartEager;
-    private final ViewUpdatedCollection viewUpdatedCollection;
-    private final ScheduleSlot scheduleSlot;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceContext;
+    protected final long msecIntervalSize;
+    protected final long numberOfEvents;
+    protected final boolean isForceOutput;
+    protected final boolean isStartEager;
+    protected final ViewUpdatedCollection viewUpdatedCollection;
+    protected final ScheduleSlot scheduleSlot;
 
     // Current running parameters
-    private ArrayList<EventBean> lastBatch = null;
-    private ArrayList<EventBean> currentBatch = new ArrayList<EventBean>();
-    private boolean isCallbackScheduled;
-    private EPStatementHandleCallback handle;
+    protected ArrayList<EventBean> lastBatch = null;
+    protected ArrayList<EventBean> currentBatch = new ArrayList<EventBean>();
+    protected Long callbackScheduledTime;
+    protected EPStatementHandleCallback handle;
 
     /**
      * Constructor.
@@ -85,8 +84,7 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
         // schedule the first callback
         if (isStartEager)
         {
-            scheduleCallback();
-            isCallbackScheduled = true;
+            scheduleCallback(0);
         }
 
         agentInstanceContext.getTerminationCallbacks().add(this);
@@ -138,13 +136,15 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
         return parent.getEventType();
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         if (oldData != null)
         {
             for (int i = 0; i < oldData.length; i++)
             {
-                currentBatch.remove(oldData[i]);
+                if (currentBatch.remove(oldData[i])) {
+                    internalHandleRemoved(oldData[i]);
+                }
             }
         }
 
@@ -155,16 +155,18 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
         }
 
         // Add data points
-        currentBatch.addAll(Arrays.asList(newData));
+        for (EventBean newEvent : newData) {
+            currentBatch.add(newEvent);
+            internalHandleAdded(newEvent);
+        }
 
         // We are done unless we went over the boundary
         if (currentBatch.size() < numberOfEvents)
         {
             // Schedule a callback if there is none scheduled
-            if (!isCallbackScheduled)
+            if (callbackScheduledTime == null)
             {
-                scheduleCallback();
-                isCallbackScheduled = true;
+                scheduleCallback(0);
             }
 
             return;
@@ -174,25 +176,33 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
         sendBatch(false);
     }
 
+    public void internalHandleAdded(EventBean newEvent) {
+        // no action required
+    }
+
+    public void internalHandleRemoved(EventBean eventBean) {
+        // no action required
+    }
+
     /**
      * This method updates child views and clears the batch of events.
      * We cancel and old callback and schedule a new callback at this time if there were events in the batch.
      * @param isFromSchedule true if invoked from a schedule, false if not
      */
-    protected final void sendBatch(boolean isFromSchedule)
+    protected void sendBatch(boolean isFromSchedule)
     {
         // No more callbacks scheduled if called from a schedule
         if (isFromSchedule)
         {
-            isCallbackScheduled = false;
+            callbackScheduledTime = null;
         }
         else
         {
             // Remove schedule if called from on overflow due to number of events
-            if (isCallbackScheduled)
+            if (callbackScheduledTime != null)
             {
                 agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
-                isCallbackScheduled = false;
+                callbackScheduledTime = null;
             }
         }
 
@@ -228,8 +238,7 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
            ||
            (isForceOutput))
         {
-            scheduleCallback();
-            isCallbackScheduled = true;
+            scheduleCallback(0);
         }
 
         // Flush and roll
@@ -265,7 +274,7 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
                 " numberOfEvents=" + numberOfEvents;
     }
 
-    private void scheduleCallback()
+    protected void scheduleCallback(long delta)
     {
         ScheduleHandleCallback callback = new ScheduleHandleCallback() {
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
@@ -274,7 +283,8 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
             }
         };
         handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
-        agentInstanceContext.getStatementContext().getSchedulingService().add(msecIntervalSize, handle, scheduleSlot);
+        agentInstanceContext.getStatementContext().getSchedulingService().add(msecIntervalSize - delta, handle, scheduleSlot);
+        callbackScheduledTime = agentInstanceContext.getStatementContext().getSchedulingService().getTime() - delta;
     }
 
     public void stopView() {
@@ -291,4 +301,6 @@ public final class TimeLengthBatchView extends ViewSupport implements CloneableV
             agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
     }
+
+
 }

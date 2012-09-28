@@ -13,6 +13,11 @@ package com.espertech.esper.core.service;
  */
 public class DeliveryConvertorNull implements DeliveryConvertor
 {
+    public static DeliveryConvertorNull INSTANCE = new DeliveryConvertorNull();
+
+    private DeliveryConvertorNull() {
+    }
+
     public Object[] convertRow(Object[] columns) {
         return columns;
     }

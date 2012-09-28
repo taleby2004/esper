@@ -51,6 +51,11 @@ public class IndexHelper
                         return new Pair<FilterValueSetParam, FilterParamIndexBase>(parameter, index);
                     }
                 }
+                else if (index instanceof FilterParamIndexBooleanExpr) {
+                    if (operator.equals(FilterOperator.BOOLEAN_EXPRESSION)) {
+                        return new Pair<FilterValueSetParam, FilterParamIndexBase>(parameter, index);
+                    }
+                }
             }
         }
 

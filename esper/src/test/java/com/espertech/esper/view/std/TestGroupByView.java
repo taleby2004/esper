@@ -171,13 +171,12 @@ public class TestGroupByView extends TestCase
         mergeViewOne = new MergeView(agentInstanceContext, SupportExprNodeFactory.makeIdentNodesMD("symbol"), null);
         firstElementView_1.addView(mergeViewOne);
 
-        Collection<View> subViews = GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, agentInstanceContext);
+        Object subViews = GroupByViewImpl.makeSubViews(groupView, "symbol".split(","), groupByValue, agentInstanceContext);
 
-        assertTrue(subViews.size() == 1);
-        assertTrue(subViews.iterator().next() instanceof FirstElementView);
-        assertTrue(subViews.iterator().next() != firstElementView_1);
+        assertTrue(subViews instanceof FirstElementView);
+        assertTrue(subViews != firstElementView_1);
 
-        FirstElementView firstEleView = (FirstElementView) subViews.iterator().next();
+        FirstElementView firstEleView = (FirstElementView) subViews;
         assertEquals(1, firstEleView.getViews().size());
         assertTrue(firstEleView.getViews().get(0) instanceof AddPropertyValueView);
 

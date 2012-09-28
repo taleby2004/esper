@@ -12,8 +12,8 @@
 package com.espertech.esper.regression.client;
 
 import com.espertech.esper.client.hook.AggregationFunctionFactory;
-import com.espertech.esper.epl.agg.AggregationMethod;
-import com.espertech.esper.epl.agg.AggregationValidationContext;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
+import com.espertech.esper.epl.agg.service.AggregationValidationContext;
 
 import java.io.Serializable;
 

@@ -357,7 +357,7 @@ public class PatternStreamSpecRaw extends StreamSpecBase implements StreamSpecRa
             if (distinctExpressions.isEmpty()) {
                 throw new ExprValidationException("Every-distinct node requires one or more distinct-value expressions that each return non-constant result values");
             }
-            distinctNode.setExpressions(distinctExpressions, msecToExpire);
+            distinctNode.setDistinctExpressions(distinctExpressions, msecToExpire);
         }
         else if (evalNode instanceof EvalMatchUntilFactoryNode)
         {

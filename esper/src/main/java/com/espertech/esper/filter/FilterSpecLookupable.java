@@ -12,6 +12,7 @@ import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.util.MetaDefItem;
 
 import java.io.Serializable;
+import java.io.StringWriter;
 
 public class FilterSpecLookupable implements MetaDefItem, Serializable
 {
@@ -52,4 +53,9 @@ public class FilterSpecLookupable implements MetaDefItem, Serializable
     public int hashCode() {
         return expression.hashCode();
     }
+
+    public void appendTo(StringWriter writer) {
+        writer.append(expression);
+    }
 }
+

@@ -11,10 +11,8 @@
 
 package com.espertech.esper.schedule;
 
-import com.espertech.esper.view.window.TimeWindowView;
-
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Service for holding expiration dates to adjust.
@@ -44,7 +42,7 @@ public class ScheduleAdjustmentService
         }
     }
 
-    public void removeCallback(TimeWindowView callback) {
+    public void removeCallback(ScheduleAdjustmentCallback callback) {
         callbacks.remove(callback);
     }
 }

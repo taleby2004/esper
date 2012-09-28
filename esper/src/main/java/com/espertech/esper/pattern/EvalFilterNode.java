@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class EvalFilterNode extends EvalNodeBase
 {
-    private final EvalFilterFactoryNode factoryNode;
+    protected final EvalFilterFactoryNode factoryNode;
     private final List<FilterValueSetParam> addendumFilters;
 
     public EvalFilterNode(PatternAgentInstanceContext context, EvalFilterFactoryNode factoryNode) {
@@ -37,22 +37,17 @@ public class EvalFilterNode extends EvalNodeBase
         return factoryNode;
     }
 
-    public EvalNodeNumber getNodeNumber() {
-        return factoryNode.getNodeNumber();
-    }
-
     public List<FilterValueSetParam> getAddendumFilters() {
         return addendumFilters;
     }
 
     public EvalStateNode newState(Evaluator parentNode,
-                                  MatchedEventMap beginState,
-                                  EvalStateNodeNumber stateNodeId)
+                                  EvalStateNodeNumber stateNodeNumber, long stateNodeId)
     {
         if (getContext().getConsumptionHandler() != null) {
-            return new EvalFilterStateNodeConsumeImpl(parentNode, this, beginState);
+            return new EvalFilterStateNodeConsumeImpl(parentNode, this);
         }
-        return new EvalFilterStateNode(parentNode, this, beginState);
+        return new EvalFilterStateNode(parentNode, this);
     }
 
     private static final Log log = LogFactory.getLog(EvalFilterNode.class);

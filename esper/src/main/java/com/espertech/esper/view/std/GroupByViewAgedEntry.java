@@ -14,22 +14,21 @@ package com.espertech.esper.view.std;
 import com.espertech.esper.view.View;
 
 import java.util.Collection;
-import java.util.List;
 
 public class GroupByViewAgedEntry
 {
-    private final Collection<View> subviews;
+    private final Object subviewHolder;
     private long lastUpdateTime;
 
-    public GroupByViewAgedEntry(Collection<View> subviews, long lastUpdateTime)
+    public GroupByViewAgedEntry(Object subviewHolder, long lastUpdateTime)
     {
-        this.subviews = subviews;
+        this.subviewHolder = subviewHolder;
         this.lastUpdateTime = lastUpdateTime;
     }
 
-    public Collection<View> getSubviews()
+    public Object getSubviewHolder()
     {
-        return subviews;
+        return subviewHolder;
     }
 
     public long getLastUpdateTime()

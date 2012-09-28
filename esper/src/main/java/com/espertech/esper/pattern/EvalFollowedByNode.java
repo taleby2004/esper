@@ -25,10 +25,6 @@ public class EvalFollowedByNode extends EvalNodeBase
         this.childNodes = childNodes;
     }
 
-    public EvalNodeNumber getNodeNumber() {
-        return factoryNode.getNodeNumber();
-    }
-
     public EvalNode[] getChildNodes() {
         return childNodes;
     }
@@ -38,20 +34,24 @@ public class EvalFollowedByNode extends EvalNodeBase
     }
 
     public EvalStateNode newState(Evaluator parentNode,
-                                  MatchedEventMap beginState,
-                                  EvalStateNodeNumber stateNodeId)
+                                  EvalStateNodeNumber stateNodeNumber, long stateNodeId)
     {
         switch (factoryNode.opType) {
             case NOMAX_PLAIN:
-                return new EvalFollowedByStateNode(parentNode, this, beginState);
-            case MAX_PLAIN:
-                return new EvalFollowedByWithMaxStateNode(parentNode, this, beginState);
-            case NOMAX_POOL:
-                return new EvalFollowedByStateNodeManaged(parentNode, this, beginState);
-            case MAX_POOL:
-                return new EvalFollowedByWithMaxStateNodeManaged(parentNode, this, beginState);
+                return new EvalFollowedByStateNode(parentNode, this);
+            default:
+                return new EvalFollowedByWithMaxStateNodeManaged(parentNode, this);
         }
-        throw new IllegalStateException("Op-type not recognized for followed-by: " + factoryNode.opType);
+    }
+
+    public boolean isTrackWithPool() {
+        return factoryNode.getOpType() == EvalFollowedByNodeOpType.NOMAX_POOL ||
+               factoryNode.getOpType() == EvalFollowedByNodeOpType.MAX_POOL;
+    }
+
+    public boolean isTrackWithMax() {
+        return factoryNode.getOpType() == EvalFollowedByNodeOpType.MAX_PLAIN ||
+               factoryNode.getOpType() == EvalFollowedByNodeOpType.MAX_POOL;
     }
 
     private static final Log log = LogFactory.getLog(EvalFollowedByNode.class);

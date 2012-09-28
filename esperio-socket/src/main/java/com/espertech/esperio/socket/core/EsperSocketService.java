@@ -58,4 +58,8 @@ public class EsperSocketService {
             log.debug("Interrupted", e);
         }        
     }
+
+    public int getPort() {
+        return serviceConfig.getPort();
+    }
 }

@@ -30,7 +30,7 @@ import java.util.Map;
  * as   (sum(price * volume) / sum(volume)).
  * Example: weighted_avg("price", "volume")
  */
-public final class WeightedAverageView extends ViewSupport implements CloneableView
+public class WeightedAverageView extends ViewSupport implements CloneableView
 {
     private final EventType eventType;
     private final AgentInstanceContext agentInstanceContext;
@@ -42,10 +42,10 @@ public final class WeightedAverageView extends ViewSupport implements CloneableV
 
     private EventBean[] eventsPerStream = new EventBean[1];
 
-    private double sumXtimesW = Double.NaN;
-    private double sumW = Double.NaN;
-    private double currentValue = Double.NaN;
-    private Object[] lastValuesEventNew;
+    protected double sumXtimesW = Double.NaN;
+    protected double sumW = Double.NaN;
+    protected double currentValue = Double.NaN;
+    protected Object[] lastValuesEventNew;
 
     private EventBean lastNewEvent;
 
@@ -91,9 +91,22 @@ public final class WeightedAverageView extends ViewSupport implements CloneableV
         return fieldNameWeight;
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         double oldValue = currentValue;
+
+        // If we have child views, keep a reference to the old values, so we can update them as old data event.
+        EventBean oldDataMap = null;
+        if (lastNewEvent == null)
+        {
+            if (this.hasViews())
+            {
+                Map<String, Object> oldDataValues = new HashMap<String, Object>();
+                oldDataValues.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), oldValue);
+                addProperties(oldDataValues);
+                oldDataMap = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(oldDataValues, eventType);
+            }
+        }
 
         // add data points to the bean
         if (newData != null)
@@ -167,11 +180,7 @@ public final class WeightedAverageView extends ViewSupport implements CloneableV
 
             if (lastNewEvent == null)
             {
-                Map<String, Object> oldDataMap = new HashMap<String, Object>();
-                oldDataMap.put(ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE.getName(), oldValue);
-                EventBean oldDataEvent = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(oldDataMap, eventType);
-
-                updateChildren(new EventBean[] {newDataEvent}, new EventBean[] {oldDataEvent});
+                updateChildren(new EventBean[] {newDataEvent}, new EventBean[] {oldDataMap});
             }
             else
             {
@@ -221,5 +230,37 @@ public final class WeightedAverageView extends ViewSupport implements CloneableV
         StatViewAdditionalProps.addCheckDupProperties(schemaMap, additionalProps, ViewFieldEnum.WEIGHTED_AVERAGE__AVERAGE);
         String outputEventTypeName = statementContext.getStatementId() + "_wavgview_" + streamNum;
         return statementContext.getEventAdapterService().createAnonymousMapType(outputEventTypeName, schemaMap);
+    }
+
+    public double getSumXtimesW() {
+        return sumXtimesW;
+    }
+
+    public void setSumXtimesW(double sumXtimesW) {
+        this.sumXtimesW = sumXtimesW;
+    }
+
+    public double getSumW() {
+        return sumW;
+    }
+
+    public void setSumW(double sumW) {
+        this.sumW = sumW;
+    }
+
+    public double getCurrentValue() {
+        return currentValue;
+    }
+
+    public void setCurrentValue(double currentValue) {
+        this.currentValue = currentValue;
+    }
+
+    public Object[] getLastValuesEventNew() {
+        return lastValuesEventNew;
+    }
+
+    public void setLastValuesEventNew(Object[] lastValuesEventNew) {
+        this.lastValuesEventNew = lastValuesEventNew;
     }
 }

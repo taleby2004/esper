@@ -119,16 +119,7 @@ public class ASTOutputLimitHelper
             }
             else if (child.getType() == EsperEPL2GrammarParser.TIME_PERIOD)
             {
-                ExprNode expression = astExprNodeMap.remove(child);
-
-                try {
-                    ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(engineURI, false), null, null, timeProvider, variableService, exprEvaluatorContext, null, null, null, null, null);
-                    timePeriodExpr = (ExprTimePeriod) ExprNodeUtility.getValidatedSubtree(expression, validationContext);
-                }
-                catch (ExprValidationException ex)
-                {
-                    throw new ASTWalkException("Invalid time period expresion: " + ex.getMessage(), ex);
-                }
+                timePeriodExpr = (ExprTimePeriod) astExprNodeMap.remove(child);
             }
             else
             {
@@ -146,14 +137,7 @@ public class ASTOutputLimitHelper
                 ExprNode expression = astExprNodeMap.remove(node.getChild(i).getChild(0));
                 if (expression != null)
                 {
-                    try {
-                        ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(engineURI, false), null, null, timeProvider, variableService, exprEvaluatorContext, null, null, null, null, null);
-                        afterTimePeriodExpr = (ExprTimePeriod) ExprNodeUtility.getValidatedSubtree(expression, validationContext);
-                    }
-                    catch (ExprValidationException ex)
-                    {
-                        throw new ASTWalkException("Invalid time period expresion: " + ex.getMessage(), ex);
-                    }
+                    afterTimePeriodExpr = (ExprTimePeriod) expression;
                 }
                 else
                 {

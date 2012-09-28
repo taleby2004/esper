@@ -1336,7 +1336,7 @@ select default.MyEvent.myProperty from MyEvent</programlisting>
 select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 	
 				<para>
-					The following operators are highly optimized through indexing and are the preferred means of filtering in high-volume event streams:
+					The following operators are highly optimized through indexing and are the preferred means of filtering in high-volume event streams and especially in the presence of a larger number of filters or statements:
 				</para>
 		
 				<itemizedlist spacing="compact">
@@ -1382,10 +1382,15 @@ select * from RfidEvent(zone=1 and category=10)]]></programlisting>
 							list-of-values checks using the <literal>in</literal> keyword or the <literal>not in </literal> keywords followed by a comma-separated list of values
 						</para>
 					</listitem>
+					<listitem>
+						<para>
+							single-row functions that have been registered and are invoked via function name (see user-defined functions) and that either return a boolean value or that have their return value compared to a constant
+						</para>
+					</listitem>
 				</itemizedlist>
 	
 				<para>
-					At compile time as well as at run time, the engine scans new filter expressions for sub-expressions that can be indexed. Indexing filter values to match event properties of incoming events enables the engine to match incoming events faster. The above list of operators represents the set of operators that the engine can best convert into indexes. The use of comma or logical <literal>and</literal> in filter expressions does not impact optimizations by the engine. 
+					At compile time as well as at run time, the engine scans new filter expressions for sub-expressions that can be indexed. Indexing filter values to match event properties of incoming events enables the engine to match incoming events faster, especially if your application creates a large number of statements or requires many similar filters. The above list of operators represents the set of operators that the engine can best convert into indexes. The use of comma or logical <literal>and</literal> in filter expressions does not impact optimizations by the engine. 
 				</para>
 			</sect3>
 			

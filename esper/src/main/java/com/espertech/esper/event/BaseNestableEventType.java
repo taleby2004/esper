@@ -311,7 +311,9 @@ public abstract class BaseNestableEventType implements EventTypeSPI
                 Class boxedThis = JavaClassHelper.getBoxedType((Class)setOneType);
                 if (!boxedOther.equals(boxedThis))
                 {
-                    return "Type by name '" + otherName + "' in property '" + propName + "' expected " + boxedThis + " but receives " + boxedOther;
+                    if (!JavaClassHelper.isSubclassOrImplementsInterface(boxedOther, boxedThis)) {
+                        return "Type by name '" + otherName + "' in property '" + propName + "' expected " + boxedThis + " but receives " + boxedOther;
+                    }
                 }
             }
             else if ((setTwoType instanceof BeanEventType) && (setOneType instanceof Class))

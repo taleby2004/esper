@@ -12,7 +12,7 @@
 package com.espertech.esper.support.epl;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.agg.AggregationResultFuture;
+import com.espertech.esper.epl.agg.service.AggregationResultFuture;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;

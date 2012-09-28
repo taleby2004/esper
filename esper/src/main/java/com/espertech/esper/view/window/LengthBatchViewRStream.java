@@ -11,7 +11,10 @@ package com.espertech.esper.view.window;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
-import com.espertech.esper.view.*;
+import com.espertech.esper.view.CloneableView;
+import com.espertech.esper.view.DataWindowView;
+import com.espertech.esper.view.View;
+import com.espertech.esper.view.ViewSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -22,15 +25,15 @@ import java.util.LinkedHashSet;
 /**
 * Same as the {@link LengthBatchView}, this view also supports fast-remove from the batch for remove stream events.
 */
-public final class LengthBatchViewRStream extends ViewSupport implements CloneableView, DataWindowView {
+public class LengthBatchViewRStream extends ViewSupport implements CloneableView, DataWindowView {
     // View parameters
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final LengthBatchViewFactory lengthBatchViewFactory;
     private final int size;
 
     // Current running windows
-    private LinkedHashSet<EventBean> lastBatch = null;
-    private LinkedHashSet<EventBean> currentBatch = new LinkedHashSet<EventBean>();
+    protected LinkedHashSet<EventBean> lastBatch = null;
+    protected LinkedHashSet<EventBean> currentBatch = new LinkedHashSet<EventBean>();
 
     /**
      * Constructor.
@@ -70,13 +73,19 @@ public final class LengthBatchViewRStream extends ViewSupport implements Cloneab
         return parent.getEventType();
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void internalHandleRemoved(EventBean oldData) {
+        // no action required
+    }
+
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         if (oldData != null)
         {
             for (int i = 0; i < oldData.length; i++)
             {
-                currentBatch.remove(oldData[i]);
+                if (currentBatch.remove(oldData[i])) {
+                    internalHandleRemoved(oldData[i]);
+                }
             }
         }
 
@@ -87,7 +96,9 @@ public final class LengthBatchViewRStream extends ViewSupport implements Cloneab
         }
 
         // add data points to the current batch
-        currentBatch.addAll(Arrays.asList(newData));
+        for (EventBean newEvent : newData) {
+            currentBatch.add(newEvent);
+        }
 
         // check if we reached the minimum size
         if (currentBatch.size() < size)
@@ -102,7 +113,7 @@ public final class LengthBatchViewRStream extends ViewSupport implements Cloneab
     /**
      * This method updates child views and clears the batch of events.
      */
-    protected final void sendBatch()
+    protected void sendBatch()
     {
         // If there are child views and the batch was filled, fireStatementStopped update method
         if (this.hasViews())

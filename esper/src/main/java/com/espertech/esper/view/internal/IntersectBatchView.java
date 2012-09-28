@@ -43,15 +43,15 @@ public class IntersectBatchView extends ViewSupport implements LastPostObserver,
 {
     private static final Log log = LogFactory.getLog(IntersectBatchView.class);
 
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
-    private final IntersectViewFactory intersectViewFactory;
-    private final EventType eventType;
-    private final View[] views;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final IntersectViewFactory intersectViewFactory;
+    protected final EventType eventType;
+    protected final View[] views;
     private int batchViewIndex;
     private final EventBean[][] oldEventsPerView;
     private final EventBean[][] newEventsPerView;
     private final HashSet<EventBean> removedEvents = new LinkedHashSet<EventBean>();
-    private final boolean hasAsymetric;
+    protected final boolean hasAsymetric;
 
     private boolean captureIRNonBatch;
     private boolean ignoreViewIRStream;

@@ -16,11 +16,6 @@ package com.espertech.esper.pattern;
 public interface EvalNode
 {
     public EvalStateNode newState(Evaluator parentNode,
-                                  MatchedEventMap beginState,
-                                  EvalStateNodeNumber stateNodeId);
-    /**
-     * Returns the evaluation node's relative node number in the evaluation node tree.
-     * @return node number
-     */
-    public EvalNodeNumber getNodeNumber();
+                                  EvalStateNodeNumber stateNodeNumber,
+                                  long stateNodeId);
 }

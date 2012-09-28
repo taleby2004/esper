@@ -16,13 +16,13 @@ public final class TimeWindowIterator extends MixedEventBeanAndCollectionIterato
      * Ctor.
      * @param window is the time-slotted collection
      */
-    public TimeWindowIterator(ArrayDeque<Pair<Long, Object>> window)
+    public TimeWindowIterator(ArrayDeque<TimeWindowPair> window)
     {
         super(window.iterator());
         init();
     }
 
     protected Object getValue(Object iteratorKeyValue) {
-        return ((Pair<Long, Object>) iteratorKeyValue).getSecond();
+        return ((TimeWindowPair) iteratorKeyValue).getEventHolder();
     }
 }

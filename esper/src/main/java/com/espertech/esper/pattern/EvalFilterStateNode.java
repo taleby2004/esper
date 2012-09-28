@@ -21,28 +21,23 @@ import java.util.Collection;
 /**
  * This class contains the state of a single filter expression in the evaluation state tree.
  */
-public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCallback
-{
-    private final EvalFilterNode evalFilterNode;
-    private final MatchedEventMap beginState;
+public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCallback {
+    protected final EvalFilterNode evalFilterNode;
 
-    private boolean isStarted;
-    private EPStatementHandleCallback handle;
+    protected boolean isStarted;
+    protected EPStatementHandleCallback handle;
+    protected MatchedEventMap beginState;
 
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
-     * @param beginState contains the events that make up prior matches
      * @param evalFilterNode is the factory node associated to the state
      */
     public EvalFilterStateNode(Evaluator parentNode,
-                                     EvalFilterNode evalFilterNode,
-                                     MatchedEventMap beginState)
+                                     EvalFilterNode evalFilterNode)
     {
-        super(parentNode, null);
-
+        super(parentNode);
         this.evalFilterNode = evalFilterNode;
-        this.beginState = beginState;
     }
 
     @Override
@@ -55,8 +50,9 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
         return evalFilterNode.getContext().getPatternContext().getStatementId();
     }
 
-    public final void start()
+    public final void start(MatchedEventMap beginState)
     {
+        this.beginState = beginState;
         if (isStarted)
         {
             throw new IllegalStateException("Filter state node already active");
@@ -162,7 +158,7 @@ public class EvalFilterStateNode extends EvalStateNode implements FilterHandleCa
         return false;
     }
 
-    private void startFiltering()
+    protected void startFiltering()
     {
         FilterService filterService = evalFilterNode.getContext().getPatternContext().getFilterService();
         handle = new EPStatementHandleCallback(evalFilterNode.getContext().getAgentInstanceContext().getEpStatementAgentInstanceHandle(), this);

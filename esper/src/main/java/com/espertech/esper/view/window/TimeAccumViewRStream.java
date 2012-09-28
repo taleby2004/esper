@@ -30,19 +30,19 @@ import java.util.Set;
  * by keeping set-like semantics. See {@link TimeAccumView} for the same behavior without
  * remove stream handling.
  */
-public final class TimeAccumViewRStream extends ViewSupport implements CloneableView, DataWindowView, StoppableView, StopCallback
+public class TimeAccumViewRStream extends ViewSupport implements CloneableView, DataWindowView, StoppableView, StopCallback
 {
     // View parameters
     private final TimeAccumViewFactory factory;
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
-    private final long msecIntervalSize;
-    private final ScheduleSlot scheduleSlot;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceContext;
+    protected final long msecIntervalSize;
+    protected final ScheduleSlot scheduleSlot;
 
     // Current running parameters
-    private LinkedHashMap<EventBean, Long> currentBatch = new LinkedHashMap<EventBean, Long>();
-    private EventBean lastEvent;
-    private long callbackScheduledTime;
-    private EPStatementHandleCallback handle;
+    protected LinkedHashMap<EventBean, Long> currentBatch = new LinkedHashMap<EventBean, Long>();
+    protected EventBean lastEvent;
+    protected long callbackScheduledTime;
+    protected EPStatementHandleCallback handle;
 
     /**
      * Constructor.
@@ -88,7 +88,7 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
         return parent.getEventType();
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         if ((newData != null) && (newData.length > 0))
         {
@@ -128,6 +128,7 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
             for (int i = 0; i < newData.length; i++)
             {
                 currentBatch.put(newData[i], timestamp);
+                internalHandleAdded(newData[i], timestamp);
                 lastEvent = newData[i];
             }
         }
@@ -138,6 +139,7 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
             for (EventBean anOldData : oldData)
             {
                 currentBatch.remove(anOldData);
+                internalHandleRemoved(anOldData);
                 if (anOldData == lastEvent)
                 {
                     removedLastEvent = true;
@@ -185,7 +187,7 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
     /**
      * This method sends the remove stream for all accumulated events.
      */
-    protected final void sendRemoveStream()
+    protected void sendRemoveStream()
     {
         callbackScheduledTime = -1;
 
@@ -240,6 +242,14 @@ public final class TimeAccumViewRStream extends ViewSupport implements Cloneable
         if (handle != null) {
             agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
+    }
+
+    public void internalHandleRemoved(EventBean anOldData) {
+        // no action required
+    }
+
+    public void internalHandleAdded(EventBean eventBean, long timestamp) {
+        // no action required
     }
 
     private static final Log log = LogFactory.getLog(TimeAccumViewRStream.class);

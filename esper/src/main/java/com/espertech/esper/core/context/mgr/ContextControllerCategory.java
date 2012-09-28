@@ -73,12 +73,20 @@ public class ContextControllerCategory implements ContextController {
         throw ContextControllerSelectorUtil.getInvalidSelector(new Class[] {ContextPartitionSelectorCategory.class}, contextPartitionSelector);
     }
 
-    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states) {
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states, ContextInternalFilterAddendum activationFilterAddendum) {
         int count = 0;
         for (ContextDetailCategoryItem category : factory.getCategorySpec().getItems()) {
             Map<String, Object> context = ContextPropertyEventType.getCategorizedBean(factory.getFactoryContext().getContextName(), 0, category.getName());
             currentSubpathId++;
-            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, null, null, category.getName(), context, states);
+
+            // merge filter addendum, if any
+            ContextInternalFilterAddendum filterAddendumToUse = activationFilterAddendum;
+            if (factory.hasFiltersSpecsNestedContexts()) {
+                filterAddendumToUse = activationFilterAddendum != null ? activationFilterAddendum.deepCopy() : new ContextInternalFilterAddendum();
+                factory.populateContextInternalFilterAddendums(filterAddendumToUse, category.getName());
+            }
+
+            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(null, currentSubpathId, this, null, null, category.getName(), context, states, filterAddendumToUse, factory.getFactoryContext().isRecoveringResilient());
             handleCategories.put(count, handle);
             count++;
         }

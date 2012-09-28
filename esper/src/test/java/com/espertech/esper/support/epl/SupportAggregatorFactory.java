@@ -11,10 +11,10 @@
 
 package com.espertech.esper.support.epl;
 
-import com.espertech.esper.epl.agg.AggregationAccessor;
-import com.espertech.esper.epl.agg.AggregationMethod;
-import com.espertech.esper.epl.agg.AggregationMethodFactory;
-import com.espertech.esper.epl.agg.AggregationSpec;
+import com.espertech.esper.epl.agg.access.AggregationAccessor;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
+import com.espertech.esper.epl.agg.service.AggregationMethodFactory;
+import com.espertech.esper.epl.agg.service.AggregationSpec;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
 public class SupportAggregatorFactory implements AggregationMethodFactory

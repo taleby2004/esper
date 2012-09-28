@@ -386,13 +386,9 @@ public class EPPreparedExecuteMethod
             for (ExprEvaluator filter : evaluators)
             {
                 Boolean result = (Boolean) filter.evaluate(eventsPerStream, true, agentInstanceContext);
-                if (result != null)
-                {
-                    if (!result)
-                    {
-                        pass = false;
-                        break;
-                    }
+                if (result == null || !result) {
+                    pass = false;
+                    break;
                 }
             }
 

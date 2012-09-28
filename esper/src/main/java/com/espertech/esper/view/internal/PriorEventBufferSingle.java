@@ -79,6 +79,39 @@ public class PriorEventBufferSingle implements ViewUpdatedCollection, RelativeAc
         lastOldData = oldData;
     }
 
+    public void update(EventBean[] newData, EventBean[] oldData, PriorEventBufferChangeCaptureSingle captureSingle)
+    {
+        // Remove last old data posted in previous post
+        if (lastOldData != null)
+        {
+            for (int i = 0; i < lastOldData.length; i++)
+            {
+                EventBean oldDataItem = lastOldData[i];
+                priorEventMap.remove(oldDataItem);
+                captureSingle.removed(oldDataItem);
+            }
+        }
+
+        // Post new data to rolling buffer starting with the oldest
+        if (newData != null)
+        {
+            for (int i = 0; i < newData.length; i++)
+            {
+                EventBean newEvent = newData[i];
+
+                // Add new event
+                newEvents.add(newEvent);
+
+                EventBean priorEvent = newEvents.get(priorEventIndex);
+                priorEventMap.put(newEvent, priorEvent);
+                captureSingle.added(newEvent, priorEvent);
+            }
+        }
+
+        // Save old data to be removed next time we get posted results
+        lastOldData = oldData;
+    }
+
     // Users are assigned an index
     public EventBean getRelativeToEvent(EventBean theEvent, int priorToIndex)
     {
@@ -117,6 +150,14 @@ public class PriorEventBufferSingle implements ViewUpdatedCollection, RelativeAc
 
     public Collection<EventBean> getWindowToEventCollReadOnly(Object evalEvent) {
         return null;
+    }
+
+    public Map<EventBean, EventBean> getPriorEventMap() {
+        return priorEventMap;
+    }
+
+    public RollingEventBuffer getNewEvents() {
+        return newEvents;
     }
 
     public void destroy()

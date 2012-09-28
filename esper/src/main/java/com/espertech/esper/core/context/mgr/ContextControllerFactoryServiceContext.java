@@ -20,12 +20,14 @@ public class ContextControllerFactoryServiceContext {
     private final EPServicesContext servicesContext;
     private final ContextDetail detail;
     private final AgentInstanceContext agentInstanceContextCreate;
+    private final boolean isRecoveringResilient;
 
-    public ContextControllerFactoryServiceContext(String contextName, EPServicesContext servicesContext, ContextDetail detail, AgentInstanceContext agentInstanceContextCreate) {
+    public ContextControllerFactoryServiceContext(String contextName, EPServicesContext servicesContext, ContextDetail detail, AgentInstanceContext agentInstanceContextCreate, boolean isRecoveringResilient) {
         this.contextName = contextName;
         this.servicesContext = servicesContext;
         this.detail = detail;
         this.agentInstanceContextCreate = agentInstanceContextCreate;
+        this.isRecoveringResilient = isRecoveringResilient;
     }
 
     public String getContextName() {
@@ -42,5 +44,9 @@ public class ContextControllerFactoryServiceContext {
 
     public AgentInstanceContext getAgentInstanceContextCreate() {
         return agentInstanceContextCreate;
+    }
+
+    public boolean isRecoveringResilient() {
+        return isRecoveringResilient;
     }
 }

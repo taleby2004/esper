@@ -11,8 +11,8 @@
 
 package com.espertech.esper.support.epl;
 
-import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.epl.agg.AggregationValidationContext;
+import com.espertech.esper.epl.agg.service.AggregationSupport;
+import com.espertech.esper.epl.agg.service.AggregationValidationContext;
 
 import java.io.Serializable;
 

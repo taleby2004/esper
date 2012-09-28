@@ -11,23 +11,25 @@ package com.espertech.esper.view.window;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
+import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.DataWindowView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 
 /**
  * This view is a moving window extending the specified number of elements into the past,
  * allowing in addition to remove events efficiently for remove-stream events received by the view.
  */
-public final class LengthWindowViewRStream extends ViewSupport implements DataWindowView, CloneableView
+public class LengthWindowViewRStream extends ViewSupport implements DataWindowView, CloneableView
 {
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final LengthWindowViewFactory lengthWindowViewFactory;
     private final int size;
-    private LinkedHashSet<EventBean> indexedEvents;
+    protected LinkedHashSet<EventBean> indexedEvents;
 
     /**
      * Constructor creates a moving window extending the specified number of elements into the past.
@@ -78,14 +80,35 @@ public final class LengthWindowViewRStream extends ViewSupport implements DataWi
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
+        EventBean[] expiredArr = null;
+        if (oldData != null)
+        {
+            for (EventBean anOldData : oldData)
+            {
+                indexedEvents.remove(anOldData);
+                internalHandleRemoved(anOldData);
+            }
+
+            if (expiredArr == null)
+            {
+                expiredArr = oldData;
+            }
+            else
+            {
+                expiredArr = CollectionUtil.addArrayWithSetSemantics(expiredArr, oldData);
+            }
+        }
+
         // add data points to the window
         // we don't care about removed data from a prior view
         if (newData != null)
         {
-            indexedEvents.addAll(Arrays.asList(newData));
+            for (EventBean newEvent : newData) {
+                indexedEvents.add(newEvent);
+                internalHandleAdded(newEvent);
+            }
         }
 
-        EventBean[] expiredArr = null;
         // Check for any events that get pushed out of the window
         int expiredCount = indexedEvents.size() - size;
         if (expiredCount > 0)
@@ -99,34 +122,28 @@ public final class LengthWindowViewRStream extends ViewSupport implements DataWi
             for (EventBean anExpired : expiredArr)
             {
                 indexedEvents.remove(anExpired);
+                internalHandleExpired(anExpired);
             }
         }
 
-        if (oldData != null)
-        {
-            for (EventBean anOldData : oldData)
-            {
-                indexedEvents.remove(anOldData);
-            }
-
-            if (expiredArr == null)
-            {
-                expiredArr = oldData;
-            }
-            else
-            {
-                Set<EventBean> oldDataSet = new HashSet<EventBean>();
-                oldDataSet.addAll(Arrays.asList(expiredArr));
-                oldDataSet.addAll(Arrays.asList(oldData));
-                expiredArr = oldDataSet.toArray(new EventBean[oldDataSet.size()]);
-            }
-        }
 
         // If there are child views, call update method
         if (this.hasViews())
         {
             updateChildren(newData, expiredArr);
         }
+    }
+
+    public void internalHandleExpired(EventBean oldData) {
+        // no action required
+    }
+
+    public void internalHandleRemoved(EventBean expiredData) {
+        // no action required
+    }
+
+    public void internalHandleAdded(EventBean newData) {
+        // no action required
     }
 
     public final Iterator<EventBean> iterator()

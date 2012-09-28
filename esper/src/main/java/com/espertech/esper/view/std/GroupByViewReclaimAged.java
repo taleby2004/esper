@@ -15,7 +15,6 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
-import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.StoppableView;
@@ -26,19 +25,19 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
-public final class GroupByViewReclaimAged extends ViewSupport implements CloneableView, GroupByView
+public class GroupByViewReclaimAged extends ViewSupport implements CloneableView, GroupByView
 {
     private final ExprNode[] criteriaExpressions;
     private final ExprEvaluator[] criteriaEvaluators;
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceContext;
     private final long reclaimMaxAge;
     private final long reclaimFrequency;
 
     private EventBean[] eventsPerStream = new EventBean[1];
-    private String[] propertyNames;
+    protected String[] propertyNames;
 
-    private final Map<Object, GroupByViewAgedEntry> subViewsPerKey = new HashMap<Object, GroupByViewAgedEntry>();
-    private final HashMap<GroupByViewAgedEntry, Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>>> groupedEvents = new HashMap<GroupByViewAgedEntry, Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>>>();
+    protected final Map<Object, GroupByViewAgedEntry> subViewsPerKey = new HashMap<Object, GroupByViewAgedEntry>();
+    private final HashMap<GroupByViewAgedEntry, Pair<Object, Object>> groupedEvents = new HashMap<GroupByViewAgedEntry, Pair<Object, Object>>();
     private Long nextSweepTime = null;
 
     /**
@@ -113,7 +112,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
             // If this is a new group-by value, the list of subviews is null and we need to make clone sub-views
             if (subViews == null)
             {
-                Collection<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey, agentInstanceContext);
+                Object subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey, agentInstanceContext);
                 subViews = new GroupByViewAgedEntry(subviewsList, currentTime);
                 subViewsPerKey.put(groupByValuesKey, subViews);
             }
@@ -121,7 +120,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
                 subViews.setLastUpdateTime(currentTime);
             }
 
-            ViewSupport.updateChildren(subViews.getSubviews(), newDataToPost, null);
+            GroupByViewImpl.updateChildViews(subViews.getSubviewHolder(), newDataToPost, null);
         }
         else
         {
@@ -144,11 +143,11 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
             }
 
             // Update child views
-            for (Map.Entry<GroupByViewAgedEntry, Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>>> entry : groupedEvents.entrySet())
+            for (Map.Entry<GroupByViewAgedEntry, Pair<Object, Object>> entry : groupedEvents.entrySet())
             {
-                EventBean[] newEvents = EventBeanUtility.toArray(entry.getValue().getFirst());
-                EventBean[] oldEvents = EventBeanUtility.toArray(entry.getValue().getSecond());
-                ViewSupport.updateChildren(entry.getKey().getSubviews(), newEvents, oldEvents);
+                EventBean[] newEvents = GroupByViewImpl.convertToArray(entry.getValue().getFirst());
+                EventBean[] oldEvents = GroupByViewImpl.convertToArray(entry.getValue().getSecond());
+                GroupByViewImpl.updateChildViews(entry.getKey(), newEvents, oldEvents);
             }
 
             groupedEvents.clear();
@@ -165,7 +164,7 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         // If this is a new group-by value, the list of subviews is null and we need to make clone sub-views
         if (subViews == null)
         {
-            Collection<View> subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey, agentInstanceContext);
+            Object subviewsList = GroupByViewImpl.makeSubViews(this, propertyNames, groupByValuesKey, agentInstanceContext);
             long currentTime = agentInstanceContext.getStatementContext().getTimeProvider().getTime();
             subViews = new GroupByViewAgedEntry(subviewsList, currentTime);
             subViewsPerKey.put(groupByValuesKey, subViews);
@@ -175,23 +174,18 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         }
 
         // Construct a pair of lists to hold the events for the grouped value if not already there
-        Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>> pair = groupedEvents.get(subViews);
-        if (pair == null)
-        {
-            ArrayDeque<EventBean> listNew = new ArrayDeque<EventBean>();
-            ArrayDeque<EventBean> listOld = new ArrayDeque<EventBean>();
-            pair = new Pair<ArrayDeque<EventBean>, ArrayDeque<EventBean>>(listNew, listOld);
+        Pair<Object, Object> pair = groupedEvents.get(subViews);
+        if (pair == null) {
+            pair = new Pair<Object, Object>(null, null);
             groupedEvents.put(subViews, pair);
         }
 
         // Add event to a child view event list for later child update that includes new and old events
-        if (isNew)
-        {
-            pair.getFirst().add(theEvent);
+        if (isNew) {
+            pair.setFirst(GroupByViewImpl.addUpgradeToDequeIfPopulated(pair.getFirst(), theEvent));
         }
-        else
-        {
-            pair.getSecond().add(theEvent);
+        else {
+            pair.setSecond(GroupByViewImpl.addUpgradeToDequeIfPopulated(pair.getSecond(), theEvent));
         }
     }
 
@@ -220,13 +214,24 @@ public final class GroupByViewReclaimAged extends ViewSupport implements Cloneab
         for (Object key : removed)
         {
             GroupByViewAgedEntry entry = subViewsPerKey.remove(key);
-            for (View view : entry.getSubviews()) {
-                view.setParent(null);
-                recursiveMergeViewRemove(view);
-                if (view instanceof StoppableView) {
-                    ((StoppableView) view).stopView();
+            Object subviewHolder = entry.getSubviewHolder();
+            if (subviewHolder instanceof List) {
+                List<View> subviews = (List<View>) subviewHolder;
+                for (View view : subviews) {
+                    removeSubview(view);
                 }
             }
+            else if (subviewHolder instanceof View) {
+                removeSubview((View) subviewHolder);
+            }
+        }
+    }
+
+    private void removeSubview(View view) {
+        view.setParent(null);
+        recursiveMergeViewRemove(view);
+        if (view instanceof StoppableView) {
+            ((StoppableView) view).stopView();
         }
     }
 

@@ -24,13 +24,13 @@ import java.util.Iterator;
 /**
  * This view is a moving window extending the specified number of elements into the past.
  */
-public final class LengthWindowView extends ViewSupport implements DataWindowView, CloneableView
+public class LengthWindowView extends ViewSupport implements DataWindowView, CloneableView
 {
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final LengthWindowViewFactory lengthWindowViewFactory;
     private final int size;
     private final ViewUpdatedCollection viewUpdatedCollection;
-    private final ArrayDeque<EventBean> events = new ArrayDeque<EventBean>();
+    protected final ArrayDeque<EventBean> events = new ArrayDeque<EventBean>();
 
     /**
      * Constructor creates a moving window extending the specified number of elements into the past.
@@ -95,7 +95,9 @@ public final class LengthWindowView extends ViewSupport implements DataWindowVie
         // we don't care about removed data from a prior view
         if (newData != null)
         {
-            events.addAll(Arrays.asList(newData));
+            for (EventBean event : newData) {
+                events.add(event);
+            }
         }
 
         // Check for any events that get pushed out of the window

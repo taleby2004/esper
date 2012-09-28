@@ -15,17 +15,13 @@ import org.apache.commons.logging.LogFactory;
  * This class represents an 'every-distinct' operator in the evaluation tree representing an event expression.
  */
 public class EvalEveryDistinctNode extends EvalNodeBase {
-    private final EvalEveryDistinctFactoryNode factoryNode;
+    protected final EvalEveryDistinctFactoryNode factoryNode;
     private final EvalNode childNode;
 
     public EvalEveryDistinctNode(EvalEveryDistinctFactoryNode factoryNode, EvalNode childNode, PatternAgentInstanceContext agentInstanceContext) {
         super(agentInstanceContext);
         this.factoryNode = factoryNode;
         this.childNode = childNode;
-    }
-
-    public EvalNodeNumber getNodeNumber() {
-        return factoryNode.getNodeNumber();
     }
 
     public EvalEveryDistinctFactoryNode getFactoryNode() {
@@ -37,14 +33,13 @@ public class EvalEveryDistinctNode extends EvalNodeBase {
     }
 
     public EvalStateNode newState(Evaluator parentNode,
-                                  MatchedEventMap beginState,
-                                  EvalStateNodeNumber stateNodeId)
+                                  EvalStateNodeNumber stateNodeNumber, long stateNodeId)
     {
         if (factoryNode.getMsecToExpire() == null) {
-            return new EvalEveryDistinctStateNode(parentNode, this, beginState);
+            return new EvalEveryDistinctStateNode(parentNode, this);
         }
         else {
-            return new EvalEveryDistinctStateExpireKeyNode(parentNode, this, beginState);
+            return new EvalEveryDistinctStateExpireKeyNode(parentNode, this);
         }
     }
 

@@ -1072,9 +1072,12 @@ public class JavaClassHelper
         {
             return false;
         }
-        for (Class classToCheck : interfaces)
+        for (Class implementedInterface : interfaces)
         {
-            boolean result = recursiveIsImplementsInterface(classToCheck, interfaceClass);
+            if (implementedInterface == interfaceClass) {
+                return true;
+            }
+            boolean result = recursiveIsImplementsInterface(implementedInterface, interfaceClass);
             if (result)
             {
                 return result;

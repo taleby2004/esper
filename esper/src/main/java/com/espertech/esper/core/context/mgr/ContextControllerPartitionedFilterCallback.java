@@ -21,8 +21,10 @@ import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.filter.FilterValueSet;
+import com.espertech.esper.filter.FilterValueSetParam;
 
 import java.util.Collection;
+import java.util.List;
 
 public class ContextControllerPartitionedFilterCallback implements FilterHandleCallback {
 
@@ -31,7 +33,7 @@ public class ContextControllerPartitionedFilterCallback implements FilterHandleC
     private final ContextControllerPartitionedInstanceCreateCallback callback;
     private final EPStatementHandleCallback filterHandle;
 
-    public ContextControllerPartitionedFilterCallback(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContextCreateContext, ContextDetailPartitionItem partitionItem, ContextControllerPartitionedInstanceCreateCallback callback) {
+    public ContextControllerPartitionedFilterCallback(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContextCreateContext, ContextDetailPartitionItem partitionItem, ContextControllerPartitionedInstanceCreateCallback callback, ContextInternalFilterAddendum filterAddendum) {
         this.agentInstanceContextCreateContext = agentInstanceContextCreateContext;
         this.callback = callback;
 
@@ -44,7 +46,8 @@ public class ContextControllerPartitionedFilterCallback implements FilterHandleC
             getters[i] = getter;
         }
 
-        FilterValueSet filterValueSet = partitionItem.getFilterSpecCompiled().getValueSet(null, null, null);
+        List<FilterValueSetParam> addendum = filterAddendum != null ? filterAddendum.getFilterAddendum(partitionItem.getFilterSpecCompiled()) : null;
+        FilterValueSet filterValueSet = partitionItem.getFilterSpecCompiled().getValueSet(null, null, addendum);
         servicesContext.getFilterService().add(filterValueSet, filterHandle);
     }
 

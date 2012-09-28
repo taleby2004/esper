@@ -11,6 +11,9 @@
 
 package com.espertech.esper.filter;
 
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -36,5 +39,24 @@ public class FilterSet
     public List<FilterSetEntry> getFilters()
     {
         return filters;
+    }
+
+    public String toString() {
+        List<String> filterTexts = new ArrayList<String>();
+        for (FilterSetEntry entry : filters) {
+            StringWriter writer = new StringWriter();
+            entry.appendTo(writer);
+            filterTexts.add(writer.toString());
+        }
+        Collections.sort(filterTexts);
+
+        StringWriter writer = new StringWriter();
+        String delimiter = "";
+        for (String filterText : filterTexts) {
+            writer.append(delimiter);
+            writer.append(filterText);
+            delimiter = ",";
+        }
+        return writer.toString();
     }
 }

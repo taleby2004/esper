@@ -11,13 +11,14 @@
 
 package com.espertech.esper.epl.agg;
 
+import com.espertech.esper.epl.agg.aggregator.AggregatorMedian;
 import junit.framework.TestCase;
 
 public class TestMedianAggregator extends TestCase
 {
     public void testAggregator()
     {
-        MedianAggregator median = new MedianAggregator();
+        AggregatorMedian median = new AggregatorMedian();
         assertEquals(null, median.getValue());
         median.enter(10);
         assertEquals(10D, median.getValue());

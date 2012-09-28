@@ -10,6 +10,7 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventType;
 
+import java.io.StringWriter;
 import java.util.ArrayDeque;
 import java.util.List;
 
@@ -30,4 +31,6 @@ public interface FilterValueSet
      * @return list of filter params
      */
     public ArrayDeque<FilterValueSetParam> getParameters();
+
+    public void appendTo(StringWriter writer);
 }

@@ -13,6 +13,7 @@ package com.espertech.esper.view.internal;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.collection.RefCountedSet;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.CloneableView;
@@ -41,9 +42,9 @@ public class UnionAsymetricView extends ViewSupport implements LastPostObserver,
     protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final UnionViewFactory unionViewFactory;
     private final EventType eventType;
-    private final View[] views;
+    protected final View[] views;
     private final EventBean[][] oldEventsPerView;
-    private final RefCountedSet<EventBean> unionWindow;
+    protected final RefCountedSet<EventBean> unionWindow;
     private final List<EventBean> removalEvents = new ArrayList<EventBean>();
     private final ArrayDeque<EventBean> newEvents = new ArrayDeque<EventBean>();
 
@@ -94,12 +95,35 @@ public class UnionAsymetricView extends ViewSupport implements LastPostObserver,
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        // The assumption is that either remove stream (named window deletes) or insert stream (new events) are indicated
-        if ((newData != null) && (oldData != null))
+        // handle remove stream
+        OneEventCollection oldDataColl = null;
+        EventBean[] newDataPosted = null;
+        if (oldData != null)
         {
-            log.error("Union view received both insert and remove stream");
+            isDiscardObserverEvents = true;    // disable reaction logic in observer
+
+            try
+            {
+                for (View view : views)
+                {
+                    view.update(null, oldData);
+                }
+            }
+            finally
+            {
+                isDiscardObserverEvents = false;
+            }
+
+            // remove from union
+            for (EventBean oldEvent : oldData)
+            {
+                unionWindow.removeAll(oldEvent);
+            }
+
+            oldDataColl = new OneEventCollection();
+            oldDataColl.add(oldData);
         }
-        
+
         // add new event to union
         if (newData != null)
         {
@@ -118,7 +142,7 @@ public class UnionAsymetricView extends ViewSupport implements LastPostObserver,
             {
                 for (int viewIndex = 0; viewIndex < views.length; viewIndex++) {
                     View view = views[viewIndex];
-                    view.update(newData, oldData);
+                    view.update(newData, null);
 
                     // first-X asymetric view post no insert stream for events that get dropped, remove these
                     if (newDataChildView != null) {
@@ -215,7 +239,12 @@ public class UnionAsymetricView extends ViewSupport implements LastPostObserver,
 
                 if (removedEvents != null)
                 {
-                    oldData = removedEvents.toArray(new EventBean[removedEvents.size()]);
+                    if (oldDataColl == null) {
+                        oldDataColl = new OneEventCollection();
+                    }
+                    for (EventBean oldItem : removedEvents) {
+                        oldDataColl.add(oldItem);
+                    }
                 }
             }
 
@@ -226,41 +255,14 @@ public class UnionAsymetricView extends ViewSupport implements LastPostObserver,
                 }
             }
 
-            EventBean[] newDataPosted = null;
             if (!newEvents.isEmpty()) {
                 newDataPosted = newEvents.toArray(new EventBean[newEvents.size()]);
             }
-
-            // indicate new and, possibly, old data
-            if ((newDataPosted != null) || (oldData != null)) {
-                updateChildren(newDataPosted, oldData);
-            }
         }
 
-        // handle remove stream
-        else if (oldData != null)
-        {
-            isDiscardObserverEvents = true;    // disable reaction logic in observer
-
-            try
-            {
-                for (View view : views)
-                {
-                    view.update(null, oldData);
-                }
-            }
-            finally
-            {
-                isDiscardObserverEvents = false;
-            }
-
-            // remove from union
-            for (EventBean oldEvent : oldData)
-            {
-                unionWindow.removeAll(oldEvent);
-            }
-
-            updateChildren(null, oldData);
+        // indicate new and, possibly, old data
+        if (this.hasViews() && ((newDataPosted != null) || (oldDataColl != null))) {
+            updateChildren(newDataPosted, oldDataColl != null ? oldDataColl.toArray() : null);
         }
     }
 

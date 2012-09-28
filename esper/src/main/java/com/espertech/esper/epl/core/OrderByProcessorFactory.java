@@ -8,10 +8,7 @@
  **************************************************************************************/
 package com.espertech.esper.epl.core;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.collection.MultiKeyUntyped;
-import com.espertech.esper.epl.agg.AggregationService;
-import com.espertech.esper.epl.expression.ExprEvaluatorContext;
+import com.espertech.esper.epl.agg.service.AggregationService;
 
 /**
  * A processor for ordering output events according to the order specified in the order-by clause.

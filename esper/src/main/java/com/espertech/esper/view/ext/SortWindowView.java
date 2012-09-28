@@ -11,9 +11,11 @@ package com.espertech.esper.view.ext;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKeyUntyped;
+import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.DataWindowView;
 import com.espertech.esper.view.View;
@@ -37,19 +39,19 @@ import java.util.*;
  *
  * Old values removed from a prior view are removed from the sort view.
  */
-public final class SortWindowView extends ViewSupport implements DataWindowView, CloneableView
+public class SortWindowView extends ViewSupport implements DataWindowView, CloneableView
 {
     private final SortWindowViewFactory sortWindowViewFactory;
-    private final ExprEvaluator[] sortCriteriaEvaluators;
+    protected final ExprEvaluator[] sortCriteriaEvaluators;
     private final ExprNode[] sortCriteriaExpressions;
     private final EventBean[] eventsPerStream = new EventBean[1];
     private final boolean[] isDescendingValues;
     private final int sortWindowSize;
     private final IStreamSortRankRandomAccess optionalSortedRandomAccess;
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
 
-    private TreeMap<Object, Object> sortedEvents;
-    private int eventCount;
+    protected TreeMap<Object, Object> sortedEvents;
+    protected int eventCount;
 
     /**
      * Ctor.
@@ -109,15 +111,6 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
         return sortWindowSize;
     }
 
-    /**
-     * Returns the friend handling the random access, cal be null if not required.
-     * @return random accessor to sort window contents
-     */
-    protected IStreamSortRankRandomAccess getOptionalSortedRandomAccess()
-    {
-        return optionalSortedRandomAccess;
-    }
-
     public View cloneView()
     {
         return sortWindowViewFactory.makeView(agentInstanceViewFactoryContext);
@@ -131,19 +124,24 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
 
     public final void update(EventBean[] newData, EventBean[] oldData)
     {
-        List<EventBean> removedEvents = new LinkedList<EventBean>();
+        OneEventCollection removedEvents = null;
 
         // Remove old data
         if (oldData != null)
         {
             for (int i = 0; i < oldData.length; i++)
             {
-                Object sortValues = getSortValues(oldData[i]);
-                boolean result = remove(sortValues, oldData[i]);
+                EventBean oldDataItem = oldData[i];
+                Object sortValues = getSortValues(oldDataItem);
+                boolean result = CollectionUtil.removeEventByKeyLazyListMap(sortValues, oldDataItem, sortedEvents);
                 if (result)
                 {
                     eventCount--;
-                    removedEvents.add(oldData[i]);
+                    if (removedEvents == null) {
+                        removedEvents = new OneEventCollection();
+                    }
+                    removedEvents.add(oldDataItem);
+                    internalHandleRemoved(sortValues, oldDataItem);
                 }
             }
         }
@@ -153,9 +151,11 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
         {
             for (int i = 0; i < newData.length; i++)
             {
-                Object sortValues = getSortValues(newData[i]);
-                add(sortValues, newData[i]);
+                EventBean newDataItem = newData[i];
+                Object sortValues = getSortValues(newDataItem);
+                CollectionUtil.addEventByKeyLazyListMapFront(sortValues, newDataItem, sortedEvents);
                 eventCount++;
+                internalHandleAdd(sortValues, newDataItem);
             }
         }
 
@@ -175,13 +175,21 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
                     if (events.isEmpty()) {
                         sortedEvents.remove(lastKey);
                     }
+                    if (removedEvents == null) {
+                        removedEvents = new OneEventCollection();
+                    }
                     removedEvents.add(theEvent);
+                    internalHandleRemoved(lastKey, theEvent);
                 }
                 else {
                     EventBean theEvent = (EventBean) lastEntry;
                     eventCount--;
                     sortedEvents.remove(lastKey);
+                    if (removedEvents == null) {
+                        removedEvents = new OneEventCollection();
+                    }
                     removedEvents.add(theEvent);
+                    internalHandleRemoved(lastKey, theEvent);
                 }
             }
         }
@@ -194,13 +202,21 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
         if (this.hasViews())
         {
             EventBean[] expiredArr = null;
-            if (!removedEvents.isEmpty())
+            if (removedEvents != null)
             {
-                expiredArr = removedEvents.toArray(new EventBean[removedEvents.size()]);
+                expiredArr = removedEvents.toArray();
             }
 
             updateChildren(newData, expiredArr);
         }
+    }
+
+    public void internalHandleAdd(Object sortValues, EventBean newDataItem) {
+        // no action required
+    }
+
+    public void internalHandleRemoved(Object sortValues, EventBean oldDataItem) {
+        // no action required
     }
 
     public final Iterator<EventBean> iterator()
@@ -216,53 +232,7 @@ public final class SortWindowView extends ViewSupport implements DataWindowView,
                 " sortWindowSize=" + sortWindowSize;
     }
 
-    private void add(Object key, EventBean bean)
-    {
-        Object current = sortedEvents.get(key);
-        if (current != null) {
-            if (current instanceof List) {
-                List<EventBean> events = (List<EventBean>) current;
-                events.add(0, bean);    // add to front, newest are listed first
-            }
-            else {
-                EventBean theEvent = (EventBean) current;
-                List<EventBean> events = new LinkedList<EventBean>();
-                events.add(bean);
-                events.add(theEvent);
-                sortedEvents.put(key, events);
-            }
-        }
-        else {
-            sortedEvents.put(key, bean);
-        }
-    }
-
-    private boolean remove(Object key, EventBean bean)
-    {
-        Object listOfBeans = sortedEvents.get(key);
-        if (listOfBeans == null)
-        {
-            return false;
-        }
-
-        if (listOfBeans instanceof List) {
-            List<EventBean> events = (List<EventBean>) listOfBeans;
-            boolean result = events.remove(bean);
-            if (events.isEmpty())
-            {
-                sortedEvents.remove(key);
-            }
-            return result;
-        }
-        else if (listOfBeans == bean) {
-            sortedEvents.remove(key);
-            return true;
-        }
-
-        return false;
-    }
-
-    private Object getSortValues(EventBean theEvent)
+    protected Object getSortValues(EventBean theEvent)
     {
         eventsPerStream[0] = theEvent;
         if (sortCriteriaExpressions.length == 1) {

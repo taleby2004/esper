@@ -13,13 +13,12 @@ package com.espertech.esper.rowregex;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.collection.Pair;
 import com.espertech.esper.collection.SingleEventIterator;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
-import com.espertech.esper.epl.agg.AggregationServiceMatchRecognize;
+import com.espertech.esper.epl.agg.service.AggregationServiceMatchRecognize;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
 import com.espertech.esper.epl.expression.ExprNodeUtility;
@@ -43,7 +42,7 @@ import java.util.*;
 /**
  * View for match recognize support.
  */
-public class EventRowRegexNFAView extends ViewSupport implements StopCallback
+public class EventRowRegexNFAView extends ViewSupport implements StopCallback, EventRowRegexNFAViewService
 {
     private static final Log log = LogFactory.getLog(EventRowRegexNFAView.class);
     private static final boolean IS_DEBUG = false;
@@ -219,7 +218,15 @@ public class EventRowRegexNFAView extends ViewSupport implements StopCallback
         }
     }
 
-    public void update(EventBean[] newData, EventBean[] oldData)
+    public void init(EventBean[] newEvents) {
+        updateInternal(newEvents, null, false);
+    }
+
+    public void update(EventBean[] newData, EventBean[] oldData) {
+       updateInternal(newData, oldData, true);
+    }
+
+    private void updateInternal(EventBean[] newData, EventBean[] oldData, boolean postOutput)
     {
         if (isIterateOnly)
         {
@@ -453,7 +460,9 @@ public class EventRowRegexNFAView extends ViewSupport implements StopCallback
             }
         }
 
-        updateChildren(outBeans, null);
+        if (postOutput) {
+            updateChildren(outBeans, null);
+        }
     }
 
     private RegexNFAStateEntry rankEndStates(List<RegexNFAStateEntry> endStates) {

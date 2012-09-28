@@ -16,7 +16,9 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class SupportDriverManagerDataSource implements DataSource
 {
@@ -105,5 +107,9 @@ public class SupportDriverManagerDataSource implements DataSource
     public boolean isWrapperFor(Class<?> iface) throws SQLException
     {
         return false;
+    }
+
+    public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+        throw new SQLFeatureNotSupportedException();
     }
 }

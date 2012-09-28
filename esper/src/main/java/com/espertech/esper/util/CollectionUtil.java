@@ -247,4 +247,113 @@ public class CollectionUtil
         System.arraycopy(second, 0, dest, firstLength, secondLength);
         return dest;
     }
+
+    public static EventBean[] addArrayWithSetSemantics(EventBean[] arrayOne, EventBean[] arrayTwo) {
+        if (arrayOne.length == 0) {
+            return arrayTwo;
+        }
+        if (arrayTwo.length == 0) {
+            return arrayOne;
+        }
+        if (arrayOne.length == 1 && arrayTwo.length == 1) {
+            if (arrayOne[0].equals(arrayTwo[0])) {
+                return arrayOne;
+            }
+            else {
+                return new EventBean[] {arrayOne[0], arrayOne[0]};
+            }
+        }
+        if (arrayOne.length == 1 && arrayTwo.length > 1) {
+            if (searchArray(arrayTwo, arrayOne[0]) != -1) {
+                return arrayTwo;
+            }
+        }
+        if (arrayOne.length > 1 && arrayTwo.length == 1) {
+            if (searchArray(arrayOne, arrayTwo[0]) != -1) {
+                return arrayOne;
+            }
+        }
+        Set<EventBean> set = new HashSet<EventBean>();
+        for (EventBean event : arrayOne) {
+            set.add(event);
+        }
+        for (EventBean event : arrayTwo) {
+            set.add(event);
+        }
+        return set.toArray(new EventBean[set.size()]);
+    }
+
+    public static <T> int searchArray(T[] array, T item) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].equals(item)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static boolean removeEventByKeyLazyListMap(Object key, EventBean bean, Map<Object, Object> eventMap)
+    {
+        Object listOfBeans = eventMap.get(key);
+        if (listOfBeans == null)
+        {
+            return false;
+        }
+
+        if (listOfBeans instanceof List) {
+            List<EventBean> events = (List<EventBean>) listOfBeans;
+            boolean result = events.remove(bean);
+            if (events.isEmpty())
+            {
+                eventMap.remove(key);
+            }
+            return result;
+        }
+        else if (listOfBeans != null && listOfBeans.equals(bean)) {
+            eventMap.remove(key);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static void addEventByKeyLazyListMapBack(Object sortKey, EventBean eventBean, Map<Object, Object> eventMap) {
+        Object existing = eventMap.get(sortKey);
+        if (existing == null) {
+            eventMap.put(sortKey, eventBean);
+        }
+        else {
+            if (existing instanceof List) {
+                List<EventBean> existingList = (List<EventBean>) existing;
+                existingList.add(eventBean);
+            }
+            else {
+                List<EventBean> existingList = new LinkedList<EventBean>();
+                existingList.add((EventBean)existing);
+                existingList.add(eventBean);
+                eventMap.put(sortKey, existingList);
+            }
+        }
+    }
+
+    public static void addEventByKeyLazyListMapFront(Object key, EventBean bean, Map<Object, Object> eventMap)
+    {
+        Object current = eventMap.get(key);
+        if (current != null) {
+            if (current instanceof List) {
+                List<EventBean> events = (List<EventBean>) current;
+                events.add(0, bean);    // add to front, newest are listed first
+            }
+            else {
+                EventBean theEvent = (EventBean) current;
+                List<EventBean> events = new LinkedList<EventBean>();
+                events.add(bean);
+                events.add(theEvent);
+                eventMap.put(key, events);
+            }
+        }
+        else {
+            eventMap.put(key, bean);
+        }
+    }
 }

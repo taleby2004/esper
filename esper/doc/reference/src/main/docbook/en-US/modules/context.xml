@@ -725,6 +725,29 @@ select * from pattern [every a=LoginEvent -> b=LogoutEvent where timer:within(10
 			<para>
 			  To output only the last value when a context partition ends (terminates, expires), please read on to the description of output rate limiting.
 			</para>
+			
+			<note>
+				<para>
+					If you specified an event filter or pattern as the end condition for a context partition, and statements that refer to the context specify an event filter or pattern that matches the same conditions,
+					use @Priority to instruct the engine whether the context management or the statement evaluation takes priority (see below for configuring prioritized execution).
+				</para>
+				<para>
+					For example, if your context declaration looks like this:
+				</para>
+				<programlisting><![CDATA[create context MyCtx start MyStartEvent end MyEndEvent]]></programlisting>
+				<para>
+					And a statement managed by the context is this:
+				</para>
+				<synopsis>context MyCtx select count(*) as cnt from MyEndEvent output when terminated</synopsis>
+				<para> 
+					By using <literal>@Priority(1)</literal> for create-context and <literal>@Priority(0)</literal> for the counting statement the counting statement does not count the last <literal>MyEndEvent</literal>
+					since context partition management takes priority.
+				</para>
+				<para> 
+					By using <literal>@Priority(0)</literal> for create-context and <literal>@Priority(1)</literal> for the counting statement the counting statement will count the last <literal>MyEndEvent</literal>
+					since the statement evaluation takes priority.
+				</para>
+			</note>
 		</sect2>
 
 		<sect2 xml:id="context_def_overlapping" revision="1">
@@ -796,6 +819,13 @@ select t1 from pattern [
 			  To output only the last value when a context partition ends (terminates, expires), please read on to the description of output rate limiting.
 			</para>
 			
+			<note>
+				<para>
+					If you specified an event filter or pattern as the termination condition for a context partition, and statements that refer to the context specify an event filter or pattern that matches the same conditions,
+					use @Priority to instruct the engine whether the context management or the statement evaluation takes priority (see below for configuring prioritized execution). See the note above for more information.
+				</para>
+			</note>
+
 			<sect3 xml:id="context_def_overlapping_builtin" revision="1">
 				<title>Built-In Context Properties</title>
 				  

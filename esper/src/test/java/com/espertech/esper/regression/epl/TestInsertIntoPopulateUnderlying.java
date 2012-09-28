@@ -284,6 +284,11 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         catch (EPException ex) {
             // expected
         }
+
+        // allow automatic cast of same-type event
+        epService.getEPAdministrator().createEPL("create schema MapOne as (prop1 string)");
+        epService.getEPAdministrator().createEPL("create schema MapTwo as (prop1 string)");
+        epService.getEPAdministrator().createEPL("insert into MapOne select * from MapTwo");
     }
 
     public void testPopulateBeanSimple()
@@ -465,6 +470,10 @@ public class TestInsertIntoPopulateUnderlying extends TestCase
         epService.getEPRuntime().sendEvent(bean);
         
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "intVal,stringVal,doubleVal".split(","), new Object[]{1000, "E1", 1001d});
+
+        // test type compatible
+        epService.getEPAdministrator().createEPL("create schema ConcreteType as (value java.lang.CharSequence)");
+        epService.getEPAdministrator().createEPL("insert into ConcreteType select \"Test\" as value from pattern[every timer:interval(1 second)]");
     }
 
     public void testPopulateObjectArray()

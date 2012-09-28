@@ -131,7 +131,7 @@ public class TestPropertyResolution extends TestCase
         EventBean result = listener.assertOneGetNewAndReset();
         assertEquals("upper", result.get("MYPROPERTY"));
         assertEquals("lower", result.get("myproperty"));
-        assertEquals("uppercamel", result.get("myProperty"));
+        assertTrue(result.get("myProperty").equals("lowercamel") || result.get("myProperty").equals("uppercamel")); // JDK6 versus JDK7 JavaBean inspector
 
         try
         {
@@ -159,7 +159,7 @@ public class TestPropertyResolution extends TestCase
         EventBean result = listener.assertOneGetNewAndReset();
         assertEquals("upper", result.get("MYPROPERTY"));
         assertEquals("lower", result.get("myproperty"));
-        assertEquals("uppercamel", result.get("myProperty"));
+        assertTrue(result.get("myProperty").equals("lowercamel") || result.get("myProperty").equals("uppercamel")); // JDK6 versus JDK7 JavaBean inspector
         assertEquals("upper", result.get("MyProperty"));
 
         stmt = epService.getEPAdministrator().createEPL("select " +
@@ -209,7 +209,7 @@ public class TestPropertyResolution extends TestCase
         EventBean result = listener.assertOneGetNewAndReset();
         assertEquals("upper", result.get("MYPROPERTY"));
         assertEquals("lower", result.get("myproperty"));
-        assertEquals("uppercamel", result.get("myProperty"));
+        assertTrue(result.get("myProperty").equals("lowercamel") || result.get("myProperty").equals("uppercamel")); // JDK6 versus JDK7 JavaBean inspector
 
         try
         {

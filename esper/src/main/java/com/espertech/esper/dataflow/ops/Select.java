@@ -182,8 +182,8 @@ public class Select implements OutputProcessViewCallback, DataFlowOpLifecycle {
                 }
                 final EPLSelectViewable viewable = found;
                 return new ViewableActivator() {
-                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
-                        return new ViewableActivationResult(viewable, new StopCallback() {public void stop() {}}, null);
+                    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect, boolean isRecoveringResilient) {
+                        return new ViewableActivationResult(viewable, new StopCallback() {public void stop() {}}, null, null);
                     }
                 };
             }
@@ -200,7 +200,7 @@ public class Select implements OutputProcessViewCallback, DataFlowOpLifecycle {
         final EPStatementStartMethodSelectDesc selectDesc = EPStatementStartMethodSelectUtil.prepare(compiled, servicesContext, statementContext, false, agentInstanceContext, false, activatorFactory, optionalOutputProcessViewCallback, deliveryCallback);
 
         // start
-        selectResult = selectDesc.getStatementAgentInstanceFactorySelect().newContext(agentInstanceContext);
+        selectResult = selectDesc.getStatementAgentInstanceFactorySelect().newContext(agentInstanceContext, false);
 
         // for output-rate-limited, register a dispatch view
         if (isOutputLimited) {

@@ -51,7 +51,7 @@ public class EPStatementStartMethodCreateContext extends EPStatementStartMethodB
         services.getStatementEventTypeRefService().addReferences(statementContext.getStatementName(), eventTypesReferenced);
 
         // add context - does not activate that context
-        services.getContextManagementService().addContextSpec(services, agentInstanceContext, context);
+        services.getContextManagementService().addContextSpec(services, agentInstanceContext, context, isRecoveringResilient);
 
         // define output event type
         String typeName = "EventType_Context_" + context.getContextName();

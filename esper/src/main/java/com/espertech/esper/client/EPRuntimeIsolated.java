@@ -41,6 +41,19 @@ public interface EPRuntimeIsolated
     public void sendEvent(Map map, String eventTypeName) throws EPException;
 
     /**
+     * Send an object array containing event property values to the event stream processing runtime.
+     * <p>
+     * Use the route method for sending events into the runtime from within UpdateListener code.
+     * to avoid the possibility of a stack overflow due to nested calls to sendEvent.
+     *
+     * @param objectarray - array that contains event property values. Your application must ensure that property values
+     * match the exact same order that the property names and types have been declared, and that the array length matches the number of properties declared.
+     * @param objectArrayEventTypeName - the name for the Object-array event type that was previously configured
+     * @throws EPException - when the processing of the event leads to an error
+     */
+    public void sendEvent(Object[] objectarray, String objectArrayEventTypeName);
+
+    /**
      * Send an event represented by a DOM node to the event stream processing runtime.
      * <p>
      * Use the route method for sending events into the runtime from within UpdateListener code.

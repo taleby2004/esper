@@ -21,7 +21,7 @@ import java.util.Map;
 
 public interface ContextController {
     public int getPathId();
-    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states);
+    public void activate(EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextControllerState states, ContextInternalFilterAddendum filterAddendum);
     public ContextControllerFactory getFactory();
     public void deactivate();
     public Collection<Integer> getSelectedContextPartitionPathIds(ContextPartitionSelector contextPartitionSelector);

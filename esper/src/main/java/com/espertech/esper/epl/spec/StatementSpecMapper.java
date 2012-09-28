@@ -16,8 +16,8 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.core.context.util.ContextPropertyRegistry;
 import com.espertech.esper.core.service.EPAdministratorHelper;
-import com.espertech.esper.epl.agg.AggregationAccessType;
-import com.espertech.esper.epl.agg.AggregationSupport;
+import com.espertech.esper.epl.agg.access.AggregationAccessType;
+import com.espertech.esper.epl.agg.service.AggregationSupport;
 import com.espertech.esper.epl.core.EngineImportService;
 import com.espertech.esper.epl.core.EngineImportSingleRowDesc;
 import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
@@ -525,7 +525,7 @@ public class StatementSpecMapper
         op.setOutput(outputs);
 
         if (spec.getDetail() != null) {
-            Map<String, Object> parameters = new LinkedHashMap<String, Object>();
+            List<DataFlowOperatorParameter> parameters = new ArrayList<DataFlowOperatorParameter>();
             for (Map.Entry<String, Object> param : spec.getDetail().getConfigs().entrySet()) {
                 Object value = param.getValue();
                 if (value instanceof StatementSpecRaw) {
@@ -534,12 +534,12 @@ public class StatementSpecMapper
                 if (value instanceof ExprNode) {
                     value = unmapExpressionDeep((ExprNode) value, unmapContext);
                 }
-                parameters.put(param.getKey(), value);
+                parameters.add(new DataFlowOperatorParameter(param.getKey(), value));
             }
             op.setParameters(parameters);
         }
         else {
-            op.setParameters(Collections.<String, Object>emptyMap());
+            op.setParameters(Collections.<DataFlowOperatorParameter>emptyList());
         }
 
         return op;
@@ -1440,8 +1440,8 @@ public class StatementSpecMapper
         }
 
         Map<String, Object> detail = new LinkedHashMap<String, Object>();
-        for (Map.Entry<String, Object> entry : op.getParameters().entrySet()) {
-            Object value = entry.getValue();
+        for (DataFlowOperatorParameter entry : op.getParameters()) {
+            Object value = entry.getParameterValue();
             if (value instanceof EPStatementObjectModel) {
                 value = map((EPStatementObjectModel) value, mapContext);
             }
@@ -1451,7 +1451,7 @@ public class StatementSpecMapper
             else {
                 // no action
             }
-            detail.put(entry.getKey(), value);
+            detail.put(entry.getParameterName(), value);
         }
 
         return new GraphOperatorSpec(op.getOperatorName(), input, output, new GraphOperatorDetail(detail), annotations);

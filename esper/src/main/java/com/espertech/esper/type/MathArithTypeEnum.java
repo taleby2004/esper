@@ -116,7 +116,9 @@ public enum MathArithTypeEnum
              (coercedType != Long.class) &&
              (coercedType != Integer.class) &&
              (coercedType != BigDecimal.class) &&
-             (coercedType != BigInteger.class))
+             (coercedType != BigInteger.class) &&
+             (coercedType != Short.class) &&
+             (coercedType != Byte.class))
         {
             throw new IllegalArgumentException("Expected base numeric type for computation result but got type " + coercedType);
         }
@@ -222,6 +224,26 @@ public enum MathArithTypeEnum
         public Number compute(Number d1, Number d2)
         {
             return d1.doubleValue() + d2.doubleValue();
+        }
+    }
+    /**
+     * Computer for type-specific arith. operations.
+     */
+    public static class AddShort implements Computer
+    {
+        public Number compute(Number d1, Number d2)
+        {
+            return d1.shortValue() + d2.shortValue();
+        }
+    }
+    /**
+     * Computer for type-specific arith. operations.
+     */
+    public static class AddByte implements Computer
+    {
+        public Number compute(Number d1, Number d2)
+        {
+            return d1.byteValue() + d2.byteValue();
         }
     }
     /**

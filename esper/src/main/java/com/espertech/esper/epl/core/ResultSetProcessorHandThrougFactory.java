@@ -10,7 +10,7 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationService;
 
 /**
  * Result set processor prototye for the hand-through case:

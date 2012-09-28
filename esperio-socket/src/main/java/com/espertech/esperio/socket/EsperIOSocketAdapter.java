@@ -9,6 +9,7 @@
 package com.espertech.esperio.socket;
 
 import com.espertech.esper.client.ConfigurationException;
+import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EPServiceProviderManager;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esperio.socket.config.ConfigurationSocketAdapter;
@@ -84,7 +85,9 @@ public class EsperIOSocketAdapter
                 entry.getValue().start(entry.getKey(), engineSPI);
             }
             catch (IOException e) {
-                log.error("Error starting socket '" + entry.getKey() + "' :" + e.getMessage());
+                String message = "Error starting socket '" + entry.getKey() + "' port " + entry.getValue().getPort() + " :" + e.getMessage();
+                log.error(message, e);
+                throw new EPException(message, e);
             }
         }
 

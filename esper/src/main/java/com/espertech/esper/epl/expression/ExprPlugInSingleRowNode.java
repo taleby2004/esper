@@ -128,11 +128,14 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
         }
         final ExprNodeUtilSingleRowMethodDesc staticMethodDesc = ExprNodeUtility.resolveSingleRowPluginFunc(clazz.getName(), firstItem.getName(), firstItem.getParameters(), validationContext.getMethodResolutionService(), allowWildcard, streamZeroType, firstItem.getName(), true);
 
+        boolean allowValueCache = true;
         if (config.getValueCache() == ConfigurationPlugInSingleRowFunction.ValueCache.DISABLED) {
             isReturnsConstantResult = false;
+            allowValueCache = false;
         }
         else if (config.getValueCache() == ConfigurationPlugInSingleRowFunction.ValueCache.CONFIGURED) {
             isReturnsConstantResult = validationContext.getMethodResolutionService().isUdfCache() && staticMethodDesc.isAllConstants() && chainList.isEmpty();
+            allowValueCache = validationContext.getMethodResolutionService().isUdfCache();
         }
         else if (config.getValueCache() == ConfigurationPlugInSingleRowFunction.ValueCache.ENABLED) {
             isReturnsConstantResult = staticMethodDesc.isAllConstants() && chainList.isEmpty();
@@ -146,7 +149,7 @@ public class ExprPlugInSingleRowNode extends ExprNodeBase implements ExprNodeInn
         ExprDotEvalTypeInfo typeInfo = optionalLambdaWrap != null ? optionalLambdaWrap.getTypeInfo() : ExprDotEvalTypeInfo.scalarOrUnderlying(staticMethodDesc.getReflectionMethod().getReturnType());
 
         ExprDotEval[] eval = ExprDotNodeUtility.getChainEvaluators(typeInfo, chainList, validationContext, false, new ExprDotNodeFilterAnalyzerInputStatic()).getChainWithUnpack();
-        evaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), clazz.getName(), staticMethodDesc.getFastMethod(), staticMethodDesc.getChildEvals(), staticMethodDesc.isAllConstants(), optionalLambdaWrap, eval);
+        evaluator = new ExprDotEvalStaticMethod(validationContext.getStatementName(), clazz.getName(), staticMethodDesc.getFastMethod(), staticMethodDesc.getChildEvals(), allowValueCache && staticMethodDesc.isAllConstants(), optionalLambdaWrap, eval);
 
         // If caching the result, evaluate now and return the result.
         if (isReturnsConstantResult) {

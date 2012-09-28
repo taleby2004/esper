@@ -13,8 +13,8 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.ContextPropertyRegistry;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryFactory;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryFactory;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.*;
 import com.espertech.esper.event.NativeEventType;
@@ -294,7 +294,8 @@ public class ResultSetProcessorFactoryFactory
         // Construct the appropriate aggregation service
         boolean hasGroupBy = !groupByNodes.isEmpty();
         AggregationServiceFactoryDesc aggregationServiceFactory = AggregationServiceFactoryFactory.getService(selectAggregateExprNodes, havingAggregateExprNodes, orderByAggregateExprNodes, hasGroupBy, evaluatorContextStmt, statementSpec.getAnnotations(), stmtContext.getVariableService(), typeService.getEventTypes().length > 1,
-                statementSpec.getFilterRootNode(), statementSpec.getHavingExprRootNode());
+                statementSpec.getFilterRootNode(), statementSpec.getHavingExprRootNode(),
+                stmtContext.getAggregationServiceFactoryService(), typeService.getEventTypes());
 
         boolean useCollatorSort = false;
         if (stmtContext.getConfigSnapshot() != null)

@@ -85,11 +85,11 @@ public class TestNamedWindowUpdate extends TestCase
 
         assertEquals(1, newevents.length);
         EPAssertionUtil.assertProps(newevents[0], "intPrimitive".split(","), new Object[]{300});
-        assertEquals(2, oldevents.length);
+        assertEquals(1, oldevents.length);
         oldevents = EPAssertionUtil.sort(oldevents, "theString");
-        EPAssertionUtil.assertPropsPerRow(oldevents, "theString,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E2", 3}});
+        EPAssertionUtil.assertPropsPerRow(oldevents, "theString,intPrimitive".split(","), new Object[][]{{"E2", 3}});
 
-        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), "theString,intPrimitive".split(","), new Object[][]{{"E2", 300}});
+        EPAssertionUtil.assertPropsPerRow(stmtCreate.iterator(), "theString,intPrimitive".split(","), new Object[][]{{"E1", 2}, {"E2", 300}});
     }
     
     public void testMultipleDataWindowIntersectOnUpdate() {

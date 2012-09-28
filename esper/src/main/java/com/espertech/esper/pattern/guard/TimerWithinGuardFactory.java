@@ -52,9 +52,8 @@ public class TimerWithinGuardFactory implements GuardFactory, MetaDefItem, Seria
         this.millisecondsExpr = parameters.get(0);
     }
 
-    public Guard makeGuard(PatternAgentInstanceContext context, MatchedEventMap matchedEventMap, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState)
-    {
-        Object millisecondVal = PatternExpressionUtil.evaluate("Timer-within guard", matchedEventMap, millisecondsExpr, convertor, quitable.getContext().getAgentInstanceContext());
+    protected long computeMilliseconds(MatchedEventMap beginState, PatternAgentInstanceContext context) {
+        Object millisecondVal = PatternExpressionUtil.evaluate("Timer-within guard", beginState, millisecondsExpr, convertor, context.getAgentInstanceContext());
 
         if (millisecondVal == null)
         {
@@ -62,7 +61,11 @@ public class TimerWithinGuardFactory implements GuardFactory, MetaDefItem, Seria
         }
 
         Number param = (Number) millisecondVal;
-        long milliseconds = Math.round(1000d * param.doubleValue());
-        return new TimerWithinGuard(milliseconds, quitable);
+        return Math.round(1000d * param.doubleValue());
+    }
+
+    public Guard makeGuard(PatternAgentInstanceContext context, MatchedEventMap matchedEventMap, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState)
+    {
+        return new TimerWithinGuard(computeMilliseconds(matchedEventMap, context), quitable);
     }
 }

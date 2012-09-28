@@ -11,8 +11,8 @@
 
 package com.espertech.esper.client.hook;
 
-import com.espertech.esper.epl.agg.AggregationMethod;
-import com.espertech.esper.epl.agg.AggregationValidationContext;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
+import com.espertech.esper.epl.agg.service.AggregationValidationContext;
 
 /**
  * Interface to implement for factories of aggregation functions.

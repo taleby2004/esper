@@ -28,15 +28,15 @@ import java.util.Map;
  * The view computes a single long-typed count of the number of events passed through it similar
  * to the base statistics COUNT column.
  */
-public final class SizeView extends ViewSupport implements CloneableView
+public class SizeView extends ViewSupport implements CloneableView
 {
     private final AgentInstanceContext agentInstanceContext;
     private final EventType eventType;
     private final StatViewAdditionalProps additionalProps;
 
-    private long size = 0;
+    protected long size = 0;
     private EventBean lastSizeEvent;
-    private Object[] lastValuesEventNew;
+    protected Object[] lastValuesEventNew;
 
     /**
      * Ctor.
@@ -59,9 +59,22 @@ public final class SizeView extends ViewSupport implements CloneableView
         return eventType;
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         long priorSize = size;
+
+        // If we have child views, keep a reference to the old values, so we can update them as old data event.
+        EventBean oldDataMap = null;
+        if (lastSizeEvent == null)
+        {
+            if (this.hasViews())
+            {
+                Map<String, Object> postOldData = new HashMap<String, Object>();
+                postOldData.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), priorSize);
+                addProperties(postOldData);
+                oldDataMap = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(postOldData, eventType);
+            }
+        }
 
         // add data points to the window
         if (newData != null)
@@ -97,11 +110,7 @@ public final class SizeView extends ViewSupport implements CloneableView
             }
             else
             {
-                Map<String, Object> postOldData = new HashMap<String, Object>();
-                postOldData.put(ViewFieldEnum.SIZE_VIEW__SIZE.getName(), priorSize);
-                EventBean oldEvent = agentInstanceContext.getStatementContext().getEventAdapterService().adapterForTypedMap(postOldData, eventType);
-
-                updateChildren(new EventBean[] {newEvent}, new EventBean[] {oldEvent});
+                updateChildren(new EventBean[] {newEvent}, new EventBean[] {oldDataMap});
             }
 
             lastSizeEvent = newEvent;

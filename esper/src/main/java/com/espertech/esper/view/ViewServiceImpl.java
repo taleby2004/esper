@@ -196,7 +196,7 @@ public final class ViewServiceImpl implements ViewService
         return nonRetainViewFactories;
     }
 
-    public Viewable createViews(Viewable eventStreamViewable,
+    public ViewServiceCreateResult createViews(Viewable eventStreamViewable,
                                 List<ViewFactory> viewFactories,
                                 AgentInstanceViewFactoryChainContext viewFactoryChainContext,
                                 boolean hasPreviousNode)
@@ -221,7 +221,7 @@ public final class ViewServiceImpl implements ViewService
                 ViewSupport.dumpChildViews("EventStream ", eventStreamViewable);
             }
 
-            return parentViewable;   // we know its a view here since the factory list is empty
+            return new ViewServiceCreateResult(parentViewable, parentViewable);   // we know its a view here since the factory list is empty
         }
 
         // Instantiate remaining chain of views from the remaining factories which didn't match to existing views.
@@ -243,7 +243,7 @@ public final class ViewServiceImpl implements ViewService
             ViewSupport.dumpChildViews("EventStream ", eventStreamViewable);
         }
 
-        return views.get(views.size() - 1);
+        return new ViewServiceCreateResult(views.get(views.size() - 1), views.get(0));
     }
 
     public void remove(EventStream eventStream, Viewable viewToRemove)

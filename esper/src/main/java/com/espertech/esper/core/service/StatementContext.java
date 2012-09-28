@@ -12,10 +12,11 @@ import com.espertech.esper.client.ConfigurationInformation;
 import com.espertech.esper.core.context.mgr.ContextControllerFactoryService;
 import com.espertech.esper.core.context.stmt.StatementAIResourceRegistry;
 import com.espertech.esper.core.context.util.ContextDescriptor;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryService;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.metric.MetricReportingServiceSPI;
-import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.epl.named.NamedWindowService;
+import com.espertech.esper.epl.script.AgentInstanceScriptContext;
 import com.espertech.esper.epl.variable.VariableService;
 import com.espertech.esper.event.EventAdapterService;
 import com.espertech.esper.event.EventTypeIdGenerator;
@@ -78,6 +79,7 @@ public final class StatementContext
     private final PatternSubexpressionPoolStmtSvc patternSubexpressionPoolSvc;
     private final boolean statelessSelect;
     private final ContextControllerFactoryService contextControllerFactoryService;
+    private final AggregationServiceFactoryService aggregationServiceFactoryService;
 
     // settable for view-sharing
     private StatementAgentInstanceLock defaultAgentInstanceLock;
@@ -148,7 +150,8 @@ public final class StatementContext
                               PatternSubexpressionPoolStmtSvc patternSubexpressionPoolSvc,
                               boolean statelessSelect,
                               ContextControllerFactoryService contextControllerFactoryService,
-                              AgentInstanceScriptContext defaultAgentInstanceScriptContext)
+                              AgentInstanceScriptContext defaultAgentInstanceScriptContext,
+                              AggregationServiceFactoryService aggregationServiceFactoryService)
     {
         this.engineURI = engineURI;
         this.engineInstanceId = engineInstanceId;
@@ -189,6 +192,7 @@ public final class StatementContext
         this.statelessSelect = statelessSelect;
         this.contextControllerFactoryService = contextControllerFactoryService;
         this.defaultAgentInstanceScriptContext = defaultAgentInstanceScriptContext;
+        this.aggregationServiceFactoryService = aggregationServiceFactoryService;
     }
 
     /**
@@ -538,5 +542,9 @@ public final class StatementContext
 
     public AgentInstanceScriptContext getDefaultAgentInstanceScriptContext() {
         return defaultAgentInstanceScriptContext;
+    }
+
+    public AggregationServiceFactoryService getAggregationServiceFactoryService() {
+        return aggregationServiceFactoryService;
     }
 }

@@ -192,6 +192,14 @@ public class TestContextInitatedTerminated extends TestCase {
 
         epService.getEPRuntime().sendEvent(new SupportBean("E2", 11));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {10, 11, 21, 10.5d});
+
+        // test with audit
+        String epl = "@Audit create context AdBreakCtx as initiated by SupportBean(intPrimitive > 0) as ad " +
+            " terminated by SupportBean(theString=ad.theString, intPrimitive < 0) as endAd";
+        epService.getEPAdministrator().createEPL(epl);
+        epService.getEPAdministrator().createEPL("context AdBreakCtx select count(*) from SupportBean");
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", -10));
     }
 
     public void testContextPartitionSelection() {

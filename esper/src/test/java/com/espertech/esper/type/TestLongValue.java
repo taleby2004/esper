@@ -81,7 +81,6 @@ public class TestLongValue extends TestCase
         tryValid("-2993L", -2993);
         tryValid("-1l", -1);
 
-        tryInvalid("++0");
         tryInvalid("-+0");
         tryInvalid("0s");
         tryInvalid("");

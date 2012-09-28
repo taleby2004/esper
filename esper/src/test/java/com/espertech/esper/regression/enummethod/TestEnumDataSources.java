@@ -15,12 +15,15 @@ import com.espertech.esper.client.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.support.bean.*;
+import com.espertech.esper.support.bean.bookexample.BookDesc;
 import com.espertech.esper.support.bean.lambda.LambdaAssertionUtil;
 import com.espertech.esper.support.bean.lrreport.LocationReportFactory;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import junit.framework.TestCase;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 public class TestEnumDataSources extends TestCase {
 
@@ -256,6 +259,18 @@ public class TestEnumDataSources extends TestCase {
 
         epService.getEPRuntime().sendEvent(SupportCollection.makeNumeric("5,6,7"));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{5 + 6 + 7, 5 + 6 + 7});
+
+        // test map event type with object-array prop
+        epService.getEPAdministrator().getConfiguration().addEventType(BookDesc.class);
+        epService.getEPAdministrator().createEPL("create schema MySchema (books BookDesc[])");
+
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select books.max(i => i.price) as mymax from MySchema");
+        SupportUpdateListener listener = new SupportUpdateListener();
+        stmt.addListener(listener);
+
+        Map<String, Object> event = Collections.<String, Object>singletonMap("books", new BookDesc[]{new BookDesc("1", "book1", "dave", 1.00, null)});
+        epService.getEPRuntime().sendEvent(event, "MySchema");
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "mymax".split(","), new Object[] {1.0});
     }
 
     public void testPrevFuncs() {

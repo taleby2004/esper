@@ -10,6 +10,7 @@ package com.espertech.esper.filter;
 
 import com.espertech.esper.client.EventType;
 
+import java.io.StringWriter;
 import java.util.ArrayDeque;
 import java.util.List;
 
@@ -55,5 +56,17 @@ public class FilterValueSetImpl implements FilterValueSet
                 "eventType=" + eventType.getName() +
                 ", parameters=" + parameters +
                 '}';
+    }
+
+    public void appendTo(StringWriter writer) {
+        writer.append(eventType.getName());
+        writer.append("(");
+        String delimiter = "";
+        for (FilterValueSetParam param : parameters) {
+            writer.append(delimiter);
+            param.appendTo(writer);
+            delimiter = ",";
+        }
+        writer.append(")");
     }
 }

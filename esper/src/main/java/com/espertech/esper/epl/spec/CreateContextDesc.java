@@ -11,7 +11,7 @@
 
 package com.espertech.esper.epl.spec;
 
-import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.filter.FilterSpecCompiled;
 
 import java.io.Serializable;
 import java.util.List;
@@ -33,5 +33,9 @@ public class CreateContextDesc implements Serializable {
 
     public ContextDetail getContextDetail() {
         return contextDetail;
+    }
+
+    public List<FilterSpecCompiled> getFilterSpecs() {
+        return contextDetail.getFilterSpecsIfAny();
     }
 }

@@ -33,7 +33,10 @@ import com.espertech.esper.util.ThreadLogUtil;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Implementation for isolated runtime.
@@ -50,6 +53,8 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
 
     private ThreadLocal<Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>> matchesPerStmtThreadLocal;
     private ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>> schedulePerStmtThreadLocal;
+    private ThreadLocal<ArrayBackedCollection<FilterHandle>> matchesArrayThreadLocal;
+    private ThreadLocal<ArrayBackedCollection<ScheduleHandle>> scheduleArrayThreadLocal;
 
     /**
      * Ctor.
@@ -64,56 +69,10 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
         isSubselectPreeval = unisolatedSvc.getEngineSettingsService().getEngineSettings().getExpression().isSelfSubselectPreeval();
         isPrioritized = unisolatedSvc.getEngineSettingsService().getEngineSettings().getExecution().isPrioritized();
         isLatchStatementInsertStream = unisolatedSvc.getEngineSettingsService().getEngineSettings().getThreading().isInsertIntoDispatchPreserveOrder();
-
         isolatedTimeEvalContext = new ExprEvaluatorContextTimeOnly(services.getSchedulingService());
 
-        matchesPerStmtThreadLocal =
-            new ThreadLocal<Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>>()
-            {
-                protected synchronized Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>> initialValue()
-                {
-                    if (isPrioritized)
-                    {
-                        return new TreeMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(EPStatementAgentInstanceHandleComparator.INSTANCE);
-                    }
-                    else
-                    {
-                        return new HashMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(10000);
-                    }
-                }
-            };
-
-        schedulePerStmtThreadLocal = new ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>>()
-            {
-                protected synchronized Map<EPStatementAgentInstanceHandle, Object> initialValue()
-                {
-                    if (isPrioritized)
-                    {
-                        return new TreeMap<EPStatementAgentInstanceHandle, Object>(EPStatementAgentInstanceHandleComparator.INSTANCE);
-                    }
-                    else
-                    {
-                        return new HashMap<EPStatementAgentInstanceHandle, Object>(10000);
-                    }
-                }
-            };
+        initThreadLocals();
     }
-
-    private ThreadLocal<ArrayBackedCollection<FilterHandle>> matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
-    {
-        protected synchronized ArrayBackedCollection<FilterHandle> initialValue()
-        {
-            return new ArrayBackedCollection<FilterHandle>(100);
-        }
-    };
-
-    private ThreadLocal<ArrayBackedCollection<ScheduleHandle>> scheduleArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<ScheduleHandle>>()
-    {
-        protected synchronized ArrayBackedCollection<ScheduleHandle> initialValue()
-        {
-            return new ArrayBackedCollection<ScheduleHandle>(100);
-        }
-    };
 
     public void sendEvent(Object theEvent) throws EPException
     {
@@ -190,6 +149,22 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
 
         // Process event
         EventBean eventBean = unisolatedServices.getEventAdapterService().adapterForMap(map, eventTypeName);
+        processWrappedEvent(eventBean);
+    }
+
+    public void sendEvent(Object[] objectarray, String objectArrayEventTypeName) {
+        if (objectarray == null)
+        {
+            throw new IllegalArgumentException("Invalid null event object");
+        }
+
+        if ((ExecutionPathDebugLog.isDebugEnabled) && (log.isDebugEnabled()))
+        {
+            log.debug(".sendEvent Processing event " + objectarray);
+        }
+
+        // Process event
+        EventBean eventBean = unisolatedServices.getEventAdapterService().adapterForObjectArray(objectarray, objectArrayEventTypeName);
         processWrappedEvent(eventBean);
     }
 
@@ -787,10 +762,18 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
     {
         services = null;
 
-        matchesArrayThreadLocal.remove();
-        matchesPerStmtThreadLocal.remove();
-        scheduleArrayThreadLocal.remove();
-        schedulePerStmtThreadLocal.remove();
+        if (matchesArrayThreadLocal != null) {
+            matchesArrayThreadLocal.remove();
+        }
+        if (matchesPerStmtThreadLocal != null) {
+            matchesPerStmtThreadLocal.remove();
+        }
+        if (scheduleArrayThreadLocal != null) {
+            scheduleArrayThreadLocal.remove();
+        }
+        if (schedulePerStmtThreadLocal != null) {
+            schedulePerStmtThreadLocal.remove();
+        }
 
         matchesArrayThreadLocal = null;
         matchesPerStmtThreadLocal = null;
@@ -842,6 +825,55 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
 
     public String getEngineURI() {
         return unisolatedServices.getEngineURI();
+    }
+
+    private void initThreadLocals() {
+        matchesPerStmtThreadLocal =
+                new ThreadLocal<Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>>()
+                {
+                    protected synchronized Map<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>> initialValue()
+                    {
+                        if (isPrioritized)
+                        {
+                            return new TreeMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(EPStatementAgentInstanceHandleComparator.INSTANCE);
+                        }
+                        else
+                        {
+                            return new HashMap<EPStatementAgentInstanceHandle, ArrayDeque<FilterHandleCallback>>(10000);
+                        }
+                    }
+                };
+
+        schedulePerStmtThreadLocal = new ThreadLocal<Map<EPStatementAgentInstanceHandle, Object>>()
+        {
+            protected synchronized Map<EPStatementAgentInstanceHandle, Object> initialValue()
+            {
+                if (isPrioritized)
+                {
+                    return new TreeMap<EPStatementAgentInstanceHandle, Object>(EPStatementAgentInstanceHandleComparator.INSTANCE);
+                }
+                else
+                {
+                    return new HashMap<EPStatementAgentInstanceHandle, Object>(10000);
+                }
+            }
+        };
+
+        matchesArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<FilterHandle>>()
+        {
+            protected synchronized ArrayBackedCollection<FilterHandle> initialValue()
+            {
+                return new ArrayBackedCollection<FilterHandle>(100);
+            }
+        };
+
+        scheduleArrayThreadLocal = new ThreadLocal<ArrayBackedCollection<ScheduleHandle>>()
+        {
+            protected synchronized ArrayBackedCollection<ScheduleHandle> initialValue()
+            {
+                return new ArrayBackedCollection<ScheduleHandle>(100);
+            }
+        };
     }
 
     private static final Log log = LogFactory.getLog(EPRuntimeImpl.class);

@@ -24,9 +24,8 @@ import java.util.*;
  */
 public final class TimeWindow implements Iterable
 {
-    private final ArrayDeque<Pair<Long, Object>> window;
-    private Long oldestTimestamp;
-    private Map<EventBean, Pair<Long, Object>> reverseIndex;
+    private ArrayDeque<TimeWindowPair> window;
+    private Map<EventBean, TimeWindowPair> reverseIndex;
 
     /**
      * Ctor.
@@ -35,12 +34,11 @@ public final class TimeWindow implements Iterable
      */
     public TimeWindow(boolean isSupportRemoveStream)
     {
-        this.window = new ArrayDeque<Pair<Long, Object>>();
-        this.oldestTimestamp = null;
+        this.window = new ArrayDeque<TimeWindowPair>();
 
         if (isSupportRemoveStream)
         {
-            reverseIndex = new HashMap<EventBean, Pair<Long, Object>>();
+            reverseIndex = new HashMap<EventBean, TimeWindowPair>();
         }
     }
 
@@ -50,13 +48,9 @@ public final class TimeWindow implements Iterable
      */
     public void adjust(long delta)
     {
-        for (Pair<Long, Object> data : window)
+        for (TimeWindowPair data : window)
         {
-            data.setFirst(data.getFirst() + delta);
-        }
-        if (oldestTimestamp != null)
-        {
-            oldestTimestamp += delta;
+            data.setTimestamp(data.getTimestamp() + delta);
         }
     }
 
@@ -67,16 +61,10 @@ public final class TimeWindow implements Iterable
      */
     public final void add(long timestamp, EventBean bean)
     {
-        // On add to an empty window, set the oldest event's timestamp
-        if (oldestTimestamp == null)
-        {
-            oldestTimestamp = timestamp;
-        }
-
         // Empty window
         if (window.isEmpty())
         {
-            Pair<Long, Object> pair = new Pair<Long, Object>(timestamp, bean);
+            TimeWindowPair pair = new TimeWindowPair(timestamp, bean);
             window.add(pair);
 
             if (reverseIndex != null)
@@ -86,24 +74,24 @@ public final class TimeWindow implements Iterable
             return;
         }
 
-        Pair<Long, Object> lastPair = window.getLast();
+        TimeWindowPair lastPair = window.getLast();
 
         // Windows last timestamp matches the one supplied
-        if (lastPair.getFirst() == timestamp)
+        if (lastPair.getTimestamp() == timestamp)
         {
-            if (lastPair.getSecond() instanceof List) {
-                List<EventBean> list = (List<EventBean>) lastPair.getSecond();
+            if (lastPair.getEventHolder() instanceof List) {
+                List<EventBean> list = (List<EventBean>) lastPair.getEventHolder();
                 list.add(bean);
             }
-            else if (lastPair.getSecond() == null) {
-                lastPair.setSecond(bean);
+            else if (lastPair.getEventHolder() == null) {
+                lastPair.setEventHolder(bean);
             }
             else {
-                EventBean existing = (EventBean) lastPair.getSecond();
+                EventBean existing = (EventBean) lastPair.getEventHolder();
                 List<EventBean> list = new ArrayList<EventBean>(4);
                 list.add(existing);
                 list.add(bean);
-                lastPair.setSecond(list);
+                lastPair.setEventHolder(list);
             }
             if (reverseIndex != null)
             {
@@ -113,7 +101,7 @@ public final class TimeWindow implements Iterable
         }
 
         // Append to window
-        Pair<Long, Object> pair = new Pair<Long, Object>(timestamp, bean);
+        TimeWindowPair pair = new TimeWindowPair(timestamp, bean);
         if (reverseIndex != null)
         {
             reverseIndex.put(bean, pair);
@@ -131,13 +119,13 @@ public final class TimeWindow implements Iterable
         {
             throw new UnsupportedOperationException("Time window does not accept event removal");
         }
-        Pair<Long, Object> pair = reverseIndex.get(theEvent);
+        TimeWindowPair pair = reverseIndex.get(theEvent);
         if (pair != null) {
-            if (pair.getSecond() == theEvent) {
-                pair.setSecond(null);
+            if (pair.getEventHolder() != null && pair.getEventHolder().equals(theEvent)) {
+                pair.setEventHolder(null);
             }
-            else if (pair.getSecond() != null) {
-                List<EventBean> list = (List<EventBean>) pair.getSecond();
+            else if (pair.getEventHolder() != null) {
+                List<EventBean> list = (List<EventBean>) pair.getEventHolder();
                 list.remove(theEvent);
             }
             reverseIndex.remove(theEvent);
@@ -157,10 +145,10 @@ public final class TimeWindow implements Iterable
             return null;
         }
 
-        Pair<Long, Object> pair = window.getFirst();
+        TimeWindowPair pair = window.getFirst();
 
         // If the first entry's timestamp is after the expiry date, nothing to expire
-        if (pair.getFirst() >= expireBefore)
+        if (pair.getTimestamp() >= expireBefore)
         {
             return null;
         }
@@ -170,12 +158,12 @@ public final class TimeWindow implements Iterable
         // Repeat until the window is empty or the timestamp is above the expiry time
         do
         {
-            if (pair.getSecond() != null) {
-                if (pair.getSecond() instanceof EventBean) {
-                    resultBeans.add((EventBean) pair.getSecond());
+            if (pair.getEventHolder() != null) {
+                if (pair.getEventHolder() instanceof EventBean) {
+                    resultBeans.add((EventBean) pair.getEventHolder());
                 }
                 else {
-                    resultBeans.addAll((List<EventBean>) pair.getSecond());
+                    resultBeans.addAll((List<EventBean>) pair.getEventHolder());
                 }
             }
 
@@ -188,16 +176,7 @@ public final class TimeWindow implements Iterable
 
             pair = window.getFirst();
         }
-        while (pair.getFirst() < expireBefore);
-
-        if (window.isEmpty())
-        {
-            oldestTimestamp = null;
-        }
-        else
-        {
-            oldestTimestamp = pair.getFirst();
-        }
+        while (pair.getTimestamp() < expireBefore);
 
         if (reverseIndex != null)
         {
@@ -226,7 +205,18 @@ public final class TimeWindow implements Iterable
      */
     public final Long getOldestTimestamp()
     {
-        return oldestTimestamp;
+        if (window.isEmpty()) {
+            return null;
+        }
+        if (window.getFirst().getEventHolder() != null) {
+            return window.getFirst().getTimestamp();
+        }
+        for (TimeWindowPair pair : window) {
+            if (pair.getEventHolder() != null) {
+                return pair.getTimestamp();
+            }
+        }
+        return null;
     }
 
     /**
@@ -235,15 +225,26 @@ public final class TimeWindow implements Iterable
      */
     public final boolean isEmpty()
     {
-        return window.isEmpty();
+        return getOldestTimestamp() == null;
     }
 
     /**
      * Returns the reverse index, for testing purposes.
      * @return reverse index
      */
-    protected Map<EventBean, Pair<Long, Object>> getReverseIndex()
-    {
+    public Map<EventBean, TimeWindowPair> getReverseIndex() {
         return reverseIndex;
+    }
+
+    public ArrayDeque<TimeWindowPair> getWindow() {
+        return window;
+    }
+
+    public void setWindow(ArrayDeque<TimeWindowPair> window) {
+        this.window = window;
+    }
+
+    public void setReverseIndex(Map<EventBean, TimeWindowPair> reverseIndex) {
+        this.reverseIndex = reverseIndex;
     }
 }

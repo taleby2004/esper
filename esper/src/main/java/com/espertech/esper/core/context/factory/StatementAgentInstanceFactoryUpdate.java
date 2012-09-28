@@ -53,7 +53,7 @@ public class StatementAgentInstanceFactoryUpdate implements StatementAgentInstan
         this.routerDesc = routerDesc;
     }
 
-    public StatementAgentInstanceFactoryUpdateResult newContext(final AgentInstanceContext agentInstanceContext)
+    public StatementAgentInstanceFactoryUpdateResult newContext(final AgentInstanceContext agentInstanceContext, boolean isRecoveringResilient)
     {
         final List<StopCallback> stopCallbacks = new ArrayList<StopCallback>();
         StopCallback stopCallback = new StopCallback() {
@@ -73,7 +73,7 @@ public class StatementAgentInstanceFactoryUpdate implements StatementAgentInstan
                 }
             });
 
-            services.getInternalEventRouter().addPreprocessing(routerDesc, onExprView);
+            services.getInternalEventRouter().addPreprocessing(routerDesc, onExprView, agentInstanceContext.getAgentInstanceLock(), !subSelectStrategyCollection.getSubqueries().isEmpty());
 
             // start subselects
             subselectStrategies = EPStatementStartMethodHelperSubselect.startSubselects(services, subSelectStrategyCollection, agentInstanceContext, stopCallbacks);

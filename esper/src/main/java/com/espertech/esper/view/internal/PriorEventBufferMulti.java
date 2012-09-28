@@ -107,6 +107,45 @@ public class PriorEventBufferMulti implements ViewUpdatedCollection, RelativeAcc
         lastOldData = oldData;
     }
 
+    public void update(EventBean[] newData, EventBean[] oldData, PriorEventBufferChangeCaptureMulti capture)
+    {
+        // Remove last old data posted in previous post
+        if (lastOldData != null)
+        {
+            for (int i = 0; i < lastOldData.length; i++)
+            {
+                EventBean oldDataItem = lastOldData[i];
+                priorEventMap.remove(oldDataItem);
+                capture.removed(oldDataItem);
+            }
+        }
+
+        // Post new data to rolling buffer starting with the oldest
+        if (newData != null)
+        {
+            for (int i = 0; i < newData.length; i++)
+            {
+                EventBean newEvent = newData[i];
+
+                // Add new event
+                newEvents.add(newEvent);
+
+                // Save prior index events in array
+                EventBean[] priorEvents = new EventBean[priorToIndexesSize];
+                for (int j = 0; j < priorToIndexesSize; j++)
+                {
+                    int priorIndex = priorToIndexes[j];
+                    priorEvents[j] = newEvents.get(priorIndex);
+                }
+                priorEventMap.put(newEvent, priorEvents);
+                capture.added(newEvent, priorEvents);
+            }
+        }
+
+        // Save old data to be removed next time we get posted results
+        lastOldData = oldData;
+    }
+
     public EventBean getRelativeToEvent(EventBean theEvent, int priorToIndex)
     {
         if (priorToIndex >= priorToIndexesSize)
@@ -148,5 +187,13 @@ public class PriorEventBufferMulti implements ViewUpdatedCollection, RelativeAcc
     public void destroy()
     {
         // No action required
+    }
+
+    public Map<EventBean, EventBean[]> getPriorEventMap() {
+        return priorEventMap;
+    }
+
+    public RollingEventBuffer getNewEvents() {
+        return newEvents;
     }
 }

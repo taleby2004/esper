@@ -116,7 +116,7 @@ public class TestTimeWindow extends TestCase
         assertTrue(beanList.size() == 1);
         assertTrue(beanList.getFirst() == beans[2]);
         assertFalse(windowRemovable.isEmpty());
-        assertTrue(windowRemovable.getOldestTimestamp() == 21);
+        assertTrue(windowRemovable.getOldestTimestamp() == 22);
 
         beanList = windowRemovable.expireEvents(22);
         assertTrue(beanList.size() == 0);

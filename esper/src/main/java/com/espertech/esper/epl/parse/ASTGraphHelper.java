@@ -61,7 +61,7 @@ public class ASTGraphHelper
         GraphOperatorDetail detail = null;
         if (parent.getChildCount() > current && parent.getChild(current).getType() == EsperEPL2GrammarParser.GOPCFG) {
             Tree detailRoot = parent.getChild(current);
-            Map<String, Object> configs = new HashMap<String, Object>();
+            Map<String, Object> configs = new LinkedHashMap<String, Object>();
             for (int i = 0; i < detailRoot.getChildCount(); i++) {
                 Tree itemRoot = detailRoot.getChild(i);
 

@@ -18,12 +18,12 @@ import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.CreateContextDesc;
 
 public interface ContextManagementService {
-    public void addContextSpec(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, CreateContextDesc contextDesc) throws ExprValidationException;
+    public void addContextSpec(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, CreateContextDesc contextDesc, boolean isRecoveringResilient) throws ExprValidationException;
     public int getContextCount();
 
     public ContextDescriptor getContextDescriptor(String contextName);
 
-    public void addStatement(String contextName, ContextControllerStatementBase statement) throws ExprValidationException;
+    public void addStatement(String contextName, ContextControllerStatementBase statement, boolean isRecoveringResilient) throws ExprValidationException;
     public void stoppedStatement(String contextName, String statementName, String statementId);
     public void destroyedStatement(String contextName, String statementName, String statementId);
 

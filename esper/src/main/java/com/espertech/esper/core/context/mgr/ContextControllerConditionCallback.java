@@ -12,10 +12,9 @@
 package com.espertech.esper.core.context.mgr;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.pattern.MatchedEventMap;
 
 import java.util.Map;
 
 public interface ContextControllerConditionCallback {
-    public void rangeNotification(Map<String, Object> builtinProperties, ContextControllerCondition originEndpoint, EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern);
+    public void rangeNotification(Map<String, Object> builtinProperties, ContextControllerCondition originEndpoint, EventBean optionalTriggeringEvent, Map<String, Object> optionalTriggeringPattern, ContextInternalFilterAddendum filterAddendum);
 }

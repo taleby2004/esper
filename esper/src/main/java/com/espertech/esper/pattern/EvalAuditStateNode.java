@@ -30,29 +30,25 @@ public final class EvalAuditStateNode extends EvalStateNode implements Evaluator
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
-     * @param beginState contains the events that make up prior matches
      * @param evalAuditNode is the factory node associated to the state
      */
     public EvalAuditStateNode(Evaluator parentNode,
-                              EvalAuditNode evalAuditNode,
-                              MatchedEventMap beginState)
+                              EvalAuditNode evalAuditNode)
     {
-        super(parentNode, null);
+        super(parentNode);
 
         this.evalAuditNode = evalAuditNode;
-
-        EvalNode child = evalAuditNode.getChildNode();
-        EvalStateNode childState = child.newState(this, beginState, null);
-        this.childState = childState;
     }
 
     public EvalNode getFactoryNode() {
         return evalAuditNode;
     }
 
-    public final void start()
+    public final void start(MatchedEventMap beginState)
     {
-        childState.start();
+        EvalNode child = evalAuditNode.getChildNode();
+        childState = child.newState(this, null, 0L);
+        childState.start(beginState);
         evalAuditNode.getFactoryNode().increaseRefCount(this, evalAuditNode.getContext().getPatternContext());
     }
 

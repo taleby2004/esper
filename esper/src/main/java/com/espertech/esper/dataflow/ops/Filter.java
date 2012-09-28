@@ -83,8 +83,8 @@ public class Filter implements DataFlowOpLifecycle {
             theEvent = (EventBeanSPI) row;
         }
 
-        boolean pass = (Boolean) evaluator.evaluate(eventsPerStream, true, null);
-        if (pass) {
+        Boolean pass = (Boolean) evaluator.evaluate(eventsPerStream, true, null);
+        if (pass != null && pass) {
             if (log.isDebugEnabled()) {
                 log.debug("Submitting row " + Arrays.toString((Object[]) row));
             }

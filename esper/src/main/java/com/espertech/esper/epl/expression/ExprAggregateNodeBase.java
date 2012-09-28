@@ -9,8 +9,8 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.agg.AggregationMethodFactory;
-import com.espertech.esper.epl.agg.AggregationResultFuture;
+import com.espertech.esper.epl.agg.service.AggregationMethodFactory;
+import com.espertech.esper.epl.agg.service.AggregationResultFuture;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.util.JavaClassHelper;
@@ -22,10 +22,10 @@ import java.util.Map;
  * <p>
  * In terms of validation each concrete aggregation node must implement it's own validation.
  * <p>
- * In terms of evaluation this base class will ask the assigned {@link com.espertech.esper.epl.agg.AggregationResultFuture} for the current state,
+ * In terms of evaluation this base class will ask the assigned {@link com.espertech.esper.epl.agg.service.AggregationResultFuture} for the current state,
  * using a column number assigned to the node.
  * <p>
- * Concrete subclasses must supply an aggregation state prototype node {@link com.espertech.esper.epl.agg.AggregationMethod} that reflects
+ * Concrete subclasses must supply an aggregation state prototype node {@link com.espertech.esper.epl.agg.aggregator.AggregationMethod} that reflects
  * each group's (there may be group-by critera) current aggregation state.
  */
 public abstract class ExprAggregateNodeBase extends ExprNodeBase implements ExprEvaluator, ExprAggregateNode

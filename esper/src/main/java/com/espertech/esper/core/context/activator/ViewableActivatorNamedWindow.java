@@ -32,9 +32,9 @@ public class ViewableActivatorNamedWindow implements ViewableActivator {
         this.optPropertyEvaluator = optPropertyEvaluator;
     }
 
-    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
+    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect, boolean isRecoveringResilient) {
         NamedWindowConsumerDesc consumerDesc = new NamedWindowConsumerDesc(filterExpressions, optPropertyEvaluator, agentInstanceContext);
         NamedWindowConsumerView consumerView = processor.addConsumer(consumerDesc, isSubselect);
-        return new ViewableActivationResult(consumerView, consumerView, null);
+        return new ViewableActivationResult(consumerView, consumerView, null, null);
     }
 }

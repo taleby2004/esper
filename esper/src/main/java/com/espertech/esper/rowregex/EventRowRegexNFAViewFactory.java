@@ -18,10 +18,10 @@ import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.epl.agg.AggregationServiceAggExpressionDesc;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryFactory;
-import com.espertech.esper.epl.agg.AggregationServiceMatchRecognize;
-import com.espertech.esper.epl.agg.AggregationServiceMatchRecognizeFactoryDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceAggExpressionDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryFactory;
+import com.espertech.esper.epl.agg.service.AggregationServiceMatchRecognize;
+import com.espertech.esper.epl.agg.service.AggregationServiceMatchRecognizeFactoryDesc;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.expression.*;
@@ -289,6 +289,12 @@ public class EventRowRegexNFAViewFactory extends ViewFactorySupport
                 validated.add(ExprNodeUtility.getValidatedSubtree(partitionExpr, validationContext));
             }
             matchRecognizeSpec.setPartitionByExpressions(validated);
+        }
+
+        // validate interval if present
+        if (matchRecognizeSpec.getInterval() != null) {
+            ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(statementContext.getEngineURI(), false), statementContext.getMethodResolutionService(), null, statementContext.getSchedulingService(), statementContext.getVariableService(), exprEvaluatorContext, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
+            matchRecognizeSpec.getInterval().validate(validationContext);
         }
     }
 

@@ -26,12 +26,12 @@ import java.util.LinkedHashSet;
  * <p>
  * Remove stream events delete from the data window.
  */
-public final class FirstLengthWindowView extends ViewSupport implements DataWindowView, CloneableView
+public class FirstLengthWindowView extends ViewSupport implements DataWindowView, CloneableView
 {
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final FirstLengthWindowViewFactory lengthFirstFactory;
     private final int size;
-    private LinkedHashSet<EventBean> indexedEvents;
+    protected LinkedHashSet<EventBean> indexedEvents;
 
     /**
      * Ctor.
@@ -98,6 +98,7 @@ public final class FirstLengthWindowView extends ViewSupport implements DataWind
                     }
                     newDataToPost.add(aNewData);
                     indexedEvents.add(aNewData);
+                    internalHandleAdded(aNewData);
                 }
             }
         }
@@ -114,6 +115,7 @@ public final class FirstLengthWindowView extends ViewSupport implements DataWind
                         oldDataToPost = new OneEventCollection();
                     }
                     oldDataToPost.add(anOldData);
+                    internalHandleRemoved(anOldData);
                 }
             }
         }
@@ -126,6 +128,14 @@ public final class FirstLengthWindowView extends ViewSupport implements DataWind
         }
     }
 
+    public void internalHandleRemoved(EventBean anOldData) {
+        // no action required
+    }
+
+    public void internalHandleAdded(EventBean aNewData) {
+        // no action required
+    }
+
     public final Iterator<EventBean> iterator()
     {
         return indexedEvents.iterator();
@@ -134,5 +144,9 @@ public final class FirstLengthWindowView extends ViewSupport implements DataWind
     public final String toString()
     {
         return this.getClass().getName() + " size=" + size;
+    }
+
+    public LinkedHashSet<EventBean> getIndexedEvents() {
+        return indexedEvents;
     }
 }

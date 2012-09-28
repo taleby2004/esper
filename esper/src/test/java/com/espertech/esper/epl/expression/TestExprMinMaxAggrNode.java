@@ -11,8 +11,6 @@
 
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.agg.MinMaxAggregator;
-import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.support.epl.SupportExprNode;
 import com.espertech.esper.support.epl.SupportExprNodeFactory;
 import com.espertech.esper.support.epl.SupportStreamTypeSvc3Stream;

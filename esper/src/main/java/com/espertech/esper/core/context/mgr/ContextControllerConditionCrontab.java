@@ -22,6 +22,7 @@ import com.espertech.esper.pattern.MatchedEventMap;
 import com.espertech.esper.schedule.ScheduleComputeHelper;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.schedule.SchedulingService;
 
 import java.util.Collections;
 
@@ -31,17 +32,19 @@ public class ContextControllerConditionCrontab implements ContextControllerCondi
     private final ScheduleSlot scheduleSlot;
     private final ContextDetailConditionCrontab spec;
     private final ContextControllerConditionCallback callback;
+    private final ContextInternalFilterAddendum filterAddendum;
 
     private EPStatementHandleCallback scheduleHandle;
 
-    public ContextControllerConditionCrontab(StatementContext statementContext, ScheduleSlot scheduleSlot, ContextDetailConditionCrontab spec, ContextControllerConditionCallback callback) {
+    public ContextControllerConditionCrontab(StatementContext statementContext, ScheduleSlot scheduleSlot, ContextDetailConditionCrontab spec, ContextControllerConditionCallback callback, ContextInternalFilterAddendum filterAddendum) {
         this.statementContext = statementContext;
         this.scheduleSlot = scheduleSlot;
         this.spec = spec;
         this.callback = callback;
+        this.filterAddendum = filterAddendum;
     }
 
-    public void activate(EventBean optionalTriggerEvent, MatchedEventMap priorMatches, long timeOffset) {
+    public void activate(EventBean optionalTriggerEvent, MatchedEventMap priorMatches, long timeOffset, boolean isRecoveringResilient) {
         startContextCallback();
     }
 
@@ -58,12 +61,14 @@ public class ContextControllerConditionCrontab implements ContextControllerCondi
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
             {
                 scheduleHandle = null;  // terminates automatically unless scheduled again
-                callback.rangeNotification(Collections.<String, Object>emptyMap(), ContextControllerConditionCrontab.this, null, null);
+                callback.rangeNotification(Collections.<String, Object>emptyMap(), ContextControllerConditionCrontab.this, null, null, filterAddendum);
             }
         };
         EPStatementAgentInstanceHandle agentHandle = new EPStatementAgentInstanceHandle(statementContext.getEpStatementHandle(), statementContext.getDefaultAgentInstanceLock(), -1, new StatementAgentInstanceFilterVersion());
         scheduleHandle = new EPStatementHandleCallback(agentHandle, scheduleCallback);
-        statementContext.getSchedulingService().add(spec.getSchedule(), scheduleHandle, scheduleSlot);
+        SchedulingService schedulingService = statementContext.getSchedulingService();
+        long nextScheduledTime = ScheduleComputeHelper.computeDeltaNextOccurance(spec.getSchedule(), schedulingService.getTime());
+        statementContext.getSchedulingService().add(nextScheduledTime, scheduleHandle, scheduleSlot);
     }
 
     private void endContextCallback() {

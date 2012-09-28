@@ -631,9 +631,16 @@ public class SelectExprProcessorHelper
                     return new EvalSelectStreamWUnderlying(selectExprContext, resultEventType, namedStreams, isUsingWildcard,
                             unnamedStreams, singleStreamWrapper, underlyingIsFragmentEvent, underlyingStreamNumber, underlyingPropertyEventGetter, underlyingExprEvaluator);
                 }
-                else    // there are onle or more streams selected with column name such as "stream.* as columnOne"
+                else    // there are one or more streams selected with column name such as "stream.* as columnOne"
                 {
                     EventType existingType = eventAdapterService.getExistsTypeByName(insertIntoDesc.getEventTypeName());
+                    if (existingType instanceof BeanEventType) {
+                        String name = selectedStreams.get(0).getStreamSelected().getStreamName();
+                        String alias = selectedStreams.get(0).getStreamSelected().getOptionalName();
+                        String syntaxUsed = name + ".*" + (alias != null ? " as " + alias : "");
+                        String syntaxInstead = name + (alias != null ? " as " + alias : "");
+                        throw new ExprValidationException("The '" + syntaxUsed + "' syntax is not allowed when inserting into an existing bean event type, use the '" + syntaxInstead + "' syntax instead");
+                    }
                     if (existingType == null || existingType instanceof MapEventType) {
                         resultEventType = eventAdapterService.addNestableMapType(insertIntoDesc.getEventTypeName(), selPropertyTypes, null, false, false, false, false, true);
                         Set<String> propertiesToUnwrap = getEventBeanToObjectProps(selPropertyTypes, resultEventType);

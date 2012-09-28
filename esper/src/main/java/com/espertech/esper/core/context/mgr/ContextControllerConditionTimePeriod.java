@@ -35,18 +35,20 @@ public class ContextControllerConditionTimePeriod implements ContextControllerCo
     private final ScheduleSlot scheduleSlot;
     private final ContextDetailConditionTimePeriod spec;
     private final ContextControllerConditionCallback callback;
+    private final ContextInternalFilterAddendum filterAddendum;
 
     private EPStatementHandleCallback scheduleHandle;
 
-    public ContextControllerConditionTimePeriod(String contextName, AgentInstanceContext agentInstanceContext, ScheduleSlot scheduleSlot, ContextDetailConditionTimePeriod spec, ContextControllerConditionCallback callback) {
+    public ContextControllerConditionTimePeriod(String contextName, AgentInstanceContext agentInstanceContext, ScheduleSlot scheduleSlot, ContextDetailConditionTimePeriod spec, ContextControllerConditionCallback callback, ContextInternalFilterAddendum filterAddendum) {
         this.contextName = contextName;
         this.agentInstanceContext = agentInstanceContext;
         this.scheduleSlot = scheduleSlot;
         this.spec = spec;
         this.callback = callback;
+        this.filterAddendum = filterAddendum;
     }
 
-    public void activate(EventBean optionalTriggerEvent, MatchedEventMap priorMatches, long timeOffset) {
+    public void activate(EventBean optionalTriggerEvent, MatchedEventMap priorMatches, long timeOffset, boolean isRecoveringResilient) {
         startContextCallback(timeOffset);
     }
 
@@ -63,7 +65,7 @@ public class ContextControllerConditionTimePeriod implements ContextControllerCo
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
             {
                 scheduleHandle = null;  // terminates automatically unless scheduled again
-                callback.rangeNotification(Collections.<String, Object>emptyMap(), ContextControllerConditionTimePeriod.this, null, null);
+                callback.rangeNotification(Collections.<String, Object>emptyMap(), ContextControllerConditionTimePeriod.this, null, null, filterAddendum);
             }
         };
         EPStatementAgentInstanceHandle agentHandle = new EPStatementAgentInstanceHandle(agentInstanceContext.getStatementContext().getEpStatementHandle(), agentInstanceContext.getStatementContext().getDefaultAgentInstanceLock(), -1, new StatementAgentInstanceFilterVersion());

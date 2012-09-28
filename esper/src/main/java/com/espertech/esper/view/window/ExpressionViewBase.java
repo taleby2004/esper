@@ -14,9 +14,9 @@ import com.espertech.esper.collection.ViewUpdatedCollection;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
-import com.espertech.esper.epl.agg.AggregationService;
-import com.espertech.esper.epl.agg.AggregationServiceAggExpressionDesc;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
+import com.espertech.esper.epl.agg.service.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationServiceAggExpressionDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryDesc;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.variable.VariableChangeCallback;
 import com.espertech.esper.epl.variable.VariableReader;
@@ -146,5 +146,13 @@ public abstract class ExpressionViewBase extends ViewSupport implements DataWind
         if (!agentInstanceContext.getStatementContext().getSchedulingService().isScheduled(scheduleHandle)) {
             agentInstanceContext.getStatementContext().getSchedulingService().add(0, scheduleHandle, scheduleSlot);
         }
+    }
+
+    public ViewUpdatedCollection getViewUpdatedCollection() {
+        return viewUpdatedCollection;
+    }
+
+    public AggregationService getAggregationService() {
+        return aggregationService;
     }
 }

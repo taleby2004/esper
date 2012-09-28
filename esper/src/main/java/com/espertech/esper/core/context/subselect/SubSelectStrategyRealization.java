@@ -8,9 +8,11 @@
  **************************************************************************************/
 package com.espertech.esper.core.context.subselect;
 
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.core.context.factory.StatementAgentInstancePostLoad;
+import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.lookup.SubordTableLookupStrategy;
+import com.espertech.esper.view.Viewable;
 
 import java.util.Map;
 
@@ -24,13 +26,17 @@ public class SubSelectStrategyRealization
     private final AggregationService subselectAggregationService;
     private final Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies;
     private final Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies;
+    private final Viewable subselectView;
+    private final StatementAgentInstancePostLoad postLoad;
 
-    public SubSelectStrategyRealization(SubordTableLookupStrategy strategy, SubselectAggregationPreprocessor subselectAggregationPreprocessor, AggregationService subselectAggregationService, Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies, Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies) {
+    public SubSelectStrategyRealization(SubordTableLookupStrategy strategy, SubselectAggregationPreprocessor subselectAggregationPreprocessor, AggregationService subselectAggregationService, Map<ExprPriorNode, ExprPriorEvalStrategy> priorNodeStrategies, Map<ExprPreviousNode, ExprPreviousEvalStrategy> previousNodeStrategies, Viewable subselectView, StatementAgentInstancePostLoad postLoad) {
         this.strategy = strategy;
         this.subselectAggregationPreprocessor = subselectAggregationPreprocessor;
         this.subselectAggregationService = subselectAggregationService;
         this.priorNodeStrategies = priorNodeStrategies;
         this.previousNodeStrategies = previousNodeStrategies;
+        this.subselectView = subselectView;
+        this.postLoad = postLoad;
     }
 
     public SubordTableLookupStrategy getStrategy() {
@@ -51,5 +57,13 @@ public class SubSelectStrategyRealization
 
     public Map<ExprPreviousNode, ExprPreviousEvalStrategy> getPreviousNodeStrategies() {
         return previousNodeStrategies;
+    }
+
+    public Viewable getSubselectView() {
+        return subselectView;
+    }
+
+    public StatementAgentInstancePostLoad getPostLoad() {
+        return postLoad;
     }
 }

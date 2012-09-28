@@ -26,7 +26,7 @@ public abstract class EvalNodeFactoryBase implements EvalFactoryNode, Serializab
     private static final long serialVersionUID = 0L;
 
     private final List<EvalFactoryNode> childNodes;
-    private EvalNodeNumber nodeNumber;
+    private short factoryNodeId;
 
     public abstract EvalNode makeEvalNode(PatternAgentInstanceContext agentInstanceContext);
 
@@ -36,24 +36,6 @@ public abstract class EvalNodeFactoryBase implements EvalFactoryNode, Serializab
     EvalNodeFactoryBase()
     {
         childNodes = new ArrayList<EvalFactoryNode>();
-    }
-
-    /**
-     * Returns the evaluation node's relative node number in the evaluation node tree.
-     * @return node number
-     */
-    public EvalNodeNumber getNodeNumber()
-    {
-        return nodeNumber;
-    }
-
-    /**
-     * Sets the evaluation node's relative node number.
-     * @param nodeNumber is the node number to set
-     */
-    public void setNodeNumber(EvalNodeNumber nodeNumber)
-    {
-        this.nodeNumber = nodeNumber;
     }
 
     /**
@@ -76,5 +58,13 @@ public abstract class EvalNodeFactoryBase implements EvalFactoryNode, Serializab
     public List<EvalFactoryNode> getChildNodes()
     {
         return childNodes;
+    }
+
+    public short getFactoryNodeId() {
+        return factoryNodeId;
+    }
+
+    public void setFactoryNodeId(short factoryNodeId) {
+        this.factoryNodeId = factoryNodeId;
     }
 }

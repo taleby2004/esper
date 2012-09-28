@@ -135,4 +135,12 @@ public class SortedRefCountedSet<K>
     {
         return countPoints;
     }
+
+    public TreeMap<K, Integer> getRefSet() {
+        return refSet;
+    }
+
+    public void setCountPoints(long countPoints) {
+        this.countPoints = countPoints;
+    }
 }

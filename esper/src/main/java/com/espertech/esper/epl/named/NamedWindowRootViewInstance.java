@@ -611,4 +611,14 @@ public class NamedWindowRootViewInstance extends ViewSupport
         }
         return (VirtualDWView) this.getViews().get(0);
     }
+
+    public void postLoad() {
+        EventBean[] events = new EventBean[1];
+        for (EventBean event : dataWindowContents) {
+            events[0] = event;
+            for (EventTable table : indexRepository.getTables()) {
+                table.add(events);
+            }
+        }
+    }
 }

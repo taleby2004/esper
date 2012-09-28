@@ -1053,6 +1053,46 @@ public class TestFilterExpressions extends TestCase
         tryArithmatic(text);
     }
 
+    public void testShortAndByteArithmetic()
+    {
+        String epl = "select " +
+                "shortPrimitive + shortBoxed as c0," +
+                "bytePrimitive + byteBoxed as c1, " +
+                "shortPrimitive - shortBoxed as c2," +
+                "bytePrimitive - byteBoxed as c3, " +
+                "shortPrimitive * shortBoxed as c4," +
+                "bytePrimitive * byteBoxed as c5, " +
+                "shortPrimitive / shortBoxed as c6," +
+                "bytePrimitive / byteBoxed as c7," +
+                "shortPrimitive + longPrimitive as c8," +
+                "bytePrimitive + longPrimitive as c9 " +
+                "from SupportBean";
+        EPStatement stmt = epService.getEPAdministrator().createEPL(epl);
+        stmt.addListener(listener);
+        String[] fields = "c0,c1,c2,c3,c4,c5,c6,c7,c8,c9".split(",");
+
+        for (String field : fields) {
+            Class expected = Integer.class;
+            if (field.equals("c6") || field.equals("c7")) {
+                expected = Double.class;
+            }
+            if (field.equals("c8") || field.equals("c9")) {
+                expected = Long.class;
+            }
+            assertEquals("for field " + field, expected, stmt.getEventType().getPropertyType(field));
+        }
+
+        SupportBean bean = new SupportBean();
+        bean.setShortPrimitive((short)5);
+        bean.setShortBoxed((short)6);
+        bean.setBytePrimitive((byte)4);
+        bean.setByteBoxed((byte)2);
+        bean.setLongPrimitive(10);
+        epService.getEPRuntime().sendEvent(bean);
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields,
+                new Object[] {11, 6, -1, 2, 30, 8, 5d/6d, 2d, 15L, 14L});
+    }
+
     private void tryArithmatic(String text)
     {
         EPStatement stmt = epService.getEPAdministrator().createEPL(text);

@@ -15,6 +15,8 @@ import com.espertech.esper.client.EventPropertyGetter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.MultiKeyUntyped;
 import com.espertech.esper.epl.expression.ExprValidationException;
+import com.espertech.esper.epl.named.NamedWindowProcessor;
+import com.espertech.esper.epl.named.NamedWindowService;
 import com.espertech.esper.epl.spec.ContextDetailPartitionItem;
 import com.espertech.esper.epl.spec.ContextDetailPartitioned;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
@@ -119,7 +121,7 @@ public class ContextControllerPartitionedUtil {
         return propertyTypes;
     }
 
-    protected static void validateStatementForContext(String contextName, ContextControllerStatementBase statement, StatementSpecCompiledAnalyzerResult streamAnalysis, Collection<EventType> itemEventTypes)
+    protected static void validateStatementForContext(String contextName, ContextControllerStatementBase statement, StatementSpecCompiledAnalyzerResult streamAnalysis, Collection<EventType> itemEventTypes, NamedWindowService namedWindowService)
         throws ExprValidationException
     {
         List<FilterSpecCompiled> filters = streamAnalysis.getFilters();
@@ -136,6 +138,11 @@ public class ContextControllerPartitionedUtil {
                         return;
                     }
                     if (EventTypeUtility.isTypeOrSubTypeOf(stmtFilterType, itemEventType)) {
+                        return;
+                    }
+
+                    NamedWindowProcessor processor = namedWindowService.getProcessor(stmtFilterType.getName());
+                    if (processor != null && processor.getContextName() != null && processor.getContextName().equals(contextName)) {
                         return;
                     }
                 }
@@ -161,10 +168,10 @@ public class ContextControllerPartitionedUtil {
     }
 
     // Compare filters in statement with filters in segmented context, addendum filter compilation
-    public static void populateAddendumFilters(Object keyValue, List<FilterSpecCompiled> filtersSpecs, ContextDetailPartitioned segmentedSpec, StatementSpecCompiled statementSpecCompiled, IdentityHashMap<FilterSpecCompiled, List<FilterValueSetParam>> addendums) {
+    public static void populateAddendumFilters(Object keyValue, List<FilterSpecCompiled> filtersSpecs, ContextDetailPartitioned segmentedSpec, StatementSpecCompiled optionalStatementSpecCompiled, IdentityHashMap<FilterSpecCompiled, List<FilterValueSetParam>> addendums) {
 
         // determine whether create-named-window
-        boolean isCreateWindow = statementSpecCompiled.getCreateWindowDesc() != null;
+        boolean isCreateWindow = optionalStatementSpecCompiled != null && optionalStatementSpecCompiled.getCreateWindowDesc() != null;
         if (!isCreateWindow) {
             for (FilterSpecCompiled filtersSpec : filtersSpecs) {
 
@@ -216,7 +223,7 @@ public class ContextControllerPartitionedUtil {
         }
         // handle segmented context for create-window
         else {
-            String declaredAsName = statementSpecCompiled.getCreateWindowDesc().getAsEventTypeName();
+            String declaredAsName = optionalStatementSpecCompiled.getCreateWindowDesc().getAsEventTypeName();
             if (declaredAsName != null) {
                 for (FilterSpecCompiled filtersSpec : filtersSpecs) {
 
@@ -233,12 +240,23 @@ public class ContextControllerPartitionedUtil {
                     }
 
                     List<FilterValueSetParam> addendumFilters = new ArrayList<FilterValueSetParam>(foundPartition.getPropertyNames().size());
+                    int propertyNumber = 0;
                     for (String partitionPropertyName : foundPartition.getPropertyNames()) {
                         EventPropertyGetter getter = foundPartition.getFilterSpecCompiled().getFilterForEventType().getGetter(partitionPropertyName);
                         Class resultType = foundPartition.getFilterSpecCompiled().getFilterForEventType().getPropertyType(partitionPropertyName);
                         FilterSpecLookupable lookupable = new FilterSpecLookupable(partitionPropertyName, getter, resultType);
-                        FilterValueSetParam filter = new FilterValueSetParamImpl(lookupable, FilterOperator.EQUAL, keyValue);
+
+                        Object propertyValue;
+                        if (keyValue instanceof MultiKeyUntyped) {
+                            propertyValue = ((MultiKeyUntyped) keyValue).get(propertyNumber);
+                        }
+                        else {
+                            propertyValue = keyValue;
+                        }
+
+                        FilterValueSetParam filter = new FilterValueSetParamImpl(lookupable, FilterOperator.EQUAL, propertyValue);
                         addendumFilters.add(filter);
+                        propertyNumber++;
                     }
 
                     // add to existing if any are present

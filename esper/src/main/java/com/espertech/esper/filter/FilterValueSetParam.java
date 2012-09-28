@@ -9,6 +9,7 @@
 package com.espertech.esper.filter;
 
 import java.io.Serializable;
+import java.io.StringWriter;
 
 /**
  * This interface represents one filter parameter in an {@link FilterValueSet} filter specification.
@@ -33,4 +34,6 @@ public interface FilterValueSetParam extends Serializable
      * @return filter parameter constant's value
      */
     public Object getFilterForValue();
+
+    public void appendTo(StringWriter writer);
 }

@@ -17,14 +17,10 @@ import com.espertech.esper.epl.core.SelectExprProcessor;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 import com.espertech.esper.epl.spec.SelectClauseStreamCompiledSpec;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
 
 public class EvalSelectStreamNoUnderlyingObjectArray extends EvalSelectStreamBase implements SelectExprProcessor {
-
-    private static final Log log = LogFactory.getLog(EvalSelectStreamNoUnderlyingObjectArray.class);
 
     public EvalSelectStreamNoUnderlyingObjectArray(SelectExprContext selectExprContext, EventType resultEventType, List<SelectClauseStreamCompiledSpec> namedStreams, boolean usingWildcard) {
         super(selectExprContext, resultEventType, namedStreams, usingWildcard);

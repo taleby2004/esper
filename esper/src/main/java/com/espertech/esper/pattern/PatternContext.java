@@ -24,6 +24,7 @@ public class PatternContext
     private final int streamNumber;
     private final StatementContext statementContext;
     private final MatchedEventMapMeta matchedEventMapMeta;
+    private final boolean isResilient;
 
     /**
      * Constructor.
@@ -32,11 +33,13 @@ public class PatternContext
      */
     public PatternContext(StatementContext statementContext,
                           int streamNumber,
-                          MatchedEventMapMeta matchedEventMapMeta)
+                          MatchedEventMapMeta matchedEventMapMeta,
+                          boolean isResilient)
     {
         this.streamNumber = streamNumber;
         this.statementContext = statementContext;
         this.matchedEventMapMeta = matchedEventMapMeta;
+        this.isResilient = isResilient;
     }
 
     /**
@@ -166,5 +169,9 @@ public class PatternContext
 
     public MatchedEventMapMeta getMatchedEventMapMeta() {
         return matchedEventMapMeta;
+    }
+
+    public boolean isResilient() {
+        return isResilient;
     }
 }

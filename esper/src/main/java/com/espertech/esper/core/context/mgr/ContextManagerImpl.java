@@ -14,7 +14,6 @@ import com.espertech.esper.core.context.util.ContextIteratorHandler;
 import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
-import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.event.MappedEventBean;
 import com.espertech.esper.filter.FilterFaultHandler;
 import com.espertech.esper.filter.FilterSpecCompiled;
@@ -61,7 +60,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         return contextDescriptor;
     }
 
-    public void addStatement(ContextControllerStatementBase statement) throws ExprValidationException {
+    public void addStatement(ContextControllerStatementBase statement, boolean isRecoveringResilient) throws ExprValidationException {
 
         // validation down the hierarchy
         ContextControllerStatementCtxCache caches = factory.validateStatement(statement);
@@ -77,7 +76,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         // activate statement in respect to existing context partitions
         else {
             for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> entry : agentInstances.entrySet()) {
-                AgentInstance agentInstance = startStatement(entry.getKey(), desc, rootContext, entry.getValue().getInitPartitionKey(), entry.getValue().getInitContextProperties());
+                AgentInstance agentInstance = startStatement(entry.getKey(), desc, rootContext, entry.getValue().getInitPartitionKey(), entry.getValue().getInitContextProperties(), isRecoveringResilient);
                 entry.getValue().getAgentInstances().add(agentInstance);
             }
         }
@@ -119,7 +118,9 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
             EventBean optionalTriggeringEvent,
             Map<String, Object> optionalTriggeringPattern, Object partitionKey,
             Map<String, Object> contextProperties,
-            ContextControllerState states) {
+            ContextControllerState states,
+            ContextInternalFilterAddendum filterAddendum,
+            boolean isRecoveringResilient) {
 
         // assign context id
         int assignedContextId;
@@ -134,7 +135,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         List<AgentInstance> newInstances = new ArrayList<AgentInstance>();
         for (Map.Entry<String, ContextControllerStatementDesc> statementEntry : statements.entrySet()) {
             ContextControllerStatementDesc statementDesc = statementEntry.getValue();
-            AgentInstance instance = startStatement(assignedContextId, statementDesc, originator, partitionKey, contextProperties);
+            AgentInstance instance = startStatement(assignedContextId, statementDesc, originator, partitionKey, contextProperties, isRecoveringResilient);
             newInstances.add(instance);
         }
 
@@ -202,7 +203,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
     }
 
     private void activate() {
-        rootContext.activate(null, null, null);
+        rootContext.activate(null, null, null, null);
     }
 
     private AgentInstance[] getAgentInstancesForStmt(String statementId, ContextPartitionSelector selector) {
@@ -284,7 +285,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         statements.remove(statementId);
     }
 
-    private AgentInstance startStatement(int contextId, ContextControllerStatementDesc statementDesc, ContextController originator, Object partitionKey, Map<String, Object> contextProperties) {
+    private AgentInstance startStatement(int contextId, ContextControllerStatementDesc statementDesc, ContextController originator, Object partitionKey, Map<String, Object> contextProperties, boolean isRecoveringResilient) {
 
         // build filters
         IdentityHashMap<FilterSpecCompiled, List<FilterValueSetParam>> filterAddendum = new IdentityHashMap<FilterSpecCompiled, List<FilterValueSetParam>>();
@@ -297,7 +298,7 @@ public class ContextManagerImpl implements ContextManager, ContextControllerLife
         MappedEventBean contextBean = (MappedEventBean) servicesContext.getEventAdapterService().adapterForTypedMap(contextProperties, contextDescriptor.getContextPropertyRegistry().getContextEventType());
 
         // activate
-        StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statementDesc.getStatement(), false, contextId, contextBean, proxy);
+        StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statementDesc.getStatement(), false, contextId, contextBean, proxy, isRecoveringResilient);
 
         // save only instance data
         return new AgentInstance(result.getStopCallback(), result.getAgentInstanceContext(), result.getFinalView());

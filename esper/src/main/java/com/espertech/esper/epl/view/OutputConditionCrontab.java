@@ -11,8 +11,10 @@ package com.espertech.esper.epl.view;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
+import com.espertech.esper.schedule.ScheduleComputeHelper;
 import com.espertech.esper.schedule.ScheduleHandleCallback;
 import com.espertech.esper.schedule.ScheduleSlot;
+import com.espertech.esper.schedule.SchedulingService;
 import com.espertech.esper.util.ExecutionPathDebugLog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,7 +90,9 @@ public final class OutputConditionCrontab extends OutputConditionBase implements
             }
         };
         EPStatementHandleCallback handle = new EPStatementHandleCallback(context.getEpStatementAgentInstanceHandle(), callback);
-        context.getStatementContext().getSchedulingService().add(factory.getScheduleSpec(), handle, scheduleSlot);
+        SchedulingService schedulingService = context.getStatementContext().getSchedulingService();
+        long nextScheduledTime = ScheduleComputeHelper.computeDeltaNextOccurance(factory.getScheduleSpec(), schedulingService.getTime());
+        schedulingService.add(nextScheduledTime, handle, scheduleSlot);
     }
 
     public void terminated() {

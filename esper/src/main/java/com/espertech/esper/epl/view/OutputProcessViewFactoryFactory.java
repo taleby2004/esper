@@ -12,6 +12,9 @@ import com.espertech.esper.client.EventType;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.InternalEventRouter;
 import com.espertech.esper.core.service.StatementContext;
+import com.espertech.esper.epl.core.StreamTypeServiceImpl;
+import com.espertech.esper.epl.expression.ExprNodeUtility;
+import com.espertech.esper.epl.expression.ExprTimePeriod;
 import com.espertech.esper.epl.expression.ExprValidationContext;
 import com.espertech.esper.epl.expression.ExprValidationException;
 import com.espertech.esper.epl.spec.*;
@@ -58,12 +61,14 @@ public class OutputProcessViewFactoryFactory
 
         if (outputLimitSpec != null) {
             ExprEvaluatorContextStatement evaluatorContextStmt = new ExprEvaluatorContextStatement(statementContext);
-            ExprValidationContext validationContext = new ExprValidationContext(null, statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), evaluatorContextStmt, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
+            ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(statementContext.getEngineURI(), false), statementContext.getMethodResolutionService(), null, statementContext.getTimeProvider(), statementContext.getVariableService(), evaluatorContextStmt, statementContext.getEventAdapterService(), statementContext.getStatementName(), statementContext.getStatementId(), statementContext.getAnnotations(), statementContext.getContextDescriptor());
             if (outputLimitSpec.getAfterTimePeriodExpr() != null) {
-                outputLimitSpec.getAfterTimePeriodExpr().validate(validationContext);
+                ExprTimePeriod timePeriodExpr = (ExprTimePeriod) ExprNodeUtility.getValidatedSubtree(outputLimitSpec.getAfterTimePeriodExpr(), validationContext);
+                outputLimitSpec.setAfterTimePeriodExpr(timePeriodExpr);
             }
             if (outputLimitSpec.getTimePeriodExpr() != null) {
-                outputLimitSpec.getTimePeriodExpr().validate(validationContext);
+                ExprTimePeriod timePeriodExpr = (ExprTimePeriod) ExprNodeUtility.getValidatedSubtree(outputLimitSpec.getTimePeriodExpr(), validationContext);
+                outputLimitSpec.setTimePeriodExpr(timePeriodExpr);
             }
         }
 

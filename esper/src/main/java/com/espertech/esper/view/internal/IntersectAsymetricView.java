@@ -37,7 +37,7 @@ public class IntersectAsymetricView extends ViewSupport implements LastPostObser
     private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final IntersectViewFactory intersectViewFactory;
     private final EventType eventType;
-    private final View[] views;
+    protected final View[] views;
     private final EventBean[][] oldEventsPerView;
     private final Set<EventBean> removalEvents = new HashSet<EventBean>();
     private final ArrayDeque<EventBean> newEvents = new ArrayDeque<EventBean>();
@@ -176,7 +176,9 @@ public class IntersectAsymetricView extends ViewSupport implements LastPostObser
                     oldEventsPerView[i] = null;  // clear entry
 
                     // add each event to the set of events removed
-                    removalEvents.addAll(Arrays.asList(viewOldData));
+                    for (EventBean oldEvent : viewOldData) {
+                        removalEvents.add(oldEvent);
+                    }
 
                     isDiscardObserverEvents = true;
                     try

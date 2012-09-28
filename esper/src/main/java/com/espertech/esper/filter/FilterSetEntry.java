@@ -14,6 +14,7 @@ package com.espertech.esper.filter;
 import com.espertech.esper.client.EventType;
 import com.espertech.esper.collection.Pair;
 
+import java.io.StringWriter;
 import java.util.Map;
 import java.util.List;
 
@@ -52,5 +53,9 @@ public class FilterSetEntry
     public FilterValueSet getFilterValueSet()
     {
         return filterValueSet;
+    }
+
+    public void appendTo(StringWriter writer) {
+        filterValueSet.appendTo(writer);
     }
 }

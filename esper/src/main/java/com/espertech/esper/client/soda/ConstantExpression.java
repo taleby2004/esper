@@ -11,6 +11,8 @@ package com.espertech.esper.client.soda;
 import com.espertech.esper.core.service.EPStatementObjectModelHelper;
 
 import java.io.StringWriter;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Constant value returns a fixed value for use in expressions.
@@ -72,7 +74,35 @@ public class ConstantExpression extends ExpressionBase
 
     public void toPrecedenceFreeEPL(StringWriter writer)
     {
-        EPStatementObjectModelHelper.renderEPL(writer, constant);
+        if (constant instanceof Iterable) {
+            Iterable iterable = (Iterable) constant;
+            Iterator<Object> iterator = iterable.iterator();
+            writer.append("[");
+            String delimiter = "";
+            for (;iterator.hasNext();) {
+                Object next = iterator.next();
+                writer.append(delimiter);
+                DataFlowOperatorParameter.renderValue(writer, next);
+                delimiter = ", ";
+            }
+            writer.append("]");
+        }
+        else if (constant instanceof Map) {
+            Map<String, Object> map = (Map<String, Object>) constant;
+            writer.append("{");
+            String delimiter = "";
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                writer.append(delimiter);
+                writer.append(entry.getKey());
+                writer.append(": ");
+                DataFlowOperatorParameter.renderValue(writer, entry.getValue());
+                delimiter = ", ";
+            }
+            writer.append("}");
+        }
+        else {
+            EPStatementObjectModelHelper.renderEPL(writer, constant);
+        }
     }
 
     /**

@@ -15,12 +15,14 @@ import com.espertech.esper.collection.ViewUpdatedCollection;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.epl.expression.ExprNode;
+import com.espertech.esper.util.CollectionUtil;
 import com.espertech.esper.view.CloneableView;
 import com.espertech.esper.view.DataWindowView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Iterator;
 
 /**
  * View for a moving window extending the specified amount of time into the past, driven entirely by external timing
@@ -40,7 +42,7 @@ import java.util.*;
  * ((Tn - T1) > t == true) then event X1 is pushed as oldData out of the window. It is assumed that
  * events are sent in in their natural order and the timestamp values are ascending.
  */
-public final class ExternallyTimedWindowView extends ViewSupport implements DataWindowView, CloneableView
+public class ExternallyTimedWindowView extends ViewSupport implements DataWindowView, CloneableView
 {
     private final ExternallyTimedWindowViewFactory externallyTimedWindowViewFactory;
     private final ExprNode timestampExpression;
@@ -48,9 +50,9 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
     private final long millisecondsBeforeExpiry;
 
     private final EventBean[] eventsPerStream = new EventBean[1];
-    private final TimeWindow timeWindow;
+    protected final TimeWindow timeWindow;
     private ViewUpdatedCollection viewUpdatedCollection;
-    private AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
 
     /**
      * Constructor.
@@ -148,10 +150,7 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
             }
             else
             {
-                Set<EventBean> oldDataPost = new HashSet<EventBean>();
-                oldDataPost.addAll(Arrays.asList(oldData));
-                oldDataPost.addAll(Arrays.asList(oldDataUpdate));
-                oldDataUpdate = oldDataPost.toArray(new EventBean[oldDataPost.size()]);
+                oldDataUpdate = CollectionUtil.addArrayWithSetSemantics(oldData, oldDataUpdate);
             }
         }
 
@@ -193,5 +192,9 @@ public final class ExternallyTimedWindowView extends ViewSupport implements Data
     public boolean isEmpty()
     {
         return timeWindow.isEmpty();
+    }
+
+    public ViewUpdatedCollection getViewUpdatedCollection() {
+        return viewUpdatedCollection;
     }
 }

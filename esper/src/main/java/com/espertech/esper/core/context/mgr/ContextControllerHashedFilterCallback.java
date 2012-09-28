@@ -20,8 +20,10 @@ import com.espertech.esper.epl.spec.ContextDetailHashItem;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.filter.FilterService;
 import com.espertech.esper.filter.FilterValueSet;
+import com.espertech.esper.filter.FilterValueSetParam;
 
 import java.util.Collection;
+import java.util.List;
 
 public class ContextControllerHashedFilterCallback implements FilterHandleCallback {
 
@@ -30,14 +32,15 @@ public class ContextControllerHashedFilterCallback implements FilterHandleCallba
     private final ContextControllerHashedInstanceCallback callback;
     private final EPStatementHandleCallback filterHandle;
 
-    public ContextControllerHashedFilterCallback(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContextCreateContext, ContextDetailHashItem hashItem, ContextControllerHashedInstanceCallback callback) {
+    public ContextControllerHashedFilterCallback(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContextCreateContext, ContextDetailHashItem hashItem, ContextControllerHashedInstanceCallback callback, ContextInternalFilterAddendum filterAddendum) {
         this.agentInstanceContextCreateContext = agentInstanceContextCreateContext;
         this.callback = callback;
         this.getter = hashItem.getLookupable().getGetter();
 
         filterHandle = new EPStatementHandleCallback(agentInstanceContextCreateContext.getEpStatementAgentInstanceHandle(), this);
 
-        FilterValueSet filterValueSet = hashItem.getFilterSpecCompiled().getValueSet(null, null, null);
+        List<FilterValueSetParam> addendum = filterAddendum != null ? filterAddendum.getFilterAddendum(hashItem.getFilterSpecCompiled()) : null;
+        FilterValueSet filterValueSet = hashItem.getFilterSpecCompiled().getValueSet(null, null, addendum);
         servicesContext.getFilterService().add(filterValueSet, filterHandle);
     }
 

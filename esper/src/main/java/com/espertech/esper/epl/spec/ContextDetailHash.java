@@ -11,6 +11,9 @@
 
 package com.espertech.esper.epl.spec;
 
+import com.espertech.esper.filter.FilterSpecCompiled;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class ContextDetailHash implements ContextDetail {
@@ -36,5 +39,13 @@ public class ContextDetailHash implements ContextDetail {
 
     public int getGranularity() {
         return granularity;
+    }
+
+    public List<FilterSpecCompiled> getFilterSpecsIfAny() {
+        List<FilterSpecCompiled> filters = new ArrayList<FilterSpecCompiled>(items.size());
+        for (ContextDetailHashItem item : items) {
+            filters.add(item.getFilterSpecCompiled());
+        }
+        return filters;
     }
 }

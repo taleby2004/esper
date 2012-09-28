@@ -14,49 +14,34 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * This class represents the state of a match-until node in the evaluation state tree.
  */
-public final class EvalMatchUntilStateNode extends EvalStateNode implements Evaluator
+public class EvalMatchUntilStateNode extends EvalStateNode implements Evaluator
 {
-    private final HashMap<EvalStateNode, Integer> nodes;
-    private final EvalMatchUntilNode evalMatchUntilNode;
-    private final MatchedEventMap beginState;
-    private final ArrayList<EventBean>[] matchedEventArrays;
+    protected final EvalMatchUntilNode evalMatchUntilNode;
+    protected MatchedEventMap beginState;
+    protected final ArrayList<EventBean>[] matchedEventArrays;
 
-    private EvalStateNode stateMatcher;
-    private EvalStateNode stateUntil;
-    private int numMatches;
-    private Integer lowerbounds;
-    private Integer upperbounds;
+    protected EvalStateNode stateMatcher;
+    protected EvalStateNode stateUntil;
+    protected int numMatches;
+    protected Integer lowerbounds;
+    protected Integer upperbounds;
 
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
-     * @param beginState contains the events that make up prior matches
      * @param evalMatchUntilNode is the factory node associated to the state
      */
     public EvalMatchUntilStateNode(Evaluator parentNode,
-                                         EvalMatchUntilNode evalMatchUntilNode,
-                                         MatchedEventMap beginState)
+                                         EvalMatchUntilNode evalMatchUntilNode)
     {
-        super(parentNode, null);
+        super(parentNode);
 
-        this.nodes = new HashMap<EvalStateNode, Integer>();
-        this.beginState = beginState;
         this.matchedEventArrays = (ArrayList<EventBean>[]) new ArrayList[evalMatchUntilNode.getFactoryNode().getTagsArrayed().length];
         this.evalMatchUntilNode = evalMatchUntilNode;
-
-        EvalNode childMatcher = evalMatchUntilNode.getChildNodeSub();
-        stateMatcher = childMatcher.newState(this, beginState, null);
-
-        if (evalMatchUntilNode.getChildNodeUntil() != null)
-        {
-            EvalNode childUntil = evalMatchUntilNode.getChildNodeUntil();
-            stateUntil = childUntil.newState(this, beginState, null);
-        }
     }
 
     @Override
@@ -64,32 +49,30 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
         return evalMatchUntilNode;
     }
 
-    public final void start()
+    public final void start(MatchedEventMap beginState)
     {
+        this.beginState = beginState;
+
+        EvalNode childMatcher = evalMatchUntilNode.getChildNodeSub();
+        stateMatcher = childMatcher.newState(this, null, 0L);
+
+        if (evalMatchUntilNode.getChildNodeUntil() != null)
+        {
+            EvalNode childUntil = evalMatchUntilNode.getChildNodeUntil();
+            stateUntil = childUntil.newState(this, null, 0L);
+        }
+
         // start until first, it controls the expression
         // if the same event fires both match and until, the match should not count
         if (stateUntil != null)
         {
-            stateUntil.start();
+            stateUntil.start(beginState);
         }
 
-        EventBean[] eventsPerStream = evalMatchUntilNode.getFactoryNode().getConvertor().convert(beginState);
-        if (evalMatchUntilNode.getFactoryNode().getLowerBounds() != null) {
-            lowerbounds = (Integer) evalMatchUntilNode.getFactoryNode().getLowerBounds().getExprEvaluator().evaluate(eventsPerStream, true, evalMatchUntilNode.getContext().getAgentInstanceContext());
-        }
-        if (evalMatchUntilNode.getFactoryNode().getUpperBounds() != null) {
-            upperbounds = (Integer) evalMatchUntilNode.getFactoryNode().getUpperBounds().getExprEvaluator().evaluate(eventsPerStream, true, evalMatchUntilNode.getContext().getAgentInstanceContext());
-        }
-        if (upperbounds != null && lowerbounds != null) {
-            if (upperbounds < lowerbounds) {
-                Integer lbounds =  lowerbounds;
-                lowerbounds = upperbounds;
-                upperbounds = lbounds;
-            }
-        }
+        initBounds();
 
         if (stateMatcher != null) {
-            stateMatcher.start();
+            stateMatcher.start(beginState);
         }
     }
 
@@ -155,8 +138,8 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
                     if (restart)
                     {
                         EvalNode childMatcher = evalMatchUntilNode.getChildNodeSub();
-                        stateMatcher = childMatcher.newState(this, beginState, null);
-                        stateMatcher.start();
+                        stateMatcher = childMatcher.newState(this, null, 0L);
+                        stateMatcher.start(beginState);
                     }
                 }
                 else
@@ -250,16 +233,18 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
 
     public final Object childrenAccept(EvalStateNodeVisitor visitor, Object data)
     {
-        for (EvalStateNode node : nodes.keySet())
-        {
-            node.accept(visitor, data);
+        if (stateMatcher != null) {
+            stateMatcher.accept(visitor, data);
+        }
+        if (stateUntil != null) {
+            stateUntil.accept(visitor, data);
         }
         return data;
     }
 
     public final String toString()
     {
-        return "EvalMatchUntilStateNode nodes=" + nodes.size();
+        return "EvalMatchUntilStateNode";
     }
 
     public boolean isNotOperator() {
@@ -280,6 +265,24 @@ public final class EvalMatchUntilStateNode extends EvalStateNode implements Eval
 
     private boolean isBounded() {
         return lowerbounds != null || upperbounds != null;
+    }
+
+    protected void initBounds()
+    {
+        EventBean[] eventsPerStream = evalMatchUntilNode.getFactoryNode().getConvertor().convert(beginState);
+        if (evalMatchUntilNode.getFactoryNode().getLowerBounds() != null) {
+            lowerbounds = (Integer) evalMatchUntilNode.getFactoryNode().getLowerBounds().getExprEvaluator().evaluate(eventsPerStream, true, evalMatchUntilNode.getContext().getAgentInstanceContext());
+        }
+        if (evalMatchUntilNode.getFactoryNode().getUpperBounds() != null) {
+            upperbounds = (Integer) evalMatchUntilNode.getFactoryNode().getUpperBounds().getExprEvaluator().evaluate(eventsPerStream, true, evalMatchUntilNode.getContext().getAgentInstanceContext());
+        }
+        if (upperbounds != null && lowerbounds != null) {
+            if (upperbounds < lowerbounds) {
+                Integer lbounds =  lowerbounds;
+                lowerbounds = upperbounds;
+                upperbounds = lbounds;
+            }
+        }
     }
 
     private static final Log log = LogFactory.getLog(EvalMatchUntilStateNode.class);

@@ -28,6 +28,8 @@ public class CreateSchemaClause implements Serializable
     private String startTimestampPropertyName;
     private String endTimestampPropertyName;
     private Set<String> copyFrom;
+    private String treeObjectName;
+
 
     /**
      * Ctor.
@@ -76,6 +78,24 @@ public class CreateSchemaClause implements Serializable
         this.columns = columns;
         this.inherits = inherits;
         this.typeDefinition = typeDefinition;
+    }
+
+    /**
+     * Returns id of expression assigned by tools.
+     * @return id
+     */
+    public String getTreeObjectName()
+    {
+        return treeObjectName;
+    }
+
+    /**
+     * Sets id of expression assigned by tools.
+     * @param treeObjectName to set
+     */
+    public void setTreeObjectName(String treeObjectName)
+    {
+        this.treeObjectName = treeObjectName;
     }
 
     /**

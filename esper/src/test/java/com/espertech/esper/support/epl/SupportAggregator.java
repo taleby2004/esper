@@ -11,7 +11,7 @@
 
 package com.espertech.esper.support.epl;
 
-import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
 public class SupportAggregator implements AggregationMethod

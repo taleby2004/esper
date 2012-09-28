@@ -37,11 +37,6 @@ public class TimerIntervalObserverFactory implements ObserverFactory, MetaDefIte
      */
     protected transient MatchedEventConvertor convertor;
 
-    /**
-     * Number of milliseconds after which the interval should fire.
-     */
-    protected long milliseconds;
-
     public void setObserverParameters(List<ExprNode> parameters, MatchedEventConvertor convertor) throws ObserverParameterException
     {
         String errorMessage = "Timer-interval observer requires a single numeric or time period parameter";
@@ -60,8 +55,7 @@ public class TimerIntervalObserverFactory implements ObserverFactory, MetaDefIte
         this.convertor = convertor;
     }
 
-    public EventObserver makeObserver(PatternAgentInstanceContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator, EvalStateNodeNumber stateNodeId, Object observerState)
-    {
+    protected long computeMilliseconds(MatchedEventMap beginState, PatternAgentInstanceContext context) {
         Object result = parameter.getExprEvaluator().evaluate(convertor.convert(beginState), true, context.getAgentInstanceContext());
         if (result == null)
         {
@@ -71,12 +65,16 @@ public class TimerIntervalObserverFactory implements ObserverFactory, MetaDefIte
         Number param = (Number) result;
         if (JavaClassHelper.isFloatingPointNumber(param))
         {
-            milliseconds = Math.round(1000d * param.doubleValue());
+            return Math.round(1000d * param.doubleValue());
         }
         else
         {
-            milliseconds = 1000 * param.longValue();
+            return 1000 * param.longValue();
         }
-        return new TimerIntervalObserver(milliseconds, beginState, observerEventEvaluator);
+    }
+
+    public EventObserver makeObserver(PatternAgentInstanceContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator, EvalStateNodeNumber stateNodeId, Object observerState)
+    {
+        return new TimerIntervalObserver(computeMilliseconds(beginState, context), beginState, observerEventEvaluator);
     }
 }

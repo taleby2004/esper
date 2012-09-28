@@ -22,7 +22,7 @@ import com.espertech.esper.core.context.util.ContextMergeView;
 import com.espertech.esper.core.context.util.StatementAgentInstanceUtil;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.view.ViewProcessingException;
@@ -88,7 +88,7 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
                     subselectPreviousStrategies.put(subselectPrevious, specificSubselectPreviousService);
                 }
 
-                subselectStrategyInstances.put(entry.getKey(), new SubSelectStrategyHolder(specificService, aggregationService, subselectPriorStrategies, subselectPreviousStrategies));
+                subselectStrategyInstances.put(entry.getKey(), new SubSelectStrategyHolder(specificService, aggregationService, subselectPriorStrategies, subselectPreviousStrategies, null, null));
             }
 
             // use statement-wide agent-instance-specific "prior"
@@ -111,7 +111,7 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
             ContextManagedStatementSelectDesc statement = new ContextManagedStatementSelectDesc(statementSpec, statementContext, mergeView, selectDesc.getStatementAgentInstanceFactorySelect(),
                     selectDesc.getResultSetProcessorPrototypeDesc().getAggregationServiceFactoryDesc().getExpressions(),
                     selectDesc.getSubSelectStrategyCollection());
-            services.getContextManagementService().addStatement(contextName, statement);
+            services.getContextManagementService().addStatement(contextName, statement, isRecoveringResilient);
             stopStatementMethod = new EPStatementStopMethod(){
                 public void stop() {
                     services.getContextManagementService().stoppedStatement(contextName, statementContext.getStatementName(), statementContext.getStatementId());
@@ -127,7 +127,7 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
         }
         // Without context - start here
         else {
-            final StatementAgentInstanceFactorySelectResult resultOfStart = selectDesc.getStatementAgentInstanceFactorySelect().newContext(defaultAgentInstanceContext);
+            final StatementAgentInstanceFactorySelectResult resultOfStart = selectDesc.getStatementAgentInstanceFactorySelect().newContext(defaultAgentInstanceContext, isRecoveringResilient);
             finalViewable = resultOfStart.getFinalView();
             stopStatementMethod = new EPStatementStopMethod() {
                 public void stop() {
@@ -141,6 +141,10 @@ public class EPStatementStartMethodSelect extends EPStatementStartMethodBase
             priorStrategyInstances = resultOfStart.getPriorNodeStrategies();
             previousStrategyInstances = resultOfStart.getPreviousNodeStrategies();
             preloadList = resultOfStart.getPreloadList();
+
+            if (statementContext.getExtensionServicesContext() != null) {
+                statementContext.getExtensionServicesContext().startContextPartition(resultOfStart, 0);
+            }
         }
 
         // assign strategies to expression nodes

@@ -56,7 +56,7 @@ public class IStreamSortRankRandomAccess implements RandomAccessByIndex
 
         this.iterator = null;
         this.cacheFilledTo = 0;
-        if (cache == null)
+        if (cache == null || cache.length < maxSize)
         {
             cache = new EventBean[maxSize];
         }

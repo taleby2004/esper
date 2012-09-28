@@ -20,6 +20,7 @@ import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.epl.SupportStaticMethodLib;
 import junit.framework.TestCase;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -216,7 +217,7 @@ public class TestInsertIntoTransposeStream extends TestCase
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), "result".split(","), new Object[]{"nestedValue"});
     }
 
-    public void testInvalidTransposeMapPropertyStream()
+    public void testInvalidTranspose()
     {
         Map<String, Object> metadata = makeMap(new Object[][] {
                 {"nested", makeMap(new Object[][] {{"nestedValue", String.class}}) }
@@ -235,6 +236,22 @@ public class TestInsertIntoTransposeStream extends TestCase
         {
             assertEquals("Error starting statement: Failed to resolve property 'inneritem.nestedValue' to a stream or nested property in a stream [select inneritem.nestedValue as result from MyStream]", ex.getMessage());
         }
+
+        // test invalid unwrap-properties
+        epService.getEPAdministrator().getConfiguration().addEventType(E1.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(E2.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(EnrichedE2.class);
+
+        try {
+            epService.getEPAdministrator().createEPL("@Resilient insert into EnrichedE2 " +
+                    "select e2.* as event, e1.otherId as playerId " +
+                    "from E1.win:length(20) as e1, E2.win:length(1) as e2 " +
+                    "where e1.id = e2.id ");
+        }
+        catch (Exception ex)
+        {
+            assertEquals("Error starting statement: The 'e2.* as event' syntax is not allowed when inserting into an existing bean event type, use the 'e2 as event' syntax instead [@Resilient insert into EnrichedE2 select e2.* as event, e1.otherId as playerId from E1.win:length(20) as e1, E2.win:length(1) as e2 where e1.id = e2.id ]", ex.getMessage());
+        }
     }
 
     private Map<String, Object> makeMap(Object[][] entries)
@@ -245,5 +262,59 @@ public class TestInsertIntoTransposeStream extends TestCase
             result.put(entry[0], entry[1]);
         }
         return result;
+    }
+
+    public static class E1 implements Serializable {
+        private final String id;
+        private final String otherId;
+
+        public E1(String id, String otherId) {
+            this.id = id;
+            this.otherId = otherId;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getOtherId() {
+            return otherId;
+        }
+    }
+
+    public static class E2 implements Serializable {
+        private final String id;
+        private final String value;
+
+        public E2(String id, String value) {
+            this.id = id;
+            this.value = value;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    public static class EnrichedE2 implements Serializable {
+        private final E2 event;
+        private final String otherId;
+
+        public EnrichedE2(E2 event, String playerId) {
+            this.event = event;
+            this.otherId = playerId;
+        }
+
+        public E2 getEvent() {
+            return event;
+        }
+
+        public String getOtherId() {
+            return otherId;
+        }
     }
 }

@@ -9,8 +9,8 @@
 package com.espertech.esper.epl.expression;
 
 import com.espertech.esper.client.hook.AggregationFunctionFactory;
-import com.espertech.esper.epl.agg.AggregationMethodFactory;
-import com.espertech.esper.epl.agg.AggregationValidationContext;
+import com.espertech.esper.epl.agg.service.AggregationMethodFactory;
+import com.espertech.esper.epl.agg.service.AggregationValidationContext;
 import com.espertech.esper.epl.core.MethodResolutionService;
 import com.espertech.esper.epl.core.StreamTypeService;
 

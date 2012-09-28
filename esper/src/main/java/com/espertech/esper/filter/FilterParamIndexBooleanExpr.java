@@ -12,7 +12,10 @@ import com.espertech.esper.client.EventBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -31,7 +34,7 @@ public final class FilterParamIndexBooleanExpr extends FilterParamIndexBase
     {
         super(FilterOperator.BOOLEAN_EXPRESSION);
 
-        evaluatorsMap = new HashMap<ExprNodeAdapterBase, EventEvaluator>();
+        evaluatorsMap = new LinkedHashMap<ExprNodeAdapterBase, EventEvaluator>();
         constantsMapRWLock = new ReentrantReadWriteLock();
     }
 
@@ -65,24 +68,18 @@ public final class FilterParamIndexBooleanExpr extends FilterParamIndexBase
 
     public final void matchEvent(EventBean theEvent, Collection<FilterHandle> matches)
     {
-        List<EventEvaluator> evaluators = new ArrayList<EventEvaluator>();
         constantsMapRWLock.readLock().lock();
         try {
-            for (ExprNodeAdapterBase exprNodeAdapter : evaluatorsMap.keySet())
+            for (Map.Entry<ExprNodeAdapterBase, EventEvaluator> evals : evaluatorsMap.entrySet())
             {
-                if (exprNodeAdapter.evaluate(theEvent))
+                if (evals.getKey().evaluate(theEvent))
                 {
-                    evaluators.add(evaluatorsMap.get(exprNodeAdapter));
+                    evals.getValue().matchEvent(theEvent, matches);
                 }
             }
         }
         finally {
             constantsMapRWLock.readLock().unlock();
-        }
-
-        for (EventEvaluator evaluator : evaluators)
-        {
-            evaluator.matchEvent(theEvent, matches);
         }
     }
 

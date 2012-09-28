@@ -19,6 +19,50 @@ import java.util.List;
 
 public class SODAAnalyzer
 {
+    public static List<CreateSchemaClause> analyzeModelCreateSchema(EPStatementObjectModel model) {
+        if (model.getCreateDataFlow() == null || model.getCreateDataFlow().getSchemas() == null) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<CreateSchemaClause>(model.getCreateDataFlow().getSchemas());
+    }
+
+    public static List<EPStatementObjectModel> analyzeModelSelectStatements(EPStatementObjectModel model) {
+        if (model.getCreateDataFlow() == null) {
+            return Collections.emptyList();
+        }
+        List<EPStatementObjectModel> models = new ArrayList<EPStatementObjectModel>();
+        if (model.getCreateDataFlow() != null) {
+            for (DataFlowOperator op : model.getCreateDataFlow().getOperators()) {
+                if (op.getParameters() == null || op.getParameters().isEmpty()) {
+                    continue;
+                }
+                for (DataFlowOperatorParameter param : op.getParameters()) {
+                    if (param.getParameterValue() instanceof EPStatementObjectModel) {
+                        models.add((EPStatementObjectModel) param.getParameterValue());
+                    }
+                }
+            }
+        }
+        return models;
+    }
+
+    public static List<AnnotationPart> analyzeModelAnnotations(EPStatementObjectModel model) {
+        List<AnnotationPart> annotations = new ArrayList<AnnotationPart>();
+        if (model.getAnnotations() != null) {
+            annotations.addAll(model.getAnnotations());
+        }
+
+        if (model.getAnnotations() != null) {
+            for (DataFlowOperator op : model.getCreateDataFlow().getOperators()) {
+                if (op.getAnnotations() != null) {
+                    annotations.addAll(op.getAnnotations());
+                }
+            }
+        }
+
+        return annotations;
+    }
+
     public static List<Expression> analyzeModelExpressions(EPStatementObjectModel model) {
         final List<Expression> expressions = new ArrayList<Expression>();
 
@@ -284,6 +328,19 @@ public class SODAAnalyzer
             for (ForClauseItem item : model.getForClause().getItems()) {
                 if (item.getExpressions() != null) {
                     expressions.addAll(item.getExpressions());
+                }
+            }
+        }
+
+        if (model.getCreateDataFlow() != null) {
+            for (DataFlowOperator op : model.getCreateDataFlow().getOperators()) {
+                if (op.getParameters() == null || op.getParameters().isEmpty()) {
+                    continue;
+                }
+                for (DataFlowOperatorParameter param : op.getParameters()) {
+                    if (param.getParameterValue() instanceof Expression) {
+                        expressions.add((Expression) param.getParameterValue());
+                    }
                 }
             }
         }

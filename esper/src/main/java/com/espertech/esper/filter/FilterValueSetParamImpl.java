@@ -8,6 +8,8 @@
  **************************************************************************************/
 package com.espertech.esper.filter;
 
+import java.io.StringWriter;
+
 /**
  * Filter parameter value defining the event property to filter, the filter operator, and the filter value.
  */
@@ -52,5 +54,11 @@ public class FilterValueSetParamImpl implements FilterValueSetParam
                 ", filterOperator=" + filterOperator +
                 ", filterValue=" + filterValue +
                 '}';
+    }
+
+    public void appendTo(StringWriter writer) {
+        lookupable.appendTo(writer);
+        writer.append(filterOperator.getTextualOp());
+        writer.append(filterValue == null ? "null" : filterValue.toString());
     }
 }

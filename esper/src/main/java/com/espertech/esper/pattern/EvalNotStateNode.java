@@ -18,27 +18,22 @@ import org.apache.commons.logging.LogFactory;
  * may turn true. It turns permenantly false when it receives an event from a subexpression and the subexpression
  * quitted. It indicates the false state via an evaluateFalse call on its parent evaluator.
  */
-public final class EvalNotStateNode extends EvalStateNode implements Evaluator
+public class EvalNotStateNode extends EvalStateNode implements Evaluator
 {
-    private final EvalNotNode evalNotNode;
-    private final MatchedEventMap beginState;
-    private EvalStateNode childNode;
+    protected final EvalNotNode evalNotNode;
+    protected EvalStateNode childNode;
 
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
-     * @param beginState contains the events that make up prior matches
      * @param evalNotNode is the factory node associated to the state
      */
     public EvalNotStateNode(Evaluator parentNode,
-                                  EvalNotNode evalNotNode,
-                                  MatchedEventMap beginState)
+                                  EvalNotNode evalNotNode)
     {
-        super(parentNode, null);
+        super(parentNode);
 
         this.evalNotNode = evalNotNode;
-        this.beginState = beginState.shallowCopy();
-        this.childNode = evalNotNode.getChildNode().newState(this, beginState, null);
     }
 
     @Override
@@ -46,14 +41,10 @@ public final class EvalNotStateNode extends EvalStateNode implements Evaluator
         return evalNotNode;
     }
 
-    public final void start()
+    public final void start(MatchedEventMap beginState)
     {
-        if (childNode == null)
-        {
-            throw new IllegalStateException("'Not' state node is inactive");
-        }
-
-        childNode.start();
+        childNode = evalNotNode.getChildNode().newState(this, null, 0L);
+        childNode.start(beginState);
 
         // The not node acts by inverting the truth
         // By default the child nodes are false. This not node acts inverts the truth and pretends the child is true,

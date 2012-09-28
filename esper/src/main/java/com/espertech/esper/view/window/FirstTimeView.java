@@ -27,16 +27,16 @@ import java.util.LinkedHashSet;
 /**
  *
  */
-public final class FirstTimeView extends ViewSupport implements CloneableView, StoppableView, DataWindowView, StopCallback {
+public class FirstTimeView extends ViewSupport implements CloneableView, StoppableView, DataWindowView, StopCallback {
     private final FirstTimeViewFactory timeFirstViewFactory;
-    private final AgentInstanceViewFactoryChainContext agentInstanceContext;
-    private final long msecIntervalSize;
-    private final ScheduleSlot scheduleSlot;
-    private EPStatementHandleCallback handle;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceContext;
+    protected final long msecIntervalSize;
+    protected final ScheduleSlot scheduleSlot;
+    protected EPStatementHandleCallback handle;
 
     // Current running parameters
-    private LinkedHashSet<EventBean> events = new LinkedHashSet<EventBean>();
-    private boolean isClosed;
+    protected LinkedHashSet<EventBean> events = new LinkedHashSet<EventBean>();
+    protected boolean isClosed;
 
     /**
      * Constructor.
@@ -92,6 +92,7 @@ public final class FirstTimeView extends ViewSupport implements CloneableView, S
                         oldDataToPost = new OneEventCollection();
                     }
                     oldDataToPost.add(anOldData);
+                    internalHandleRemoved(anOldData);
                 }
             }
         }
@@ -108,6 +109,7 @@ public final class FirstTimeView extends ViewSupport implements CloneableView, S
                     newDataToPost = new OneEventCollection();
                 }
                 newDataToPost.add(aNewData);
+                internalHandleAdded(aNewData);
             }
         }
 
@@ -118,6 +120,19 @@ public final class FirstTimeView extends ViewSupport implements CloneableView, S
                            (oldDataToPost != null) ? oldDataToPost.toArray() : null);
         }
     }
+
+    public void internalHandleAdded(EventBean newEvent) {
+        // no action
+    }
+
+    public void internalHandleRemoved(EventBean oldEvent) {
+        // no action
+    }
+
+    public void internalHandleClosed() {
+        // no action
+    }
+
 
     /**
      * Returns true if the window is empty, or false if not empty.
@@ -147,6 +162,7 @@ public final class FirstTimeView extends ViewSupport implements CloneableView, S
             public void scheduledTrigger(ExtensionServicesContext extensionServicesContext)
             {
                 FirstTimeView.this.isClosed = true;
+                internalHandleClosed();
             }
         };
         handle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), callback);
@@ -166,6 +182,14 @@ public final class FirstTimeView extends ViewSupport implements CloneableView, S
         if (handle != null) {
             agentInstanceContext.getStatementContext().getSchedulingService().remove(handle, scheduleSlot);
         }
+    }
+
+    public void setClosed(boolean closed) {
+        isClosed = closed;
+    }
+
+    public LinkedHashSet<EventBean> getEvents() {
+        return events;
     }
 
     private static final Log log = LogFactory.getLog(TimeBatchViewRStream.class);

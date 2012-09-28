@@ -99,8 +99,8 @@ public class CreateDataFlowClause implements Serializable
         writer.append("create dataflow ");
         writer.append(dataFlowName);
         if (schemas != null) {
-            formatter.beginDataFlowSchema(writer);
             for (CreateSchemaClause clause : schemas) {
+                formatter.beginDataFlowSchema(writer);
                 clause.toEPL(writer);
                 writer.append(",");
             }

@@ -33,18 +33,6 @@ public interface SchedulingService extends TimeProvider
             throws ScheduleServiceException;
 
     /**
-     * Add a callback for a time specified by the schedule specification passed in based on the current time.
-     * If the same callback (equals) was already added before, the method will not add a new
-     * callback or change the existing callback to a new time, but throw an exception.
-     * @param scheduleSpec holds the crontab-like information defining the next occurance
-     * @param handle to add
-     * @param slot allows ordering of concurrent callbacks
-     * @throws ScheduleServiceException thrown if the add operation did not complete
-     */
-    public void add(ScheduleSpec scheduleSpec, ScheduleHandle handle, ScheduleSlot slot)
-            throws ScheduleServiceException;
-
-    /**
      * Remove a handle.
      * If the handle to be removed was not found an exception is thrown.
      * @param handle to remove

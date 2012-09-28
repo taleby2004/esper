@@ -11,7 +11,7 @@
 
 package com.espertech.esper.epl.spec;
 
-import com.espertech.esper.epl.expression.ExprTimePeriod;
+import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.util.MetaDefItem;
 
 import java.io.Serializable;
@@ -21,8 +21,7 @@ import java.io.Serializable;
  */
 public class MatchRecognizeInterval implements MetaDefItem, Serializable
 {
-    private final ExprTimePeriod timePeriodExpr;
-    private final long msec;
+    private ExprTimePeriod timePeriodExpr;
     private static final long serialVersionUID = 9015877742992218244L;
 
     /**
@@ -32,8 +31,6 @@ public class MatchRecognizeInterval implements MetaDefItem, Serializable
     public MatchRecognizeInterval(ExprTimePeriod timePeriodExpr)
     {
         this.timePeriodExpr = timePeriodExpr;
-        double seconds = (Double) timePeriodExpr.evaluate(null, true, null);
-        msec = (long) (seconds * 1000);
     }
 
     /**
@@ -51,6 +48,11 @@ public class MatchRecognizeInterval implements MetaDefItem, Serializable
      */
     public long getMSec()
     {
-        return msec;
+        double seconds = (Double) timePeriodExpr.evaluate(null, true, null);
+        return (long) (seconds * 1000);
+    }
+
+    public void validate(ExprValidationContext validationContext) throws ExprValidationException {
+        timePeriodExpr = (ExprTimePeriod) ExprNodeUtility.getValidatedSubtree(timePeriodExpr, validationContext);
     }
 }

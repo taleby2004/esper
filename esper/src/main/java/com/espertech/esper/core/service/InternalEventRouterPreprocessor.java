@@ -158,20 +158,34 @@ public class InternalEventRouterPreprocessor
     private void apply(EventBean theEvent, EventBean[] eventsPerStream, InternalEventRouterEntry entry, ExprEvaluatorContext exprEvaluatorContext)
     {
         // evaluate
-        Object[] values = new Object[entry.getAssignments().length];
-        for (int i = 0; i < entry.getAssignments().length; i++)
-        {
-            Object value = entry.getAssignments()[i].evaluate(eventsPerStream, true, exprEvaluatorContext);
-
-            if ((value != null) && (entry.getWideners()[i] != null))
-            {
-                value = entry.getWideners()[i].widen(value);
+        Object[] values;
+        if (entry.isHasSubselect()) {
+            entry.getAgentInstanceLock().acquireWriteLock(null);
+            try {
+                values = obtainValues(eventsPerStream, entry, exprEvaluatorContext);
             }
-
-            values[i] = value;
+            finally {
+                entry.getAgentInstanceLock().releaseWriteLock(null);
+            }
+        }
+        else {
+            values = obtainValues(eventsPerStream, entry, exprEvaluatorContext);
         }
 
         // apply
         entry.getWriter().write(values, theEvent);
+    }
+
+    private Object[] obtainValues(EventBean[] eventsPerStream, InternalEventRouterEntry entry, ExprEvaluatorContext exprEvaluatorContext)
+    {
+        Object[] values = new Object[entry.getAssignments().length];
+        for (int i = 0; i < entry.getAssignments().length; i++) {
+            Object value = entry.getAssignments()[i].evaluate(eventsPerStream, true, exprEvaluatorContext);
+            if ((value != null) && (entry.getWideners()[i] != null)) {
+                value = entry.getWideners()[i].widen(value);
+            }
+            values[i] = value;
+        }
+        return values;
     }
 }

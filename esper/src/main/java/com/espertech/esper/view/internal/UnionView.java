@@ -13,6 +13,7 @@ package com.espertech.esper.view.internal;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.EventType;
+import com.espertech.esper.collection.OneEventCollection;
 import com.espertech.esper.collection.RefCountedSet;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.view.CloneableView;
@@ -39,9 +40,9 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
     protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final UnionViewFactory unionViewFactory;
     private final EventType eventType;
-    private final View[] views;
+    protected final View[] views;
     private final EventBean[][] oldEventsPerView;
-    private final RefCountedSet<EventBean> unionWindow;
+    protected final RefCountedSet<EventBean> unionWindow;
     private final List<EventBean> removalEvents = new ArrayList<EventBean>();
 
     private boolean isHasRemovestreamData;
@@ -90,12 +91,33 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
 
     public void update(EventBean[] newData, EventBean[] oldData)
     {
-        // The assumption is that either remove stream (named window deletes) or insert stream (new events) are indicated
-        if ((newData != null) && (oldData != null))
+        OneEventCollection oldDataColl = null;
+        if (oldData != null)
         {
-            log.error("Union view received both insert and remove stream");
+            isDiscardObserverEvents = true;    // disable reaction logic in observer
+
+            try
+            {
+                for (View view : views)
+                {
+                    view.update(null, oldData);
+                }
+            }
+            finally
+            {
+                isDiscardObserverEvents = false;
+            }
+
+            // remove from union
+            for (EventBean oldEvent : oldData)
+            {
+                unionWindow.removeAll(oldEvent);
+            }
+
+            oldDataColl = new OneEventCollection();
+            oldDataColl.add(oldData);
         }
-        
+
         // add new event to union
         if (newData != null)
         {
@@ -112,7 +134,7 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
             {
                 for (View view : views)
                 {
-                    view.update(newData, oldData);
+                    view.update(newData, null);
                 }
             }
             finally
@@ -155,38 +177,20 @@ public class UnionView extends ViewSupport implements LastPostObserver, Cloneabl
 
                 if (removedEvents != null)
                 {
-                    oldData = removedEvents.toArray(new EventBean[removedEvents.size()]);
+                    if (oldDataColl == null) {
+                        oldDataColl = new OneEventCollection();
+                    }
+                    for (EventBean oldItem : removedEvents) {
+                        oldDataColl.add(oldItem);
+                    }
                 }
             }
 
-            // indicate new and, possibly, old data
-            updateChildren(newData, oldData);
         }
 
-        // handle remove stream
-        else if (oldData != null)
-        {
-            isDiscardObserverEvents = true;    // disable reaction logic in observer
-
-            try
-            {
-                for (View view : views)
-                {
-                    view.update(null, oldData);
-                }
-            }
-            finally
-            {
-                isDiscardObserverEvents = false;
-            }
-
-            // remove from union
-            for (EventBean oldEvent : oldData)
-            {
-                unionWindow.removeAll(oldEvent);
-            }
-
-            updateChildren(null, oldData);
+        if (this.hasViews()) {
+            // indicate new and, possibly, old data
+            updateChildren(newData, oldDataColl != null ? oldDataColl.toArray() : null);
         }
     }
 

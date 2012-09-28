@@ -13,6 +13,7 @@ import com.espertech.esper.client.annotation.Audit;
 import com.espertech.esper.client.annotation.AuditEnum;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
+import com.espertech.esper.epl.enummethod.dot.ExprDeclaredOrLambdaNode;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.spec.ExpressionDeclItem;
 import com.espertech.esper.util.SerializableObjectCopier;
@@ -23,7 +24,7 @@ import java.util.List;
 /**
  * Expression instance as declared elsewhere.
  */
-public class ExprDeclaredNodeImpl extends ExprNodeBase implements ExprDeclaredNode
+public class ExprDeclaredNodeImpl extends ExprNodeBase implements ExprDeclaredNode, ExprDeclaredOrLambdaNode
 {
     private static final long serialVersionUID = 9140100131374697808L;
 
@@ -42,6 +43,10 @@ public class ExprDeclaredNodeImpl extends ExprNodeBase implements ExprDeclaredNo
         } catch (Exception e) {
             throw new RuntimeException("Internal error providing expression tree: " + e.getMessage(), e);
         }
+    }
+
+    public boolean validated() {
+        return exprEvaluator != null;
     }
 
     /**

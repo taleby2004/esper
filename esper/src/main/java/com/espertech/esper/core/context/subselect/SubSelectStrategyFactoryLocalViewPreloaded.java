@@ -11,13 +11,14 @@ package com.espertech.esper.core.context.subselect;
 import com.espertech.esper.client.EPException;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.Pair;
+import com.espertech.esper.core.context.factory.StatementAgentInstancePostLoad;
 import com.espertech.esper.core.context.util.AgentInstanceContext;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperPrevious;
 import com.espertech.esper.core.start.EPStatementStartMethodHelperPrior;
-import com.espertech.esper.epl.agg.AggregationService;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
+import com.espertech.esper.epl.agg.service.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryDesc;
 import com.espertech.esper.epl.core.ViewResourceDelegateVerified;
 import com.espertech.esper.epl.expression.*;
 import com.espertech.esper.epl.join.table.EventTable;
@@ -34,6 +35,7 @@ import com.espertech.esper.epl.subquery.SubselectAggregatorView;
 import com.espertech.esper.epl.subquery.SubselectBufferObserver;
 import com.espertech.esper.util.StopCallback;
 import com.espertech.esper.view.ViewFactory;
+import com.espertech.esper.view.ViewServiceCreateResult;
 import com.espertech.esper.view.Viewable;
 import com.espertech.esper.view.internal.BufferView;
 import com.espertech.esper.view.internal.PriorEventViewFactory;
@@ -68,9 +70,9 @@ public class SubSelectStrategyFactoryLocalViewPreloaded implements SubSelectStra
         this.viewResourceDelegate = viewResourceDelegate;
     }
 
-    public SubSelectStrategyRealization instantiate(EPServicesContext services,
+    public SubSelectStrategyRealization instantiate(final EPServicesContext services,
                                                  Viewable viewableRoot,
-                                                 AgentInstanceContext agentInstanceContext,
+                                                 final AgentInstanceContext agentInstanceContext,
                                                  List<StopCallback> stopCallbackList) {
 
         List<ViewFactory> viewFactoryChain = subSelectHolder.getViewFactoryChain().getViewFactoryChain();
@@ -86,10 +88,11 @@ public class SubSelectStrategyFactoryLocalViewPreloaded implements SubSelectStra
         // create factory chain context to hold callbacks specific to "prior" and "prev"
         AgentInstanceViewFactoryChainContext viewFactoryChainContext = AgentInstanceViewFactoryChainContext.create(viewFactoryChain, agentInstanceContext, viewResourceDelegate.getPerStream()[0]);
 
-        Viewable subselectView = services.getViewService().createViews(viewableRoot, viewFactoryChain, viewFactoryChainContext, false);
+        ViewServiceCreateResult createResult = services.getViewService().createViews(viewableRoot, viewFactoryChain, viewFactoryChainContext, false);
+        final Viewable subselectView = createResult.getFinalViewable();
 
         // create index/holder table
-        EventTable index = pair.getFirst().makeEventTable();
+        final EventTable index = pair.getFirst().makeEventTable();
         stopCallbackList.add(new SubqueryStopCallback(index));
 
         // create strategy
@@ -112,7 +115,7 @@ public class SubSelectStrategyFactoryLocalViewPreloaded implements SubSelectStra
 
                 preload(services, null, aggregatorView, agentInstanceContext);
 
-                return new SubSelectStrategyRealization(NULL_ROW_STRATEGY, null, aggregationService, priorNodeStrategies, previousNodeStrategies);
+                return new SubSelectStrategyRealization(NULL_ROW_STRATEGY, null, aggregationService, priorNodeStrategies, previousNodeStrategies, subselectView, null);
             }
             else {
                 subselectAggregationPreprocessor = new SubselectAggregationPreprocessor(aggregationService, filterExprEval);
@@ -121,12 +124,17 @@ public class SubSelectStrategyFactoryLocalViewPreloaded implements SubSelectStra
 
         // preload
         preload(services, index, subselectView, agentInstanceContext);
+        StatementAgentInstancePostLoad postLoad = new StatementAgentInstancePostLoad() {
+            public void executePostLoad() {
+                preload(services, index, subselectView, agentInstanceContext);
+            }
+        };
 
         BufferView bufferView = new BufferView(subSelectHolder.getStreamNumber());
         bufferView.setObserver(new SubselectBufferObserver(index));
         subselectView.addView(bufferView);
 
-        return new SubSelectStrategyRealization(strategy, subselectAggregationPreprocessor, aggregationService, priorNodeStrategies, previousNodeStrategies);
+        return new SubSelectStrategyRealization(strategy, subselectAggregationPreprocessor, aggregationService, priorNodeStrategies, previousNodeStrategies, subselectView, postLoad);
     }
 
     private void preload(EPServicesContext services, EventTable eventIndex, Viewable subselectView, AgentInstanceContext agentInstanceContext) {

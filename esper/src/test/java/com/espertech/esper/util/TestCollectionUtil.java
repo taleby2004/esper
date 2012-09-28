@@ -11,7 +11,9 @@
 
 package com.espertech.esper.util;
 
+import com.espertech.esper.client.EventBean;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.event.map.MapEventBean;
 import junit.framework.TestCase;
 
 import java.util.Set;
@@ -21,6 +23,50 @@ import java.util.Arrays;
 
 public class TestCollectionUtil extends TestCase
 {
+    public void testAddArraySetSemantics() {
+
+        EventBean[] e = new EventBean[10];
+        for (int i = 0; i < e.length; i++) {
+            e[i] = new MapEventBean(null);
+        }
+        assertFalse(e[0].equals(e[1]));
+
+        Object[][] testData = new Object[][] {
+                {new EventBean[] {}, new EventBean[] {}, "p2"},
+                {new EventBean[] {}, new EventBean[] {e[0], e[1]}, "p2"},
+                {new EventBean[] {e[0]}, new EventBean[] {}, "p1"},
+                {new EventBean[] {e[0]}, new EventBean[] {e[0]}, "p1"},
+                {new EventBean[] {e[0]}, new EventBean[] {e[1]}, new EventBean[] {e[0], e[1]}},
+                {new EventBean[] {e[0], e[1]}, new EventBean[] {e[1]}, "p1"},
+                {new EventBean[] {e[0], e[1]}, new EventBean[] {e[0]}, "p1"},
+                {new EventBean[] {e[0]}, new EventBean[] {e[0], e[1]}, "p2"},
+                {new EventBean[] {e[1]}, new EventBean[] {e[0], e[1]}, "p2"},
+                {new EventBean[] {e[2]}, new EventBean[] {e[0], e[1]}, new EventBean[] {e[0], e[1], e[2]}},
+                {new EventBean[] {e[2], e[0]}, new EventBean[] {e[0], e[1]}, new EventBean[] {e[0], e[1], e[2]}},
+                {new EventBean[] {e[2], e[0]}, new EventBean[] {e[0], e[1], e[2]}, new EventBean[] {e[0], e[1], e[2]}}
+        };
+
+        for (int i = 0; i < testData.length; i++) {
+            EventBean[] p1 = (EventBean[]) testData[i][0];
+            EventBean[] p2 = (EventBean[]) testData[i][1];
+            Object expectedObj = testData[i][2];
+
+            Object result = CollectionUtil.addArrayWithSetSemantics(p1, p2);
+
+            if (expectedObj.equals("p1")) {
+                assertTrue(result == p1);
+            }
+            else if (expectedObj.equals("p2")) {
+                assertTrue(result == p2);
+            }
+            else {
+                EventBean[] resultArray = (EventBean[]) result;
+                EventBean[] expectedArray = (EventBean[]) result;
+                EPAssertionUtil.assertEqualsAnyOrder(resultArray, expectedArray);
+            }
+        }
+    }
+
     public void testAddArray() {
         tryAddStringArr("b,a".split(","), CollectionUtil.addArrays(new String[] {"b"}, new String[] {"a"}));
         tryAddStringArr("a".split(","), CollectionUtil.addArrays(null, new String[] {"a"}));

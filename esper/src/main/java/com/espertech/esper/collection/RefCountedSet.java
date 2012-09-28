@@ -30,6 +30,11 @@ public class RefCountedSet<K>
         refSet = new HashMap<K, Integer>();
     }
 
+    public RefCountedSet(Map<K, Integer> refSet, int numValues) {
+        this.refSet = refSet;
+        this.numValues = numValues;
+    }
+
     /**
      * Clear out the collection.
      */
@@ -145,5 +150,17 @@ public class RefCountedSet<K>
     public int size()
     {
         return numValues;
+    }
+
+    public Map<K, Integer> getRefSet() {
+        return refSet;
+    }
+
+    public int getNumValues() {
+        return numValues;
+    }
+
+    public void setNumValues(int numValues) {
+        this.numValues = numValues;
     }
 }

@@ -22,6 +22,7 @@ import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.StatementContext;
 import com.espertech.esper.core.service.StatementResultServiceImpl;
 import com.espertech.esper.core.thread.ThreadingServiceImpl;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryServiceImpl;
 import com.espertech.esper.epl.core.EngineImportServiceImpl;
 import com.espertech.esper.epl.core.MethodResolutionServiceImpl;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
@@ -113,6 +114,6 @@ public class SupportStatementContextFactory
                 null,
                 null,
                 null,
-                null, new EventTypeIdGeneratorImpl(), null, null, null, null, false, null, null);
+                null, new EventTypeIdGeneratorImpl(), null, null, null, null, false, null, null, AggregationServiceFactoryServiceImpl.DEFAULT_FACTORY);
     }
 }

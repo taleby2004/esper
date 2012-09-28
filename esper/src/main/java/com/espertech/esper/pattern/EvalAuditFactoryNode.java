@@ -43,7 +43,7 @@ public class EvalAuditFactoryNode extends EvalNodeFactoryBase
 
     public final String toString()
     {
-        return ("EvalAuditStateNode children=" + this.getChildNodes().size());
+        return ("EvalAuditFactoryNode children=" + this.getChildNodes().size());
     }
 
     public void decreaseRefCount(EvalAuditStateNode current, PatternContext patternContext) {

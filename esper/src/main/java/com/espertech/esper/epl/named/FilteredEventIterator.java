@@ -87,7 +87,7 @@ public class FilteredEventIterator implements Iterator<EventBean>
             for (ExprEvaluator filter : filterList)
             {
                 Boolean result = (Boolean) filter.evaluate(eventPerStream, true, exprEvaluatorContext);
-                if ((result != null) && (!result))
+                if (result == null || !result)
                 {
                     pass = false;
                     break;

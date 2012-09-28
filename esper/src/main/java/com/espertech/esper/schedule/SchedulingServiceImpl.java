@@ -75,26 +75,6 @@ public final class SchedulingServiceImpl implements SchedulingServiceSPI
         addTrigger(slot, handle, triggerOnTime);
     }
 
-    public synchronized final void add(ScheduleSpec spec, ScheduleHandle handle, ScheduleSlot slot)
-    {
-        if (handleSetMap.containsKey(handle))
-        {
-            remove(handle, slot);
-        }
-
-        long nextScheduledTime = ScheduleComputeHelper.computeNextOccurance(spec, currentTime);
-
-        if (nextScheduledTime <= currentTime)
-        {
-            String message = "Schedule computation returned invalid time, operation not completed";
-            SchedulingServiceImpl.log.fatal(".add " + message + "  nextScheduledTime=" + nextScheduledTime + "  currentTime=" + currentTime);
-            assert false;
-            return;
-        }
-
-        addTrigger(slot, handle, nextScheduledTime);
-    }
-
     public synchronized final void remove(ScheduleHandle handle, ScheduleSlot slot)
     {
         SortedMap<ScheduleSlot, ScheduleHandle> handleSet = handleSetMap.get(handle);

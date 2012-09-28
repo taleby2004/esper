@@ -23,5 +23,6 @@ public interface PatternStarter
      * @return a callback to stop the expression again
      */
     public PatternStopCallback start(PatternMatchCallback matchCallback,
-                                             PatternContext context);
+                                     PatternContext context,
+                                     boolean isRecoveringResilient);
 }

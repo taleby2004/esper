@@ -11,13 +11,15 @@
 
 package com.espertech.esper.epl.agg;
 
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
+import com.espertech.esper.epl.agg.aggregator.AggregatorStddev;
 import junit.framework.TestCase;
 
 public class TestStddevAggregator extends TestCase
 {
     public void testAggregateFunction()
     {
-        AggregationMethod agg = new StddevAggregator();
+        AggregationMethod agg = new AggregatorStddev();
         assertEquals(Double.class, agg.getValueType());
 
         assertNull(agg.getValue());
@@ -43,7 +45,7 @@ public class TestStddevAggregator extends TestCase
     }
 
     public void testAllOne() {
-        AggregationMethod agg = new StddevAggregator();
+        AggregationMethod agg = new AggregatorStddev();
         agg.enter(1);
         agg.enter(1);
         agg.enter(1);

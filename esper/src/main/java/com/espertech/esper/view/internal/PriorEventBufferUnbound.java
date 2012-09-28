@@ -93,4 +93,8 @@ public class PriorEventBufferUnbound implements ViewUpdatedCollection, RandomAcc
         // no requirement for count support
         return 0;
     }
+
+    public RollingEventBuffer getNewEvents() {
+        return newEvents;
+    }
 }

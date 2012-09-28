@@ -29,6 +29,8 @@ public class InternalEventRouterEntry
     private final EventBeanWriter writer;
     private final TypeWidener[] wideners;
     private final InternalRoutePreprocessView outputView;
+    private final StatementAgentInstanceLock agentInstanceLock;
+    private final boolean hasSubselect;
 
     /**
      * Ctor.
@@ -39,8 +41,9 @@ public class InternalEventRouterEntry
      * @param writer writes values to an event
      * @param wideners for widening types to write
      * @param outputView for indicating output
+     * @param agentInstanceLock
      */
-    public InternalEventRouterEntry(int priority, boolean drop, ExprNode optionalWhereClause, ExprNode[] assignments, EventBeanWriter writer, TypeWidener[] wideners, InternalRoutePreprocessView outputView)
+    public InternalEventRouterEntry(int priority, boolean drop, ExprNode optionalWhereClause, ExprNode[] assignments, EventBeanWriter writer, TypeWidener[] wideners, InternalRoutePreprocessView outputView, StatementAgentInstanceLock agentInstanceLock, boolean hasSubselect)
     {
         this.priority = priority;
         this.isDrop = drop;
@@ -49,6 +52,8 @@ public class InternalEventRouterEntry
         this.writer = writer;
         this.wideners = wideners;
         this.outputView = outputView;
+        this.agentInstanceLock = agentInstanceLock;
+        this.hasSubselect = hasSubselect;
     }
 
     /**
@@ -111,5 +116,13 @@ public class InternalEventRouterEntry
      */
     public InternalRoutePreprocessView getOutputView() {
         return outputView;
+    }
+
+    public StatementAgentInstanceLock getAgentInstanceLock() {
+        return agentInstanceLock;
+    }
+
+    public boolean isHasSubselect() {
+        return hasSubselect;
     }
 }

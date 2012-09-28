@@ -316,7 +316,12 @@ public class BaseNestableEventUtil
         }
         if (result.getClass().isArray())
         {
-            return null;
+            int len = Array.getLength(result);
+            EventBean[] events = new EventBean[len];
+            for (int i = 0; i < events.length; i++) {
+                events[i] = eventAdapterService.adapterForTypedBean(Array.get(result, i), eventType);
+            }
+            return events;
         }
         return eventAdapterService.adapterForTypedBean(result, eventType);
     }

@@ -11,13 +11,14 @@
 
 package com.espertech.esper.epl.agg;
 
+import com.espertech.esper.epl.agg.aggregator.AggregatorAvedev;
 import junit.framework.TestCase;
 
 public class TestAvedevAggregator extends TestCase
 {
     public void testAggregateFunction()
     {
-        AvedevAggregator agg = new AvedevAggregator();
+        AggregatorAvedev agg = new AggregatorAvedev();
         assertEquals(Double.class, agg.getValueType());
 
         assertNull(agg.getValue());

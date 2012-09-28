@@ -16,7 +16,7 @@ import com.espertech.esper.pattern.MatchedEventMap;
 
 public interface ContextControllerCondition {
 
-    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset);
+    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset, boolean isRecoveringReslient);
     public void deactivate();
     public boolean isRunning();
     public Long getExpectedEndTime();

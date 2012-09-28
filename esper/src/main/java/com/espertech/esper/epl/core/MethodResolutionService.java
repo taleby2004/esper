@@ -10,10 +10,10 @@ package com.espertech.esper.epl.core;
 
 import com.espertech.esper.client.hook.AggregationFunctionFactory;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.epl.agg.AggregationAccess;
-import com.espertech.esper.epl.agg.AggregationMethod;
-import com.espertech.esper.epl.agg.AggregationMethodFactory;
-import com.espertech.esper.epl.agg.AggregationSupport;
+import com.espertech.esper.epl.agg.access.AggregationAccess;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
+import com.espertech.esper.epl.agg.service.AggregationMethodFactory;
+import com.espertech.esper.epl.agg.service.AggregationSupport;
 import com.espertech.esper.type.MinMaxTypeEnum;
 
 import java.lang.reflect.Constructor;

@@ -13,8 +13,8 @@ package com.espertech.esper.support.epl;
 
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.Pair;
-import com.espertech.esper.epl.agg.AggregationRowRemovedCallback;
-import com.espertech.esper.epl.agg.AggregationService;
+import com.espertech.esper.epl.agg.service.AggregationRowRemovedCallback;
+import com.espertech.esper.epl.agg.service.AggregationService;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;
@@ -70,4 +70,5 @@ public class SupportAggregationService implements AggregationService
     public void setRemovedCallback(AggregationRowRemovedCallback callback) {
         // not applicable
     }
+
 }

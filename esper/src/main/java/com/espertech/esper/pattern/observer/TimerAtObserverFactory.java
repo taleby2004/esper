@@ -82,20 +82,22 @@ public class TimerAtObserverFactory implements ObserverFactory, MetaDefItem, Ser
         }
     }
 
-    public EventObserver makeObserver(PatternAgentInstanceContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator,
-                                      EvalStateNodeNumber stateNodeId, Object observerState)
-    {
-        List<Object> observerParameters = PatternExpressionUtil.evaluate("Timer-at observer", beginState, parameters, convertor, context.getAgentInstanceContext());
-
-        try
-        {
-            spec = ScheduleSpecUtil.computeValues(observerParameters.toArray());
+    protected ScheduleSpec computeSpec(MatchedEventMap beginState, PatternAgentInstanceContext context) {
+        if (spec != null) {
+            return spec;
         }
-        catch (ScheduleParameterException e)
-        {
+        List<Object> observerParameters = PatternExpressionUtil.evaluate("Timer-at observer", beginState, parameters, convertor, context.getAgentInstanceContext());
+        try {
+            return ScheduleSpecUtil.computeValues(observerParameters.toArray());
+        }
+        catch (ScheduleParameterException e) {
             throw new EPException("Error computing crontab schedule specification: " + e.getMessage(), e);
         }
-        return new TimerAtObserver(spec, beginState, observerEventEvaluator);
+    }
+
+    public EventObserver makeObserver(PatternAgentInstanceContext context, MatchedEventMap beginState, ObserverEventEvaluator observerEventEvaluator,
+                                      EvalStateNodeNumber stateNodeId, Object observerState) {
+        return new TimerAtObserver(computeSpec(beginState, context), beginState, observerEventEvaluator);
     }
 
     private static final Log log = LogFactory.getLog(TimerAtObserverFactory.class);

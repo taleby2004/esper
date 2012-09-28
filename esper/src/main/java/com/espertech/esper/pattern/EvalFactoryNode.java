@@ -18,18 +18,6 @@ import java.util.List;
 public interface EvalFactoryNode
 {
     /**
-     * Returns the evaluation node's relative node number in the evaluation node tree.
-     * @return node number
-     */
-    public EvalNodeNumber getNodeNumber();
-
-    /**
-     * Sets the evaluation node's relative node number.
-     * @param nodeNumber is the node number to set
-     */
-    public void setNodeNumber(EvalNodeNumber nodeNumber);
-
-    /**
      * Adds a child node.
      * @param childNode is the child evaluation tree node to add
      */
@@ -46,4 +34,7 @@ public interface EvalFactoryNode
     public EvalNode makeEvalNode(PatternAgentInstanceContext agentInstanceContext);
 
     public boolean isFilterChildNonQuitting();
+
+    public short getFactoryNodeId();
+    public void setFactoryNodeId(short factoryNodeId);
 }

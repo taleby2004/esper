@@ -13,6 +13,8 @@ import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.epl.spec.StatementSpecRaw;
 
+import java.util.Map;
+
 /**
  * Handles statement management.
  */
@@ -120,4 +122,6 @@ public interface StatementLifecycleSvc
     public void destroy();
 
     public String getStatementNameById(String key);
+
+    public Map<String, EPStatement> getStmtNameToStmt();
 }

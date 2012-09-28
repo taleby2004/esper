@@ -19,7 +19,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -36,17 +35,17 @@ import java.util.Iterator;
  * <p>
  * If there are no events in the current and prior batch, the view will not invoke the update method of child views.
  */
-public final class LengthBatchView extends ViewSupport implements CloneableView
+public class LengthBatchView extends ViewSupport implements CloneableView
 {
     // View parameters
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final LengthBatchViewFactory lengthBatchViewFactory;
     private final int size;
     private final ViewUpdatedCollection viewUpdatedCollection;
 
     // Current running windows
-    private ArrayDeque<EventBean> lastBatch = null;
-    private ArrayDeque<EventBean> currentBatch = new ArrayDeque<EventBean>();
+    protected ArrayDeque<EventBean> lastBatch = null;
+    protected ArrayDeque<EventBean> currentBatch = new ArrayDeque<EventBean>();
 
     /**
      * Constructor.
@@ -89,7 +88,7 @@ public final class LengthBatchView extends ViewSupport implements CloneableView
         return parent.getEventType();
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         // we don't care about removed data from a prior view
         if ((newData == null) || (newData.length == 0))
@@ -98,7 +97,9 @@ public final class LengthBatchView extends ViewSupport implements CloneableView
         }
 
         // add data points to the current batch
-        currentBatch.addAll(Arrays.asList(newData));
+        for (EventBean newEvent : newData) {
+            currentBatch.add(newEvent);
+        }
 
         // check if we reached the minimum size
         if (currentBatch.size() < size)
@@ -113,7 +114,7 @@ public final class LengthBatchView extends ViewSupport implements CloneableView
     /**
      * This method updates child views and clears the batch of events.
      */
-    protected final void sendBatch()
+    protected void sendBatch()
     {
         // If there are child views and the batch was filled, fireStatementStopped update method
         if (this.hasViews())

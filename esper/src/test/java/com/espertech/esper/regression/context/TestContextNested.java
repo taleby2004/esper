@@ -14,6 +14,7 @@ package com.espertech.esper.regression.context;
 import com.espertech.esper.client.*;
 import com.espertech.esper.client.context.*;
 import com.espertech.esper.client.scopetest.EPAssertionUtil;
+import com.espertech.esper.client.scopetest.SupportSubscriber;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
 import com.espertech.esper.client.soda.EPStatementObjectModel;
 import com.espertech.esper.client.time.CurrentTimeEvent;
@@ -21,7 +22,11 @@ import com.espertech.esper.client.util.DateTime;
 import com.espertech.esper.core.service.EPServiceProviderSPI;
 import com.espertech.esper.core.service.EPStatementSPI;
 import com.espertech.esper.filter.FilterServiceSPI;
-import com.espertech.esper.support.bean.*;
+import com.espertech.esper.filter.FilterSet;
+import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBean_S0;
+import com.espertech.esper.support.bean.SupportBean_S1;
+import com.espertech.esper.support.bean.SupportBean_S2;
 import com.espertech.esper.support.client.SupportConfigFactory;
 import com.espertech.esper.support.util.AgentInstanceAssertionUtil;
 import junit.framework.TestCase;
@@ -180,7 +185,126 @@ public class TestContextNested extends TestCase {
         EPAssertionUtil.assertPropsPerRow(stmtUser.safeIterator(), fields, expected);
     }
 
-    public void testPartitionedWithFilterOverInitiated() {
+    public void testPartitionedWithFilter() {
+
+        runAssertionPartitionedNonOverlap();
+
+        runAssertionPartitionOverlap();
+    }
+
+    public void testNestingFilterCorrectness() {
+        String eplContext;
+        String eplSelect = "context TheContext select count(*) from SupportBean";
+        EPStatementSPI spiCtx;
+        EPStatementSPI spiStmt;
+        SupportBean bean;
+
+        // category over partition
+        eplContext = "create context TheContext " +
+                "context CtxCategory as group intPrimitive < 0 as negative, group intPrimitive > 0 as positive from SupportBean, " +
+                "context CtxPartition as partition by theString from SupportBean";
+        spiCtx = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplContext);
+        spiStmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplSelect);
+
+        assertFilters("SupportBean(intPrimitive<0),SupportBean(intPrimitive>0)", spiCtx);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", -1));
+        assertFilters("SupportBean(theString=E1,intPrimitive<0)", spiStmt);
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // category over partition over category
+        eplContext = "create context TheContext " +
+                "context CtxCategoryOne as group intPrimitive < 0 as negative, group intPrimitive > 0 as positive from SupportBean, " +
+                "context CtxPartition as partition by theString from SupportBean," +
+                "context CtxCategoryTwo as group longPrimitive < 0 as negative, group longPrimitive > 0 as positive from SupportBean";
+        spiCtx = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplContext);
+        spiStmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplSelect);
+
+        assertFilters("SupportBean(intPrimitive<0),SupportBean(intPrimitive>0)", spiCtx);
+        bean = new SupportBean("E1", -1);
+        bean.setLongPrimitive(1);
+        epService.getEPRuntime().sendEvent(bean);
+        assertFilters("SupportBean(longPrimitive<0,theString=E1,intPrimitive<0),SupportBean(longPrimitive>0,theString=E1,intPrimitive<0)", spiStmt);
+        assertFilters("SupportBean(intPrimitive<0),SupportBean(intPrimitive>0)", spiCtx);
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // partition over partition over partition
+        eplContext = "create context TheContext " +
+                "context CtxOne as partition by theString from SupportBean, " +
+                "context CtxTwo as partition by intPrimitive from SupportBean," +
+                "context CtxThree as partition by longPrimitive from SupportBean";
+        spiCtx = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplContext);
+        spiStmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplSelect);
+
+        assertFilters("SupportBean()", spiCtx);
+        bean = new SupportBean("E1", 2);
+        bean.setLongPrimitive(3);
+        epService.getEPRuntime().sendEvent(bean);
+        assertFilters("SupportBean(longPrimitive=3,intPrimitive=2,theString=E1)", spiStmt);
+        assertFilters("SupportBean(),SupportBean(theString=E1),SupportBean(theString=E1,intPrimitive=2)", spiCtx);
+        epService.getEPAdministrator().destroyAllStatements();
+
+        // category over hash
+        eplContext = "create context TheContext " +
+                "context CtxCategoryOne as group intPrimitive < 0 as negative, group intPrimitive > 0 as positive from SupportBean, " +
+                "context CtxTwo as coalesce by consistent_hash_crc32(theString) from SupportBean granularity 100";
+        spiCtx = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplContext);
+        spiStmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplSelect);
+
+        assertFilters("SupportBean(intPrimitive<0),SupportBean(intPrimitive>0)", spiCtx);
+        bean = new SupportBean("E1", 2);
+        bean.setLongPrimitive(3);
+        epService.getEPRuntime().sendEvent(bean);
+        assertFilters("SupportBean(consistent_hash_crc32(unresolvedPropertyName=theString streamOrPropertyName=null resolvedPropertyName=theString)=33,intPrimitive>0)", spiStmt);
+        assertFilters("SupportBean(intPrimitive<0),SupportBean(intPrimitive>0)", spiCtx);
+        epService.getEPAdministrator().destroyAllStatements();
+
+        eplContext = "create context TheContext " +
+                "context CtxOne as partition by theString from SupportBean, " +
+                "context CtxTwo as start pattern [SupportBean_S0] end pattern[SupportBean_S1]";
+        spiCtx = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplContext);
+        spiStmt = (EPStatementSPI) epService.getEPAdministrator().createEPL(eplSelect);
+
+        assertFilters("SupportBean()", spiCtx);
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 2));
+        assertFilters("", spiStmt);
+        assertFilters("SupportBean(),SupportBean_S0()", spiCtx);
+        epService.getEPAdministrator().destroyAllStatements();
+    }
+
+    private void assertFilters(String expected, EPStatementSPI spiStmt) {
+        FilterServiceSPI filterSPI = (FilterServiceSPI) spi.getFilterService();
+        FilterSet set = filterSPI.take(Collections.singleton(spiStmt.getStatementId()));
+        assertEquals(expected, set.toString());
+        filterSPI.apply(set);
+    }
+
+    private void runAssertionPartitionOverlap() {
+        epService.getEPAdministrator().getConfiguration().addEventType(TestEvent.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(EndEvent.class);
+        epService.getEPAdministrator().createEPL("@Audit('pattern-instances') create context TheContext"
+                + " context CtxSession partition by id from TestEvent, "
+                + " context CtxStartEnd start TestEvent as te end EndEvent(id=te.id)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL(
+                "context TheContext select firstEvent from TestEvent.std:firstevent() as firstEvent"
+                        + " inner join TestEvent.std:lastevent() as lastEvent");
+        SupportSubscriber supportSubscriber = new SupportSubscriber();
+        stmt.setSubscriber(supportSubscriber);
+
+        for (int i = 0; i < 2; i++) {
+            epService.getEPRuntime().sendEvent(new TestEvent(1, 5));
+            epService.getEPRuntime().sendEvent(new TestEvent(2, 10));
+            epService.getEPRuntime().sendEvent(new EndEvent(1));
+
+            supportSubscriber.reset();
+            epService.getEPRuntime().sendEvent(new TestEvent(2, 15));
+            assertEquals(10, (((TestEvent) supportSubscriber.assertOneGetNewAndReset()) .getTime()));
+
+            epService.getEPRuntime().sendEvent(new EndEvent(1));
+            epService.getEPRuntime().sendEvent(new EndEvent(2));
+        }
+    }
+
+    private void runAssertionPartitionedNonOverlap() {
         sendTimeEvent("2002-05-1T8:00:00.000");
 
         String eplCtx = "create context NestedContext as " +
@@ -603,8 +727,11 @@ public class TestContextNested extends TestCase {
     public void testCategoryOverTemporalOverlapping() {
         sendTimeEvent("2002-05-1T8:00:00.000");
 
-        EPStatement stmtCtx = epService.getEPAdministrator().createEPL("create context NestedContext " +
-                "context ByCat group intPrimitive < 0 and intPrimitive != -9999 as g1, group intPrimitive = 0 as g2, group intPrimitive > 0 as g3 from SupportBean, " +
+        epService.getEPAdministrator().createEPL("create context NestedContext " +
+                "context ByCat " +
+                "  group intPrimitive < 0 and intPrimitive != -9999 as g1, " +
+                "  group intPrimitive = 0 as g2, " +
+                "  group intPrimitive > 0 as g3 from SupportBean, " +
                 "context InitGrd initiated by SupportBean(theString like 'init%') as sb terminated after 10 seconds");
         assertEquals(0, spi.getSchedulingService().getScheduleHandleCount());
 
@@ -619,19 +746,28 @@ public class TestContextNested extends TestCase {
         assertFalse(listener.isInvoked());
 
         epService.getEPRuntime().sendEvent(new SupportBean("init_1", -9999));
+        epService.getEPRuntime().sendEvent(new SupportBean("X100", 0));
+        epService.getEPRuntime().sendEvent(new SupportBean("X101", 10));
+        epService.getEPRuntime().sendEvent(new SupportBean("X102", -10));
         assertFalse(listener.isInvoked());
 
+        epService.getEPRuntime().sendEvent(new SupportBean("init_2", 0));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"g2", "init_2", 1L});
+
         epService.getEPRuntime().sendEvent(new SupportBean("E3", 0));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"g2", "init_1", 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"g2", "init_2", 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E4", 10));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"g3", "init_1", 1L});
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("init_3", -2));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"g1", "init_3", 1L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E5", -1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"g1", "init_1", 1L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"g1", "init_3", 2L});
 
         epService.getEPRuntime().sendEvent(new SupportBean("E6", -1));
-        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"g1", "init_1", 2L});
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"g1", "init_3", 3L});
 
         sendTimeEvent("2002-05-1T8:11:00.000"); // terminates all
 
@@ -1017,6 +1153,36 @@ public class TestContextNested extends TestCase {
 
         public List<ContextPartitionSelector[]> getSelectors() {
             return selectors;
+        }
+    }
+
+    public static class TestEvent {
+        private int time;
+        private int id;
+
+        public TestEvent(int id, int time) {
+            this.id = id;
+            this.time = time;
+        }
+
+        public int getTime() {
+            return time;
+        }
+
+        public int getId() {
+            return id;
+        }
+    }
+
+    public static class EndEvent {
+        private int id;
+
+        public EndEvent(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
         }
     }
 }

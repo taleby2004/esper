@@ -99,7 +99,7 @@ public final class FilterSpecParamExprNode extends FilterSpecParam
         return taggedEventTypes;
     }
 
-    public final Object getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext)
+    public final ExprNodeAdapterBase getFilterValue(MatchedEventMap matchedEvents, ExprEvaluatorContext exprEvaluatorContext)
     {
         EventBean[] events = null;
 

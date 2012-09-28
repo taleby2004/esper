@@ -15,8 +15,11 @@ import com.espertech.esper.collection.Pair;
 import com.espertech.esper.core.context.util.ContextPropertyRegistry;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.epl.agg.AggregationSupport;
+import com.espertech.esper.epl.agg.service.AggregationSupport;
 import com.espertech.esper.epl.core.*;
+import com.espertech.esper.epl.declexpr.ExprDeclaredNode;
+import com.espertech.esper.epl.declexpr.ExprDeclaredNodeImpl;
+import com.espertech.esper.epl.enummethod.dot.ExprDeclaredOrLambdaNode;
 import com.espertech.esper.epl.enummethod.dot.ExprLambdaGoesNode;
 import com.espertech.esper.event.EventBeanUtility;
 import com.espertech.esper.schedule.ScheduleParameterException;
@@ -82,8 +85,11 @@ public class ExprNodeUtility {
         for (int i = 0; i < exprNode.getChildNodes().size(); i++)
         {
             ExprNode childNode = exprNode.getChildNodes().get(i);
-            if (childNode instanceof ExprLambdaGoesNode) {
-                continue;
+            if (childNode instanceof ExprDeclaredOrLambdaNode) {
+                ExprDeclaredOrLambdaNode node = (ExprDeclaredOrLambdaNode) childNode;
+                if (node.validated()) {
+                    continue;
+                }
             }
             ExprNode childNodeValidated = getValidatedSubtreeInternal(childNode, validationContext, false);
             exprNode.getChildNodes().set(i, childNodeValidated);

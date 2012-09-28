@@ -28,7 +28,7 @@ public final class EvalEveryStateSpawnEvaluator implements Evaluator
 
     private final String statementName;
 
-    EvalEveryStateSpawnEvaluator(String statementName) {
+    public EvalEveryStateSpawnEvaluator(String statementName) {
         this.statementName = statementName;
     }
 

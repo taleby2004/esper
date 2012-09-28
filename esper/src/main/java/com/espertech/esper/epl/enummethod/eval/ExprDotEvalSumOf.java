@@ -12,7 +12,7 @@
 package com.espertech.esper.epl.enummethod.eval;
 
 import com.espertech.esper.client.EventType;
-import com.espertech.esper.epl.agg.*;
+import com.espertech.esper.epl.agg.aggregator.*;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalEnumMethodBase;
 import com.espertech.esper.epl.enummethod.dot.ExprDotEvalParam;
@@ -49,19 +49,19 @@ public class ExprDotEvalSumOf extends ExprDotEvalEnumMethodBase {
     private static AggregationMethod getAggregator(Class evalType) {
         AggregationMethod aggMethod;
         if (JavaClassHelper.isFloatingPointClass(evalType)) {
-            aggMethod = new DoubleSumAggregator();
+            aggMethod = new AggregatorSumDouble();
         }
         else if (evalType == BigDecimal.class) {
-            aggMethod = new BigDecimalSumAggregator();
+            aggMethod = new AggregatorSumBigDecimal();
         }
         else if (evalType == BigInteger.class) {
-            aggMethod = new BigIntegerSumAggregator();
+            aggMethod = new AggregatorSumBigInteger();
         }
         else if (JavaClassHelper.getBoxedType(evalType) == Long.class) {
-            aggMethod = new LongSumAggregator();
+            aggMethod = new AggregatorSumLong();
         }
         else {
-            aggMethod = new IntegerSumAggregator();
+            aggMethod = new AggregatorSumInteger();
         }
         return aggMethod;
     }

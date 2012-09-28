@@ -8,7 +8,10 @@
  **************************************************************************************/
 package com.espertech.esper.epl.expression;
 
-import com.espertech.esper.epl.agg.*;
+import com.espertech.esper.epl.agg.access.AggregationAccessor;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
+import com.espertech.esper.epl.agg.service.AggregationMethodFactory;
+import com.espertech.esper.epl.agg.service.AggregationSpec;
 import com.espertech.esper.epl.core.MethodResolutionService;
 
 public class ExprAvgNodeFactory implements AggregationMethodFactory

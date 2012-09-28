@@ -25,6 +25,10 @@ public class SortedDoubleVector
         values = new ArrayList<Double>();
     }
 
+    public SortedDoubleVector(ArrayList<Double> values) {
+        this.values = values;
+    }
+
     /**
      * Clear out the collection.
      */
@@ -104,7 +108,7 @@ public class SortedDoubleVector
      * Returns underlying ArrayList, for testing purposes only.
      * @return sorted double values list
      */
-    protected ArrayList<Double> getValues()
+    public ArrayList<Double> getValues()
     {
         return values;
     }

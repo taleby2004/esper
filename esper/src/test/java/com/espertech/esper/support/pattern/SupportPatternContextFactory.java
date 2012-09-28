@@ -32,13 +32,13 @@ public class SupportPatternContextFactory
         else {
             stmtContext = SupportStatementContextFactory.makeContext(scheduleService);
         }
-        PatternContext context = new PatternContext(stmtContext, 1, new MatchedEventMapMeta(new String[0], false));
+        PatternContext context = new PatternContext(stmtContext, 1, new MatchedEventMapMeta(new String[0], false), false);
         return new PatternAgentInstanceContext(context, SupportStatementContextFactory.makeAgentInstanceContext(), false);
     }
 
     public static PatternContext makeContext()
     {
         StatementContext stmtContext = SupportStatementContextFactory.makeContext();
-        return new PatternContext(stmtContext, 1, new MatchedEventMapMeta(new String[0], false));
+        return new PatternContext(stmtContext, 1, new MatchedEventMapMeta(new String[0], false), false);
     }
 }

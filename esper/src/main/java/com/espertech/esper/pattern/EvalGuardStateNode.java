@@ -18,30 +18,22 @@ import org.apache.commons.logging.LogFactory;
  * The within operator applies to a subexpression and is thus expected to only
  * have one child node.
  */
-public final class EvalGuardStateNode extends EvalStateNode implements Evaluator, Quitable
+public class EvalGuardStateNode extends EvalStateNode implements Evaluator, Quitable
 {
-    private EvalGuardNode evalGuardNode;
-    private EvalStateNode activeChildNode;
-    private final Guard guard;
+    protected EvalGuardNode evalGuardNode;
+    protected EvalStateNode activeChildNode;
+    protected Guard guard;
 
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
-     * @param beginState contains the events that make up prior matches
      * @param evalGuardNode is the factory node associated to the state
-     * @param stateObjectId is the state object's id value
      */
     public EvalGuardStateNode(Evaluator parentNode,
-                               EvalGuardNode evalGuardNode,
-                                 MatchedEventMap beginState,
-                                 EvalStateNodeNumber stateObjectId)
+                               EvalGuardNode evalGuardNode)
     {
-        super(parentNode, null);
+        super(parentNode);
         this.evalGuardNode = evalGuardNode;
-
-        guard = evalGuardNode.getFactoryNode().getGuardFactory().makeGuard(evalGuardNode.getContext(), beginState, this, stateObjectId, null);
-
-        this.activeChildNode = evalGuardNode.getChildNode().newState(this, beginState, null);
     }
 
     @Override
@@ -53,15 +45,13 @@ public final class EvalGuardStateNode extends EvalStateNode implements Evaluator
         return evalGuardNode.getContext();
     }
 
-    public final void start()
+    public void start(MatchedEventMap beginState)
     {
-        if (activeChildNode == null)
-        {
-            throw new IllegalStateException("Invalid state, child state node is inactive");
-        }
+        guard = evalGuardNode.getFactoryNode().getGuardFactory().makeGuard(evalGuardNode.getContext(), beginState, this, null, null);
+        activeChildNode = evalGuardNode.getChildNode().newState(this, null, 0L);
 
         // Start the single child state
-        activeChildNode.start();
+        activeChildNode.start(beginState);
 
         // Start the guard
         guard.startGuard();

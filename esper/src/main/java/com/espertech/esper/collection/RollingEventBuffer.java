@@ -19,7 +19,6 @@ import com.espertech.esper.client.EventBean;
  */
 public class RollingEventBuffer
 {
-    private int size;
     private EventBean[] buffer;
     private int nextFreeIndex;
 
@@ -34,7 +33,6 @@ public class RollingEventBuffer
             throw new IllegalArgumentException("Minimum buffer size is 1");
         }
 
-        this.size = size;
         nextFreeIndex = 0;
         buffer = new EventBean[size];
     }
@@ -45,13 +43,11 @@ public class RollingEventBuffer
      */
     public void add(EventBean[] events)
     {
-        if (events == null)
-        {
+        if (events == null) {
             return;
         }
 
-        for (int i = 0; i < events.length; i++)
-        {
+        for (int i = 0; i < events.length; i++) {
             add(events[i]);
         }
     }
@@ -65,7 +61,7 @@ public class RollingEventBuffer
         buffer[nextFreeIndex] = theEvent;
         nextFreeIndex++;
 
-        if (nextFreeIndex == size)
+        if (nextFreeIndex == buffer.length)
         {
             nextFreeIndex = 0;
         }
@@ -81,9 +77,9 @@ public class RollingEventBuffer
      */
     public EventBean get(int index)
     {
-        if (index >= size)
+        if (index >= buffer.length)
         {
-            throw new IllegalArgumentException("Invalid index " + index + " for size " + size);
+            throw new IllegalArgumentException("Invalid index " + index + " for size " + buffer.length);
         }
 
         // The newest event is at (nextFreeIndex + 1)
@@ -91,8 +87,28 @@ public class RollingEventBuffer
         int relative = newest - index;
         if (relative < 0)
         {
-            relative += size;
+            relative += buffer.length;
         }
         return buffer[relative];
+    }
+
+    public int getSize() {
+        return buffer.length;
+    }
+
+    public EventBean[] getBuffer() {
+        return buffer;
+    }
+
+    public int getNextFreeIndex() {
+        return nextFreeIndex;
+    }
+
+    public void setBuffer(EventBean[] buffer) {
+        this.buffer = buffer;
+    }
+
+    public void setNextFreeIndex(int nextFreeIndex) {
+        this.nextFreeIndex = nextFreeIndex;
     }
 }

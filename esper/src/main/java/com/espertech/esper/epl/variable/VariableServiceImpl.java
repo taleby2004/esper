@@ -117,7 +117,7 @@ public class VariableServiceImpl implements VariableService
     private final ReadWriteLock readWriteLock;
 
     // Thread-local for the visible version per thread
-    private final VariableVersionThreadLocal versionThreadLocal = new VariableVersionThreadLocal();
+    private VariableVersionThreadLocal versionThreadLocal = new VariableVersionThreadLocal();
 
     // Number of milliseconds that old versions of a variable are allowed to live
     private final long millisecondLifetimeOldVersions;
@@ -159,6 +159,10 @@ public class VariableServiceImpl implements VariableService
         this.readWriteLock = new ReentrantReadWriteLock();
         this.changeCallbacks = new ArrayList<Set<VariableChangeCallback>>();
         currentVersionNumber = startVersion;
+    }
+
+    public void destroy() {
+        versionThreadLocal = new VariableVersionThreadLocal();
     }
 
     public synchronized void removeVariable(String name) {

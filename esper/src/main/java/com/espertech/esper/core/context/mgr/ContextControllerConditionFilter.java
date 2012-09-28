@@ -19,10 +19,12 @@ import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.epl.spec.ContextDetailConditionFilter;
 import com.espertech.esper.filter.FilterHandleCallback;
 import com.espertech.esper.filter.FilterValueSet;
+import com.espertech.esper.filter.FilterValueSetParam;
 import com.espertech.esper.pattern.MatchedEventMap;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class ContextControllerConditionFilter implements ContextControllerCondition {
@@ -31,17 +33,19 @@ public class ContextControllerConditionFilter implements ContextControllerCondit
     private final AgentInstanceContext agentInstanceContext;
     private final ContextDetailConditionFilter endpointFilterSpec;
     private final ContextControllerConditionCallback callback;
+    private final ContextInternalFilterAddendum filterAddendum;
 
     private EPStatementHandleCallback filterHandle;
 
-    public ContextControllerConditionFilter(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, ContextDetailConditionFilter endpointFilterSpec, ContextControllerConditionCallback callback) {
+    public ContextControllerConditionFilter(EPServicesContext servicesContext, AgentInstanceContext agentInstanceContext, ContextDetailConditionFilter endpointFilterSpec, ContextControllerConditionCallback callback, ContextInternalFilterAddendum filterAddendum) {
         this.servicesContext = servicesContext;
         this.agentInstanceContext = agentInstanceContext;
         this.endpointFilterSpec = endpointFilterSpec;
         this.callback = callback;
+        this.filterAddendum = filterAddendum;
     }
 
-    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset) {
+    public void activate(EventBean optionalTriggeringEvent, MatchedEventMap priorMatches, long timeOffset, boolean isRecoveringResilient) {
         FilterHandleCallback filterCallback = new FilterHandleCallback() {
             public String getStatementId() {
                 return agentInstanceContext.getStatementContext().getStatementId();
@@ -55,8 +59,15 @@ public class ContextControllerConditionFilter implements ContextControllerCondit
                 return false;
             }
         };
+
+        // determine addendum, if any
+        List<FilterValueSetParam> addendum = null;
+        if (filterAddendum != null) {
+            addendum = filterAddendum.getFilterAddendum(endpointFilterSpec.getFilterSpecCompiled());
+        }
+
         filterHandle = new EPStatementHandleCallback(agentInstanceContext.getEpStatementAgentInstanceHandle(), filterCallback);
-        FilterValueSet filterValueSet = endpointFilterSpec.getFilterSpecCompiled().getValueSet(null, null, null);
+        FilterValueSet filterValueSet = endpointFilterSpec.getFilterSpecCompiled().getValueSet(null, null, addendum);
         servicesContext.getFilterService().add(filterValueSet, filterHandle);
 
         if (optionalTriggeringEvent != null) {
@@ -73,7 +84,7 @@ public class ContextControllerConditionFilter implements ContextControllerCondit
         if (endpointFilterSpec.getOptionalFilterAsName() != null) {
             props = Collections.<String, Object>singletonMap(endpointFilterSpec.getOptionalFilterAsName(), theEvent);
         }
-        callback.rangeNotification(props, this, theEvent, null);
+        callback.rangeNotification(props, this, theEvent, null, filterAddendum);
     }
 
     public void deactivate() {

@@ -27,8 +27,8 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
     private ExprNode whenExpressionNode;
     private final List<OnTriggerSetAssignment> thenExpressions;
     private final List<ExprNode> crontabAtSchedule;
-    private final ExprTimePeriod timePeriodExpr;
-    private final ExprTimePeriod afterTimePeriodExpr;
+    private ExprTimePeriod timePeriodExpr;
+    private ExprTimePeriod afterTimePeriodExpr;
     private final Integer afterNumberOfEvents;
     private final boolean andAfterTerminate;
     private ExprNode andAfterTerminateExpr;
@@ -187,5 +187,13 @@ public class OutputLimitSpec implements MetaDefItem, Serializable
 
     public void setAndAfterTerminateThenExpressions(List<OnTriggerSetAssignment> andAfterTerminateThenExpressions) {
         this.andAfterTerminateThenExpressions = andAfterTerminateThenExpressions;
+    }
+
+    public void setAfterTimePeriodExpr(ExprTimePeriod afterTimePeriodExpr) {
+        this.afterTimePeriodExpr = afterTimePeriodExpr;
+    }
+
+    public void setTimePeriodExpr(ExprTimePeriod timePeriodExpr) {
+        this.timePeriodExpr = timePeriodExpr;
     }
 }

@@ -11,7 +11,7 @@
 
 package com.espertech.esper.regression.client;
 
-import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
 
 public class MyConcatTwoAggMethod implements AggregationMethod
 {

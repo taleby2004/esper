@@ -17,7 +17,6 @@ import com.espertech.esper.view.DataWindowView;
 import com.espertech.esper.view.View;
 import com.espertech.esper.view.ViewSupport;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
@@ -25,12 +24,12 @@ import java.util.LinkedHashSet;
  * This view is a keep-all data window that simply keeps all events added.
  * It in addition allows to remove events efficiently for the remove-stream events received by the view.
  */
-public final class KeepAllView extends ViewSupport implements DataWindowView, CloneableView
+public class KeepAllView extends ViewSupport implements DataWindowView, CloneableView
 {
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
     private final KeepAllViewFactory keepAllViewFactory;
-    private LinkedHashSet<EventBean> indexedEvents;
-    private final ViewUpdatedCollection viewUpdatedCollection;
+    protected LinkedHashSet<EventBean> indexedEvents;
+    protected ViewUpdatedCollection viewUpdatedCollection;
 
     /**
      * Ctor.
@@ -78,7 +77,10 @@ public final class KeepAllView extends ViewSupport implements DataWindowView, Cl
     {
         if (newData != null)
         {
-            indexedEvents.addAll(Arrays.asList(newData));
+            for (EventBean newEvent : newData) {
+                indexedEvents.add(newEvent);
+                internalHandleAdded(newEvent);
+            }
         }
 
         if (oldData != null)
@@ -86,6 +88,7 @@ public final class KeepAllView extends ViewSupport implements DataWindowView, Cl
             for (EventBean anOldData : oldData)
             {
                 indexedEvents.remove(anOldData);
+                internalHandleRemoved(anOldData);
             }
         }
 
@@ -102,4 +105,13 @@ public final class KeepAllView extends ViewSupport implements DataWindowView, Cl
     {
         return indexedEvents.iterator();
     }
+
+    public void internalHandleAdded(EventBean newEvent) {
+        // no action required
+    }
+
+    public void internalHandleRemoved(EventBean oldEvent) {
+        // no action required
+    }
+
 }

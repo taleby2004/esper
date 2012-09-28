@@ -91,6 +91,9 @@ public class TestUnidirectionalStreamJoin extends TestCase
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fieldsIJ, new Object[] {300, 2L});
         stmtIJ.destroy();
 
+        // test 2-stream inner join with group-by
+        runAssertion2StreamInnerWGroupBy();
+
         // test 3-stream inner join
         //
         String[] fields3IJ = "c0,c1".split(",");
@@ -175,6 +178,24 @@ public class TestUnidirectionalStreamJoin extends TestCase
 
         epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "Y1"));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields3FOJW, new Object[] {"Y1", "Y1", null});
+    }
+
+    private void runAssertion2StreamInnerWGroupBy() {
+        epService.getEPAdministrator().createEPL("create objectarray schema E1 (id string, grp string, value int)");
+        epService.getEPAdministrator().createEPL("create objectarray schema E2 (id string, value2 int)");
+        EPStatement stmt = epService.getEPAdministrator().createEPL("select count(*) as c0, sum(E1.value) as c1, E1.id as c2 " +
+                "from E1 unidirectional inner join E2.win:keepall() on E1.id = E2.id group by E1.grp");
+        stmt.addListener(listener);
+        String[] fields = "c0,c1,c2".split(",");
+
+        epService.getEPRuntime().sendEvent(new Object[] {"A", 100}, "E2");
+        assertFalse(listener.isInvoked());
+
+        epService.getEPRuntime().sendEvent(new Object[]{"A", "X", 10}, "E1");
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1L, 10, "A"});
+
+        epService.getEPRuntime().sendEvent(new Object[]{"A", "Y", 20}, "E1");
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{1L, 20, "A"});
     }
 
     private void runAssertionPatternUniOuterJoinNoOn(long startTime) {

@@ -17,25 +17,22 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This class represents the state of an eventObserver sub-expression in the evaluation state tree.
  */
-public final class EvalObserverStateNode extends EvalStateNode implements ObserverEventEvaluator
+public class EvalObserverStateNode extends EvalStateNode implements ObserverEventEvaluator
 {
-    private final EvalObserverNode evalObserverNode;
-    private EventObserver eventObserver;
+    protected final EvalObserverNode evalObserverNode;
+    protected EventObserver eventObserver;
 
     /**
      * Constructor.
      * @param parentNode is the parent evaluator to call to indicate truth value
-     * @param beginState contains the events that make up prior matches
      * @param evalObserverNode is the factory node associated to the state
      */
     public EvalObserverStateNode(Evaluator parentNode,
-                             EvalObserverNode evalObserverNode,
-                                   MatchedEventMap beginState)
+                             EvalObserverNode evalObserverNode)
     {
-        super(parentNode, null);
+        super(parentNode);
 
         this.evalObserverNode = evalObserverNode;
-        eventObserver = evalObserverNode.getFactoryNode().getObserverFactory().makeObserver(evalObserverNode.getContext(), beginState, this, null, null);
     }
 
     @Override
@@ -58,8 +55,9 @@ public final class EvalObserverStateNode extends EvalStateNode implements Observ
         this.getParentEvaluator().evaluateFalse(this);
     }
 
-    public final void start()
+    public void start(MatchedEventMap beginState)
     {
+        eventObserver = evalObserverNode.getFactoryNode().getObserverFactory().makeObserver(evalObserverNode.getContext(), beginState, this, null, null);
         eventObserver.startObserve();
     }
 

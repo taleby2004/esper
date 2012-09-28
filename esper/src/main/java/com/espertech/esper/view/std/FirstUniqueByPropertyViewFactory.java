@@ -54,7 +54,7 @@ public class FirstUniqueByPropertyViewFactory implements AsymetricDataWindowView
 
     public View makeView(AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext)
     {
-        return new FirstUniqueByPropertyView(criteriaExpressions, agentInstanceViewFactoryContext.getAgentInstanceContext());
+        return new FirstUniqueByPropertyView(criteriaExpressions, agentInstanceViewFactoryContext);
     }
 
     public EventType getEventType()

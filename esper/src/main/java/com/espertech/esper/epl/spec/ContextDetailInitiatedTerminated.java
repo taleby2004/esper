@@ -11,6 +11,11 @@
 
 package com.espertech.esper.epl.spec;
 
+import com.espertech.esper.filter.FilterSpecCompiled;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class ContextDetailInitiatedTerminated implements ContextDetail {
 
     private static final long serialVersionUID = 800736876398383226L;
@@ -43,4 +48,21 @@ public class ContextDetailInitiatedTerminated implements ContextDetail {
     public boolean isOverlapping() {
         return overlapping;
     }
+
+    public List<FilterSpecCompiled> getFilterSpecsIfAny() {
+        List<FilterSpecCompiled> startFS = start.getFilterSpecIfAny();
+        List<FilterSpecCompiled> endFS = end.getFilterSpecIfAny();
+        if (startFS == null && endFS == null) {
+            return null;
+        }
+        List<FilterSpecCompiled> filters = new ArrayList<FilterSpecCompiled>(2);
+        if (startFS != null) {
+            filters.addAll(startFS);
+        }
+        if (endFS != null) {
+            filters.addAll(endFS);
+        }
+        return filters;
+    }
+
 }

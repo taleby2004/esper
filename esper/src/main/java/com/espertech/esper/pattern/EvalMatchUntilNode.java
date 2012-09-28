@@ -15,7 +15,7 @@ import org.apache.commons.logging.LogFactory;
  * This class represents a match-until observer in the evaluation tree representing any event expressions.
  */
 public class EvalMatchUntilNode extends EvalNodeBase {
-    private final EvalMatchUntilFactoryNode factoryNode;
+    protected final EvalMatchUntilFactoryNode factoryNode;
     private final EvalNode childNodeSub;
     private final EvalNode childNodeUntil;
 
@@ -24,10 +24,6 @@ public class EvalMatchUntilNode extends EvalNodeBase {
         this.factoryNode = factoryNode;
         this.childNodeSub = childNodeSub;
         this.childNodeUntil = childNodeUntil;
-    }
-
-    public EvalNodeNumber getNodeNumber() {
-        return factoryNode.getNodeNumber();
     }
 
     public EvalMatchUntilFactoryNode getFactoryNode() {
@@ -43,10 +39,9 @@ public class EvalMatchUntilNode extends EvalNodeBase {
     }
 
     public EvalStateNode newState(Evaluator parentNode,
-                                  MatchedEventMap beginState,
-                                  EvalStateNodeNumber stateNodeId)
+                                  EvalStateNodeNumber stateNodeNumber, long stateNodeId)
     {
-        return new EvalMatchUntilStateNode(parentNode, this, beginState);
+        return new EvalMatchUntilStateNode(parentNode, this);
     }
 
     private static final Log log = LogFactory.getLog(EvalMatchUntilNode.class);

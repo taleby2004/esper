@@ -27,7 +27,7 @@ import java.util.Map;
  * This class accepts most of its behaviour from its parent, {@link com.espertech.esper.view.stat.BaseBivariateStatisticsView}. It adds
  * the usage of the regression bean and the appropriate schema.
  */
-public final class RegressionLinestView extends BaseBivariateStatisticsView implements CloneableView
+public class RegressionLinestView extends BaseBivariateStatisticsView implements CloneableView
 {
     /**
      * Constructor.

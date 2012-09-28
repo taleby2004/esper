@@ -22,9 +22,10 @@ import java.util.List;
 public class EvalEveryDistinctFactoryNode extends EvalNodeFactoryBase
 {
     protected List<ExprNode> expressions;
-    protected transient ExprEvaluator[] expressionsArray;
+    protected transient ExprEvaluator[] distinctExpressionsArray;
     private transient MatchedEventConvertor convertor;
     private Long msecToExpire;
+    protected List<ExprNode> distinctExpressions;
     private static final long serialVersionUID = 7455570958072753956L;
 
     /**
@@ -37,15 +38,15 @@ public class EvalEveryDistinctFactoryNode extends EvalNodeFactoryBase
     }
 
     public EvalNode makeEvalNode(PatternAgentInstanceContext agentInstanceContext) {
-        if (expressionsArray == null) {
-            expressionsArray = ExprNodeUtility.getEvaluators(expressions);
+        if (distinctExpressionsArray == null) {
+            distinctExpressionsArray = ExprNodeUtility.getEvaluators(distinctExpressions);
         }
         EvalNode child = EvalNodeUtil.makeEvalNodeSingleChild(this.getChildNodes(), agentInstanceContext);
         return new EvalEveryDistinctNode(this, child, agentInstanceContext);
     }
 
-    public ExprEvaluator[] getExpressionsArray() {
-        return expressionsArray;
+    public ExprEvaluator[] getDistinctExpressionsArray() {
+        return distinctExpressionsArray;
     }
 
     public MatchedEventConvertor getConvertor() {
@@ -62,12 +63,20 @@ public class EvalEveryDistinctFactoryNode extends EvalNodeFactoryBase
     }
 
     /**
-     * Returns expressions for distinct-value.
+     * Returns all expressions.
      * @return expressions
      */
     public List<ExprNode> getExpressions()
     {
         return expressions;
+    }
+
+    /**
+     * Returns distinct expressions.
+     * @return expressions
+     */
+    public List<ExprNode> getDistinctExpressions() {
+        return distinctExpressions;
     }
 
     /**
@@ -81,11 +90,11 @@ public class EvalEveryDistinctFactoryNode extends EvalNodeFactoryBase
 
     /**
      * Sets expressions for distinct-value.
-     * @param expressions to set
+     * @param distinctExpressions to set
      */
-    public void setExpressions(List<ExprNode> expressions, Long msecToExpire)
+    public void setDistinctExpressions(List<ExprNode> distinctExpressions, Long msecToExpire)
     {
-        this.expressions = expressions;
+        this.distinctExpressions = distinctExpressions;
         this.msecToExpire = msecToExpire;
     }
 

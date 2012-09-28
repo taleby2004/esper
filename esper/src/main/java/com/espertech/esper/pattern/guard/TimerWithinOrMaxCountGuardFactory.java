@@ -61,20 +61,25 @@ public class TimerWithinOrMaxCountGuardFactory implements GuardFactory, MetaDefI
         this.convertor = convertor;
     }
 
-    public Guard makeGuard(PatternAgentInstanceContext context, MatchedEventMap beginState, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState)
-    {
+    protected long computeMilliseconds(MatchedEventMap beginState, PatternAgentInstanceContext context) {
         Object millisecondVal = PatternExpressionUtil.evaluate("Timer-Within-Or-Max-Count guard", beginState, millisecondsExpr, convertor, context.getAgentInstanceContext());
         if (null == millisecondVal) {
             throw new EPException("Timer-within-or-max first parameter evaluated to a null-value");
         }
         Number param = (Number) millisecondVal;
-        long milliseconds = Math.round(1000d * param.doubleValue());
+        return Math.round(1000d * param.doubleValue());
+    }
 
+    protected int computeNumCountTo(MatchedEventMap beginState, PatternAgentInstanceContext context) {
         Object numCountToVal = PatternExpressionUtil.evaluate("Timer-Within-Or-Max-Count guard", beginState, numCountToExpr, convertor,context.getAgentInstanceContext());
         if (null == numCountToVal) {
             throw new EPException("Timer-within-or-max second parameter evaluated to a null-value");
         }
-        Integer numCountTo = (Integer) numCountToVal;
-        return new TimerWithinOrMaxCountGuard(milliseconds, numCountTo, quitable);
+        return (Integer) numCountToVal;
+    }
+
+    public Guard makeGuard(PatternAgentInstanceContext context, MatchedEventMap beginState, Quitable quitable, EvalStateNodeNumber stateNodeId, Object guardState)
+    {
+        return new TimerWithinOrMaxCountGuard(computeMilliseconds(beginState, context), computeNumCountTo(beginState, context), quitable);
     }
 }

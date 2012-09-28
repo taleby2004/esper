@@ -8,9 +8,17 @@
  **************************************************************************************/
 package com.espertech.esper.core.service;
 
+import com.espertech.esper.core.context.factory.StatementAgentInstanceFactoryResult;
+import com.espertech.esper.pattern.EvalRootState;
+
 /**
  * Statement-level extension services.
  */
 public interface StatementExtensionSvcContext
 {
+    public void startContextPartition(StatementAgentInstanceFactoryResult startResult, int agentInstanceId);
+    public void endContextPartition(int agentInstanceId);
+
+    public void startContextPattern(EvalRootState patternStopCallback, boolean startEndpoint, int subPathId);
+    public void stopContextPattern(EvalRootState patternStopCallback, boolean startEndpoint, int subPathId);
 }

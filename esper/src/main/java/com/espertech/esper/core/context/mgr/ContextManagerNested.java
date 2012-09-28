@@ -106,7 +106,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         return getAgentInstancesForSelector(contextPartitionSelector);
     }
 
-    public void addStatement(ContextControllerStatementBase statement) throws ExprValidationException {
+    public void addStatement(ContextControllerStatementBase statement, boolean isRecoveringResilient) throws ExprValidationException {
 
         // validation down the hierarchy
         ContextControllerStatementCtxCache[] caches = new ContextControllerStatementCtxCache[nestedContextFactories.length];
@@ -134,7 +134,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
                 }
 
                 for (Map.Entry<Integer, ContextControllerTreeAgentInstanceList> entry : subcontext.getValue().getAgentInstances().entrySet()) {
-                    AgentInstance agentInstance = startStatement(entry.getKey(), desc, subcontext.getKey(), entry.getValue().getInitPartitionKey(), entry.getValue().getInitContextProperties());
+                    AgentInstance agentInstance = startStatement(entry.getKey(), desc, subcontext.getKey(), entry.getValue().getInitPartitionKey(), entry.getValue().getInitContextProperties(), isRecoveringResilient);
                     entry.getValue().getAgentInstances().add(agentInstance);
                 }
             }
@@ -183,7 +183,9 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             Map<String, Object> optionalTriggeringPattern,
             Object partitionKey,
             Map<String, Object> contextProperties,
-            ContextControllerState states) {
+            ContextControllerState states,
+            ContextInternalFilterAddendum filterAddendum,
+            boolean isRecoveringResilient) {
 
         // detect non-leaf
         int nestingLevel = originator.getFactory().getFactoryContext().getNestingLevel();   // starts at 1 for root
@@ -205,7 +207,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
             subcontexts.put(nextContext, entry);
 
             // now post-initialize, this may actually call back
-            nextContext.activate(optionalTriggeringEvent, optionalTriggeringPattern, states);
+            nextContext.activate(optionalTriggeringEvent, optionalTriggeringPattern, states, filterAddendum);
 
             if (log.isDebugEnabled()) {
                 log.debug("Instantiating branch context path for " + contextName +
@@ -243,7 +245,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         List<AgentInstance> newInstances = new ArrayList<AgentInstance>();
         for (Map.Entry<String, ContextControllerStatementDesc> statementEntry : statements.entrySet()) {
             ContextControllerStatementDesc statementDesc = statementEntry.getValue();
-            AgentInstance instance = startStatement(assignedContextId, statementDesc, originator, partitionKey, contextProperties);
+            AgentInstance instance = startStatement(assignedContextId, statementDesc, originator, partitionKey, contextProperties, isRecoveringResilient);
             newInstances.add(instance);
         }
 
@@ -325,7 +327,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         return new AgentInstanceArraySafeIterator(instances);
     }
 
-    private AgentInstance startStatement(int contextId, ContextControllerStatementDesc statementDesc, ContextController originator, Object partitionKey, Map<String, Object> contextProperties) {
+    private AgentInstance startStatement(int contextId, ContextControllerStatementDesc statementDesc, ContextController originator, Object partitionKey, Map<String, Object> contextProperties, boolean isRecoveringResilient) {
 
         // build filters
         AgentInstanceFilterProxy proxy = getMergedFilterAddendums(statementDesc, originator, partitionKey, contextId);
@@ -339,7 +341,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
         MappedEventBean contextBean = (MappedEventBean) servicesContext.getEventAdapterService().adapterForTypedMap(properties, contextDescriptor.getContextPropertyRegistry().getContextEventType());
 
         // activate
-        StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statementDesc.getStatement(), false, contextId, contextBean, proxy);
+        StatementAgentInstanceFactoryResult result = StatementAgentInstanceUtil.start(servicesContext, statementDesc.getStatement(), false, contextId, contextBean, proxy, isRecoveringResilient);
         return new AgentInstance(result.getStopCallback(), result.getAgentInstanceContext(), result.getFinalView());
     }
 
@@ -384,7 +386,7 @@ public class ContextManagerNested implements ContextManager, ContextControllerLi
 
         rootContext = nestedContextFactories[0].createNoCallback(0, this);
         subcontexts.put(rootContext, new ContextControllerTreeEntry(null, null, null, null));
-        rootContext.activate(null, null, null);
+        rootContext.activate(null, null, null, null);
     }
 
     private void removeStatement(String statementId) {

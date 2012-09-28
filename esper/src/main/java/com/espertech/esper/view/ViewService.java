@@ -54,7 +54,7 @@ public interface ViewService
      * @param viewFactoryChainContext provides services
      * @return last viewable in chain, or the eventStreamViewable if no view factories are supplied
      */
-    public Viewable createViews(Viewable eventStreamViewable,
+    public ViewServiceCreateResult createViews(Viewable eventStreamViewable,
                                 List<ViewFactory> viewFactoryChain,
                                 AgentInstanceViewFactoryChainContext viewFactoryChainContext,
                                 boolean hasPreviousNode);

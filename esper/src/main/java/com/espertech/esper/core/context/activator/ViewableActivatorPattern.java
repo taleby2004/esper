@@ -35,7 +35,7 @@ public class ViewableActivatorPattern implements ViewableActivator {
         this.hasConsumingFilter = hasConsumingFilter;
     }
 
-    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect) {
+    public ViewableActivationResult activate(AgentInstanceContext agentInstanceContext, boolean isSubselect, boolean isRecoveringResilient) {
         PatternAgentInstanceContext patternAgentInstanceContext = agentInstanceContext.getStatementContext().getPatternContextFactory().createPatternAgentContext(patternContext, agentInstanceContext, hasConsumingFilter);
         EvalRootNode rootNode = EvalNodeUtil.makeRootNodeFromFactory(rootFactoryNode, patternAgentInstanceContext);
 
@@ -49,7 +49,7 @@ public class ViewableActivatorPattern implements ViewableActivator {
             }
         };
 
-        PatternStopCallback patternStopCallback = rootNode.start(callback, patternContext);
-        return new ViewableActivationResult(sourceEventStream, patternStopCallback, null);
+        EvalRootState rootState = rootNode.start(callback, patternContext, isRecoveringResilient);
+        return new ViewableActivationResult(sourceEventStream, rootState, null, rootState);
     }
 }

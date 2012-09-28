@@ -40,7 +40,8 @@ public class SupportInternalEventRouter implements InternalEventRouter
         return null;
     }
 
-    public void addPreprocessing(InternalEventRouterDesc internalEventRouterDesc, InternalRoutePreprocessView outputView) {
+    public void addPreprocessing(InternalEventRouterDesc internalEventRouterDesc, InternalRoutePreprocessView outputView, StatementAgentInstanceLock agentInstanceLock, boolean hasSubselect) {
+
     }
 
     public void removePreprocessing(EventType eventType, UpdateDesc desc) {

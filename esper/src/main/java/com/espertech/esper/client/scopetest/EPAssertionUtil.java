@@ -1478,4 +1478,21 @@ public class EPAssertionUtil
         }
         return false;
     }
+
+    public static void assertEqualsIgnoreNewline(String expected, String received) {
+        String expectedClean = removeNewline(expected);
+        String receivedClean = removeNewline(received);
+        if (!expectedClean.equals(receivedClean)) {
+            log.error("Expected: " + expectedClean);
+            log.error("Received: " + receivedClean);
+            ScopeTestHelper.assertEquals("Mismatch ", expected, received);
+        }
+    }
+
+    private static String removeNewline(String raw) {
+        raw = raw.replaceAll("\t", "");
+        raw = raw.replaceAll("\n", "");
+        raw = raw.replaceAll("\r", "");
+        return raw;
+    }
 }

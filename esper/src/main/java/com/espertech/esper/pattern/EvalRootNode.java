@@ -17,8 +17,8 @@ import org.apache.commons.logging.LogFactory;
  */
 public class EvalRootNode extends EvalNodeBase implements PatternStarter
 {
-    private final EvalRootFactoryNode factoryNode;
-    private final EvalNode childNode;
+    protected final EvalRootFactoryNode factoryNode;
+    protected final EvalNode childNode;
 
     public EvalRootNode(PatternAgentInstanceContext context, EvalRootFactoryNode factoryNode, EvalNode childNode) {
         super(context);
@@ -26,47 +26,49 @@ public class EvalRootNode extends EvalNodeBase implements PatternStarter
         this.childNode = childNode;
     }
 
-    public EvalNodeNumber getNodeNumber() {
-        return factoryNode.getNodeNumber();
-    }
-
     public EvalNode getChildNode() {
         return childNode;
     }
 
-    public final PatternStopCallback start(PatternMatchCallback callback,
-                                           PatternContext context)
+    public EvalRootFactoryNode getFactoryNode() {
+        return factoryNode;
+    }
+
+    public EvalRootState start(PatternMatchCallback callback,
+                                           PatternContext context,
+                                           boolean isRecoveringResilient)
     {
         MatchedEventMap beginState = new MatchedEventMapImpl(context.getMatchedEventMapMeta());
-        return startInternal(callback, context, beginState);
+        return startInternal(callback, context, beginState, isRecoveringResilient);
     }
 
-    public final PatternStopCallback start(PatternMatchCallback callback,
+    public EvalRootState start(PatternMatchCallback callback,
                                            PatternContext context,
-                                           MatchedEventMap beginState)
+                                           MatchedEventMap beginState,
+                                           boolean isRecoveringResilient)
     {
-        return startInternal(callback, context, beginState);
+        return startInternal(callback, context, beginState, isRecoveringResilient);
     }
 
-    private final PatternStopCallback startInternal(PatternMatchCallback callback,
+    protected EvalRootState startInternal(PatternMatchCallback callback,
                                            PatternContext context,
-                                           MatchedEventMap beginState)
+                                           MatchedEventMap beginState,
+                                           boolean isRecoveringResilient)
     {
         if (beginState == null) {
             throw new IllegalArgumentException("No pattern begin-state has been provided");
         }
-        EvalStateNode rootStateNode = newState(null, beginState, null);
+        EvalStateNode rootStateNode = newState(null, null, 0L);
         EvalRootState rootState = (EvalRootState) rootStateNode;
         rootState.setCallback(callback);
-        rootStateNode.start();
+        rootState.startRecoverable(isRecoveringResilient, beginState);
         return rootState;
     }
 
     public EvalStateNode newState(Evaluator parentNode,
-                                  MatchedEventMap beginState,
-                                  EvalStateNodeNumber stateNodeId)
+                                  EvalStateNodeNumber stateNodeNumber, long stateNodeId)
     {
-        return new EvalRootStateNode(childNode, beginState, getContext().getPatternContext());
+        return new EvalRootStateNode(childNode);
     }
 
     private static final Log log = LogFactory.getLog(EvalRootNode.class);

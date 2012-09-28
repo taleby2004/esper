@@ -17,9 +17,12 @@ import com.espertech.esper.collection.UniformPair;
 import com.espertech.esper.core.context.mgr.ContextManagementService;
 import com.espertech.esper.core.context.util.ContextDescriptor;
 import com.espertech.esper.core.service.EPAdministratorHelper;
-import com.espertech.esper.epl.agg.AggregationAccessType;
-import com.espertech.esper.epl.agg.AggregationSupport;
-import com.espertech.esper.epl.core.*;
+import com.espertech.esper.epl.agg.access.AggregationAccessType;
+import com.espertech.esper.epl.agg.service.AggregationSupport;
+import com.espertech.esper.epl.core.EngineImportException;
+import com.espertech.esper.epl.core.EngineImportService;
+import com.espertech.esper.epl.core.EngineImportSingleRowDesc;
+import com.espertech.esper.epl.core.EngineImportUndefinedException;
 import com.espertech.esper.epl.db.DatabasePollingViewableFactory;
 import com.espertech.esper.epl.declexpr.ExprDeclaredNodeImpl;
 import com.espertech.esper.epl.expression.*;
@@ -1593,15 +1596,7 @@ public class EPLTreeWalker extends EsperEPL2Ast
                     throw new ASTWalkException("Invalid interval-clause within match-recognize, expecting keyword INTERVAL");
                 }
                 ExprNode expression = astExprNodeMap.remove(intervalParent.getChild(1));
-                ExprTimePeriod timePeriodExpr;
-                try {
-                    ExprValidationContext validationContext = new ExprValidationContext(new StreamTypeServiceImpl(engineURI, false), null, null, timeProvider, variableService, exprEvaluatorContext, null, null, null, null, null);
-                    timePeriodExpr = (ExprTimePeriod) ExprNodeUtility.getValidatedSubtree(expression, validationContext);
-                }
-                catch (ExprValidationException ex)
-                {
-                    throw new ASTWalkException("Invalid interval-clause within match-recognize: " + ex.getMessage(), ex);
-                }
+                ExprTimePeriod timePeriodExpr = (ExprTimePeriod) expression;
                 statementSpec.getMatchRecognizeSpec().setInterval(new MatchRecognizeInterval(timePeriodExpr));
             }
         }
@@ -3008,8 +3003,12 @@ public class EPLTreeWalker extends EsperEPL2Ast
         }
         else {
             StatementSpecRaw newSpec = new StatementSpecRaw(defaultStreamSelector);
-            value = statementSpec;
             newSpec.getAnnotations().addAll(statementSpec.getAnnotations());
+
+            StatementSpecRaw existingSpec = statementSpec;
+            value = existingSpec;
+            existingSpec.setAnnotations(Collections.<AnnotationDesc>emptyList());  // clearing property-level annotations
+
             statementSpec = newSpec;
         }
         astGOPNodeMap.put(node, value);

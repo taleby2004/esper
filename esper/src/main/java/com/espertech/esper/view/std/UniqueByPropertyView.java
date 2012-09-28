@@ -43,14 +43,14 @@ import java.util.Map;
  * The type of the field returning the unique value can be any type but should override equals and hashCode()
  * as the type plays the role of a key in a map storing unique values.
  */
-public final class UniqueByPropertyView extends ViewSupport implements CloneableView
+public class UniqueByPropertyView extends ViewSupport implements CloneableView
 {
     private final ExprNode[] criteriaExpressions;
-    private final ExprEvaluator[] criteriaExpressionsEvals;
+    protected final ExprEvaluator[] criteriaExpressionsEvals;
     private final int numKeys;
-    private final Map<Object, EventBean> mostRecentEvents = new LinkedHashMap<Object, EventBean>();
+    protected final Map<Object, EventBean> mostRecentEvents = new LinkedHashMap<Object, EventBean>();
     private final EventBean[] eventsPerStream = new EventBean[1];
-    private final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
+    protected final AgentInstanceViewFactoryChainContext agentInstanceViewFactoryContext;
 
     /**
      * Constructor.
@@ -129,7 +129,7 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
 
                 // If the old event is the current unique event, remove and post as old data
                 EventBean lastValue = mostRecentEvents.get(key);
-                if (lastValue != oldData[i])
+                if (lastValue == null || !lastValue.equals(oldData[i]))
                 {
                     continue;
                 }
@@ -173,7 +173,7 @@ public final class UniqueByPropertyView extends ViewSupport implements Cloneable
         return this.getClass().getName() + " uniqueFieldNames=" + Arrays.toString(criteriaExpressions);
     }
 
-    private Object getUniqueKey(EventBean theEvent)
+    protected Object getUniqueKey(EventBean theEvent)
     {
         eventsPerStream[0] = theEvent;
         if (criteriaExpressionsEvals.length == 1) {

@@ -11,9 +11,7 @@ package com.espertech.esper.pattern.observer;
 import com.espertech.esper.core.service.EPStatementHandleCallback;
 import com.espertech.esper.core.service.ExtensionServicesContext;
 import com.espertech.esper.pattern.MatchedEventMap;
-import com.espertech.esper.schedule.ScheduleHandleCallback;
-import com.espertech.esper.schedule.ScheduleSlot;
-import com.espertech.esper.schedule.ScheduleSpec;
+import com.espertech.esper.schedule.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -58,7 +56,9 @@ public class TimerAtObserver implements EventObserver, ScheduleHandleCallback
         }
 
         scheduleHandle = new EPStatementHandleCallback(observerEventEvaluator.getContext().getAgentInstanceContext().getEpStatementAgentInstanceHandle(), this);
-        observerEventEvaluator.getContext().getPatternContext().getSchedulingService().add(scheduleSpec, scheduleHandle, scheduleSlot);
+        SchedulingService schedulingService = observerEventEvaluator.getContext().getPatternContext().getSchedulingService();
+        long nextScheduledTime = ScheduleComputeHelper.computeDeltaNextOccurance(scheduleSpec, schedulingService.getTime());
+        schedulingService.add(nextScheduledTime, scheduleHandle, scheduleSlot);
         isTimerActive = true;
     }
 

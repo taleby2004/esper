@@ -25,7 +25,7 @@ import java.util.List;
 public interface ContextManager extends FilterFaultHandler {
     public ContextDescriptor getContextDescriptor();
 
-    public void addStatement(ContextControllerStatementBase statement) throws ExprValidationException;
+    public void addStatement(ContextControllerStatementBase statement, boolean isRecoveringResilient) throws ExprValidationException;
     public void stopStatement(String statementName, String statementId);
     public void destroyStatement(String statementName, String statementId);
 

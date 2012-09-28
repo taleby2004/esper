@@ -1,6 +1,6 @@
 package com.espertech.esper.example.runtimeconfig;
 
-import com.espertech.esper.epl.agg.AggregationMethod;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
 
 public class MyConcatAggregationFunction implements AggregationMethod {
     private final static char DELIMITER = ' ';

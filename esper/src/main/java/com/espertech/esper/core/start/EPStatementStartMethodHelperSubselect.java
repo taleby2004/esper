@@ -19,8 +19,8 @@ import com.espertech.esper.core.context.util.ContextPropertyRegistry;
 import com.espertech.esper.core.service.EPServicesContext;
 import com.espertech.esper.core.service.ExprEvaluatorContextStatement;
 import com.espertech.esper.core.service.StatementContext;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryFactory;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryFactory;
 import com.espertech.esper.epl.core.StreamTypeService;
 import com.espertech.esper.epl.core.StreamTypeServiceImpl;
 import com.espertech.esper.epl.core.ViewResourceDelegateUnverified;
@@ -279,7 +279,7 @@ public class EPStatementStartMethodHelperSubselect
                 {
                     List<ExprAggregateNode> havingAgg = Collections.emptyList();
                     List<ExprAggregateNode> orderByAgg = Collections.emptyList();
-                    aggregationServiceFactoryDesc = AggregationServiceFactoryFactory.getService(aggExprNodes, havingAgg, orderByAgg, false, evaluatorContextStmt, annotations, statementContext.getVariableService(), false, statementSpec.getFilterRootNode(), statementSpec.getHavingExprRootNode());
+                    aggregationServiceFactoryDesc = AggregationServiceFactoryFactory.getService(aggExprNodes, havingAgg, orderByAgg, false, evaluatorContextStmt, annotations, statementContext.getVariableService(), false, statementSpec.getFilterRootNode(), statementSpec.getHavingExprRootNode(), statementContext.getAggregationServiceFactoryService(), subselectTypeService.getEventTypes());
 
                     // Other stream properties, if there is aggregation, cannot be under aggregation.
                     for (ExprAggregateNode aggNode : aggExprNodes)
@@ -404,7 +404,7 @@ public class EPStatementStartMethodHelperSubselect
             SubSelectActivationHolder holder = factoryDesc.getSubSelectActivationHolder();
 
             // activate view
-            ViewableActivationResult subselectActivationResult = holder.getActivator().activate(agentInstanceContext, true);
+            ViewableActivationResult subselectActivationResult = holder.getActivator().activate(agentInstanceContext, true, false);
             stopCallbackList.add(subselectActivationResult.getStopCallback());
 
             // apply returning the strategy instance
@@ -434,7 +434,11 @@ public class EPStatementStartMethodHelperSubselect
             }
 
             SubSelectStrategyHolder instance = new SubSelectStrategyHolder(strategy,
-                    result.getSubselectAggregationService(), result.getPriorNodeStrategies(), result.getPreviousNodeStrategies());
+                    result.getSubselectAggregationService(),
+                    result.getPriorNodeStrategies(),
+                    result.getPreviousNodeStrategies(),
+                    result.getSubselectView(),
+                    result.getPostLoad());
             subselectStrategies.put(subselectNode, instance);
         }
 

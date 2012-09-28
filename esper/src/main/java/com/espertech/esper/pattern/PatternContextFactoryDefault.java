@@ -20,7 +20,7 @@ public class PatternContextFactoryDefault implements PatternContextFactory
                                         int streamId,
                                         EvalRootFactoryNode rootNode,
                                         MatchedEventMapMeta matchedEventMapMeta) {
-        return new PatternContext(statementContext, streamId, matchedEventMapMeta);
+        return new PatternContext(statementContext, streamId, matchedEventMapMeta, false);
     }
 
     public PatternAgentInstanceContext createPatternAgentContext(PatternContext patternContext, AgentInstanceContext agentInstanceContext, boolean hasConsumingFilter) {

@@ -11,8 +11,8 @@ package com.espertech.esper.view.window;
 import com.espertech.esper.client.EventBean;
 import com.espertech.esper.collection.ViewUpdatedCollection;
 import com.espertech.esper.core.context.util.AgentInstanceViewFactoryChainContext;
-import com.espertech.esper.epl.agg.AggregationServiceAggExpressionDesc;
-import com.espertech.esper.epl.agg.AggregationServiceFactoryDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceAggExpressionDesc;
+import com.espertech.esper.epl.agg.service.AggregationServiceFactoryDesc;
 import com.espertech.esper.epl.expression.ExprEvaluator;
 import com.espertech.esper.event.map.MapEventBean;
 import com.espertech.esper.view.View;
@@ -25,14 +25,14 @@ import java.util.Set;
 /**
  * This view is a moving window extending the into the past until the expression passed to it returns false.
  */
-public final class ExpressionBatchView extends ExpressionViewBase {
+public class ExpressionBatchView extends ExpressionViewBase {
 
     private final ExpressionBatchViewFactory dataWindowViewFactory;
-    private final Set<EventBean> window = new LinkedHashSet<EventBean>();
+    protected final Set<EventBean> window = new LinkedHashSet<EventBean>();
 
-    private EventBean[] lastBatch;
-    private long newestEventTimestamp;
-    private long oldestEventTimestamp;
+    protected EventBean[] lastBatch;
+    protected long newestEventTimestamp;
+    protected long oldestEventTimestamp;
 
     /**
      * Constructor creates a moving window extending the specified number of elements into the past.
@@ -73,7 +73,7 @@ public final class ExpressionBatchView extends ExpressionViewBase {
         }
     }
 
-    public final void update(EventBean[] newData, EventBean[] oldData)
+    public void update(EventBean[] newData, EventBean[] oldData)
     {
         boolean fireBatch = false;
 
@@ -121,7 +121,7 @@ public final class ExpressionBatchView extends ExpressionViewBase {
 
     // Called based on schedule evaluation registered when a variable changes (new data is null).
     // Called when new data arrives.
-    private void expire() {
+    public void expire() {
         EventBean[] batchNewData = window.toArray(new EventBean[window.size()]);
 
         if (viewUpdatedCollection != null) {

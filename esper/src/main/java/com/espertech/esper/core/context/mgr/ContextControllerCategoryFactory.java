@@ -33,13 +33,18 @@ import java.util.*;
 public class ContextControllerCategoryFactory extends ContextControllerFactoryBase implements ContextControllerFactory {
 
     private final ContextDetailCategory categorySpec;
+    private final List<FilterSpecCompiled> filtersSpecsNestedContexts;
 
     private Map<String, Object> contextBuiltinProps;
 
-    public ContextControllerCategoryFactory(ContextControllerFactoryContext factoryContext, ContextDetailCategory categorySpec)
-    {
+    public ContextControllerCategoryFactory(ContextControllerFactoryContext factoryContext, ContextDetailCategory categorySpec, List<FilterSpecCompiled> filtersSpecsNestedContexts) {
         super(factoryContext);
         this.categorySpec = categorySpec;
+        this.filtersSpecsNestedContexts = filtersSpecsNestedContexts;
+    }
+
+    public boolean hasFiltersSpecsNestedContexts() {
+        return filtersSpecsNestedContexts != null && !filtersSpecsNestedContexts.isEmpty();
     }
 
     public void validateFactory() throws ExprValidationException {
@@ -58,7 +63,12 @@ public class ContextControllerCategoryFactory extends ContextControllerFactoryBa
     public void populateFilterAddendums(IdentityHashMap<FilterSpecCompiled, List<FilterValueSetParam>> filterAddendum, ContextControllerStatementDesc statement, Object categoryLabel, int contextId) {
         ContextControllerStatementCtxCacheFilters statementInfo = (ContextControllerStatementCtxCacheFilters) statement.getCaches()[factoryContext.getNestingLevel() - 1];
         ContextDetailCategoryItem category = findCategoryForName((String) categoryLabel);
-        getAddendumFilters(filterAddendum, category, categorySpec, statementInfo, statement);
+        getAddendumFilters(filterAddendum, category, categorySpec, statementInfo.getFilterSpecs(), statement);
+    }
+
+    public void populateContextInternalFilterAddendums(ContextInternalFilterAddendum filterAddendum, Object categoryLabel) {
+        ContextDetailCategoryItem category = findCategoryForName((String) categoryLabel);
+        getAddendumFilters(filterAddendum.getFilterAddendum(), category, categorySpec, filtersSpecsNestedContexts, null);
     }
 
     public FilterSpecLookupable getFilterLookupable(EventType eventType) {
@@ -138,13 +148,13 @@ public class ContextControllerCategoryFactory extends ContextControllerFactoryBa
     private static void getAddendumFilters(IdentityHashMap<FilterSpecCompiled, List<FilterValueSetParam>> addendums,
                                            ContextDetailCategoryItem category,
                                            ContextDetailCategory categorySpec,
-                                           ContextControllerStatementCtxCacheFilters statementDesc,
+                                           List<FilterSpecCompiled> filters,
                                            ContextControllerStatementDesc statement) {
 
         // determine whether create-named-window
-        boolean isCreateWindow = statement.getStatement().getStatementSpec().getCreateWindowDesc() != null;
+        boolean isCreateWindow = statement != null && statement.getStatement().getStatementSpec().getCreateWindowDesc() != null;
         if (!isCreateWindow) {
-            for (FilterSpecCompiled filtersSpec : statementDesc.getFilterSpecs()) {
+            for (FilterSpecCompiled filtersSpec : filters) {
 
                 boolean typeOrSubtype = EventTypeUtility.isTypeOrSubTypeOf(filtersSpec.getFilterForEventType(), categorySpec.getFilterSpecCompiled().getFilterForEventType());
                 if (!typeOrSubtype) {
@@ -168,7 +178,7 @@ public class ContextControllerCategoryFactory extends ContextControllerFactoryBa
         else {
             String declaredAsName = statement.getStatement().getStatementSpec().getCreateWindowDesc().getAsEventTypeName();
             if (declaredAsName != null) {
-                for (FilterSpecCompiled filtersSpec : statementDesc.getFilterSpecs()) {
+                for (FilterSpecCompiled filtersSpec : filters) {
 
                     List<FilterValueSetParam> addendumFilters = new ArrayList<FilterValueSetParam>();
                     addendumFilters.addAll(category.getCompiledFilterParam());

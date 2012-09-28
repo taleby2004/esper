@@ -235,6 +235,12 @@ public class TestDeployAdmin extends TestCase
 
         assertEquals(1, deploymentAdmin.getDeployments().length);
         assertEquals(result.getDeploymentId(), deploymentAdmin.getDeployments()[0]);
+
+        // test deploy with variable
+        String moduleStr = "create variable integer snapshotOutputSecs = 10; " +
+                "create schema foo as (bar string); " +
+                "select bar from foo output snapshot every snapshotOutputSecs seconds;";
+        deploymentAdmin.parseDeploy(moduleStr);
     }
 
     public void testLineNumberAndComments() throws Exception {

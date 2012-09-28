@@ -15,7 +15,7 @@ import java.io.Serializable;
  * the objects that form the pair equal, ie. first pair first object equals (.equals) the second pair first object,
  * and the first pair second object equals the second pair second object.
  */
-public final class Pair<First,Second> implements Serializable
+public class Pair<First,Second> implements Serializable
 {
     private First first;
     private Second second;

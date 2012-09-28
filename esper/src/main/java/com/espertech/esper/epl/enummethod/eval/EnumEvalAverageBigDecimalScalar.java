@@ -11,11 +11,8 @@
 
 package com.espertech.esper.epl.enummethod.eval;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.agg.BigDecimalAvgAggregator;
-import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.agg.aggregator.AggregatorAvgBigDecimal;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
-import com.espertech.esper.event.map.MapEventType;
 
 import java.util.Collection;
 
@@ -27,7 +24,7 @@ public class EnumEvalAverageBigDecimalScalar extends EnumEvalBase implements Enu
 
     public Object evaluateEnumMethod(Collection target, boolean isNewData, ExprEvaluatorContext context) {
 
-        BigDecimalAvgAggregator agg = new BigDecimalAvgAggregator();
+        AggregatorAvgBigDecimal agg = new AggregatorAvgBigDecimal();
 
         for (Object next : target) {
 

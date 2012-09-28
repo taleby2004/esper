@@ -15,26 +15,20 @@ import org.apache.commons.logging.LogFactory;
  * This class is always the root node in the evaluation state tree representing any activated event expression.
  * It hold the handle to a further state node with subnodes making up a whole evaluation state tree.
  */
-public final class EvalRootStateNode extends EvalStateNode implements Evaluator, PatternStopCallback, EvalRootState
+public class EvalRootStateNode extends EvalStateNode implements Evaluator, PatternStopCallback, EvalRootState
 {
-    private EvalNode rootSingleChildNode;
-    private EvalStateNode topStateNode;
+    protected EvalNode rootSingleChildNode;
+    protected EvalStateNode topStateNode;
     private PatternMatchCallback callback;
 
     /**
      * Constructor.
      * @param rootSingleChildNode is the root nodes single child node
-     * @param beginState contains the events that make up prior matches
-     * @param context contains handles to services required
      */
-    public EvalRootStateNode(EvalNode rootSingleChildNode,
-                                   MatchedEventMap beginState,
-                                   PatternContext context)
+    public EvalRootStateNode(EvalNode rootSingleChildNode)
     {
-        super(null, null);
+        super(null);
         this.rootSingleChildNode = rootSingleChildNode;
-
-        topStateNode = rootSingleChildNode.newState(this, beginState, null);
     }
 
     @Override
@@ -51,14 +45,14 @@ public final class EvalRootStateNode extends EvalStateNode implements Evaluator,
         this.callback = callback;
     }
 
-    public final void start()
-    {
-        if (topStateNode == null)
-        {
-            throw new IllegalStateException("root state node is inactive");
-        }
+    public void startRecoverable(boolean startRecoverable, MatchedEventMap beginState) {
+        start(beginState);
+    }
 
-        topStateNode.start();
+    public final void start(MatchedEventMap beginState)
+    {
+        topStateNode = rootSingleChildNode.newState(this, null, 0L);
+        topStateNode.start(beginState);
     }
 
     public final void stop()
@@ -66,13 +60,26 @@ public final class EvalRootStateNode extends EvalStateNode implements Evaluator,
         quit();
     }
 
-    public final void quit()
+    public void quit()
     {
         if (topStateNode != null)
         {
             topStateNode.quit();
+            handleQuitEvent();
         }
         topStateNode = null;
+    }
+
+    public void handleQuitEvent() {
+        // no action
+    }
+
+    public void handleChildQuitEvent() {
+        // no action
+    }
+
+    public void handleEvaluateFalseEvent() {
+        // no action
     }
 
     public final void evaluateTrue(MatchedEventMap matchEvent, EvalStateNode fromNode, boolean isQuitted)
@@ -80,6 +87,7 @@ public final class EvalRootStateNode extends EvalStateNode implements Evaluator,
         if (isQuitted)
         {
             topStateNode = null;
+            handleChildQuitEvent();
         }
 
         callback.matchFound(matchEvent.getMatchingEventsAsMap());
@@ -87,6 +95,11 @@ public final class EvalRootStateNode extends EvalStateNode implements Evaluator,
 
     public final void evaluateFalse(EvalStateNode fromNode)
     {
+        if (topStateNode != null) {
+            topStateNode.quit();
+            topStateNode = null;
+            handleEvaluateFalseEvent();
+        }
     }
 
     public final Object accept(EvalStateNodeVisitor visitor, Object data)
@@ -118,6 +131,10 @@ public final class EvalRootStateNode extends EvalStateNode implements Evaluator,
     public final String toString()
     {
         return "EvalRootStateNode topStateNode=" + topStateNode;
+    }
+
+    public EvalStateNode getTopStateNode() {
+        return topStateNode;
     }
 
     private static final Log log = LogFactory.getLog(EvalRootStateNode.class);

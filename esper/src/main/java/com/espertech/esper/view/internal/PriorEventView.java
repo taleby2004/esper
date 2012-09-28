@@ -22,7 +22,7 @@ import java.util.Iterator;
 public class PriorEventView extends ViewSupport
 {
     private Viewable parent;
-    private ViewUpdatedCollection buffer;
+    protected ViewUpdatedCollection buffer;
 
     /**
      * Ctor.

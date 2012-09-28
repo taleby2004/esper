@@ -32,10 +32,7 @@ import com.espertech.esper.epl.spec.StatementSpecCompiled;
 import com.espertech.esper.epl.view.OutputProcessViewFactory;
 import com.espertech.esper.epl.virtualdw.VirtualDWView;
 import com.espertech.esper.util.StopCallback;
-import com.espertech.esper.view.View;
-import com.espertech.esper.view.ViewFactoryChain;
-import com.espertech.esper.view.ViewProcessingException;
-import com.espertech.esper.view.Viewable;
+import com.espertech.esper.view.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -67,7 +64,7 @@ public class StatementAgentInstanceFactoryCreateWindow implements StatementAgent
         isRecoveringStatement = recoveringStatement;
     }
 
-    public StatementAgentInstanceFactoryCreateWindowResult newContext(final AgentInstanceContext agentInstanceContext)
+    public StatementAgentInstanceFactoryCreateWindowResult newContext(final AgentInstanceContext agentInstanceContext, boolean isRecoveringResilient)
     {
         final List<StopCallback> stopCallbacks = new ArrayList<StopCallback>();
         StopCallback stopCallback = new StopCallback() {
@@ -78,12 +75,15 @@ public class StatementAgentInstanceFactoryCreateWindow implements StatementAgent
 
         String windowName = statementSpec.getCreateWindowDesc().getWindowName();
         Viewable finalView;
+        Viewable eventStreamParentViewable;
+        StatementAgentInstancePostLoad postLoad = null;
+        Viewable topView;
 
         try {
             // Register interest
-            ViewableActivationResult activationResult = activator.activate(agentInstanceContext, false);
+            ViewableActivationResult activationResult = activator.activate(agentInstanceContext, false, isRecoveringResilient);
             stopCallbacks.add(activationResult.getStopCallback());
-            Viewable eventStreamParentViewable = activationResult.getViewable();
+            eventStreamParentViewable = activationResult.getViewable();
 
             // Obtain processor for this named window
             NamedWindowProcessor processor = services.getNamedWindowService().getProcessor(windowName);
@@ -99,7 +99,9 @@ public class StatementAgentInstanceFactoryCreateWindow implements StatementAgent
 
             // Materialize views
             AgentInstanceViewFactoryChainContext viewFactoryChainContext = new AgentInstanceViewFactoryChainContext(agentInstanceContext, true, null, null);
-            finalView = services.getViewService().createViews(rootView, unmaterializedViewChain.getViewFactoryChain(), viewFactoryChainContext, false);
+            ViewServiceCreateResult createResult = services.getViewService().createViews(rootView, unmaterializedViewChain.getViewFactoryChain(), viewFactoryChainContext, false);
+            topView = createResult.getTopViewable();
+            finalView = createResult.getFinalViewable();
 
             // If this is a virtual data window implementation, bind it to the context for easy lookup
             StopCallback envStopCallback = null;
@@ -160,6 +162,9 @@ public class StatementAgentInstanceFactoryCreateWindow implements StatementAgent
             finalView.addView(outputView);
             finalView = outputView;
 
+            // obtain post load
+            postLoad = processorInstance.getPostLoad();
+
             // Handle insert case
             if (statementSpec.getCreateWindowDesc().isInsert() && !isRecoveringStatement)
             {
@@ -204,6 +209,6 @@ public class StatementAgentInstanceFactoryCreateWindow implements StatementAgent
         }
 
         log.debug(".start Statement start completed");
-        return new StatementAgentInstanceFactoryCreateWindowResult(finalView, stopCallback, agentInstanceContext);
+        return new StatementAgentInstanceFactoryCreateWindowResult(finalView, stopCallback, agentInstanceContext, eventStreamParentViewable, postLoad, topView);
     }
 }

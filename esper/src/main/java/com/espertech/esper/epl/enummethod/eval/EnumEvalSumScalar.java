@@ -11,9 +11,7 @@
 
 package com.espertech.esper.epl.enummethod.eval;
 
-import com.espertech.esper.client.EventBean;
-import com.espertech.esper.epl.agg.AggregationMethod;
-import com.espertech.esper.epl.expression.ExprEvaluator;
+import com.espertech.esper.epl.agg.aggregator.AggregationMethod;
 import com.espertech.esper.epl.expression.ExprEvaluatorContext;
 
 import java.util.Collection;

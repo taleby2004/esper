@@ -34,13 +34,18 @@ import java.util.*;
 public class ContextControllerHashFactory extends ContextControllerFactoryBase implements ContextControllerFactory {
 
     private final ContextDetailHash hashedSpec;
+    private final List<FilterSpecCompiled> filtersSpecsNestedContexts;
 
     private Map<String, Object> contextBuiltinProps;
 
-    public ContextControllerHashFactory(ContextControllerFactoryContext factoryContext, ContextDetailHash hashedSpec)
-    {
+    public ContextControllerHashFactory(ContextControllerFactoryContext factoryContext, ContextDetailHash hashedSpec, List<FilterSpecCompiled> filtersSpecsNestedContexts) {
         super(factoryContext);
         this.hashedSpec = hashedSpec;
+        this.filtersSpecsNestedContexts = filtersSpecsNestedContexts;
+    }
+
+    public boolean hasFiltersSpecsNestedContexts() {
+        return filtersSpecsNestedContexts != null && !filtersSpecsNestedContexts.isEmpty();
     }
 
     public void validateFactory() throws ExprValidationException {
@@ -50,7 +55,7 @@ public class ContextControllerHashFactory extends ContextControllerFactoryBase i
 
     public ContextControllerStatementCtxCache validateStatement(ContextControllerStatementBase statement) throws ExprValidationException {
         StatementSpecCompiledAnalyzerResult streamAnalysis = StatementSpecCompiledAnalyzer.analyzeFilters(statement.getStatementSpec());
-        ContextControllerPartitionedUtil.validateStatementForContext(factoryContext.getContextName(), statement, streamAnalysis, getItemEventTypes(hashedSpec));
+        ContextControllerPartitionedUtil.validateStatementForContext(factoryContext.getContextName(), statement, streamAnalysis, getItemEventTypes(hashedSpec), factoryContext.getServicesContext().getNamedWindowService());
         return new ContextControllerStatementCtxCacheFilters(streamAnalysis.getFilters());
     }
 
@@ -59,6 +64,12 @@ public class ContextControllerHashFactory extends ContextControllerFactoryBase i
         int assignedContextPartition = (Integer) key;
         int code = assignedContextPartition % hashedSpec.getGranularity();
         getAddendumFilters(filterAddendum, code, statementInfo.getFilterSpecs(), hashedSpec, statement);
+    }
+
+    public void populateContextInternalFilterAddendums(ContextInternalFilterAddendum filterAddendum, Object key) {
+        int assignedContextPartition = (Integer) key;
+        int code = assignedContextPartition % hashedSpec.getGranularity();
+        getAddendumFilters(filterAddendum.getFilterAddendum(), code, filtersSpecsNestedContexts, hashedSpec, null);
     }
 
     public FilterSpecLookupable getFilterLookupable(EventType eventType) {
@@ -186,7 +197,7 @@ public class ContextControllerHashFactory extends ContextControllerFactoryBase i
     private static void getAddendumFilters(IdentityHashMap<FilterSpecCompiled, List<FilterValueSetParam>> addendums, int agentInstanceId, List<FilterSpecCompiled> filtersSpecs, ContextDetailHash hashSpec, ContextControllerStatementDesc statementDesc) {
 
         // determine whether create-named-window
-        boolean isCreateWindow = statementDesc.getStatement().getStatementSpec().getCreateWindowDesc() != null;
+        boolean isCreateWindow = statementDesc != null && statementDesc.getStatement().getStatementSpec().getCreateWindowDesc() != null;
         if (!isCreateWindow) {
             for (FilterSpecCompiled filtersSpec : filtersSpecs) {
 
