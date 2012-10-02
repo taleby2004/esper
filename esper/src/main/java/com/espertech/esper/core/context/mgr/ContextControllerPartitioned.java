@@ -125,7 +125,15 @@ public class ContextControllerPartitioned implements ContextController, ContextC
         for (Map.Entry<ContextStatePathKey, ContextStatePathValue> entry : childContexts.entrySet()) {
             String key = (String) factory.getBinding().byteArrayToObject(entry.getValue().getBlob(), eventAdapterService);
             Map<String, Object> props = ContextPropertyEventType.getPartitionBean(factoryContext.getContextName(), 0, key, factory.getSegmentedSpec().getItems().get(0).getPropertyNames());
-            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(entry.getValue().getOptionalContextPartitionId(), entry.getKey().getSubPath(), this, optionalTriggeringEvent, optionalTriggeringPattern, key, props, controllerState, filterAddendum, factoryContext.isRecoveringResilient());
+
+            // merge filter addendum, if any
+            ContextInternalFilterAddendum myFilterAddendum = activationFilterAddendum;
+            if (factory.hasFiltersSpecsNestedContexts()) {
+                filterAddendum = activationFilterAddendum != null ? activationFilterAddendum.deepCopy() : new ContextInternalFilterAddendum();
+                factory.populateContextInternalFilterAddendums(filterAddendum, key);
+            }
+
+            ContextControllerInstanceHandle handle = activationCallback.contextPartitionInstantiate(entry.getValue().getOptionalContextPartitionId(), entry.getKey().getSubPath(), this, optionalTriggeringEvent, optionalTriggeringPattern, key, props, controllerState, myFilterAddendum, factoryContext.isRecoveringResilient());
             partitionKeys.put(key, handle);
 
             int subPathId = entry.getKey().getSubPath();
