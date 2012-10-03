@@ -223,8 +223,14 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
 
                         // preload view for stream unless the expiry policy is batch window
                         Iterator<EventBean> consumerViewIterator = consumerView.iterator();
-                        if (!consumerView.getTailView().isParentBatchWindow() && consumerViewIterator.hasNext() && !isRecoveringResilient)
-                        {
+                        boolean preload = !consumerView.getTailView().isParentBatchWindow() && consumerViewIterator.hasNext();
+                        if (preload) {
+                            if (isRecoveringResilient && numStreams < 2) {
+                                preload = false;
+                            }
+                        }
+                        if (preload) {
+                            final boolean yesRecoveringResilient = isRecoveringResilient;
                             preloadList.add(new StatementAgentInstancePreload() {
                                 public void executePreload() {
                                     ArrayList<EventBean> eventsInWindow = new ArrayList<EventBean>();
@@ -234,7 +240,7 @@ public class StatementAgentInstanceFactorySelect implements StatementAgentInstan
 
                                     EventBean[] newEvents = eventsInWindow.toArray(new EventBean[eventsInWindow.size()]);
                                     view.update(newEvents, null);
-                                    if (joinPreloadMethod != null && !joinPreloadMethod.isPreloading() && agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable() != null) {
+                                    if (!yesRecoveringResilient && joinPreloadMethod != null && !joinPreloadMethod.isPreloading() && agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable() != null) {
                                         agentInstanceContext.getEpStatementAgentInstanceHandle().getOptionalDispatchable().execute(agentInstanceContext);
                                     }
                                 }
