@@ -37,12 +37,23 @@ public class ScopeTestHelper {
     }
 
     /**
-     * Assert a condition is false.
+     * Assert a condition is true.
      * @param message an optional message
      * @param condition to assert
      */
     public static void assertTrue(String message, boolean condition) {
         if (!condition) {
+            fail(message);
+        }
+    }
+
+    /**
+     * Assert a condition is false.
+     * @param message an optional message
+     * @param condition to assert
+     */
+    public static void assertFalse(String message, boolean condition) {
+        if (condition) {
             fail(message);
         }
     }
