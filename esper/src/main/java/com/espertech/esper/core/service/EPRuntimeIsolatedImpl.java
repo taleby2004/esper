@@ -446,6 +446,9 @@ public class EPRuntimeIsolatedImpl implements EPRuntimeIsolatedSPI, InternalEven
             {
                 // Dispatch results to listeners
                 dispatch();
+                if (!queues.getFrontQueue().isEmpty()) {
+                    processThreadWorkQueue();
+                }
             }
         }
         else {
