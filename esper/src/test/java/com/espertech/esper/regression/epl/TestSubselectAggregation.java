@@ -69,6 +69,30 @@ public class TestSubselectAggregation extends TestCase
         epService.getEPRuntime().sendEvent(new SupportBean("T2", -7));
         epService.getEPRuntime().sendEvent(new SupportBean_S0(5, "T2"));
         EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[]{"T2", -9});
+        stmt.destroy();
+
+        // test distinct
+        fields = "theString,c0,c1,c2,c3".split(",");
+        String viewExpr = "select theString, " +
+                "(select count(sb.intPrimitive) from SupportBean().win:keepall() as sb where bean.theString = sb.theString) as c0, " +
+                "(select count(distinct sb.intPrimitive) from SupportBean().win:keepall() as sb where bean.theString = sb.theString) as c1, " +
+                "(select count(sb.intPrimitive, true) from SupportBean().win:keepall() as sb where bean.theString = sb.theString) as c2, " +
+                "(select count(distinct sb.intPrimitive, true) from SupportBean().win:keepall() as sb where bean.theString = sb.theString) as c3 " +
+                "from SupportBean as bean";
+        stmt = epService.getEPAdministrator().createEPL(viewExpr);
+        stmt.addListener(listener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E1", 1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E1", 1L, 1L, 1L, 1L});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 1L, 1L, 1L, 1L});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 2));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 2L, 2L, 2L, 2L});
+
+        epService.getEPRuntime().sendEvent(new SupportBean("E2", 1));
+        EPAssertionUtil.assertProps(listener.assertOneGetNewAndReset(), fields, new Object[] {"E2", 3L, 2L, 3L, 2L});
     }
 
     public void testCorrelatedAggregationWhereGreater()

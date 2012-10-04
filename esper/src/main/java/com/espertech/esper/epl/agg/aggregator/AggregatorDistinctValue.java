@@ -33,6 +33,7 @@ public class AggregatorDistinctValue implements AggregationMethod
     public void clear()
     {
         valueSet.clear();
+        inner.clear();
     }
 
     public void enter(Object value)
