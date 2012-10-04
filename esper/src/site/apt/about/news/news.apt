@@ -1,5 +1,14 @@
 News
 
+* October 8, 2012  -  Esper 4.7.0 - Update release
+  
+  * Many performance-related changes and also related to support of the new EsperHA release.
+  
+  * Please see history or changelog.txt for additional information.
+
+  []
+
+
 * September 26, 2012  -  NEsper 4.5.2 for .NET
 	      
   * Feature equivalent to Esper version 4.5.0

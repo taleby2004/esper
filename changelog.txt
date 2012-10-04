@@ -1,6 +1,39 @@
 Esper Changelog
 ===================
 
+Changes in version 4.7.0
+------------------------
+Major API or EPL changes
+  - Many performance-related changes and also related to support of the new EsperHA release.
+
+Bug fixes
+  - Fixed issue ESPER-544 Prefer more specific update method over less specific update method in subscriber
+  - Fixed issue ESPER-662 Custom aggregation function that receives wildcard ("*") receives instance of com.espertech.esper.type.WildcardParameter and not event
+  - Fixed issue ESPER-663 Keyed Segmented Context with multiple properties not working
+  - Fixed issue ESPER-664 ValueCache.DISABLED in single row function configuration does not disable UDF cache
+  - Fixed issue ESPER-666 StatementAgentInstanceFactoryCreateWindow.newContext() throws NPE if other named window does not exist in insert case
+  - Fixed issue ESPER-668 CharSequence and String type not compatible
+  - Fixed issue ESPER-669 Enumeration method not working on bean-array that is property of Map
+  - Fixed issue ESPER-670 Event that ends/terminates context partition
+  - Fixed issue ESPER-671 Unexpected exception occurs when applying a basic arithmetic operation to short/byte properties
+  - Fixed issue ESPER-673 Aggregated row-per-event and grouped query with unidirectional join produces incorrect aggregation value
+  - Fixed issue ESPER-676 Exception using @Audit with create-context and terminated-by filter
+  - Fixed issue ESPER-679 Improve performance of CSVInputAdapter
+  - Fixed issue ESPER-683 Firstunique window and firstevent window handling updates
+  - Fixed issue ESPER-684 Object Array Event Types in Isolated Services
+  - Fixed issue ESPER-685 "Very likely memory leak" warning in Tomcat 6
+  - Fixed issue ESPER-687 Named Window and Fire-And-Forget query incorrectly passes null comparison operator
+  - Fixed issue ESPER-688 ArrayOOB exception with expression def in where-clause of on-select
+  - Fixed issue ESPER-689 ClassCastException with "stream.*" syntax and insert-into and context
+  - Fixed issue ESPER-693 Unit test fails with JDK 1.7_07
+  - Fixed issue ESPER-695 Pattern with named window events when used in partitioned context, not allowing named window
+  - Fixed issue ESPER-697 EsperIOSocketAdapter hides a critical exception
+  - Fixed issue ESPER-698 Update-istream with sub-select has thread-safety issue
+  - Fixed issue ESPER-699 Variable not recognized in output-rate-limiting when using deployment API (default compile option)
+  - Fixed issue ESPER-701 Nested context with partitioned context managing a non-overlapping context produces incorrect results
+  - Fixed issue ESPER-702 Distinct count in correlated subselect returns invalid result
+
+
 Changes in version 4.6.0
 ------------------------
 Major API or EPL changes

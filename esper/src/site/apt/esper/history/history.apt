@@ -12,6 +12,25 @@ Change History
 	[]
 
 
+Version 4.7.0
+
+	Released October 8, 2012
+	
+	Built and tested with JDK 6.0 Update 36
+
+* API changes
+
+  * None.
+    
+* Major changes
+
+  * Many performance-related changes and also related to support of the new EsperHA release. 
+  
+  * Many bug fixes and other improvements; Please see history or changelog.txt for additional information.
+
+  []
+
+
 Version 4.6.0
 
 	Released April 27, 2012
