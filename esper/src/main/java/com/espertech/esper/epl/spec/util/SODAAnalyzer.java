@@ -52,7 +52,7 @@ public class SODAAnalyzer
             annotations.addAll(model.getAnnotations());
         }
 
-        if (model.getAnnotations() != null) {
+        if (model.getCreateDataFlow() != null) {
             for (DataFlowOperator op : model.getCreateDataFlow().getOperators()) {
                 if (op.getAnnotations() != null) {
                     annotations.addAll(op.getAnnotations());
