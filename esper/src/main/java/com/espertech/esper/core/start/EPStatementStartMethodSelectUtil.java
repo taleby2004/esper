@@ -285,10 +285,14 @@ public class EPStatementStartMethodSelectUtil
         // handle join
         JoinSetComposerPrototype joinSetComposerPrototype = null;
         if (numStreams > 1) {
+            boolean selectsRemoveStream = statementSpec.getSelectStreamSelectorEnum().isSelectsRStream() ||
+                    statementSpec.getOutputLimitSpec() != null;
+            boolean hasAggregations = !resultSetProcessorPrototypeDesc.getAggregationServiceFactoryDesc().getExpressions().isEmpty();
             joinSetComposerPrototype = JoinSetComposerPrototypeFactory.makeComposerPrototype(
                     statementContext.getStatementName(), statementContext.getStatementId(),
                     statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typeService.getEventTypes(), streamNames,
-                    joinAnalysisResult, queryPlanLogging, statementContext.getAnnotations(), historicalViewableDesc, defaultAgentInstanceContext);
+                    joinAnalysisResult, queryPlanLogging, statementContext.getAnnotations(), historicalViewableDesc, defaultAgentInstanceContext,
+                    selectsRemoveStream, hasAggregations);
         }
 
         // obtain factory for output limiting

@@ -59,7 +59,9 @@ public class JoinSetComposerPrototypeFactory
                                                           boolean queryPlanLogging,
                                                           Annotation[] annotations,
                                                           HistoricalViewableDesc historicalViewableDesc,
-                                                          ExprEvaluatorContext exprEvaluatorContext)
+                                                          ExprEvaluatorContext exprEvaluatorContext,
+                                                          boolean selectsRemoveStream,
+                                                          boolean hasAggregations)
             throws ExprValidationException
     {
         // Determine if there is a historical stream, and what dependencies exist
@@ -148,6 +150,7 @@ public class JoinSetComposerPrototypeFactory
             queryPlanLog.info("Query plan: " + queryPlan.toQueryPlan());
         }
 
+        boolean joinRemoveStream = selectsRemoveStream || hasAggregations;
         return new JoinSetComposerPrototypeImpl(statementName,
                                                 statementId,
                                                 outerJoinDescList,
@@ -160,7 +163,8 @@ public class JoinSetComposerPrototypeFactory
                                                 exprEvaluatorContext,
                                                 indexSpecs,
                                                 queryPlan,
-                                                historicalStreamIndexLists);
+                                                historicalStreamIndexLists,
+                                                joinRemoveStream);
     }
 
     private static JoinSetComposerPrototype makeComposerHistorical2Stream(List<OuterJoinDesc> outerJoinDescList,

@@ -163,9 +163,10 @@ public class EPPreparedExecuteMethod
                 }
             }
 
+            boolean hasAggregations = !resultSetProcessorPrototype.getAggregationServiceFactoryDesc().getExpressions().isEmpty();
             joinSetComposerPrototype = JoinSetComposerPrototypeFactory.makeComposerPrototype(null, null,
                     statementSpec.getOuterJoinDescList(), statementSpec.getFilterRootNode(), typesPerStream, namesPerStream,
-                    streamJoinAnalysisResult, queryPlanLogging, null, new HistoricalViewableDesc(numStreams), agentInstanceContext);
+                    streamJoinAnalysisResult, queryPlanLogging, null, new HistoricalViewableDesc(numStreams), agentInstanceContext, false, hasAggregations);
         }
 
         // check context partition use

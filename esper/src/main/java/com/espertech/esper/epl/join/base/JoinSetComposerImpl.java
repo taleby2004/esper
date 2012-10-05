@@ -29,6 +29,7 @@ public class JoinSetComposerImpl implements JoinSetComposer
     private final QueryStrategy[] queryStrategies;
     private final boolean isPureSelfJoin;
     private final ExprEvaluatorContext exprEvaluatorContext;
+    private final boolean joinRemoveStream;
 
     // Set semantic eliminates duplicates in result set, use Linked set to preserve order
     private Set<MultiKey<EventBean>> oldResults = new LinkedHashSet<MultiKey<EventBean>>();
@@ -42,12 +43,13 @@ public class JoinSetComposerImpl implements JoinSetComposer
      * @param exprEvaluatorContext expression evaluation context
      */
     public JoinSetComposerImpl(Map<String, EventTable>[] repositories, QueryStrategy[] queryStrategies, boolean isPureSelfJoin,
-                               ExprEvaluatorContext exprEvaluatorContext)
+                               ExprEvaluatorContext exprEvaluatorContext, boolean joinRemoveStream)
     {
         this.repositories = JoinSetComposerUtil.toArray(repositories);
         this.queryStrategies = queryStrategies;
         this.isPureSelfJoin = isPureSelfJoin;
         this.exprEvaluatorContext = exprEvaluatorContext;
+        this.joinRemoveStream = joinRemoveStream;
     }
 
     public void init(EventBean[][] eventsPerStream)
@@ -84,11 +86,13 @@ public class JoinSetComposerImpl implements JoinSetComposer
         newResults.clear();
 
         // join old data
-        for (int i = 0; i < oldDataPerStream.length; i++)
-        {
-            if (oldDataPerStream[i] != null)
+        if (joinRemoveStream) {
+            for (int i = 0; i < oldDataPerStream.length; i++)
             {
-                queryStrategies[i].lookup(oldDataPerStream[i], oldResults, exprEvaluatorContext);
+                if (oldDataPerStream[i] != null)
+                {
+                    queryStrategies[i].lookup(oldDataPerStream[i], oldResults, exprEvaluatorContext);
+                }
             }
         }
 

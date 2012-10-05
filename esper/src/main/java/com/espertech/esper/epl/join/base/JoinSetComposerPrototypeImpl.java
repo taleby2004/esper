@@ -49,6 +49,7 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
     private final QueryPlanIndex[] indexSpecs;
     private final QueryPlan queryPlan;
     private final HistoricalStreamIndexList[] historicalStreamIndexLists;
+    private final boolean joinRemoveStream;
 
     public JoinSetComposerPrototypeImpl(String statementName,
                                         String statementId,
@@ -62,7 +63,8 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
                                         ExprEvaluatorContext exprEvaluatorContext,
                                         QueryPlanIndex[] indexSpecs,
                                         QueryPlan queryPlan,
-                                        HistoricalStreamIndexList[] historicalStreamIndexLists) {
+                                        HistoricalStreamIndexList[] historicalStreamIndexLists,
+                                        boolean joinRemoveStream) {
         this.statementName = statementName;
         this.statementId = statementId;
         this.outerJoinDescList = outerJoinDescList;
@@ -76,6 +78,7 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
         this.indexSpecs = indexSpecs;
         this.queryPlan = queryPlan;
         this.historicalStreamIndexLists = historicalStreamIndexLists;
+        this.joinRemoveStream = joinRemoveStream;
     }
 
     public JoinSetComposerDesc create(Viewable[] streamViews) {
@@ -139,7 +142,7 @@ public class JoinSetComposerPrototypeImpl implements JoinSetComposerPrototype {
             }
             else
             {
-                composer = new JoinSetComposerImpl(indexesPerStream, queryStrategies, streamJoinAnalysisResult.isPureSelfJoin(), exprEvaluatorContext);
+                composer = new JoinSetComposerImpl(indexesPerStream, queryStrategies, streamJoinAnalysisResult.isPureSelfJoin(), exprEvaluatorContext, joinRemoveStream);
             }
 
             // rewrite the filter expression for all-inner joins in case "on"-clause outer join syntax was used to include those expressions

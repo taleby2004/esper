@@ -58,7 +58,7 @@ public class TestJoinSetComposerImpl extends TestCase
         indexes[0].put("idxLeft", indexLeft);
         indexes[1].put("idxLeft", indexRight);
 
-        joinSetComposerImpl = new JoinSetComposerImpl(indexes, queryStrategies, false, null);
+        joinSetComposerImpl = new JoinSetComposerImpl(indexes, queryStrategies, false, null, true);
     }
 
     public void testJoin()

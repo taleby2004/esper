@@ -12,15 +12,17 @@
 package com.espertech.esper.regression.epl;
 
 import com.espertech.esper.client.EPServiceProvider;
-import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.EPServiceProviderManager;
+import com.espertech.esper.client.EPStatement;
 import com.espertech.esper.client.scopetest.SupportUpdateListener;
-import com.espertech.esper.support.bean.SupportMarketDataBean;
+import com.espertech.esper.client.time.CurrentTimeEvent;
 import com.espertech.esper.support.bean.SupportBean;
+import com.espertech.esper.support.bean.SupportBean_S0;
+import com.espertech.esper.support.bean.SupportMarketDataBean;
 import com.espertech.esper.support.client.SupportConfigFactory;
+import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import junit.framework.TestCase;
 
 public class TestPerf2StreamAndPropertyJoin extends TestCase
 {
@@ -36,6 +38,33 @@ public class TestPerf2StreamAndPropertyJoin extends TestCase
 
     protected void tearDown() throws Exception {
         updateListener = null;
+    }
+
+    public void testPerfRemoveStream() {
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean.class);
+        epService.getEPAdministrator().getConfiguration().addEventType(SupportBean_S0.class);
+        epService.getEPAdministrator().getConfiguration().addPlugInSingleRowFunction("myStaticEvaluator", MyStaticEval.class.getName(), "myStaticEvaluator");
+
+        MyStaticEval.setCountCalled(0);
+        MyStaticEval.setWaitTimeMSec(0);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(0));
+
+        String joinStatement = "select * from SupportBean.win:time(1) as sb, " +
+                " SupportBean_S0.win:keepall() as s0 " +
+                " where myStaticEvaluator(sb.theString, s0.p00)";
+        EPStatement joinView = epService.getEPAdministrator().createEPL(joinStatement);
+        joinView.addListener(updateListener);
+
+        epService.getEPRuntime().sendEvent(new SupportBean_S0(1, "x"));
+        assertEquals(0, MyStaticEval.getCountCalled());
+
+        epService.getEPRuntime().sendEvent(new SupportBean("y", 10));
+        assertEquals(1, MyStaticEval.getCountCalled());
+        assertTrue(updateListener.isInvoked());
+
+        // this would be observed as hanging if there was remove-stream evaluation
+        MyStaticEval.setWaitTimeMSec(10000000);
+        epService.getEPRuntime().sendEvent(new CurrentTimeEvent(100000));
     }
 
     public void testPerf2Properties()
@@ -112,6 +141,38 @@ public class TestPerf2StreamAndPropertyJoin extends TestCase
     private Object makeMarketEvent(String id, long volume)
     {
         return new SupportMarketDataBean(id, 0, (long) volume, "");
+    }
+
+    public static class MyStaticEval {
+        private static int countCalled = 0;
+        private static long waitTimeMSec;
+
+        public static int getCountCalled() {
+            return countCalled;
+        }
+
+        public static void setCountCalled(int countCalled) {
+            MyStaticEval.countCalled = countCalled;
+        }
+
+        public static long getWaitTimeMSec() {
+            return waitTimeMSec;
+        }
+
+        public static void setWaitTimeMSec(long waitTimeMSec) {
+            MyStaticEval.waitTimeMSec = waitTimeMSec;
+        }
+
+        public static boolean myStaticEvaluator(String a, String b) {
+            try {
+                Thread.sleep(waitTimeMSec);
+                countCalled++;
+            }
+            catch (InterruptedException ex) {
+                return false;
+            }
+            return true;
+        }
     }
 
     private static final Log log = LogFactory.getLog(TestPerf2StreamAndPropertyJoin.class);
