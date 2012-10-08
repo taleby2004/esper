@@ -32,7 +32,7 @@ public class TestSocketAdapterCSV extends TestCase
     {
         ConfigurationSocketAdapter adapterConfig = new ConfigurationSocketAdapter();
 
-        int port = 7989;
+        int port = 6801;
         String engineURI = "TestSocketAdapterCSV";
 
         SocketConfig socket = new SocketConfig();
@@ -52,10 +52,10 @@ public class TestSocketAdapterCSV extends TestCase
         ConfigurationSocketAdapter adapterConfigTwo = new ConfigurationSocketAdapter();
         SocketConfig socketConfigTwo = new SocketConfig();
         socketConfigTwo.setDataType(DataType.CSV);
-        socketConfigTwo.setPort(port);
-        adapterConfigTwo.getSockets().put("SocketService", socket);
+        socketConfigTwo.setPort(6802);
+        adapterConfigTwo.getSockets().put("SocketServiceTwo", socketConfigTwo);
 
-        EsperIOSocketAdapter adapterTwo = new EsperIOSocketAdapter(adapterConfig, engineURI);
+        EsperIOSocketAdapter adapterTwo = new EsperIOSocketAdapter(adapterConfigTwo, engineURI);
         adapterTwo.start();
 
 

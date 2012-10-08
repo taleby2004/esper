@@ -57,11 +57,11 @@ public class TestJMSSpringInputAdapter extends TestCase
 
         jmsSender.sendSerializable(new SupportSerializableBean("x1"));
         Thread.sleep(200);
-        assertEquals("x1", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("x1", listener.assertOneGetNewAndReset().get("theString"));
 
         jmsSender.sendSerializable(new SupportSerializableBean("x2"));
         Thread.sleep(200);
-        assertEquals("x2", listener.assertOneGetNewAndReset().get("string"));
+        assertEquals("x2", listener.assertOneGetNewAndReset().get("theString"));
 
         EPServiceProviderSPI spi = (EPServiceProviderSPI) service;
         PluginLoader loader = (PluginLoader) spi.getContext().lookup("plugin-loader/MyLoader");
