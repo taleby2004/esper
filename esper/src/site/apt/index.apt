@@ -53,7 +53,7 @@ Esper Enterprise Edition Feature Summary
 
 EsperHA Feature Summary 
 
-	* Resiliency of CEP engine state and EPL statement state, as needed; Supports storing state to either BerkeleyDB Java or Relational DB (JDBC) or Apache Cassandra
+	* Resiliency of CEP engine state and EPL statement state, as needed; High write performance and fast recovery
 
 	* {{{http://www.espertech.com/products/esperha.php}Info and Download}}
 
