@@ -72,6 +72,16 @@
                     You may specify a nested context that is composed from two or more contexts. In particular a temporal context type is frequently used in combination with a segmentation-oriented context.
                 </para>
 			</listitem>
+			<listitem>
+				<para>
+                    Using contexts your application can aggregate events over time periods (overlapping or non-overlapping) without retaining any events in memory.
+                </para>
+			</listitem>
+			<listitem>
+				<para>
+                    Using contexts your application can coordinate time boundaries for multiple statements.
+                </para>
+			</listitem>
 		</orderedlist>		
 		
 		<para>
