@@ -840,6 +840,11 @@ select * from PersonEvent(department=VAR_DEPARTMENT)]]></programlisting>
 ...std:unique(firstName, lastName)...
 ...order by firstName, lastName]]></programlisting>
 
+				<note>
+				  The example above is not a comprehensive discussion where composite or compound keys may be used in EPL. Other places where composite keys may apply are
+				  patterns, partitioned contexts and grouped data windows (we may have missed one).
+				</note>
+
 				<para>
 					You application could change the EPL to instead refer to a single value <literal>fullName</literal>:
 				</para>
