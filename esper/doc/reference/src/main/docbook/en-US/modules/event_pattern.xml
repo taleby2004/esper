@@ -779,6 +779,16 @@ RfidEvent(zone=1 and category=10)]]></programlisting>
 				This pattern now matches for each A event that is followed by a B event and then a C event, regardless of when the A event arrives. Note that for each A event that arrives the pattern engine starts a new subexpression looking for a B event and then a C event, outputting each combination of matching events.
             </para>
 			
+			<sect3 xml:id="pattern-every-equivanence">
+				<title><literal>Every</literal> Operator Equivalence</title>
+				<para>
+					A pattern that only has the <literal>every</literal> operator and a single filter expression is equivalent to selecting the same filter in the <literal>from</literal> clause:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent(symbol='GE')	     // Prefer this
+// ... equivalent to ...
+select * from pattern[every StockTickEvent(symbol='GE')]]]></programlisting>
+			</sect3>
+			
 			<sect3 xml:id="pattern-every-ending-subexp">
 				<title>Limiting Subexpression Lifetime</title>
 				

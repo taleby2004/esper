@@ -638,6 +638,18 @@ select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:la
 				In your application design you may also want to be conscious when the application listener or subscriber objects retain output data.
 			</para>
 			
+			<para>
+			    An engine instance, uniquely identified by an <literal>engine URI</literal> is a relatively heavyweight object. Optimally your application allocates only one or a few engine instances per JVM.
+			    A statement instance is associated to one engine instance, is uniquely identified by a statement name and is a medium weight object. We have seen applications allocate 100,000 statements easily.
+			    A statement's context partition instance is associated to one statement, is uniquely identified by a context partition id and is a light weight object. We have seen applications allocate 5000 context partitions for 100 statements easily, i.e. 5,000,000 context partitions.
+			    An aggregation row, data window row, pattern etc. is associated to a statement context partition and is a very lightweight object itself. 
+			</para>
+			
+			<para>
+			  The <literal>prev</literal>, <literal>prevwindow</literal> and <literal>prevtail</literal> functions access a data window directly. The engine does not need to maintain a separate data structure and grouping is based on the use of the <literal>std:groupwin</literal> grouped data window. 
+			  Compare this to the use of data window aggregation functions <literal>first</literal>, <literal>window</literal> and <literal>last</literal> which group according to the <literal>group by</literal> clause. If your statement utilizes both together consider reformulating to use <literal>prev</literal> instead.
+			</para>
+			
 		</sect2>
 
 		<sect2 xml:id="perf-tips-14">

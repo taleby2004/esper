@@ -264,6 +264,13 @@
 				</para>
 	
 				<programlisting><![CDATA[select sum(price) from StockTickEvent.std:groupwin(symbol).win:length(10) group by symbol]]></programlisting>
+
+				<para>
+					A length window of 1 is equivalent to the last event window <literal>std:lastevent</literal>. The <literal>std:lastevent</literal> data window is the preferred notation:
+				</para>
+				<programlisting><![CDATA[select * from StockTickEvent.std:lastevent()	// Prefer this
+// ... equivalent to ...
+select * from StockTickEvent.win:length(1)]]></programlisting>
 			</sect2>
 
 			<sect2 xml:id="view-win-length-batch" >
