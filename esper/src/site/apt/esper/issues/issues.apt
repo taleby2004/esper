@@ -35,7 +35,35 @@ Getting Help
 	When we get questions on the mailing lists that ask for a complete solution, we can often only provide short summarized answers as
 	we don't usually have the time to look into each inquiry in the detail required. EsperTech support will spend the time
 	needed to get you to a desired solution.
+
+
+* Sample format for "How do I" questions
+
+	When asking design questions on the user mailing list please consider this outline.
+
+	Please first summarize the general use case briefly in 1 sentence.
 	
+	In order for us to try and understand what you want to accomplish, please report input events, time passing and desired output 
+	following below format. This helps us understand the requirements you have. 
+	We would prefer not to look at an existing EPL design 
+	since we can usually help you better by understanding the requirements. 
+	
+	Please provide 3 minimal sample events and the desired output event(s) and timing relationship of input and output. 
+	Optimally this takes only 10 lines of text and concentrates only on relevant event properties, 
+	leaving unnecessary details off.
+	
+	Please consider following this format for describing input and output events:
+		
+----------------------------------------
+at time t0, an event arrives:
+  event E1{id='001', value='...', ....}  (E1 being the event type and {} contains event property name value pairs)
+  
+at time t1, an event arrives:
+  event E2{id='002', value='...', ....}		
+
+at time t2, which is 15 minutes after t0:
+  output event {id='002', value='...', ....}
+----------------------------------------	
 	
 * Sample code snippet for providing a test
 
