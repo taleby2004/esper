@@ -121,8 +121,7 @@
           We allow declaring a start timestamp property name and end timestamp property name on event types in connection with support for interval algebra, for example.          
         </p>
         <p>
-          We did not assume that every event arrive in order. But if wanted, the engine provides constructs to reorder events. Some constructs rely on events to arrive in order (A -> B for example)
-          and that can be convenient to express many conditions. Interval algebra is also good method to handle events that arrive out-of-order.
+          We did not assume that every event arrive in order. See below for a more complete discussion.
         </p>
         <p>
           We did not assume that analysis is only over a few events - the engine optimizes in various ways for evaluating large numbers of events.
@@ -517,18 +516,23 @@ variable factor in the statements?</i>".
       </answer>  
     </faq>
     <faq id="arrival_time_concept">
-      <question>How can the timestamp for an event be explicitly controlled?</question>
+      <question>How can the timestamp for an event be explicitly controlled? What to do with event occurrence time, time synchronization or event timestamps?</question>
       <answer>
+
         <p>
-	  In Esper the concept of time is under the control of an application via CurrentTimeEvent at the level of the runtime and at the level of statements via 
-	  isolated service provider.
-	  This allows any number of time dimensions to be controlled separately, such as event originating time or transmitted time for example. 
+	Consider attaching timestamps to events and the use of EPL’s support for Allan’s interval algebra in the where-clause of joins and sub-queries (see docs). You may declare a start timestamp property name and an end timestamp property name for event types. These work conveniently with interval algebra methods.
 	</p>
-	<p>
-	  Esper also allows declaring a start timestamp property name and an end timestamp property name for event types. These work together with interval algebra methods.
-	</p>
+	
         <p>
-	  Use the time-order view (ext:time_order) to reorder events arriving out-of-order. The time order view can operate on a timestamp event property that is part of your event.
+	Consider controlling the concept of time in your application code: In Esper the concept of time is under the control of an application via CurrentTimeEvent at the level of the runtime and at the level of statements via isolated service provider. This allows any number of time dimensions to be controlled separately, such as event originating time or transmitted time for example. 
+	</p>
+
+        <p>
+	Consider using the time-order view (ext:time_order) to reorder events arriving out-of-order. The time order view can operate on a timestamp event property that is part of your event. The time-order view works by buffering events for a short amount of time to allow late-arriving events to sort into place. The time-ordered output stream of the time-order view can then be used by the EPL pattern followed-by and the match-recognize regular expression patterns, which both provide a concise and convenient syntax but require that the pattern-specific input stream (not the arrival stream of event into the engine) is ordered.
+	</p>
+
+        <p>
+	Consider if you have events that are created by different computers you may want all those computers to have synchronized time, e.g. using NTP: either the event itself already has a timestamp in it, or when you send the event using any transport you add a timestamp. Note that if you manually add a timestamp, that timestamp won't exactly be the real time at which the event was created, it will just be the time when it was received by that computer which is going to forward it - also investigate how precise you can get using NTP nor how precise you need to be.  
 	</p>
       </answer>  
     </faq>
