@@ -126,14 +126,14 @@ event properties of the simple events?</question>
           Consider the stream of sensor events and a stream of sensor location events, assuming our sensors can move around geographically.
         </p>
         <p>
-          This sample query joins the last sensor event with the last sensor location (SensorLocationEvent) for each sensor identified by a sensor id (sensorId):
+          This sample query joins the last sensor event per sensor id with the last sensor location (SensorLocationEvent) for each sensor identified by a sensor id (sensorId):
         </p>
 	<div class="source"><pre>select temperature, coordinates 
-from SensorEvent.std:lastevent() as sensor,
-     SensorLocationEvent.std:lastevent() as loc
+from SensorEvent.std:unique(sensorId) as sensor,
+     SensorLocationEvent.std:unique(sensorId) as loc
 where sensor.sensorId = loc.sensorId</pre></div>
 	<p>
-	  You may ask why the "std:lastevent()" is needed here. When joining two streams, in this example and as is often the case we are simply looking to join the last event of each stream.
+	  You may ask why the "std:unique(sensorId)" is needed here. When joining two streams, in this example and as is often the case we are looking to join the last event per key of each stream.
 	</p>
       </answer>
     </faq>   
