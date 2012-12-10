@@ -1562,7 +1562,7 @@ EPServiceProvider epService = EPServiceProviderManager.getDefaultProvider(config
 
         <para>
 			After disabling the internal timer, it is wise to set a defined time so that any statements created thereafter start relative to the time defined. Use the <literal>CurrentTimeEvent</literal> class to indicate current time to the engine
-			and to move time forward for the engine.
+			and to move time forward for the engine (a.k.a application-time model).
         </para>
 
         <para>
@@ -2018,6 +2018,10 @@ isolatedService.getEPRuntime().send(historyEvent);
 
         <para>
 			The statement object model supports full round-trip from object model to EPL  statement string and back to object model: A statement object model can be rendered into an EPL  string representation via the <literal>toEPL</literal> method on <literal>EPStatementObjectModel</literal>. Further, the administrative API allows to compile a statement string into an object model representation via the <literal>compileEPL</literal> method on <literal>EPAdministrator</literal>.
+        </para>
+
+        <para>
+			The statement object model is fully mutable. Mutating a any list such as returned by <literal>getChildren()</literal>, for example, is acceptable and supported.
         </para>
 
 		<para>
