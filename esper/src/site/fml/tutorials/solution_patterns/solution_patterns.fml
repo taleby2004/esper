@@ -1669,7 +1669,7 @@ select sum(price*volume) from BucketWindow3</pre></div>
           If using a named window, the on-select is a good way to fire at any schedule as the pattern defines. Here the example fires the query every
           20 seconds if the hour is between 9am and 9:59am:
         </p>
-	<div class="source">on pattern[every timer:crontab(*, 9, *, *, *, */20)] select * from MyNamedWindow<pre></pre></div>
+	<div class="source">on pattern[every timer:at(*, 9, *, *, *, */20)] select * from MyNamedWindow<pre></pre></div>
 
         <p>
           You could also join a pattern to historical data, thereby repeatedly poll, optionally parameterize with variables (not shown below) to do incremental polling, a sample is here:
@@ -1687,8 +1687,8 @@ select sum(price*volume) from BucketWindow3</pre></div>
           via runtime API (we show multiple individual statements below).
         </p>
 	<div class="source"><pre>create variable boolean var_on_off
-on pattern[timer:crontab(*, 9, *, *, *)] set var_on_off = true
-on pattern[timer:crontab(*, 10, *, *, *)] set var_on_off = false
+on pattern[timer:at(*, 9, *, *, *)] set var_on_off = true
+on pattern[timer:at(*, 10, *, *, *)] set var_on_off = false
 insert into nextStream select * from xyz(var_on_off)
 ..or..
 select * from xyz output when var_on_off</pre></div>
