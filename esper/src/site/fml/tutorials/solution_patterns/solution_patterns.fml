@@ -462,6 +462,33 @@ min(value) as minValue, max(value) as maxValue from MyEvent.win:time(60 sec)</pr
       </answer>
     </faq>    
 
+    <faq id="aggregate-5">
+      <question>How to calculate aggregations per partition and control output externally?</question>
+      <answer>
+        <p>
+          We have input events that have fields called key1 and key2 which logically partition events. 
+	  We want to calculate aggregates for each partition (combination of key1 and key2) and control externally when that specific partition should end.
+        </p>
+
+        <p>
+          The sample statements here compute average temperature and count for sensor events.
+	  A nested context is useful in that is can partition by keys and initiate and terminate based on some control events arriving.
+The control events in below EPL are MyInitEvent and MyTermEvent.
+        </p>
+	<div class="source"><pre>create context CtxPerKeysAndExternallyControlled
+  context PartitionedByKeys
+    partition by
+      key1, key2 from MyInitEvent
+      key1, key2 from SensorEvent
+  context InitiateAndTerm initiated by MyInitEvent as e1 terminated by MyTermEvent(key1=e1.key1 and key2=e1.key2)</pre></div>      
+	<div class="source"><pre>context CtxPerKeysAndExternallyControlled
+select key1, key2, avg(temp) as avgTemp, count(*) as cnt
+from SensorEvent
+output snapshot when terminated
+// note: no group-by needed since partioned by keys</pre></div>      
+      </answer>
+    </faq>    
+
     <faq id="correlate-0">
       <question>How do I correlate events arriving in 2 or more streams?</question>
       <answer>
