@@ -5180,15 +5180,26 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 			<indexterm><primary>create index</primary></indexterm>
 
 			<para>
-				You may explicitly create an index on a named window. When executing on-demand (fire-and-forget) queries as described in <xref linkend="api-runtime-ondemand"/> using prepared or unprepared queries, 
-				an explicit index can help speed query performance.
+				You may explicitly create an index on a named window. The engine considers explicitly-created as well as implicitly-allocated indexes in query planning and execution of the following
+				types of usages of named windows:
 			</para>
-
-			<para>
-				You do not need to explicitly create an index unless using on-demand (fire-and-forget) queries. Therefore you do not need to explicitly create an index for <literal>on-select</literal>, <literal>on-merge</literal>, <literal>on-update</literal>, <literal>on-delete</literal> as well as subqueries or consuming statements against named windows.
-				However if the engine finds an explicitly-created index matching the requirements of such on-select/merge/update/delete or subqueries it uses that index instead. 
-				Joins of named windows do not utilize explicit indexes: Only on-demand, on-select/merge/update/delete and subqueries utilize explicit indexes.
-			</para>
+			
+		    <orderedlist>
+			  <listitem>
+				  <para>
+                      On-demand (fire-and-forget, non-continuous) queries as described in <xref linkend="api-runtime-ondemand"/>.
+                  </para>
+				  <para>
+                      <literal>On-select</literal>, <literal>on-merge</literal>, <literal>on-update</literal>, <literal>on-delete</literal> and <literal>on-insert</literal>.
+                  </para>
+				  <para>
+                      Subqueries against named windows.
+                  </para>
+				  <para>
+                      For joins (including outer joins) with named windows the engine considers the filter criteria listed in parenthesis using the syntax <synopsis><emphasis>name_window_name</emphasis>(<emphasis>filter_criteria</emphasis>)</synopsis> for index access.
+                  </para>
+			  </listitem>
+		    </orderedlist>
 
 			<para>
 				Please use the following syntax to create an explicit index on a named window:

@@ -157,50 +157,75 @@ select assetId, zone, xlocation, ylocation from RFIDEvent ]]></programlisting>
 			<title>Prefer stream-level filtering over post-data-window filtering</title>
 
 			<para>
-				Esper stream-level filtering is very well optimized, while filtering via the where-clause post any data windows is not optimized. 
-				In very simple statements that don't have data windows this distinction can make a performance difference.
+				Esper stream-level filtering is very well optimized, while filtering via the where-clause post any data windows is not optimized. 				
 			</para>
 	
 			<para>
-				Consider the example below, which performs stream-level filtering:
-			</para>
-
-<programlisting><![CDATA[// Better performance : stream-level filtering
-select * from MarketData(ticker = 'GOOG')]]></programlisting>
-
-			<para>
-				The example below is the equivalent (same semantics) statement and performs post-data-window filtering without a data window.
-				The engine does not optimize statements that filter in the where-clause for the reason that data window views are generally present.
-			</para>
-
-<programlisting><![CDATA[// Less good performance : post-data-window filtering
-select * from Market where ticker = 'GOOG']]></programlisting>
-
-			<para>
-				Thus this optimization technique applies to statements without any data window. 
-			</para>
-
-			<para>
-				When a data window is used, the semantics change. Let's look at an example to better understand the difference:
-				In the next statement only GOOG market events enter the length window:
-			</para>
-
-			<programlisting><![CDATA[select avg(price) from MarketData(ticker = 'GOOG').win:length(100)]]></programlisting>
-
-			<para>
-				The above statement computes the average price of GOOG market data events for the last 100 GOOG market data events. 
+				The same is true for named windows. If your application is only interested in a subset of named window data and such filters
+				are not correlated to arriving events, place the filters into parenthesis after the named window name.
 			</para>
 			
-			<para>
-				Compare the filter position to a filter in the where clause. 
-				The following statement is NOT equivalent as all events enter the data window (not just GOOG events):
-			</para>
-	
-			<programlisting><![CDATA[select avg(price) from Market.win:length(100) where ticker = 'GOOG']]></programlisting>
+			<sect3 xml:id="perf-tips-5-nonnamedwindowexample">
+				<title>Examples without named windows</title>
+			
+				<para>
+					Consider the example below, which performs stream-level filtering:
+				</para>
 
-			<para>
-				The statement above computes the average price of all market data events for the last 100 market data events, and outputs results only for GOOG.
-			</para>
+				<programlisting><![CDATA[// Better performance : stream-level filtering
+select * from MarketData(ticker = 'GOOG')]]></programlisting>
+
+				<para>
+					The example below is the equivalent (same semantics) statement and performs post-data-window filtering without a data window.
+					The engine does not optimize statements that filter in the where-clause for the reason that data window views are generally present.
+				</para>
+
+				<programlisting><![CDATA[// Less good performance : post-data-window filtering
+select * from Market where ticker = 'GOOG']]></programlisting>
+
+				<para>
+					Thus this optimization technique applies to statements without any data window. 
+				</para>
+	
+				<para>
+					When a data window is used, the semantics change. Let's look at an example to better understand the difference:
+					In the next statement only GOOG market events enter the length window:
+				</para>
+
+				<programlisting><![CDATA[select avg(price) from MarketData(ticker = 'GOOG').win:length(100)]]></programlisting>
+
+				<para>
+					The above statement computes the average price of GOOG market data events for the last 100 GOOG market data events. 
+				</para>
+				
+				<para>
+					Compare the filter position to a filter in the where clause. 
+					The following statement is NOT equivalent as all events enter the data window (not just GOOG events):
+				</para>
+		
+				<programlisting><![CDATA[select avg(price) from Market.win:length(100) where ticker = 'GOOG']]></programlisting>
+
+				<para>
+					The statement above computes the average price of all market data events for the last 100 market data events, and outputs results only for GOOG.
+				</para>
+			</sect3>
+			
+			<sect3 xml:id="perf-tips-5-namedwindowexample">
+				<title>Examples using named windows</title>
+			
+				<para>
+					The next two example EPL queries put the account number filter criteria directly into parenthesis following the named window name:
+				</para>
+
+				<programlisting><![CDATA[// Better performance : stream-level filtering
+select * from WithdrawalNamedWindow(accountNumber = '123')]]></programlisting>
+
+				<programlisting><![CDATA[// Better performance : example with subquery
+select *, (select * from LoginSucceededWindow(accountNumber = '123'))
+from WithdrawalNamedWindow(accountNumber = '123')]]></programlisting>
+
+			</sect3>
+
 		</sect2>
 	
 		<sect2 xml:id="perf-tips-6">
