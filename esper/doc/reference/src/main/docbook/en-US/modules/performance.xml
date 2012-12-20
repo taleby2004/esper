@@ -525,12 +525,13 @@ where a.symbol = b.symbol]]></programlisting>
 				A join is multidirectionally evaluated: When an event of any of the streams participating in the join arrive, the join gets evaluated, unless using the unidirectional keyword.
 				Consider using a subquery instead when evaluation only needs to take place when a certain event arrives:
 			</para>
-<programlisting><![CDATA[// Rewrite this join since we don't join when a LoginSucceededWindow arrives
+<programlisting><![CDATA[// Rewrite this join since we don't need to join when a LoginSucceededWindow arrives
+// Also rewrite because the account number always is the value 123.
 select * from LoginSucceededWindow as l, WithdrawalWindow as w
-where w.accountNumber = '123' and w.accountNumber = l.acctNumber
+where w.accountNumber = '123' and w.accountNumber = l.accountNumber
 
 // Rewritten as a subquery, 
-select *, (select * from LoginSucceededWindow lw where lw.accountNumber = w.accountNumber) 
+select *, (select * from LoginSucceededWindow where accountNumber=’123’) 
 from WithdrawalWindow(accountNumber=’123’) as w]]></programlisting>			
 		</sect2>
 

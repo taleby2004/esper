@@ -5186,7 +5186,8 @@ merge [into] <emphasis>window_name</emphasis> [as <emphasis>stream_name</emphasi
 
 			<para>
 				You do not need to explicitly create an index unless using on-demand (fire-and-forget) queries. Therefore you do not need to explicitly create an index for <literal>on-select</literal>, <literal>on-merge</literal>, <literal>on-update</literal>, <literal>on-delete</literal> as well as subqueries or consuming statements against named windows.
-				However if the engine finds an explicitly-created index matching the requirements of such on-query or subqueries it uses that index instead.
+				However if the engine finds an explicitly-created index matching the requirements of such on-select/merge/update/delete or subqueries it uses that index instead. 
+				Joins of named windows do not utilize explicit indexes: Only on-demand, on-select/merge/update/delete and subqueries utilize explicit indexes.
 			</para>
 
 			<para>
