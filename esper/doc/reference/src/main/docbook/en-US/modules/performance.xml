@@ -468,7 +468,7 @@ group by venue, ccyPair, side]]></programlisting>
 		</sect2>
 
 		<sect2 xml:id="perf-tips-13a">
-			<title>Joins And Where-clause And Data Windows</title>
+			<title>Subqueries versus Joins And Where-clause And Data Windows</title>
 
 			<para>
 				When joining streams the engine builds a product of the joined data windows based on the <literal>where</literal> clause. It analyzes the <literal>where</literal> clause at time of statement compilation and
@@ -476,7 +476,7 @@ group by venue, ccyPair, side]]></programlisting>
 			</para>
 
 			<para>
-				When joining streams and not providing a <literal>where</literal> clause, consider using the <literal>std:lastevent</literal> data window to join only the last event of each stream. 
+				When joining streams and not providing a <literal>where</literal> clause, consider using the <literal>std:unique</literal> data window or <literal>std:lastevent</literal> data window to join only the last event or the last event per unique key(s) of each stream. 
 			</para>
 
 			<para>
@@ -491,29 +491,47 @@ select * from StreamA.win:length(100), StreamB.win:length(50)]]></programlisting
 			</para>
 
 			<para>
-				Below examples show different approaches, assuming that an <literal>MyEvent</literal> is defined with the properties symbol and value:
+				Below examples show different approaches, that are not semantically equivalent, assuming that an <literal>MyEvent</literal> is defined with the properties symbol and value:
 			</para>
 
 <programlisting><![CDATA[// Replace the following statement as it may not perform well
 select a.symbol, avg(a.value), avg(b.value) 
 from MyEvent.win:length(100) a, MyEvent.win:length(50) b
 
-// Fast version, first alternative
+// Join with where-clause
 select a.symbol, avg(a.value), avg(b.value) 
 from MyEvent.win:length(100) a, MyEvent.win:length(50) b 
 where a.symbol = b.symbol
 
-// Fast version, second alternative
+// Unidirectional join with where-clause
+select a.symbol, avg(b.value) 
+from MyEvent unidirectional, MyEvent.win:length(50) b 
+where a.symbol = b.symbol
+
+// Subquery
 select 
   (select avg(value) from MyEvent.win:length(100)) as avgA, 
   (select avg(value) from MyEvent.win:length(50)) as avgB,
   a.symbol
-from MyEvent.std:lastevent() a, MyEvent.std:lastevent() b
+from MyEvent
 
-// Fast version, third alternative
+// Since streams cost almost nothing, use insert-into to populate and a unidirectional join 
 insert into StreamAvgA select symbol, avg(value) as avgA from MyEvent.win:length(100)
 insert into StreamAvgB select symbol, avg(value) as avgB from MyEvent.win:length(50)
-select a.symbol, avgA, avgB from StreamAvgA.std:lastevent() a, StreamAvgB.std:lastevent() b]]></programlisting>
+select a.symbol, avgA, avgB from StreamAvgA unidirectional, StreamAvgB.std:unique(symbol) b
+where a.symbol = b.symbol]]></programlisting>
+
+			<para>
+				A join is multidirectionally evaluated: When an event of any of the streams participating in the join arrive, the join gets evaluated, unless using the unidirectional keyword.
+				Consider using a subquery instead when evaluation only needs to take place when a certain event arrives:
+			</para>
+<programlisting><![CDATA[// Rewrite this join since we don't join when a LoginSucceededWindow arrives
+select * from LoginSucceededWindow as l, WithdrawalWindow as w
+where w.accountNumber = '123' and w.accountNumber = l.acctNumber
+
+// Rewritten as a subquery, 
+select *, (select * from LoginSucceededWindow lw where lw.accountNumber = w.accountNumber) 
+from WithdrawalWindow(accountNumber=’123’) as w]]></programlisting>			
 		</sect2>
 
 		<sect2 xml:id="perf-tips-13b">

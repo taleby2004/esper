@@ -274,7 +274,7 @@ where sensor.sensorId = loc.sensorId</pre></div>
           One aspect of statement design will need to consider the specificity of EPL statements. What should the EPL statement be specific to, i.e. which sub-stream of all the sensor data should an EPL statement focus on? In relationship to the sensor stream example, you may decide to create an EPL statement per device specifying the device id, an EPL statement for a group of devices by listing multiple device ids, an EPL statement for a device type (i.e. valve sensors), an EPL statement for a given customer id that owns the sensor, or an EPL statement that analyzes all devices or combinations of these. You typically solve specificity by using filters such as "TemperatureSensor(customerId=10)" or TemperatureSensor(deviceId='A0001')" as part of statements. In that respect consider using constant variables (declared as const) so that certain constants are defined only once and need not occur multiple times.
         </p>
         <p>
-          You may search for the right EPL construct to use. Should I use an EPL join or outer join? Or an EPL pattern? Or combine a join and a pattern? Or use a sub-query? While there is no general answer, since you are likely processing high-arrival-rate streams, its best to understand, at least at a high level, what the engine does internally for each such construct. Joins use relational algebra and query planning, so they are very suited to one-to-many relationships and fast index-based lookup. Outer joins can handle absence of events. Joins also handle out-of-order arrival well and time-based relationship testing can be accomplished with Alan’s interval algebra in the where-clause. EPL patterns are dynamically-managed state trees. They are very suitable to detect time-based relationship with presence or absence of events and other complex situations based on event arrival order (reorder if needed using time order window). EPL match-recognize pattern matching is based on NFA and most suitable for find patterns among ordered events.
+          You may search for the right EPL construct to use. Should I use an EPL subquery, join or outer join? Or an EPL pattern? Or combine a join and a pattern? Or use a sub-query? While there is no general answer, since you are likely processing high-arrival-rate streams, its best to understand, at least at a high level, what the engine does internally for each such construct. Joins use relational algebra and query planning, so they are very suited to one-to-many relationships and fast index-based lookup. Outer joins can handle absence of events. Joins also handle out-of-order arrival well and time-based relationship testing can be accomplished with Alan’s interval algebra in the where-clause. EPL patterns are dynamically-managed state trees. They are very suitable to detect time-based relationship with presence or absence of events and other complex situations based on event arrival order (reorder if needed using time order window). EPL match-recognize pattern matching is based on NFA and most suitable for find patterns among ordered events.
         </p>        
         <p>
           You may consider whether to use a data window, what the right data window to use is and whether to use named windows or not. The most frequently used data windows are unique (std:unique), last event (std:lastevent) and time window (win:time). Use named windows when you need custom merge, update or expiry logic or when the same data window is used in multiple EPL statements. You can also use no data window, so the engine does not retain any events. Context partitions are often useful here to control when state should be discarded.
@@ -282,7 +282,7 @@ where sensor.sensorId = loc.sensorId</pre></div>
       </answer>
     </faq>    
     <faq id="design-3">
-      <question>Understand Joins</question>
+      <question>Understand Subqueries and Joins</question>
       <answer>
         <p>
           Joins are harder to get right as they are multidirectional: When new data arrives on any of the joined streams the join (Cartesian) product of the data windows is output (joined or limited by the where-clause if present) and aggregated (if using aggregations).
@@ -292,12 +292,25 @@ where sensor.sensorId = loc.sensorId</pre></div>
           Unidirectional is also useful when you want to trigger a join from a time-based pattern, for example "select sum(xyz) from pattern[every timer:interval(10)] unidirectional, MyEvent.win:time(100), ... where ...".
         </p>
         <p>
-          Consider replacing the join with one or more sub-queries, it is often easier to read and conceptually clearer.
+          Consider replacing the join with one or more sub-queries. Subqueries are often easier to read and conceptually clearer.
+          Subqueries don't have multidirectional evaluation. The query planning and indexing for fast lookup
+          can be very different between subqueries and joins. Please see the performance tips section in the docs
+          for a comparison of subqueries and joins.
         </p>
         <p>
           When using joins with aggregations, consider splitting the statement into multiple simpler statements: Aggregate and output to a stream in one statement and use the output stream(s) in a second statement that joins or sub-queries without also aggregating.
           Using separate streams gives you the flexibility to report or debug each individually, do the output rate controlling you prefer and reuse the streams for other stuff.
-        </p>        
+        </p>
+      </answer>
+    </faq>    
+    <faq id="design-4">
+      <question>Performance</question>
+      <answer>
+        <p>
+          To obtain the best possible startup and runtime performance for your design,
+          we have compiled valuable performance tips in a section on performance in the documentation. Please also
+          see the "On Performance" page under "Esper for Java" on the left side page menu.
+        </p>
       </answer>
     </faq>    
   </part>
