@@ -125,9 +125,9 @@ results via method invocation. The subscriber class need not implement an interf
 			Similar to a length window, a time window also keeps the most recent events up to a given time period. A time window of 5 seconds, for example, keeps the last 5 seconds of events. As seconds pass, the time window actively pushes the oldest events out of the window resulting in one or more old events posted to update listeners.
         </para>
 
-        <para>
+        <note>
 			Note: By default the engine only delivers the insert stream to listeners and observers. EPL supports optional <literal>istream</literal>, <literal>irstream</literal> and <literal>rstream</literal> keywords on select-clauses and on insert-into clauses to control which stream to deliver, see <xref linkend="epl-select-using-istream-rstream"/>. There is also a related, engine-wide configuration setting described in <xref linkend="config-engine-stream-selection"/>.		
-        </para>
+        </note>
 
     </sect1>
 
